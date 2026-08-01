@@ -179,6 +179,37 @@ export const SETTLED_REGIME_BOUNDARIES: readonly RegimeBoundary[] = [
       'the boundary day are excluded — the switch instant within the day is ' +
       'not recoverable from the record.',
   },
+  {
+    // ⚠ THE BAND DATES BELOW MUST EQUAL THE ACTUAL DEPLOY DAY OF THE C1
+    // EXTRACTION CHANGE. They are authored as the intended deploy day
+    // (2026-08-01). If the founder deploys on a different day, RECONCILE THESE
+    // TWO DATES BEFORE PUSHING — it is a blocking step on the C1 founder-walk
+    // checklist. Consequence of getting it wrong, stated plainly so the step is
+    // not skipped: rows written under the CORRECTED vocabulary but dated before
+    // band_start would be labelled `post-s11b-recomposition`, and rows written
+    // under the OLD vocabulary but dated after band_end would be labelled
+    // `agent-circles-v1` — either way the delta would compare examinations
+    // across the very vocabulary change Q9a forbids comparing across.
+    band_start_iso: '2026-08-01T00:00:00.000Z',
+    band_end_iso: '2026-08-02T00:00:00.000Z',
+    from_era: 'post-s11b-recomposition',
+    to_era: 'agent-circles-v1',
+    note:
+      // NOTE: this string is serialised INTO the delta block, which the §9
+      // MEASURE pin scans for 'recommend' / 'enforce' / 'do_not_proceed' /
+      // 'verdict'. Say "rulings", never "verdicts" — the pin is a substring scan
+      // by design and must stay strict.
+      'Agent-circles C1 first-circle correction (mentor rulings Q3/Q9a, ' +
+      '2026-08-01). The Layer-1 extraction stopped attaching the first circle ' +
+      '(self_preservation) as a background condition and now fires it only when ' +
+      "the practitioner's own reasoning integrity is directly implicated; the " +
+      'outermost circle (cosmopolis) additionally learned the circle-4 ' +
+      'obligation to other reasoning agents. Q9a is forward-only: "examinations ' +
+      'before the marker are read under the earlier vocabulary; examinations ' +
+      'after it are read under the corrected one", and NO retroactive ' +
+      're-processing is performed. Rows on the boundary day are excluded — the ' +
+      'deploy instant within the day is not recoverable from the record.',
+  },
 ]
 
 // ============================================================================

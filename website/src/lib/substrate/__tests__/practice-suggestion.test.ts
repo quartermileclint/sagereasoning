@@ -220,12 +220,23 @@ function delta(overrides: Partial<TrajectoryDeltaBlock> = {}): TrajectoryDeltaBl
 function sessionDecline(
   dim: keyof SessionDeclineBlock['dimension_trends'] = 'judgement_quality',
 ): SessionDeclineBlock {
+  // Agent-circles C1f (2026-08-01) — SessionDeclineBasis gained the extraction-
+  // regime segmentation report. These fixtures exercise the composer, not the
+  // segmentation, so they carry a single-segment report with nothing excluded.
+  const regime = {
+    segment_used: 'agent-circles-v1',
+    rows_in_window: 9,
+    rows_in_segment: 9,
+    rows_excluded_earlier_eras: 0,
+    rows_excluded_boundary_band: 0,
+  }
   const insufficientBasis = {
     ...basis(),
     qualifying_sessions: 0,
     threshold: 3,
+    regime,
   }
-  const decliningBasis = { ...basis(), qualifying_sessions: 3, threshold: 3 }
+  const decliningBasis = { ...basis(), qualifying_sessions: 3, threshold: 3, regime }
   const dims: (keyof SessionDeclineBlock['dimension_trends'])[] = [
     'passion_reduction',
     'judgement_quality',

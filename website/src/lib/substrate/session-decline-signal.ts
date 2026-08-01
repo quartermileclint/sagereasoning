@@ -48,11 +48,17 @@
  * does not — the conservative reading of "sustained decline… never a
  * single-session dip".
  *
- * DISCLOSED, NOT SILENTLY OMITTED: this module does not apply the
- * regime-boundary exclusion trajectory-delta.ts uses (ADR-014 §3.1) — a
- * session straddling an extraction-regime boundary is read as-is. Narrower in
- * scope than the full delta machinery; a named follow-up should this signal
- * graduate past its dark build.
+ * EXTRACTION-REGIME EXCLUSION (added 2026-08-01, agent-circles C1f — this
+ * closes the named follow-up this header previously carried as an open gap).
+ * Rows are segmented to the LATEST extraction regime before any session is
+ * bucketed: rows inside a boundary band are dropped, and rows from earlier eras
+ * are excluded, reusing trajectory-delta's `assignRegimeEra` and settled
+ * boundaries rather than re-deriving them (ADR-014 §4's one-record rule). The
+ * C1 first-circle correction is the first boundary this signal would actually
+ * straddle, which is what made the gap material: a "sustained decline across
+ * sessions" computed across that correction would be reading a VOCABULARY
+ * change as a change in the practitioner, which mentor verdict Q9a forbids.
+ * The segmentation counts ride on every basis object (`basis.regime`).
  *
  * MEASURE-ONLY: feeds B5's suggestion detector only; never a trust event,
  * never an S4 intervention-engine input, no recommendation field. WEIGHTS
@@ -65,7 +71,14 @@ import type {
   DimensionLevel,
 } from './trust-layer/types/accreditation'
 import { computeWindowSnapshot } from './trust-layer/evaluation-window/window-aggregator'
-import { EVIDENCE_FLOOR, type DeltaTrend, type SignalBasis } from './trajectory-delta'
+import {
+  EVIDENCE_FLOOR,
+  SETTLED_REGIME_BOUNDARIES,
+  assignRegimeEra,
+  type DeltaTrend,
+  type RegimeBoundary,
+  type SignalBasis,
+} from './trajectory-delta'
 
 /** The declared session-boundary vocabulary — supplied by the calling agent,
  *  never inferred here. */
@@ -100,6 +113,81 @@ export interface SessionDeclineBasis extends SignalBasis {
   qualifying_sessions: number
   /** Qualifying sessions required before a trend is computed. */
   threshold: number
+  /** Agent-circles C1f (2026-08-01) — the extraction-regime segmentation this
+   *  signal now applies (see `segmentRowsToLatestRegime`). `segment_used` is null
+   *  when every row fell in a boundary band, i.e. nothing was computable. */
+  regime: {
+    segment_used: string | null
+    rows_in_window: number
+    rows_in_segment: number
+    rows_excluded_earlier_eras: number
+    rows_excluded_boundary_band: number
+  }
+}
+
+/**
+ * Agent-circles C1f (2026-08-01) — the regime-boundary exclusion this module's own
+ * header previously disclosed as MISSING ("this module does not apply the
+ * regime-boundary exclusion trajectory-delta.ts uses (ADR-014 §3.1) — a session
+ * straddling an extraction-regime boundary is read as-is… a named follow-up should
+ * this signal graduate past its dark build").
+ *
+ * The C1 first-circle correction creates the first boundary B5 would actually
+ * straddle, which is what makes the gap material rather than theoretical: a
+ * "sustained decline across sessions" computed across the correction would be
+ * reading a VOCABULARY CHANGE as a change in the practitioner. Mentor Q9a is
+ * explicit that examinations before and after the marker are read under different
+ * vocabularies and that no re-interpretation across it is permitted.
+ *
+ * The rule is trajectory-delta's, reused rather than re-derived (ADR-014 §4's
+ * one-record rule): drop rows inside a boundary band (the switch instant within
+ * the day is unrecoverable), then keep only the LATEST era present. Rows and
+ * markers are filtered together so the caller's index alignment is preserved.
+ */
+function segmentRowsToLatestRegime(
+  actions: readonly EvaluatedAction[],
+  markers: readonly (SessionMarker | null | undefined)[],
+  boundaries: readonly RegimeBoundary[],
+): {
+  actions: EvaluatedAction[]
+  markers: (SessionMarker | null | undefined)[]
+  report: SessionDeclineBasis['regime']
+} {
+  const eras = actions.map((a) => assignRegimeEra(a.evaluated_at, boundaries).era)
+  const bandCount = eras.filter((e) => e === 'boundary_band').length
+
+  // The latest era present among non-band rows. Boundaries are ordered, so the
+  // latest era is the one belonging to the highest-indexed boundary that any row
+  // sits at/after; taking the era of the newest non-band row is equivalent and
+  // needs no re-derivation of the ordering.
+  let latest: string | null = null
+  for (let i = actions.length - 1; i >= 0; i--) {
+    if (eras[i] !== 'boundary_band') {
+      latest = eras[i]
+      break
+    }
+  }
+
+  const keptActions: EvaluatedAction[] = []
+  const keptMarkers: (SessionMarker | null | undefined)[] = []
+  for (let i = 0; i < actions.length; i++) {
+    if (eras[i] === 'boundary_band') continue
+    if (eras[i] !== latest) continue
+    keptActions.push(actions[i])
+    keptMarkers.push(markers[i])
+  }
+
+  return {
+    actions: keptActions,
+    markers: keptMarkers,
+    report: {
+      segment_used: latest,
+      rows_in_window: actions.length,
+      rows_in_segment: keptActions.length,
+      rows_excluded_earlier_eras: actions.length - bandCount - keptActions.length,
+      rows_excluded_boundary_band: bandCount,
+    },
+  }
 }
 
 export interface SessionDeclineBlock {
@@ -141,9 +229,13 @@ function bucketCompleteSessions(
 function makeBasis(
   actions: readonly EvaluatedAction[],
   qualifying: readonly SessionBucket[],
+  regime: SessionDeclineBasis['regime'],
 ): SessionDeclineBasis {
   const nonEmpty = qualifying.reduce((n, b) => n + b.rows.length, 0)
   return {
+    // `input_count` / `empty_count` describe the SEGMENT the signal actually
+    // computed over, not the raw window — the raw window is reported separately
+    // as regime.rows_in_window so neither number is silently conflated.
     input_count: actions.length,
     empty_count: actions.length - nonEmpty,
     baseline_non_empty: qualifying.length > 0 ? qualifying[0].rows.length : 0,
@@ -152,6 +244,7 @@ function makeBasis(
     floor: EVIDENCE_FLOOR,
     qualifying_sessions: qualifying.length,
     threshold: SESSION_DECLINE_THRESHOLD,
+    regime,
   }
 }
 
@@ -163,12 +256,17 @@ function makeBasis(
 export function computeSessionDeclineSignal(
   actions: readonly EvaluatedAction[],
   markers: readonly (SessionMarker | null | undefined)[],
+  boundaries: readonly RegimeBoundary[] = SETTLED_REGIME_BOUNDARIES,
 ): SessionDeclineBlock | undefined {
   if (actions.length !== markers.length) return undefined
 
-  const buckets = bucketCompleteSessions(actions, markers)
+  // C1f — segment to the latest extraction regime BEFORE bucketing, so a session
+  // is never assembled from rows produced under two different vocabularies.
+  const segmented = segmentRowsToLatestRegime(actions, markers, boundaries)
+
+  const buckets = bucketCompleteSessions(segmented.actions, segmented.markers)
   const qualifying = buckets.filter((b) => b.rows.length >= EVIDENCE_FLOOR)
-  const basis = makeBasis(actions, qualifying)
+  const basis = makeBasis(segmented.actions, qualifying, segmented.report)
 
   if (qualifying.length < SESSION_DECLINE_THRESHOLD) {
     const trends = {} as Record<ProgressDimensionId, DeltaTrend>

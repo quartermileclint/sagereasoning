@@ -44,6 +44,7 @@ import {
 } from '../agent-assessment-history-store'
 import { computeTrajectoryOverlay } from '../trajectory-overlay'
 import {
+  assignRegimeEra,
   computeTrajectoryDelta,
   SETTLED_REGIME_BOUNDARIES,
   EVIDENCE_FLOOR,
@@ -77,11 +78,24 @@ function assert(condition: boolean, label: string): void {
 // Fixtures
 // ============================================================================
 
-const DAY = 86_400_000
 const PRE = Date.parse('2026-07-10T00:00:00.000Z') // pre-S11b era
 const POST = Date.parse('2026-07-20T00:00:00.000Z') // post-S11b era
-const isoAt = (baseMs: number, offsetDays: number): string =>
-  new Date(baseMs + offsetDays * DAY).toISOString()
+
+/**
+ * Fixture rows are spaced one HOUR apart (agent-circles C1, 2026-08-01 — was one
+ * DAY). The spacing was never load-bearing: every pin below depends on rows being
+ * strictly ordered oldest-first and on how the segment halves, not on the absolute
+ * gap. Day-spacing became actively wrong once a SECOND settled regime boundary
+ * existed: a 20-row window based at 2026-07-20 spanned to 2026-08-08 and so
+ * straddled the agent-circles boundary (2026-08-01), which the module then
+ * correctly refused to compute across — turning ten unrelated pins red for a
+ * reason that had nothing to do with what they test. Hour-spacing keeps every
+ * synthetic window inside one era. The cross-boundary behaviour itself is pinned
+ * deliberately and explicitly in §3, with literal dates.
+ */
+const STEP = 3_600_000
+const isoAt = (baseMs: number, offsetSteps: number): string =>
+  new Date(baseMs + offsetSteps * STEP).toISOString()
 
 function mkAction(
   evaluatedAt: string,
@@ -347,13 +361,50 @@ function postRows(n: number, per?: (i: number) => Partial<EvaluatedAction>): Eva
     '§3 band-only window: null segment, all signals floored',
   )
 
-  // The settled boundary constant carries the S11b identifiers.
+  // The settled boundary constants carry their regime identifiers. Append-only:
+  // each entry is pinned individually so a future boundary extends this list
+  // rather than loosening the assertion.
   assert(
-    SETTLED_REGIME_BOUNDARIES.length === 1 &&
-      SETTLED_REGIME_BOUNDARIES[0].note.includes('at-action-v1-lean') &&
+    SETTLED_REGIME_BOUNDARIES.length === 2,
+    '§3 settled boundaries: two regime changes are encoded (S11b, agent-circles)',
+  )
+  assert(
+    SETTLED_REGIME_BOUNDARIES[0].note.includes('at-action-v1-lean') &&
       SETTLED_REGIME_BOUNDARIES[0].note.includes('at-action-v2-composed') &&
-      SETTLED_REGIME_BOUNDARIES[0].band_start_iso === '2026-07-18T00:00:00.000Z',
-    '§3 settled boundary: the S11b regime identifiers + date are encoded',
+      SETTLED_REGIME_BOUNDARIES[0].band_start_iso === '2026-07-18T00:00:00.000Z' &&
+      SETTLED_REGIME_BOUNDARIES[0].to_era === 'post-s11b-recomposition',
+    '§3 settled boundary 0: the S11b regime identifiers + date are encoded',
+  )
+  // Agent-circles C1 (2026-08-01) — the first-circle correction is a vocabulary
+  // change, so Q9a forbids reading examinations across it. The band dates are
+  // reconciled to the actual deploy day at the founder walk; this pin asserts the
+  // entry's identity and ordering, not the day.
+  assert(
+    SETTLED_REGIME_BOUNDARIES[1].to_era === 'agent-circles-v1' &&
+      SETTLED_REGIME_BOUNDARIES[1].from_era === 'post-s11b-recomposition' &&
+      Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_start_iso) >
+        Date.parse(SETTLED_REGIME_BOUNDARIES[0].band_end_iso),
+    '§3 settled boundary 1: agent-circles-v1 follows post-s11b-recomposition, ordered',
+  )
+  assert(
+    Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_end_iso) -
+      Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_start_iso) ===
+      86_400_000,
+    '§3 settled boundary 1: the uncertainty band is exactly one day, as for S11b',
+  )
+  // The shared reader assigns across BOTH boundaries — non-vacuity for the entry
+  // above (a row after the agent-circles band must read the new era, not the old).
+  assert(
+    assignRegimeEra(
+      new Date(Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_end_iso) + 3_600_000).toISOString(),
+    ).era === 'agent-circles-v1',
+    '§3 a row after the agent-circles band reads agent-circles-v1',
+  )
+  assert(
+    assignRegimeEra(
+      new Date(Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_start_iso) + 3_600_000).toISOString(),
+    ).era === 'boundary_band',
+    '§3 a row inside the agent-circles band reads boundary_band (excluded)',
   )
 
   // Unsorted custom boundaries are sorted before assignment.

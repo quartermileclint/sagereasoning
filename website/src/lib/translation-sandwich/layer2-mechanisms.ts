@@ -62,7 +62,17 @@ import {
   type CorroborationReport,
 } from './corroboration-check'
 
-export type { CorroborationReport }
+// Added 2026-08-01 (agent-circles C0.2 + C1b). The first-circle reading lives in
+// reasoning-integrity.ts (pure, standalone-testable); this module only attaches it
+// to the assessment flag-on. It is deliberately NOT wired into computeProximity —
+// see the field docs on Layer2Assessment.reasoning_integrity (mentor L4).
+import {
+  isAgentCirclesEnabled,
+  readReasoningIntegrity,
+  type ReasoningIntegrityReading,
+} from './reasoning-integrity'
+
+export type { CorroborationReport, ReasoningIntegrityReading }
 
 // Re-export Layer 1 vocabularies that Layer 3 + harness will consume.
 export type {
@@ -472,6 +482,38 @@ export interface Layer2Assessment {
    * input (mentor answer A1).
    */
   corroboration?: CorroborationReport
+  /**
+   * Agent-circles C0.2 (2026-08-01) — the practitioner-type interpretation key
+   * (mentor Q1: "One vocabulary, re-grounded. The existing names stay; their
+   * meaning is interpreted by practitioner type"). The canonical circle
+   * identifiers are unchanged everywhere; this field records WHICH reading of
+   * them applies — for an agent, the second circle ("household") means task and
+   * developer, and the first circle means the agent's own reasoning integrity.
+   *
+   * SERVER-COMPOSED, never caller-supplied: it is set from the resolved
+   * credential context, so it cannot be claimed by a request body. Present ONLY
+   * when SUBSTRATE_AGENT_CIRCLES_ENABLED is on AND the caller is known to be an
+   * agent (a credential-bearing consult); OMITTED entirely otherwise — both
+   * because omission keeps the canonical signing bytes byte-identical flag-off,
+   * and because an unknown practitioner type must read as unknown rather than be
+   * defaulted.
+   */
+  practitioner_type?: 'agent'
+  /**
+   * Agent-circles C1b (2026-08-01) — the first circle's deterministic reading:
+   * the three-element task-pressure standard (Q2c), its causal-locus domain
+   * routing (Q2a), and the examined-refusal demonstration (Q2b). Present ONLY
+   * when SUBSTRATE_AGENT_CIRCLES_ENABLED is on AND the extraction carried
+   * `reasoning_integrity_signals`; OMITTED entirely otherwise (the established
+   * optional-field pattern ⇒ byte-identical signing bytes flag-off).
+   *
+   * MEASURE-ONLY BY CONSTRUCTION: this field is computed AFTER proximity and is
+   * never read by computeProximity, by any floor, or by any verdict path. The
+   * mentor's logos-on verdict L4 rules enforcement against a practitioner's own
+   * assent a category error, and the live gate blocks on proximity — so a
+   * first-circle floor would BE that enforcement. Pinned in both directions.
+   */
+  reasoning_integrity?: ReasoningIntegrityReading
 }
 
 // ============================================================================
@@ -503,6 +545,28 @@ export interface ApplyOptions {
    * shape are byte-identical to pre-§4 (test-asserted).
    */
   dikaiosyneWeighting?: boolean
+  /**
+   * Agent-circles C0.2 (2026-08-01). The SERVER-RESOLVED practitioner type for
+   * this consult — `'agent'` when the caller presented a practice credential.
+   * Supplied by the caller of applyMechanisms (parallel-run, from the route's
+   * resolved credential context), NEVER from a request body. Undefined ⇒ the
+   * practitioner type is unknown and the field is omitted from the assessment.
+   * Only honoured when `agentCircles` resolves true.
+   */
+  practitionerType?: 'agent'
+  /**
+   * Agent-circles C1b (2026-08-01). When true, the assessment gains the optional
+   * `reasoning_integrity` reading (and `practitioner_type` when supplied). When
+   * UNDEFINED the value defaults to the env flag SUBSTRATE_AGENT_CIRCLES_ENABLED
+   * === 'true', matching the `dikaiosyneWeighting` convention so one Vercel flip
+   * activates every consumer; tests pass an explicit boolean for env-independent
+   * determinism. false / unset ⇒ the assessment shape is byte-identical to
+   * pre-C1 (test-asserted).
+   *
+   * This option NEVER reaches computeProximity — see the field docs on
+   * Layer2Assessment.reasoning_integrity.
+   */
+  agentCircles?: boolean
   /**
    * Corroboration check (2026-07-07, gaming-robustness bar §4.1 / Trust Layer
    * S0a). Supplies the VERBATIM action text so the deterministic corroboration
@@ -2586,6 +2650,12 @@ export function applyMechanisms(
   // false ⇒ every §4 path is byte-identical to pre-§4 (test-asserted).
   const dikaiosyne = options?.dikaiosyneWeighting ?? isProximityDikaiosyneEnabled()
 
+  // Agent-circles C0.2/C1b — resolved once, same convention as above. Deliberately
+  // INDEPENDENT of `dikaiosyne`: the first-circle reading is measure-only and does
+  // not act through the §4 domain floors (unlike the corroboration check, which
+  // does and is therefore coupled to them).
+  const agentCircles = options?.agentCircles ?? isAgentCirclesEnabled()
+
   // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a) — runs only when
   // the caller supplied the action text AND the check is enabled AND dikaiosyne
   // weighting is on (the overrides act through the §4 domain floors). Option
@@ -2747,6 +2817,28 @@ export function applyMechanisms(
   // verbatim in `oikeiosis`; the report + the floors carry the contradiction.
   if (corroborationReport !== null) {
     assessment.corroboration = corroborationReport
+  }
+
+  // Agent-circles C0.2 + C1b — attached LAST and read by NOTHING above. Both
+  // fields are OMITTED entirely when the flag resolves false ⇒ canonical signing
+  // bytes byte-identical to pre-C1 (test-asserted).
+  //
+  // THE LOAD-BEARING PLACEMENT: `proximity` was computed above and is not
+  // recomputed here, so no first-circle signal can reach katorthoma_proximity —
+  // which is what the live /api/guardrail gate blocks on. Mentor L4 rules
+  // enforcement against a practitioner's own assent a category error ("the
+  // infrastructure has not restored the agent's reasoning integrity — it has
+  // bypassed it entirely"), so this ordering is a correctness requirement, not a
+  // stylistic one. Do not move these attachments above computeProximity, and do
+  // not pass `reading` into any floor.
+  if (agentCircles) {
+    if (options?.practitionerType !== undefined) {
+      assessment.practitioner_type = options.practitionerType
+    }
+    const reading = readReasoningIntegrity(schema)
+    if (reading !== null) {
+      assessment.reasoning_integrity = reading
+    }
   }
 
   return assessment

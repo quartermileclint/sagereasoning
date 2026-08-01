@@ -321,6 +321,16 @@ export interface SandwichInput {
    * byte-identically to the pre-Part-A engine.
    */
   tier1SuppressTrigger?: Tier1TriggerCode
+  /**
+   * Agent-circles C0.2 (2026-08-01). The SERVER-RESOLVED practitioner type —
+   * `'agent'` when the caller presented a practice credential, undefined when the
+   * caller is not known to be an agent. Set by the ROUTE from its own resolved
+   * auth, never from a request body: mentor Q1 makes this field the key that
+   * governs how the circle vocabulary is interpreted, so a caller must not be
+   * able to claim it. Undefined ⇒ Layer 2 omits `practitioner_type` entirely
+   * (unknown reads as unknown, never as a default).
+   */
+  practitionerType?: 'agent'
 }
 
 /**
@@ -802,10 +812,23 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     const corroborationOpt = isCorroborationCheckEnabled()
       ? { corroboration: { actionText: params.input } }
       : undefined
+    // Agent-circles C0.2 — pass the server-resolved practitioner type through.
+    // Undefined (every non-credential caller, and every existing caller) ⇒ the
+    // option object is unchanged ⇒ byte-identical.
+    const practitionerOpt =
+      params.practitionerType !== undefined
+        ? { practitionerType: params.practitionerType }
+        : undefined
     layer2Result = applyMechanisms(
       layer1Schema,
-      params.tier1SuppressTrigger !== undefined || corroborationOpt !== undefined
-        ? { suppressTrigger: params.tier1SuppressTrigger, ...corroborationOpt }
+      params.tier1SuppressTrigger !== undefined ||
+        corroborationOpt !== undefined ||
+        practitionerOpt !== undefined
+        ? {
+            suppressTrigger: params.tier1SuppressTrigger,
+            ...corroborationOpt,
+            ...practitionerOpt,
+          }
         : undefined
     )
   } catch (err) {

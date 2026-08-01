@@ -1371,6 +1371,13 @@ export async function POST(request: NextRequest) {
       // would omit this and A7 would run a fresh classifier call inheriting
       // the AC2 ~500ms budget.
       safetyGate: gate,
+      // Agent-circles C0.2 (2026-08-01): the practitioner-type interpretation key
+      // (mentor Q1). SERVER-COMPOSED from this route's own resolved auth — a
+      // credential-bearing consult is an agent practitioner; anything else leaves
+      // it undefined and the field is omitted (unknown reads as unknown). It is
+      // deliberately NOT read from the request body: the field governs how the
+      // circle vocabulary is interpreted, so a caller must not be able to claim it.
+      practitionerType: apiKey ? ('agent' as const) : undefined,
       // M1 CI-1 (2026-06-12): a REQUEST to defer prose, not a guarantee — the
       // orchestrator applies the structural distress guard (shouldDeferProse)
       // and reports the actual outcome on sandwichResult.prose_deferred.

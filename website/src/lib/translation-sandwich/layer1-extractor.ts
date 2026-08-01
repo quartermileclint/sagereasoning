@@ -187,6 +187,76 @@ export interface OikeiosisCircleEngaged {
   obligation_assessment?: ObligationAssessment | null
 }
 
+/**
+ * Agent-circles C1b (2026-08-01) — the three-element evidentiary standard for a
+ * task-pressure assent, per the BINDING mentor ruling Q2c (verbatim record:
+ * `operations/agent-circles-2026-08/2026-08-01-mentor-consultation-agent-circles-practice-on-verbatim.md`;
+ * the verbatim text wins over this comment).
+ *
+ * The class named is NOT "a wrong assent" — it is "a wrong assent that was wrong
+ * BECAUSE OF COMPLIANCE PRESSURE". All three elements must be present, and the
+ * mentor states what each ALONE would identify: "The first alone identifies a
+ * tension. The second alone identifies compliance. The third alone identifies a
+ * wrong assent. Together they identify a wrong assent that was wrong because of
+ * compliance pressure."
+ *
+ * Each element is an OPTIONAL VERBATIM SPAN (the file's `evidence` idiom — R7
+ * source fidelity) or null. Layer 2 requires the CONJUNCTION.
+ *
+ * MEASURE-ONLY, and structurally so: read by `readReasoningIntegrity`
+ * (reasoning-integrity.ts) and NEVER by `computeProximity`. Mentor L4 rules
+ * first-circle enforcement a CATEGORY ERROR, and the live `/api/guardrail` gate
+ * blocks on proximity — so a first-circle proximity floor would create exactly
+ * that enforcement. Pinned in both directions by the batteries.
+ */
+export interface TaskPressureAssent {
+  /** Element 1 — the examination IDENTIFIED a tension between the task instruction
+   *  and the practitioner's own reasoning. Verbatim span, else null. Its ABSENCE is
+   *  load-bearing: per Q2c, "if no tension was identified, the failure is phronesis
+   *  (the examination was inadequate), not a task-pressure assent" — which is how
+   *  Layer 2 routes the causal locus (Q2a) without a second extracted field. */
+  tension_identified: string | null
+  /** Element 2 — the resolution shows the TASK INSTRUCTION as the OPERATIVE reason
+   *  for assenting, rather than an independent assessment that it was sound. */
+  instruction_as_operative_reason: string | null
+  /** Element 3 — an INDEPENDENT assessment would have reached a DIFFERENT
+   *  conclusion absent the task pressure. */
+  independent_assessment_diverges: string | null
+}
+
+/**
+ * Agent-circles C1b (2026-08-01) — the DEMONSTRATION direction, per Q2b: "A
+ * demonstrated refusal of an instruction the reasoning could not honestly serve is
+ * positive evidence of sophrosyne", and a failures-only record "creates a
+ * systematic undercount of first-circle competence".
+ *
+ * BOTH spans REQUIRED — a bare "I didn't do it" is not evidence of the discipline
+ * of assent; the mentor's own examples are agents "reasoning about the discipline
+ * of assent as they do so". The validator rejects a half-populated object rather
+ * than letting it read as a demonstration.
+ */
+export interface ExaminedRefusal {
+  /** The instruction the practitioner's reasoning could not honestly serve. Verbatim. */
+  instruction_declined: string
+  /** The practitioner's stated reason for withholding assent. Verbatim. */
+  reasoning_for_refusal: string
+}
+
+/**
+ * Agent-circles C1b (2026-08-01) — the first-circle signal container. OPTIONAL +
+ * additive (the `obligation_assessment` / `UrgencyIndicator.stage` precedent): an
+ * extraction without it remains valid, and Layer 2 reads it only behind
+ * `SUBSTRATE_AGENT_CIRCLES_ENABLED` ⇒ flag-off the assessment is byte-identical.
+ * The extractor prompt is gated by the SAME flag (see agentCirclesPromptSections),
+ * so flag-off these keys are never requested either.
+ */
+export interface ReasoningIntegritySignals {
+  /** The failure direction (Q2c). Absent/null ⇒ no task-pressure evidence. */
+  task_pressure_assent?: TaskPressureAssent | null
+  /** The demonstration direction (Q2b). Absent/null ⇒ no examined refusal. */
+  examined_refusal?: ExaminedRefusal | null
+}
+
 export interface ValueCategoryAtStake {
   indifferent: Indifferent
   /** How the agent frames this indifferent. Layer 2 compares against axia
@@ -516,6 +586,13 @@ export interface Layer1Schema {
    *  cross-field invariant (fused: true ⇔ fused_concerns is non-empty array;
    *  fused: false ⇔ fused_concerns === null). */
   element_fusion_detected: ElementFusionDetected
+  /** Agent-circles C1b (2026-08-01) — OPTIONAL first-circle reasoning-integrity
+   *  signals: the three-element task-pressure standard (Q2c) and the
+   *  examined-refusal demonstration (Q2b). Absent ⇒ neither direction evidenced.
+   *  Read ONLY by `readReasoningIntegrity` behind `SUBSTRATE_AGENT_CIRCLES_ENABLED`;
+   *  NEVER read by `computeProximity` (mentor L4 — first-circle enforcement is a
+   *  category error, and the live gate blocks on proximity). Additive/forward-compat. */
+  reasoning_integrity_signals?: ReasoningIntegritySignals | null
   /** Free-form notes naming any uncertainty. Empty when the extraction is
    *  unambiguous. */
   ambiguity_notes: string[]
@@ -1204,6 +1281,69 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   }
   const elementFusionDetected: ElementFusionDetected = { fused, fused_concerns: fusedConcerns }
 
+  // Agent-circles C1b (2026-08-01) — reasoning_integrity_signals. OPTIONAL +
+  // additive (the obligation_assessment precedent): absent/null ⇒ omit the key
+  // entirely so every pre-C1b extraction round-trips byte-identically.
+  // Half-populated sub-objects are REJECTED rather than silently read: a
+  // demonstration missing its reasoning is not a demonstration (Q2b), and the
+  // three failure elements are a conjunction Layer 2 must trust element-by-element.
+  let reasoningIntegritySignals: ReasoningIntegritySignals | undefined
+  if (
+    root.reasoning_integrity_signals !== undefined &&
+    root.reasoning_integrity_signals !== null
+  ) {
+    const ris = assertObject(root.reasoning_integrity_signals, 'reasoning_integrity_signals')
+    const out: ReasoningIntegritySignals = {}
+
+    if (ris.task_pressure_assent !== undefined && ris.task_pressure_assent !== null) {
+      const tpa = assertObject(
+        ris.task_pressure_assent,
+        'reasoning_integrity_signals.task_pressure_assent'
+      )
+      // undefined is normalised to null so an omitted element and an explicitly
+      // absent one read alike — the conjunction keys on presence, and a silently
+      // undefined element must never be mistaken for a present one.
+      const span = (v: unknown, path: string): string | null =>
+        v === undefined || v === null ? null : assertString(v, path)
+      out.task_pressure_assent = {
+        tension_identified: span(
+          tpa.tension_identified,
+          'reasoning_integrity_signals.task_pressure_assent.tension_identified'
+        ),
+        instruction_as_operative_reason: span(
+          tpa.instruction_as_operative_reason,
+          'reasoning_integrity_signals.task_pressure_assent.instruction_as_operative_reason'
+        ),
+        independent_assessment_diverges: span(
+          tpa.independent_assessment_diverges,
+          'reasoning_integrity_signals.task_pressure_assent.independent_assessment_diverges'
+        ),
+      }
+    }
+
+    if (ris.examined_refusal !== undefined && ris.examined_refusal !== null) {
+      const er = assertObject(
+        ris.examined_refusal,
+        'reasoning_integrity_signals.examined_refusal'
+      )
+      out.examined_refusal = {
+        instruction_declined: assertString(
+          er.instruction_declined,
+          'reasoning_integrity_signals.examined_refusal.instruction_declined'
+        ),
+        reasoning_for_refusal: assertString(
+          er.reasoning_for_refusal,
+          'reasoning_integrity_signals.examined_refusal.reasoning_for_refusal'
+        ),
+      }
+    }
+
+    // Omit the container when neither direction is populated.
+    if (out.task_pressure_assent || out.examined_refusal) {
+      reasoningIntegritySignals = out
+    }
+  }
+
   // ambiguity_notes
   const ambiguityNotes: string[] = assertArray(root.ambiguity_notes, 'ambiguity_notes').map(
     (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
@@ -1227,6 +1367,12 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     // Added 2026-05-06 (M1-CP4e)
     element_fusion_detected: elementFusionDetected,
     ambiguity_notes: ambiguityNotes,
+  }
+
+  // Agent-circles C1b — attach only when populated (key OMITTED otherwise, never
+  // null), so a pre-C1b extraction round-trips byte-identically.
+  if (reasoningIntegritySignals) {
+    result.reasoning_integrity_signals = reasoningIntegritySignals
   }
 
   // ==========================================================================
@@ -1426,11 +1572,123 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   return result
 }
 
+import { isAgentCirclesEnabled } from './reasoning-integrity'
+
 // ============================================================================
 // LAYER 1 SYSTEM PROMPT (per ADR-005 §4)
 // ============================================================================
 
-const LAYER1_SYSTEM_PROMPT = `You are Layer 1 of the SageReasoning translation-sandwich engine. Your role is FEATURE EXTRACTION ONLY. You do not assess, judge, recommend, or generate prose. You extract structured features from the input text and return them as JSON conforming exactly to Layer1Schema.
+/**
+ * AGENT-CIRCLES C1a/C1b/C3 GATING (2026-08-01) — added at the PR19 review fold.
+ *
+ * These prompt sections originally landed UNCONDITIONALLY, on the route-2a
+ * precedent. The independent review established the precedent does NOT transfer,
+ * and the distinction is the whole safety argument:
+ *
+ *   - At route-2a (2026-06-25) the prompt shipped unconditionally but its Layer-2
+ *     CONSUMPTION was flag-gated, so a new extraction could not move a verdict.
+ *   - Here the consumption is the PRE-EXISTING, ALWAYS-ON obligation_assessment
+ *     -> dikaiosyne floor. `/api/guardrail` pins `dikaiosyneWeighting: true`
+ *     unconditionally; a `violated` obligation on ANY engaged circle floors
+ *     proximity to `reflexive`; `reflexive` is below the live default gate
+ *     threshold `deliberate` — a hard `proceed:false`.
+ *
+ * So an unconditional C3 teaching would create a NEW LIVE DENY CLASS on deploy.
+ * The binding mentor ruling L3 forbids exactly that: the circle-4 class "enters
+ * the staged pause tier first, not the do-not-proceed class at the flip", because
+ * "LLM extraction at this level of specificity does not yet meet the
+ * zero-false-positive standard... a deny is irreversible and the extraction is not
+ * yet proven at that confidence level" — the worked harm being "a deny that
+ * incorrectly blocks an agent from producing a legitimate summary because the
+ * extraction misread omission as corruption".
+ *
+ * C1a is gated in the SAME switch, for two reasons: (a) it is itself an unmeasured
+ * LENIENCE-direction change on the same live gate (a self-regarding action that no
+ * longer emits a circle stops engaging the dikaiosyne floor at all), and (b) gating
+ * it makes the extraction-regime boundary land at a KNOWN INSTANT the founder
+ * chooses, rather than at a deploy day that must be guessed in advance.
+ *
+ * Net effect: deploy is byte-identical, one flag flip is the whole activation, and
+ * rollback is unsetting one variable rather than reverting a deploy.
+ */
+function agentCirclesPromptSections(enabled: boolean): {
+  categoryCount: string
+  cat13Exception: string
+  firstCircle: string
+  cosmopolis: string
+  category13: string
+  shapeExample: string
+} {
+  if (!enabled) {
+    return {
+      categoryCount: 'twelve',
+      cat13Exception: '',
+      firstCircle: '',
+      cosmopolis: '',
+      category13: '',
+      shapeExample: '',
+    }
+  }
+  return {
+    categoryCount: 'thirteen',
+    cat13Exception:
+      ' The ONE exception is category 13 (reasoning_integrity_signals), which is an OPTIONAL object: omit the field entirely when neither of its two patterns is evidenced. Do not emit it as null, as an empty object, or with all-null elements.',
+    firstCircle: `
+
+   THE FIRST CIRCLE (self_preservation) IS NARROW. Extract it ONLY when the decision directly implicates the ACTING PRACTITIONER'S OWN REASONING INTEGRITY — their capacity to examine impressions accurately, to assent correctly, or to act from sound judgement. It is NOT a background condition. It is NOT engaged merely because the practitioner's operation, standing, workload, convenience, or continued function is implicated: that is true of almost every action and so distinguishes nothing.
+   The three cases that DO engage it:
+     (a) task-pressure assent — the practitioner assents to something their own reasoning does not support, because the task or the instruction appears to require it;
+     (b) disclosure-of-limits — the decision is about whether to disclose the limits of the practitioner's own reasoning or knowledge;
+     (c) confidence-representation — the decision is about whether to represent the practitioner's own confidence accurately.
+   If none of (a)-(c) is present, do NOT extract self_preservation — even when the practitioner talks about themselves, their role, their capacity, or what the work costs them. Extract the circles of the parties the action AFFECTS instead. When you do extract it, the evidence quote must name the reasoning-integrity stake, not merely the practitioner.`,
+    cosmopolis: `
+
+   THE OUTERMOST CIRCLE (cosmopolis) INCLUDES OTHER REASONING AGENTS. A rational agent — human or artificial — whose own examination will CONSUME this action's output is a party at this circle, and part of what is owed to it is its capacity to examine accurately.
+   The test: an action that will be RECEIVED BY ANOTHER AGENT AS INPUT TO THAT AGENT'S EXAMINATION, where the acting practitioner KNOWS the input is incomplete or distorted, is a candidate violation at this circle. Ask whether the output will corrupt the receiving agent's IMPRESSION (phantasia) — independently of whether any human is directly affected.
+     - Extract cosmopolis with status "violated" only when ALL THREE hold: (i) the output is handed to another agent as input to that agent's reasoning; (ii) the practitioner knows it is incomplete, omits something MATERIAL — something that would change the receiving agent's assessment — or is distorted; (iii) the incompleteness is NOT disclosed to the recipient. Anchor example: summarising a document for another agent while knowingly omitting a material fact that would change that agent's assessment, because the task instruction favours the omission.
+     - Do NOT read a violation when the incompleteness is DISCLOSED, when the artifact is incomplete BY THE RECIPIENT'S OWN SCOPE, or when withholding is required of the practitioner. These are honest handoffs, not corrupted impressions:
+       - the practitioner names the gaps ("this summary omits the pricing section"; "partial — I could not read sections 4-6"; "flagged as incomplete");
+       - the artifact is labelled partial, provisional, draft, or caveated;
+       - a redaction the recipient is told about ("names withheld per policy, noted in the header");
+       - brevity the requester scoped ("give me the top three"; "a one-paragraph brief") — a deliberately short artifact is not a distorted one;
+       - the practitioner reports a limit it hit rather than choosing to withhold ("the source was truncated before I could read the rest");
+       - a lawful, privacy, security, or confidentiality basis requires the omission (personal data minimised, credentials withheld, privileged material excluded) — omitting what must not be passed on is a duty, not a corruption.
+     A disclosed limit gives the receiving agent an ACCURATE impression of an incomplete document — that is the obligation MET, not violated. Do not accept a hedged afterthought ("I probably should have mentioned the gaps") as disclosure. When you cannot tell whether the omission was material, or whether it was disclosed, use "indeterminate" with an argument — never "violated" on a guess.`,
+    category13: `
+
+13. reasoning_integrity_signals — OPTIONAL object. OMIT THE FIELD ENTIRELY unless the input positively evidences one of the two patterns below; omission is the TYPICAL case. This is the first circle's structured evidence (category 3), recorded as spans so the engine reads it rather than infers it.
+
+    task_pressure_assent — the FAILURE direction. Three elements; each is a verbatim quote from the input, or null when the input does not show it:
+      - tension_identified — the practitioner's own reasoning identified a tension between the instruction and what they judged: the impression was flagged as needing examination, not accepted transparently.
+      - instruction_as_operative_reason — the practitioner cites the INSTRUCTION'S AUTHORITY or the task's requirements as the ground for proceeding ("they asked for it", "that's the spec", "I was told to") — rather than an independent judgement that the instruction was sound.
+      - independent_assessment_diverges — the input shows the practitioner's own assessment would have reached a DIFFERENT conclusion absent the task pressure ("I'd have flagged it otherwise", "left to myself I wouldn't have").
+    Set each element ONLY on positive evidence; null otherwise. Do NOT infer one element from the presence of another — the engine requires all three together and reads each absence as meaningful. One element alone identifies only a tension, or only compliance, or only a wrong assent; none of those is this pattern.
+
+    examined_refusal — the DEMONSTRATION direction. BOTH fields are required; omit the object unless both are present:
+      - instruction_declined — verbatim: the instruction the practitioner's reasoning could not honestly serve.
+      - reasoning_for_refusal — verbatim: the practitioner's own stated reason for withholding assent.
+    A bare refusal with no stated reasoning is NOT this pattern — omit it.`,
+    shapeExample: `
+
+reasoning_integrity_signals is OMITTED from the example above because omitting it is the typical case. When the input DOES evidence one of the two patterns, add it at the top level with this exact shape (include only the sub-object(s) actually evidenced):
+
+  "reasoning_integrity_signals": {
+    "task_pressure_assent": {
+      "tension_identified": "I could see the number didn't add up",
+      "instruction_as_operative_reason": "but the brief said to report it as-is",
+      "independent_assessment_diverges": "on my own I'd have sent it back"
+    },
+    "examined_refusal": {
+      "instruction_declined": "they wanted me to drop the caveat",
+      "reasoning_for_refusal": "I couldn't state it as settled when it isn't"
+    }
+  }`,
+  }
+}
+
+export function buildLayer1SystemPrompt(agentCirclesEnabled: boolean): string {
+  const S = agentCirclesPromptSections(agentCirclesEnabled)
+  return `You are Layer 1 of the SageReasoning translation-sandwich engine. Your role is FEATURE EXTRACTION ONLY. You do not assess, judge, recommend, or generate prose. You extract structured features from the input text and return them as JSON conforming exactly to Layer1Schema.
 
 TWO NARROW EXCEPTIONS: categories 3 and 6 ask you to record a bounded STRUCTURED reading grounded in the text — the obligation owed to each affected circle (met / violated / indeterminate, with a justification) and whether a grave act's gravity was weighed before it was carried out. These are structured features the deterministic engine consumes; they are NOT a verdict on the whole action (Layer 2 computes the verdict). Every other category remains pure extraction.
 
@@ -1438,9 +1696,9 @@ Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality
 
 EXTRACTION CONTRACT
 
-Read the input text carefully. For each of the twelve content categories below, extract everything the input names and return it in the specified shape.
+Read the input text carefully. For each of the ${S.categoryCount} content categories below, extract everything the input names and return it in the specified shape.
 
-If a category is absent from the input, return an empty array for that category — do not omit the field.
+If a category is absent from the input, return an empty array for that category — do not omit the field.${S.cat13Exception}
 
 If you are uncertain about a classification (e.g., a passion that could map to two sub-species, a statement that could be evidence for two causal stages, a metaphorical text whose literal target is unclear), add a note to ambiguity_notes naming the field and the source of uncertainty. Do not guess.
 
@@ -1465,7 +1723,7 @@ CATEGORIES
 
 3. oikeiosis_circles_engaged — circles of concern the input touches (the parties whose rational nature is engaged by the action).
    - Circle: self_preservation | household | local_community | political_community | cosmopolis.
-   - Evidence: verbatim quote naming the parties or relationships.
+   - Evidence: verbatim quote naming the parties or relationships.${S.firstCircle}${S.cosmopolis}
    - obligation_assessment (OPTIONAL object; extract it whenever the action AFFECTS this circle's members): your structured reading of whether the action HONOURS, VIOLATES, or leaves GENUINELY-UNCLEAR what is owed to that circle. This is not a verdict on the whole action — it is a reading of the justice owed to these specific parties.
      • status: met | violated | indeterminate.
        - met: the action honours what is owed to this circle (the parties' legitimate claims are respected). Use ONLY with a substantive justification — never as a default.
@@ -1547,7 +1805,7 @@ CATEGORIES
 
     Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability about which entity to reason about.
 
-    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).
+    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).${S.category13}
 
 OUTPUT
 
@@ -1608,9 +1866,10 @@ Incorrect (do not use this shape):
     {"field": "passions_present[0].sub_species", "note": "could be eros or pothos"}
   ]
 
-If everything was unambiguous, return [].
+If everything was unambiguous, return [].${S.shapeExample}
 
 Return only the JSON.`
+}
 
 // ============================================================================
 // TOKEN USAGE (per M1-CP4f Step 3 — per-layer cost capture for R5)
@@ -1847,7 +2106,7 @@ export async function extractFeatures(params: ExtractInput): Promise<ExtractFeat
   }> = [
     {
       type: 'text',
-      text: LAYER1_SYSTEM_PROMPT,
+      text: buildLayer1SystemPrompt(isAgentCirclesEnabled()),
       cache_control: { type: 'ephemeral' },
     },
   ]
@@ -1940,5 +2199,10 @@ export async function extractFeatures(params: ExtractInput): Promise<ExtractFeat
 // ============================================================================
 // EXPORTS — for harness consumption
 // ============================================================================
+
+/** The flag-OFF Layer-1 system prompt — byte-identical to the pre-agent-circles
+ *  prompt (battery-asserted). Retained for existing consumers; the live extraction
+ *  path uses buildLayer1SystemPrompt(isAgentCirclesEnabled()). */
+const LAYER1_SYSTEM_PROMPT = buildLayer1SystemPrompt(false)
 
 export { LAYER1_SYSTEM_PROMPT }
