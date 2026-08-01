@@ -180,11 +180,19 @@ export const SETTLED_REGIME_BOUNDARIES: readonly RegimeBoundary[] = [
       'not recoverable from the record.',
   },
   {
-    // ⚠ THE BAND DATES BELOW MUST EQUAL THE ACTUAL DEPLOY DAY OF THE C1
-    // EXTRACTION CHANGE. They are authored as the intended deploy day
-    // (2026-08-01). If the founder deploys on a different day, RECONCILE THESE
-    // TWO DATES BEFORE PUSHING — it is a blocking step on the C1 founder-walk
-    // checklist. Consequence of getting it wrong, stated plainly so the step is
+    // ⚠ THE BAND DATES BELOW MUST EQUAL THE ACTUAL FLAG-FLIP DAY, NOT THE
+    // DEPLOY DAY (mentor ruling, PR19 Q1, 2026-08-02): "the vocabulary changes
+    // when the flag is flipped, not when the code is deployed... marking the
+    // boundary at deploy day splits a genuinely unchanged run of examinations
+    // into two spurious eras." This entry is authored as the INTENDED
+    // flag-flip day (2026-08-01) and is READ ONLY WHEN `SUBSTRATE_AGENT_
+    // CIRCLES_ENABLED` IS ON — see `activeRegimeBoundaries` below, which every
+    // consumer must call rather than reading this constant directly. Deploy
+    // and flag-flip are structurally decoupled (that decoupling is the whole
+    // point of flag-gating C1a/C3, per BD-7); if the founder flips the flag on
+    // a DIFFERENT day than authored here, RECONCILE THESE TWO DATES TO THAT
+    // DAY before flipping — still a blocking walk step, now correctly
+    // targeted. Consequence of getting it wrong, stated plainly so the step is
     // not skipped: rows written under the CORRECTED vocabulary but dated before
     // band_start would be labelled `post-s11b-recomposition`, and rows written
     // under the OLD vocabulary but dated after band_end would be labelled
@@ -208,9 +216,36 @@ export const SETTLED_REGIME_BOUNDARIES: readonly RegimeBoundary[] = [
       'before the marker are read under the earlier vocabulary; examinations ' +
       'after it are read under the corrected one", and NO retroactive ' +
       're-processing is performed. Rows on the boundary day are excluded — the ' +
-      'deploy instant within the day is not recoverable from the record.',
+      'flag-flip instant within the day is not recoverable from the record.',
   },
 ]
+
+/**
+ * The regime boundaries actually IN EFFECT, given the agent-circles flag
+ * state (mentor ruling, PR19 Q1, 2026-08-02 — binding, verbatim wins): "the
+ * regime-boundary marker is gated by the same flag as the prompt change. They
+ * write together or not at all." Flag-off, the `agent-circles-v1` entry is
+ * EXCLUDED — no consumer reads it, so a deploy without a flag-flip cannot
+ * split an unchanged run of examinations into two spurious eras. Flag-on, it
+ * is included exactly as authored above.
+ *
+ * PURE — takes the flag state as an explicit parameter rather than reading
+ * the environment itself, preserving this module's "no env reads" invariant;
+ * the one impure environment read happens once at each route-level call site
+ * (`isAgentCirclesEnabled()`), not inside this file. Every one of this
+ * module's own consumers (and session-decline-signal.ts's, and loop-fold.ts's)
+ * that is invoked from a live request path MUST pass this function's result
+ * as their `boundaries` argument — passing none (falling through to the
+ * `SETTLED_REGIME_BOUNDARIES` default) reintroduces exactly the flag-
+ * independence defect this function exists to close.
+ */
+export function activeRegimeBoundaries(
+  agentCirclesEnabled: boolean,
+): readonly RegimeBoundary[] {
+  return agentCirclesEnabled
+    ? SETTLED_REGIME_BOUNDARIES
+    : SETTLED_REGIME_BOUNDARIES.filter((b) => b.to_era !== 'agent-circles-v1')
+}
 
 // ============================================================================
 // BLOCK SHAPE

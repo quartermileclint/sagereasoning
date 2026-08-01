@@ -181,7 +181,8 @@ import {
 // constant. Pure — no DB read, no LLM call: composed from blocks this response
 // has already computed. MEASURE-only, advisory by the channel law.
 import { practiceSuggestionFor } from '@/lib/substrate/practice-suggestion'
-import { computeTrajectoryDelta } from '@/lib/substrate/trajectory-delta'
+import { computeTrajectoryDelta, activeRegimeBoundaries } from '@/lib/substrate/trajectory-delta'
+import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
 import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
 import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
@@ -1377,7 +1378,7 @@ export async function POST(request: NextRequest) {
       // it undefined and the field is omitted (unknown reads as unknown). It is
       // deliberately NOT read from the request body: the field governs how the
       // circle vocabulary is interpreted, so a caller must not be able to claim it.
-      practitionerType: apiKey ? ('agent' as const) : undefined,
+      practitionerType: isApiKeyAuth ? ('agent' as const) : undefined,
       // M1 CI-1 (2026-06-12): a REQUEST to defer prose, not a guarantee — the
       // orchestrator applies the structural distress guard (shouldDeferProse)
       // and reports the actual outcome on sandwichResult.prose_deferred.
@@ -1659,6 +1660,10 @@ export async function POST(request: NextRequest) {
                 layer1Sources: windowResult.value.readRows?.map(
                   (r) => r.layer1_source ?? null,
                 ),
+                // Mentor ruling (PR19 Q1, 2026-08-02): the regime-boundary
+                // marker must be gated by the SAME flag as the prompt change
+                // it marks — this call is the one impure env read.
+                boundaries: activeRegimeBoundaries(isAgentCirclesEnabled()),
               })
             } catch (deltaErr) {
               console.warn(
@@ -1675,6 +1680,9 @@ export async function POST(request: NextRequest) {
               sessionDeclineSignal = computeSessionDeclineSignal(
                 windowResult.value.actions,
                 windowResult.value.readRows?.map((r) => r.session_marker ?? null) ?? [],
+                // Mentor ruling (PR19 Q1, 2026-08-02): same flag-gated
+                // boundaries as the trajectory-delta call above.
+                activeRegimeBoundaries(isAgentCirclesEnabled()),
               )
             } catch (sessionErr) {
               console.warn(

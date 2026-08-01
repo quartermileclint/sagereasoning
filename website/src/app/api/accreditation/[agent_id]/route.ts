@@ -257,6 +257,8 @@ import {
   computeLoopFoldAnnotation,
   isLoopFoldEnabled,
 } from '@/lib/substrate/trust-core/loop-fold'
+import { activeRegimeBoundaries } from '@/lib/substrate/trajectory-delta'
+import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
 import { resolveCredentialContext } from '@/lib/substrate/agent-assessment-history-store'
 // Practice reminders, agent Phase A1 (2026-07-28) — the practice-suggestion
 // composer. Flag-gated by SUBSTRATE_PRACTICE_SUGGESTION_ENABLED; UNSET ⇒ no
@@ -866,6 +868,10 @@ export async function POST(
                   pathAgentId: agent_id,
                 }),
                 now: new Date(),
+                // Mentor ruling (PR19 Q1, 2026-08-02): the regime-boundary
+                // marker must be gated by the SAME flag as the prompt change
+                // it marks — this call is the one impure env read.
+                boundaries: activeRegimeBoundaries(isAgentCirclesEnabled()),
               },
             )
           : undefined

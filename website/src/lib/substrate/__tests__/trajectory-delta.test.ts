@@ -46,6 +46,7 @@ import { computeTrajectoryOverlay } from '../trajectory-overlay'
 import {
   assignRegimeEra,
   computeTrajectoryDelta,
+  activeRegimeBoundaries,
   SETTLED_REGIME_BOUNDARIES,
   EVIDENCE_FLOOR,
   VOCABULARY_NOTE,
@@ -430,6 +431,44 @@ function postRows(n: number, per?: (i: number) => Partial<EvaluatedAction>): Eva
     dMulti.regime.segment_used === 'late' &&
       dMulti.regime.boundaries[0].from_era === 'early',
     '§3 multi-boundary: boundaries sorted; latest era wins',
+  )
+}
+
+// ============================================================================
+// §3b — activeRegimeBoundaries (PR19 Q1 mentor fold, 2026-08-02): the
+// agent-circles-v1 entry is excluded when the flag is off, included when on.
+// ============================================================================
+{
+  const off = activeRegimeBoundaries(false)
+  const on = activeRegimeBoundaries(true)
+  assert(
+    off.length === 1 && off[0].to_era === 'post-s11b-recomposition',
+    '§3b flag-off: only the S11b boundary is active; agent-circles-v1 excluded',
+  )
+  assert(
+    on.length === 2 && on[1].to_era === 'agent-circles-v1',
+    '§3b flag-on: both boundaries are active, in the authored order',
+  )
+  assert(
+    off.every((b) => b.to_era !== 'agent-circles-v1'),
+    '§3b NON-VACUITY: the excluded entry is genuinely absent, not merely reordered',
+  )
+  // The load-bearing consequence: a row dated inside the authored
+  // agent-circles-v1 band reads as the OLD era flag-off (a deploy-without-
+  // flip cannot split an unchanged run into two spurious eras), and as the
+  // correctly-excluded boundary_band flag-on.
+  const midBandIso = new Date(
+    Date.parse(SETTLED_REGIME_BOUNDARIES[1].band_start_iso) + 3_600_000,
+  ).toISOString()
+  assert(
+    assignRegimeEra(midBandIso, activeRegimeBoundaries(false)).era ===
+      'post-s11b-recomposition',
+    '§3b flag-off: a row dated inside the authored agent-circles-v1 band reads the ' +
+      'PRIOR era, not boundary_band — the boundary genuinely does not exist yet',
+  )
+  assert(
+    assignRegimeEra(midBandIso, activeRegimeBoundaries(true)).era === 'boundary_band',
+    '§3b flag-on CONTROL: the same row now correctly reads boundary_band',
   )
 }
 

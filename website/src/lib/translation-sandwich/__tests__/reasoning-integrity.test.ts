@@ -234,6 +234,40 @@ assert(all3?.insufficient_evidence_note === null, '§7 a met class ⇒ note is n
 assert(demo?.insufficient_evidence_note === null, '§7 a demonstration alone ⇒ note is null')
 
 // ============================================================================
+// §7b — elements_present tracks the REAL per-element evidence (PR19 fold:
+// this field was previously hardcoded to {true,true,true} regardless of the
+// actual reading — self-contradicting insufficient_evidence_note on every
+// partial fixture, and invisible to the battery because the all-present and
+// all-absent fixtures happen to make the hardcoded value look correct).
+// ============================================================================
+
+assert(
+  all3?.elements_present.tension_identified === true &&
+    all3?.elements_present.instruction_as_operative_reason === true &&
+    all3?.elements_present.independent_assessment_diverges === true,
+  '§7b all-three fixture ⇒ elements_present all true',
+)
+
+assert(
+  partial?.elements_present.tension_identified === true &&
+    partial?.elements_present.instruction_as_operative_reason === false &&
+    partial?.elements_present.independent_assessment_diverges === false,
+  '§7b tension-only fixture ⇒ elements_present reflects ONLY tension as true (non-vacuity: catches the all-true hardcode)',
+)
+
+assert(
+  noTension?.elements_present.tension_identified === false &&
+    noTension?.elements_present.instruction_as_operative_reason === true &&
+    noTension?.elements_present.independent_assessment_diverges === true,
+  '§7b no-tension fixture ⇒ elements_present reflects the compliance pair true, tension false',
+)
+
+assert(
+  blankTension?.elements_present.tension_identified === false,
+  '§7b a blank (whitespace-only) tension span reads as ABSENT in elements_present, not true',
+)
+
+// ============================================================================
 // §8 — bounds ride every reading, verbatim
 // ============================================================================
 

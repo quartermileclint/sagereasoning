@@ -63,11 +63,18 @@ import type { Layer1Schema, TaskPressureAssent } from './layer1-extractor'
  * attaches neither `reasoning_integrity` nor `practitioner_type`, so the signed
  * assessment is BYTE-IDENTICAL to pre-C1 (battery-asserted).
  *
- * Note the deliberate asymmetry, inherited from the 2026-06-25 route-2a landing:
- * the Layer-1 extractor PROMPT is unconditional (it is shared with the live
- * `/api/guardrail` gate and cannot be flag-forked), so flag-off the `extraction`
- * object on the wire MAY carry the new keys while the signed Layer-2 assessment
- * does not.
+ * CORRECTED (PR19 fold, BD-7, 2026-08-01): unlike the 2026-06-25 route-2a
+ * precedent this module's design note originally invoked, the C1a/C3 Layer-1
+ * extractor PROMPT is NOT unconditional here — `buildLayer1SystemPrompt` is
+ * itself flag-gated (`buildLayer1SystemPrompt(isAgentCirclesEnabled())`),
+ * because at route-2a only Layer-2 *consumption* was flag-gated while the
+ * prompt shipped unconditionally; that precedent does not transfer to a
+ * prompt teaching that can newly floor the live `/api/guardrail` gate (§3 of
+ * the 2026-08-01 close). Flag-off, the prompt is byte-identical to pre-C1
+ * (16,942 chars, verified by direct module comparison) and solicits none of
+ * the new fields, so the `extraction` object on the wire is also unaffected
+ * flag-off — the two-flag asymmetry this note previously described does not
+ * exist in the shipped code.
  */
 export function isAgentCirclesEnabled(): boolean {
   return process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED === 'true'
@@ -236,7 +243,7 @@ export function readReasoningIntegrity(schema: Layer1Schema): ReasoningIntegrity
     schema: 'agent-reasoning-integrity-v1',
     failure,
     demonstration,
-    elements_present: { tension_identified: true, instruction_as_operative_reason: true, independent_assessment_diverges: true },
+    elements_present: elements,
     insufficient_evidence_note: insufficient,
     bounds: REASONING_INTEGRITY_BOUNDS,
   }

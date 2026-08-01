@@ -25,7 +25,7 @@ import {
   SESSION_DECLINE_THRESHOLD,
   type SessionMarker,
 } from '../session-decline-signal'
-import { EVIDENCE_FLOOR } from '../trajectory-delta'
+import { EVIDENCE_FLOOR, type RegimeBoundary } from '../trajectory-delta'
 
 let passed = 0
 let failed = 0
@@ -247,6 +247,98 @@ function concat(
 // §9 — SESSION_DECLINE_THRESHOLD sanity (documents the build decision)
 // ============================================================================
 assert(SESSION_DECLINE_THRESHOLD === 3, 'SESSION_DECLINE_THRESHOLD is 3 (the conservative end of 2-3)')
+
+// ============================================================================
+// §10 — segmentRowsToLatestRegime (C1f) is genuinely non-vacuous (PR19 fold:
+// zero prior test constructed a session straddling a regime boundary; a
+// mutation gutting segmentation to a no-op passed all 9 sections above
+// unchanged). Uses a SYNTHETIC boundary — never the real production dates —
+// so this pin is independent of when it runs.
+// ============================================================================
+{
+  const SYNTHETIC_BOUNDARY: readonly RegimeBoundary[] = [
+    {
+      band_start_iso: '2020-06-01T00:00:00.000Z',
+      band_end_iso: '2020-06-02T00:00:00.000Z',
+      from_era: 'test-era-old',
+      to_era: 'test-era-new',
+      note: 'synthetic boundary for §10 — not a real production regime change',
+    },
+  ]
+  const oldRow = (proximity: KatorthomaProximityLevel) =>
+    mkAction({ evaluated_at: '2020-05-01T00:00:00.000Z', proximity })
+  const bandRow = (proximity: KatorthomaProximityLevel) =>
+    mkAction({ evaluated_at: '2020-06-01T12:00:00.000Z', proximity })
+  const newRow = (proximity: KatorthomaProximityLevel) =>
+    mkAction({ evaluated_at: '2020-07-01T00:00:00.000Z', proximity })
+
+  // A session entirely in the OLD era, one entirely IN the boundary band, and
+  // two entirely in the NEW era (the second a genuine decline vs the first).
+  const sOld = session(
+    [oldRow('sage_like'), oldRow('sage_like'), oldRow('sage_like')],
+    { close: true },
+  )
+  const sBand = session(
+    [bandRow('sage_like'), bandRow('sage_like'), bandRow('sage_like')],
+    { close: true },
+  )
+  const sNew1 = session(
+    [newRow('sage_like'), newRow('sage_like'), newRow('sage_like')],
+    { close: true },
+  )
+  const sNew2 = session(
+    [newRow('reflexive'), newRow('reflexive'), newRow('reflexive')],
+    { close: true },
+  )
+  const { actions, markers } = concat([sOld, sBand, sNew1, sNew2])
+  const block = computeSessionDeclineSignal(actions, markers, SYNTHETIC_BOUNDARY)
+  const basis = block!.dimension_trends_basis.judgement_quality
+
+  assert(
+    basis.regime.segment_used === 'test-era-new',
+    `§10 the latest non-band era is selected (got ${basis.regime.segment_used})`,
+  )
+  assert(
+    basis.regime.rows_excluded_boundary_band === 3,
+    `§10 the 3 band rows are excluded and counted (got ${basis.regime.rows_excluded_boundary_band})`,
+  )
+  assert(
+    basis.regime.rows_excluded_earlier_eras === 3,
+    `§10 the 3 old-era rows are excluded and counted (got ${basis.regime.rows_excluded_earlier_eras})`,
+  )
+  assert(
+    basis.regime.rows_in_segment === 6,
+    `§10 only the 6 new-era rows enter the segment (got ${basis.regime.rows_in_segment})`,
+  )
+  assert(
+    basis.qualifying_sessions === 2,
+    `§10 NON-VACUITY: only 2 qualifying sessions (sOld and sBand dropped) — a no-op ` +
+      `segmentation would report 4 (got ${basis.qualifying_sessions})`,
+  )
+  assert(
+    block!.dimension_trends.judgement_quality !== 'declining',
+    `§10 fewer than 3 qualifying sessions after segmentation ⇒ insufficient_extraction, ` +
+      `never 'declining' (a no-op segmentation would see 4 sessions incl. the old-era one ` +
+      `and could read a spurious decline) (got ${block!.dimension_trends.judgement_quality})`,
+  )
+}
+{
+  // CONTROL: the same rows with NO boundary supplied (default SETTLED_REGIME_
+  // BOUNDARIES, which does not straddle 2020) all fall in one era and all 4
+  // sessions qualify — proves §10's exclusions above are the boundary's doing,
+  // not some other filter.
+  const oldRow = (proximity: KatorthomaProximityLevel) =>
+    mkAction({ evaluated_at: '2020-05-01T00:00:00.000Z', proximity })
+  const s1 = session([oldRow('sage_like'), oldRow('sage_like'), oldRow('sage_like')], { close: true })
+  const s2 = session([oldRow('sage_like'), oldRow('sage_like'), oldRow('sage_like')], { close: true })
+  const s3 = session([oldRow('sage_like'), oldRow('sage_like'), oldRow('sage_like')], { close: true })
+  const { actions, markers } = concat([s1, s2, s3])
+  const block = computeSessionDeclineSignal(actions, markers, [])
+  assert(
+    block!.dimension_trends_basis.judgement_quality.qualifying_sessions === 3,
+    '§10 CONTROL: with an EMPTY boundary list every row is one era, all 3 sessions qualify',
+  )
+}
 
 console.log('')
 console.log(`Total: ${passed + failed}  Pass: ${passed}  Fail: ${failed}`)
