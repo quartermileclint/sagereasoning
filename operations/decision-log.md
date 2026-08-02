@@ -17287,3 +17287,35 @@ Executed the next-session prompt (`operations/handoffs/founder/2026-08-02-agent-
 **Rollback path:** `git revert` the build commit — flag unset throughout, so nothing live either way; no schema to reverse.
 
 **Carried, none blocking:** the optional live-extraction demonstration fixture for Q2's routing in `first-circle-calibration-probe.ts` (unit pins already demonstrate it positively); the `virtue_domains_engaged` downstream-reach disclosure above, for the activation reviewer. **The remaining walk steps (§5 steps 1, 4–8) are unchanged and the founder's.**
+
+---
+
+## 2026-08-02 — D-CONNECTIVE-LAYER-STOA-MENTOR-VERDICTS-ADOPTED-PLAN-AUTHORED-2026-08-02
+
+**Decision:** The connective-layer program (**"The Stoa"**) is adopted and planned in one day: the founder's gathering-function enquiry + the mentor's first answer (the oikeiosis Stage-3/4 warrant; the four principles — offer never prompt · no obligation by visibility · the referral a preferred indifferent, no engagement tracking · humans + agents in one un-segregated space; the three-field minimal form) and the **fourteen follow-up answers are ADOPTED AS BINDING** — verbatim record `operations/connective-layer-2026-08/2026-08-02-mentor-consultation-connective-layer-verbatim.md` (**wins over every summary**) — and a build plan is authored from them (`operations/connective-layer-2026-08/2026-08-02-stoa-build-plan.md`: ST1 the community-map reach-back → ST2 schema → ST3 human surface → ST4 agent surface → ST5 activation walk → ST6 the optional draft mirror reading → ST7 deferred/named; everything Stoa-proper dark behind a new `SUBSTRATE_STOA_ENABLED`). **Tier: `governance` — documents only; nothing built or activated; every schema/flag/deploy step remains its own founder-walked 0c-ii.**
+
+**Reasoning:** the fourteen questions were authored the same day by the scoping session after a grounding sweep surfaced three facts that shaped them: directory declarations would be the platform's **first-published human free text** (journals/reflections are encrypted, owner-only); the existing community map **already displays an opted-in practitioner's alignment tier** publicly (and is broken in production — the standing 42703); and the mentor's skill-contract mapping is **partly net-new** (no gaps/provider/contact fields exist). The mentor confirmed most recommendations and issued six deltas the plan carries as constraints: recency-only ordering (Q3a); the passive shelf computed from **declared content only, never behaviour** (Q2a); the no-tracking rule extends to **internal** use, including feature priorities (Q8); the platform is **not the sole judge** of dishonesty — removal on the examined-artifact standard (Q5b); the one plainness exception is an optional, request-only, private **draft** reading (Q12); calling↔declaration divergence may be noted in the trust record **as an examined observation, never a violation, never auto-removed** (Q13a). **The one implement-now directive: Q6a reaches back to the community map — at repair it is rebuilt WITHOUT the alignment tier ("not grandfathered by its prior existence")** — carried as plan phase ST1. Name ruled: **The Stoa**; the mentor's two-sentence self-description is canonical copy (Q14).
+
+**Files touched:**
+- `operations/connective-layer-2026-08/2026-08-02-mentor-consultation-connective-layer-QUESTIONS.md` — new (the outbound briefing; status → ANSWERED + ADOPTED)
+- `operations/connective-layer-2026-08/2026-08-02-mentor-consultation-connective-layer-verbatim.md` — new (the binding record)
+- `operations/connective-layer-2026-08/2026-08-02-stoa-build-plan.md` — new (Authored — awaiting founder approval; PR19 before/at the first build)
+- `inbox/stoic network enquiry and mentor response.txt` — committed in place as the thread's first binding source (the agent-circles inbox-source precedent)
+- `operations/handoffs/founder/2026-08-02-connective-layer-stoa-adoption-and-plan-CLOSE.md` — new (lean close)
+- this entry
+
+**Risk classification:** Standard under 0d-ii (documents/plans; the plan classifies its own future sessions — ST1 `code-elevated`+`schema`; ST3's distress wiring `code-critical` per the R20a-perimeter row; ST5 activation `code-critical`; PR19 required at the builds). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit (documents only). Adoption stands as record; reverting restores the pre-program state (the verbatim records would need re-adding to re-adopt).
+
+**Verification step (founder-performable):**
+```
+ls operations/connective-layer-2026-08/
+```
+Expected: the three program files above. Then read the plan (~10 min); the program commences on your approval — ST1 first if you take the mentor's implement-now directive.
+
+**Open questions:** plan approval + sequencing vs the standing queue (plan §5); ST1 breadth (aggregate alignment stats off the map page — recommended yes); the agent-declare capability shape (ST4); PR19 on the plan itself vs at each build (minimum: each build); the standing opener + CLAUDE.md refresh to carry this program (deliberately not edited this session per the in-place-edit discipline).
+
+**Rules served:** PR7 (verdicts adopted at the moment of application, verbatim canonical), PR15 (the plan reuses: profiles/display_name, requireAuth, the UPC chokepoint, the R20a classifier, S10 trust-record links, house battery patterns, the Anthropic frontend-design/webapp-testing skills), PR17 (no live op arose; every future one staged founder-walked), PR18, PR19 (mandated at the builds), R13 (the plan's §6 "does not do" list is pinned rulings, not scope cuts), R17/R18/R20a (wired into the plan's phases at birth).
+
+**Status:** Adopted. Cross-references: the two binding sources; the plan; `D-AGENT-CIRCLES-MENTOR-VERDICTS-ADOPTED-PLANS-AUTHORED-2026-08-01` (the one-day adoption precedent); `D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED` (the binding-convention precedent); the close.
