@@ -10,7 +10,7 @@ import {
   EVALUATIVE_DISCLAIMER,
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'
-import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay, getEupatheiaForRoot } from '@/lib/brand-display'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, getStageDisplay, getEupatheiaForRoot, resolvePassionImage } from '@/lib/brand-display'
 import { resolveScoreEvaluation } from '@/lib/practice-sequence'
 import { resolveNewlyEarnedStage, type StageCrossingResolution } from '@/lib/stage-crossing'
 import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
@@ -625,19 +625,30 @@ export default function ScoreActionPage() {
               <p className="font-body text-sm text-sage-600 italic">No passions detected — the action appears free from distortion by false judgement.</p>
             ) : (
               <div className="space-y-3">
-                {result.passion_diagnosis.passions_detected.map((passion, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
-                    {PASSION_IMAGE_MAP[passion.id] && (
-                      <img
-                        src={PASSION_IMAGE_MAP[passion.id]}
-                        alt={passion.name}
-                        className="w-16 h-auto flex-shrink-0"
-                      />
-                    )}
-                    <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
-                    <span className="font-body text-xs text-sage-600 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
-                  </div>
-                ))}
+                {result.passion_diagnosis.passions_detected.map((passion, i) => {
+                  // The scoring prompt places no constraint on `passion.id`
+                  // (the LLM emits arbitrary placeholders like "P1"/"P2"), so a
+                  // direct PASSION_IMAGE_MAP[passion.id] lookup has never
+                  // reliably resolved on real output — found via a read-only
+                  // production probe while wiring passion images onto the
+                  // dashboard (2026-08-02). resolvePassionImage best-effort
+                  // matches the Greek/English passion name embedded in
+                  // `passion.name` instead.
+                  const img = resolvePassionImage(passion)
+                  return (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
+                      {img && (
+                        <img
+                          src={img}
+                          alt={passion.name}
+                          className="w-16 h-auto flex-shrink-0"
+                        />
+                      )}
+                      <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
+                      <span className="font-body text-xs text-sage-600 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
+                    </div>
+                  )
+                })}
 
                 {/* The rational counterparts (eupatheiai) of the passions found —
                     what each becomes once its underlying judgement is corrected.

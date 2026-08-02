@@ -150,6 +150,121 @@ export const PASSION_IMAGE_MAP: Record<string, string> = {
 }
 
 // ============================================================================
+// PASSION IMAGE RESOLUTION — a best-effort fallback for records whose
+// `passions_detected` entry does not carry a usable id, added 2026-08-02.
+//
+// THE PROBLEM (found via a read-only production probe while wiring passion
+// images onto the dashboard): the scoring engine's prompt schema
+// (sage_reason_engine — a guarded, measured file this module must not import
+// or edit) specifies `passions_detected: [{"id": "...", "name": "...",
+// "root_passion": "..."}]` with NO constraint on what `id` should contain. Real
+// production rows carry `id: "P1"`, `id: "P2"` — arbitrary per-response
+// placeholders, never a sub-species id. `PASSION_IMAGE_MAP[passion.id]` has
+// therefore never reliably resolved on real action_evaluations_v3 data,
+// INCLUDING on /score itself at the moment of scoring, not only in later
+// history views. Reflections carry a differently-shaped, equally free-text
+// `passions_detected` entry (`{sub_species, root_passion, false_judgement}` —
+// no `id`, no `name` at all; see supabase-reflections-migration.sql and
+// /api/reflect's REFLECTION_PROMPT).
+//
+// THE FIX IS DISPLAY-LAYER ONLY, deliberately: the prompt lives in a guarded
+// file this module must not touch (editing it would trip the false-hold
+// observation window's byte-identity guard), and even a same-session prompt
+// fix wouldn't help ALREADY-STORED rows. `resolvePassionImage` tries, in
+// order: the field literally being a valid id (works when the LLM happens to
+// echo the sub-species id verbatim, which the read-only probe found it
+// sometimes does); a Greek sub-species id appearing as a whole word inside the
+// free-text `name`/`description`, which is common (e.g. "epithumia — orge
+// (...)", "philedonia (...)"); and an English label word appearing the same
+// way ("Timidity" -> oknos), using the vocabulary from Brand_Guidelines.docx
+// §Passion Logos / Stobaeus Ecl. 2.90-91 (the same source stoic-brain.ts's
+// ROOT_PASSIONS encodes — duplicated here as a small literal, NOT imported
+// from stoic-brain, to keep this file's stated "types only, never values" rule
+// toward stoic-brain intact). Returns null rather than guessing — never a
+// wrong image, matching every other passion-image site in the codebase.
+// ============================================================================
+
+const PASSION_ENGLISH_KEYWORD_TO_ID: Record<string, string> = {
+  anger: 'orge',
+  erotic: 'eros',
+  longing: 'pothos',
+  pleasure: 'philedonia',
+  wealth: 'philoplousia',
+  honour: 'philodoxia',
+  honor: 'philodoxia',
+  enchantment: 'kelesis',
+  malicious: 'epichairekakia',
+  amusement: 'terpsis',
+  terror: 'deima',
+  timidity: 'oknos',
+  shame: 'aischyne',
+  dread: 'thambos',
+  panic: 'thorybos',
+  agony: 'agonia',
+  pity: 'eleos',
+  envy: 'phthonos',
+  jealousy: 'zelotypia',
+  grief: 'penthos',
+  anxiety: 'achos',
+}
+
+/**
+ * Find the first of `words` that appears as a whole word inside `text`
+ * (case-insensitive), and return that WORD ITSELF — never a value looked up
+ * through it. Keeping the return type "the matched word" (not "whatever the
+ * caller's dictionary maps it to") is deliberate: it is what let a real bug
+ * surface in this function's first version, caught only by testing against
+ * real production rows rather than trusting the type-checker — passing
+ * PASSION_IMAGE_MAP (id -> imagePath) into a helper that returned the
+ * DICTIONARY VALUE meant every Greek-id match silently returned an image path,
+ * which was then looked up AGAIN as if it were an id, matching nothing. Every
+ * caller below now does its own explicit second lookup instead.
+ */
+function findWordMatch(text: string | undefined | null, words: readonly string[]): string | null {
+  if (!text) return null
+  const lower = text.toLowerCase()
+  for (const word of words) {
+    if (new RegExp(`\\b${word}\\b`).test(lower)) return word
+  }
+  return null
+}
+
+const KNOWN_PASSION_IDS = Object.keys(PASSION_IMAGE_MAP)
+const KNOWN_ENGLISH_KEYWORDS = Object.keys(PASSION_ENGLISH_KEYWORD_TO_ID)
+
+/**
+ * Best-effort passion-image lookup — see the module comment above for why this
+ * exists and what it deliberately does NOT do (fabricate a match). Verified
+ * 2026-08-02 against real production `action_evaluations_v3` and `reflections`
+ * rows (a read-only probe) — the fix here specifically closes the gap that
+ * probe found: every real evaluation row's `id` is an opaque placeholder
+ * ("P1", "P2", ...), so the direct-id path alone resolves nothing on real data,
+ * and the Greek-id-inside-`name`/`description` fallback is what actually
+ * carries the feature.
+ */
+export function resolvePassionImage(passion: {
+  id?: string | null
+  name?: string | null
+  sub_species?: string | null
+}): string | null {
+  const directId = passion.id?.toLowerCase()
+  if (directId && PASSION_IMAGE_MAP[directId]) return PASSION_IMAGE_MAP[directId]
+
+  const directSubSpecies = passion.sub_species?.toLowerCase()
+  if (directSubSpecies && PASSION_IMAGE_MAP[directSubSpecies]) return PASSION_IMAGE_MAP[directSubSpecies]
+
+  const greekId = findWordMatch(passion.name, KNOWN_PASSION_IDS) || findWordMatch(passion.sub_species, KNOWN_PASSION_IDS)
+  if (greekId) return PASSION_IMAGE_MAP[greekId]
+
+  const englishWord =
+    findWordMatch(passion.name, KNOWN_ENGLISH_KEYWORDS) ||
+    findWordMatch(passion.sub_species, KNOWN_ENGLISH_KEYWORDS)
+  if (englishWord) return PASSION_IMAGE_MAP[PASSION_ENGLISH_KEYWORD_TO_ID[englishWord]]
+
+  return null
+}
+
+// ============================================================================
 // EUPATHEIA DISPLAY — the three rational good feelings (chara / boulesis /
 // eulabeia) and their commissioned brand images, added 2026-08-02 from the
 // updated Brand_Guidelines.docx. These are the positive counterparts to the

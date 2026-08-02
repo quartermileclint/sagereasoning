@@ -3,21 +3,49 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
-import { PROXIMITY_COLORS } from '@/lib/brand-display'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, resolvePassionImage } from '@/lib/brand-display'
 
+/**
+ * FIELD NAMES HERE MUST MATCH src/app/api/practice-calendar/route.ts EXACTLY.
+ *
+ * They didn't (2026-08-02 fix): this interface named `strongest_virtue` and
+ * `virtues_demonstrated` — fields the API has never returned (it returns
+ * `strongest_domain` and `virtue_domains_engaged`, matching the DB column
+ * name used everywhere else in the codebase, e.g. /score's
+ * `virtue_quality.virtue_domains_engaged`). Every active day's strongest-virtue
+ * lookup silently resolved to nothing, so it rendered as a bare, clickable grey
+ * number indistinguishable from an empty day — and clicking it threw on
+ * `activity.virtues_demonstrated.map(...)` (undefined), which is exactly what
+ * produced an application-error page instead of the day's detail.
+ */
 interface DayActivity {
-  type: 'action' | 'reflection'
+  type: 'action' | 'reflection' | 'journal'
   description?: string
   katorthoma_proximity: 'reflexive' | 'habitual' | 'deliberate' | 'principled' | 'sage_like'
-  virtue_domains_engaged?: string[]
-  virtues_demonstrated: string[]
+  virtue_domains_engaged: string[]
+  // A union, not one shape — action_evaluations_v3 rows carry {id, name,
+  // root_passion}; reflections rows carry {sub_species, root_passion,
+  // false_judgement}, no id/name at all. Must match
+  // src/app/api/practice-calendar/route.ts's DayActivity type EXACTLY (see
+  // practice-calendar-api-contract.test.ts).
+  passions_detected?: Array<{
+    id?: string
+    name?: string
+    sub_species?: string
+    root_passion: string
+    false_judgement?: string
+  }>
 }
 
 interface DayData {
   virtues: string[]
-  strongest_virtue: string | null
+  strongest_domain: string | null
   stamp_earned: boolean
-  best_proximity: 'reflexive' | 'habitual' | 'deliberate' | 'principled' | 'sage_like'
+  // A day can be genuinely active with no proximity contribution at all — a
+  // journal-only day, for instance. The API types this as nullable; this
+  // interface previously didn't, which is fine for the button branches below
+  // (they check dayData/strongestVirtue first) but was a latent type lie.
+  best_proximity: 'reflexive' | 'habitual' | 'deliberate' | 'principled' | 'sage_like' | null
   activities: DayActivity[]
 }
 
@@ -37,6 +65,15 @@ const PROXIMITY_LABELS: Record<string, string> = {
   deliberate: 'Deliberate',
   principled: 'Principled',
   sage_like: 'Sage-Like',
+}
+
+// Was `activity.type === 'action' ? 'Action' : 'Reflection'` — a two-way
+// ternary against a three-value type, so every journal entry was mislabelled
+// "Reflection" in the day-detail panel.
+const ACTIVITY_TYPE_LABEL: Record<DayActivity['type'], string> = {
+  action: 'Action',
+  reflection: 'Reflection',
+  journal: 'Journal',
 }
 
 // PROXIMITY_COLORS is now imported from stoic-brain.ts — the single canonical
@@ -198,9 +235,17 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isToday = dayStr === todayStr
             const isSelected = dayStr === selectedDay
             const isFuture = new Date(year, month, day) > today
-            const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
+            const strongestVirtue = dayData?.strongest_domain ? VIRTUE_MAP[dayData.strongest_domain] : null
             const hasStamp = dayData?.stamp_earned ?? false
-            const proximityLabel = dayData ? PROXIMITY_LABELS[dayData.best_proximity] : ''
+            const proximityLabel = dayData?.best_proximity ? PROXIMITY_LABELS[dayData.best_proximity] : ''
+            // A day can be genuinely active (a reflection or a journal entry)
+            // with no virtue domain to badge it — reflections don't tag virtue
+            // domains, and journal entries never did. Without this, such a day
+            // rendered identically to an empty one: a bare grey number, clickable
+            // but visually indistinguishable from nothing-happened. This is
+            // exactly the "grey square" a practitioner would have no reason to
+            // click.
+            const hasActivityWithoutBadge = !!dayData && !strongestVirtue
 
             return (
               <button
@@ -213,6 +258,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   ${isSelected ? 'shadow-md scale-105' : ''}
                   ${dayData && !isSelected ? 'hover:scale-105 hover:shadow-sm cursor-pointer' : ''}
                   ${!dayData ? 'border-transparent cursor-default' : ''}
+                  ${hasActivityWithoutBadge ? 'border-sage-200 bg-sage-50/50' : ''}
                   ${isFuture ? 'opacity-30' : ''}
                 `}
                 style={dayData && strongestVirtue ? {
@@ -220,7 +266,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   backgroundColor: hasStamp ? (strongestVirtue.color + '10') : (strongestVirtue.color + '06'),
                 } : undefined}
                 disabled={!dayData}
-                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}${hasStamp ? ` (stamp earned - ${proximityLabel})` : ''}` : ''}`}
+                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}${hasStamp ? ` (stamp earned - ${proximityLabel})` : ''}` : hasActivityWithoutBadge ? ' - practice recorded' : ''}`}
               >
                 {/* Stamped day: full-colour virtue logo */}
                 {dayData && strongestVirtue && hasStamp ? (
@@ -248,6 +294,16 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                       {day}
                     </span>
                   </div>
+                ) : hasActivityWithoutBadge ? (
+                  /* Active day with no virtue badge (a reflection or journal
+                     entry — neither tags a virtue domain): a small dot marks it
+                     as clickable rather than leaving it identical to an empty
+                     day. Click reveals what was recorded, incl. any passion
+                     images, in the detail panel below. */
+                  <div className="relative w-full h-full flex items-center justify-center" title="Practice recorded — click to view">
+                    <span className="font-display text-sm text-sage-600 font-medium">{day}</span>
+                    <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-sage-400" aria-hidden="true" />
+                  </div>
                 ) : (
                   /* Inactive day: just the date number */
                   <span className={`font-display text-sm ${isToday ? 'text-sage-700 font-bold' : 'text-sage-300'}`}>
@@ -274,10 +330,10 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
       {selectedDayData && selectedDay && (
         <div className="mt-5 pt-5 border-t border-sage-200">
           <div className="flex items-center gap-3 mb-4">
-            {selectedDayData.strongest_virtue && VIRTUE_MAP[selectedDayData.strongest_virtue] && (
+            {selectedDayData.strongest_domain && VIRTUE_MAP[selectedDayData.strongest_domain] && (
               <img
-                src={VIRTUE_MAP[selectedDayData.strongest_virtue].icon}
-                alt={VIRTUE_MAP[selectedDayData.strongest_virtue].name}
+                src={VIRTUE_MAP[selectedDayData.strongest_domain].icon}
+                alt={VIRTUE_MAP[selectedDayData.strongest_domain].name}
                 className="w-10 h-10"
               />
             )}
@@ -289,9 +345,9 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   month: 'long',
                 })}
               </h3>
-              {selectedDayData.strongest_virtue && VIRTUE_MAP[selectedDayData.strongest_virtue] && (
-                <p className="font-body text-sm" style={{ color: VIRTUE_MAP[selectedDayData.strongest_virtue].color }}>
-                  Strongest virtue: {VIRTUE_MAP[selectedDayData.strongest_virtue].name}
+              {selectedDayData.strongest_domain && VIRTUE_MAP[selectedDayData.strongest_domain] && (
+                <p className="font-body text-sm" style={{ color: VIRTUE_MAP[selectedDayData.strongest_domain].color }}>
+                  Strongest virtue: {VIRTUE_MAP[selectedDayData.strongest_domain].name}
                 </p>
               )}
             </div>
@@ -302,16 +358,38 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
               <div key={i} className="flex items-start gap-3 bg-sage-50/50 rounded-lg px-4 py-3">
                 {/* Activity type */}
                 <span className="font-body text-xs text-sage-400 w-16 flex-shrink-0 pt-0.5">
-                  {activity.type === 'action' ? 'Action' : 'Reflection'}
+                  {ACTIVITY_TYPE_LABEL[activity.type]}
                 </span>
 
-                {/* Description + virtue logos */}
+                {/* Description + passion images + virtue logos */}
                 <div className="flex-1 min-w-0">
                   {activity.description && (
                     <p className="font-body text-sm text-sage-700 truncate">{activity.description}</p>
                   )}
+
+                  {/* Passion images — what the evaluation/reflection actually
+                      diagnosed that day. Was fetched by the API and discarded
+                      before 2026-08-02; never rendered here at all. */}
+                  {activity.passions_detected && activity.passions_detected.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {activity.passions_detected.map((passion, pi) => {
+                        const img = resolvePassionImage(passion)
+                        if (!img) return null
+                        // `name` exists on action-evaluation passions, not on
+                        // reflection passions (which carry `sub_species`
+                        // instead) — fall back rather than showing "undefined".
+                        const label = passion.name || passion.sub_species || 'passion'
+                        return (
+                          <div key={pi} className="flex items-center gap-1" title={`${label} (${ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})`}>
+                            <img src={img} alt={label} className="w-8 h-auto" />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
                   <div className="flex gap-2 mt-1.5">
-                    {activity.virtues_demonstrated.map(virtueId => {
+                    {activity.virtue_domains_engaged.map(virtueId => {
                       const virtue = VIRTUE_MAP[virtueId]
                       return virtue ? (
                         <div key={virtueId} className="flex items-center gap-1">

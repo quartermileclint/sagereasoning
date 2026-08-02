@@ -17,8 +17,8 @@ import PracticeCalendar from '@/components/PracticeCalendar'
 import MilestonesDisplay from '@/components/MilestonesDisplay'
 import PracticeSequenceModule from '@/components/PracticeSequenceModule'
 import type { User } from '@supabase/supabase-js'
-import { PROXIMITY_COLORS } from '@/lib/brand-display'
-import type { KatorthomaProximityLevel, OikeiosisStageId, SenecanGradeId } from '@/lib/stoic-brain'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, getEupatheiaForRoot, resolvePassionImage } from '@/lib/brand-display'
+import { VIRTUE_EXPRESSIONS, type KatorthomaProximityLevel, type OikeiosisStageId, type SenecanGradeId } from '@/lib/stoic-brain'
 
 // ─── V3 Dashboard Types ───
 
@@ -33,15 +33,34 @@ interface V3BaselineData {
   created_at: string
 }
 
+/**
+ * Full row shape for the "click to expand" full report (2026-08-02). Previously
+ * the dashboard selected only a partial column list (action, proximity,
+ * passions, false judgements, virtue domains, ruling-faculty state,
+ * improvement path) — enough for the summary card, nothing to expand into. The
+ * remaining fields all exist on action_evaluations_v3 (supabase-v3-migration.sql)
+ * and are what /score itself renders at evaluation time; fetching them here
+ * lets a past evaluation show the SAME report, not a trimmed one.
+ */
 interface V3ActionEvaluation {
   id: string
   action: string
+  context: string | null
+  relationships: string | null
+  emotional_state: string | null
+  within_prohairesis: string[]
+  outside_prohairesis: string[]
+  is_kathekon: boolean | null
+  kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary' | null
   katorthoma_proximity: KatorthomaProximityLevel
-  passions_detected: Array<{ name: string; root_passion: string }>
+  passions_detected: Array<{ id: string; name: string; root_passion: string }>
   false_judgements: string[]
+  causal_stage_affected: string | null
   virtue_domains_engaged: string[]
   ruling_faculty_state: string
   improvement_path: string
+  oikeiosis_context: string | null
+  philosophical_reflection: string | null
   created_at: string
 }
 
@@ -73,6 +92,16 @@ const GRADE_COLORS: Record<string, string> = {
   grade_1: '#059669',
 }
 
+// Mirrors /score's local KATHEKON_DISPLAY (same tiering: strong~sage_like,
+// moderate~principled, marginal~deliberate, contrary~reflexive) so a past
+// evaluation's expanded report reads identically to how it looked when scored.
+const KATHEKON_DISPLAY: Record<string, { label: string; color: string }> = {
+  strong: { label: 'Strong Appropriate Action', color: PROXIMITY_COLORS.sage_like },
+  moderate: { label: 'Moderate Appropriate Action', color: PROXIMITY_COLORS.principled },
+  marginal: { label: 'Marginal Appropriate Action', color: PROXIMITY_COLORS.deliberate },
+  contrary: { label: 'Contrary to Appropriate Action', color: PROXIMITY_COLORS.reflexive },
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -85,6 +114,10 @@ export default function DashboardPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [dataNotice, setDataNotice] = useState<{ type: 'error' | 'info'; text: string } | null>(null)
+  // Which past evaluation's full report is expanded, if any. At most one at a
+  // time — a re-click on the open one collapses it (an accordion, matching the
+  // revise-in-place convention used elsewhere, e.g. /morning, /sage-compass).
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const hasLoaded = useRef(false)
 
   useEffect(() => {
@@ -108,7 +141,7 @@ export default function DashboardPage() {
       const [evalsRes, baselineRes] = await Promise.all([
         supabase
           .from('action_evaluations_v3')
-          .select('id, action, katorthoma_proximity, passions_detected, false_judgements, virtue_domains_engaged, ruling_faculty_state, improvement_path, created_at')
+          .select('id, action, context, relationships, emotional_state, within_prohairesis, outside_prohairesis, is_kathekon, kathekon_quality, katorthoma_proximity, passions_detected, false_judgements, causal_stage_affected, virtue_domains_engaged, ruling_faculty_state, improvement_path, oikeiosis_context, philosophical_reflection, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(20),
@@ -476,31 +509,78 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {evaluations.map((evaluation) => {
                 const proxColor = PROXIMITY_COLORS[evaluation.katorthoma_proximity] || '#6B7280'
-                const passionCount = Array.isArray(evaluation.passions_detected) ? evaluation.passions_detected.length : 0
+                const passions = Array.isArray(evaluation.passions_detected) ? evaluation.passions_detected : []
+                const isExpanded = expandedId === evaluation.id
+                const toggle = () => setExpandedId(isExpanded ? null : evaluation.id)
+                const kDisplay = evaluation.kathekon_quality ? KATHEKON_DISPLAY[evaluation.kathekon_quality] : null
+                const counterparts = Array.from(
+                  new Map(
+                    passions
+                      .map(p => getEupatheiaForRoot(p.root_passion))
+                      .filter((e): e is NonNullable<typeof e> => e !== null)
+                      .map(e => [e.id, e])
+                  ).values()
+                )
                 return (
                   <div key={evaluation.id} className="border border-sage-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
+                    {/* The whole summary is the toggle — the full report was
+                        unreachable before 2026-08-02 (a past evaluation showed
+                        only the improvement path, never the rest of what /score
+                        itself produced for it). No nested interactive elements
+                        sit inside, so a single clickable region is safe. */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      onClick={toggle}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle() } }}
+                      className="flex items-start justify-between gap-4 cursor-pointer -m-1 p-1 rounded hover:bg-sage-50/60 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
                         <p className="font-body text-sage-800 leading-relaxed">{evaluation.action}</p>
-                        <div className="flex items-center gap-3 mt-1">
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
                           <p className="font-body text-xs text-sage-600">
                             {new Date(evaluation.created_at).toLocaleDateString('en-AU', {
                               day: 'numeric', month: 'short', year: 'numeric',
                             })}
                           </p>
-                          {passionCount > 0 && (
-                            <span className="font-body text-xs text-amber-600">
-                              {passionCount} passion{passionCount !== 1 ? 's' : ''} identified
-                            </span>
+                          {/* Passion thumbnails — was text-only ("N passions
+                              identified"); the images the diagnosis actually
+                              named were fetched but never shown here. */}
+                          {passions.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              {passions.slice(0, 5).map((p, i) => {
+                                const img = resolvePassionImage(p)
+                                return img ? (
+                                  <img
+                                    key={i}
+                                    src={img}
+                                    alt={p.name}
+                                    title={p.name}
+                                    className="w-6 h-auto"
+                                  />
+                                ) : null
+                              })}
+                              <span className="font-body text-xs text-amber-600">
+                                {passions.length} passion{passions.length !== 1 ? 's' : ''} identified
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-display text-lg font-bold" style={{ color: proxColor }}>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <p className="font-display text-lg font-bold text-right" style={{ color: proxColor }}>
                           {PROXIMITY_ENGLISH[evaluation.katorthoma_proximity]}
                         </p>
+                        <svg
+                          className={`w-4 h-4 text-sage-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
                       </div>
                     </div>
+
                     {evaluation.improvement_path && (
                       <div className="mt-3 border-t border-sage-100 pt-3">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -510,6 +590,156 @@ export default function DashboardPage() {
                         <p className="font-body text-sm text-sage-600">
                           {evaluation.improvement_path}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Full report — the same four stages /score itself renders
+                        at evaluation time, reconstructed from the stored row. */}
+                    {isExpanded && (
+                      <div className="mt-4 pt-4 border-t border-sage-200 space-y-4">
+                        {(evaluation.context || evaluation.relationships || evaluation.emotional_state) && (
+                          <div>
+                            <p className="font-display text-xs font-medium text-sage-600 mb-2">What was evaluated</p>
+                            <div className="space-y-1.5">
+                              {evaluation.context && (
+                                <p className="font-body text-sm text-sage-700"><span className="text-sage-500">Context: </span>{evaluation.context}</p>
+                              )}
+                              {evaluation.relationships && (
+                                <p className="font-body text-sm text-sage-700"><span className="text-sage-500">Relationships: </span>{evaluation.relationships}</p>
+                              )}
+                              {evaluation.emotional_state && (
+                                <p className="font-body text-sm text-sage-700"><span className="text-sage-500">Emotional state: </span>{evaluation.emotional_state}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {(evaluation.within_prohairesis?.length > 0 || evaluation.outside_prohairesis?.length > 0) && (
+                          <div>
+                            <p className="font-display text-xs font-medium text-sage-600 mb-2">Control Filter</p>
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              <div>
+                                <p className="font-display text-[11px] text-sage-500 mb-1">Within your moral choice</p>
+                                <ul className="space-y-0.5">
+                                  {evaluation.within_prohairesis.map((item, i) => (
+                                    <li key={i} className="font-body text-sm text-sage-700 flex items-start gap-1.5">
+                                      <span className="text-sage-500 mt-0.5">+</span> {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div>
+                                <p className="font-display text-[11px] text-sage-500 mb-1">Outside your moral choice</p>
+                                <ul className="space-y-0.5">
+                                  {evaluation.outside_prohairesis.map((item, i) => (
+                                    <li key={i} className="font-body text-sm text-sage-600 flex items-start gap-1.5">
+                                      <span className="text-sage-500 mt-0.5">–</span> {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {kDisplay && (
+                          <div>
+                            <p className="font-display text-xs font-medium text-sage-600 mb-2">Appropriate Action</p>
+                            <span
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-display text-xs font-medium text-white"
+                              style={{ backgroundColor: kDisplay.color }}
+                            >
+                              {evaluation.is_kathekon ? '✓' : '✗'} {kDisplay.label}
+                            </span>
+                            {evaluation.oikeiosis_context && (
+                              <p className="font-body text-sm text-sage-600 mt-2">{evaluation.oikeiosis_context}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {(passions.length > 0 || evaluation.false_judgements?.length > 0) && (
+                          <div>
+                            <p className="font-display text-xs font-medium text-sage-600 mb-2">
+                              Passions Identified
+                              {evaluation.causal_stage_affected && (
+                                <span className="font-normal text-sage-500"> — affected {evaluation.causal_stage_affected}</span>
+                              )}
+                            </p>
+                            {passions.length > 0 && (
+                              <div className="space-y-2">
+                                {passions.map((p, i) => {
+                                  const img = resolvePassionImage(p)
+                                  return (
+                                    <div key={i} className="flex items-center gap-3 p-2 bg-sage-50/50 rounded">
+                                      {img && (
+                                        <img src={img} alt={p.name} className="w-10 h-auto flex-shrink-0" />
+                                      )}
+                                      <span className="font-display text-sm font-medium text-sage-700">{p.name}</span>
+                                      <span className="font-body text-xs text-sage-600">({ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion})</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                            {counterparts.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-sage-100">
+                                <p className="font-body text-xs text-sage-500 italic mb-1.5">
+                                  {counterparts.length === 1 ? 'Its rational counterpart' : 'Their rational counterparts'}
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                  {counterparts.map(e => (
+                                    <div key={e.id} className="flex items-center gap-1.5">
+                                      <img src={e.image} alt={e.name} className="w-8 h-auto" />
+                                      <span className="font-body text-xs text-sage-600">{e.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {evaluation.false_judgements?.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-sage-100">
+                                <p className="font-display text-[11px] text-sage-500 mb-1">False judgements identified</p>
+                                {evaluation.false_judgements.map((fj, i) => (
+                                  <p key={i} className="font-body text-sm text-sage-700">• {fj}</p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {evaluation.virtue_domains_engaged?.length > 0 && (
+                          <div>
+                            <p className="font-display text-xs font-medium text-sage-600 mb-2">Unified Virtue Assessment</p>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {VIRTUE_EXPRESSIONS.map((v) => {
+                                const isEngaged = evaluation.virtue_domains_engaged.includes(v.id)
+                                return (
+                                  <span
+                                    key={v.id}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-display text-xs"
+                                    style={{
+                                      backgroundColor: isEngaged ? '#f0efe6' : '#fafaf8',
+                                      color: isEngaged ? '#4a5a3a' : '#b8b4a0',
+                                      border: `1px solid ${isEngaged ? '#c5c0a8' : '#e8e6dc'}`,
+                                    }}
+                                  >
+                                    {v.name}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                            {evaluation.ruling_faculty_state && (
+                              <p className="font-body text-sm text-sage-600">{evaluation.ruling_faculty_state}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {evaluation.philosophical_reflection && (
+                          <div className="pt-3 border-t border-sage-100">
+                            <p className="font-display text-xs font-medium text-amber-700 mb-1.5">Philosophical Reflection</p>
+                            <p className="font-body text-sm text-sage-700 leading-relaxed">{evaluation.philosophical_reflection}</p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

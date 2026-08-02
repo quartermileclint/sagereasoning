@@ -20,7 +20,7 @@ const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
  * GET /api/practice-calendar?user_id=...&month=2026-03
  *
  * Returns practice activity grouped by day for a given month.
- * Each day lists which virtue domains were engaged through actions and reflections,
+ * Each day lists which virtue domains were engaged through actions,
  * and tracks the highest katorthoma_proximity level achieved that day.
  *
  * Response shape:
@@ -28,16 +28,21 @@ const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
  *   days: {
  *     "2026-03-15": {
  *       virtues: ["wisdom", "courage"],
- *       strongest_domain: "wisdom",
- *       best_proximity: "deliberate",
+ *       strongest_domain: "wisdom" | null,
+ *       best_proximity: "deliberate" | null,
  *       stamp_earned: true,
  *       activities: [
- *         { type: "action", description: "...", katorthoma_proximity: "deliberate", virtue_domains_engaged: ["wisdom", "courage"] },
- *         { type: "reflection", katorthoma_proximity: "habitual", virtue_domains_engaged: ["wisdom"] }
+ *         { type: "action", description: "...", katorthoma_proximity: "deliberate", virtue_domains_engaged: ["wisdom", "courage"], passions_detected: [...] },
+ *         { type: "reflection", description: "...", katorthoma_proximity: "habitual", virtue_domains_engaged: [], passions_detected: [...] },
+ *         { type: "journal", description: "Journal Day 12", katorthoma_proximity: "reflexive", virtue_domains_engaged: [] }
  *       ]
  *     }
  *   }
  * }
+ *
+ * `best_proximity`/`strongest_domain` are `null` when a day's only activity is
+ * a journal entry (no proximity contribution) or a reflection (no virtue-domain
+ * tagging) — a day can be genuinely active with neither set.
  */
 export async function GET(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
@@ -79,7 +84,15 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: true }),
     supabase
       .from('reflections')
-      .select('id, katorthoma_proximity, virtue_domains_engaged, created_at')
+      // `virtue_domains_engaged` does NOT exist on this table (see
+      // supabase-reflections-migration.sql) — every prior version of this
+      // select asked for it anyway, so PostgREST 400'd (42703) on EVERY call
+      // and the `if (reflectionsRes.data)` guard below silently dropped the
+      // whole reflections branch. Reflections have never appeared on the
+      // calendar. Read-only column probe against TEST + PRODUCTION on
+      // 2026-08-02 confirms the absence and confirms `passions_detected` +
+      // `what_happened` ARE present — selecting those instead.
+      .select('id, katorthoma_proximity, passions_detected, what_happened, created_at')
       .eq('user_id', userId)
       .gte('created_at', startDate)
       .lt('created_at', endDate)
@@ -106,6 +119,23 @@ export async function GET(request: NextRequest) {
       description?: string
       katorthoma_proximity: KatorthomaProximityLevel
       virtue_domains_engaged: string[]
+      // Present on 'action' and 'reflection' — but the two tables store a
+      // DIFFERENT shape. action_evaluations_v3 rows carry {id, name,
+      // root_passion} (supabase-v3-migration.sql); reflections rows carry
+      // {sub_species, root_passion, false_judgement} — no `id`, no `name` at
+      // all (supabase-reflections-migration.sql; the actual shape /api/reflect
+      // writes, confirmed against a live read-only probe 2026-08-02). Typed as
+      // a union rather than picking one shape and hoping — a consumer must
+      // handle both, and brand-display's `resolvePassionImage` accepts exactly
+      // this shape for that reason. Absent entirely on 'journal', which
+      // diagnoses nothing.
+      passions_detected?: Array<{
+        id?: string
+        name?: string
+        sub_species?: string
+        root_passion: string
+        false_judgement?: string
+      }>
     }>
   }> = {}
 
@@ -130,23 +160,29 @@ export async function GET(request: NextRequest) {
         description: action.action?.slice(0, 80),
         katorthoma_proximity: action.katorthoma_proximity,
         virtue_domains_engaged: domains,
+        // Was fetched but silently discarded before 2026-08-02 — the passion
+        // images on the calendar's day-detail panel depend on this.
+        passions_detected: action.passions_detected || [],
       })
     }
   }
 
-  // Process reflections
+  // Process reflections. No `virtue_domains_engaged` — the reflections table
+  // does not track virtue domains (see the select comment above), so a
+  // reflection-only day never sets `strongest_domain`; it still carries a
+  // proximity and its diagnosed passions, both shown on the day-detail panel.
   if (reflectionsRes.data) {
     for (const reflection of reflectionsRes.data) {
       const day = ensureDay(reflection.created_at)
-      const domains = (reflection.virtue_domains_engaged as string[]) || []
-      domains.forEach(v => days[day].virtues.add(v))
       // Only add proximity if available in the reflection record
       if (reflection.katorthoma_proximity) {
         days[day].proximities.push(reflection.katorthoma_proximity)
         days[day].activities.push({
           type: 'reflection',
+          description: reflection.what_happened?.slice(0, 80),
           katorthoma_proximity: reflection.katorthoma_proximity,
-          virtue_domains_engaged: domains,
+          virtue_domains_engaged: [],
+          passions_detected: reflection.passions_detected || [],
         })
       }
     }
