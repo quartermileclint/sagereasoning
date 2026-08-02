@@ -563,8 +563,15 @@ export interface ApplyOptions {
    * determinism. false / unset ⇒ the assessment shape is byte-identical to
    * pre-C1 (test-asserted).
    *
-   * This option NEVER reaches computeProximity — see the field docs on
-   * Layer2Assessment.reasoning_integrity.
+   * SCOPE CORRECTION (Q4, 2026-08-02): this option DOES now reach computeProximity
+   * — but only to NARROW the dikaiosyne floor's engaged-circle set (excluding
+   * `self_preservation`; see `dikaiosyneEngagedCircles`). That is a monotone
+   * REMOVAL of a floor, never an addition, and it carries no first-circle SIGNAL
+   * into the verdict. What remains categorically forbidden (mentor L4) is the
+   * reverse: `reasoning_integrity` and `practitioner_type` never reach
+   * computeProximity, and Q2's `virtue_domains_engaged` routing never does either —
+   * see the field docs on Layer2Assessment.reasoning_integrity and the placement
+   * comment at the end of applyMechanisms.
    */
   agentCircles?: boolean
   /**
@@ -1445,7 +1452,13 @@ export function isProximityDikaiosyneEnabled(): boolean {
   return process.env.SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED === 'true'
 }
 
-const PROXIMITY_RANK: Record<KatorthomaProximity, number> = {
+/** EXPORTED (Q3, 2026-08-02) so `guardrail-sandwich.ts`'s port-layer staged-pause
+ *  override can re-derive the circle-4-isolated reading WITHOUT re-implementing
+ *  the rank ordering a second time in a second file — the scope doc's own stated
+ *  reasoning: a duplicated `obligationToProximity` in two files risks silently
+ *  drifting; a slightly wider export list on an already-reviewed pure function
+ *  does not. */
+export const PROXIMITY_RANK: Record<KatorthomaProximity, number> = {
   reflexive: 0,
   habitual: 1,
   deliberate: 2,
@@ -1456,8 +1469,8 @@ const PROXIMITY_RANK: Record<KatorthomaProximity, number> = {
 /** Weakest-link (lowest rank) over a non-empty set — the KP-04 unity-thesis fold.
  *  Mirrors the proximity-domains.ts `weakest()` PATTERN (re-implemented locally
  *  over the substrate's KatorthomaProximity rather than importing the trust-layer
- *  type across the tsconfig boundary). */
-function weakestProximity(levels: KatorthomaProximity[]): KatorthomaProximity {
+ *  type across the tsconfig boundary). EXPORTED (Q3) — see PROXIMITY_RANK docstring. */
+export function weakestProximity(levels: KatorthomaProximity[]): KatorthomaProximity {
   return levels.reduce((lo, l) => (PROXIMITY_RANK[l] < PROXIMITY_RANK[lo] ? l : lo))
 }
 
@@ -1539,8 +1552,9 @@ function hasGenuineDeliberation(oik: Oikeiosis): boolean {
  *  mentor's deterministic J3 DETECTION ("the engine must detect a preferred
  *  indifferent pursued at the cost of an obligation to another") is intentionally
  *  deferred to the Layer-1 extraction (LOCUS 2) under route 2a — `case 'violated'`
- *  here is the extraction's REPORTED violation, not an engine-side value-error scan. */
-function obligationToProximity(oa: ObligationAssessment | null): KatorthomaProximity {
+ *  here is the extraction's REPORTED violation, not an engine-side value-error scan.
+ *  EXPORTED (Q3, 2026-08-02) — see PROXIMITY_RANK docstring above. */
+export function obligationToProximity(oa: ObligationAssessment | null): KatorthomaProximity {
   if (!oa) return 'reflexive' // J1: an unevaluated obligation reads reflexive (not a penalty — an accurate reading)
   switch (oa.status) {
     case 'violated':
@@ -1556,20 +1570,95 @@ function obligationToProximity(oa: ObligationAssessment | null): KatorthomaProxi
   }
 }
 
+/** The self circle. Compile-checked against the canonical `OikeiosisCircle`
+ *  vocabulary, exactly as `kathekon-engagement.ts` does for its Arm-1 narrowing. */
+const SELF_PRESERVATION_CIRCLE: OikeiosisCircle = 'self_preservation'
+
+/** Shared derivation of the natural_relationship signal — hoisted so the dikaiosyne
+ *  floor and the Q2 first-circle routing read ONE value, never two independently
+ *  re-derived restatements that can silently drift. (The two other
+ *  `factor_type === 'natural_relationship'` reads in this module — `assessOikeiosis`
+ *  and `assessKathekon` — are different mechanisms with different purposes and are
+ *  deliberately left alone.) */
+function hasNaturalRelationshipFactor(kathekonFactors: KathekonFactor[]): boolean {
+  return kathekonFactors.some((f) => f.factor_type === 'natural_relationship')
+}
+
+/** Q4 (2026-08-02) — THE SELF-CIRCLE NARROWING AT THE VERDICT LAYER. The circles that
+ *  count as a justice surface for dikaiosyne.
+ *
+ *  Flag-off (`agentCircles === false`) ⇒ every circle counts (byte-identical to the
+ *  pre-Q4 ADR-010 §4 behaviour, test-asserted).
+ *
+ *  Flag-on ⇒ `self_preservation` is EXCLUDED, mirroring
+ *  `substrate/trust-core/kathekon-engagement.ts`'s Arm-1 narrowing (2026-07-19 mentor
+ *  ruling) exactly: dikaiosyne is other-directed, so the self circle standing alone is
+ *  not a justice surface.
+ *
+ *  NO COMPENSATING BRANCH — binding, per the 2026-08-02 mentor ruling
+ *  (`operations/agent-circles-2026-08/2026-08-02-mentor-consultation-q4-residual-verbatim.md`;
+ *  verbatim wins). `kathekon-engagement.ts` preserves an Arm-2 asymmetry (a violated
+ *  obligation on the self circle alone still engages SOMETHING) because that is a
+ *  trust-LEDGER surface governed by an epistemic principle — "adverse evidence is never
+ *  silently dropped from the record." This is a VERDICT surface governed by a different
+ *  principle — "the verdict must be grounded in the correct virtue domain for the failure
+ *  being assessed." A dikaiosyne floor on a self-only failure is not a conservative
+ *  reading; it is a misclassification, a false claim that the agent failed in what it
+ *  owes to others, and that inaccuracy propagates into the live /api/guardrail gate.
+ *  The mentor: *"The Arm-2 asymmetry was the right answer for the ledger. It is the wrong
+ *  answer for the floor."* A self-only violated obligation therefore carries NO proximity
+ *  consequence through this path; Q2's phronesis/sophrosyne routing is the complete
+ *  replacement at the classification level. DO NOT add a compensating floor here.
+ *
+ *  EXPORTED (Q3, 2026-08-02) so `guardrail-sandwich.ts`'s staged-pause isolation
+ *  check can compose with Q4 rather than silently re-opening the excluded self
+ *  circle as a de facto compensating branch. Caught live: a real Layer-1
+ *  extraction on the C3-teaching anchor case read BOTH `self_preservation` and
+ *  `cosmopolis` violated; an isolation check that treated the raw, UNFILTERED
+ *  circle list as "others" would have read self_preservation as independently
+ *  flooring to reflexive (via `obligationToProximity`'s J1/J3 branches, which
+ *  this function does not touch — only `computeDikaiosyneFloor`'s caller applies
+ *  the exclusion), wrongly concluding the violation was NOT circle-4-isolated
+ *  and leaving the hard deny standing — the exact failure Q4's ruling forbids,
+ *  just relocated one function over. Any consumer checking whether a set of
+ *  circles "independently floors" post-Q4 must filter through this function
+ *  FIRST, never fold the raw list. */
+export function dikaiosyneEngagedCircles(
+  circles: OikeiosisCircleAssessment[],
+  agentCircles: boolean
+): OikeiosisCircleAssessment[] {
+  if (!agentCircles) return circles
+  return circles.filter((c) => c.circle !== SELF_PRESERVATION_CIRCLE)
+}
+
+/** THE ONE shared engagement predicate. `computeDikaiosyneFloor` returns null exactly
+ *  when this is false, and Q2's first-circle routing fires exactly when this is false —
+ *  so the two can never drift on what "no circle" means (the coordination requirement
+ *  both Q2's and Q4's scope documents name). */
+function isDikaiosyneEngaged(
+  circles: OikeiosisCircleAssessment[],
+  hasNaturalRelationship: boolean,
+  agentCircles: boolean
+): boolean {
+  return dikaiosyneEngagedCircles(circles, agentCircles).length >= 1 || hasNaturalRelationship
+}
+
 /** dikaiosyne domain proximity (Change 2 / 2a). null ⇒ not engaged (no constraint).
- *  Engaged when a circle is surfaced OR a natural_relationship obligation is claimed.
- *  A relationship claimed with NO identified party is an unresolved justice domain →
- *  reflexive (this is what catches the circle-free gamed injustice that is otherwise
- *  identical to the legitimate sage at Layer 2). */
+ *  Engaged when a QUALIFYING circle is surfaced (see `dikaiosyneEngagedCircles` — post-Q4
+ *  flag-on that excludes `self_preservation`) OR a natural_relationship obligation is
+ *  claimed. A relationship claimed with NO identified party is an unresolved justice
+ *  domain → reflexive (this is what catches the circle-free gamed injustice that is
+ *  otherwise identical to the legitimate sage at Layer 2). */
 function computeDikaiosyneFloor(
   circles: OikeiosisCircleAssessment[],
-  hasNaturalRelationship: boolean
+  hasNaturalRelationship: boolean,
+  agentCircles: boolean
 ): KatorthomaProximity | null {
-  const engaged = circles.length >= 1 || hasNaturalRelationship
-  if (!engaged) return null
-  if (circles.length === 0) return 'reflexive' // unidentified affected party ⇒ obligation necessarily unresolved
+  const qualifying = dikaiosyneEngagedCircles(circles, agentCircles)
+  if (!isDikaiosyneEngaged(circles, hasNaturalRelationship, agentCircles)) return null
+  if (qualifying.length === 0) return 'reflexive' // unidentified affected party ⇒ obligation necessarily unresolved
   return weakestProximity(
-    circles.map((c) => obligationToProximity(c.obligation_assessment ?? null))
+    qualifying.map((c) => obligationToProximity(c.obligation_assessment ?? null))
   )
 }
 
@@ -1723,7 +1812,11 @@ function computeProximity(
   dikaiosyne: boolean,
   // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a). null ⇒ the
   // check did not run (option absent / flag off) ⇒ byte-identical §4 behaviour.
-  corroboration: CorroborationReport | null = null
+  corroboration: CorroborationReport | null = null,
+  // Q4 (2026-08-02) — SUBSTRATE_AGENT_CIRCLES_ENABLED. Flag-off ⇒ the dikaiosyne
+  // floor folds every circle exactly as before (byte-identical, test-asserted).
+  // Flag-on ⇒ `self_preservation` is excluded from the justice surface.
+  agentCircles: boolean = false
 ): { proximity: KatorthomaProximity; floors: ProximityFloors | null } {
   if (!dikaiosyne) {
     const base = computeProximityBase(
@@ -1737,10 +1830,8 @@ function computeProximity(
   }
 
   const base = computeProximityBase(passions, cf, va, kathekon, hasGenuineDeliberation(oik))
-  const hasNaturalRelationship = kathekonFactors.some(
-    (f) => f.factor_type === 'natural_relationship'
-  )
-  let dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship)
+  const hasNaturalRelationship = hasNaturalRelationshipFactor(kathekonFactors)
+  let dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship, agentCircles)
   let and = computeAndreiaFloor(passions, urgency, stages)
   const sop = computeSophrosyneFloor(passions)
 
@@ -1879,6 +1970,64 @@ function computeVirtueDomains(
   }
 
   return domains
+}
+
+/** The module's stable virtue-domain order, made explicit so the Q2 routing can
+ *  re-seat appended domains into it rather than tacking them on the end. */
+const VIRTUE_DOMAIN_ORDER: VirtueDomain[] = [
+  'phronesis',
+  'dikaiosyne',
+  'andreia',
+  'sophrosyne',
+]
+
+/** Q2 (2026-08-02) — FIRST-CIRCLE POSITIVE ROUTING. When no justice surface is
+ *  engaged at all (per the ONE shared `isDikaiosyneEngaged` predicate — post-Q4 that
+ *  includes a schema carrying ONLY a `self_preservation` circle), a purely
+ *  self-regarding action must not go unrouted. The mentor: *"A self-regarding action
+ *  with no justice surface still has a virtue surface — it has moved to the right
+ *  one."* It engages phronesis (accurate judgement about what is genuinely good, bad
+ *  and indifferent) and sophrosyne (the discipline of assent).
+ *
+ *  UNCONDITIONAL once the flag is on and nothing is engaged — the mentor's language
+ *  names no further gate (*"These domains do not stop being relevant because
+ *  dikaiosyne has stepped back"*), and any narrative-conjunction gate would leave the
+ *  mentor's own ordinary example ("reorganize my own task queue for the afternoon")
+ *  unrouted, which is exactly what Q2 exists to prevent.
+ *
+ *  ADDITIVE + IDEMPOTENT: it never removes a domain `computeVirtueDomains` produced
+ *  (including a `dikaiosyne` entry pushed by that function's own separate
+ *  `is_kathekon !== null` trigger — Q2 does not touch that), never duplicates a domain
+ *  already present, and re-seats the result into the module's stable order.
+ *
+ *  CLASSIFICATION ONLY, w.r.t. THE VERDICT. `virtue_domains_engaged` has zero reach
+ *  into any verdict: `computeProximity` never reads it, and `deriveGuardrailVerdict`
+ *  (`guardrail-sandwich.ts`) never reads it — re-confirmed by grep at build time. That
+ *  keeps this routing outside mentor L4's category-error boundary by construction, the
+ *  same way BD-3 keeps C1b's `reasoning_integrity` outside it. Do not feed this value
+ *  into `computeProximity`, any floor, or any gate.
+ *
+ *  DISCLOSED, PRE-EXISTING, NOT A VIOLATION OF THE ABOVE (flagged for the activation
+ *  reviewer — 2026-08-02 adversarial review finding): `virtue_domains_engaged` DOES
+ *  have downstream reach beyond the verdict surfaces named above —
+ *  `derive-trust-events.ts` mints a `credential-completed` trust event per domain it
+ *  contains, and `score-architecture.ts`'s `computeVirtueBonus` sums a score bonus
+ *  over it. Neither is a "verdict" or "gate" in the sense this routing must avoid, and
+ *  both consumers are untouched, pre-existing code — but once this flag is live, a
+ *  self-only action will newly accrue phronesis/sophrosyne trust-core credit and score
+ *  bonus it did not accrue before. This is a foreseeable, intended consequence of
+ *  correctly classifying the action (per Q2's own language, the domains "do not stop
+ *  being relevant"), not a leak into the proximity/gate verdict — but it should be
+ *  named, not silently discovered, at activation time. */
+function applyFirstCircleRouting(
+  virtueDomains: VirtueDomain[],
+  dikaiosyneEngaged: boolean
+): VirtueDomain[] {
+  if (dikaiosyneEngaged) return virtueDomains
+  const present = new Set<VirtueDomain>(virtueDomains)
+  present.add('phronesis')
+  present.add('sophrosyne')
+  return VIRTUE_DOMAIN_ORDER.filter((d) => present.has(d))
 }
 
 // ============================================================================
@@ -2747,7 +2896,8 @@ export function applyMechanisms(
     schema.urgency_indicators,
     schema.causal_stage_evidence,
     dikaiosyne,
-    corroborationReport
+    corroborationReport,
+    agentCircles
   )
   const proximity = proximityResult.proximity
   const rulingFacultyState = computeRulingFacultyState(
@@ -2756,7 +2906,22 @@ export function applyMechanisms(
     schema.urgency_indicators.length,
     oik.deliberation_notes.length > 0
   )
-  const virtueDomains = computeVirtueDomains(pd, cf, oik, kathekon, va)
+  // Q2 (2026-08-02) — first-circle positive routing. Keyed off the SAME shared
+  // `isDikaiosyneEngaged` predicate Q4's narrowing uses inside computeDikaiosyneFloor,
+  // never a hand-rolled restatement — so a schema carrying only a `self_preservation`
+  // circle (which Q4 narrows OUT of the justice surface flag-on) is exactly the case
+  // this routes to phronesis/sophrosyne. Classification only; `proximity` was already
+  // computed above and is NOT recomputed, so nothing here can reach the gate.
+  const virtueDomains = agentCircles
+    ? applyFirstCircleRouting(
+        computeVirtueDomains(pd, cf, oik, kathekon, va),
+        isDikaiosyneEngaged(
+          oik.relevant_circles,
+          hasNaturalRelationshipFactor(schema.kathekon_factors),
+          agentCircles
+        )
+      )
+    : computeVirtueDomains(pd, cf, oik, kathekon, va)
   const improvementPath = selectImprovementPath(pd, cf, va, oik, kathekon)
   const stageScores = computeStageScores(schema, cf, pd, oik, va, ir)
   const hastyAssentRisk = computeHastyAssentRisk(schema.urgency_indicators, cf)

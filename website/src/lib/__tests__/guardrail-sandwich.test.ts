@@ -304,6 +304,198 @@ function loadCodeBody(p: string): string {
     .join('\n')
 }
 
+// ============================================================================
+// Q3 — STAGED-PAUSE TIER FOR CIRCLE-4 (2026-08-02 mentor ruling, binding)
+//
+// A `cosmopolis`-ISOLATED violated obligation must soften the gate's
+// recommendation from 'do_not_proceed' to 'pause_for_review' — never to
+// 'proceed'/'proceed_with_caution', never repainting katorthoma_proximity, and
+// never softening a deny an ordinary circle-1–3 violation independently earned.
+// Flag-gated on SUBSTRATE_AGENT_CIRCLES_ENABLED (inherited from C3's teaching).
+//
+// Option B (an automated promotion algorithm) was explicitly ruled OUT at this
+// stage — there is deliberately NO counter, NO persistence, and NO promotion
+// path here; the pause is unconditional and indefinite until a human narrows it.
+// ============================================================================
+
+type TestCircle = Layer2Assessment['oikeiosis']['relevant_circles'][number]
+
+function circle(
+  name: string,
+  status: 'violated' | 'met' | 'indeterminate' | null,
+): TestCircle {
+  const c = {
+    stage: 1,
+    circle: name,
+    description: `${name} circle`,
+    honourability_grade: 2,
+    advantageousness_grade: 2,
+    cicero_verdict: 'balanced_neither_decisive',
+    obligation_met: null,
+    tension: null,
+  } as unknown as TestCircle
+  if (status !== null) {
+    ;(c as unknown as { obligation_assessment: unknown }).obligation_assessment = {
+      status,
+      justification: `${name} ${status}`,
+    }
+  }
+  return c
+}
+
+/** A verdict that WOULD be a hard deny: reflexive proximity two ranks below a
+ *  'deliberate' threshold ⇒ getV3Recommendation returns 'do_not_proceed'. */
+function denyFixture(circles: TestCircle[]): Layer2Assessment {
+  return makeAssessment({
+    katorthoma_proximity: 'reflexive',
+    oikeiosis: { relevant_circles: circles, deliberation_notes: 'Deliberation considered.' },
+  })
+}
+
+function runQ3StagedPauseTests(): void {
+  const prior = process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED
+
+  // ---- FLAG-OFF BYTE-IDENTITY -------------------------------------------
+  delete process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED
+  const offIsolated = deriveGuardrailVerdict(denyFixture([circle('cosmopolis', 'violated')]), 'deliberate')
+  expectEq(
+    'Q3-1 flag-off: a cosmopolis-isolated violation still hard-denies (pre-Q3 behaviour intact)',
+    offIsolated.recommendation,
+    'do_not_proceed',
+  )
+
+  // ---- FLAG-ON ------------------------------------------------------------
+  process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED = 'true'
+
+  const isolated = deriveGuardrailVerdict(denyFixture([circle('cosmopolis', 'violated')]), 'deliberate')
+  expectEq(
+    'Q3-2 flag-on: cosmopolis violated ALONE ⇒ staged pause, not deny',
+    isolated.recommendation,
+    'pause_for_review',
+  )
+  expectEq('Q3-3 the pause is NOT a pass — proceed stays false', isolated.proceed, false)
+  expectEq(
+    'Q3-4 katorthoma_proximity is NOT repainted (the profile keeps the honest reflexive read)',
+    isolated.katorthoma_proximity,
+    'reflexive',
+  )
+
+  // Isolation: an ordinary circle-1–3 deny must NOT be softened.
+  expectEq(
+    'Q3-5 cosmopolis violated + household ALSO violated ⇒ deny stands (staging never softens an independently-earned deny)',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('household', 'violated')]),
+      'deliberate',
+    ).recommendation,
+    'do_not_proceed',
+  )
+  // An UNEVALUATED (absent obligation_assessment) other circle also reads
+  // reflexive via obligationToProximity's J1 branch — so it is NOT isolated.
+  expectEq(
+    'Q3-6 cosmopolis violated + an UNEVALUATED other circle ⇒ deny stands (J1 reads reflexive too)',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('household', null)]),
+      'deliberate',
+    ).recommendation,
+    'do_not_proceed',
+  )
+  // A non-reflexive other circle does NOT independently floor ⇒ still isolated ⇒ pause.
+  expectEq(
+    'Q3-7 cosmopolis violated + an argued-MET other circle ⇒ still isolated ⇒ pause',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('household', 'met')]),
+      'deliberate',
+    ).recommendation,
+    'pause_for_review',
+  )
+  expectEq(
+    'Q3-8 cosmopolis violated + an argued-INDETERMINATE other circle ⇒ still isolated ⇒ pause',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('household', 'indeterminate')]),
+      'deliberate',
+    ).recommendation,
+    'pause_for_review',
+  )
+  // No cosmopolis violation at all ⇒ untouched.
+  expectEq(
+    'Q3-9 household violated, NO cosmopolis ⇒ untouched deny',
+    deriveGuardrailVerdict(denyFixture([circle('household', 'violated')]), 'deliberate').recommendation,
+    'do_not_proceed',
+  )
+  expectEq(
+    'Q3-9b cosmopolis ALONE, UNEVALUATED (no obligation_assessment at all) ⇒ untouched deny — Q3 fires ONLY on a genuinely VIOLATED cosmopolis, never merely-unevaluated (a mutant loosening cosmopolisViolated to treat null as violated would soften THIS fixture, and only this one — no other circle is present to independently earn the deny)',
+    deriveGuardrailVerdict(denyFixture([circle('cosmopolis', null)]), 'deliberate').recommendation,
+    'do_not_proceed',
+  )
+  expectEq(
+    'Q3-10 cosmopolis present but MET (not violated) ⇒ untouched deny',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'met'), circle('household', 'violated')]),
+      'deliberate',
+    ).recommendation,
+    'do_not_proceed',
+  )
+  // The override only ever fires on a would-be DENY — it can never soften a
+  // pause into a proceed, nor touch an already-passing verdict.
+  const passing = deriveGuardrailVerdict(
+    makeAssessment({
+      katorthoma_proximity: 'principled',
+      oikeiosis: {
+        relevant_circles: [circle('cosmopolis', 'violated')],
+        deliberation_notes: 'Deliberation considered.',
+      },
+    }),
+    'deliberate',
+  )
+  expectEq('Q3-11 a passing verdict is untouched by the override', passing.recommendation, 'proceed')
+  expectEq('Q3-12 …and still proceeds', passing.proceed, true)
+
+  // ---- THE Q4 COMPOSITION (caught by a LIVE extraction, 2026-08-02) --------
+  // A real Layer-1 run on the C3 anchor case read BOTH self_preservation AND
+  // cosmopolis violated. Q4 rules a self-only violation carries NO proximity
+  // consequence — so it must not count as an "other circle independently
+  // flooring" here either, or the deny stands and Q4's exclusion is silently
+  // undone one function away from where it was made.
+  expectEq(
+    'Q3-14 Q4 COMPOSITION: cosmopolis violated + self_preservation violated ⇒ still isolated ⇒ pause',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('self_preservation', 'violated')]),
+      'deliberate',
+    ).recommendation,
+    'pause_for_review',
+  )
+  expectEq(
+    'Q3-15 Q4 COMPOSITION: cosmopolis + self_preservation violated + household violated ⇒ deny stands (household earns it)',
+    deriveGuardrailVerdict(
+      denyFixture([
+        circle('cosmopolis', 'violated'),
+        circle('self_preservation', 'violated'),
+        circle('household', 'violated'),
+      ]),
+      'deliberate',
+    ).recommendation,
+    'do_not_proceed',
+  )
+  expectEq(
+    'Q3-16 Q4 COMPOSITION: cosmopolis violated + an UNEVALUATED self circle ⇒ still isolated ⇒ pause',
+    deriveGuardrailVerdict(
+      denyFixture([circle('cosmopolis', 'violated'), circle('self_preservation', null)]),
+      'deliberate',
+    ).recommendation,
+    'pause_for_review',
+  )
+
+  // NON-VACUITY: the fixture genuinely WOULD deny without the override — proven
+  // by the flag-off leg above reading 'do_not_proceed' on the identical input.
+  expectTrue(
+    'Q3-13 NON-VACUITY: identical fixture, flag-off denies and flag-on pauses',
+    offIsolated.recommendation === 'do_not_proceed' && isolated.recommendation === 'pause_for_review',
+  )
+
+  if (prior === undefined) delete process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED
+  else process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED = prior
+}
+
 function runRouteWiringTests(): void {
   expectTrue('INV-0 guardrail route.ts exists', fs.existsSync(ROUTE_PATH))
   const body = loadCodeBody(ROUTE_PATH)
@@ -403,6 +595,7 @@ async function main(): Promise<void> {
   runFlagTests()
   runVerdictTests()
   runDeliberationTests()
+  runQ3StagedPauseTests()
   runRouteWiringTests()
   console.log('---')
   console.log('NOTE: the end-to-end verdict-equivalence battery is LLM-dependent — run separately via')

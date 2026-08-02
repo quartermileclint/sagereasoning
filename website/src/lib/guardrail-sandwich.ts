@@ -61,12 +61,18 @@ import { isCorroborationCheckEnabled } from '@/lib/translation-sandwich/corrobor
 import {
   applyMechanisms,
   detectTier1Trigger,
+  weakestProximity,
+  obligationToProximity,
+  dikaiosyneEngagedCircles,
   type Layer2Assessment,
   type Tier1Trigger,
   type KathekonQuality,
   type HastyAssentRisk,
   type StageScores,
 } from '@/lib/translation-sandwich/layer2-mechanisms'
+// Q3 (2026-08-02) — the staged-pause override inherits SUBSTRATE_AGENT_CIRCLES_ENABLED
+// (it only matters once C3's cosmopolis teaching is live; no second flag).
+import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
 import {
   signLayer2Assessment,
   type SignedLayer2Assessment,
@@ -243,6 +249,77 @@ export function deriveGuardrailVerdict(
   // computeProximity does the weakest-domain flooring natively (ADR-010 §4).
   let proceed = meetsThreshold(proximity, threshold)
   let recommendation = getV3Recommendation(proximity, threshold)
+
+  // STAGED-PAUSE TIER FOR CIRCLE-4 (Q3, 2026-08-02 mentor ruling, binding). C3
+  // teaches the extractor to attach a `cosmopolis` circle (the fourth, outermost
+  // oikeiosis circle — "other reasoning agents"). A `violated` obligation on
+  // ANY circle floors to 'reflexive' through the SAME unmodified path every
+  // other circle uses (computeDikaiosyneFloor → obligationToProximity →
+  // weakestProximity), and 'reflexive' two-or-more ranks below threshold reads
+  // getV3Recommendation as 'do_not_proceed' — an immediate hard deny.
+  //
+  // The mentor's L3 ruling: LLM extraction confidence at circle-4 does not meet
+  // the zero-false-positive standard a deny requires, because a deny is
+  // irreversible. Circle-4 must "enter the staged pause tier first" and "earn
+  // promotion to the deny class through demonstrated false-positive
+  // performance" — a later, deliberate, founder-walked decision (Q3's own
+  // 2026-08-02 residual ruling: "build the pause; do not build the promotion
+  // algorithm" — Option A, stateless pause + manual promotion; Option B,
+  // an automated promotion algorithm, was explicitly ruled OUT at this stage).
+  //
+  // PORT-LAYER ONLY, identical footprint to the SD-1 kathekon floor below:
+  // reads the already-computed deterministic assessment, adjusts
+  // `recommendation` alone. computeProximity + katorthoma_proximity are NEVER
+  // repainted — that field is shared with /api/reason's public profile, and
+  // the ruling is about the GATE's disposition, not about mis-stating the
+  // underlying proximity assessment (so a self-only-consult reading `reflexive`
+  // via a cosmopolis-only violation still reads `reflexive` in the profile;
+  // only the gate softens do_not_proceed → pause_for_review).
+  //
+  // ISOLATION, not blanket softening: fires ONLY when cosmopolis is violated
+  // AND excluding it, the remaining circles do NOT themselves floor to
+  // 'reflexive' — an ordinary circle-1–3 deny (household/local_community/
+  // political_community violated) is untouched; L3's concern is specifically
+  // about circle-4 extraction confidence, not the other three. NEVER softens
+  // to 'proceed' or 'proceed_with_caution' — `proceed` stays exactly what
+  // meetsThreshold computed (false, since 'reflexive' fails every non-
+  // 'reflexive' threshold); only `recommendation` is adjusted, mirroring the
+  // SD-1 precedent's own shape.
+  //
+  // THE Q4 COMPOSITION, LOAD-BEARING (caught by a live extraction, 2026-08-02):
+  // the "others" set is filtered through `dikaiosyneEngagedCircles` FIRST, so a
+  // co-extracted `self_preservation` violation cannot make the reading look
+  // non-isolated. A real Layer-1 run on the C3 anchor case read BOTH
+  // `self_preservation` and `cosmopolis` violated; folding the RAW list would
+  // have read self_preservation as independently flooring (J1/J3) and left the
+  // hard deny standing — reintroducing exactly the self-circle proximity
+  // consequence Q4's ruling forbids, one function away from where Q4 removed it.
+  //
+  // Flag-gated on the SAME `SUBSTRATE_AGENT_CIRCLES_ENABLED` C3's teaching
+  // rides — this override only matters once cosmopolis can be extracted at
+  // all, so it inherits the existing flag rather than needing a second one.
+  // Flag-off ⇒ byte-identical (this whole block is a no-op: relevant_circles
+  // can carry no cosmopolis entry when the flag-off prompt never teaches it).
+  if (isAgentCirclesEnabled() && recommendation === 'do_not_proceed') {
+    const circles = assessment.oikeiosis.relevant_circles
+    const cosmopolisViolated = circles.some(
+      (c) => c.circle === 'cosmopolis' && c.obligation_assessment?.status === 'violated'
+    )
+    // Filter through Q4's exclusion FIRST (self_preservation is not a justice
+    // surface), THEN drop cosmopolis — what remains is the set that could
+    // independently earn the deny.
+    const others = dikaiosyneEngagedCircles(circles, isAgentCirclesEnabled()).filter(
+      (c) => c.circle !== 'cosmopolis'
+    )
+    const othersFloorReflexive =
+      others.length > 0 &&
+      weakestProximity(others.map((c) => obligationToProximity(c.obligation_assessment ?? null))) ===
+        'reflexive'
+    const circle4IsolatedFloor = cosmopolisViolated && !othersFloorReflexive
+    if (circle4IsolatedFloor) {
+      recommendation = 'pause_for_review'
+    }
+  }
 
   // KATHEKON FLOOR (SD-1, adversarial review 2026-06-19; ADR-009 §4). A verdict
   // that judges the action CONTRARY to appropriate action (is_kathekon === false,
