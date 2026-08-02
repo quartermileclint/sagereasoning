@@ -233,23 +233,26 @@ export const PRACTICE_SOURCE_TABLES: Readonly<Record<string, readonly string[]>>
  * the pin's own label invoked the `action_evaluations_v3` drift lesson and then
  * failed to cover `action_evaluations_v3`. Found by the adversarial review.
  *
- * `reflections` was added for Phase 4 (the daily rhythm). The evening pole is
- * "journal OR reflection" per plan §9, and before this the route read only
- * `journal_entries` — so a practitioner who had reflected but not journalled
- * would have been told, wrongly, that they had not done the evening review.
+ * `reflections` was added for Phase 4 (the daily rhythm) and is now, as of
+ * 2026-08-02, the SOLE source of the evening pole.
  *
- * ONE HONEST ASYMMETRY, verified 2026-07-27 and recorded rather than smoothed
- * over: no page available to an ORDINARY practitioner writes `reflections`.
- * `/api/reflections` is GET-only and `/reflections` is a read-only history view;
- * rows arrive via `/api/reflect` (the API skill surface) and
- * `/api/mentor/private/reflect`. The latter IS reachable from a browser, at
- * `/private-mentor` — but it is FOUNDER_USER_ID-gated, so for everyone else the
- * claim holds without qualification. (The unqualified phrasing was corrected
- * after the adversarial review pointed out the founder-only exception.)
+ * THE ASYMMETRY THAT USED TO LIVE HERE IS GONE. Until 2026-08-02 this comment
+ * recorded, and rationalised, a real defect: no page an ordinary practitioner
+ * could reach wrote `reflections`, so the evening pole LINKED to `/journal`
+ * instead and an `eveningVia` note disclosed the mismatch. The founder rejected
+ * that workaround — the journal is a finite 55-day guided curriculum, a
+ * different kind of reflection from the nightly examination the pole names. The
+ * fix was to build the missing page (`/reflect`), not to keep disclosing its
+ * absence.
  *
- * The table is therefore right to COUNT toward the evening pole — a row in it
- * genuinely is an evening review — but the pole must LINK to `/journal`, the
- * only surface an ordinary practitioner at a browser can record one on.
+ * `journal` DELIBERATELY REMAINS A KEY HERE while being barred from
+ * EVENING_RHYTHM_KEYS. The two are not the same question: `foldDailyRhythm`'s
+ * returning-after-absence scan reads `Object.keys(RHYTHM_TABLES)`, so a
+ * practitioner journalling daily still counts as active and is never told "it
+ * has been a while". This is exactly the treatment `evaluations` already has
+ * (pin I0d) — a surface may evidence activity while not satisfying the evening
+ * pole. Conflating the two would fire the returning line at an active
+ * practitioner.
  */
 export const RHYTHM_TABLES: Readonly<Record<string, string>> = {
   journal: 'journal_entries',
@@ -464,20 +467,28 @@ export function foldPracticeStatuses(
  * What evidences each pole.
  *
  * The morning pole is the `morning` practice, read from the sequence fold the
- * route already returns. The evening pole is "journal OR reflection" (plan §9)
- * — either is a genuine evening review, so a row in either satisfies it.
+ * route already returns. The evening pole is the REFLECTION, and nothing else.
  *
- * `evaluations` (`action_evaluations_v3`) is deliberately NOT an evening key.
- * Scoring an action happens when an action arises, not as an evening
- * examination; plan §9 names the evening pole as the journal or the reflection
- * and nothing else. It IS counted for the absence check below, because someone
- * who scored an action yesterday is plainly not absent.
+ * AMENDED 2026-08-02, and this supersedes plan §9's "journal OR reflection".
+ * §9 was written when no evening-review page existed, so it mapped the pole onto
+ * the surface that did — the journal. The founder's correction: the journal is a
+ * finite 55-day guided curriculum, a different practice from the nightly
+ * examination this pole names, and a journal entry must no longer satisfy it.
+ * `/reflect` now exists as the dedicated page, and `reflections` is its table.
+ *
+ * TWO SURFACES ARE DELIBERATELY EXCLUDED HERE AND STILL COUNTED FOR ABSENCE:
+ *   `journal`      — a different practice (see above), as of this amendment.
+ *   `evaluations`  — scoring an action happens when an action arises, not as an
+ *                    evening examination.
+ * Both remain keys of RHYTHM_TABLES, so `foldDailyRhythm`'s absence scan still
+ * sees them: someone who journalled or scored an action yesterday is plainly not
+ * absent, and must never be told "it has been a while".
  *
  * These are RHYTHM KEYS, not table names — they index the `rhythm` block of the
  * route's response, which is the shape the client actually holds.
  */
 export const MORNING_PRACTICE_ID: PracticeId = 'morning'
-export const EVENING_RHYTHM_KEYS: readonly string[] = ['journal', 'reflections']
+export const EVENING_RHYTHM_KEYS: readonly string[] = ['reflections']
 
 /**
  * Days of total silence across EVERY practice surface before the returning line
@@ -707,10 +718,12 @@ export const PRACTICE_MODULE_COPY = {
  * does not say what to look for — naming where you fell short would be the
  * alarm reaching the conclusion the examination is meant to reach.
  *
- * `eveningVia` exists because of a real asymmetry: the evening pole is
- * satisfied by the journal OR a reflection, but only the journal has a page a
- * practitioner can write on (see RHYTHM_TABLES). Saying so is more honest than
- * a link that silently under-describes what counts.
+ * `eveningVia` WAS HERE AND IS DELIBERATELY GONE (2026-08-02). It disclosed
+ * that the evening link under-described what counted, because the pole pointed
+ * at `/journal` for want of a dedicated page. `/reflect` is now that page, the
+ * pole points at it, and `reflections` is the sole satisfier — so the link no
+ * longer under-describes anything and a note saying it does would be false.
+ * A disclosure that outlives the mismatch it disclosed is just noise.
  */
 export const DAILY_RHYTHM_COPY = {
   heading: 'Today',
@@ -720,8 +733,7 @@ export const DAILY_RHYTHM_COPY = {
   morningHref: '/morning',
   eveningLabel: 'Evening review',
   eveningDoorbell: 'Before sleep, look back over the day.',
-  eveningHref: '/journal',
-  eveningVia: 'The journal or a reflection — either one is the evening review.',
+  eveningHref: '/reflect',
   doneLabel: 'Done today',
   openLabel: 'Open',
   /**
@@ -771,7 +783,7 @@ export const WELCOME_SEQUENCE_COPY = {
     'Everything below assumes one idea: that some things are up to you and some are not. That is what the logos page above sets out, and it is why the practices cohere rather than sitting side by side as techniques.',
   dailyRhythmHeading: 'The daily rhythm',
   dailyRhythm:
-    'Alongside the sequence, two things recur: score an action as one arises, and keep the journal in the evening. The morning declares the intention; the evening looks at whether it held.',
+    'Alongside the sequence, two things recur: score an action as one arises, and sit with the evening review before sleep. The morning declares the intention; the evening looks at whether it held. (The journal is its own thing — a 55-day path you walk at your own pace, not the nightly examination.)',
   toolsHeading: 'The practices, in sequence',
 } as const
 

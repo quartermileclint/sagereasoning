@@ -79,6 +79,9 @@ export async function gatherUserPersonalData(
     { key: 'evaluations', table: 'action_evaluations_v3' },
     { key: 'baseline_assessments', table: 'baseline_assessments_v3' },
     { key: 'journal_entries', table: 'journal_entries' },
+    // The nightly evening review (/reflect). Distinct from `oikeiosis_reflections`
+    // (the quarterly circle diagnostic) — different table, different practice.
+    { key: 'reflections', table: 'reflections' },
     { key: 'deliberation_chains', table: 'deliberation_chains' },
     { key: 'deliberation_steps', table: 'deliberation_steps' },
     { key: 'location', table: 'user_locations' },

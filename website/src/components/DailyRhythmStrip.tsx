@@ -44,21 +44,21 @@ interface DailyRhythmStripProps {
   fold: DailyRhythmFold
 }
 
+// Both poles now have exactly one page to write on, so neither carries a `via`
+// note. The evening pole used to: it linked to `/journal` for want of a
+// dedicated page, and `eveningVia` disclosed that the link under-described what
+// counted. `/reflect` (2026-08-02) removed the mismatch, so the disclosure went
+// with it rather than being left to outlive the thing it disclosed.
 const POLE_COPY = {
   morning: {
     label: DAILY_RHYTHM_COPY.morningLabel,
     doorbell: DAILY_RHYTHM_COPY.morningDoorbell,
     href: DAILY_RHYTHM_COPY.morningHref,
-    via: null as string | null,
   },
   evening: {
     label: DAILY_RHYTHM_COPY.eveningLabel,
     doorbell: DAILY_RHYTHM_COPY.eveningDoorbell,
     href: DAILY_RHYTHM_COPY.eveningHref,
-    // The evening pole is satisfied by the journal OR a reflection, but only the
-    // journal has a page to write on — so the link under-describes what counts,
-    // and this says so rather than leaving it misleading.
-    via: DAILY_RHYTHM_COPY.eveningVia,
   },
 } as const
 
@@ -67,19 +67,14 @@ function Pole({ pole }: { pole: RhythmPole }) {
 
   if (pole.state === 'not_yet_today') {
     return (
-      <div>
-        <CadenceBanner title={copy.label} line={copy.doorbell}>
-          <a
-            href={copy.href}
-            className="px-4 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors whitespace-nowrap"
-          >
-            {DAILY_RHYTHM_COPY.openLabel}
-          </a>
-        </CadenceBanner>
-        {copy.via && (
-          <p className="font-body text-xs text-sage-500 mt-1.5 px-1">{copy.via}</p>
-        )}
-      </div>
+      <CadenceBanner title={copy.label} line={copy.doorbell}>
+        <a
+          href={copy.href}
+          className="px-4 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors whitespace-nowrap"
+        >
+          {DAILY_RHYTHM_COPY.openLabel}
+        </a>
+      </CadenceBanner>
     )
   }
 

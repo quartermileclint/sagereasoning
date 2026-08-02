@@ -96,6 +96,9 @@ export async function GET(request: NextRequest) {
     { key: 'evaluations', table: 'action_evaluations_v3', select: '*' },
     { key: 'baseline_assessments', table: 'baseline_assessments_v3', select: '*' },
     { key: 'journal_entries', table: 'journal_entries', select: '*' },
+    // The nightly evening review (/reflect). Distinct from `oikeiosis_reflections`
+    // (the quarterly circle diagnostic) — different table, different practice.
+    { key: 'reflections', table: 'reflections', select: '*' },
     { key: 'deliberation_chains', table: 'deliberation_chains', select: '*' },
     { key: 'deliberation_steps', table: 'deliberation_steps', select: '*' },
     { key: 'location', table: 'user_locations', select: '*' },

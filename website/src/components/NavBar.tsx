@@ -81,6 +81,7 @@ export default function NavBar() {
                 <div className="absolute right-0 mt-2 w-56 bg-white border border-sage-200 rounded-lg shadow-lg z-50 py-1">
                   <a href="/view-from-above" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>View from Above</a>
                   <a href="/morning" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Morning Preparation</a>
+                  <a href="/reflect" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Evening Review</a>
                   <a href="/hupexairesis" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Reserve Clause</a>
                   <a href="/premeditatio" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Premeditatio</a>
                   <a href="/sage-compass" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Sage Compass</a>

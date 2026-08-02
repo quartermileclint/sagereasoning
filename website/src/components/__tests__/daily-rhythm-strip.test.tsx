@@ -149,26 +149,36 @@ for (const state of ['not_yet_today', 'done_today', 'unknown'] as RhythmState[])
   }
 }
 
-// ─── The evening "via" note, which exists because the link under-describes it ───
+// ─── The evening pole points at its own page, and carries no "via" note ───
+//
+// R7a/R7b/R7c used to pin the `eveningVia` disclosure — the note that admitted
+// the evening link under-described what counted, because the pole opened onto
+// `/journal` for want of a dedicated page. `/reflect` (2026-08-02) closed that
+// mismatch and the note went with it. What replaces those pins is the property
+// that actually matters now: the evening pole opens onto the evening review, and
+// a journal link does not appear in the strip at all.
 
 {
-  const t = textOf(render(fold('done_today', 'not_yet_today')))
-  assert(t.includes(DAILY_RHYTHM_COPY.eveningVia), 'R7a: the not-yet evening pole explains that a reflection counts too')
+  const t = render(fold('done_today', 'not_yet_today'))
+  assert(t.includes('href="/reflect"'), 'R7a: the not-yet evening pole opens onto the evening review')
+  assert(!t.includes('href="/journal"'), 'R7a2: and never onto the journal, which is a different practice')
 }
 {
-  const t = textOf(render(fold('done_today', 'done_today')))
-  assert(!t.includes(DAILY_RHYTHM_COPY.eveningVia), 'R7b: and does not repeat it once the review is done')
+  // The done/unknown branch renders a different element (a quiet label link, not
+  // a doorbell button) and must point at the same page — the earlier defect was
+  // present in BOTH branches, so fixing one would have been a half-fix.
+  const t = render(fold('done_today', 'done_today'))
+  assert(t.includes('href="/reflect"'), 'R7b: the done evening pole still links to the evening review')
+  assert(!t.includes('href="/journal"'), 'R7b2: and still never to the journal')
 }
 {
-  // R7b alone does NOT pin what it appears to. It passes because the whole
-  // not-yet branch is skipped when both poles are done — so a component that
-  // attached the evening's note to EVERY pole would still satisfy it. Found by
-  // mutation: `{copy.via && …}` → `{true && …}` survived R7a and R7b together.
-  // The real property is that the note is per-pole, so it is counted, not
-  // merely detected.
-  const t = textOf(render(fold('not_yet_today', 'not_yet_today')))
-  const occurrences = t.split(DAILY_RHYTHM_COPY.eveningVia).length - 1
-  assert(occurrences === 1, `R7c: the via note belongs to the EVENING pole alone — expected exactly 1 occurrence with both poles not-yet, got ${occurrences}`)
+  // NON-VACUITY, mirroring the mutation lesson the old R7c recorded: a strip that
+  // rendered NO evening pole at all would satisfy the two "never /journal"
+  // assertions above. Count the evening link instead of merely detecting it.
+  const t = render(fold('not_yet_today', 'not_yet_today'))
+  const occurrences = t.split('href="/reflect"').length - 1
+  assert(occurrences === 1, `R7c: exactly one evening-review link, on the evening pole alone — got ${occurrences}`)
+  assert(t.includes('href="/morning"'), 'R7c2: and the morning pole is still rendered alongside it')
 }
 
 // ─── No gamification reaches the rendered page (plan §11) ───

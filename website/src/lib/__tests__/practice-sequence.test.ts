@@ -228,7 +228,7 @@ assertEqual(
 )
 assert(
   Object.prototype.hasOwnProperty.call(RHYTHM_TABLES, 'reflections'),
-  'C8b: `reflections` is a rhythm source. Phase 4 (plan §9) makes the evening pole "journal OR reflection"; without this table a practitioner who reflected but did not journal would be told, wrongly, that the evening review was not done'
+  'C8b: `reflections` is a rhythm source — and since 2026-08-02 the SOLE source of the evening pole (see I0c). It is the table /reflect writes; without it the evening pole reads permanently "unknown" and renders as silence, which hides itself'
 )
 
 // ─── D. The stage ↔ practice mapping, held to the canonical vocabulary ───
@@ -551,7 +551,7 @@ assertEqual(
       'Everything below assumes one idea: that some things are up to you and some are not. That is what the logos page above sets out, and it is why the practices cohere rather than sitting side by side as techniques.',
     dailyRhythmHeading: 'The daily rhythm',
     dailyRhythm:
-      'Alongside the sequence, two things recur: score an action as one arises, and keep the journal in the evening. The morning declares the intention; the evening looks at whether it held.',
+      'Alongside the sequence, two things recur: score an action as one arises, and sit with the evening review before sleep. The morning declares the intention; the evening looks at whether it held. (The journal is its own thing — a 55-day path you walk at your own pace, not the nightly examination.)',
     toolsHeading: 'The practices, in sequence',
   },
   'F15: the /welcome sequence copy, verbatim — every key'
@@ -733,13 +733,28 @@ assert(
 )
 assertEqual(
   [...EVENING_RHYTHM_KEYS],
-  ['journal', 'reflections'],
-  'I0c: the evening pole is journal OR reflection (plan §9)'
+  ['reflections'],
+  'I0c: the evening pole is the REFLECTION and nothing else (2026-08-02; supersedes plan §9\'s "journal OR reflection", which mapped the pole onto the journal for want of a dedicated page)'
 )
 assert(
   !EVENING_RHYTHM_KEYS.includes('evaluations'),
   'I0d: scoring an action is NOT the evening review — it happens when an action arises. It still counts for the absence check, but it must not satisfy the evening pole'
 )
+assert(
+  !EVENING_RHYTHM_KEYS.includes('journal'),
+  'I0d2: a JOURNAL entry must not satisfy the evening pole either. The journal is a finite 55-day guided curriculum — a different practice from the nightly examination — and conflating them is the defect /reflect was built to fix'
+)
+// I0d and I0d2 bar two surfaces from the evening pole; this pins the other half
+// of that arrangement, which is the half that is easy to break by accident. Both
+// must remain RHYTHM_TABLES keys, because foldDailyRhythm's absence scan reads
+// Object.keys(RHYTHM_TABLES) — dropping them there would tell a practitioner who
+// journals or scores actions daily that "it has been a while".
+for (const stillCounted of ['journal', 'evaluations']) {
+  assert(
+    Object.prototype.hasOwnProperty.call(RHYTHM_TABLES, stillCounted),
+    `I0d3: '${stillCounted}' is barred from the evening pole but MUST remain a rhythm table — it still evidences activity for the returning-after-absence check`
+  )
+}
 
 // --- Basic states.
 {
@@ -764,17 +779,27 @@ assert(
   assertEqual(poleOf(f, 'morning').state, 'unknown', 'I4: a failed morning read is unknown, never "not yet" — telling a practitioner they skipped something they may have done is a fabricated status')
 }
 {
-  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { journal: DOWN } }), NOW)
-  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I5: unavailable is contagious within the evening pole — journal down')
+  // I5 INVERTED (2026-08-02). It used to assert that a journal outage made the
+  // evening pole `unknown`, because the journal was one of two evening sources.
+  // It is no longer a source at all, so the property worth pinning is the
+  // DECOUPLING: a journal outage must leave the evening pole alone. If someone
+  // re-added 'journal' to EVENING_RHYTHM_KEYS, this fails.
+  const f = foldDailyRhythm(
+    rhythmInput({ base: at(2026, 7, 26), rhythm: { journal: DOWN, reflections: OK(at(2026, 7, 27, 21)) } }),
+    NOW
+  )
+  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I5: a JOURNAL outage does not touch the evening pole — the journal is not an evening source')
 }
 {
-  // The MIRROR of I5. Without it, a fold that checked only the first source
-  // would pass I5 and still be broken.
+  // The evening pole now has exactly one source, so "contagious unavailable"
+  // reduces to this. Still load-bearing: a fold that treated an unavailable read
+  // as an empty one would report "not yet" and tell a practitioner they skipped
+  // an examination they may well have done.
   const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { reflections: DOWN } }), NOW)
-  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I6: unavailable is contagious within the evening pole — reflections down (the mirror of I5)')
+  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I6: an unavailable reflections read is unknown, never "not yet"')
 }
 {
-  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { journal: OK('not-a-date') , reflections: OK(null) } }), NOW)
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { reflections: OK('not-a-date') } }), NOW)
   assertEqual(poleOf(f, 'evening').state, 'unknown', 'I7: an unreadable timestamp is unknown — a value we cannot parse is not evidence that nothing happened')
 }
 
@@ -818,35 +843,68 @@ assert(
   assertEqual(poleOf(f, 'evening').state, 'not_yet_today', 'I0e: scoring an action TODAY does not make the evening review done — the dashboard must not claim the evening examination happened at lunchtime')
 }
 
-// --- Journal OR reflection, in BOTH directions. This pair is the whole point of
-// --- Phase 4's table change: before it, the second case was impossible to satisfy.
+// --- THE FOUNDER'S REQUIREMENT (2026-08-02), pinned in both directions.
+// --- I8 formerly asserted the OPPOSITE of what it asserts now: that a journal
+// --- entry satisfied the evening pole. That was the defect. The journal is a
+// --- finite 55-day guided curriculum; the evening pole is Seneca's nightly
+// --- examination, and only /reflect performs it.
 {
   const f = foldDailyRhythm(
     rhythmInput({ base: null, rhythm: { journal: OK(at(2026, 7, 27, 21)), reflections: OK(null) } }),
     NOW
   )
-  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I8: the journal alone satisfies the evening pole')
+  assertEqual(poleOf(f, 'evening').state, 'not_yet_today', 'I8: a JOURNAL entry today does NOT satisfy the evening pole — "Done today" means the evening review was done, not that something was written')
 }
 {
   const f = foldDailyRhythm(
     rhythmInput({ base: null, rhythm: { journal: OK(null), reflections: OK(at(2026, 7, 27, 21)) } }),
     NOW
   )
-  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I9: a REFLECTION alone satisfies the evening pole — the regression Phase 4 exists to fix; before `reflections` was a rhythm source this case reported "not yet"')
+  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I9: a REFLECTION alone satisfies the evening pole — it is now the sole source')
+}
+{
+  // The pair above could BOTH be satisfied by a pole that was permanently
+  // "not_yet"/"done" for unrelated reasons, so pin the discriminating fact: the
+  // SAME fixture differs only in which table holds the row.
+  const ts = at(2026, 7, 27, 21)
+  const viaJournal = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(ts), reflections: OK(null) } }), NOW)
+  const viaReflect = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(null), reflections: OK(ts) } }), NOW)
+  assert(
+    poleOf(viaJournal, 'evening').state !== poleOf(viaReflect, 'evening').state,
+    'I8b: the two are genuinely DISCRIMINATED — an identical timestamp in the journal and in reflections must not produce the same evening state'
+  )
 }
 
-// --- Order independence, written as an explicit MIRROR PAIR.
+// --- Order independence of `laterOf`, written as an explicit MIRROR PAIR.
 // --- The Phase 1 lesson, recurring: two fixtures that both put the later value
 // --- in the same position let a "last wins" mutant pass everything.
+// ---
+// --- RE-TARGETED 2026-08-02. This used to run through the evening pole, which
+// --- had two sources. It has one now, so the multi-source reduction is exercised
+// --- here through the ACTIVITY scan instead — which still reduces every practice
+// --- AND every rhythm table (foldDailyRhythm's `activitySources`), and which is
+// --- what the returning-after-absence line depends on. Deleting the coverage
+// --- with the fixture would have left `reduceSources`' `laterOf` untested.
 {
-  const older = at(2026, 7, 24)
-  const today = at(2026, 7, 27, 9)
-  const a = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(today), reflections: OK(older) } }), NOW)
-  const b = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(older), reflections: OK(today) } }), NOW)
-  assertEqual(poleOf(a, 'evening').state, 'done_today', 'I10a: later value FIRST — the pole takes the later of its sources')
-  assertEqual(poleOf(b, 'evening').state, 'done_today', 'I10b: later value SECOND — the mirror, so a positional bug cannot hide')
-  assertEqual(poleOf(a, 'evening').last_used_at, today, 'I10c: and reports the later timestamp, order-independently (first)')
-  assertEqual(poleOf(b, 'evening').last_used_at, today, 'I10d: and reports the later timestamp, order-independently (second)')
+  const older = at(2026, 6, 1)
+  const recent = at(2026, 7, 24)
+  const a = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(recent), reflections: OK(older), evaluations: OK(older) } }), NOW)
+  const b = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(older), reflections: OK(older), evaluations: OK(recent) } }), NOW)
+  assertEqual(a.days_absent, 3, 'I10a: later value FIRST — the activity scan takes the LATER of its sources (3 days from 24 Jul to NOW)')
+  assertEqual(b.days_absent, 3, 'I10b: later value LAST — the mirror, so a positional bug cannot hide')
+  assertEqual(a.returning, false, 'I10c: and neither is "returning", because the later value is well inside the 14-day window')
+  assertEqual(b.returning, false, 'I10d: likewise for the mirror')
+}
+{
+  // NON-VACUITY for I10a-d: if `laterOf` took the EARLIER value, days_absent
+  // would be ~57 and `returning` would flip. This proves the assertions above
+  // discriminate rather than merely running.
+  const older = at(2026, 6, 1)
+  const f = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(older), reflections: OK(older), evaluations: OK(older) } }), NOW)
+  assert(
+    f.days_absent !== null && f.days_absent > 14 && f.returning === true,
+    `I10e: the all-old control DOES trip the returning line (days_absent=${f.days_absent}) — so I10a-d are discriminating, not vacuous`
+  )
 }
 
 // --- The local-day boundary. The named requirement: an entry must read as
@@ -986,8 +1044,7 @@ assertEqual(
     morningHref: '/morning',
     eveningLabel: 'Evening review',
     eveningDoorbell: 'Before sleep, look back over the day.',
-    eveningHref: '/journal',
-    eveningVia: 'The journal or a reflection — either one is the evening review.',
+    eveningHref: '/reflect',
     doneLabel: 'Done today',
     openLabel: 'Open',
     unavailableNote: 'One of these could not be read just now, so it is left blank rather than guessed at.',

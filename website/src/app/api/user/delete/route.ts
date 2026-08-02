@@ -80,6 +80,9 @@ export async function DELETE(request: NextRequest) {
     'deliberation_steps',
     'deliberation_chains',
     'journal_entries',
+    'reflections',               // R17b intimate — the nightly evening review (/reflect). Was
+                                 // absent from all three R17 paths; harmless while nothing
+                                 // routinely wrote it, a live gap once /reflect made it daily.
     'baseline_assessments_v3',
     'reserve_clause_entries',    // R17b intimate — Remaining Principles #10-human (FK-independent of the others)
     'view_from_above_entries',   // R17b intimate — Remaining Principles #9 + #13 (FK-independent of the others)

@@ -58,6 +58,7 @@ export default function RootLayout({
                   <p className="font-display font-medium mb-2">Practice</p>
                   <a href="/view-from-above" className="block hover:text-sage-900">View from Above</a>
                   <a href="/morning" className="block hover:text-sage-900">Morning Preparation</a>
+                  <a href="/reflect" className="block hover:text-sage-900">Evening Review</a>
                   <a href="/hupexairesis" className="block hover:text-sage-900">Reserve Clause</a>
                   <a href="/premeditatio" className="block hover:text-sage-900">Premeditatio</a>
                   <a href="/sage-compass" className="block hover:text-sage-900">Sage Compass</a>

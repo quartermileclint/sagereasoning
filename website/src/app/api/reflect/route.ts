@@ -74,7 +74,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const startTime = Date.now()
-    const { what_happened, how_i_responded, user_id } = await request.json()
+    // `user_id` is deliberately NOT destructured. It was previously read from the
+    // body and used to key the reflection row, the analytics row and the Mentor
+    // profile update — a cross-tenant write surface on a service-role client.
+    // Every one of those now uses `auth.user.id`. A body that still sends the
+    // field is accepted and the field ignored, so no existing caller breaks.
+    const { what_happened, how_i_responded } = await request.json()
 
     const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
     if (textLengthError) {
@@ -176,12 +181,39 @@ Score my actions and give me the sage perspective.`
       )
     }
 
-    // Save reflection if user_id provided
-    if (user_id) {
-      await supabaseAdmin
+    // Save the reflection, ALWAYS, under the AUTHENTICATED user.
+    //
+    // TWO DEFECTS FIXED HERE (2026-08-02), both of which became load-bearing the
+    // moment `/reflect` shipped and the dashboard's evening pole started reading
+    // this table:
+    //
+    // 1. CROSS-TENANT WRITE. The row was keyed on a CLIENT-SUPPLIED `user_id`
+    //    from the request body while running on `supabaseAdmin` (RLS bypassed),
+    //    even though the route already knew `auth.user.id` and used it for
+    //    analytics a few lines below. Any authenticated caller could write into
+    //    another practitioner's reflection history — forging their "Done today"
+    //    and feeding their Mentor passion map. Now bound to the session. The
+    //    body's `user_id` is read but deliberately IGNORED (see below), so the
+    //    change is strictly narrowing for every legitimate caller.
+    //
+    // 2. SILENT WRITE LOSS. The insert was fire-and-forget (`.then(() => {})`),
+    //    so a failure returned HTTP 200 with a fully rendered reflection and no
+    //    row and no log — exactly the `action_evaluations_v3` class that lost
+    //    four months of human score saves. The error is now awaited, checked and
+    //    logged, and reported to the caller as `saved`.
+    //
+    // The insert used to be gated on the body supplying `user_id`, so omitting
+    // it meant "score but do not store". Nothing in the repo relied on that (no
+    // in-repo caller passes the field, and the published llms.txt body does not
+    // include it), and a scored-but-unsaved evening review would leave the pole
+    // reading "not yet" forever. Persisting for the authenticated user is the
+    // honest behaviour and the one requirement (3) rests on.
+    let saved = false
+    {
+      const { error: insertError } = await supabaseAdmin
         .from('reflections')
         .insert({
-          user_id,
+          user_id: auth.user.id,
           what_happened: what_happened.trim(),
           how_responded: how_i_responded?.trim() || null,
           katorthoma_proximity: reflectionData.katorthoma_proximity,
@@ -189,7 +221,14 @@ Score my actions and give me the sage perspective.`
           sage_perspective: reflectionData.sage_perspective,
           evening_prompt: reflectionData.evening_prompt,
         })
-        .then(() => {})
+      if (insertError) {
+        // Log and continue: the practitioner has already done the examination and
+        // the reading is worth returning. `saved: false` lets the page say the
+        // review could not be recorded rather than silently implying it was.
+        console.error('[api/reflect] Failed to persist reflection:', insertError)
+      } else {
+        saved = true
+      }
     }
 
     // Generate reasoning receipt
@@ -213,6 +252,14 @@ Score my actions and give me the sage perspective.`
       reasoning_receipt: receipt,
       disclaimer: reflectionData.disclaimer,
       reflected_at: new Date().toISOString(),
+      /**
+       * Whether the row actually landed. Additive and optional for existing
+       * consumers, but load-bearing for `/reflect`: the dashboard's evening pole
+       * is derived from the presence of a `reflections` row, so a page that
+       * rendered "recorded" over a failed insert would leave the practitioner
+       * looking at a complete review while the strip said "not yet" forever.
+       */
+      saved,
     }
 
     // Analytics
@@ -220,7 +267,7 @@ Score my actions and give me the sage perspective.`
       .from('analytics_events')
       .insert({
         event_type: 'daily_reflection',
-        user_id: user_id || null,
+        user_id: auth.user.id,
         metadata: {
           katorthoma_proximity: reflectionData.katorthoma_proximity,
           passions_count: (reflectionData.passions_detected || []).length,
@@ -236,12 +283,17 @@ Score my actions and give me the sage perspective.`
     //
     // Uses dynamic import (bridge pattern) to avoid build-time resolution
     // failures when sage-mentor isn't available in the website build context.
-    if (user_id) {
+    // Keyed on the AUTHENTICATED user, not the body's `user_id` — same fix as the
+    // insert above. A forged id here would write passions and causal tendencies
+    // into another practitioner's Mentor profile, which then shapes what the ring
+    // wrapper tells THEM on their next interaction. No longer conditional: there
+    // is always an authenticated user by this point (`requireAuth` ran at entry).
+    {
       try {
         const { updateProfileFromReflection } = await import('../../../../../sage-mentor/profile-store')
         await updateProfileFromReflection(
           supabaseAdmin as any,
-          user_id,
+          auth.user.id,
           {
             katorthoma_proximity: reflectionData.katorthoma_proximity,
             passions_detected: reflectionData.passions_detected || [],
@@ -265,9 +317,14 @@ Score my actions and give me the sage perspective.`
       maxTokens: 1024,
       composability: {
         next_steps: ['/api/reflect', '/api/score'],
-        recommended_action: user_id
-          ? 'Reflect on the sage perspective and evening prompt. Reflection findings are being fed back into your Mentor profile (passion map, rolling window). The next interaction will benefit from this reflection.'
-          : 'Reflect on the sage perspective and evening prompt. No user_id provided — reflection stored but Mentor profile not updated.',
+        // No longer branches on a body-supplied `user_id`: the reflection is
+        // always stored for, and the profile always updated for, the
+        // authenticated caller. (The old `else` branch also stated the opposite
+        // of what the code did — it claimed the reflection was "stored but
+        // Mentor profile not updated" in exactly the case where nothing was
+        // stored at all.)
+        recommended_action:
+          'Reflect on the sage perspective and evening prompt. Reflection findings are being fed back into your Mentor profile (passion map, rolling window). The next interaction will benefit from this reflection.',
       },
     })
 
