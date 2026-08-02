@@ -1,6 +1,17 @@
 -- ============================================================
 -- PRIORITY 6: User Location for Community Map
--- Run this migration in your Supabase SQL editor
+-- ⚠ SUPERSEDED (2026-08-03, Stoa ST1 / Q6a): DO NOT RUN THIS FILE.
+-- The view definition it carried included the practice-derived
+-- sage_alignment / avg_total fields, which the adopted mentor
+-- ruling Q6a (D-CONNECTIVE-LAYER-STOA-MENTOR-VERDICTS-ADOPTED-
+-- PLAN-AUTHORED-2026-08-02) forbids on this surface. Re-running
+-- that view block would silently re-grade the live view
+-- (CREATE OR REPLACE VIEW appends columns). The current,
+-- authoritative migration is:
+--   website/supabase-community-map-degrade-migration.sql
+-- The view block below has been neutralised to a comment; the
+-- column/policy sections are retained for historical reference
+-- only and are subsumed by the degrade migration's §1.
 -- ============================================================
 
 -- Add location columns to profiles table
@@ -11,26 +22,11 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
   ADD COLUMN IF NOT EXISTS show_on_map BOOLEAN DEFAULT FALSE;
 
--- Create a public view that only returns opted-in users
--- This is what the community map API reads — NO personal info, just location + score tier
-CREATE OR REPLACE VIEW public.community_map_pins AS
-SELECT
-  p.id,
-  p.display_name,
-  p.city,
-  p.country,
-  p.latitude,
-  p.longitude,
-  COALESCE(sp.sage_alignment, 'Aware') AS sage_alignment,
-  COALESCE(sp.avg_total, 0) AS avg_total
-FROM public.profiles p
-LEFT JOIN public.user_stoic_profiles sp ON sp.user_id = p.id
-WHERE p.show_on_map = TRUE
-  AND p.latitude IS NOT NULL
-  AND p.longitude IS NOT NULL;
-
--- Grant public read access to this view only
-GRANT SELECT ON public.community_map_pins TO anon, authenticated;
+-- [NEUTRALISED 2026-08-03 — Q6a] The graded view definition that
+-- stood here (profiles JOIN user_stoic_profiles, exposing
+-- sage_alignment + avg_total) has been removed so this file can
+-- never re-grade the live view. The current view definition and
+-- grants live in supabase-community-map-degrade-migration.sql §2–§3.
 
 -- RLS: users can update their own location fields
 CREATE POLICY "Users can update own location"

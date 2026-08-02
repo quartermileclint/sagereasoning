@@ -4,20 +4,21 @@ import { useState, useEffect, useCallback } from 'react'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } = require('react-simple-maps')
 import { supabase } from '@/lib/supabase'
-import { PROXIMITY_COLORS } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
+// Per the adopted Q6a ruling (The Stoa, 2026-08-02): no practice-derived
+// data appears on this surface — pins carry display name + location only.
+const PIN_COLOR = '#5b7f63'
+const OWN_PIN_COLOR = '#3f5c47'
+
 interface MapPin {
-  id: string
   display_name: string | null
   city: string | null
   country: string | null
   latitude: number
   longitude: number
-  sage_alignment: string
-  avg_total: number
 }
 
 interface UserLocation {
@@ -70,28 +71,37 @@ export default function CommunityPage() {
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    // Load map pins
-    const res = await fetch('/api/community-map')
-    const data = await res.json()
-    setPins(data.pins ?? [])
-
-    // Load user session + their location prefs
-    const { data: { user: u } } = await supabase.auth.getUser()
-    setUser(u)
-    if (u) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('city, country, latitude, longitude, show_on_map')
-        .eq('id', u.id)
-        .single()
-      if (profile) {
-        setUserLocation(profile)
-        setSelectedCountry(profile.country ?? '')
-        setCityInput(profile.city ?? '')
-        setShowOnMap(profile.show_on_map ?? false)
-      }
+    // Load map pins (the route returns an honest 500 on a real DB error;
+    // render an empty map in that case rather than crashing)
+    try {
+      const res = await fetch('/api/community-map')
+      const data = res.ok ? await res.json() : { pins: [] }
+      setPins(data.pins ?? [])
+    } catch {
+      setPins([])
     }
-    setLoading(false)
+
+    // Load user session + their location prefs (finally-guarded so an
+    // unexpected throw can never leave the page stuck on "Loading map...")
+    try {
+      const { data: { user: u } } = await supabase.auth.getUser()
+      setUser(u)
+      if (u) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('city, country, latitude, longitude, show_on_map')
+          .eq('id', u.id)
+          .single()
+        if (profile) {
+          setUserLocation(profile)
+          setSelectedCountry(profile.country ?? '')
+          setCityInput(profile.city ?? '')
+          setShowOnMap(profile.show_on_map ?? false)
+        }
+      }
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { loadData() }, [loadData])
@@ -132,23 +142,6 @@ export default function CommunityPage() {
     loadData()
   }
 
-  const tierColor = (alignment: string) => {
-    switch (alignment) {
-      case 'sage_like': return PROXIMITY_COLORS.sage_like
-      case 'principled': return PROXIMITY_COLORS.principled
-      case 'deliberate': return PROXIMITY_COLORS.deliberate
-      case 'habitual': return PROXIMITY_COLORS.habitual
-      case 'reflexive': return PROXIMITY_COLORS.reflexive
-      // V1 fallbacks for legacy data
-      case 'Sage': return PROXIMITY_COLORS.sage_like
-      case 'Progressing': return PROXIMITY_COLORS.principled
-      case 'Aware': return PROXIMITY_COLORS.deliberate
-      case 'Misaligned': return PROXIMITY_COLORS.habitual
-      case 'Contrary': return PROXIMITY_COLORS.reflexive
-      default: return PROXIMITY_COLORS.principled
-    }
-  }
-
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Page header */}
@@ -163,12 +156,10 @@ export default function CommunityPage() {
         </p>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      {/* Stats row — location facts only, never practice-derived (Q6a) */}
+      <div className="grid grid-cols-2 gap-4 mb-10">
         {[
           { label: 'Sages on map', value: pins.length },
-          { label: 'Sage-like', value: pins.filter(p => p.sage_alignment === 'sage_like' || p.sage_alignment === 'Sage').length },
-          { label: 'Principled', value: pins.filter(p => p.sage_alignment === 'principled' || p.sage_alignment === 'Progressing').length },
           { label: 'Countries', value: new Set(pins.map(p => p.country).filter(Boolean)).size },
         ].map(stat => (
           <div key={stat.label} className="bg-white/60 border border-sage-200 rounded-lg p-5 text-center">
@@ -212,9 +203,9 @@ export default function CommunityPage() {
                   }
                 </Geographies>
 
-                {pins.map((pin) => (
+                {pins.map((pin, i) => (
                   <Marker
-                    key={pin.id}
+                    key={`${pin.longitude},${pin.latitude},${i}`}
                     coordinates={[pin.longitude, pin.latitude]}
                     onMouseEnter={(e: React.MouseEvent<SVGElement>) => {
                       setHoveredPin(pin)
@@ -228,14 +219,14 @@ export default function CommunityPage() {
                     {/* Outer glow ring */}
                     <circle
                       r={8}
-                      fill={tierColor(pin.sage_alignment) + '30'}
-                      stroke={tierColor(pin.sage_alignment)}
+                      fill={PIN_COLOR + '30'}
+                      stroke={PIN_COLOR}
                       strokeWidth={1}
                     />
                     {/* Sage logo as a small circle */}
                     <circle
                       r={5}
-                      fill={tierColor(pin.sage_alignment)}
+                      fill={PIN_COLOR}
                     />
                     {/* Mini sage leaf dot */}
                     <text
@@ -253,8 +244,8 @@ export default function CommunityPage() {
                 {/* User's own pin highlight */}
                 {user && userLocation?.show_on_map && userLocation.latitude && userLocation.longitude && (
                   <Marker coordinates={[userLocation.longitude, userLocation.latitude]}>
-                    <circle r={11} fill="none" stroke={PROXIMITY_COLORS.sage_like} strokeWidth={2} strokeDasharray="3,2" />
-                    <circle r={6} fill={PROXIMITY_COLORS.sage_like} />
+                    <circle r={11} fill="none" stroke={OWN_PIN_COLOR} strokeWidth={2} strokeDasharray="3,2" />
+                    <circle r={6} fill={OWN_PIN_COLOR} />
                     <text textAnchor="middle" y={2} fontSize={6} fill="white" style={{ pointerEvents: 'none' }}>★</text>
                   </Marker>
                 )}
@@ -273,26 +264,8 @@ export default function CommunityPage() {
                 <p className="font-body text-xs text-sage-500">
                   {[hoveredPin.city, hoveredPin.country].filter(Boolean).join(', ')}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tierColor(hoveredPin.sage_alignment) }} />
-                  <span className="font-display text-xs" style={{ color: tierColor(hoveredPin.sage_alignment) }}>
-                    {hoveredPin.sage_alignment}
-                  </span>
-                  <span className="font-body text-xs text-sage-400">· {Math.round(hoveredPin.avg_total)}</span>
-                </div>
               </div>
             )}
-
-            {/* Tier legend */}
-            <div className="absolute bottom-4 left-4 bg-white/90 border border-sage-200 rounded-lg px-3 py-2 text-xs">
-              <p className="font-display text-sage-500 mb-1.5 text-xs">Proximity levels</p>
-              {['sage_like', 'principled', 'deliberate', 'habitual', 'reflexive'].map(t => (
-                <div key={t} className="flex items-center gap-1.5 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tierColor(t) }} />
-                  <span className="font-body text-sage-600">{t === 'sage_like' ? 'Sage-like' : t.charAt(0).toUpperCase() + t.slice(1)}</span>
-                </div>
-              ))}
-            </div>
 
             {/* Zoom hint */}
             <div className="absolute top-3 right-4 bg-white/80 border border-sage-100 rounded px-2 py-1">
@@ -308,7 +281,7 @@ export default function CommunityPage() {
           <div>
             <h2 className="font-display text-xl font-medium text-sage-800 mb-1">Your pin on the map</h2>
             <p className="font-body text-sm text-sage-600">
-              Joining the map is completely optional and shows only your city and alignment tier — never your email or personal details.
+              Joining the map is completely optional and shows only your chosen display name, city, and country — never your email, personal details, or anything from your practice.
             </p>
           </div>
           {user ? (
@@ -402,7 +375,7 @@ export default function CommunityPage() {
               <div>
                 <span className="font-display text-sm text-sage-800">Show my pin on the community map</span>
                 <p className="font-body text-xs text-sage-500 mt-0.5">
-                  Only your city, country, and alignment tier will be visible to others.
+                  Only your display name, city, and country will be visible to others.
                 </p>
               </div>
             </label>

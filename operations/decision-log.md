@@ -17345,3 +17345,33 @@ Expected: the ST1 prompt. Open a fresh session with it when ready.
 **Rules served:** PR17 (no live op; ST1's are staged founder-walked), PR18, PR19 (mandated per founder direction at every build).
 
 **Status:** Adopted. Cross-references: `D-CONNECTIVE-LAYER-STOA-MENTOR-VERDICTS-ADOPTED-PLAN-AUTHORED-2026-08-02`; the plan; the ST1 prompt.
+
+---
+
+## 2026-08-03 — D-STOA-ST1-COMMUNITY-MAP-REPAIRED-DEGRADED-2026-08-03
+
+**Decision:** Stoa ST1 executed — the broken `/community` map surface is repaired AND rebuilt without the alignment tier per the adopted Q6a ruling (the mentor's one implement-now directive). **Built + PR19-reviewed + folds applied; the founder-walked SQL apply + push + live smoke are the carried closing steps** (staged in the close — production is byte-equivalent until the founder walks them).
+
+**Reasoning:** implements plan §3 ST1 / constraint #18 (`D-STOA-BUILD-PLAN-APPROVED-ST1-FIRST-2026-08-02`). §5 item iii re-confirmed at open: aggregate alignment stats leave the page entirely. **Root cause sharpened in-session (Diagnostic-certain; git-history-confirmed by the independent migration reviewer):** the live 42703 is caused by the ROUTE filtering `.eq('show_on_map', true)` against the VIEW, which never exposed that column in ANY definition — so the 42703 was guaranteed by code regardless of production schema state, and sat latent because the old route swallowed every error into a fake-benign `{pins: []}`. The repair is therefore paired: code (filter removed — the view's own WHERE gate is and always was the opt-in gate) + an idempotent defensive migration (profiles columns IF NOT EXISTS; the view DROP+CREATE'd without `sage_alignment`/`avg_total` and without the `user_stoic_profiles` join — Postgres cannot drop view columns via CREATE OR REPLACE). Deploy/migration ordering is safe in both directions (reviewer-verified: new code selects a valid subset of the old graded view; old code against the new view errors into the legacy empty map — broken but never leaky).
+
+**PR19 independent adversarial review (four parallel independent Agent reviewers — the accepted Workflow equivalent, disclosed; dimensions: ruling-fidelity / migration-correctness / privacy-regression / error-handling+client):** 0 HIGH; **1 MEDIUM confirmed + folded** (the legacy `supabase-location-migration.sql` still carried a runnable `CREATE OR REPLACE VIEW` that would silently re-grade the live view — its view block is now NEUTRALISED to a superseded pointer); **4 LOW folded** (the raw auth-user UUID dropped from view+route+page — an unnecessary stable correlator served to anonymous callers on a leak-history surface, page now keys pins positionally; explicit `service_role` grant added to §3+V2 — the grant the live API actually uses is now stated and verified, not assumed; a §2 note explaining the wrong-relkind DROP abort signature; the page's session-load half wrapped in try/finally so a throw can never strand "Loading map..."); NITs folded (rollback-note error-code precision 42P01/42703). Privacy dimension: **no regression — strictly narrowing** (opt-in gate exists inside BOTH view generations, so every interim state stays gated; error paths leak no DB detail). Pre-existing findings recorded as named follow-ups, deliberately out of scope: `update-location` returns raw `error.message` to the authenticated caller; range-only lat/long validation permits self-published precise coordinates (own pin only, opt-in only); "Remove from map" nulls the user's own saved location; the stale `component-registry.json` `prod-community-map` blocker text (next registry pass).
+
+**Files touched:**
+- `website/supabase-community-map-degrade-migration.sql` — NEW (§0 diagnostic; §1 idempotent profiles columns + DO-block policy guard; §2 the 5-column de-graded view — `display_name, city, country, latitude, longitude`, opt-in + location gates preserved exactly; §3 grants anon/authenticated/service_role; §VERIFY V1–V4; rollback notes stating THE GRADED VIEW IS NEVER RESTORED)
+- `website/src/app/api/community-map/route.ts` — alignment fields + `id` dropped from select; the 42703-causing `.eq('show_on_map', true)` filter removed; honest 500 `{error:'community_map_unavailable'}` on real DB error (genuinely-empty stays a clean 200); Q6a constraint comment in-file
+- `website/src/app/community/page.tsx` — tier colors/legend/tooltip-tier/sage-like+principled stat tiles removed (two location-fact tiles remain); fixed pin colors; copy corrected ("never … anything from your practice"); fetch 500-tolerant; loadData finally-guarded; positional pin keys
+- `website/supabase-location-migration.sql` — SUPERSEDED header + the graded-view block neutralised (the F1 fold)
+- `.claude/launch.json` — `autoPort` added (session tooling only)
+- this entry + the close
+
+**Risk classification:** Elevated under 0d-ii (`code-elevated` + `schema` — existing user-facing surface + a production view). Critical Change Protocol NOT engaged (no auth/encryption/R20a/flag surface); the SQL steps are founder-walked per PR17. AC7 not engaged this session (nothing applied/deployed yet).
+
+**Rollback path:** `git revert` the session commit (route+page revert to alignment-selecting code → errors against the de-graded/absent view, rendered as the legacy empty map — the pre-session broken state, honest and safe) and/or the migration footer's rollback. **The graded view is never restored** — reversing Q6a would require re-opening the mentor record, not a rollback.
+
+**Verification step (founder-performable):** tsc 0 · `npm run build` 0 (`/community` + `/api/community-map` registered) · local render + API checked (200 `{pins:[],total:0}`, payload alignment-free, page shows two tiles/no legend). The production walk is staged in the close: §0 diagnose → §1–§3 apply (TEST first if it mirrors the gap) → §VERIFY green → commit+push, Vercel green **with the confirmed hash** → `curl https://www.sagereasoning.com/api/community-map` (200; payload greps clean of `sage_alignment`/`avg_total`/`id`) → load `/community`.
+
+**Open questions:** the map-into-Stoa fold election (plan ST7); the named follow-ups above.
+
+**Rules served:** PR15 (reused house patterns; original migration's columns reused in meaning), PR17 (walk staged live-form in the close), PR18, PR19 (four independent reviewers; all confirmed findings folded), R13, R17 (no new personal data; strictly narrowing), KG1 (route DB paths fail honest).
+
+**Status:** Adopted. Cross-references: `D-STOA-BUILD-PLAN-APPROVED-ST1-FIRST-2026-08-02`; the plan §3 ST1; the verbatim Q6a record; `operations/handoffs/founder/2026-08-03-stoa-ST1-community-map-CLOSE.md`.
