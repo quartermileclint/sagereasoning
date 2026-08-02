@@ -45,7 +45,7 @@ Expected: HTTP 200 with real pins for opted-in practitioners, or honestly-empty 
 **6. Report the results back** — a one-line reply with the §0 found-state + §VERIFY green + the curl output closes ST1 to Live in the next entry.
 
 ## Blocked On
-**Production state at session close (PR18):** byte-equivalent — nothing applied, deployed, or flipped this session; AC7 not engaged. On the founder's walk above, production changes deliberately and standing: the repaired, de-graded map (an adopted-ruling implementation, not a regression). Rollback: `git revert` the session commit and/or the migration footer's rollback — **the graded view is never restored** (reversing Q6a requires re-opening the mentor record).
+**Production state at session close (PR18 — updated at the walk, 2026-08-03):** **the walk is DISCHARGED — production is intentionally NOT byte-equivalent, a deliberate standing change: the repaired, de-graded community map is LIVE** (§0 found the original migration fully applied — the 42703 was purely the code defect; §VERIFY green on prod — 5-column view, exactly-SELECT grants; commit pushed, Vercel green with the confirmed hash; live curl `{"pins":[],"total":0}` honest-empty, payload clean). The founder's TEST walk caught a writable-auto-updatable-view grants defect all reviewers missed — folded revoke-first before prod (see the decision-log walk addendum; memory `supabase-view-default-grants-auto-updatable`). Rollback: `git revert` the session commit and/or the migration footer's rollback — **the graded view is never restored** (reversing Q6a requires re-opening the mentor record).
 
 **Files remaining uncommitted (this session's — stage ONLY these; the tree carries other sessions' strays, untouched):** the eight paths in step 4 above.
 
