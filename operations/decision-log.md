@@ -17319,3 +17319,29 @@ Expected: the three program files above. Then read the plan (~10 min); the progr
 **Rules served:** PR7 (verdicts adopted at the moment of application, verbatim canonical), PR15 (the plan reuses: profiles/display_name, requireAuth, the UPC chokepoint, the R20a classifier, S10 trust-record links, house battery patterns, the Anthropic frontend-design/webapp-testing skills), PR17 (no live op arose; every future one staged founder-walked), PR18, PR19 (mandated at the builds), R13 (the plan's §6 "does not do" list is pinned rulings, not scope cuts), R17/R18/R20a (wired into the plan's phases at birth).
 
 **Status:** Adopted. Cross-references: the two binding sources; the plan; `D-AGENT-CIRCLES-MENTOR-VERDICTS-ADOPTED-PLANS-AUTHORED-2026-08-01` (the one-day adoption precedent); `D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED` (the binding-convention precedent); the close.
+
+---
+
+## 2026-08-02 — D-STOA-BUILD-PLAN-APPROVED-ST1-FIRST-2026-08-02
+
+**Decision:** The founder **APPROVES the Stoa build plan** (`operations/connective-layer-2026-08/2026-08-02-stoa-build-plan.md`) and its recommended sequencing: **ST1 first** (the community-map repair + Q6a de-grading — the mentor's one implement-now directive), then **ST2→ST5 per the plan, with PR19 at every build.** The plan's §5 open items disposed at approval: (i) sequencing — settled as above; (iv) PR19 — at each build; (iii) ST1 breadth (aggregate alignment stats off the map page) — approved-as-recommended, re-confirmed at ST1 open; (ii) agent-declare capability shape — carried to ST4's session; (v) the opener/CLAUDE.md refresh — carried to the next regrounding.
+
+**Reasoning:** founder direction in-session, same day as adoption ("Plan approved to sequence next as per recommended first build ST1 with ST2 to ST5 per the plan with PR19 at every build"), following verification that the adoption commit (`8cd005c`) is pushed and Vercel green. Recorded per the plan-approval precedent (`D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12`): approval pre-approves NO activation — every schema/flag/deploy step stays its own founder-walked 0c-ii.
+
+**Files touched:** the plan (status header → APPROVED + dispositions); `operations/handoffs/founder/2026-08-02-stoa-ST1-community-map-reachback-NEXT-SESSION-PROMPT.md` (new — ST1's session prompt); this entry.
+
+**Risk classification:** Standard under 0d-ii (documents; ST1 itself will run `code-elevated` + `schema`, founder-walked SQL, PR19 — per its prompt). AC7 not engaged this session. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit; approval itself stands as founder record.
+
+**Verification step (founder-performable):**
+```
+ls operations/handoffs/founder/ | grep stoa-ST1
+```
+Expected: the ST1 prompt. Open a fresh session with it when ready.
+
+**Open questions:** none new — the walk-session decision-log entry for the agent-circles activation (`SUBSTRATE_AGENT_CIRCLES_ENABLED` live 2026-08-02) remains to be appended by/from that session's record (its close is committed at `operations/agent-circles-2026-08/2026-08-02-live-verification-walk-CLOSE.md`; the log tail is now stable, so appending is conflict-free).
+
+**Rules served:** PR17 (no live op; ST1's are staged founder-walked), PR18, PR19 (mandated per founder direction at every build).
+
+**Status:** Adopted. Cross-references: `D-CONNECTIVE-LAYER-STOA-MENTOR-VERDICTS-ADOPTED-PLAN-AUTHORED-2026-08-02`; the plan; the ST1 prompt.
