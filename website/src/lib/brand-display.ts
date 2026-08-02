@@ -148,3 +148,73 @@ export const PASSION_IMAGE_MAP: Record<string, string> = {
   penthos: '/images/onion.PNG',
   achos: '/images/millstone.PNG',
 }
+
+// ============================================================================
+// EUPATHEIA DISPLAY — the three rational good feelings (chara / boulesis /
+// eulabeia) and their commissioned brand images, added 2026-08-02 from the
+// updated Brand_Guidelines.docx. These are the positive counterparts to the
+// passions: each eupatheia is what a root passion becomes once the underlying
+// judgement is corrected (DL 7.116; Stobaeus Ecl. 2.90).
+//
+// `replacesRoot` keys onto stoic-brain's ROOT_PASSIONS ids so a surface that
+// has diagnosed a passion can name its rational counterpart without re-deriving
+// the mapping. Note there is deliberately NO eupatheia for lupe — the Stoics
+// held that distress has no rational counterpart, since nothing genuinely evil
+// befalls the wise. That absence is a doctrine, not a gap; surfaces should say
+// so rather than silently render nothing.
+// ============================================================================
+
+export interface EupatheiaDisplay {
+  id: 'chara' | 'boulesis' | 'eulabeia'
+  name: string
+  greek: string
+  image: string
+  /** Root passion id (stoic-brain ROOT_PASSIONS) this good feeling replaces. */
+  replacesRoot: 'hedone' | 'epithumia' | 'phobos'
+  /** Why this image carries this meaning — Brand_Guidelines.docx §2. */
+  imageRationale: string
+}
+
+export const EUPATHEIA_DISPLAY: readonly EupatheiaDisplay[] = [
+  {
+    id: 'chara',
+    name: 'Joy / Rational Gladness',
+    greek: 'chara',
+    image: '/images/stone%20basin.PNG',
+    replacesRoot: 'hedone',
+    imageRationale:
+      'A stone basin holds still water — gladness that rests in what is genuinely good, rather than the restless pleasure that chases it.',
+  },
+  {
+    id: 'boulesis',
+    name: 'Rational Wish',
+    greek: 'boulesis',
+    image: '/images/open%20hand%20extended.PNG',
+    replacesRoot: 'epithumia',
+    imageRationale:
+      'The extended palm turned upward is a gesture of both giving and receiving — wanting the good, for oneself and others, with an open rather than a grasping hand.',
+  },
+  {
+    id: 'eulabeia',
+    name: 'Rational Caution',
+    greek: 'eulabeia',
+    image: '/images/Lituus.PNG',
+    replacesRoot: 'phobos',
+    imageRationale:
+      'The lituus is the augur’s instrument for marking boundaries — caution as a drawn line you decline to cross, not as fear of what lies beyond it.',
+  },
+] as const
+
+/** The eupatheia that replaces a given root passion, or null for lupe (see above). */
+export function getEupatheiaForRoot(rootId: string): EupatheiaDisplay | null {
+  return EUPATHEIA_DISPLAY.find(e => e.replacesRoot === rootId) ?? null
+}
+
+/**
+ * Canonical passionId -> eupatheia lookup for all 20 sub-species passions.
+ * Returns null for every lupe sub-species — distress has no rational
+ * counterpart in the Stoic scheme.
+ */
+export const EUPATHEIA_IMAGE_MAP: Record<string, string> = Object.fromEntries(
+  EUPATHEIA_DISPLAY.map(e => [e.id, e.image])
+)

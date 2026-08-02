@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
-import { PASSION_IMAGE_MAP } from '@/lib/brand-display'
+import { PASSION_IMAGE_MAP, getEupatheiaForRoot } from '@/lib/brand-display'
 import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
 import type { SuggestedPractice } from '@/lib/practice-sequence'
 import type { User } from '@supabase/supabase-js'
@@ -101,6 +101,21 @@ const PASSION_LABELS: Record<string, string> = {
   kelesis: 'Kelesis (enchantment)',
   epichairekakia: 'Epichairekakia (malicious joy)',
   terpsis: 'Terpsis (delight in wrong)',
+}
+
+/**
+ * The rational counterpart of a diagnosed passion, or null when there isn't one.
+ *
+ * Deliberately STRICT where getFamilyForType() below is lenient: that helper
+ * defaults an unrecognised type to 'epithumia' for colouring, which is harmless
+ * for a swatch but would state a false doctrinal claim here (naming boulesis as
+ * the counterpart of a passion we failed to place). Null for an unknown type,
+ * and null for every lupe sub-species — distress has no eupatheia.
+ */
+function getCounterpart(passionType: string) {
+  const family = Object.entries(PASSION_FAMILIES).find(([, d]) => d.types.includes(passionType))
+  if (!family) return null
+  return getEupatheiaForRoot(family[0])
 }
 
 type ViewMode = 'log' | 'trends' | 'catch-rate'
@@ -549,6 +564,47 @@ export default function PassionLogPage() {
                     </span>
                   </div>
                   <p className="font-body text-xs text-sage-600 mt-2">{classificationResult.reasoning}</p>
+
+                  {/* The rational counterpart — what this passion becomes once the
+                      judgement underneath it is corrected. Silent when there isn't
+                      one (lupe), rather than inventing a counterpart. */}
+                  {(() => {
+                    const counterpart = getCounterpart(classificationResult.classified_type)
+                    if (!counterpart) {
+                      return (
+                        <p className="font-body text-xs text-sage-600 mt-4 pt-3 border-t border-sage-100 italic">
+                          Distress has no rational counterpart — the Stoic claim is that nothing
+                          genuinely evil has befallen you, so there is nothing here for a rational
+                          feeling to be about.
+                        </p>
+                      )
+                    }
+                    return (
+                      <div className="mt-4 pt-3 border-t border-sage-100">
+                        <div className="font-body text-xs text-sage-600 mb-2">
+                          Its rational counterpart
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={counterpart.image}
+                            alt={counterpart.name}
+                            className="w-12 h-auto flex-shrink-0"
+                          />
+                          <div>
+                            <div className="font-display text-sm font-medium text-sage-800">
+                              {counterpart.name}
+                              <span className="font-body text-xs text-sage-500 italic ml-1">
+                                ({counterpart.greek})
+                              </span>
+                            </div>
+                            <p className="font-body text-xs text-sage-600 mt-0.5 leading-snug">
+                              {counterpart.imageRationale}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
 

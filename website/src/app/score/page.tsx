@@ -10,7 +10,7 @@ import {
   EVALUATIVE_DISCLAIMER,
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'
-import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay } from '@/lib/brand-display'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay, getEupatheiaForRoot } from '@/lib/brand-display'
 import { resolveScoreEvaluation } from '@/lib/practice-sequence'
 import { resolveNewlyEarnedStage, type StageCrossingResolution } from '@/lib/stage-crossing'
 import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
@@ -638,6 +638,43 @@ export default function ScoreActionPage() {
                     <span className="font-body text-xs text-sage-600 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
                   </div>
                 ))}
+
+                {/* The rational counterparts (eupatheiai) of the passions found —
+                    what each becomes once its underlying judgement is corrected.
+                    Deduplicated by counterpart, and silent for lupe, which has none. */}
+                {(() => {
+                  const counterparts = Array.from(
+                    new Map(
+                      result.passion_diagnosis.passions_detected
+                        .map(p => getEupatheiaForRoot(p.root_passion))
+                        .filter((e): e is NonNullable<typeof e> => e !== null)
+                        .map(e => [e.id, e])
+                    ).values()
+                  )
+                  if (counterparts.length === 0) return null
+                  return (
+                    <div className="pt-3 border-t border-sage-100">
+                      <p className="font-display text-xs text-sage-600 mb-1">
+                        {counterparts.length === 1 ? 'Its rational counterpart' : 'Their rational counterparts'}
+                      </p>
+                      <p className="font-body text-xs text-sage-600 mb-3 italic">
+                        Not the absence of feeling — what it becomes when the judgement underneath is corrected.
+                      </p>
+                      <div className="space-y-3">
+                        {counterparts.map(e => (
+                          <div key={e.id} className="flex items-start gap-3">
+                            <img src={e.image} alt={e.name} className="w-12 h-auto flex-shrink-0" />
+                            <div>
+                              <span className="font-display text-sm font-medium text-sage-700">{e.name}</span>
+                              <span className="font-body text-xs text-sage-600 italic ml-1">({e.greek})</span>
+                              <p className="font-body text-xs text-sage-600 mt-0.5 leading-snug">{e.imageRationale}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {result.passion_diagnosis.false_judgements.length > 0 && (
                   <div className="pt-3 border-t border-sage-100">

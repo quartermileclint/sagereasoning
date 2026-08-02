@@ -1,5 +1,5 @@
-import { VIRTUE_DISPLAY, ROOT_PASSIONS } from '@/lib/stoic-brain'
-import { STAGE_DISPLAY, PASSION_IMAGE_MAP } from '@/lib/brand-display'
+import { VIRTUE_DISPLAY, ROOT_PASSIONS, EUPATHEIAI } from '@/lib/stoic-brain'
+import { STAGE_DISPLAY, PASSION_IMAGE_MAP, EUPATHEIA_DISPLAY } from '@/lib/brand-display'
 
 /**
  * Image glossary — every brand image shown at once as reference material.
@@ -51,7 +51,8 @@ export default function GlossaryPage() {
         </h1>
         <p className="font-body text-sage-600 max-w-2xl mx-auto leading-relaxed">
           Every image the site uses, gathered in one place as reference material — the virtues,
-          the Five Stages of Practice, Mirror, and the twenty passion logos.
+          the Five Stages of Practice, Mirror, the twenty passion logos, and the three rational
+          good feelings that replace them.
         </p>
       </div>
 
@@ -110,7 +111,7 @@ export default function GlossaryPage() {
       </section>
 
       {/* ─── Passion logos, grouped by root family ─── */}
-      <section>
+      <section className="mb-16">
         <h2 className="font-display text-2xl text-sage-800 mb-2 text-center">Passion Logos</h2>
         <p className="font-body text-sm text-sage-600 text-center max-w-xl mx-auto mb-8 italic">
           The 20 sub-species passions, grouped by the four root passions.
@@ -134,6 +135,47 @@ export default function GlossaryPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ─── The three rational good feelings (eupatheiai) ─── */}
+      <section>
+        <h2 className="font-display text-2xl text-sage-800 mb-2 text-center">
+          Rational Good Feelings
+        </h2>
+        <p className="font-body text-sm text-sage-600 text-center max-w-2xl mx-auto mb-8 italic">
+          The eupatheiai — what each passion becomes once the judgement underneath it is
+          corrected. They are not the absence of feeling but its rational form.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {EUPATHEIA_DISPLAY.map(e => {
+            const doctrine = EUPATHEIAI.find(x => x.id === e.id)
+            return (
+              <div key={e.id} className="bg-white/60 border border-sage-200 rounded-lg p-5 text-center">
+                <img src={e.image} alt={e.name} className="w-full max-w-[220px] h-auto mx-auto mb-3" />
+                <h3 className="font-display text-sm font-medium text-sage-800">{e.name}</h3>
+                <p className="font-body text-[11px] text-sage-500 italic mt-0.5">{e.greek}</p>
+                {doctrine && (
+                  <>
+                    <p className="font-body text-xs text-sage-600 mt-2 leading-snug">
+                      {doctrine.definition}
+                    </p>
+                    <p className="font-body text-[11px] text-sage-500 mt-2">
+                      Replaces {doctrine.replaces}
+                    </p>
+                  </>
+                )}
+                <p className="font-body text-[11px] text-sage-600 mt-3 pt-3 border-t border-sage-100 leading-snug italic">
+                  {e.imageRationale}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+        <p className="font-body text-xs text-sage-600 text-center max-w-2xl mx-auto mt-6 leading-relaxed">
+          There are only three. Distress (lupe) has no rational counterpart — the Stoic claim is
+          that nothing genuinely evil befalls a person reasoning well, so there is nothing for a
+          rational distress to be about. The absence is the doctrine, not a gap in the set.
+        </p>
       </section>
     </div>
   )
