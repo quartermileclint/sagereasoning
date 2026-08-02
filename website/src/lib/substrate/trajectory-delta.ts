@@ -184,22 +184,24 @@ export const SETTLED_REGIME_BOUNDARIES: readonly RegimeBoundary[] = [
     // DEPLOY DAY (mentor ruling, PR19 Q1, 2026-08-02): "the vocabulary changes
     // when the flag is flipped, not when the code is deployed... marking the
     // boundary at deploy day splits a genuinely unchanged run of examinations
-    // into two spurious eras." This entry is authored as the INTENDED
-    // flag-flip day (2026-08-01) and is READ ONLY WHEN `SUBSTRATE_AGENT_
-    // CIRCLES_ENABLED` IS ON — see `activeRegimeBoundaries` below, which every
-    // consumer must call rather than reading this constant directly. Deploy
-    // and flag-flip are structurally decoupled (that decoupling is the whole
-    // point of flag-gating C1a/C3, per BD-7); if the founder flips the flag on
-    // a DIFFERENT day than authored here, RECONCILE THESE TWO DATES TO THAT
-    // DAY before flipping — still a blocking walk step, now correctly
-    // targeted. Consequence of getting it wrong, stated plainly so the step is
-    // not skipped: rows written under the CORRECTED vocabulary but dated before
-    // band_start would be labelled `post-s11b-recomposition`, and rows written
-    // under the OLD vocabulary but dated after band_end would be labelled
-    // `agent-circles-v1` — either way the delta would compare examinations
-    // across the very vocabulary change Q9a forbids comparing across.
-    band_start_iso: '2026-08-01T00:00:00.000Z',
-    band_end_iso: '2026-08-02T00:00:00.000Z',
+    // into two spurious eras." RECONCILED 2026-08-02 (walk step 1) to the
+    // ACTUAL flag-flip day: the flag is being set on 2026-08-02 (was authored
+    // as an anticipated 2026-08-01 during the build session and never
+    // corrected — this edit is that correction, made as the founder-walk's
+    // own step 1 explicitly requires, immediately before the flip). This
+    // entry is READ ONLY WHEN `SUBSTRATE_AGENT_CIRCLES_ENABLED` IS ON — see
+    // `activeRegimeBoundaries` below, which every consumer must call rather
+    // than reading this constant directly. If the flip is delayed past
+    // 2026-08-02, RECONCILE THESE TWO DATES AGAIN TO THE NEW DAY before
+    // flipping — still a blocking walk step. Consequence of getting it wrong,
+    // stated plainly so the step is not skipped: rows written under the
+    // CORRECTED vocabulary but dated before band_start would be labelled
+    // `post-s11b-recomposition`, and rows written under the OLD vocabulary
+    // but dated after band_end would be labelled `agent-circles-v1` — either
+    // way the delta would compare examinations across the very vocabulary
+    // change Q9a forbids comparing across.
+    band_start_iso: '2026-08-02T00:00:00.000Z',
+    band_end_iso: '2026-08-03T00:00:00.000Z',
     from_era: 'post-s11b-recomposition',
     to_era: 'agent-circles-v1',
     note:
@@ -208,7 +210,7 @@ export const SETTLED_REGIME_BOUNDARIES: readonly RegimeBoundary[] = [
       // 'verdict'. Say "rulings", never "verdicts" — the pin is a substring scan
       // by design and must stay strict.
       'Agent-circles C1 first-circle correction (mentor rulings Q3/Q9a, ' +
-      '2026-08-01). The Layer-1 extraction stopped attaching the first circle ' +
+      '2026-08-02). The Layer-1 extraction stopped attaching the first circle ' +
       '(self_preservation) as a background condition and now fires it only when ' +
       "the practitioner's own reasoning integrity is directly implicated; the " +
       'outermost circle (cosmopolis) additionally learned the circle-4 ' +
