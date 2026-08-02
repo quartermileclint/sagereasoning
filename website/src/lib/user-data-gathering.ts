@@ -19,6 +19,9 @@
 
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-encryption'
+// Stoa ST2 (R17g/R17i, 2026-08-03) — the practitioner's Stoa entries in the
+// Art 15 access copy (owner_user_id-keyed; missing-table-benign).
+import { getStoaDataForOwner, getStoaDataForCredentials } from '@/lib/stoa/stoa-store'
 
 /**
  * Decrypt an at-rest encrypted field (ciphertext column + encryption_meta JSONB)
@@ -115,6 +118,34 @@ export async function gatherUserPersonalData(
       data[key] = { error: error.message }
     } else {
       data[key] = rows || []
+    }
+  }
+
+  // 1b. Stoa ST2 (2026-08-03) — the practitioner's Stoa entries, keyed by
+  //     owner_user_id (= profiles.id, NOT user_id — so they cannot ride the
+  //     loop above). Standing declarations (#24 — no retention sweep covers
+  //     them). The store classifies a not-yet-migrated table as benign empty,
+  //     so only a REAL failure surfaces here.
+  {
+    const stoa = await getStoaDataForOwner(userId)
+    if (!stoa.ok) {
+      data.stoa_entries = { error: stoa.error }
+    } else {
+      data.stoa_entries = stoa.value
+    }
+    // PR19 fold F3 (2026-08-03): agent entries declared under this user's
+    // owned credentials (owner-NULL rows; the operator is the accountable
+    // declarer) join the Art 15 copy. Keyed by credential_ref, exactly.
+    const { data: credRows, error: credError } = await supabaseAdmin
+      .from('api_keys')
+      .select('id')
+      .eq('owner_user_id', userId)
+    if (credError) {
+      data.stoa_agent_entries = { error: credError.message }
+    } else {
+      const refs = ((credRows ?? []) as { id: string }[]).map((r) => `api_key:${r.id}`)
+      const agentStoa = await getStoaDataForCredentials(refs)
+      data.stoa_agent_entries = agentStoa.ok ? agentStoa.value : { error: agentStoa.error }
     }
   }
 

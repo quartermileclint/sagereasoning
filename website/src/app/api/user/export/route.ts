@@ -28,6 +28,9 @@ import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collabo
 // Trust Layer S10 rider (R17i, 2026-07-12) — portability of the operator's agents'
 // reflect sessions (agent_id-keyed; owner→agent_ids resolution mirrors /api/user/delete).
 import { getAgentSessionsForExport } from '@/lib/sage-reflect/session-store'
+// Stoa ST2 (R17i, 2026-08-03) — portability of the practitioner's Stoa entries
+// (owner_user_id-keyed standing declarations). Missing-table-benign.
+import { getStoaDataForOwner, getStoaDataForCredentials } from '@/lib/stoa/stoa-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -176,6 +179,33 @@ export async function GET(request: NextRequest) {
       exportData.collaboration_records = { error: collabExport.error }
     } else {
       exportData.collaboration_records = collabExport.value
+    }
+  }
+
+  // 2d-ii. Stoa ST2 (R17i, 2026-08-03) — the practitioner's Stoa entries, keyed
+  //        by owner_user_id (standing declarations, #24 — no sweep covers them,
+  //        so the export is their portability surface). Missing-table-benign.
+  {
+    const stoaExport = await getStoaDataForOwner(userId)
+    if (!stoaExport.ok) {
+      exportData.stoa_entries = { error: stoaExport.error }
+    } else {
+      exportData.stoa_entries = stoaExport.value
+    }
+    // PR19 fold F3 (2026-08-03): agent entries declared under this user's
+    // owned credentials are owner-NULL by the identity XOR, yet the operator
+    // is the accountable declarer (the ST4 design) — so they belong in the
+    // Art 20 copy too. Keyed by credential_ref, exactly.
+    const { data: credRows, error: credError } = await supabaseAdmin
+      .from('api_keys')
+      .select('id')
+      .eq('owner_user_id', userId)
+    if (credError) {
+      exportData.stoa_agent_entries = { error: credError.message }
+    } else {
+      const refs = ((credRows ?? []) as { id: string }[]).map((r) => `api_key:${r.id}`)
+      const agentStoa = await getStoaDataForCredentials(refs)
+      exportData.stoa_agent_entries = agentStoa.ok ? agentStoa.value : { error: agentStoa.error }
     }
   }
 

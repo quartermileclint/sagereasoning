@@ -26,6 +26,11 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
 import { deleteAgentSessions } from '@/lib/sage-reflect/session-store'
+// Stoa ST2 (2026-08-03) — genuine deletion (R17c) of the practitioner's Stoa
+// entries, keyed by owner_user_id (= profiles.id). Wired at birth (the
+// milestones lesson); missing-table-benign until the migration lands; the
+// profiles FK cascade is the backstop.
+import { deleteStoaDataForOwner, deleteStoaDataForCredential } from '@/lib/stoa/stoa-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -153,6 +158,36 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Stoa ST2 (R17c) — the practitioner's Stoa entries (standing declarations;
+  // no retention sweep exists for them, so erasure is one of their only two
+  // exits — #24). TWO arms (PR19 fold F1, 2026-08-03 — the HIGH): the human
+  // entry is keyed by owner_user_id, but AGENT entries declared under this
+  // user's credentials are owner-NULL by the identity XOR and would otherwise
+  // SURVIVE account deletion forever (no sweep, no FK backstop) — so the
+  // user's owned credential ids are resolved and each `api_key:<id>` ref is
+  // deleted explicitly. Keyed by credential_ref, exactly — never by agent_id
+  // (avoids the reflect precedent's disclosed shared-agent_id overreach).
+  {
+    const stoaDelete = await deleteStoaDataForOwner(userId)
+    if (!stoaDelete.ok) {
+      deletionErrors.push(`stoa_entries: ${stoaDelete.error}`)
+    }
+    const { data: credRows, error: credError } = await supabaseAdmin
+      .from('api_keys')
+      .select('id')
+      .eq('owner_user_id', userId)
+    if (credError) {
+      deletionErrors.push(`stoa_entries (credential resolution): ${credError.message}`)
+    } else {
+      for (const { id } of (credRows ?? []) as { id: string }[]) {
+        const agentStoaDelete = await deleteStoaDataForCredential(`api_key:${id}`)
+        if (!agentStoaDelete.ok) {
+          deletionErrors.push(`stoa_entries (api_key:${id}): ${agentStoaDelete.error}`)
+        }
+      }
+    }
+  }
+
   // S9b G2 (R17c — closes the Gate-1 Slice-5c named follow-up, 2026-07-11):
   // sage_reflect_sessions rows are keyed by agent_id, so resolve this user's
   // credential-bound agent_ids from api_keys and hard-delete each agent's reflect
@@ -200,7 +235,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'sage_reflect_sessions'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'sage_reflect_sessions', 'stoa_entries'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

@@ -253,6 +253,8 @@ export async function runConsumerErasure(
       `collaboration_records (credential-scoped: ${credentialRef}; ${result.value.collaboration_deleted} rows)`,
       // S9b G2: reflect rows are AGENT-keyed (the disclosed shared-identity scope).
       `sage_reflect_sessions (agent-scoped via the credential; ${result.value.reflect_deleted} rows)`,
+      // Stoa ST2 (2026-08-03): the agent's standing declarations.
+      `stoa_entries (credential-scoped: ${credentialRef}; ${result.value.stoa_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
@@ -266,6 +268,7 @@ export async function runConsumerErasure(
       trust_rows_deleted: result.value.trust_deleted,
       collaboration_rows_deleted: result.value.collaboration_deleted,
       reflect_rows_deleted: result.value.reflect_deleted,
+      stoa_rows_deleted: result.value.stoa_deleted,
       billing_rows_depersonalised: result.value.billing_depersonalised,
       credential: 'anonymised_and_revoked',
       retained_by_law: RETAINED_BY_LAW,

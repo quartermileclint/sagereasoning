@@ -45,6 +45,9 @@ import {
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
+// Stoa ST2 (R17c, 2026-08-03) — genuine deletion of the agent's Stoa entries by
+// owning credential. Missing-table-benign until the migration lands.
+import { deleteStoaDataForCredential } from './stoa/stoa-store'
 import { deleteAgentSessions } from './sage-reflect/session-store'
 
 // ============================================================================
@@ -197,6 +200,9 @@ export interface ErasureResult {
   /** S9b G2 (R17c): sage_reflect_sessions rows hard-deleted for the credential's
    *  agent identity (agent-keyed — the disclosed shared-identity scope). */
   reflect_deleted: number
+  /** Stoa ST2 (R17c): stoa_entries rows hard-deleted for this credential
+   *  (credential_ref-keyed standing declarations — no sweep covers them). */
+  stoa_deleted: number
   billing_depersonalised: number
   /** Non-fatal issues (e.g. the best-effort billing de-personalisation) — the
    *  personal data is gone regardless; these are surfaced for the audit record. */
@@ -239,6 +245,14 @@ export async function eraseExternalConsumerCredential(
   //     Missing-table-benign until the migration lands.
   const collab = await deleteCollaborationDataForCredential(credentialRef, client)
   if (!collab.ok) return { ok: false, error: `collaboration: ${collab.error}` }
+
+  // 1c-ii. Stoa ST2 (R17c critical — a fail is ok:false so erasure stays
+  //        verifiable): genuine deletion of this credential's Stoa entries
+  //        (standing declarations, #24 — no retention sweep ever covers them,
+  //        so this path is one of their only two exits). Missing-table-benign
+  //        until the migration lands. Runs BEFORE step 2 anonymises the husk.
+  const stoa = await deleteStoaDataForCredential(credentialRef, client)
+  if (!stoa.ok) return { ok: false, error: `stoa: ${stoa.error}` }
 
   // 1d. S9b G2 (R17c — closes the Gate-1 Slice-5c named follow-up, 2026-07-11):
   //     genuine deletion of the credential's agent-keyed reflect sessions.
@@ -325,6 +339,7 @@ export async function eraseExternalConsumerCredential(
       trust_deleted: trust.value.events + trust.value.state,
       collaboration_deleted: collab.value,
       reflect_deleted,
+      stoa_deleted: stoa.value,
       billing_depersonalised,
       warnings,
     },
