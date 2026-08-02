@@ -23,7 +23,7 @@ The Stoa's substrate exists, dark: the one-entry-per-practitioner declaration mo
 
 **1. Commit + push FIRST** (the standing lesson — code before any DB step; the wiring is missing-table-benign, so deploy order vs. migration is safe either way, but the confirmed-hash discipline stands):
 ```bash
-cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add website/supabase-stoa-entries-migration.sql website/src/lib/stoa website/src/app/api/user/delete/route.ts website/src/app/api/user/export/route.ts website/src/lib/user-data-gathering.ts website/src/lib/consumer-erasure.ts website/src/app/api/credential/erase/handler.ts website/src/app/api/credential/erase/__tests__/handler.test.ts operations/decision-log.md operations/handoffs/founder/2026-08-03-stoa-ST2-entry-model-CLOSE.md operations/connective-layer-2026-08/2026-08-02-stoa-build-plan.md
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add website/supabase-stoa-entries-migration.sql website/src/lib/stoa website/src/app/api/user/delete/route.ts website/src/app/api/user/export/route.ts website/src/lib/user-data-gathering.ts website/src/lib/consumer-erasure.ts website/src/app/api/credential/erase/handler.ts website/src/app/api/credential/erase/__tests__/handler.test.ts operations/decision-log.md operations/handoffs/founder/2026-08-03-stoa-ST2-entry-model-CLOSE.md operations/handoffs/founder/2026-08-03-stoa-ST3-human-surface-NEXT-SESSION-PROMPT.md operations/connective-layer-2026-08/2026-08-02-stoa-build-plan.md
 ```
 ```bash
 cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git commit -m "Stoa ST2: the stoa_entries entry model dark - schema + store + data rights at birth; PR19 folds incl. the agent-erasure HIGH"
@@ -41,7 +41,7 @@ Then push via GitHub Desktop; wait for Vercel green and confirm the deployed has
 **6. Report back** the §0 found-states + §VERIFY results for both projects — a one-line reply closes ST2 to "applied-inert" in the next entry. The table then sits empty and inert (nothing reads or writes it until ST3/ST4 build and ST5 flips the flag).
 
 ## Blocked On
-**Production state at session close (PR18):** production is **byte-equivalent** until the founder's push; on push the only live-behaviour deltas are the additive data-rights coverage of a not-yet-existing table (missing-table-benign — verified: the four surfaces return honest empties/zeros pre-migration) and the additive `stoa_agent_entries`/`stoa_rows_deleted` fields on the export/access/erase responses. No flag is set; `SUBSTRATE_STOA_ENABLED` remains UNSET everywhere; the migration is unapplied until the walk. Rollback: `git revert` the session commit and/or `DROP TABLE public.stoa_entries;` per the migration footer.
+**Production state at session close (PR18 — updated at the walk, 2026-08-03):** **the migration walk is DISCHARGED — `stoa_entries` is APPLIED-INERT on TEST + PRODUCTION** (§0 clean first-run state both; §1–§3 one paste; §VERIFY green — TEST's V2 verified row-by-row first-hand: exactly the 10 CHECKs + fkey + pkey; prod founder-reported verified; one transient dashboard fetch error on the first TEST §0, refresh-resolved, read-only). The table is empty + inert: `SUBSTRATE_STOA_ENABLED` remains UNSET everywhere, no route reads or writes it, RLS deny-all + service-role-only grants verified. On the founder's push the only live-behaviour deltas are the additive data-rights coverage (now of a real, empty table) and the additive `stoa_agent_entries`/`stoa_rows_deleted` response fields. Rollback: `git revert` the session commit and/or `DROP TABLE public.stoa_entries;` per the migration footer.
 
 **Files remaining uncommitted (this session's — stage ONLY these; the tree carries other sessions' strays, untouched):** the twelve paths in walk step 1.
 
@@ -52,7 +52,7 @@ Then push via GitHub Desktop; wait for Vercel green and confirm the deployed has
 - Stated battery limits: harness/ and sdk/ are outside the §B sweep (hand-verified clean 2026-08-03); constructed references invisible to grep; the fake does not model the DB CHECKs (covered by store validation + V7 probes).
 
 ## Next Session Should
-**ST3** — the human surface `/stoa` (`code-elevated`, EXCEPT the declaration route's distress wiring — an R20a perimeter addition, **`code-critical`** per 0d-ii with its AC5 recorded decision; plan §3 ST3). Pre-condition: this commit pushed + the ST2 migration walked (or explicitly deferred — ST3 can build against TEST).
+**ST3** — the human surface `/stoa` (`code-elevated`, EXCEPT the declaration route's distress wiring — an R20a perimeter addition, **`code-critical`** per 0d-ii with its AC5 recorded decision; plan §3 ST3). **Prompt authored at the walk: `operations/handoffs/founder/2026-08-03-stoa-ST3-human-surface-NEXT-SESSION-PROMPT.md`.** Pre-condition: this commit pushed, Vercel green (the migration walk is DISCHARGED — see the production-state line).
 
 ## Cross-references
 - `operations/handoffs/founder/2026-08-03-stoa-ST1-community-map-CLOSE.md` (predecessor)
