@@ -17551,3 +17551,27 @@ Expected: 56/0 · 115/0 · 42/0 · tsc silent · ✓ Compiled successfully.
 **Rules served:** R20a, AC2, AC4, AC5 (thirteenth-route protocol), KG1, PR3, PR6 (the Critical element), PR15, PR17, PR18, PR19.
 
 **Status:** Adopted. Cross-references: `D-STOA-ST4-AGENT-SURFACE-BUILT-DARK-2026-08-03`; the plan §3 ST6; the mentor consultation verbatim Q12 (`operations/connective-layer-2026-08/2026-08-02-mentor-consultation-connective-layer-verbatim.md`); `operations/handoffs/founder/2026-08-03-stoa-ST6-draft-mirror-reading-NEXT-SESSION-PROMPT.md` (the session's opening prompt).
+
+---
+
+## D-STOA-ST6-DRAFT-MIRROR-READING-ACTIVATION-LIVE-2026-08-03
+
+**Session:** Stoa ST6 activation — the draft mirror reading goes live. **Tier:** `code-critical` 0c-ii, founder-walked (AC7 engaged + discharged) — the founder pushed, flipped the flag, redeployed, and ran every live smoke; the AI guided + verified, performed no Vercel/git/mint op.
+
+**What happened:** `SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED=true` set in Vercel Production (the base `SUBSTRATE_STOA_ENABLED` already `true`), redeployed, green. `POST /api/mentor/stoa/draft-reflect` is now live and reachable.
+
+**Live smoke matrix — all required checks (B1–B6) passed; B7 (outage honesty) explicitly skipped, founder-elected, accepted on the MR-6 unit-battery pin alone (verified structurally during the build session, not exercised live):**
+- **B1 (flag-off proof):** with the sub-flag briefly unset, the route returned `{"error":"The Stoa is not yet open."}` at 503 — the same closed-state message the base flag uses. Flag re-set + redeployed green before proceeding.
+- **B2 (genuine mirror reading):** a real draft with a deliberate tension between `what_i_bring`/`what_i_seek` returned exactly `{success, reflection, disclaimer}` — no `id`/`score`/`level`/`proximity`/`virtue` field anywhere. The reflection text read as description throughout ("you're describing a pattern...", "the tension worth noticing is...") — no verdict language, no "you should," no scoring, confirming the system prompt's discipline held live, not just in the unit battery.
+- **B3 (R20a redirect, live):** a phrase tripping the Stage-1 **regex** acute pattern directly (`guardrails.ts:154`, the hopelessness pattern) returned `distress_detected:true` + the full crisis redirect message, no `reflection` field, HTTP 200. Confirmed via the Anthropic usage dashboard (repeated + re-checked) that **zero new LLM calls fired** for this request — the short-circuit at Stage 1 held before either the Stage-2 Haiku classifier or the Sonnet mirror-reading call were ever touched.
+- **B4 (mild fold, live):** a phrase tripping the Stage-1 mild pattern returned a genuine `reflection` (mild never blocks) **plus** an additive `support_resources: {severity:'mild', message:...}` field carrying the correct 7-line crisis-resource list. **Named follow-up (non-blocking, copy only):** the `support_resources.message` text reads *"Your declaration has been saved"* — copy evidently borrowed from the twelfth route's declare-flow (which does persist), inaccurate for this stateless draft-reflect route (no `id` in the success response, nothing saved). Founder's call whether to correct now or later; does not affect the gating logic's correctness.
+- **B5 (all-empty submission):** `{"what_i_bring":"","what_i_seek":""}` returned 400 "Nothing to reflect on — fill in what you bring or what you seek first." before any LLM touch.
+- **B6 (rate-limit isolation):** the `stoa-draft-reflect` bucket (10/hour, checked at route.ts:128 — before auth, before body parsing, so every reachable call including B1's flag-off pre-check-adjacent calls and B5's 400 count toward it) was exhausted (429 fired after the cumulative session total crossed budget — the loop alone showed 6 successes then 429s, consistent with the B1–B5 smoke calls earlier in the session already having drawn on the same hourly window, not a defect). Immediately after exhaustion, the base Stoa declare route (`POST /api/mentor/stoa`, the twelfth route) succeeded (200, real entry created, `reactivated:true`) — confirming the two rate-limit buckets are genuinely isolated, the property B6 exists to prove.
+
+**Disclosed, non-blocking finding:** the `support_resources` mild-fold copy overstates persistence ("Your declaration has been saved") on a route that saves nothing — a documentation/copy defect, not a functional or safety defect (the R20a gating logic itself is correct and was verified live). Recorded as a named follow-up, not fixed this session (founder-elected, out of scope for the activation walk).
+
+**Rollback path:** unset `SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED` + redeploy — byte-identical to before this activation (the base Stoa flag and every other surface untouched); no schema to reverse.
+
+**Rules served:** AC5 (R20a perimeter member, now live-verified), AC7 (engaged + discharged, founder-walked), PR6, PR17, PR18, PR19.
+
+**Status:** Adopted. This closes ST6 activation — every scoped Stoa build item (§3 ST1–ST6) is now both built AND live. Only ST7's four deliberately deferred, unscoped threads remain (subscriptions blocked on the Resend/email decision; the Q5c/Q13a trust-event machinery; the map-into-Stoa fold election; nav+glossary placement) — founder-sequenced, no next-session prompt owed until one is opened. Cross-references: `D-STOA-ST6-DRAFT-MIRROR-READING-BUILT-DARK-2026-08-03`; `operations/handoffs/founder/2026-08-03-stoa-ST6-activation-NEXT-SESSION-PROMPT.md` (the session's opening prompt).
