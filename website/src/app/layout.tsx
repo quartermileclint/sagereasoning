@@ -47,6 +47,7 @@ export default function RootLayout({
                   <a href="/journal" className="block hover:text-sage-900">Journal</a>
                   <a href="/journal-feed" className="block hover:text-sage-900">Live Journal Feed</a>
                   <a href="/community" className="block hover:text-sage-900">Community</a>
+                  <a href="/stoa" className="block hover:text-sage-900">The Stoa</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
                   <a href="/marketplace" className="block hover:text-sage-900">Skill Marketplace</a>
                   <a href="/private-mentor" className="block hover:text-sage-900">Private Mentor Hub</a>
