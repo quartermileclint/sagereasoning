@@ -100,6 +100,14 @@ const HUMAN_FACING_POST_ROUTES = [
   // its check). The browse route (/api/stoa/entries) takes no free text and
   // stays outside the perimeter (the recorded AC5 decision's other half).
   'src/app/api/mentor/stoa/route.ts',
+  // Stoa ST6 (2026-08-03; AC5 thirteenth route-level protocol; the Q12
+  // exception): the draft mirror-reading route accepts the SAME human
+  // free-text class (what_i_bring / what_i_seek / contact_channel), this
+  // time pre-publish, and screens it via the mandated
+  // `await enforceDistressCheck(detectDistressTwoStage(...))` BEFORE the
+  // mirror-reading LLM call ever fires. Dark behind SUBSTRATE_STOA_ENABLED
+  // AND SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED (both required).
+  'src/app/api/mentor/stoa/draft-reflect/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -133,6 +141,19 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     route: 'src/app/api/mentor/stoa/route.ts',
     flag: 'isStoaEnabled',
     flagSource: 'stoa-store',
+  },
+  {
+    // Stoa ST6: gated behind BOTH the base Stoa flag and its own dedicated
+    // sub-flag — two entries, same route, one per flag (the interface only
+    // carries one flag per entry; the loop below checks each independently).
+    route: 'src/app/api/mentor/stoa/draft-reflect/route.ts',
+    flag: 'isStoaEnabled',
+    flagSource: 'stoa-store',
+  },
+  {
+    route: 'src/app/api/mentor/stoa/draft-reflect/route.ts',
+    flag: 'isStoaDraftReflectEnabled',
+    flagSource: 'stoa-draft-reflect',
   },
 ]
 
@@ -250,15 +271,18 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 12 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 13 route-level routes (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
   // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
   // the AC5 eleventh-route protocol, flag-gated dark + the Stoa declaration
   // route added 2026-08-03 under the AC5 twelfth-route protocol, flag-gated
-  // dark behind SUBSTRATE_STOA_ENABLED) + 2 substrate-gate routes (Calling +
+  // dark behind SUBSTRATE_STOA_ENABLED + the Stoa draft-reflect route added
+  // 2026-08-03 (ST6, the Q12 exception) under the AC5 thirteenth-route
+  // protocol, flag-gated dark behind SUBSTRATE_STOA_ENABLED AND
+  // SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED) + 2 substrate-gate routes (Calling +
   // Reflect-content added 2026-05-28 under Option A; see
-  // SUBSTRATE_GATE_ROUTES) = 14 routes in the R20a perimeter overall.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 12, `${label} (>=12 route-level)`)
+  // SUBSTRATE_GATE_ROUTES) = 15 routes in the R20a perimeter overall.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 13, `${label} (>=13 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
 }
 
