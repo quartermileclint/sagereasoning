@@ -82,6 +82,16 @@ const HUMAN_FACING_POST_ROUTES = [
   // asserted in FLAG_GATED_ROUTE_LEVEL_ROUTES + the per-route test at
   // src/app/api/score-conversation/__tests__/r20a-invocation.test.ts.
   'src/app/api/score-conversation/route.ts',
+  // Stoa ST3 (2026-08-03; AC5 twelfth-route protocol): the Stoa declaration
+  // route accepts human free text (what_i_bring / what_i_seek /
+  // contact_channel — a person's own words about what they carry and what
+  // they need) on POST + PATCH and screens it via the mandated
+  // `await enforceDistressCheck(detectDistressTwoStage(...))` BEFORE any
+  // store write. Dark behind SUBSTRATE_STOA_ENABLED (the whole route 503s
+  // flag-off — no separate R20a flag; the route never exists live without
+  // its check). The browse route (/api/stoa/entries) takes no free text and
+  // stays outside the perimeter (the recorded AC5 decision's other half).
+  'src/app/api/mentor/stoa/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -107,6 +117,14 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     route: 'src/app/api/score-conversation/route.ts',
     flag: 'isScoreConversationR20aEnabled',
     flagSource: 'score-conversation-r20a',
+  },
+  {
+    // Stoa ST3: the route's flag IS the surface flag (SUBSTRATE_STOA_ENABLED
+    // via isStoaEnabled) — flag-off the route 503s before any work, so the
+    // perimeter check is unconditional on the flag-on path.
+    route: 'src/app/api/mentor/stoa/route.ts',
+    flag: 'isStoaEnabled',
+    flagSource: 'stoa-store',
   },
 ]
 
@@ -158,6 +176,24 @@ const REQUIRED_SUBSTRATE_GATE_SOURCE = 'substrate/r20a-gate'
 // websiteRoot — original test resolves from __dirname (.. .. ..) i.e. website/.
 const websiteRoot = path.resolve(__dirname, '..', '..', '..')
 
+/**
+ * Strip TS comments before any CALL-site check (ST3 fold, 2026-08-03 — a
+ * live mutation proved the raw-source call checks were COMMENT-SATISFIABLE:
+ * a route whose documentation quotes the AC5 pattern kept passing this guard
+ * with the real call mutated away; the guard-non-vacuity lesson). Import
+ * checks stay on raw source (import lines are code). Strictly tightening —
+ * every registered route re-verified green after the fold.
+ *
+ * Known corruption classes (PR19 review, 2026-08-03 — none currently trip):
+ * a '//' inside a non-protocol string literal truncates that line, and a
+ * regex literal containing '/*' opens a phantom block comment. Both fail in
+ * the SAFE direction (a swallowed real call site goes loudly red, never a
+ * vacuous pass); revisit only if a registered route ever carries such text.
+ */
+function stripComments(ts: string): string {
+  return ts.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
+}
+
 // ---------------------------------------------------------------------------
 // R20a Safety Invocation Guard
 // ---------------------------------------------------------------------------
@@ -183,7 +219,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
 for (const routePath of HUMAN_FACING_POST_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${routePath} calls detectDistressTwoStage (not just imports it)`
   const fullPath = path.join(websiteRoot, routePath)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   // Remove import lines to isolate call sites
   const lines = source.split('\n')
@@ -206,13 +242,15 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 11 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 12 route-level routes (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
   // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
-  // the AC5 eleventh-route protocol, flag-gated dark) + 2 substrate-gate
-  // routes (Calling + Reflect-content added 2026-05-28 under Option A; see
-  // SUBSTRATE_GATE_ROUTES) = 13 routes in the R20a perimeter overall.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 11, `${label} (>=11 route-level)`)
+  // the AC5 eleventh-route protocol, flag-gated dark + the Stoa declaration
+  // route added 2026-08-03 under the AC5 twelfth-route protocol, flag-gated
+  // dark behind SUBSTRATE_STOA_ENABLED) + 2 substrate-gate routes (Calling +
+  // Reflect-content added 2026-05-28 under Option A; see
+  // SUBSTRATE_GATE_ROUTES) = 14 routes in the R20a perimeter overall.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 12, `${label} (>=12 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
 }
 
@@ -223,7 +261,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // is constructed. This checks that the call uses `await`.
   for (const routePath of HUMAN_FACING_POST_ROUTES) {
     const fullPath = path.join(websiteRoot, routePath)
-    const source = fs.readFileSync(fullPath, 'utf-8')
+    const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
     // Look for `await enforceDistressCheck(detectDistressTwoStage(` — the Task 3 pattern
     // OR the original `await detectDistressTwoStage(` pattern for backward compatibility
@@ -256,7 +294,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
 for (const routePath of HUMAN_FACING_POST_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${routePath} calls enforceDistressCheck wrapping detectDistressTwoStage (Task 3 — compile-time gate)`
   const fullPath = path.join(websiteRoot, routePath)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   // The enforceDistressCheck(detectDistressTwoStage(...)) pattern must be present
   const hasGateCall = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/.test(source)
@@ -321,7 +359,7 @@ for (const { route, flag } of SUBSTRATE_GATE_ROUTES) {
 for (const { route } of SUBSTRATE_GATE_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${route} calls enforceLayer2R20aGate awaited (PR3 — synchronous safety)`
   const fullPath = path.join(websiteRoot, route)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   const lines = source.split('\n')
   const nonImportLines = lines.filter(
@@ -340,7 +378,7 @@ for (const { route } of SUBSTRATE_GATE_ROUTES) {
 for (const { route, flag } of SUBSTRATE_GATE_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${route} gates the enforceLayer2R20aGate call behind its substrate-gate flag ${flag} (feature flag check present)`
   const fullPath = path.join(websiteRoot, route)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   const lines = source.split('\n')
   const nonImportLines = lines.filter(
@@ -385,7 +423,7 @@ for (const { route, flag, flagSource } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
 for (const { route, flag } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${route} calls its route-level feature flag ${flag} in the body (flag check, not just import)`
   const fullPath = path.join(websiteRoot, route)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   const lines = source.split('\n')
   const nonImportLines = lines.filter(

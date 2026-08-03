@@ -107,6 +107,17 @@ export function isStoaEnabled(): boolean {
   return process.env.SUBSTRATE_STOA_ENABLED === 'true'
 }
 
+/** The shared read-path rate-limit config (PR19 fold, 2026-08-03: both read
+ *  surfaces share the 'stoa-read' BUCKET, so the limits must be one literal —
+ *  two drifting copies would enforce inconsistent limits against one shared
+ *  counter with no compile-time signal). Dedicated category — never `scoring`
+ *  (memory: rate-limit-bucket-couples-to-measured-surface). */
+export const STOA_READ_RATE_LIMIT = {
+  maxRequests: 60,
+  windowSeconds: 60,
+  category: 'stoa-read',
+}
+
 // ============================================================================
 // VOCABULARY + TYPES
 // ============================================================================
@@ -514,8 +525,8 @@ export async function removeStoaEntry(
 }
 
 /**
- * The serving list (#8: recency of declaration, the ONLY ordering — the single
- * .order() call in this module; battery-pinned).
+ * The serving list (#8: recency of declaration, the ONLY ordering — both
+ * .order() calls in this module key declared_at; battery-pinned §D).
  *
  * scope 'public'    → active entries with visibility 'public' (unauthenticated)
  * scope 'community' → ALL active entries — community-scoped AND public
