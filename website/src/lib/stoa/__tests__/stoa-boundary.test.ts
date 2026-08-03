@@ -123,6 +123,17 @@ function extractSpecifiers(src: string): string[] {
     // response only (a static resource list) — nothing Stoa-derived flows
     // out through it.
     '@/lib/guardrails',
+    // ST4 addition (2026-08-03): the UPC capability-checking chokepoint,
+    // consumed by the new stoa-credential.ts for the agent-presence +
+    // agent-declare auth arms. NOT the forbidden trust/practice class (see
+    // practice-credential.ts's own module banner: no trust-core/kathekon/
+    // practice-suggestion data flow — it is an auth primitive, same
+    // single-purpose-import discipline as the K1 grammar allowance above).
+    '@/lib/practice-credential',
+    // ST4 addition: a TYPE-ONLY import (NextRequest) in stoa-credential.ts —
+    // no runtime dependency, needed because that module reads request
+    // headers directly (the presence/declare auth seam).
+    'next/server',
   ]
   // PR19 fold F2 (2026-08-03): scan EVERY non-test .ts under lib/stoa — a
   // future sibling module (helpers.ts) must meet the same allowlist, or a
@@ -180,6 +191,8 @@ function extractSpecifiers(src: string): string[] {
   const SERVING_SURFACES = [
     join(SRC, 'app', 'api', 'stoa', 'entries', 'route.ts'),
     join(SRC, 'app', 'api', 'mentor', 'stoa', 'route.ts'),
+    // ST4 addition (2026-08-03): the agent declare/tend/withdraw route.
+    join(SRC, 'app', 'api', 'stoa', 'declare', 'route.ts'),
     join(SRC, 'app', 'stoa', 'page.tsx'),
     join(SRC, 'app', 'stoa', 'layout.tsx'),
   ]
@@ -224,6 +237,10 @@ function extractSpecifiers(src: string): string[] {
     join(SRC, 'lib', '__tests__', 'r20a-invocation-guard.test.ts'),
     // The declaration route's own per-route R20a battery.
     join(SRC, 'app', 'api', 'mentor', 'stoa', '__tests__', 'r20a-invocation.test.ts'),
+    // ST4 additions (2026-08-03): the agent declare/tend/withdraw route (the
+    // agent-identity counterpart — it IS the surface) and the guard
+    // registry's now-extended exclusion comment naming it by path.
+    join(SRC, 'app', 'api', 'stoa', 'declare', 'route.ts'),
   ])
   const offenders: string[] = []
   let scanned = 0
@@ -583,6 +600,9 @@ function extractSpecifiers(src: string): string[] {
   const files: Array<[string, string]> = [
     ['entries route', join(SRC, 'app', 'api', 'stoa', 'entries', 'route.ts')],
     ['mentor route', join(SRC, 'app', 'api', 'mentor', 'stoa', 'route.ts')],
+    // ST4 addition (2026-08-03): the agent declare route also reads
+    // listStoaEntries for its own shelf — it must serve recency verbatim too.
+    ['declare route', join(SRC, 'app', 'api', 'stoa', 'declare', 'route.ts')],
     ['page', join(SRC, 'app', 'stoa', 'page.tsx')],
     ['layout', join(SRC, 'app', 'stoa', 'layout.tsx')],
     ['presentation', join(SRC, 'lib', 'stoa', 'stoa-presentation.ts')],
@@ -594,7 +614,7 @@ function extractSpecifiers(src: string): string[] {
     scanned++
     if (RESORT.test(stripTsComments(readFileSync(p, 'utf8')))) sorters.push(label)
   }
-  check('J.1 all six serving files exist and were scanned (non-vacuity)', scanned === 6)
+  check('J.1 all seven serving files exist and were scanned (non-vacuity)', scanned === 7)
   check('J.2 no re-sort primitive on any serving surface — recency served verbatim (#8)',
     sorters.length === 0, sorters.join(', '))
 }
@@ -631,6 +651,24 @@ function extractSpecifiers(src: string): string[] {
     !servedKeys.includes('status') && !servedKeys.includes('removal_ground'))
   check('K.7 declaration dates always served (#12)',
     hv.declared_at === '2026-08-01T00:00:00Z' && 'renewed_at' in hv)
+
+  // K.11–K.13 (ST4, #19): the trust-record/accreditation links — agent
+  // entries only, STATIC relative paths (no live probe — the design
+  // election recorded in stoa-presentation.ts's header).
+  check('K.11 agent entries carry trust_record_url + accreditation_url keyed on the agent_id',
+    av.trust_record_url === '/api/trust-record/sagereasoning:demo@v1' &&
+      av.accreditation_url === '/api/accreditation/sagereasoning:demo@v1',
+    JSON.stringify({ t: av.trust_record_url, a: av.accreditation_url }))
+  check('K.12 human entries carry NEITHER link (null, never omitted-but-truthy)',
+    hv.trust_record_url === null && hv.accreditation_url === null)
+  check('K.13 non-vacuity: a different agent_id changes both links (not hardcoded)', (() => {
+    const agent2: StoaEntry = { ...agent, id: 'e4', agentId: 'acme:other@v2' }
+    const av2 = presentStoaEntry(agent2, new Map()) as unknown as Record<string, unknown>
+    return (
+      av2.trust_record_url === '/api/trust-record/acme:other@v2' &&
+      av2.accreditation_url === '/api/accreditation/acme:other@v2'
+    )
+  })())
 
   // K.8–K.10 (PR19 fold, 2026-08-03): the OWN-VIEW projection — the first
   // draft served the raw store row to its owner, contradicting the stated

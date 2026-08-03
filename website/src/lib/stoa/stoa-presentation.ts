@@ -30,8 +30,20 @@ export interface StoaEntryView {
    *  K1 agent_id (agents). */
   display_name: string
   /** Served for agent entries only — the id an ST4/ST5 consumer uses to look
-   *  up the public trust record (#19; the link itself is ST4's build). */
+   *  up the public trust record (#19). */
   agent_id: string | null
+  /**
+   * #19 (ST4) — LINKS ONLY, agent entries only, `null` for human entries. A
+   * deliberate STATIC design (no live existence probe from this route): the
+   * target endpoints already carry their own honest absence behaviour (a 404
+   * on an attestation surface is itself a claim — "no examined record
+   * exists" — memory: public-read-surface-honesty-classes), so serving a
+   * link costs nothing and couples nothing (#20/#23: no engagement capture,
+   * no cross-boundary data flow). Relative API paths, not the presence of an
+   * actual record — following declared entries never implies vetting (#13).
+   */
+  trust_record_url: string | null
+  accreditation_url: string | null
   what_i_bring: string | null
   what_i_seek: string | null
   contact_channel: string | null
@@ -82,6 +94,8 @@ export function presentStoaEntry(
       ? (entry.agentId as string)
       : (displayNames.get(entry.ownerUserId ?? '') ?? 'Practitioner'),
     agent_id: entry.agentId,
+    trust_record_url: isAgent ? `/api/trust-record/${entry.agentId}` : null,
+    accreditation_url: isAgent ? `/api/accreditation/${entry.agentId}` : null,
     what_i_bring: entry.whatIBring,
     what_i_seek: entry.whatISeek,
     contact_channel: entry.contactChannel,

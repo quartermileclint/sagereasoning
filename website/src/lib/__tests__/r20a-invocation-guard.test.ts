@@ -57,6 +57,14 @@ function assert(condition: boolean, label: string): void {
 //
 // Agent-facing endpoints (score-iterate, assessment/*, baseline/agent) are
 // excluded because they process agent output, not human distress input.
+//
+// Stoa ST4 (2026-08-03, recorded decision): src/app/api/stoa/declare/route.ts
+// is excluded for the same reason — its what_i_bring/what_i_seek/
+// contact_channel/tags fields are agent-authored text submitted over a
+// credential-authenticated API call (Bearer practice credential), not human
+// free text through a cookie/JWT session. Its human counterpart,
+// src/app/api/mentor/stoa/route.ts, IS the perimeter member above for this
+// exact field set, because there the same fields are typed by a human.
 // ---------------------------------------------------------------------------
 
 const HUMAN_FACING_POST_ROUTES = [

@@ -8,8 +8,15 @@
  *   - unauthenticated        → PUBLIC entries only
  *   - authenticated (JWT)    → COMMUNITY scope (all active entries: an
  *     authenticated practitioner is "present in the space" and sees both
- *     community-scoped and public declarations). ST4 adds the
- *     practice-credential presence arm for agents.
+ *     community-scoped and public declarations).
+ *   - credentialed (UPC)     → COMMUNITY scope, same as JWT (ST4, #2 — a
+ *     credentialed agent is equally "present in the space"; a valid practice
+ *     credential's `consult` capability is checked with NO metering and NO
+ *     usage-counter increment — this is presence, never a consult action).
+ *     Checked ONLY when no JWT session elevated scope already (never both;
+ *     never additive beyond community). Still never a gate (#3): an absent
+ *     or invalid credential falls back to public scope, exactly like an
+ *     absent JWT.
  *
  * NO RECIPROCITY GATE (#3): consulting the list never requires declaring —
  * nothing here reads whether the viewer has an entry.
@@ -33,6 +40,7 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, getAuthenticatedUser } from '@/lib/security'
 import { isStoaEnabled, listStoaEntries, STOA_READ_RATE_LIMIT } from '@/lib/stoa/stoa-store'
 import { presentStoaEntries, filterStoaEntriesByQuery } from '@/lib/stoa/stoa-presentation'
+import { resolveStoaCredentialPresence } from '@/lib/stoa/stoa-credential'
 
 export async function GET(request: NextRequest) {
   // Flag first (PR19 fold): flag-off production does no work at all —
@@ -45,9 +53,15 @@ export async function GET(request: NextRequest) {
 
   try {
     // Presence check only — never a gate (#3). A signed-in practitioner sees
-    // the community scope; anyone else sees public entries.
+    // the community scope; anyone else sees public entries. ST4 adds a
+    // second presence path (a valid practice credential) checked only when
+    // the JWT path didn't already elevate scope.
     const user = await getAuthenticatedUser(request)
-    const scope: 'public' | 'community' = user ? 'community' : 'public'
+    let scope: 'public' | 'community' = user ? 'community' : 'public'
+    if (scope === 'public') {
+      const credentialPresence = await resolveStoaCredentialPresence(request)
+      if (credentialPresence) scope = 'community'
+    }
 
     const { searchParams } = new URL(request.url)
     const tag = searchParams.get('tag')?.trim() || undefined
