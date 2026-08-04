@@ -76,16 +76,25 @@ The residual risk the mentor named explicitly: **the curator can be wrong about 
 
 1. **Three new `TrustEventType` literals** in `website/src/lib/substrate/trust-core/types.ts` + their `EVENT_EFFECT` entries in `trust-transition.ts` (decrease / decrease / flag).
 2. **A CHECK-widening migration** on `agent_trust_events.event_type` — additive, same pattern as the S9b vocabulary migration. **Founder-walked TEST→prod, its own 0c-ii step, before any emitting code goes live.** ← the migration gate.
-3. **A flag/report intake path** — how a contradiction is submitted, by whom, carrying which artifact reference. This is the genuinely new surface and the main design work remaining. Must capture: the specific entry, the specific claim within it, the specific artifact, and the asserted contradiction.
-4. **Derivers** in `derive-trust-events.ts` (following `deriveCallingEvent`'s shape) enforcing the R18f-parallel verifiable-artifact rule and the "concretely contradicts" bar.
-5. **Flag-gating** behind `SUBSTRATE_TRUST_CORE_ENABLED` at minimum; a narrower dedicated flag is worth considering given a false positive writes a permanent ledger entry even in MEASURE mode.
+3. **The admin flag-intake route** (E1) — admin-gated `POST`, no UI. Captures the specific entry, the specific claim within it, the artifact reference, and the asserted contradiction. Reuse the house admin-gate pattern; **confirm which admin gate** (`ADMIN_EMAILS` allowlist vs `FOUNDER_USER_ID`) rather than assuming — the two are non-interchangeable and both exist live.
+4. **Derivers** in `derive-trust-events.ts` (following `deriveCallingEvent`'s shape) enforcing the R18f-parallel verifiable-artifact rule and the "concretely contradicts" bar. The dikaiosyne-vs-oversight domain choice is an **input to the deriver** (the submitter asserts which wrong occurred; both may be submitted), never inferred from severity.
+5. **Flag-gating** behind BOTH `SUBSTRATE_TRUST_CORE_ENABLED` and the new `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED` (E2) — both on to emit; either unset ⇒ byte-identical, battery-asserted.
 6. **Boundary battery extension** — the Stoa↔trust-core separation (#20) is currently asserted structurally in both directions. **This build deliberately opens ONE direction** (a curator-triggered path writes trust events referencing a Stoa entry). The existing boundary pins must be re-derived, not merely relaxed: the Stoa's own surfaces must still never read trust state, and nothing about directory presence or use may feed any signal (#20 stands — the mentor did not reopen it).
 
-## Remaining open items (none are mentor questions)
+## Founder elections — ALL SETTLED 2026-08-04 (AskUserQuestion, all four as recommended)
 
-- The flag-intake surface's own shape (who can submit, what UI/route, how a curator is authorised). **The one genuinely undesigned piece.**
-- ~~Whether Q13(a)'s event carries `oversight` or a null domain.~~ **RESOLVED 2026-08-04 — `oversight`, never `null`** (see §3 above; `null` routes to the reflect path and would slow decay across all domains from a divergence finding).
-- Whether a narrower feature flag is warranted alongside `SUBSTRATE_TRUST_CORE_ENABLED`. **Leaning yes** — a false positive here writes a permanent ledger row even in MEASURE mode, and the curator-pairing path has a named residual risk (the curator can be wrong about the relationship). A dedicated flag makes the rollback surgical rather than "turn the whole trust core off."
+**E1 — flag intake: founder/admin only.** One admin-gated `POST` route, no UI. Carries: the entry id, the specific claim within it, the artifact reference, and the asserted contradiction. Rationale: matches the build plan's existing *"operated founder-manually on examined artifacts"* posture; satisfies the mentor's flag-triggered ruling exactly without inventing a curator-authorisation model for a curator population that does not exist pre-0h. Widening to an agent-owner path or to other practitioners later is purely additive.
+
+**E2 — a DEDICATED feature flag** (`SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`) alongside `SUBSTRATE_TRUST_CORE_ENABLED`, not instead of it. Both must be on to emit. Rationale: a false positive writes a permanent ledger row even in MEASURE mode, and the mentor named the residual risk explicitly (the curator can be wrong about the pairing). Rolling back on the trust-core flag alone would take S9–S11 surfaces down with it; this keeps rollback surgical.
+
+**E3 — the three event-type literals are APPROVED AND LOCKED** (they become CHECK-constraint literals; changing one later costs another founder-walked migration):
+- `stoa-claim-contradicted-oversight`
+- `stoa-claim-contradicted-dikaiosyne`
+- `stoa-declaration-diverges-from-calling`
+
+**E4 — first slice = the FULL build, all dark:** three types + the CHECK-widening migration + derivers + the admin intake route, everything behind E2's flag. **Activation is a separate founder-walked step**, per the ST2/ST4 pattern this arc has used throughout.
+
+**Already resolved (2026-08-04, by reading the code):** Q13(a)'s event carries `virtue_domain: 'oversight'`, **never `null`** — see §3 above; `null` routes to the reflect path and would slow decay across all domains from a divergence finding.
 
 ## A note on the `null`-domain trap, for whoever builds this
 
