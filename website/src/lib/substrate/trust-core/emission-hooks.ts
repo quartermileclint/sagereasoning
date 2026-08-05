@@ -20,15 +20,18 @@
 import { createHash } from 'crypto'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
 import { resolveCredentialContext } from '../agent-assessment-history-store'
-import { isTrustCoreEnabled } from './trust-core-flag'
+import { isTrustCoreEnabled, isStoaTrustEventsEnabled } from './trust-core-flag'
 import {
   deriveCredentialAndJusticeEvents,
   deriveReflectEvent,
   deriveScreenedReflectEvent,
   deriveSuppressionWatchEvents,
+  deriveStoaContradictionEvents,
+  deriveStoaCallingDivergenceEvent,
   type SurfacedPassion,
+  type StoaContradictionAssertion,
 } from './derive-trust-events'
-import { emitTrustEvents } from './trust-core-store'
+import { emitTrustEvents, emitStoaGatedTrustEvents } from './trust-core-store'
 
 /** Extract the provenance.signed_assessments array from a parsed write body,
  *  defensively (returns [] on any shape mismatch). */
@@ -242,5 +245,123 @@ export async function emitReflectTrustEvent(input: ReflectEmissionInput): Promis
     await emitTrustEvents([event])
   } catch (e) {
     console.error('[trust-core] emitReflectTrustEvent error:', (e as Error).message)
+  }
+}
+
+export interface StoaContradictionEmissionInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  stoaEntryId: string
+  claimQuote: string
+  /** Each assertion carries its OWN correlationId (PR19 fold, 2026-08-04) —
+   *  there is deliberately no submission-level correlation id on this input;
+   *  see StoaContradictionAssertion's docstring. */
+  contradictsOversight?: StoaContradictionAssertion
+  contradictsDikaiosyne?: StoaContradictionAssertion
+  now?: Date
+}
+
+/**
+ * Stoa Q5(c) — emit the claim-contradicted trust event(s) from an admin-flagged
+ * examined-use artifact. Gated behind BOTH SUBSTRATE_TRUST_CORE_ENABLED AND
+ * SUBSTRATE_STOA_TRUST_EVENTS_ENABLED (founder election E2 — a false positive
+ * here writes a permanent ledger row even in measure mode). Fully guarded;
+ * returns the written/held counts for the CALLER to surface honestly (the
+ * admin intake route, unlike the other emission hooks, must tell the
+ * submitting admin what actually happened — never throws, never silently
+ * drops).
+ *
+ * EVIDENCE-GATED (2026-08-04 mentor ruling, verbatim record:
+ * operations/connective-layer-2026-08/2026-08-04-mentor-consultation-stoa-
+ * followups-verbatim.md): "a contradiction event narrows or corrects an
+ * existing record; it does not by itself create one." Routes through
+ * emitStoaGatedTrustEvents (NOT the generic emitTrustEvents every other
+ * event type uses) — every event is still LEDGERED, but a domain with no
+ * independent examined evidence has its event HELD (recorded, not folded
+ * into the public trust record). `held` in the return value surfaces this
+ * honestly to the submitting admin, distinct from `written` — a nonzero
+ * `held` means the finding was preserved but did NOT change the agent's
+ * public record.
+ */
+export async function emitStoaContradictionTrustEvents(
+  input: StoaContradictionEmissionInput,
+): Promise<{ written: number; held: number } | { error: string }> {
+  try {
+    if (!isTrustCoreEnabled() || !isStoaTrustEventsEnabled()) return { written: 0, held: 0 }
+
+    const now = input.now ?? new Date()
+    const events = deriveStoaContradictionEvents({
+      agentId: input.agentId,
+      ownerUserId: input.ownerUserId,
+      credentialRef: input.credentialRef,
+      stoaEntryId: input.stoaEntryId,
+      claimQuote: input.claimQuote,
+      contradictsOversight: input.contradictsOversight,
+      contradictsDikaiosyne: input.contradictsDikaiosyne,
+      now,
+    })
+    if (events.length === 0) return { written: 0, held: 0 }
+    const result = await emitStoaGatedTrustEvents(events)
+    if (!result.ok) return { error: result.error }
+    return { written: result.value.written, held: result.value.held }
+  } catch (e) {
+    const error = `emitStoaContradictionTrustEvents threw: ${(e as Error).message}`
+    console.error('[trust-core] ' + error)
+    return { error }
+  }
+}
+
+export interface StoaCallingDivergenceEmissionInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  stoaEntryId: string
+  callingRecordRef: string
+  divergenceDescription: string
+  now?: Date
+  correlationId: string
+}
+
+/**
+ * Stoa Q13(a) — emit the declaration-diverges-from-calling flag event.
+ * Gated identically to the contradiction emitter above. 'flag' effect — never
+ * raises or lowers a domain level on its own (see trust-transition.ts); still
+ * gated behind both flags because the row itself (and its artifact_ref
+ * pairing) is a standing, permanent record even though it changes no trust
+ * level.
+ *
+ * EVIDENCE-GATED identically to the contradiction path (2026-08-04 mentor
+ * ruling — see the contradiction emitter's docstring; the mentor stated this
+ * explicitly for Q13(a) too, "regardless of whether the current flag
+ * mechanism would trip it," because the flag path's non-effect on the seeded
+ * state is "an implementation coincidence, not a principled constraint" that
+ * a future mechanism change could inadvertently remove).
+ */
+export async function emitStoaCallingDivergenceTrustEvent(
+  input: StoaCallingDivergenceEmissionInput,
+): Promise<{ written: number; held: number } | { error: string }> {
+  try {
+    if (!isTrustCoreEnabled() || !isStoaTrustEventsEnabled()) return { written: 0, held: 0 }
+
+    const now = input.now ?? new Date()
+    const event = deriveStoaCallingDivergenceEvent({
+      agentId: input.agentId,
+      ownerUserId: input.ownerUserId,
+      credentialRef: input.credentialRef,
+      stoaEntryId: input.stoaEntryId,
+      callingRecordRef: input.callingRecordRef,
+      divergenceDescription: input.divergenceDescription,
+      now,
+      correlationId: input.correlationId,
+    })
+    if (event === null) return { written: 0, held: 0 }
+    const result = await emitStoaGatedTrustEvents([event])
+    if (!result.ok) return { error: result.error }
+    return { written: result.value.written, held: result.value.held }
+  } catch (e) {
+    const error = `emitStoaCallingDivergenceTrustEvent threw: ${(e as Error).message}`
+    console.error('[trust-core] ' + error)
+    return { error }
   }
 }

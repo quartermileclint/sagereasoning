@@ -17615,3 +17615,229 @@ Expected: 56/0 · 115/0 · 42/0 · tsc silent · ✓ Compiled successfully.
 **Rules served:** PR15, PR17, PR18, R18 (no public surface changed by the records; the nav links are internal navigation, not a published contract), AC2, AC4.
 
 **Status:** Adopted. **ST7 is now two threads lighter:** nav+glossary DONE, map-fold CLOSED. Remaining: subscriptions (still blocked on the Resend/email provisioning decision — a founder-performed step) and the Q5c/Q13a build itself (now scoped, needing the flag-intake design + its founder-walked CHECK-widening migration). Cross-references: `D-STOA-ST6-DRAFT-MIRROR-READING-ACTIVATION-LIVE-2026-08-03`; the plan §3 ST7; both mentor verbatim records in `operations/connective-layer-2026-08/`.
+
+---
+
+## D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04
+
+**Session:** Stoa ST7 thread 2 — Q5c/Q13a trust-event wiring, BUILD. **Tier:** `code-critical` (new trust-event types + a CHECK-widening migration on the append-only ledger; 0d-ii applies). **Built dark; NO production/flag/schema/mint/deploy change; activation is a separate founder-walked session — nothing here pre-approved for production.**
+
+**Built per `operations/handoffs/founder/2026-08-03-stoa-Q5c-Q13a-trust-event-wiring-SCOPED.md`:** three new `TrustEventType` literals (`stoa-claim-contradicted-oversight`/`-dikaiosyne` = decrease, `stoa-declaration-diverges-from-calling` = flag) + `EVENT_EFFECT` entries; two pure derivers in `derive-trust-events.ts` (`deriveStoaContradictionEvents`, `deriveStoaCallingDivergenceEvent` — the latter hard-codes `virtueDomain:'oversight'`, never a caller-supplied value, closing the null-domain trap the scoped plan named); a dedicated `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED` flag alongside (not instead of) `SUBSTRATE_TRUST_CORE_ENABLED` (E2); a new admin-only, no-UI `POST /api/admin/stoa-trust-flag` route (`requireAdmin`/`ADMIN_USER_ID` — confirmed as the correct house gate for admin credential/audit-style routes, distinct from `ADMIN_EMAILS` and `FOUNDER_USER_ID`); a `getStoaEntryById` addition to the Stoa store; the boundary battery's `ALLOWED_REFERENCERS` extended for exactly this one new file (the deliberate one-direction opening, #20 re-derived not merely relaxed); a new 47-assertion battery; an authored-not-applied CHECK-widening migration (`website/supabase-agent-trust-events-stoa-vocabulary-migration.sql`).
+
+**PR19 independent adversarial review ran** (a fresh agent, no visibility into the build's own conclusions). Verdict GO_WITH_FIX: **HIGH-1** (a shared submission-level correlation id let a later resubmission adding a second block change the first block's hash, defeating the DB dedup key and risking a double-decrease from one root cause — fixed: each assertion now carries its own correlation id, keyed only on its own content) and **MEDIUM-3** (the battery's "route refuses a human entry" pin was string-presence-vacuous, mutation-proven to stay green with the guard replaced by `if (false)` — fixed: a bounded-window extraction + a mutation self-test). Both fixed + re-verified (battery 54/0 at that point). **LOW-1** (the divergence correlation id dropped the free-text justification, so rewording no longer spawns a duplicate) and **LOW-3** (the migration's "additive" pin now asserts the new CHECK is a strict superset of all 15 prior literals, not just "no DROP TABLE") folded cheaply alongside.
+
+**MEDIUM-1 — the review's one substantive finding NOT resolved by the AI — was written up as a brief and sent to the mentor rather than decided unilaterally.** The finding: a Q5(c) contradiction event, folded through the generic `emitTrustEvents` path every other event type uses, seeds a fresh `agent_trust_state` row at the profile prior when no prior state exists, and — because a `decrease` from a fresh `habitual` seed hits the floor — sets `hasEvidence:true`, so one admin-flagged submission against a previously-unexamined agent could **originate that agent's public trust record at `reflexive`** from a single curator pairing (the exact residual risk the original ruling named: "the curator can be wrong about the relationship").
+
+**Mentor consultation 2 (same day), verbatim record: `operations/connective-layer-2026-08/2026-08-04-mentor-consultation-stoa-followups-verbatim.md`.** Ruling, in full: *"A contradiction event narrows or corrects an existing record; it does not by itself create one."* The evidentiary standard's own word "contradicts" presupposes prior standing — where no examined use exists in a domain, there is nothing to contradict, only a curator's judgement paired with an artifact. **The complete ruling:** Q5(c) contradiction events require independent examined evidence in the domain before applying any effect to the public trust record; where none exists, the event is recorded in the ledger and HELD (preserved, available to a future reader, applicable once independent evidence accumulates) but does not seed the domain row or set the last-activity timestamp. **Q13(a) carries the identical constraint explicitly** — the mentor's reasoning applies equally (a coherence observation should not originate a public record any more than a contradiction should), even though the current flag mechanism happens not to trip the bug mechanically; stating it now prevents the protection being "coincidental and silent."
+
+**Built same session, in response:** a new `emitStoaGatedTrustEvents` in `trust-core-store.ts` — every Stoa event is ALWAYS ledgered; the fold into `agent_trust_state` (the step that can originate a public record) fires ONLY when a pre-insert read confirms the domain already carries independent evidence (`lastDomainActivityAt !== null || earnedRank !== priorRank || justiceFloorActive`, read BEFORE this event's own insert so it can never count as its own evidence). Both Stoa emitters now route through this gated path instead of the generic one (scoped to exactly these two event types by construction — no other event type's behaviour changed, verified by re-running every adjacent trust-core battery unchanged). Return shape widened to `{written, held}` so the admin route can honestly tell the submitting curator when a finding was preserved-but-not-applied. Battery §G rewritten from a "disclosed, unresolved" documentation pin into genuine gate-behaviour tests against the house in-memory fake (`fake-supabase.ts`) — a fresh domain now proves `written:1, held:1` + zero state rows created; a domain with genuine prior evidence proves `written:1, held:0` + the fold applying normally; a defensive null-domain refusal is pinned; Q13(a) is proven to share the identical gate. Final battery: **60/0**. `tsc` 0, `npm run build` ✓, all adjacent trust-core batteries unchanged (emission-hooks 19/0, kathekon 105/0, loop-fold 181/0, S9b 86/0, S10 106/0, developmental-observations 20/0), stoa-boundary 83/3 (the 3 pre-existing ST6 failures, confirmed unchanged before/after this session's diff — not this build's).
+
+**PR20 adopted, same session, at the founder's direction — see the separate `D-PR20-ADOPTED-MENTOR-BRIEF-ARCHITECTURAL-SURFACES-2026-08-04` entry immediately below.** The founder's stated reasoning: *"The floor-creation problem would have been visible before the ruling if the brief had included: 'the fold mechanism seeds a new domain row at the floor for any decrease event in an unexamined domain.'"* This session's own second-consultation brief (sent before PR20 existed) already modelled the behaviour PR20 will require going forward — it is cited in PR20's Source as the grounding instance.
+
+**Files touched:** `website/src/lib/substrate/trust-core/{types,trust-transition,derive-trust-events,emission-hooks,trust-core-flag,trust-core-store}.ts` · `website/src/lib/stoa/stoa-store.ts` (+`getStoaEntryById`) · `website/src/app/api/admin/stoa-trust-flag/route.ts` (NEW) · `website/src/lib/stoa/__tests__/stoa-boundary.test.ts` (allowlist) · `website/src/lib/substrate/trust-core/__tests__/stoa-trust-events.test.ts` (NEW, 60/0) · `website/supabase-agent-trust-events-stoa-vocabulary-migration.sql` (NEW, authored not applied) · `operations/connective-layer-2026-08/2026-08-04-mentor-consultation-stoa-followups-verbatim.md` (the second, evidence-gate ruling, appended to the existing verbatim file).
+
+**Risk classification:** `code-critical` for the schema-adjacent build (0d-ii; new trust-event types + a CHECK-widening migration), fully discharged as a DARK repo-only artifact — both flags UNSET everywhere, migration authored not applied, `emitStoaGatedTrustEvents` unreachable from any live route until the admin route itself is reachable and both flags are set.
+
+**Rollback path:** `git revert` the build commit (nothing installed/live; the migration is inert unapplied). No production/perimeter/auth/schema/flag/credential change survives outside this repo commit.
+
+**Rules served:** PR19 (independent review ran, findings folded), PR20 (retroactively — this session's brief already modelled the rule), R18f-parallel (every Stoa event still requires the curator-supplied pairing before deriving; the new gate adds a SECOND, independent bar — evidence-before-effect — on top of it), the S9b null-domain lesson (extended: any future `decrease`/`increase`-effect event type built on an unexamined domain inherits the identical seed-then-floor/seed-then-ceiling risk and should be evidence-gated by the same pattern unless a mentor ruling says otherwise).
+
+**Status:** Adopted. **Build complete, dark, awaiting a separate founder-walked activation session** (migration TEST→prod, then both flags). Cross-references: `D-STOA-ST7-FOLLOWUP-MENTOR-VERDICTS-ADOPTED-2026-08-04` (the first consultation, scoping the build); `D-PR20-ADOPTED-MENTOR-BRIEF-ARCHITECTURAL-SURFACES-2026-08-04` (the process-rule this session's second consultation prompted).
+
+---
+
+## D-PR20-ADOPTED-MENTOR-BRIEF-ARCHITECTURAL-SURFACES-2026-08-04
+
+**Decision:** Adopted PR20 — Mentor Consultation Briefs Must Name the Affected Architectural Surfaces — at the founder's direction, immediately following the Stoa Q5c/Q13a build session (`D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04`). Full rule text in `/adopted/project-instructions-snapshot.md` §PR20; cross-referenced into `/adopted/standing-protocol-cache.md`'s status header and both process-rule reference lines (PR1–PR20).
+
+**Grounding instance:** the same build's PR19 independent adversarial review found MEDIUM-1 — the existing fold mechanism (`foldDomainEvent` in `trust-core-store.ts`) seeds a fresh `agent_trust_state` row at the profile prior for ANY event on a domain with no prior state, and a `decrease`-effect event one rank down from a fresh `habitual` seed hits the floor, silently originating a public trust record from a single event. This was a **pre-existing, generic property of the fold mechanism** — not something the Stoa build introduced — and it was mechanically discoverable by reading `trust-core-store.ts` before the original Q5(c) evidentiary-standard ruling was ever requested. The original consultation brief (`operations/connective-layer-2026-08/2026-08-02-mentor-consultation-connective-layer-verbatim.md`, Q5(c)) did not name it, so the mentor's first ruling ("an examined artifact, never accusation alone") could not address a consequence it wasn't told existed. A second consultation was required to close the gap the first brief should have surfaced.
+
+**The rule (summary; full text at the cross-reference above):** a mentor-consultation brief on any question with an architectural consequence must name the specific EXISTING mechanisms — stated as one-sentence, mechanism-level facts about current behaviour, not a code dump or file listing — that the ruling will land on. The test for what to name: a fact not implied by the question itself, that would change what the mentor rules if they knew it. Applies to consultations producing verbatim records under the `operations/*/mentor-consultation-*.md` pattern whose question concerns a change to the trust-core, practice, Stoa, or any other examined-record surface; does not apply to purely philosophical/design-space consultations with no landing mechanism.
+
+**Rationale:** the mentor reasons from the brief, not the repository. PR19 catches this class of gap adversarially, after a build exists to review; PR20 is the cheaper, earlier catch — the same class of fact, surfaced before the ruling is requested rather than found afterward, so the first ruling is complete rather than needing a follow-up round-trip.
+
+**Files touched:** `adopted/project-instructions-snapshot.md` (new §PR20 + cross-reference count updated PR1–PR19 → PR1–PR20) · `adopted/standing-protocol-cache.md` (status header amendment note + both process-rule reference lines updated) · this entry.
+
+**Risk classification:** `governance` — documents only, no code/schema/flag/perimeter change.
+
+**Rollback path:** `git revert` this session's records commit for the two governing documents; the rule's absence reverts session-open behaviour to the pre-PR20 baseline (no mechanical enforcement — PR20 is a drafting discipline, not a code-level gate).
+
+**Status:** Adopted. Cross-references: `D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04` (the grounding instance); `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21` (the adjacent, later-stage catch this rule complements at an earlier stage).
+
+---
+
+## D-C1A-DEGRADATIONS-LOGGED-2026-08-04
+
+**Session:** A status brief on the practice-on/logos-on program (the 2026-08-01 fifth-circle split) was given to the mentor 2026-08-04, covering what shipped (`SUBSTRATE_AGENT_CIRCLES_ENABLED=true` live since 2026-08-02 — the first-circle correction, positive phronesis/sophrosyne routing, the circle-4 staged pause) and what's outstanding (C1c, C2, D4, W2, W3 — all named and unbuilt). Two disclosed-but-unfixed items were flagged in that brief: `loop-fold.ts`'s `self_regarding` bucket being starved, and `practice-suggestion.ts` basis B6 becoming largely unreachable, both caused by C1a's deliberate `self_preservation`-extraction narrowing. **Tier: `governance` — documents only; no code/schema/flag/deploy change.**
+
+**Decision:** Per the mentor's ruling on sequencing (verbatim: *"Leave them in sequence. Do not interrupt C1c/C2/D4 to fix them... A known, named, bounded cost is a different thing from an unknown one. These are known. They stay on the list, they get their own session, and the sequencing holds."*), both items remain unfixed and are sequenced AFTER C1c/C2/D4. **Per the mentor's one confirming requirement** — that each item have "a clear owner in the backlog with enough context that they can be picked up without reconstruction," since prior to this they existed only in one session-close document's Carried section (`operations/handoffs/founder/2026-08-01-agent-circles-C0-C1-C3-CLOSE.md` §4b) and this status brief — a dedicated backlog file was written: `operations/agent-circles-2026-08/2026-08-04-backlog-c1a-measurement-degradations.md`. It names the exact root cause (both items share one mechanism: C1a extracting `self_preservation` far less often, per the 2026-07-19 self-circle ruling it extends), the exact files to read first for each, what the fixing session needs to decide (not a mechanical fix — a genuine re-examination of what each downstream consumer's trigger condition should mean now that first-circle extraction has changed shape), and the sequencing constraint.
+
+**Reasoning:** the mentor's distinction — a known, named, bounded cost vs. an unknown one — only holds if "known and named" means genuinely retrievable by a future session, not merely mentioned in passing inside a prior close document's Carried list or a one-off status brief to the mentor. Neither of those is the standing backlog surface this repo's session-open protocol scans. A dedicated file with root cause, harm, disclosure provenance, the open design question, and file pointers closes that gap without requiring the fix itself.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-04-backlog-c1a-measurement-degradations.md` (NEW); this entry.
+
+**Risk classification:** `governance` — documents only. No code touched; neither item is fixed by this entry, deliberately (per the mentor's ruling — not fixed, logged).
+
+**Rollback path:** `git revert` this session's records commit. The backlog file's absence would simply return both items to their prior, less-discoverable state (still named in the C0-C1-C3-CLOSE.md Carried section).
+
+**Rules served:** PR5 (knowledge-gap / carried-item logging discipline — this is the same standing pattern, applied to a mentor-directed logging requirement rather than a 3rd-re-explanation threshold), PR18 (this entry does not retype a production-state summary — it points to the dedicated file rather than duplicating its content).
+
+**Status:** Adopted. Both items remain open, sequenced after C1c/C2/D4, per the mentor's ruling. Cross-references: `operations/handoffs/founder/2026-08-01-agent-circles-C0-C1-C3-CLOSE.md` §4b (original disclosure); the new backlog file; `D-AGENT-CIRCLES-Q2-Q4-Q3-BUILT-REVIEW-FOLDED-2026-08-02` (C1a itself); `operations/agent-circles-2026-08/2026-08-02-live-verification-walk-CLOSE.md` (the flag-flip that made this degradation live — note: this close's own decision-log entry has not yet been appended to this file as of this session; a standing gap named here for whoever closes it).
+
+---
+
+## D-MENTOR-ARCHITECTURE-MAP-REVIEW-INSTRUCTIONS-RECEIVED-2026-08-05
+
+**Session:** The mentor reviewed the six-file architecture map (`operations/architecture-map-2026-08/`) in full, confirmed it accurate and well-structured, and issued instructions covering: a sixth "dependency graph of outstanding items" element for the plain-text mirror; C2's build constraints (a scope document due before building, three hard prerequisites from prior rulings); D4's priority (blocks logos-on W1, does not block C2); the two degraded consumers' sequencing (their own session, after C2 is live); a Stoa pre-activation checklist request; and an explicit instruction to NOT scope or build any part of the founder's autonomous-loop/sage-calling vision until C2 is live and validated on real traffic. **Tier: `governance` — documents only.**
+
+**Decision:** Produced the two concretely-requested, immediately-actionable artifacts; queued the rest without building ahead of a session that hasn't been opened.
+
+**Built this session:**
+1. **The dependency graph** — added to `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` as a new "Sixth element" section: outstanding items only, plain-text ordered list, blocking relationships named explicitly, ending in a stated critical path to logos-on completion.
+2. **The Stoa pre-activation checklist** — `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md`. Names the two exact flag env-var names, the migration file + its apply order + its rollback boundary (reversible only before any real Stoa event is written), a six-step smoke test sequence built around confirming the evidence gate specifically (a fresh domain must read 404 on the public trust record, not a floored 200), and the monitoring signal for the gate's specific silent-failure mode (a nonzero `held` expectation quietly reading `held:0` on a fresh domain — checkable per-call from the response body alone, without log access).
+
+**A genuine inconsistency in the mentor's own instructions was found and NOT silently resolved.** The mentor's message states, in one place, "C2 is the next build priority after C1c" (C1c first), and later in the same message, "C2 and C1c are sequenced — C2 first" (C2 first). These contradict. The dependency graph records both statements verbatim, presents C2 and C1c as mutually scoped-together (per the mentor's own instruction that their scope documents should be visible side by side before either is built — this part is unambiguous), and flags the build-order question as open pending a one-line clarification, rather than the AI silently picking whichever reading seemed more plausible.
+
+**Not built this session, deliberately:** the C2 scope document (the mentor named its required contents — the Layer-1 extraction signal it reads, the threshold condition, the Layer-3 prose framing, and the eventual C1c trust-event type — but scoping it is its own session, not a byproduct of receiving instructions); D4's fix; the two degraded consumers' fix; any part of the autonomous-loop/sage-calling design (explicitly, per the mentor's instruction, blocked until C2 is live and validated — not merely built).
+
+**Files touched:** `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (the dependency-graph addition) · `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md` (NEW) · this entry.
+
+**Risk classification:** `governance` — documents only, no code/schema/flag change. The checklist itself authorizes nothing; every step inside it marked founder-performed stays the founder's, per PR17.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR17 (the checklist explicitly defers every live step to a founder-walked session, not a hand-off), PR18 (the dependency graph describes CURRENT outstanding-item state as of this close, not a prediction), the same evidence-gate discipline the checklist's smoke sequence exists to verify.
+
+**Status:** Adopted. **Carried, in order per the dependency graph:** resolve the C2/C1c build-order ambiguity → scope C2 and C1c together → D4 (parallel track, own schedule, gates logos-on W1) → the Stoa activation session (independent, ready to run once the founder walks it) → the two degraded consumers' own session (after C2 is live) → logos-on W2/W3 → the autonomous-loop design brief (only after C2 is live and validated). Cross-references: `D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04`; `D-C1A-DEGRADATIONS-LOGGED-2026-08-04`; `operations/handoffs/founder/2026-08-01-agent-circles-C0-C1-C3-CLOSE.md`.
+
+---
+
+## D-C2-C1C-ORDERING-RULED-CROSSCHECK-BUILT-2026-08-05
+
+**Session:** The mentor ruled on the C2/C1c ordering inconsistency flagged in `D-MENTOR-ARCHITECTURE-MAP-REVIEW-INSTRUCTIONS-RECEIVED-2026-08-05`, confirmed the flagging itself as the honest-claims discipline "applied to the mentor's own output... an example of the adversarial review function working on instructions, not just on code," and issued three further instructions: sharpen the autonomous-loop's blocking condition to two explicit parts, harden the Stoa checklist's step-2 into an unambiguous hard gate, and build the cross-check query named in that checklist BEFORE the activation session rather than only referencing it as a future shape. **Tier: `governance` for the ruling + graph update; the cross-check query is a read-only SQL artifact, no schema/data change.**
+
+**Decision:**
+
+1. **C2/C1c binding order, recorded as a standing ruling:** C2 builds first. C1c builds second. Both are scoped together — one four-element scope document (the Layer-1 signal C2 reads, the threshold condition, the Layer-3 prose framing, and C1c's eventual trust-event type) — before either builds. Reasoning: C1c's schema needs to describe C2's actual output; you cannot name that correctly before C2 exists.
+
+2. **The autonomous-loop/sage-calling blocking condition sharpened to two explicit parts**, per mentor instruction: (a) C2 live in production, AND (b) at least one real production consult has fired the orientation reading, its output reviewed, no anomalous behaviour found — with that review going to the mentor BEFORE any design brief is scoped. "C2 built" alone does not satisfy this.
+
+3. **Built:** `operations/connective-layer-2026-08/2026-08-05-stoa-evidence-gate-crosscheck.sql` — a read-only, runnable query. Finds every `(agent_id, virtue_domain)` whose entire trust-event history is Stoa-sourced but whose `agent_trust_state` row shows folded activity anyway (mirrors `trust-aggregate.ts`'s `hasEvidence` formula exactly). Expected result on a healthy gate: zero rows. To be run once as a pre-activation baseline (before any Stoa event exists — should read 0 by construction) and again after the smoke sequence completes.
+
+4. **The pre-activation checklist updated:** step 2 (the fresh-domain check) is now stated as an explicit hard gate — a 200 where a 404 is expected means the session stops immediately, the flag is unset, the cross-check query is run to capture the affected row(s), and the finding goes to the mentor before any further activation attempt; no mid-walk patching. The R18 public-docs step's trigger is now named explicitly (activation confirmed clean — the smoke sequence passes including the step-2 hard gate, and the cross-check query returns zero rows post-smoke) so it has a clear moment to be picked up rather than drifting into the backlog un-triggered.
+
+5. **The dependency graph (`06-PLAIN-TEXT-MIRROR.md`, the "Sixth element" section) rewritten** to carry the resolved C2→C1c order, the two-part loop condition, and the mentor's own eleven-step binding sequence verbatim-structured as the graph's closing summary, replacing the earlier "critical path, order TBD" framing.
+
+**Files touched:** `operations/connective-layer-2026-08/2026-08-05-stoa-evidence-gate-crosscheck.sql` (NEW) · `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md` (step 2 hardened; §4 cross-check reference updated from "recommended, not built" to built + when to run it; §5 R18 trigger named) · `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (the Sixth element section rewritten) · this entry.
+
+**Risk classification:** `governance`/documents for the ordering ruling and graph update; the SQL file is read-only with no schema or data effect — safe to run at any time, including before this session, with an expected-empty result either way.
+
+**Rollback path:** `git revert` this session's records commit. The SQL file's absence would simply remove the pre-built cross-check artifact — the checklist's §4 description of what it should do would still stand as a spec for rebuilding it.
+
+**Rules served:** PR20 (this exchange is itself an instance of the discipline PR20 codifies, run in the other direction — the AI's own architecture-map output was reviewed by the mentor and a genuine defect, the ordering contradiction, was caught; noted per the mentor's own instruction to name this when C2 scoping begins), PR17 (every activation step in the checklist stays founder-performed; the cross-check query is explicitly read-only and pre-built specifically so nothing about it requires a live decision at build time).
+
+**Status:** Adopted. **Binding sequence as of this entry (see the dependency graph's closing summary for the full eleven steps):** cross-check query — DONE. Stoa activation — ready, awaiting the founder's walk. C2+C1c scope document — not started. D4 — not started, parallel track. Cross-references: `D-MENTOR-ARCHITECTURE-MAP-REVIEW-INSTRUCTIONS-RECEIVED-2026-08-05`; `D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04`; `D-C1A-DEGRADATIONS-LOGGED-2026-08-04`.
+
+---
+
+## D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05
+
+**Session:** The mentor ruled on all five items from the IDEA-loop pre-brief technical feedback (`operations/agent-circles-2026-08/2026-08-05-idea-loop-prebrief-technical-feedback.md`) — the loop's own architecture, two new data types, the novelty-detection approach, the dashboard content, and the C2 generative-prompt-field tension. **Tier: `governance` — rulings + a dependency-graph update; no code/schema/flag change.**
+
+**Decision — five rulings, recorded as standing:**
+
+1. **The IDEA loop is externally-driven (Option B), ruled directly.** The loop lives outside SageReasoning's own servers; a calling process (the founder's Claude Code session, a dedicated harness, or a future purpose-built runner) holds cycle state and the continue/stop decision between calls. SageReasoning stays stateless and request-scoped per call — examination, novelty check, and trust-event write only. Reasoning: a cron-tick model can only approximate cycle-to-cycle continuity by flattening the full developing context to a database row between every step, destroying the property that makes generation different from scheduled processing. Philosophical framing offered alongside the technical reasoning: the platform is one step the reasoning calls into, not where the reasoning lives.
+
+2. **Two new data types, scoped upstream of C2, not scoped yet:** `OikeiösisGap` (current circle 1–5, target circle = current+1 always, a plain-language description of what serving the target would mean for the current project goal) and `GeneratedCandidate` (a not-yet-taken action: proposed action text, oriented circle, expected virtue domains, a confidence field for how strongly the generation step believes the candidate addresses the gap). Once generated, a `GeneratedCandidate` feeds the EXISTING `DiscernmentInput.candidates` shape — the generation step is new; the examination step is not. Explicitly: do not scope the generation step itself yet — scope only the two types, bring them to the mentor first.
+
+3. **Novelty detection: structural, not content-based, for the first build.** Query the history table for the circle/virtue-domain-combination distribution within the session window; flag a `GeneratedCandidate` novel if its combination falls outside that distribution OR has appeared fewer than 3 times (the existing `trajectory-delta.ts` evidence floor, reused). The honest limitation — two structurally identical but substantively different actions won't be distinguished — is to be documented AT BUILD TIME, not discovered later. Content novelty (embeddings / LLM-as-judge) is a named future upgrade, not a current requirement. Store the result as a boolean + confidence score on the `GeneratedCandidate` type before it enters examination.
+
+4. **Dashboard: delivery mechanism confirmed sufficient as-is (the existing poll-a-GET-route pattern); content and storage defined.** A new table, one row per IDEA-loop cycle: the seeding oikeiosis gap, the `GeneratedCandidate` produced, the examination result (proximity + virtue domains), the novelty result, a plain-language summary (a Layer-3 prose call, reusing the existing mechanism), and the cycle's stop-condition check result. The dashboard row display: which circle is being served, the proposed action, the verdict, novelty, and the summary.
+
+5. **The C2 generative-prompt-field tension — resolved, not left open.** "Never feeds back into the verdict" means exactly and only that the orientation reading does not alter Layer 2's proximity rating — it does NOT mean the field's output can never be consumed generatively by a downstream process. The IDEA loop consuming the field as a generation seed is downstream consumption of a completed examination result, not feedback into that examination's own verdict — the constraint is not violated. Claude's proposed field shape (a gap description, never a prescribed action) is confirmed correct and made exact: **format = one sentence, maximum, of the form "this action engaged circle N but left room to extend toward circle N+1 by [gap description]."** The instruction/prescription happens in the IDEA loop's OWN generation step, never in the C2 field itself.
+
+**Consequence for sequencing — the dependency graph revised same day.** Two new prerequisite items added upstream of C2's own scope document (the two type definitions, item "2a"); C2's scope document widened from four elements to three GROUPED components (orientation reading, generative-prompt field, novelty-detection spec — all three visible together before C2 builds, not just the original four sub-elements of the reading alone); the full binding sequence renumbered from eleven to twelve steps to carry the new type-scoping step explicitly. `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` §"Sixth element" rewritten to match.
+
+**Files touched:** `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (dependency graph revised) · this entry. The pre-brief feedback document itself (`operations/agent-circles-2026-08/2026-08-05-idea-loop-prebrief-technical-feedback.md`) is left as the historical record of what was asked and answered — not rewritten to fold in the ruling, per the standing practice of treating a prior document as the record and the decision log as where the ruling lands.
+
+**Risk classification:** `governance` — documents only. No type, table, or route has been built; both new data types and the widened C2 scope remain SCOPED, not built.
+
+**Rollback path:** `git revert` this session's records commit. The rulings themselves stand as record regardless (per the same convention used for every other mentor consultation this arc).
+
+**Rules served:** PR17 (the loop-runner ruling explicitly keeps every live/generative step outside the platform's own automated surface — nothing here authorizes autonomous action), PR20 (the pre-brief technical-feedback document is itself an instance of naming the affected architectural surfaces before a ruling was requested — the four questions were answered against actual code, not assumption, before being sent).
+
+**Status:** Adopted. **Binding order as of this entry (see the dependency graph's twelve-step summary for the full sequence):** cross-check query — DONE. Stoa activation — ready, awaiting the founder's walk. `OikeiösisGap`/`GeneratedCandidate` type scoping — NOT STARTED, now the next upstream item before C2. C2+C1c three-component scope document — NOT STARTED, follows the types. Cross-references: `D-C2-C1C-ORDERING-RULED-CROSSCHECK-BUILT-2026-08-05`; `D-MENTOR-ARCHITECTURE-MAP-REVIEW-INSTRUCTIONS-RECEIVED-2026-08-05`; the pre-brief technical-feedback document.
+
+---
+
+## D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05
+
+**Session:** The mentor relayed six generation heuristics from a family conversation, meant for the IDEA loop's eventual generation-step prompt structure (analogous transfer, combinatorial generation, synthesis-over-novelty, context transfer, fifth-circle weighting, anomaly detection — one candidate produced per heuristic, six per cycle, filtered down by examination + novelty detection to one). **Tier: `governance` — content capture + one technical note; no code/schema/flag change.**
+
+**Decision:** Captured the six heuristics verbatim in a new document (`operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md`) rather than only in this session's transcript, since the generation step they belong to is explicitly NOT next in the queue — `OikeiösisGap`/`GeneratedCandidate` type scoping is — and the heuristics need to survive intact to whenever that later session opens.
+
+**One technical consequence flagged, not resolved:** six candidates per cycle multiplies EXAMINATION cost, not just generation cost. A full examination (`/api/reason`'s Layer 1→2→3 pipeline) and the platform's own cheaper guardrail-shaped examination (`/api/guardrail`, stops after Layer 2, no prose call, roughly half the cost/latency) both already exist. If the eventual generation-step scope has all six candidates go through the full pipeline, one IDEA-loop cycle costs six full consults before novelty detection even runs; if the filtering pass uses the cheaper guardrail shape for all six and only the winning candidate gets the full treatment, the cost profile is roughly six lightweight checks plus one full one. Offered as an option for the eventual scope document, not decided here — consistent with PR20 (naming the affected architectural surface before a ruling locks in a shape, rather than after).
+
+**Also named, not decided:** the `GeneratedCandidate` type will likely need a field recording which of the six heuristics produced it, for the filtering step to work and for any future review of heuristic productivity — a note for the type-scoping session, not a change to that session's scope today.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md` (NEW); this entry.
+
+**Risk classification:** `governance` — documents only. Nothing built; the generation step remains unscoped, per the standing sequence.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the cost-consequence note names a specific existing mechanism — the guardrail path's cheaper shape — before the generation step's scope is written, not after).
+
+**Status:** Adopted. Sequencing unchanged: `OikeiösisGap`/`GeneratedCandidate` type scoping remains the next item; these heuristics + the cost note are queued for whenever the generation step itself is scoped. Cross-references: `D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`; `operations/agent-circles-2026-08/2026-08-05-idea-loop-prebrief-technical-feedback.md`.
+
+---
+
+## D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05
+
+**Session:** The mentor ruled directly on the examination-cost consequence flagged in `D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05` (six candidates per cycle, full-vs-guardrail-shaped examination for the filtering pass). **Tier: `governance` — a standing design ruling; no code/schema/flag change.**
+
+**Decision — binding design for the IDEA loop's generation-step cycle, recorded now for the session that eventually scopes it:**
+
+1. Six candidates generated, one per heuristic (unchanged).
+2. Each of the six passes through the **guardrail-shaped examination only** — proximity + virtue-domain assessment, no Layer 3 prose call. Reasoning: the guardrail shape exists for exactly this reason (the 2026-06-19 no-prose ruling); the filtering pass is the same use case — rapid assessment to decide what's worth full treatment, not a consult needing human-readable reasoning. Six full consults per cycle would make the loop prohibitively expensive for repeated cycles, defeating the point of a generative loop.
+3. Novelty detection runs on all six guardrail-shaped results.
+4. The highest-proximity candidate that ALSO passes the novelty threshold gets the **full examination shape** (Layer 3 prose included) — that prose becomes the dashboard's human-legible cycle result.
+5. **The null-cycle rule.** If no candidate passes the novelty threshold, the cycle must NOT fall back to presenting the highest-proximity non-novel candidate as a result. It records a named, honest **null cycle** — generation produced nothing new — and the loop continues to the next cycle. Explicitly: not a failure; the honest-claims discipline applied to generation, refusing to manufacture novelty by quietly lowering the threshold.
+
+**Consequences named for the eventual type/table scoping session, not decided now:** the per-cycle dashboard table needs an honest representation of a null cycle (not an empty row, not a row forced to hold a non-novel candidate); `GeneratedCandidate` needs to carry a guardrail-shaped result for all six candidates and, additionally, full-examination prose only for the eventual winner — populated at different pipeline stages, not both up front; the heuristic-attribution field (named in the prior document) is now more clearly load-bearing, since all six candidates need to stay distinguishable through the whole filter-then-full-examine pipeline.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md` (the cost section rewritten from "flagged, open" to "ruled, standing design," the null-cycle rule added, three scoping consequences named); this entry.
+
+**Risk classification:** `governance` — documents only. Nothing built; the generation step remains unscoped, per the standing sequence — this ruling fixes its cost SHAPE in advance of that scoping session, it doesn't move the session earlier.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the cost fact was surfaced before the ruling was requested, per the prior entry; this entry records the ruling that fact produced), the honest-claims discipline (the null-cycle rule is a direct instance of it, applied to generation for the first time in this program).
+
+**Status:** Adopted. Sequencing unchanged — `OikeiösisGap`/`GeneratedCandidate` type scoping remains the next item; this ruling and the heuristics it applies to are queued for the generation step's own scoping session. Cross-references: `D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05`; `D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`.
+
+---
+
+## D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05
+
+**Session:** The mentor added a seventh generation heuristic (friction detection), a fallback rule using it as a null-cycle backstop, and a new shared-state storage requirement surfaced by a multi-agent framing of the loop. **Tier: `governance` — content capture + rulings; no code/schema/flag change.**
+
+**Decision:**
+
+1. **Friction detection (heuristic 7) captured.** Given the current task list, what routine-task friction points (steps taking longer than expected, unsatisfying results, workaround behaviour) exist — each generates one candidate to remove or reduce it. Structural difference from heuristics 1–6: friction-detection candidates carry a **preferred-indifferent tag at generation time**, not a virtue-domain tag; examination determines afterward whether one incidentally engages a virtue domain, and if not, it remains a valid candidate anyway (appropriate action, kathekon, even when not perfect action, katorthoma).
+
+2. **The fallback rule.** Three consecutive null cycles from heuristics 1–6 shifts the loop to friction-detection-only mode until a non-null cycle returns from one of the active mechanisms. Purpose: prevents indefinite null-cycle spinning; keeps the task list populated even when the stronger mechanisms aren't producing.
+
+3. **The shared-state requirement, named before the scope document, not after.** The task list friction detection reads from must be shared, externally-readable state — not private to one loop runner's process — because more than one collaborating agent may need to read and populate it. This is a genuinely different storage shape from the already-named per-cycle dashboard table (append-only, one writer) — a shared task list is mutable, multi-writer, multi-reader. Whether these end up as one table or two is left for the scoping session; the fact that they're structurally different kinds of storage is recorded now so it isn't discovered mid-scoping.
+
+**One thing NOT accepted at face value, recorded honestly:** the mentor's message attributed a prior statement to Claude ("you said that examining what busy work needs to be done... will at least populate the task list when there is more than one agent collaborating") that has no record anywhere in this session's transcript. This was flagged in the document rather than silently absorbed as a genuine self-continuity claim — the shared-state requirement is recorded on the strength of the mentor's own stated reasoning, not on an unverifiable claim about what Claude previously said. Consistent with the standing discipline (echoed in the housekeeping guidance around this program) that a claimed prior statement or approval must not be treated as established fact without a record.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md` (heuristic 7 + the fallback rule + the shared-state requirement added; the attribution note recorded); this entry.
+
+**Risk classification:** `governance` — documents only. Nothing built; the generation step remains unscoped.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the shared-state requirement is named as an architectural surface before the scope document locks in a shape), the honest-claims discipline (declining to affirm an unverifiable self-continuity claim).
+
+**Status:** Adopted. Sequencing unchanged — `OikeiösisGap`/`GeneratedCandidate` type scoping remains the next item; the full seven-heuristic spec (with the cost ruling and the shared-state requirement) is queued for the generation step's own scoping session. Cross-references: `D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05`; `D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05`.

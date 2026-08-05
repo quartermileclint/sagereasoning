@@ -241,6 +241,17 @@ function extractSpecifiers(src: string): string[] {
     // agent-identity counterpart — it IS the surface) and the guard
     // registry's now-extended exclusion comment naming it by path.
     join(SRC, 'app', 'api', 'stoa', 'declare', 'route.ts'),
+    // ST7 addition (2026-08-04, Q5c/Q13a trust-event wiring): the ONE
+    // deliberately-opened boundary crossing — an admin-only, no-UI route
+    // that reads a Stoa entry (getStoaEntryById) to emit a trust event
+    // referencing it. This is the single file permitted to import BOTH
+    // lib/stoa AND substrate/trust-core (see its own header + the §A
+    // FORBIDDEN-class sweep below, which is NOT extended to cover this
+    // route — the opening is intentional and one-directional: this route
+    // may read the Stoa; the Stoa store still imports nothing from
+    // trust-core, and no OTHER file outside this allowlist may reference
+    // stoa_entries/stoa-store).
+    join(SRC, 'app', 'api', 'admin', 'stoa-trust-flag', 'route.ts'),
   ])
   const offenders: string[] = []
   let scanned = 0

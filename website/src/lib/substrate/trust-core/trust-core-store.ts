@@ -166,6 +166,121 @@ export async function emitTrustEvents(
   }
 }
 
+/**
+ * True iff a domain already carries INDEPENDENT earned evidence — a trust
+ * state row with lastDomainActivityAt set, a level that has moved off the
+ * profile prior, or an active justice cap — BEFORE the event about to be
+ * emitted is applied. Read-only; never inserts, never folds. Mirrors
+ * trust-aggregate.ts's hasEvidence formula exactly (kept independent here
+ * rather than importing computeEffectiveDomain, which additionally runs A3
+ * decay + the justice cap — irrelevant to "does independent evidence
+ * exist," and would require a `now` this pre-write gate has no honest use
+ * for).
+ */
+async function domainHasIndependentEvidence(
+  agentId: string,
+  domain: VirtueTrustDomain,
+  client: SupabaseClient,
+): Promise<boolean> {
+  const { data, error } = await client
+    .from(STATE_TABLE)
+    .select('earned_level, profile_prior, last_domain_activity_at, justice_floor_active')
+    .eq('agent_id', agentId)
+    .eq('virtue_domain', domain)
+    .maybeSingle()
+  if (error) {
+    if (!isMissingTableError(error as { code?: string; message?: string })) {
+      console.error(
+        `[trust-core] domainHasIndependentEvidence(${agentId}/${domain}): read failed — treating as no evidence (conservative):`,
+        (error as { message?: string }).message,
+      )
+    }
+    return false
+  }
+  if (!data) return false
+  const row = data as { earned_level: string; profile_prior: string; last_domain_activity_at: string | null; justice_floor_active: boolean }
+  return (
+    row.last_domain_activity_at !== null ||
+    row.earned_level !== row.profile_prior ||
+    row.justice_floor_active === true
+  )
+}
+
+/**
+ * Stoa Q5c/Q13a — the mentor's 2026-08-04 evidence-gated emission path
+ * (verbatim record: operations/connective-layer-2026-08/2026-08-04-mentor-
+ * consultation-stoa-followups-verbatim.md — "Q5(c) contradiction events
+ * require independent examined evidence in the domain before applying any
+ * effect to the public trust record... Q13(a) divergence events carry the
+ * same constraint explicitly, regardless of whether the current flag
+ * mechanism would trip it. Both constraints should be implemented as
+ * explicit checks in the trust-event application path, not relied upon as
+ * coincidental properties of the current architecture.")
+ *
+ * Every Stoa event is ALWAYS inserted into the ledger (the finding is
+ * preserved — "the event is not lost... available to a reader who consults
+ * the full record"). The fold into agent_trust_state — the step that can
+ * seed a domain row, set lastDomainActivityAt, and thereby originate a
+ * public trust record — is applied ONLY when the domain already carried
+ * independent evidence BEFORE this event (checked pre-insert, so the event
+ * about to be written can never count as its own prior evidence; the Stoa
+ * itself never writes trust events at all — #20 — so "independent" and
+ * "not from the Stoa entry" are structurally the same condition here).
+ *
+ * A domain WITHOUT prior evidence gets its event ledgered and HELD: written
+ * to the record with no effect on the public trust record, available to be
+ * applied once independent examination establishes the domain. This is
+ * distinct from emitTrustEvents' generic insert-then-fold path deliberately
+ * — the gate is scoped to the two Stoa event types by construction (this
+ * function's only callers), not a change to any other event type's
+ * behaviour.
+ */
+export async function emitStoaGatedTrustEvents(
+  events: TrustEvent[],
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<{ written: number; held: number }>> {
+  try {
+    let written = 0
+    let held = 0
+    for (const event of events) {
+      if (event.virtueDomain === null) {
+        // Structurally unreachable for the current Stoa event types (both
+        // derivers hard-code a non-null domain), but fail-honest rather than
+        // silently mis-routing into the reflect-wide fold if that ever changes.
+        console.error(
+          `[trust-core] emitStoaGatedTrustEvents: refusing a null-domain event (${event.eventType}) — the evidence gate requires a domain.`,
+        )
+        continue
+      }
+      const domain = event.virtueDomain
+      // Read BEFORE insert — the event about to be written can never count
+      // as its own prior evidence (the ledger insert has not happened yet).
+      const hadIndependentEvidence = await domainHasIndependentEvidence(event.agentId, domain, client)
+
+      const inserted = await insertEvent(event, client)
+      if (!inserted.ok) {
+        console.error(
+          `[trust-core] emitStoaGatedTrustEvents: insert failed at ${event.eventType} — events lost:`,
+          inserted.error,
+        )
+        return inserted
+      }
+      if (!inserted.value.inserted) continue // duplicate — already ledgered (+ folded or held, unchanged)
+      written++
+      if (hadIndependentEvidence) {
+        await foldDomainEvent(event, client)
+      } else {
+        held++ // ledgered, deliberately NOT folded — no public-record effect
+      }
+    }
+    return { ok: true, value: { written, held } }
+  } catch (e) {
+    const error = `emitStoaGatedTrustEvents threw: ${(e as Error).message}`
+    console.error('[trust-core] ' + error)
+    return { ok: false, error }
+  }
+}
+
 async function insertEvent(
   event: TrustEvent,
   client: SupabaseClient,

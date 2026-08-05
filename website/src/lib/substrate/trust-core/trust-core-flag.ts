@@ -32,3 +32,17 @@ export const TRUST_READ_SURFACE_ENV_VAR = 'SUBSTRATE_TRUST_READ_SURFACE_ENABLED'
 export function isTrustReadSurfaceEnabled(): boolean {
   return process.env[TRUST_READ_SURFACE_ENV_VAR] === 'true'
 }
+
+/** Stoa Q5c/Q13a (2026-08-04) — a DEDICATED flag alongside (never instead of)
+ *  SUBSTRATE_TRUST_CORE_ENABLED (founder election E2). Rationale: a false
+ *  positive here writes a PERMANENT ledger row even in measure mode, and the
+ *  mentor named the residual risk explicitly (a curator can be wrong about
+ *  the artifact/entry pairing). BOTH this flag AND the trust-core flag must
+ *  be 'true' for the admin flag-intake route to emit; either unset ⇒ no
+ *  derivation attempted, no DB write — byte-identical, battery-asserted. A
+ *  rollback on this flag alone leaves S9–S11 surfaces untouched. */
+export const STOA_TRUST_EVENTS_ENV_VAR = 'SUBSTRATE_STOA_TRUST_EVENTS_ENABLED'
+
+export function isStoaTrustEventsEnabled(): boolean {
+  return process.env[STOA_TRUST_EVENTS_ENV_VAR] === 'true'
+}

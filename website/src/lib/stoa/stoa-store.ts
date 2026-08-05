@@ -484,6 +484,35 @@ export async function withdrawStoaEntry(
 }
 
 /**
+ * Fetch one entry by id, founder/admin-operated (ST7 — the Q5c/Q13a trust-
+ * event flag intake). Returns null on not-found or a missing table (the
+ * house missing-table-benign read discipline); a genuine query error is
+ * surfaced as ok:false so a caller never mistakes a DB outage for "no such
+ * entry". No visibility/status filtering — the admin path may reference any
+ * entry, including a withdrawn or removed one (the trust event describes
+ * what was examined, not the entry's current lifecycle state).
+ */
+export async function getStoaEntryById(
+  entryId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoaStoreResult<{ entry: StoaEntry | null }>> {
+  try {
+    const { data, error } = await client
+      .from(TABLE)
+      .select('*')
+      .eq('id', entryId)
+      .maybeSingle()
+    if (error) {
+      if (isMissingTableError(error)) return { ok: true, value: { entry: null } }
+      return { ok: false, error: `getStoaEntryById: ${error.message}` }
+    }
+    return { ok: true, value: { entry: data ? rowToEntry(data as StoaRow) : null } }
+  } catch (e) {
+    return { ok: false, error: `getStoaEntryById threw: ${(e as Error).message}` }
+  }
+}
+
+/**
  * Platform removal — ONLY on the three ruled grounds (#16, Q5b), founder-
  * operated until the ST7 machinery exists. The Q5b examined-artifact standard
  * is enforced HERE as well as at the DB CHECK: a dishonesty removal without an

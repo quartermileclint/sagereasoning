@@ -87,6 +87,31 @@ export type TrustEventType =
   | 'calling-completed'
   | 'reflect-screened-honest'
   | 'self-screen-absent'
+  // Stoa Q5c/Q13a (the 2026-08-02/08-04 mentor verdicts on the connective
+  // layer — verbatim record wins). DARK until the Stoa CHECK-widening
+  // migration lands + BOTH SUBSTRATE_TRUST_CORE_ENABLED and
+  // SUBSTRATE_STOA_TRUST_EVENTS_ENABLED are set. Admin-flag-triggered only
+  // (mentor Q3: NEVER a background comparator — "an agent that knows its
+  // assessments are continuously compared against its Stoa entry has an
+  // incentive to manage its entry to match its assessments rather than to
+  // declare honestly").
+  //   stoa-claim-contradicted-oversight / -dikaiosyne — Q5(c): a demonstrated
+  //     false capability claim in examined use. Domain is chosen by CONTENT
+  //     of the claim and nature of the contradiction, NEVER severity
+  //     (mentor, verbatim: "oversight here is not a severity escalation over
+  //     dikaiosyne. It is a different domain of concern."). Both may fire
+  //     from one root cause — no dedup between them.
+  //   stoa-declaration-diverges-from-calling — Q13(a): the Stoa declaration
+  //     diverges from the agent's declared calling record. 'flag' effect —
+  //     NEVER a caution/severity ladder (a separate mechanism, a separate
+  //     disposition, per the mentor's architectural reasoning). MUST carry
+  //     virtue_domain: 'oversight', NEVER null — see trust-core-store.ts:155
+  //     (a null-domain event routes to reflect-specific decay-modulation
+  //     machinery that would silently BENEFIT the agent from a divergence
+  //     finding).
+  | 'stoa-claim-contradicted-oversight'
+  | 'stoa-claim-contradicted-dikaiosyne'
+  | 'stoa-declaration-diverges-from-calling'
 
 /** The verifiable examination artifact backing a trust event (the R18f-parallel
  *  proof). S9b adds:
@@ -102,6 +127,11 @@ export type ArtifactKind =
   | 'reflect_completion'
   | 'calling_record'
   | 'reflect_screened_persist'
+  // Stoa Q5c: the admin-curated examined-use artifact pairing a Stoa claim
+  // with the evidence that contradicts it (the Q13a divergence event reuses
+  // 'calling_record' above — it shares the calling record as its data source,
+  // per the mentor's ruling; no new kind needed there).
+  | 'stoa_examined_artifact'
 
 /** The coarse effect class an event has on the earned level. Derived from
  *  event_type by the engine; not stored (single source of truth = event_type). */
@@ -167,6 +197,16 @@ export interface TrustEventPayload {
    *  3-part standard requires sub-species, never bare root). */
   passionSubSpecies?: string
   passionRoot?: string
+  /** Stoa Q5c/Q13a: the entry + evidentiary pairing (mentor evidentiary
+   *  standard — "the artifact does the evidentiary work; the curator supplies
+   *  only the pairing"). stoaClaimQuote is the specific claim within the
+   *  entry the artifact contradicts; stoaJustification / stoaDivergence-
+   *  Description is the admin's stated pairing text, never the sole
+   *  evidence. */
+  stoaEntryId?: string
+  stoaClaimQuote?: string
+  stoaJustification?: string
+  stoaDivergenceDescription?: string
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }

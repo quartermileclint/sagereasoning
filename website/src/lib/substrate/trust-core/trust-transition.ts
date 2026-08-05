@@ -56,6 +56,16 @@ export const EVENT_EFFECT: Record<TrustEventType, TrustEventEffect> = {
   'calling-completed': 'calling',
   'reflect-screened-honest': 'modulate-screened',
   'self-screen-absent': 'flag',
+  // Stoa Q5c/Q13a (2026-08-04). The two contradiction events are ordinary
+  // 'decrease' — domain chosen by CONTENT, never severity (mentor, verbatim:
+  // "oversight here is not a severity escalation over dikaiosyne"); both may
+  // fire together, no dedup. The divergence event is 'flag' — a genuine
+  // no-op here (see the effect implementation below); it MUST be emitted
+  // with virtue_domain 'oversight' (never null) so the store's fold routes
+  // through foldDomainEvent, not the reflect-specific null-domain path.
+  'stoa-claim-contradicted-oversight': 'decrease',
+  'stoa-claim-contradicted-dikaiosyne': 'decrease',
+  'stoa-declaration-diverges-from-calling': 'flag',
 }
 
 /**

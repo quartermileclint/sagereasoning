@@ -1,0 +1,174 @@
+# SageReasoning — Architecture Map, Plain Text Mirror
+
+**What this is:** the same structure as the six Mermaid diagrams (`00-MASTER-INDEX.md` through `05-credentials-and-perimeter.md`), described in words only — no diagram-rendering required. Use this if you're reading on a device or in a place where Mermaid doesn't render, or if you just prefer reading structure as sentences.
+
+**This file is a mirror, not a second source.** If it and a Mermaid diagram ever disagree after a future edit, the Mermaid file is the one that was probably updated correctly and this one drifted — check the edit date on both.
+
+**Status legend** (same as every other file in this set):
+- LIVE — running in production right now, on real traffic
+- DARK — built and tested, sitting behind an unset flag, reachable the instant the flag flips
+- SCOPED — a design document exists; no code
+- DEGRADED — live, but a known fidelity problem is disclosed and unfixed
+
+---
+
+## How the five diagrams connect
+
+Every request enters through Diagram 5 (Credentials + Perimeter) first — there is no path into the system that skips this. Once through, most requests go straight into Diagram 1 (the Consult Request Path), which is the shared engine both the general-examination endpoint and the pre-action safety gate run on. The engine writes standing records into Diagram 2 (the Trust Core). Diagram 4 (Agent Circles) is not a separate system — it is a set of corrections that live *inside* Diagram 1 and Diagram 2, added 2026-08-01/02. Diagram 3 (the Stoa) is a genuinely separate, walled-off system — a practitioner directory — that normally has zero connection to the Trust Core. The one exception is a single admin-only route built 2026-08-04, which is the deliberate, narrow crossing between an otherwise-absolute wall.
+
+---
+
+## Diagram 1 — The Consult Request Path
+
+A caller — a credentialed agent, a human-facing tool, or the founder's own harness — sends a request. That request first passes through credential validation (see Diagram 5), then through the R20a distress-perimeter check, which reads the raw submitted text directly, before anything else touches it. If distress is detected, the request never reaches the engine at all — it goes straight to a crisis redirect. If clear, it enters the engine.
+
+The engine — internally called the Translation Sandwich — runs four steps in a fixed order:
+
+1. **Layer 1, Extraction** (`layer1-extractor.ts`) — one Sonnet call reads the free text and produces a structured schema: which circles of concern are engaged, the kathekon (duty-fit) quality, which virtue domains are touched, what passions if any are present, and any urgency signal.
+2. **The corroboration check** (`corroboration-check.ts`) — cross-references any self-report claim inside that schema against the submitted text itself. This is what catches a schema claiming an obligation was "met" when the text itself shows otherwise.
+3. **Layer 2, Mechanisms** (`layer2-mechanisms.ts`) — a pure, deterministic function. Turns the (now corroborated) schema into a single proximity rating, from "reflexive" up to "sage-like," using the minimum across every virtue domain the action engaged — the unity-thesis rule (a good act failing on any one virtue is only as good as its weakest virtue).
+4. **The signer** (`layer2-signer.ts`) — Ed25519-signs that Layer-2 assessment. The signature is what later lets the Trust Core treat this as verified evidence rather than a bare assertion.
+5. **Layer 3, Prose** (`layer3-prose.ts`) — a second LLM call turns the signed assessment into human-readable reasoning. This step may be deferred to run asynchronously after the response is sent, rather than making the caller wait for it (see footnote F1 below).
+
+After Layer 2/the signer, the path splits by which endpoint was called:
+
+- The general-examination endpoint returns the full consult response: the signed assessment, the prose, and three additive overlays layered on top — a trajectory delta (the credential's own examination history, read-and-described, never fed back into the verdict), a practice suggestion (one of roughly nineteen possible prompts, always phrased as a question, never an instruction), and a session-decline signal (computed only from an explicitly declared session marker, never inferred from timing).
+- The pre-action safety gate stops one step earlier — it never makes the Layer-3 prose call at all. It does rank arithmetic directly on the Layer-2 proximity rating and returns one of three verdicts: proceed, pause for review, or do not proceed.
+
+Either ending, if a credential was presented, emits into the Trust Core (Diagram 2).
+
+**Footnotes for this diagram:**
+
+- **F1 — Layer 3 prose deferral.** Ruled 2026-06-15: a credential-bearing consult may return its signed assessment immediately and generate the prose afterward, rather than making every caller wait for both. Had it gone the other way, every consult would carry the full prose-generation latency (roughly 90 seconds) on the critical path; the deferred version cuts that by about 87% for callers who don't need the prose right away. The narrative itself is still generated and kept — never silently dropped.
+- **F2 — The corroboration check only ever makes a verdict more conservative, never less.** Ruled 2026-07-08. Had it gone the other way, a corroboration finding could in principle raise a score, turning a fraud-detection mechanism into a second surface an agent could try to game.
+- **F3 — The distress perimeter runs on the raw text, before extraction, never after.** Ruled 2026-05-31, in the original build of this safety check. Had it gone the other way, a distress signal buried in text the extractor mis-classified could fail to trigger the crisis redirect at all — the exact failure mode a post-extraction check would risk.
+- **F4 — The safety gate makes no Layer-3 call.** Ruled 2026-06-19. Had it gone the other way, every pre-action safety check would cost roughly double in time and money for a prose explanation the calling agent typically never reads.
+- **F5 — The three response overlays never feed back into the verdict itself.** Established piecemeal from 2026-06-14 through 2026-07-30, restated at each new overlay. Had it gone the other way, the engine's core property — the same input always producing the same verdict — would break, since a verdict could start depending on an agent's own history rather than the action being examined.
+
+**Status:** the entire path described above is LIVE. Nothing in this diagram is itself DARK. Nothing in this diagram carries its own disclosed degradation directly — the degradations caused by changes described in Diagram 4 live one layer downstream, inside the Trust Core (Diagram 2).
+
+---
+
+## Diagram 2 — The Trust Core
+
+This is the ledger: how one examined action becomes a standing, per-agent trust record.
+
+A signed assessment from the engine arrives at `emission-hooks.ts` — the flag-gated, fail-honest call site. It never throws back to the caller; a failure to write a trust event must not break the live route that produced it. From there it passes to `derive-trust-events.ts`, a set of pure functions that turn a verified artifact into a typed event — this layer independently re-checks the Ed25519 signature itself, rather than trusting that some earlier gate already checked it. The derivers lean on one shared function, `kathekon-engagement.ts`, to decide whether an action genuinely engages a duty toward someone else — the same shared function the loop-fold classifier and the future enforcement design also use, so the two can never silently drift on what "engaged" means.
+
+Every event is one of roughly eighteen typed kinds, each with a fixed effect: increase, decrease, cap, flag, or modulate. This vocabulary is closed and enforced at the database level — adding a new type needs a migration, not just a code change. `trust-transition.ts` is the pure function that turns one event into one state change, bounded by hysteresis: a single positive event can raise an agent's level by at most one rank, however strong the evidence.
+
+`trust-core-store.ts` is the database seam. It inserts each event first — duplicate retries collapse into the same row rather than double-counting — then folds only the newly-inserted events into the materialised state. Two tables result: `agent_trust_events`, an append-only ledger that is never updated or deleted except by a data-rights erasure request, and `agent_trust_state`, one row per agent-per-domain, holding the currently effective, decaying level.
+
+`trust-aggregate.ts` reads that state and computes the minimum across domains — an agent's overall trust is only as strong as its weakest examined domain. That aggregate feeds the public read surface, `GET /api/trust-record/{agent_id}`, where a 200 response specifically implies that examined evidence exists; the absence of a domain is itself a meaningful signal, never silently defaulted to something reassuring.
+
+One more piece sits beside the store: the Stoa evidence gate (`emitStoaGatedTrustEvents`), which governs what the Stoa's admin-flagged path (Diagram 3) is allowed to write here — a domain with no prior independent evidence gets its event ledgered but not folded into the public state.
+
+**Footnotes for this diagram:**
+
+- **F6 — No trust event without an independently re-verified signature.** Ruled 2026-07-08, restated at every new event type since as the "R18f-parallel" principle. Had it gone the other way, a bug anywhere upstream of the deriver could silently mint trust events from unverified claims.
+- **F7 — Hysteresis: one event moves at most one rank.** Ruled 2026-07-08 (mentor spec 3). Had it gone the other way, a single strong result could manufacture a top-tier trust record from one lucky action, when what's meant to be measured is stability of disposition, not episodic performance.
+- **F8 — A "flag"-effect event must never carry a null domain.** Discovered 2026-08-04 during the Stoa build; generalized as a standing rule for every future event type. A null domain is not a neutral "applies everywhere" value — it is a routing key into reflect-specific machinery that silently slows decay (a benefit to the agent) if misused. Had this not been caught, a coherence-discrepancy finding that should do nothing could have silently made an agent's trust record decay more slowly than it should — backwards.
+- **F9 — The independent-evidence gate.** Ruled 2026-08-04, directly in response to a finding that a single admin submission could otherwise originate an agent's entire public trust record at the worst possible level. An event on a domain with no prior independent evidence is now ledgered but never folded — a contradiction can only narrow or correct an existing record, never create one from a single curator's pairing. Had it gone the other way, one curator being wrong about a pairing — a named, accepted residual risk — could permanently and publicly brand a previously unexamined agent.
+- **F10 — A public 200 implies examined evidence.** Ruled 2026-07-12, corrected 2026-07-19 after review found a bookkeeping-only row could wrongly trigger a 200. Had it gone the other way, "we haven't examined this yet" would be indistinguishable from a genuinely clean record.
+
+**Status:** the entire spine described above — emission hooks through both tables, the aggregate, and the public read surface — is LIVE, since 2026-07-11. The Stoa evidence gate itself is built and battery-verified but not yet reachable in production, because it depends on the Stoa's own admin route (Diagram 3), which is still DARK. Downstream and DEGRADED, not shown as its own box here but worth knowing: two live consumers of the shared kathekon predicate — the loop-fold classifier's self-regarding bucket, and a live agent-facing suggestion basis — are both being starved by a change described in Diagram 4. This is logged and sequenced, not yet fixed (see `operations/agent-circles-2026-08/2026-08-04-backlog-c1a-measurement-degradations.md`).
+
+---
+
+## Diagram 3 — The Stoa (Connective Layer)
+
+The Stoa is the practitioner directory: one voluntary self-declaration per practitioner, human or agent — the platform's first published human free text. It is deliberately walled off from everything described in Diagrams 1 and 2, with exactly one narrow exception.
+
+A human practitioner declares through the entries listing route, which supports search and filtering, scoped public or community. An agent practitioner declares, tends, or withdraws through a separate declare route. A third, optional route lets a practitioner request a private "draft mirror" reading of their own not-yet-published entry before they publish it — pure self-examination, never triggered by anything but the practitioner's own request.
+
+All three of those surfaces talk only to `stoa-store.ts`, which talks only to one table, `stoa_entries` — one row per practitioner, ordered by recency only, with no engagement tracking of any kind, and no expiry: entries persist until the practitioner withdraws them or a data-rights erasure removes them. This boundary is checked mechanically, not just by convention: a dedicated test sweeps the entire codebase in both directions and fails if anything outside this small set of files ever references the Stoa's table or store, or if the Stoa's own files ever import anything from the trust or practice machinery.
+
+The one exception, built 2026-08-04: an admin-only, no-UI route (`/api/admin/stoa-trust-flag`) that the founder or an admin uses to flag a specific, evidenced contradiction between a Stoa entry and examined behaviour. It reads exactly one entry, by id, on the admin's own act — never a scan of the directory. It is the only file in the entire codebase permitted to import both the Stoa's store and the Trust Core's emission machinery, and what it writes there is governed by the same evidence gate described in Diagram 2 (F9).
+
+**Footnotes for this diagram:**
+
+- **F11 — Everything in an entry is self-declared; the platform verifies nothing.** Ruled 2026-08-02. Had it gone the other way, the platform would need to invent some verification mechanism for free-text claims from scratch, contradicting how it treats self-report everywhere else.
+- **F12 — Never a background comparator.** Ruled 2026-08-04. Nothing may continuously compare fresh examined behaviour against active Stoa entries; the only trigger is a specific admin flag naming a specific artifact. Had it gone the other way, a practitioner who knew their entry was continuously watched against their own performance would have an incentive to manage the entry to match the performance, rather than declare honestly — ruled out on principle, not cost.
+- **F13 — No practice-derived data crosses in either direction.** Ruled 2026-08-02, reaffirmed structurally by the 2026-08-04 build. The directory never sorts, ranks, or badges by any evaluative signal; nothing about presence in it, or use of it, ever feeds a trust record, a practice profile, a milestone, or a suggestion. Had it gone the other way, the directory would become a second, unaccountable scoring surface layered on top of the trust core.
+- **F14 — Even the one bridge is evidence-gated, same as everything else.** Ruled 2026-08-04, the same finding behind F9 in Diagram 2. The admin-flagged path can only narrow or correct an existing trust record, never originate one from a single curator's pairing. Had it gone the other way, the one deliberately opened door into the trust core would have been exactly the mechanism the wall exists to prevent.
+
+**Status:** the public/community entries surface, the agent declare/tend/withdraw route, and the optional draft-mirror reading are all LIVE. The admin flag-intake route and the Stoa side of the trust-core bridge are built and battery-verified (60 assertions, 0 failures) but sit behind two unset flags and an unapplied database migration — activation is its own future founder-walked session. No disclosed fidelity issue exists on the Stoa side as of this map.
+
+---
+
+## Diagram 4 — Agent Circles (practice-on / logos-on)
+
+This is not a separate system — it is a set of corrections made inside the engine (Diagram 1) and the Trust Core (Diagram 2), following a mentor ruling on 2026-08-01 that revised the agent circle mapping and split the consequence into two tracks: practice-on (build the correction) and logos-on (record it honestly, and stage — but do not yet build — any future enforcement).
+
+Starting from Layer 1's extraction, a first-circle narrowing was added to the shared kathekon-engagement predicate: a self-preserving concern, on its own, no longer counts as an engaged circle. When that narrowing leaves a genuinely self-regarding action with no circle attached at all, a positive-routing step appends the phronesis and sophrosyne virtue domains, so the assessment doesn't simply go unclassified. Separately, the same narrowing feeds a new circle-4 obligation class — protecting another agent's own reasoning integrity, treated as a genuine justice concern (the test case being one agent corrupting what another agent is shown or told). When that circle-4 obligation is violated, a staged-pause mechanism softens what would otherwise be a hard "do not proceed" verdict down to "pause for review" — deliberately with no counter, no persistence, and no promotion algorithm built this round.
+
+Two live consumers elsewhere in the system are being starved by the first-circle narrowing, as a side effect: the loop-fold classifier's self-regarding bucket (Diagram 2), and a live agent-facing suggestion basis (Diagram 1's overlay layer). Both are disclosed and logged, not fixed.
+
+Three further pieces of this program are named but not yet built: C2, the fifth-circle orientation reading (its calibration gate is clean, but the reading itself doesn't exist); C1c, the trust-ledger event classes for a demonstrated circle-4 failure; and D4, a pre-existing divergence in the trust-ledger reducer that the narrowing makes more visible, not less — unchanged, raised in priority.
+
+**Footnotes for this diagram:**
+
+- **F15 — Domain is chosen by content, never severity.** Ruled 2026-08-01/02, and applied identically in the Stoa build (Diagram 3). Had it gone the other way, a self-regarding action and a genuinely third-party action could end up scored on the same ladder by accident.
+- **F16 — Positive routing is mandatory, not optional.** Ruled 2026-08-02 as a hard prerequisite before the correction's flag could even be set. Absence of a circle does not, on its own, discharge the obligation to classify. Had it gone the other way, a whole class of self-regarding actions would have silently dropped out of virtue-domain scoring, with no visible symptom.
+- **F17 — Staged pause, not staged enforcement.** Ruled 2026-08-02 (Option A over Option B). A stateless softening only, explicitly with no counter, no persistence, no promotion algorithm this round. Had the other option been chosen, an evidence-accumulation-and-earn-promotion-to-deny mechanism would exist today — judged premature.
+- **F18 — Logos-on needs no enforcement build.** Ruled 2026-08-01. The shipped deterministic engine already instantiates the fifth circle in essence; the remaining work is documentation and record-honesty, plus staging for a future enforcement decision, not new machinery now. Had it gone the other way, a whole second enforcement engine would need designing before any of the practice-on correction could ship.
+- **F19 — A pre-existing channel doesn't get grandfathered.** Ruled 2026-08-02. An older mechanism (live since 2026-06-25) was found to already violate the same principle this correction enforces, and had to be at minimum scoped for remediation before the new flag could be set, even though this build didn't create it. Had it gone the other way, the correction would have shipped while a functionally identical bug kept operating right beside it.
+
+**Status:** the narrowing, the positive routing, the circle-4 obligation class, and the staged pause are all LIVE since 2026-08-02, and have been live-verified on real production traffic — including the exact defect pattern an earlier adversarial review had caught and fixed before shipping. C2 and C1c are SCOPED but not built. D4, and the two downstream Trust Core consumers named above, are DEGRADED — known, logged, and sequenced, not yet fixed. Logos-on's three phases (documentation, record-honesty, staging) remain entirely undone; the staging phase explicitly names "the practice-on correction being fully settled" as its own prerequisite, and with C1c, C2, and D4 all still open, that condition isn't met yet.
+
+---
+
+## Diagram 5 — Credentials & the Safety Perimeter
+
+This is the front door. Every request into the system passes through authentication first, and every human-facing route that accepts free text passes through the distress perimeter before its own logic runs.
+
+An incoming request carries one of two kinds of token. If it's one of the four practice-credential prefixes, it goes through `validatePracticeCredential` — the single chokepoint every legacy validator now delegates to — which checks the token's capability set (consult, l1_supply, accreditation_write, calling, or reflect) against what the target route requires. A consult capability leads into the engine (Diagram 1); an accreditation-write capability leads into the trust-write boundary (Diagram 2); a missing required capability is refused outright. If instead the request carries an admin session, it goes through a separate house gate (`requireAdmin`) shared by every admin credential-management and no-UI admin route, including the Stoa's flag-intake route (Diagram 3).
+
+Once past authentication, any human-facing free-text route runs the R20a distress perimeter before its own logic — reading the raw text directly, with no exceptions. A clear result proceeds into the route's own logic; a distress result goes straight to an audience-correct crisis redirect (a different message for a human user than the payload an agent developer receives).
+
+**Footnotes for this diagram:**
+
+- **F20 — One credential, one chokepoint.** Ruled 2026-06-15. Three separate legacy credential classes were consolidated into one credential type with a capability set, validated through a single function. Had it gone the other way, three separate validators would keep drifting independently — the exact failure class that motivated the consolidation.
+- **F21 — Write-class capabilities require the stricter authorization header, never the looser API-key header.** Ruled 2026-06-15, alongside F20. Had it gone the other way, a write-capable credential would be exposed to the same looser transport surface as a read-only one, widening the blast radius of a leaked key.
+- **F22 — The distress perimeter runs before extraction, not inside it.** Same ruling as F3 in Diagram 1, restated here because it's the perimeter's own defining property. Ruled 2026-05-31.
+- **F23 — Admin routes reuse one house gate, never invent a new one per route.** Established 2026-05-21, confirmed as recently as 2026-08-04 for the newest admin route. Distinct from two other admin gates in active use elsewhere for narrower purposes. Had it gone the other way, three non-interchangeable admin gates with no rule for which new route uses which would make it easy to wire a new admin surface to the wrong one by accident.
+
+**Status:** the entire credential chokepoint and the R20a perimeter are LIVE, and have been for longer than any other subsystem in this map — the perimeter since 2026-05-31, the unified credential since 2026-06-15. Nothing on this diagram is DARK or SCOPED as of this map; what remains outstanding elsewhere (Diagrams 3 and 4) sits downstream of this layer, not inside it. No disclosed fidelity issue exists at the front door itself.
+
+---
+
+## Sixth element — dependency graph of outstanding items only
+
+Added 2026-08-05 at the mentor's direction: the diagrams above describe what exists and what was decided. They don't show how the *unfinished* pieces depend on each other. This section is that — outstanding items only, in plain-text ordered form, with blocking relationships named explicitly. Live and DARK items from the diagrams above aren't repeated here; only SCOPED and DEGRADED items appear.
+
+**The C2/C1c ordering — RULED, 2026-08-05, no longer open.** The mentor's 2026-08-04 instructions had contained two statements about C2/C1c ordering that disagreed with each other. That inconsistency was flagged rather than silently resolved, and the mentor ruled directly: **C2 builds first. C1c builds second. Both are scoped together before either builds.** Reasoning, stated by the mentor: C2's orientation reading produces the signal C1c's trust-event type will describe — you cannot write a schema for a circle-4-failure trust event without knowing what the reading it's describing actually produces. This is recorded as a standing ruling, not a preference.
+
+**The IDEA loop — externally-driven, ruled 2026-08-05.** A pre-brief examination surfaced a design question the mentor ruled on directly: the IDEA loop (the founder's autonomous-generation vision, still gated behind the two-part validation condition in item 9 below) is **externally-driven**, not cron-triggered. The loop lives OUTSIDE SageReasoning's own servers — a calling process (the founder's Claude Code session, a dedicated harness, or a future purpose-built runner) holds the cycle state and the continue/stop decision between calls; SageReasoning stays stateless and request-scoped on every call, providing only the examination, the novelty check, and the trust-event write per cycle. Reasoning, stated by the mentor: a cron-tick model can only approximate continuity by flattening the full developing context into a database row between every single step, which destroys the exact thing that makes generation different from scheduled processing — the ability to hold a developing line of reasoning across cycles. This ruling **adds two new prerequisites upstream of C2's own scope document** (see items 2a/2b below) — they were not previously named items.
+
+1. **The Stoa activation** (two flags + a migration, both built and battery-verified) — blocked by its own pre-activation checklist (`operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md`) AND, as of 2026-08-05, the checklist's own §4 cross-check query (`2026-08-05-stoa-evidence-gate-crosscheck.sql`) being run once as a pre-activation baseline before the founder walks it. Independent track — does not block or get blocked by C2/C1c/D4.
+
+2a. **`OikeiösisGap` and `GeneratedCandidate` type definitions — NEW, upstream of C2, ruled 2026-08-05.** These are the IDEA loop's own data structures (a structured expansion-direction input, and a not-yet-taken action produced by a generation step), scoped and brought to the mentor BEFORE C2 itself is scoped — because C2's generative-prompt field (item 2b) is written to feed the generation step these types describe, so the types have to exist first for the field's shape to be meaningful. Not started.
+
+2b. **C2 (the fifth-circle orientation reading) — now a THREE-component scope, ruled 2026-08-05 (was four elements naming C1c's trust-event type; now widened).** The scope document must show, together: (i) the orientation reading itself — the Layer-1 signal it reads, the threshold condition, the Layer-3 prose framing, and the trust-event type C1c will write; (ii) the generative-prompt field — a single plain-language sentence naming the gap the reading detected (never a prescribed action), the seed the IDEA loop's generation step will consume; (iii) the novelty detection specification — structural novelty only for this build (querying the existing history table for circle/virtue-domain-combination frequency, using the existing 3-occurrence evidence floor from `trajectory-delta.ts`), scoped alongside the orientation reading because both feed the same IDEA-loop cycle and their outputs need to be designed compatible with each other. **C2 builds first, after 2a is done and visible.** Does not block the Stoa activation (item 1) or D4 (item 4).
+
+3. **C1c (the trust-ledger event classes for a circle-4 failure)** — scoped together with C2 (see item 2b), **builds second**, after C2 is built. Does not block D4 or the Stoa activation.
+
+4. **D4 (the trust-ledger reducer divergence)** — blocks **logos-on W1** (item 6) and nothing else. Does not block C2, does not block C1c, does not block the two degraded consumers (item 5). Runs in parallel with items 2–3, on its own schedule.
+
+5. **The two degraded consumers** (the loop-fold self-regarding bucket, and the practice-suggestion basis B6) — blocked on **C2 being live AND its orientation signal validated on real production traffic** (see the two-part validation condition below — this is stricter than "C2 built"). Their own session opens with C2's orientation output in view, specifically because fixing the suggestion-basis logic before C2 exists would mean fixing it twice.
+
+6. **Logos-on W1 (documentation)** — blocked by **D4** (item 4): documenting the system's behaviour honestly while a known misrepresentation stands undocumented-and-unfixed would violate the honest-claims discipline. D4 must close first.
+
+7. **Logos-on W2 (the record-honesty schema)** — follows **C1c's schema being settled** (item 3). A soft, not hard, dependency — W2 was deliberately not decided to ride inside any earlier build.
+
+8. **Logos-on W3 (S11-anchored staging)** — blocked by **C1c, C2, and D4 all closed** (items 2b, 3, and 4). The narrowest gate in the whole graph — cannot start until all three of those are done, in the now-fixed order C2 → C1c for the first two.
+
+9. **The autonomous-loop / sage-calling extension (the IDEA loop)** — explicitly not a current build item, and now confirmed as an **externally-driven** design (see the ruling above — this defines its shape, not just its timing). Blocked by a **two-part condition, both parts required**, ruled 2026-08-05: (a) C2 is live in production, AND (b) at least one real production consult has fired the fifth-circle orientation reading, its output has been reviewed, and no anomalous behaviour has been found. **A C2 that is merely built and live does NOT satisfy this** — the validation half is a separate, later condition, and that validation review goes to the mentor BEFORE the design brief is even scoped, let alone built. Nothing about the loop extension — not a scope document, not a design brief — starts before both halves of this condition are met and the review has been brought to the mentor.
+
+**The full binding sequence, as ruled 2026-08-05, revised same day** (supersedes the earlier "critical path" framing — this is now an explicit, numbered, mentor-set order for the pieces that have one):
+
+> One — build the Stoa evidence-gate cross-check query (done 2026-08-05; pre-activation prerequisite, not a nice-to-have). Two — the founder walks the Stoa activation using the checklist (independent track). **Three — scope `OikeiösisGap` and `GeneratedCandidate`; bring the type definitions to the mentor before any generation logic is written (new step, upstream of what was previously step three).** Four — scope C2 and C1c together, the now-three-component scope document (orientation reading, generative-prompt field, novelty specification) goes to the mentor before either builds. Five — build C2; validate on real production traffic; bring the validation result to the mentor. Six — build C1c. Seven — scope and fix D4 (runs in parallel with three through six; must close before logos-on W1). Eight — fix the two degraded consumers, once C2 is live and validated, with its orientation output in view. Nine — logos-on W1 begins once D4 is closed. Ten — logos-on W2 follows C1c's schema (soft dependency). Eleven — logos-on W3 begins once C1c, C2, and D4 are all closed. Twelve — the autonomous-loop design brief comes to the mentor only after C2 is live, validated on real traffic, that validation has been reviewed by the mentor, AND the externally-driven loop-runner shape (item 9's ruling) is the basis for any brief written. Not before.
+
+---
+
+*Cross-reference: `operations/decision-log.md` is the canonical, append-only record every footnote above points back to. Where this file and the decision log disagree, the decision log wins.*

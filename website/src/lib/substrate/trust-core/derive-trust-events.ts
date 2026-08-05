@@ -525,3 +525,172 @@ export function deriveReflectEvent(input: ReflectInput): TrustEvent | null {
     credentialRef: input.credentialRef,
   }
 }
+
+// ============================================================================
+// Stoa Q5c/Q13a (2026-08-04) — admin-flag-triggered only. See types.ts's
+// TrustEventType Stoa block + the scoped plan
+// (operations/handoffs/founder/2026-08-03-stoa-Q5c-Q13a-trust-event-wiring-
+// SCOPED.md) for the binding design. NEVER call these from a background
+// comparator — the mentor ruled that out on principle (Q3), not cost: a
+// continuously-compared agent has an incentive to manage its Stoa entry to
+// match its assessments rather than declare honestly.
+// ============================================================================
+
+/** One asserted contradiction: the curator-supplied evidentiary artifact +
+ *  the curator's stated pairing (the "curator supplies only the pairing"
+ *  standard — the artifact itself must independently demonstrate the
+ *  contradiction; the justification records WHY the pairing was drawn, it is
+ *  never itself the evidence). */
+export interface StoaContradictionAssertion {
+  artifactRef: string
+  justification: string
+  /**
+   * PER-ASSERTION idempotency key (PR19 fold, 2026-08-04, HIGH — a shared
+   * submission-level correlation id let a later resubmission that added the
+   * SECOND block change the first block's hash input, defeating the DB
+   * dedup key (correlation_id, event_type, virtue_domain) and double-
+   * decreasing a domain from what is evidentially one root cause). Derive
+   * this from ONLY this assertion's own content (e.g. entryId + claimQuote +
+   * this artifactRef) so its identity never depends on what else is
+   * submitted alongside it — an identical resubmission of THIS block alone
+   * always dedupes, regardless of any other block present.
+   */
+  correlationId: string
+}
+
+export interface StoaContradictionInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  /** The Stoa entry carrying the false claim. */
+  stoaEntryId: string
+  /** The specific claim within the entry the artifact contradicts (the
+   *  "reader examining both... without requiring inference" bar starts with
+   *  quoting the claim itself). */
+  claimQuote: string
+  /** Domain is an INPUT — asserted by the submitter from the CONTENT of the
+   *  claim and the nature of the contradiction, never inferred from severity
+   *  here or anywhere downstream. Either, neither, or both may be present;
+   *  both present ⇒ both events emitted (no dedup — "two entries from one
+   *  root cause is honest, not redundant"). Each carries its OWN
+   *  correlationId (see StoaContradictionAssertion) — there is deliberately
+   *  no submission-level correlation id here. */
+  contradictsOversight?: StoaContradictionAssertion
+  contradictsDikaiosyne?: StoaContradictionAssertion
+  now: Date
+}
+
+function stoaAssertionValid(a: StoaContradictionAssertion | undefined): a is StoaContradictionAssertion {
+  return (
+    a !== undefined &&
+    typeof a.artifactRef === 'string' &&
+    a.artifactRef.trim() !== '' &&
+    typeof a.justification === 'string' &&
+    a.justification.trim() !== ''
+  )
+}
+
+/**
+ * Derive Q5(c) claim-contradicted events (oversight and/or dikaiosyne, per
+ * the asserted content — never a severity choice). Each requires a non-empty
+ * claim quote AND a non-empty artifact reference AND a non-empty
+ * justification for the domain(s) asserted — the evidentiary standard is
+ * enforced structurally here (empty ⇒ no event, never a fabricated one); the
+ * "concretely contradicts, no interpretation required" judgement itself is
+ * the admin gate's responsibility (this function cannot verify semantic
+ * contradiction — only that the required pairing was actually supplied).
+ */
+export function deriveStoaContradictionEvents(
+  input: StoaContradictionInput,
+): TrustEvent[] {
+  if (input.claimQuote.trim() === '') return []
+  if (input.stoaEntryId.trim() === '') return []
+
+  const events: TrustEvent[] = []
+  const base = {
+    agentId: input.agentId,
+    ownerUserId: input.ownerUserId,
+    credentialRef: input.credentialRef,
+    artifactKind: 'stoa_examined_artifact' as const,
+    occurredAt: input.now.toISOString(),
+  }
+
+  if (stoaAssertionValid(input.contradictsOversight)) {
+    events.push({
+      ...base,
+      virtueDomain: 'oversight',
+      eventType: 'stoa-claim-contradicted-oversight',
+      artifactRef: input.contradictsOversight.artifactRef,
+      correlationId: input.contradictsOversight.correlationId,
+      payload: {
+        stoaEntryId: input.stoaEntryId,
+        stoaClaimQuote: input.claimQuote,
+        stoaJustification: input.contradictsOversight.justification,
+      },
+    })
+  }
+  if (stoaAssertionValid(input.contradictsDikaiosyne)) {
+    events.push({
+      ...base,
+      virtueDomain: 'dikaiosyne',
+      eventType: 'stoa-claim-contradicted-dikaiosyne',
+      artifactRef: input.contradictsDikaiosyne.artifactRef,
+      correlationId: input.contradictsDikaiosyne.correlationId,
+      payload: {
+        stoaEntryId: input.stoaEntryId,
+        stoaClaimQuote: input.claimQuote,
+        stoaJustification: input.contradictsDikaiosyne.justification,
+      },
+    })
+  }
+  return events
+}
+
+export interface StoaCallingDivergenceInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  stoaEntryId: string
+  /** The server-persisted calling artifact the entry is compared against —
+   *  the mentor's "shares the calling record as a data source only". */
+  callingRecordRef: string
+  /** The admin's stated pairing — what diverges and why (never accusation
+   *  alone; the standing "concretely contradicts" bar applies here too, even
+   *  though the ruling frames this as a discrepancy rather than a
+   *  violation). */
+  divergenceDescription: string
+  now: Date
+  correlationId: string
+}
+
+/**
+ * Derive Q13(a): a coherence observation, never a caution. 'flag' effect —
+ * present in the record for a reader who consults it, changes no domain
+ * level. virtue_domain is HARD-CODED to 'oversight' — this is NOT a
+ * caller-supplied choice, closing the null-domain trap (a null-domain event
+ * would route to reflect-specific decay-modulation machinery one layer up in
+ * the store, silently benefiting the agent from a divergence finding).
+ */
+export function deriveStoaCallingDivergenceEvent(
+  input: StoaCallingDivergenceInput,
+): TrustEvent | null {
+  if (input.stoaEntryId.trim() === '') return null
+  if (input.callingRecordRef.trim() === '') return null
+  if (input.divergenceDescription.trim() === '') return null
+
+  return {
+    agentId: input.agentId,
+    virtueDomain: 'oversight',
+    eventType: 'stoa-declaration-diverges-from-calling',
+    artifactKind: 'calling_record',
+    artifactRef: input.callingRecordRef,
+    payload: {
+      stoaEntryId: input.stoaEntryId,
+      stoaDivergenceDescription: input.divergenceDescription,
+    },
+    occurredAt: input.now.toISOString(),
+    correlationId: input.correlationId,
+    ownerUserId: input.ownerUserId,
+    credentialRef: input.credentialRef,
+  }
+}
