@@ -18023,3 +18023,74 @@ Expected: 56/0 · 115/0 · 42/0 · tsc silent · ✓ Compiled successfully.
 **Rules served:** PR20 (each note names the specific mechanism-level surface it clarifies — `gapRef`'s format, `SharedTask`'s field list, `/schedule`'s session-only/7-day constraint — rather than restating the memo's prose loosely), the honest-claims discipline (the `frictionAssessment` mapping gap and the validation-vs-standing-runner distinction are both recorded as open questions for a later session, not quietly resolved to make this update look more complete than the mentor's own instruction supports).
 
 **Status:** Adopted. The architecture map's §Sixth element now carries four mentor-authored clarifying notes alongside items 2a, 9, 10, and 11, none of which alter any ruled item's substance. Sequencing unchanged: the generation step's three named prerequisites (types, configuration shape, shared task-list storage) remain fully closed; C2+C1c remains next in the standing numbered sequence. Cross-references: `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`; `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-SCOPED-2026-08-06`; the automation-capabilities memo, `operations/agent-circles-2026-08/2026-08-06-idea-loop-runner-automation-capabilities-memo.md`.
+
+---
+
+## D-C2-C1C-ORIENTATION-READING-SCOPED-2026-08-06
+
+**Session:** The standing next item in the binding sequence (`06-PLAIN-TEXT-MIRROR.md` §Sixth element, step four): scope C2 (the fifth-circle orientation reading, all three widened components) and C1c (its trust-event class) together, before either builds, per `D-C2-C1C-ORDERING-RULED-CROSSCHECK-BUILT-2026-08-05`. **Tier: `governance`/`code-elevated` — a scope document, no code written.**
+
+**Decision:** Authored `operations/agent-circles-2026-08/2026-08-06-c2-orientation-reading-and-c1c-trust-event-scope.md`, scoping all four required pieces: **C2(i)** the orientation reading (an optional, additive `OrientationObservation[]` Layer-1 field mirroring the `obligation_assessment` precedent; a deterministic, conservative-by-default `toward|away|indeterminate` threshold computed outside `applyMechanisms`'s return value, so "never feeds back into the verdict" is structural, not just documented; a corrected reading of "Layer-3 prose framing" — the placement ruling forbids any agent-facing LLM prose for this signal, so the element is a fixed entry-text template selected deterministically, not a live Layer-3 call); **C2(ii)** the generative-prompt field (the mentor's exact settled format, populated only on `away`/`indeterminate` readings that engaged ≥1 circle, never on `toward`); **C2(iii)** structural novelty detection (reuses `trajectory-delta.ts`'s exact `EVIDENCE_FLOOR = 3` constant and its `agent_assessment_history` window, a new `noveltyConfidence` field distinct from the already-approved `generationConfidence`); **C1c** the trust-event class(es) for the reading — three new `agent_trust_events` types (`orientation-reading-{toward,away,indeterminate}`), each a genuine `'flag'` no-op effect reusing the exact precedent already live for `stoa-declaration-diverges-from-calling`, `virtue_domain: NULL` (mirroring `reflect-completed-honest`'s agent-wide pattern, no CHECK widening needed there), and a named, bounded exception to S10's state-fold-only read policy (a capped `orientation_readings` list, mirroring the existing reflect-summary cap).
+
+**Two genuine open questions flagged, with recommendations, not resolved silently:**
+
+1. **§0 — a naming ambiguity in "C1c" itself.** The 2026-08-01 build plan's own C1c is the DEFERRED first-circle failure/demonstration event classes (phronesis/sophrosyne routing) — a still-outstanding, separate item. But the current dependency graph's item 3 describes C1c as "the trust-ledger event classes for a circle-4 failure," and the mentor's 2026-08-05 ordering ruling reasons about C1c as needing to "describe C2's actual output" — which only makes sense as the orientation-reading's own event class (§4 above), not a circle-4 event (circle 4 already has C3's machinery, "no new mechanism"). This document adopts the orientation-reading reading as a recommendation and flags the graph's "circle-4" phrasing as a likely drafting slip, but does not treat this as ruled — the two readings produce genuinely different schemas, and the mentor is asked to confirm or correct before either C1c is built.
+2. **§4.1 — the storage-home election**, explicitly named by the mentor's own C2c ruling as still open ("a build-time election"). Recommends reusing `agent_trust_events` with a `'flag'` effect (Option A), on the strength of the exact working precedent already live for the Stoa divergence event, over a sibling table (Option B, isolation-by-construction rather than precedent-proven-safe reuse).
+
+**Also named, not silently assumed:** §2.2 — a genuine tension between C2's `generativePrompt` (a computed, per-examination field) and the already-approved `OikeiosisGap.targetCircleMeaning`'s documented character ("free text... not something the type itself derives"); resolved by recommendation (the field is raw material a runner or human synthesizes INTO a later `targetCircleMeaning`, not a substitute for it), offered for mentor confirmation since it connects two independently-ruled shapes that were never explicitly reconciled until this document.
+
+**What this session did not do:** did not build C2 or C1c; did not resolve either flagged open question with finality; did not touch D4, the Stoa activation, or the generation step's own (now separately unblocked) scope document; did not write any TypeScript, migration, or RLS policy.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-c2-orientation-reading-and-c1c-trust-event-scope.md` (NEW); this entry.
+
+**Risk classification:** `governance`/`code-elevated` — a design document surfacing two open questions for review; no production surface touched.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (every field justified against actual code, cited by file:line — the `obligation_assessment` precedent, the `stoa-declaration-diverges-from-calling` `'flag'` precedent, the `reflect-completed-honest` NULL-domain precedent, the exact `EVIDENCE_FLOOR` constant — nothing invented past what the rulings and existing code already settled), the honest-claims discipline (both genuine open questions recorded as open with reasoned recommendations, not resolved by fiat; the naming ambiguity in particular is flagged rather than silently picked, mirroring the same discipline `D-MENTOR-ARCHITECTURE-MAP-REVIEW-INSTRUCTIONS-RECEIVED-2026-08-05` applied to the mentor's own instructions).
+
+**Status:** Offered for mentor review, not yet approved. Sequencing: `OikeiösisGap`/`GeneratedCandidate` — DONE, APPROVED. IDEA loop configuration shape + shared task-list storage — DONE, APPROVED. **C2+C1c — SCOPED, awaiting mentor ruling on the two flagged open questions (§0's naming ambiguity; §4.1's storage-home election) before either builds.** D4, the Stoa activation, and the generation step's own scope document remain independent, unblocked, not opened by this session. Cross-references: `D-C2-C1C-ORDERING-RULED-CROSSCHECK-BUILT-2026-08-05`; `D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`; `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`; `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`.
+
+---
+
+## D-C1C-NAMING-RESOLVED-2026-08-06
+
+**Session:** The mentor reviewed `2026-08-06-c2-orientation-reading-and-c1c-trust-event-scope.md` and ruled directly on §0's flagged naming ambiguity (which "C1c" the current binding sequence means). **Tier: `governance` — a ruling + documentation corrections; no code/schema/flag change.**
+
+**Ruling:** "C1c" in the dependency graph's binding sequence (item 3) names the trust-event class for **C2's orientation reading**, as scoped in §4 of the C2 scope document. The dependency graph's "circle-4" phrasing is a drafting slip — the orientation reading targets **circle 5** (the telos, right reason, the rational cosmos), not circle 4 (which already has C3's machinery and needs no new event type). Corrected everywhere it appeared in the dependency graph in connection with this item. **The original build-plan C1c — first-circle failure events (phronesis/sophrosyne per locus) and first-circle demonstration events (positive sophrosyne) — is confirmed as a distinct, separately-outstanding item.** It is not addressed by the C2/C1c scope document and must not be silently folded in or dropped. It needs its own future session.
+
+**Disposition:** the C2/C1c scope document's §0 section (the flagged ambiguity itself) is amended in place to read RULED rather than open, with the recommendation it offered confirmed as correct. Item 3 of the dependency graph (`06-PLAIN-TEXT-MIRROR.md`) is retitled from "C1c (the trust-ledger event classes for a circle-4 failure)" to "C1c (the trust-ledger event class for the circle-5 orientation reading)," with the naming-ambiguity note rewritten to record the ruling and the explicit distinction from the original first-circle C1c. The step-four binding-sequence prose summary is updated to match.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-c2-orientation-reading-and-c1c-trust-event-scope.md` (status line + §0 + §6 amended to RULED); `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (item 3 retitled and rewritten; item 2b and the step-four summary updated to cross-reference the ruling); this entry.
+
+**Risk classification:** `governance` — documents only.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the ruling's own reasoning — circle 4 already has C3's machinery, "no new mechanism" — is recorded rather than paraphrased away), the honest-claims discipline (the original first-circle C1c is explicitly preserved as a separate outstanding item rather than allowed to be silently absorbed or lost in the rename).
+
+**Status:** Adopted. C1c now unambiguously means the circle-5 orientation-reading trust-event class in the binding sequence; the original first-circle C1c remains a separate, unscoped, outstanding item. Cross-references: `D-C2-C1C-ORIENTATION-READING-SCOPED-2026-08-06`; `D-C2-C1C-STORAGE-HOME-VIRTUE-DOMAIN-RULED-2026-08-06` (companion ruling, same session).
+
+---
+
+## D-C2-C1C-STORAGE-HOME-VIRTUE-DOMAIN-RULED-2026-08-06
+
+**Session:** Same mentor review as `D-C1C-NAMING-RESOLVED-2026-08-06`, ruling on the C2/C1c scope document's §4.1 storage-home election and §4.3 `virtue_domain` recommendation — both explicitly named as open build-time elections in the scope document. **Tier: `governance` — a ruling + documentation corrections; no code/schema/flag change.**
+
+**Ruling one — storage home: Option A confirmed.** Three new `event_type` CHECK values on `agent_trust_events`: `orientation-reading-toward`, `orientation-reading-away`, `orientation-reading-indeterminate`. All three carry `'flag'` effect in `EVENT_EFFECT` — the exact precedent already live for `stoa-declaration-diverges-from-calling`, reused rather than re-derived. One migration, widening only the `event_type` CHECK. No new table (Option B, the sibling-store alternative, is closed).
+
+**Ruling two — `virtue_domain: NULL` confirmed.** Following the `reflect-completed-honest` precedent exactly. No `virtue_domain` CHECK widening needed. The three new event types are agent-wide, not tied to one virtue domain.
+
+**Follow-on confirmations, same ruling (carried into the scope document and forward to the generation step, not separately built here):** (1) §1.3's correction of "Layer-3 prose framing" to a deterministic `ORIENTATION_ENTRY_TEXT` template — confirmed; no LLM call composes this text; to be reflected in ADR-013 when the C2 build closes. (2) §2.2's resolution of the `generativePrompt`/`OikeiosisGap.targetCircleMeaning` tension — confirmed: `generativePrompt` is a per-examination computed seed, raw material for runner/human authorship of a later gap, never itself an `OikeiosisGap`; to be carried as a named design principle into the generation step's own scope document, not rediscovered there. (3) §3's structural-novelty-only approach and its honest limitation (cannot distinguish two structurally identical but substantively different actions) — confirmed as a required PR19 review dimension, not an implementation afterthought; the `noveltyConfidence` field addition confirmed. (4) §4.6's founder-sign-off-before-any-public-file-change gate on the not-attestable clause's exact wording — confirmed as a hard gate; the clause lands in ADR-013 §8's dated amendment, `TRUST_RECORD_ENVELOPE`, and all three R18 surfaces, in that order, after sign-off.
+
+**Disposition:** the C2/C1c scope document's §4.1 and §4.3 are amended in place from recommendation to RULED. No other change to the document — approved as written, subject to both rulings.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-c2-orientation-reading-and-c1c-trust-event-scope.md` (§4.1, §4.3, §6, and the top status line amended to RULED/APPROVED); `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (item 2b, item 3, and the step-four summary updated to record both rulings); this entry.
+
+**Risk classification:** `governance` — documents only. No migration applied, no code written — the scope is approved, the build has not started.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the storage-home ruling names the exact existing precedent it reuses — `stoa-declaration-diverges-from-calling`'s `'flag'` effect — rather than inventing a new pattern), the honest-claims discipline (§4.6's sign-off gate is restated as binding rather than left as a build-time detail that could be improvised past).
+
+**Status:** Adopted. **The C2/C1c scope document is now fully APPROVED** — both flagged open questions ruled, no open items remain in the scope itself. C2 builds first. C1c builds second. Neither builds until the founder elects to open the build session. Sequencing: `OikeiösisGap`/`GeneratedCandidate` — DONE, APPROVED. IDEA loop configuration shape + shared task-list storage — DONE, APPROVED. **C2+C1c — DONE, APPROVED, ready to build whenever the founder opens the build session.** D4, the Stoa activation, and the generation step's own scope document remain independent, unblocked, not opened by this session. Cross-references: `D-C1C-NAMING-RESOLVED-2026-08-06` (companion ruling, same session); `D-C2-C1C-ORIENTATION-READING-SCOPED-2026-08-06`.
