@@ -17946,3 +17946,80 @@ Expected: 56/0 · 115/0 · 42/0 · tsc silent · ✓ Compiled successfully.
 **Rules served:** PR20 (the configuration shape's four parameters are named with their stated purposes before any scoping session locks in a type), the honest-claims discipline (the flag-then-correction sequence recorded transparently rather than silently smoothed over).
 
 **Status:** Adopted. Sequencing: `OikeiösisGap`/`GeneratedCandidate` — DONE, APPROVED. IDEA loop configuration shape — QUEUED, not yet scoped. Shared task-list storage — QUEUED, not yet scoped. C2+C1c — next in the standing numbered sequence, independent of both queued items above. The generation step itself remains last, blocked on all three prerequisites named across this and the prior entries. Cross-references: `D-IDEA-LOOP-NEUROSCIENCE-ADDITIONS-RECORDED-2026-08-06`; `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`.
+
+---
+
+## D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-SCOPED-2026-08-06
+
+**Session:** Continuation of the same day, per the queued next-session prompt (`06-PLAIN-TEXT-MIRROR.md` §Sixth element, binding-sequence step thirteen). **Tier: `governance`/`code-elevated` — a scope document, no code/schema/flag change.**
+
+**Decision:** Authored `operations/agent-circles-2026-08/2026-08-06-idea-loop-configuration-and-shared-task-list-scope.md`, scoping the two remaining generation-step prerequisites named in step thirteen: the IDEA loop configuration shape (four parameters — `minimumInterval`, `maximumDuration`, `randomOffsetPercent`, `minimumIncubationInterval`) and the shared task-list storage heuristic 7 reads from. Both are offered for mentor review, not yet approved.
+
+**Two genuine open questions surfaced and flagged rather than resolved silently, each with a recommendation:**
+
+1. **Whose configuration is this?** The four parameters were framed in session reasoning as loop parameters, but the loop itself is ruled externally-driven (SageReasoning stateless and request-scoped per call). Three candidate answers named (external-only / server-advisory / partial server-enforcement); recommended external-only ("option 1") on the reasoning that the externally-driven ruling's own stated purpose — keeping developing-context state outside SageReasoning — applies equally to configuration state, and that SageReasoning's existing per-call contract already gives a runner what it needs to self-enforce cadence without a server-side read.
+2. **Where does the shared task-list storage live?** A new RLS-scoped Supabase table (the pattern every other new storage surface in this arc has followed) vs. storage external to SageReasoning entirely (coordination infrastructure belonging to the collaborating agents, not to the examination/trust-event contract). Recommended external-to-SageReasoning ("option 2") on the same externally-driven-ruling reasoning, while naming that the RLS alternative would need a genuinely new access-control shape (multi-agent open read/write) nothing in this arc has solved yet.
+
+**Also recorded, not resolved:** `randomOffsetPercent`'s second stated purpose ("phantasia variation into the generation step's input sequence") is content for the generation step's own mechanism, not the configuration shape — left as a single numeric parameter here, its mechanical effect on generation input explicitly deferred; no default value is proposed for any of the four parameters (explicitly TBD, consistent with the heuristics document's own "TBD at generation-step scoping" note); a proposed minimal `SharedTask` shape (five required fields + an optional friction-assessment sub-object) is offered with three fields deliberately left out (`assignee`, priority, due date) and reasons given for each omission; the structural distinctness between the shared task list (mutable, multi-writer/reader) and the still-unscoped per-cycle dashboard table (append-only, one-writer) is restated with a comparison table, per the standing instruction to carry that distinction into scoping rather than let it be rediscovered.
+
+**What this does not do:** does not scope the generation step's prompt structure, the friction-detection threshold, or the phantasia-variation mechanism (all deferred to the generation step's own scope document, which follows this item); does not pick between the two open architectural questions — both are recommendations awaiting mentor ruling; does not touch C2/C1c, D4, or the Stoa activation (independent tracks); writes no TypeScript, migration, or RLS policy.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-idea-loop-configuration-and-shared-task-list-scope.md` (new); this entry.
+
+**Risk classification:** `governance`/`code-elevated` — a design document surfacing two open questions for review; no production surface touched.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (mechanism-level connection points named for every field; the architectural tension between "externally-driven loop" and "loop configuration" surfaced explicitly rather than silently assumed away), the honest-claims discipline (two genuine open questions recorded as open, with reasoned recommendations, not resolved by fiat to make the document look more finished than the rulings actually support).
+
+**Status:** Offered for mentor review, not yet approved. Sequencing: `OikeiösisGap`/`GeneratedCandidate` — DONE, APPROVED. IDEA loop configuration shape — SCOPED, awaiting mentor ruling (incl. the ownership question). Shared task-list storage — SCOPED, awaiting mentor ruling (incl. the storage-location question). C2+C1c — next in the standing numbered sequence, independent of both. The generation step remains last, blocked on all three prerequisites (types done; these two now scoped-but-not-approved). Cross-references: `D-IDEA-LOOP-CONFIGURATION-SHAPE-QUEUED-2026-08-06`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`; `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`.
+
+---
+
+## D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06
+
+**Session:** Same-day continuation. The mentor reviewed `2026-08-06-idea-loop-configuration-and-shared-task-list-scope.md`'s two open architectural questions (A.1: whose configuration is this; B.4: where does the shared task list live) and ruled on both directly. **Tier: `governance` — content/type amendment; no code/schema/flag change.**
+
+**Ruling one — A.1 resolved: option 1 confirmed.** The external runner owns and enforces the IDEA loop configuration entirely; SageReasoning never sees these values. The deliverable is a documented external-configuration contract — `IdeaLoopConfiguration` lives with the runner's own tooling, not a SageReasoning-hosted schema or table. **Addition:** a new required field `loopId: string`, assigned at loop instantiation, carried on every trust-event write that loop produces — the minimum coordination surface for distinguishing one loop instance's writes from another's in multi-loop operation, without requiring SageReasoning to manage loop identity itself.
+
+**Ruling two — B.4 resolved: option 2 confirmed.** The shared task list lives outside SageReasoning's own database. SageReasoning's role in friction detection is as a consumer — the runner hands the task list to the generation step. SageReasoning does not host, write to, or manage access control for the shared task list. `SharedTask` is a specification for the external storage shape, not a migration target.
+
+**Companion amendment — `GeneratedCandidate.cycleOutcome`:** a sixth value, `'dependency_unavailable'`, added alongside the existing five, with a companion field `unavailableDependency: string` naming which dependency was unreachable. The friction-detection-attempted-task-list-unreachable case is the first named instance. The generation step's scope document inherits this as a settled case to handle.
+
+**Disposition:** both recommendations from the prior scope document (external-only configuration; external task-list storage) were confirmed as ruled, not overridden or split differently. No other changes to the approved `OikeiosisGap`, `GeneratedCandidate`, or `IdeaLoopConfiguration` shapes — `loopId` and `dependency_unavailable`/`unavailableDependency` are the only modifications. No conflicts found between this ruling and any other standing ruling in the arc.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-idea-loop-configuration-and-shared-task-list-scope.md` (status line added; A.1 and B.4 marked RULED with the disposition folded in; `loopId` added to `IdeaLoopConfiguration`; closing sections updated to reflect approval rather than open questions); `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md` (status line amended; `cycleOutcome` gains `'dependency_unavailable'` + `unavailableDependency`); `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (dependency-graph items 10 and 11, and the step-thirteen prose summary, marked APPROVED); this entry.
+
+**Risk classification:** `governance` — documents + a type-shape amendment; no production surface touched.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (both rulings map cleanly onto existing mechanism-level surfaces — trust-event writes, the null-cycle honesty discipline — with no invented architecture), the honest-claims discipline (the `dependency_unavailable` outcome extends the same "record the honest fact, don't manufacture a result" principle the null-cycle rule already established, applied to a new failure class rather than silently folding it into `null_cycle`).
+
+**Status:** Adopted. Both prerequisite items for the generation step (configuration shape, shared task-list storage) are now **APPROVED**, alongside the already-approved `OikeiösisGap`/`GeneratedCandidate` types. All three of the generation step's named prerequisites (per step thirteen of the binding sequence) are now closed. C2+C1c remains the next item in the standing numbered sequence, independent of this. The generation step's own scope document is now unblocked to open whenever the founder elects it. Cross-references: `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-SCOPED-2026-08-06`; `D-IDEA-LOOP-CONFIGURATION-SHAPE-QUEUED-2026-08-06`; `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`.
+
+---
+
+## D-IDEA-LOOP-ARCHITECTURE-MAP-FOLLOWON-UPDATES-2026-08-06
+
+**Session:** Same-day continuation. The mentor reviewed `06-PLAIN-TEXT-MIRROR.md`'s §Sixth element and the automation-capabilities memo (`2026-08-06-idea-loop-runner-automation-capabilities-memo.md`) and issued four follow-on updates to the architecture map. **Tier: `governance` — documentation correction + notes; no code/schema/flag/ruling change.**
+
+**Update 1 (item 11):** corrected a stale field count — "Four named parameters" → "Five named parameters," adding `loopId` to the enumerated list (the step-thirteen binding-sequence entry already named all five correctly; item 11's own body sentence had not been updated to match).
+
+**Update 2 (item 2a):** added a note on `sessionId`/`loopId` independence — `sessionId` (in `gapRef`) names a SageReasoning examination session, server-side, one per consult call; `loopId` (in `IdeaLoopConfiguration`) names an external runner instance, one per process, persisting across many consult calls. Explicitly not the same thing; the generation step's scope document is instructed to name this distinction when describing how the two compose in a trust-event write, "not to resolve a conflict, but to prevent one from being invented later."
+
+**Update 3 (item 10):** added a note confirming `SharedTask` is a contract specification, not a mandate for bespoke storage — the ruling fixed *where* the list lives (external to SageReasoning), not *what* external thing it is; an existing PM tool satisfying the required properties would make `SharedTask` a mapping spec rather than a schema to implement. Named one open question, not solved: `frictionAssessment` has no natural analogue in most PM tools' native schemas — the mapping layer will need to carry it explicitly, either as a custom field or a SageReasoning-side annotation referencing the external task.
+
+**Update 4 (item 9):** added a note distinguishing the bounded validation runner from the standing operational runner — Claude Code's `/schedule` (session-only, 7-day auto-expiry on recurring jobs) and `/loop` (requires the session to stay live) both fit producing the two-part validation condition's evidence, but neither is standing infrastructure; "a future purpose-built runner" in item 9 refers to the separate standing-operational design question, which "must not be pre-answered by whatever tooling happens to be available during validation."
+
+**Disposition:** no ruled item is modified by any of the four updates — `loopId`, `dependency_unavailable`/`unavailableDependency`, the option 1 configuration ruling, and the option 2 task-list ruling all stand exactly as issued in `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`. All four updates are clarifying notes/corrections layered onto the existing dependency-graph items, not new rulings on open questions. No conflicts found between these updates and any other standing content in the map or either scope document.
+
+**Files touched:** `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (item 11 field-count correction; notes added to items 2a, 10, and 9); this entry.
+
+**Risk classification:** `governance` — documentation only; no production surface touched.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (each note names the specific mechanism-level surface it clarifies — `gapRef`'s format, `SharedTask`'s field list, `/schedule`'s session-only/7-day constraint — rather than restating the memo's prose loosely), the honest-claims discipline (the `frictionAssessment` mapping gap and the validation-vs-standing-runner distinction are both recorded as open questions for a later session, not quietly resolved to make this update look more complete than the mentor's own instruction supports).
+
+**Status:** Adopted. The architecture map's §Sixth element now carries four mentor-authored clarifying notes alongside items 2a, 9, 10, and 11, none of which alter any ruled item's substance. Sequencing unchanged: the generation step's three named prerequisites (types, configuration shape, shared task-list storage) remain fully closed; C2+C1c remains next in the standing numbered sequence. Cross-references: `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`; `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-SCOPED-2026-08-06`; the automation-capabilities memo, `operations/agent-circles-2026-08/2026-08-06-idea-loop-runner-automation-capabilities-memo.md`.

@@ -2,7 +2,7 @@
 
 **Session:** 2026-08-06. Tier: `governance`/`code-elevated` — a type-shape scope document, no code written. Per the binding sequence (`D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`), this is the item upstream of C2's own scope document. Per the same ruling: the generation step itself (the seven heuristics' implementation) is explicitly NOT scoped here — that remains queued for its own later session. This document also does not scope C2.
 
-**Status: APPROVED by the mentor, 2026-08-06, with one ruling and two clarifications — folded into this document below.** See `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06` in the decision log for the ruling verbatim and its disposition.
+**Status: APPROVED by the mentor, 2026-08-06, with one ruling and two clarifications — folded into this document below.** See `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06` in the decision log for the ruling verbatim and its disposition. **Amended 2026-08-06 (same day, config/shared-task-list scope review):** `cycleOutcome` gains a sixth value, `'dependency_unavailable'`, with a companion `unavailableDependency` field — see §2 below and `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`.
 
 **Method:** every field below is justified by an existing binding ruling (cited) or an existing architectural surface (cited, mechanism-level only, per PR20). Nothing here is invented past what the rulings already settled.
 
@@ -162,7 +162,20 @@ export interface GeneratedCandidate {
    * initialClassification: { kind: 'preferred_indifferent' } — it is not a
    * variant classification, it is the specific shape the fallback produces.
    */
-  cycleOutcome: 'pending' | 'rejected_by_guardrail' | 'rejected_by_novelty' | 'winner' | 'null_cycle'
+  cycleOutcome: 'pending' | 'rejected_by_guardrail' | 'rejected_by_novelty' | 'winner' | 'null_cycle' | 'dependency_unavailable'
+
+  /**
+   * ADDED by mentor ruling, 2026-08-06 (config/shared-task-list scope review).
+   * Present only when cycleOutcome === 'dependency_unavailable' — names which
+   * dependency was unreachable. The first named instance of this outcome is
+   * friction detection attempting to read the shared task list and finding it
+   * unreachable (per the null-cycle rule's honesty discipline extended to this
+   * case, D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06): the loop
+   * records the honest fact that a required dependency could not be reached,
+   * rather than silently treating the attempt as a null cycle indistinguishable
+   * from "generation produced nothing new."
+   */
+  unavailableDependency?: string
 }
 ```
 
