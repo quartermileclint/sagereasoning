@@ -48,3 +48,45 @@ The technical option flagged below the heuristics (guardrail-shaped filtering vs
 ## What this doesn't change
 
 - Sequencing is unaffected. `OikeiösisGap`/`GeneratedCandidate` scoping is still the next item. This ruling fixes the SHAPE of the generation step's cost profile for when that step is eventually scoped — it doesn't move it earlier in the queue.
+
+---
+
+## Neuroscience-grounded additions — RULED, 2026-08-06, standing design (CORRECTED same day)
+
+The mentor reviewed neuroscience research this session and issued three additions to the generation-step specification, to be incorporated before the generation step's own scope document is written. Recorded here verbatim-faithful, in this document rather than the type-scope document, per the mentor's own instruction that additions two and three are "design documentation, not type definitions."
+
+**Discrepancy resolved, 2026-08-06 (same day it was flagged):** the original instruction referenced `minimumInterval`, `maximumDuration`, and `randomOffsetPercent` as existing parameters. I checked this repository and every document under `operations/` and found no prior record of them, and flagged that rather than silently absorbing the "existing" framing as fact. The mentor's corrected instruction confirms the flag was right: **those three parameters existed in session reasoning only — never scoped or committed anywhere in this repository.** Nothing was found that I missed; the correction supplies the shape that genuinely didn't exist yet, rather than pointing to a record I'd overlooked. This is recorded plainly rather than glossed over, consistent with the same honest-claims discipline that produced the original flag.
+
+### Revised addition one — the IDEA loop configuration shape (NEW upstream scope item, not yet scoped)
+
+**A dedicated IDEA loop configuration shape must be scoped as its own item, before the generation step scope document is written.** Per the corrected instruction, it carries four named parameters — all established in session reasoning now, and now queued for formal scoping (not scoped by this document; this document only records what that future scoping session must carry in):
+
+- **`minimumInterval`** — the minimum time between the initiation of one cycle and the initiation of the next, for computational throttling purposes.
+- **`maximumDuration`** — the ceiling on how long a single cycle may run before it is terminated regardless of outcome.
+- **`randomOffsetPercent`** — a small percentage variation applied to the interval, for two stated purposes: preventing synchronisation problems when multiple loops run simultaneously, and introducing phantasia variation into the generation step's input sequence.
+- **`minimumIncubationInterval`** — the mandatory wait between the close of one cycle and the initiation of the next generation step. Distinct from `minimumInterval`: not a computational throttle, but a design-encoded recognition that generative capacity increases when the system is not actively processing. Configurable per loop instance; default value TBD at generation-step scoping. **Rationale to preserve in documentation:** allowing new material to enter the knowledge-base context between cycles increases the probability that the next generation step draws on richer and more varied inputs than the previous cycle had access to.
+
+**Sequencing, as ruled:** the IDEA loop configuration shape is a prerequisite for the generation step scope document — it must be scoped, reviewed by the mentor, and approved before the generation step session opens. This is now formally queued in the dependency graph (`06-PLAIN-TEXT-MIRROR.md` §Sixth element) as its own item, ahead of the generation step and downstream of `OikeiösisGap`/`GeneratedCandidate` (already approved) and C2+C1c (next in the standing sequence — the configuration-shape scoping does not need to wait for C2/C1c to close; it is independent of them, feeding only the generation step).
+
+### Addition two — three-network pipeline mapping (design rationale, not a technical requirement)
+
+A named correspondence to preserve in documentation, so future sessions do not reorder the pipeline stages without understanding what each stage is doing:
+
+- **The generation step ↔ the Default Mode Network** — combines existing knowledge without constraint to produce candidates.
+- **The guardrail examination ↔ the Executive Control Network** — evaluates candidates against the goal and filters those that do not serve it.
+- **The novelty-detection function ↔ the Salience Network** — determines which candidates are worth surfacing to the dashboard.
+
+### Addition three — four-stage creativity-model alignment (design rationale, not a technical requirement)
+
+A second named correspondence, same status as addition two:
+
+- **Preparation ↔ the knowledge-base accumulation that happens between loop sessions** — the history table, the trust ledger, the practitioner profile.
+- **Incubation ↔ `minimumIncubationInterval`** between cycles.
+- **Illumination ↔ the generation step producing a candidate that passes both the guardrail examination and the novelty check.**
+- **Verification ↔ the full examination shape applied to the winning candidate**, producing the Layer 3 prose that reaches the dashboard.
+
+### What is unchanged
+
+Per the mentor's own instruction: **no change to the approved `OikeiösisGap` and `GeneratedCandidate` type definitions** (`2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md`). Additions two and three are prose design-rationale mappings only — not a type-level change. Addition one is now a full new upstream scope item (the IDEA loop configuration shape, four parameters), not a single field bolted onto either approved type.
+
+**Sequencing, corrected:** `OikeiösisGap`/`GeneratedCandidate` are scoped and approved. **The IDEA loop configuration shape is now queued as its own prerequisite scope item, ahead of the generation step session** — it must be scoped, brought to the mentor, and approved before that session opens (see the dependency-graph update, `06-PLAIN-TEXT-MIRROR.md` §Sixth element, item 11). C2+C1c remains the next item in the standing numbered sequence and is independent of the configuration-shape item (neither blocks the other — C2/C1c feeds the orientation reading + trust-event classes; the configuration shape feeds the loop's own cadence, separately). The generation step itself (seven heuristics, the examination-cost ruling, the null-cycle rule, the shared-state requirement, and the two design-rationale mappings above) remains queued last, and now also requires the configuration shape to be approved before it opens.

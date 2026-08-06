@@ -17841,3 +17841,108 @@ Expected: 56/0 · 115/0 · 42/0 · tsc silent · ✓ Compiled successfully.
 **Rules served:** PR20 (the shared-state requirement is named as an architectural surface before the scope document locks in a shape), the honest-claims discipline (declining to affirm an unverifiable self-continuity claim).
 
 **Status:** Adopted. Sequencing unchanged — `OikeiösisGap`/`GeneratedCandidate` type scoping remains the next item; the full seven-heuristic spec (with the cost ruling and the shared-state requirement) is queued for the generation step's own scoping session. Cross-references: `D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05`; `D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05`.
+
+---
+
+## D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-SCOPED-2026-08-06
+
+**Session:** Scoped the two type definitions named as the next upstream item before C2 (`D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`): `OikeiösisGap` (the loop's direction input) and `GeneratedCandidate` (a not-yet-taken proposed action, distinct from the existing `CandidateProfile`). **Tier: `governance`/`code-elevated` — a scope document only; no code, schema, or flag change.**
+
+**Decision:** Authored `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md` — proposed TypeScript shapes for both types (not committed to the codebase), each field justified by an existing binding ruling or architectural surface, cited. Key design calls: (1) `OikeiosisGap` needs a local, ordered `OikeiosisCircleRank` (1–5) distinct from the existing free-form `OikeiosisCircle` string type, since the "current+1, never jump" rule needs an ordering the live type doesn't carry — deliberately not widening the live type, which is used across the trust core; (2) `GeneratedCandidate.initialClassification` is a discriminated union (`virtue_domain` vs `preferred_indifferent`) so friction-detection candidates (heuristic 7) can't be forced into the six-heuristic virtue-domain shape; (3) `guardrailResult` and `fullExaminationProse` are both optional fields populated at different pipeline stages (filtering vs. cycle-winner), never both at once for a non-winning candidate; (4) the current+1 rule is enforced once, on `OikeiosisGap`, not re-derived per candidate. Named, not solved: the shared task-list storage requirement (heuristic 7's dependency) as a known-adjacent requirement for whichever session scopes storage.
+
+**What this session did not do:** did not scope the generation step's prompt structure or the seven heuristics' implementation (remains queued); did not scope C2; did not write any TypeScript file into the codebase; did not touch the Stoa trust-flag activation.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md` (NEW); this entry.
+
+**Risk classification:** `governance` — documents only.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (every field justified against actual code/existing rulings, connection points named at mechanism level before any shape is finalized).
+
+**Status:** Offered for mentor review, per the established pattern — not yet brought. Sequencing: `OikeiösisGap`/`GeneratedCandidate` type scoping — DONE (this entry), pending mentor review. C2+C1c three-component scope document — next, follows mentor sign-off on these types. Cross-references: `D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`; `D-IDEA-LOOP-GENERATION-HEURISTICS-CAPTURED-2026-08-05`; `D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`.
+
+---
+
+## D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06
+
+**Session:** The mentor reviewed and approved `2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md`, with one ruling and two clarifications. **Tier: `governance` — folding a mentor ruling into an existing scope document and the dependency graph; no code, schema, or flag change.**
+
+**The ruling and clarifications, disposed:**
+
+1. **`gapRef` format — RULED, not left TBD.** The scope document had marked `gapRef` as settled-later at the generation-step scoping session. The mentor ruled the field's *purpose* needed settling now, since it determines whether the type is self-contained or needs external state to be meaningful. Settled format: `{sessionId}:{cycleNumber}:{currentCircle}->{targetCircle}` — cycle-local, human-readable on the dashboard without external lookup, unique within any session, requiring no separate gap registry or foreign-key relationship. Folded into the scope document's `GeneratedCandidate.gapRef` field; the generation-step scoping session inherits this as settled, not open.
+
+2. **`generationConfidence` scale — CLARIFIED.** Settled as 0.00–1.00, two decimal places: 0.0 = no basis for believing the candidate addresses the gap, 1.0 = strong structural reason to believe it does. Explicitly NOT a probability estimate or a prediction of the examination outcome — a generation-time relevance signal only, orthogonal to the examination result (a low-confidence candidate can still pass the guardrail examination; a high-confidence candidate can still be rejected by it). Folded into the field's doc comment.
+
+3. **The null-cycle condition's type representation — CLARIFIED, new field added.** The examination-cost session's null-cycle ruling named the *condition* but not its type-system representation. Added `GeneratedCandidate.cycleOutcome: 'pending' | 'rejected_by_guardrail' | 'rejected_by_novelty' | 'winner' | 'null_cycle'` — making the null cycle (three consecutive cycles with no candidate passing novelty, triggering the friction-detection fallback mode) a first-class named outcome rather than something inferred from which optional fields are populated. A `null_cycle` candidate always carries `heuristic: 'friction_detection'` and `initialClassification: { kind: 'preferred_indifferent' }` — the fallback's fixed shape, not a free variant. Consistent with the honest-claims discipline already governing the rest of this program (the loop records that it manufactured nothing, rather than leaving a silent gap).
+
+4. **`OikeiosisCircleRank` — approved as written**, no change. The mentor confirmed the decision not to widen the live `OikeiosisCircle` type (used across the trust core, K1 identity, S1–S9) was correct, and that a local, scoped ordinal enumeration was the right approach.
+
+5. **Current+1 enforcement at construction time on `OikeiosisGap` — approved as written**, no change. The mentor confirmed this is the single-chokepoint principle already governing the credential validator, the kathekon predicate, and the distress perimeter — one rule, one location, everything else inherits.
+
+6. **Shared task-list storage — formally entered into the dependency graph.** Per the mentor's instruction, added as a new numbered item (item 10) in `06-PLAIN-TEXT-MIRROR.md` §Sixth element: blocks the friction-detection heuristic's implementation only; does not block C2, C1c, the other six heuristics, or the `OikeiösisGap`/`GeneratedCandidate` types being committed.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md` (ruling + clarifications folded into the `gapRef`, `generationConfidence` fields; new `cycleOutcome` field added; §5 cross-referenced to the new dependency-graph item; approval status recorded at top and in the closing note); `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (item 2a updated to APPROVED with a summary of the ruling; new item 10, "Shared task-list storage," added); this entry.
+
+**What remains open:** the mentor's note that approval "does not block the type definitions being committed" is not itself an instruction to commit them this session — no TypeScript module has been written into the codebase. Whether to commit the types now or hold them for the C2 scoping session is the founder's or a future session's call, not decided here.
+
+**Risk classification:** `governance` — documents only.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (mechanism-level naming maintained throughout — the ruling's own reasoning, e.g. the single-chokepoint precedent, is recorded rather than paraphrased away), the honest-claims discipline (the `cycleOutcome` field is a direct extension of the null-cycle rule's own honesty principle into the type system).
+
+**Status:** Adopted. Sequencing: `OikeiösisGap`/`GeneratedCandidate` type scoping — DONE and APPROVED. C2+C1c three-component scope document — next. Cross-references: `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-SCOPED-2026-08-06`; `D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`; `D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`.
+
+---
+
+## D-IDEA-LOOP-NEUROSCIENCE-ADDITIONS-RECORDED-2026-08-06
+
+**Session:** Relayed instruction from the mentor incorporating neuroscience research reviewed this session: three additions to the IDEA loop generation-step specification, to be folded in before the generation step's own scope document is written. **Tier: `governance` — content capture + one flagged discrepancy; no code/schema/flag change.**
+
+**Decision:** Recorded all three additions in `2026-08-05-idea-loop-generation-heuristics.md` (the generation step's standing design document), per the mentor's own instruction that additions two and three are documentation, not type definitions, and addition one is a loop-configuration parameter, not a change to either approved type:
+
+1. **`minimumIncubationInterval`** — a new named loop parameter, the mandatory wait between cycle close and next-cycle generation. Rationale as given: incubation increases the odds the next generation step draws on richer, more varied inputs than the prior cycle had access to. Default TBD at generation-step scoping; the parameter itself must exist in the configuration shape before that session opens.
+2. **Three-network pipeline mapping** (design rationale, not a technical requirement): generation ↔ Default Mode Network, guardrail examination ↔ Executive Control Network, novelty detection ↔ Salience Network.
+3. **Four-stage creativity-model alignment** (same status): Preparation ↔ between-session knowledge accumulation, Incubation ↔ `minimumIncubationInterval`, Illumination ↔ a candidate passing both guardrail examination and novelty check, Verification ↔ the full-examination Layer 3 prose reaching the dashboard.
+
+**Conflict flagged, per the instruction's own request to surface any before the generation-step session opens:** the instruction introduced `minimumIncubationInterval` as sitting "alongside the existing `minimumInterval`, `maximumDuration`, and `randomOffsetPercent`." A repo-wide + `operations/`-wide search for those three names returned zero prior matches — no IDEA-loop configuration shape has been scoped or recorded anywhere in this program to date. Per the standing discipline this program has applied consistently to attributed-but-unverifiable claims (the friction-detection session's unverifiable self-continuity attribution; the `model-confabulates-plausible-harness-output` memory), this was not silently absorbed as established fact. Recorded honestly in the design document: as of this repository's record, all four named parameters are UNSCOPED, and the generation-step scoping session should treat the loop's configuration shape as something to establish, not confirm against a record that doesn't currently exist here. The three additions themselves stand on their own merits regardless of this discrepancy's resolution.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md` (three additions appended under a new "Neuroscience-grounded additions" section, with the discrepancy flagged inline); this entry.
+
+**What this session did not do:** did not change the approved `OikeiösisGap`/`GeneratedCandidate` type shapes (per the mentor's explicit instruction that these are unaffected); did not scope the generation step itself (still queued, now carrying a longer specification); did not resolve the flagged parameter discrepancy — that resolution is left to whoever opens the generation-step scoping session, or to the founder/mentor if they hold a record this repository doesn't.
+
+**Risk classification:** `governance` — documents only.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (a repo-wide search performed before accepting the instruction's "existing" framing as fact), the honest-claims discipline (recording an unverifiable claim as flagged rather than confirmed, consistent with every prior instance of this discipline in this program).
+
+**Status:** Adopted, with the flagged discrepancy carried forward unresolved. Sequencing unchanged — `OikeiösisGap`/`GeneratedCandidate` scoped and approved; C2+C1c is next; the generation step (now carrying seven heuristics, the examination-cost ruling, the null-cycle rule, the shared-state requirement, and these three neuroscience-grounded additions) remains queued for its own later session. Cross-references: `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`; `D-IDEA-LOOP-EXAMINATION-COST-RULED-NULL-CYCLE-2026-08-05`.
+
+---
+
+## D-IDEA-LOOP-CONFIGURATION-SHAPE-QUEUED-2026-08-06
+
+**Session:** The mentor issued a corrected instruction acknowledging the flagged discrepancy from `D-IDEA-LOOP-NEUROSCIENCE-ADDITIONS-RECORDED-2026-08-06`: `minimumInterval`, `maximumDuration`, and `randomOffsetPercent` existed in session reasoning only, never scoped or committed anywhere in this repository — confirming the flag was correct, not mistaken. **Tier: `governance` — content correction + a new dependency-graph item; no code/schema/flag change.**
+
+**Decision:** Corrected `2026-08-05-idea-loop-generation-heuristics.md`'s "Neuroscience-grounded additions" section: the original addition one (`minimumIncubationInterval` alone, with the flagged discrepancy left open) is replaced with the corrected addition one — **a new upstream scope item, the IDEA loop configuration shape**, carrying all four parameters together:
+
+- `minimumInterval` — computational throttle between cycle starts.
+- `maximumDuration` — per-cycle hard ceiling, regardless of outcome.
+- `randomOffsetPercent` — jitter, for two stated purposes: preventing multi-loop synchronisation problems, and introducing phantasia variation into the generation step's input sequence.
+- `minimumIncubationInterval` — the mandatory generative rest between cycle close and next generation; distinct from `minimumInterval` (not a throttle — an incubation period, design-encoded on the premise that generative capacity increases when the system is not actively processing).
+
+**Sequencing, as ruled:** the configuration shape must be scoped, brought to the mentor, and approved before the generation step session opens — the same standing as the already-discharged `OikeiösisGap`/`GeneratedCandidate` prerequisite for C2. Entered into the dependency graph (`06-PLAIN-TEXT-MIRROR.md` §Sixth element) as new item 11, and folded into the prose binding-sequence summary as new step thirteen. Confirmed independent of C2/C1c (items 2b/3) and of the shared task-list storage item (item 10, also still-unscoped) — none of the three block each other; all converge only at the generation step itself, which now carries three prerequisites (types — done; configuration shape — queued; shared task-list storage — queued) rather than one.
+
+**What this closes:** the flagged discrepancy from the prior entry is resolved — not by finding a record that was missed, but by the mentor confirming none existed and supplying the missing scope item. Recorded plainly, per the same honest-claims discipline that produced the original flag.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-05-idea-loop-generation-heuristics.md` (addition one rewritten; the discrepancy marked resolved; the closing "What is unchanged" section's sequencing corrected); `operations/architecture-map-2026-08/06-PLAIN-TEXT-MIRROR.md` (new dependency-graph item 11; the prose binding-sequence summary gains step thirteen; step three marked DONE/APPROVED); this entry.
+
+**Risk classification:** `governance` — documents only.
+
+**Rollback path:** `git revert` this session's records commit.
+
+**Rules served:** PR20 (the configuration shape's four parameters are named with their stated purposes before any scoping session locks in a type), the honest-claims discipline (the flag-then-correction sequence recorded transparently rather than silently smoothed over).
+
+**Status:** Adopted. Sequencing: `OikeiösisGap`/`GeneratedCandidate` — DONE, APPROVED. IDEA loop configuration shape — QUEUED, not yet scoped. Shared task-list storage — QUEUED, not yet scoped. C2+C1c — next in the standing numbered sequence, independent of both queued items above. The generation step itself remains last, blocked on all three prerequisites named across this and the prior entries. Cross-references: `D-IDEA-LOOP-NEUROSCIENCE-ADDITIONS-RECORDED-2026-08-06`; `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06`; `D-IDEA-LOOP-FRICTION-DETECTION-SHARED-STATE-2026-08-05`.
