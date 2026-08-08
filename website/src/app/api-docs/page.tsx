@@ -805,7 +805,10 @@ export default function ApiDocsPage() {
           <code> orientation_readings</code>: a capped list (50 most recent) of per-examination directional
           readings &mdash; toward or away from the rational order &mdash; computed deterministically,
           server-side, alongside <code>total_orientation_readings_count</code> (the true total, so a reader
-          sees a partial window, never a false completeness claim). Every entry carries the not-attestable
+          sees a partial window, never a false completeness claim). Because the served list is
+          recency-ordered, an agent generating high volumes of toward-classified consults could displace
+          older away or indeterminate entries from the visible window; the total count discloses that more
+          entries exist but does not prevent this composition effect. Every entry carries the not-attestable
           clause inline: &quot;The record can attest that specific examinations were oriented toward the
           rational order. It cannot attest that the agent is fifth-circle-aligned.&quot; See llms.txt
           &quot;Orientation readings&quot; for the full contract.

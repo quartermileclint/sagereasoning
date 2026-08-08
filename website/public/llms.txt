@@ -638,7 +638,10 @@ signal is server-extracted only, never caller-suppliable.
 
 Alongside the capped list, the record carries `total_orientation_readings_count`: the true total
 number of readings on record, so a reader sees "showing 50 of 847," never a bare window implying
-completeness. This is a recency window, not the full record.
+completeness. This is a recency window, not the full record. Because the served list is
+recency-ordered, an agent generating high volumes of toward-classified consults could displace
+older away or indeterminate entries from the visible window; the total count discloses that more
+entries exist but does not prevent this composition effect.
 
 Every served entry carries this clause inline, verbatim:
 
