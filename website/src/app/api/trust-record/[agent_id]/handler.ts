@@ -40,7 +40,11 @@ import {
   readTrustVerdict,
   type TrustVerdict,
 } from '@/lib/substrate/trust-core/harness-integration'
-import { readHonestReflectSummary } from '@/lib/substrate/trust-core/trust-core-store'
+import {
+  readHonestReflectSummary,
+  readOrientationReadings,
+} from '@/lib/substrate/trust-core/trust-core-store'
+import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
 import {
   composeTrustRecordPayload,
   type TrustRecordPayload,
@@ -90,6 +94,16 @@ export interface TrustRecordDeps {
   readReflectSummary: (
     agentId: string,
   ) => Promise<{ ok: true; value: ReflectSummary } | { ok: false; error: string }>
+  /** C2c (2026-08-08, OPTIONAL so pre-C2 dep objects stay valid): the
+   *  orientation surface's flag + capped ledger read. Absent or flag-off ⇒ no
+   *  read, no payload field — byte-identical to pre-C2. */
+  isOrientationEnabled?: () => boolean
+  readOrientationReadings?: (
+    agentId: string,
+  ) => Promise<
+    | { ok: true; value: { entries: { reading: string; occurredAt: string }[]; capped: boolean } }
+    | { ok: false; error: string }
+  >
   now: () => Date
 }
 
@@ -101,6 +115,8 @@ const REAL_DEPS: TrustRecordDeps = {
   // profile that a cacheable 404 would misreport as "no record exists".
   readVerdict: (agentId, opts) => readTrustVerdict(agentId, { ...opts, strictStore: true }),
   readReflectSummary: (agentId) => readHonestReflectSummary(agentId),
+  isOrientationEnabled: isOrientationReadingEnabled,
+  readOrientationReadings: (agentId) => readOrientationReadings(agentId),
   now: () => new Date(),
 }
 
@@ -217,9 +233,30 @@ export async function runTrustRecordGet(
     console.error('[trust-record] reflect summary read failed (fail-honest):', reflectRes.error)
   }
 
+  // 6b. C2c (2026-08-08) — the capped orientation-readings slice. Flag-off (the
+  //     production default) NOTHING is read and the composer receives undefined
+  //     ⇒ the payload carries no orientation_readings key (byte-identical).
+  //     Flag-on, an outage never blocks the record (null ⇒ omitted + honest
+  //     note — the reflect-summary posture).
+  let orientationReadings:
+    | { entries: { reading: string; occurredAt: string }[]; capped: boolean }
+    | null
+    | undefined
+  if (deps.isOrientationEnabled?.() && deps.readOrientationReadings) {
+    const orientRes = await deps.readOrientationReadings(agentId)
+    orientationReadings = orientRes.ok ? orientRes.value : null
+    if (!orientRes.ok) {
+      console.error(
+        '[trust-record] orientation readings read failed (fail-honest):',
+        orientRes.error,
+      )
+    }
+  }
+
   const payload: TrustRecordPayload = composeTrustRecordPayload({
     verdict,
     reflectSummary,
+    ...(orientationReadings !== undefined ? { orientationReadings } : {}),
     generatedAt: deps.now(),
   })
 

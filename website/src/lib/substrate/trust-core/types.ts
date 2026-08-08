@@ -112,6 +112,28 @@ export type TrustEventType =
   | 'stoa-claim-contradicted-oversight'
   | 'stoa-claim-contradicted-dikaiosyne'
   | 'stoa-declaration-diverges-from-calling'
+  // Agent-circles C1c (2026-08-08) — the circle-5 orientation reading's event
+  // class (the C2/C1c scope §4, both rulings: Option A storage + NULL domain).
+  // DARK until the orientation CHECK-widening migration lands + BOTH
+  // SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ORIENTATION_READING_ENABLED are
+  // set. Three types, not one type with a payload field — the
+  // justice-surface-{...} precedent ("event_type is the single source of truth
+  // for the event's effect on trust state"). All three carry the 'flag' effect
+  // (the stoa-declaration-diverges-from-calling precedent — a genuine no-op on
+  // trust state) and virtue_domain NULL (the reflect-completed-honest agent-wide
+  // precedent: the reading describes the whole examination's directional
+  // character, not one virtue domain's engagement).
+  //
+  // ⚠ EMISSION PATH IS LOAD-BEARING: a NULL-domain event through the generic
+  // emitTrustEvents would route to applyReflectAcrossDomains and stamp
+  // reflect_last_honest_at — silently granting the agent half-rate decay from
+  // an orientation reading. Orientation events are emitted ONLY via
+  // emitLedgerOnlyTrustEvents (insert-only, never folds state, never touches a
+  // reflect timestamp) — see trust-core-store.ts; the reflect fold additionally
+  // refuses non-reflect event types (defence in depth).
+  | 'orientation-reading-toward'
+  | 'orientation-reading-away'
+  | 'orientation-reading-indeterminate'
 
 /** The verifiable examination artifact backing a trust event (the R18f-parallel
  *  proof). S9b adds:
@@ -207,6 +229,15 @@ export interface TrustEventPayload {
   stoaClaimQuote?: string
   stoaJustification?: string
   stoaDivergenceDescription?: string
+  /** orientation-reading-* (C1c): the computed reading + its basis, the
+   *  observation evidence that produced it (auditable server-side; NEVER served
+   *  on S10 — spans quote the submitted text), the C2(ii) generative-prompt
+   *  seed when populated, and the standing MEASURE-only bound. */
+  orientationReading?: 'toward' | 'away' | 'indeterminate'
+  orientationBasis?: string
+  orientationObservations?: Array<{ observed: string; evidence: string }>
+  generativePrompt?: string
+  orientationBounds?: string
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }

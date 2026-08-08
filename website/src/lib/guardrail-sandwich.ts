@@ -73,6 +73,7 @@ import {
 // Q3 (2026-08-02) — the staged-pause override inherits SUBSTRATE_AGENT_CIRCLES_ENABLED
 // (it only matters once C3's cosmopolis teaching is live; no second flag).
 import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
+import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
 import {
   signLayer2Assessment,
   type SignedLayer2Assessment,
@@ -509,10 +510,23 @@ export async function runGuardrailSandwich(
 
     // ---- Verdict (pure rank arithmetic over the §4-native proximity) --------
     const verdict = deriveGuardrailVerdict(assessment, params.threshold)
+    // Agent-circles C2c (2026-08-08): the gate shares the Layer-1 prompt with
+    // /api/reason, so flag-on its extraction may carry orientation_observations
+    // — strip them from the echo (the placement ruling: the reading's
+    // antecedents never ride ANY agent-facing response; the at-action hook
+    // consumes this verdict, so an unstripped echo would put the markers one
+    // step from an at-action frame). The gate derives NO orientation reading
+    // and NO event — consult examinations only. Flag-off the field never
+    // exists (the prompt never solicits it) — byte-identical.
+    let wireSchema = schema
+    if (isOrientationReadingEnabled() && schema.orientation_observations !== undefined) {
+      const { orientation_observations: _stripped, ...rest } = schema
+      wireSchema = rest as typeof schema
+    }
     return {
       status: 'verdict',
       verdict,
-      extraction: schema,
+      extraction: wireSchema,
       assessment,
       signed,
       usage,

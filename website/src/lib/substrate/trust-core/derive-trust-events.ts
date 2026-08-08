@@ -23,6 +23,12 @@ import {
   verifyLayer2Signature,
 } from '@/lib/translation-sandwich/layer2-verifier'
 import { SUB_SPECIES } from '@/lib/translation-sandwich/layer1-extractor'
+import type { OrientationObservation } from '@/lib/translation-sandwich/layer1-extractor'
+import {
+  computeOrientationReading,
+  composeGenerativePrompt,
+  ORIENTATION_READING_BOUNDS,
+} from '@/lib/translation-sandwich/orientation-reading'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
 import type {
   KatorthomaProximity,
@@ -688,6 +694,97 @@ export function deriveStoaCallingDivergenceEvent(
       stoaEntryId: input.stoaEntryId,
       stoaDivergenceDescription: input.divergenceDescription,
     },
+    occurredAt: input.now.toISOString(),
+    correlationId: input.correlationId,
+    ownerUserId: input.ownerUserId,
+    credentialRef: input.credentialRef,
+  }
+}
+
+// ============================================================================
+// Agent-circles C1c (2026-08-08) — the circle-5 orientation-reading event
+// ============================================================================
+
+export interface OrientationReadingInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  /** The signed Layer-2 assessment of the SAME examination the reading is
+   *  computed over — the R18f-parallel artifact. RE-VERIFIED here before any
+   *  event is derived (the module's standing rule), even though the consult
+   *  path signs it moments earlier — the discipline is uniform, and the
+   *  deriver must hold against a hand-constructed envelope. */
+  signedAssessment: SignedLayer2Assessment
+  /** The server-side extraction's orientation observations (possibly absent —
+   *  absence reads 'indeterminate', never a defaulted 'toward'). The CALLER is
+   *  responsible for the server-extraction-only rule (layer1_source ===
+   *  'server'); this deriver additionally never sees a supplied schema because
+   *  the route refuses the field on the l1_supply path flag-on. */
+  observations: readonly OrientationObservation[] | null | undefined
+  /** The engaged circle names from the same extraction (for the C2(ii)
+   *  generative-prompt seed's population condition). */
+  engagedCircles: readonly string[]
+  now: Date
+  /** Deterministic idempotency key, computed by the emission hook from the
+   *  signature digest (`orient:<sha256(signature)[:32]>`) so one examination
+   *  derives at most one ledgered reading. */
+  correlationId: string
+  /** Injectable for tests; defaults to the real Ed25519 verifier. */
+  verify?: VerifyFn
+}
+
+/**
+ * Derive the orientation-reading event for ONE examination (C2/C1c scope §4).
+ * Returns null when the signed assessment does not verify (R18f-parallel — no
+ * event without a verifiable artifact).
+ *
+ * virtue_domain is HARD-CODED to null (the ruling: agent-wide, the
+ * reflect-completed-honest precedent — the reading describes the whole
+ * examination's directional character, not one virtue domain's engagement).
+ * BECAUSE of that null, this event must NEVER be emitted through the generic
+ * emitTrustEvents (whose null-domain branch routes to the reflect-timestamp
+ * fold and would grant half-rate decay) — the emission hook uses the
+ * INSERT-ONLY path (emitLedgerOnlyTrustEvents). The 'flag' effect + the null
+ * domain are two independent structural reasons the reading cannot bind
+ * (scope §4.5).
+ */
+export function deriveOrientationReadingEvent(
+  input: OrientationReadingInput,
+): TrustEvent | null {
+  const verify = input.verify ?? (verifyLayer2Signature as unknown as VerifyFn)
+  const res = verify(input.signedAssessment, input.now)
+  if (!res.valid) return null
+
+  const { reading, basis } = computeOrientationReading(input.observations)
+  const generativePrompt = composeGenerativePrompt(reading, input.engagedCircles)
+
+  const payload: TrustEvent['payload'] = {
+    orientationReading: reading,
+    orientationBasis: basis,
+    orientationBounds: ORIENTATION_READING_BOUNDS,
+  }
+  if (input.observations && input.observations.length > 0) {
+    // Auditability (the "reproducible/auditable per the R18f-parallel
+    // discipline" requirement, C2c consequence 1): the derivation is
+    // recomputable from the ledger row alone. Spans quote the submitted text —
+    // service-role-only + owner-exportable + retention-swept; NEVER served on
+    // S10 (the public list carries reading/entry_text/clause/occurred_at only).
+    payload.orientationObservations = input.observations.map((o) => ({
+      observed: o.observed,
+      evidence: o.evidence.length > 300 ? o.evidence.slice(0, 300) + '…' : o.evidence,
+    }))
+  }
+  if (generativePrompt !== undefined) {
+    payload.generativePrompt = generativePrompt
+  }
+
+  return {
+    agentId: input.agentId,
+    virtueDomain: null,
+    eventType: `orientation-reading-${reading}` as TrustEvent['eventType'],
+    artifactKind: 'signed_layer2_assessment',
+    artifactRef: `signed:${res.key_id}`,
+    payload,
     occurredAt: input.now.toISOString(),
     correlationId: input.correlationId,
     ownerUserId: input.ownerUserId,

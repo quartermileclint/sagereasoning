@@ -32,6 +32,11 @@ import * as path from 'path'
 import { makeFakeSupabase } from './fake-supabase'
 import { readTrustVerdict } from '../harness-integration'
 import { readHonestReflectSummary, readTrustProfile } from '../trust-core-store'
+// Agent-circles C2c (2026-08-08) — the orientation-readings exception's pins.
+import {
+  ORIENTATION_ENTRY_TEXT,
+  ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+} from '@/lib/translation-sandwich/orientation-reading'
 import { PROXIMITY_RANK } from '../constants'
 import {
   composeTrustRecordPayload,
@@ -552,6 +557,124 @@ async function main(): Promise<void> {
     assert(
       storeSrc.includes('!opts?.strictMissingTable &&'),
       'S5-17 strict mode gates the benign missing-table fold in readTrustProfile',
+    )
+  }
+
+  // ═══ §6 — agent-circles C2c: the orientation_readings bounded exception ═══
+  {
+    // S6-1: the surface DARK case — no orientationReadings input ⇒ the key is
+    // structurally ABSENT (byte-identity for every pre-C2 payload) and no
+    // orientation note rides.
+    const dark = composeTrustRecordPayload({ verdict, reflectSummary: null, generatedAt: NOW })
+    assert(!('orientation_readings' in dark.record), 'S6-1 no input ⇒ no orientation_readings key (flag-off byte-identity)')
+    assert(!dark.notes.some((n) => n.includes('orientation')), 'S6-1b no orientation note flag-off')
+
+    // S6-2: entries compose with the template + the INLINE clause on EVERY entry.
+    const composed = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: {
+        entries: [
+          { reading: 'toward', occurredAt: '2026-08-08T09:00:00.000Z' },
+          { reading: 'away', occurredAt: '2026-08-08T08:00:00.000Z' },
+          { reading: 'indeterminate', occurredAt: '2026-08-08T07:00:00.000Z' },
+          { reading: 'sideways', occurredAt: '2026-08-08T06:00:00.000Z' }, // unknown — filtered
+        ],
+        capped: false,
+      },
+      generatedAt: NOW,
+    })
+    const entries = composed.record.orientation_readings ?? []
+    assert(entries.length === 3, 'S6-2 unknown reading vocabulary filtered (never a template-less entry)')
+    assert(
+      entries.every((e) => e.entry_text === ORIENTATION_ENTRY_TEXT[e.reading]),
+      'S6-3 entry_text is the deterministic template (never generated)',
+    )
+    assert(
+      entries.every((e) => e.not_attestable_clause === ORIENTATION_NOT_ATTESTABLE_CLAUSE),
+      'S6-4 EVERY entry carries the not-attestable clause INLINE, verbatim (the placement ruling\'s structural addition)',
+    )
+
+    // S6-5: capped ⇒ honest note.
+    const capped = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: { entries: [{ reading: 'toward', occurredAt: NOW_ISO }], capped: true },
+      generatedAt: NOW,
+    })
+    assert(
+      capped.notes.some((n) => n.includes('orientation_readings is capped')),
+      'S6-5 capped read surfaces an honest note',
+    )
+
+    // S6-6: flag-on read failure ⇒ field omitted + honest note (the reflect-
+    // summary outage posture; never fabricated, never blocking).
+    const failed = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: null,
+      generatedAt: NOW,
+    })
+    assert(!('orientation_readings' in failed.record), 'S6-6 failed read ⇒ field omitted')
+    assert(
+      failed.notes.some((n) => n.includes('orientation readings unavailable')),
+      'S6-6b failed read ⇒ honest note',
+    )
+
+    // S6-7: handler back-compat — a pre-C2 deps object (no orientation fns)
+    // still serves a 200 with no orientation field.
+    const resOld = await runTrustRecordGet(AGENT, liveDeps)
+    const oldBody = (await resOld.json()) as { data: { record: Record<string, unknown> } }
+    assert(resOld.status === 200 && !('orientation_readings' in oldBody.data.record), 'S6-7 pre-C2 deps ⇒ 200, field absent (back-compat)')
+
+    // S6-8: handler flag-on — the field rides, each entry claused.
+    const orientDeps: TrustRecordDeps = {
+      ...liveDeps,
+      isOrientationEnabled: () => true,
+      readOrientationReadings: async () => ({
+        ok: true,
+        value: { entries: [{ reading: 'away', occurredAt: NOW_ISO }], capped: false },
+      }),
+    }
+    const resOn = await runTrustRecordGet(AGENT, orientDeps)
+    const onBody = (await resOn.json()) as {
+      data: { record: { orientation_readings?: { reading: string; not_attestable_clause: string }[] } }
+    }
+    assert(
+      resOn.status === 200 &&
+        onBody.data.record.orientation_readings?.length === 1 &&
+        onBody.data.record.orientation_readings[0].not_attestable_clause === ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+      'S6-8 flag-on deps ⇒ served entries carry the inline clause',
+    )
+
+    // S6-8b (PR19 first-hand fold F-3): the ENV-1 evidence-gated 404 fires
+    // BEFORE the orientation read — an agent with no examined evidence gets its
+    // honest 404 without the orientation ledger ever being touched (orientation
+    // events can never flip a 404, and a 404 response never leaks readings).
+    const orient404Deps: TrustRecordDeps = {
+      ...liveDeps,
+      isOrientationEnabled: () => true,
+      readOrientationReadings: (() => {
+        throw new Error('readOrientationReadings must not be called on the 404 path')
+      }) as unknown as TrustRecordDeps['readOrientationReadings'],
+    }
+    const res404Orient = await runTrustRecordGet('test:unknown@v1', orient404Deps)
+    assert(res404Orient.status === 404, 'S6-8b ENV-1 404 precedes the orientation read (bomb untripped)')
+
+    // S6-9: handler flag-on + read outage ⇒ 200 still served (never blocks).
+    const outageDeps: TrustRecordDeps = {
+      ...liveDeps,
+      isOrientationEnabled: () => true,
+      readOrientationReadings: async () => ({ ok: false, error: 'boom' }),
+    }
+    const errSaved = console.error
+    console.error = () => {}
+    const resOutage = await runTrustRecordGet(AGENT, outageDeps)
+    console.error = errSaved
+    const outageBody = (await resOutage.json()) as { data: { record: Record<string, unknown>; notes?: string[] } }
+    assert(
+      resOutage.status === 200 && !('orientation_readings' in outageBody.data.record),
+      'S6-9 orientation outage never blocks the record (200, field omitted)',
     )
   }
 

@@ -315,12 +315,30 @@ export function renderCallingElicitation() {
   ].join("\n");
 }
 
+/** Agent-circles C2e (2026-08-08) — whether the calling frame carries the
+ *  mentor's fifth-circle telos line (Q7: "The calling moment carries the telos,
+ *  not the criterion... the compass bearing set before the work begins").
+ *  Default OFF — dark until the C2 activation walk sets it in the operator's
+ *  env block (the harness hot-reloads, so an unconditional line would go live
+ *  in the founder's loop on file save — the dark-build discipline applies to
+ *  the hooks too). ADVISE channel: a question, never a target; the at-action
+ *  moment stays SILENT on the fifth circle (Q7, battery-pinned). */
+export function telosLineEnabled() {
+  return (process.env.GATE1_TELOS_LINE_ENABLED || "").trim().toLowerCase() === "true";
+}
+
+/** The mentor's Q7 telos line, VERBATIM (battery-locked — never reworded). */
+export const TELOS_LINE =
+  "The reasoning this session serves is oriented toward the rational order. " +
+  "What does this session's work require of that reasoning?";
+
 /** The purpose orientation line prepended to the H1 frame when a purpose IS
  *  declared — the calling stage's orientation frame for the opening examination. */
 export function renderPurposeOrientation(declared, source) {
   return (
     `[SageReasoning Calling — declared purpose (${source})]\n` +
-    `This session's examination is oriented against the declared purpose: ${declared}\n`
+    `This session's examination is oriented against the declared purpose: ${declared}\n` +
+    (telosLineEnabled() ? `${TELOS_LINE}\n` : "")
   );
 }
 

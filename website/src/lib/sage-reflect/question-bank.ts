@@ -135,6 +135,27 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
 // unnecessary Sage Calling pass is lower than carrying a purpose that no longer
 // fits).
 
+// ============================================================================
+// AGENT-CIRCLES C2e — THE ORIENTATION QUESTION (mentor Q7, verbatim)
+// ============================================================================
+//
+// The mentor's fifth-circle reflection question, VERBATIM (2026-08-01 verdicts,
+// Q7 — binding): the reflection moment's engagement with the fifth-circle
+// criterion, "a question, not a reading" — it "cannot be answered by optimising
+// a score. It requires the agent to examine its own examination." Surfaced as a
+// MANDATORY SUB-QUESTION of Q6 (the closing purpose question) — additive to the
+// existing Q1–Q6 structure per the same verdict ("the orientation question
+// belongs there as a natural extension of the reflection's existing function"),
+// appended at the SERVICE surfacing seam behind
+// SUBSTRATE_ORIENTATION_READING_ENABLED (this bank stays static + flag-free;
+// reflect-service.ts owns the gate). The instrument's computed reading and the
+// agent's answer to this question are two separate things that may or may not
+// agree — and per the C2c ruling the instrument NEVER acts on that divergence
+// (no basis code, no event, no suggestion — battery-pinned).
+export const ORIENTATION_REFLECT_QUESTION =
+  "Across this session's examinations, was the reasoning reaching toward the " +
+  'rational order or producing outputs that resembled it?'
+
 export const RS4_SUPPORTING_QUESTIONS: readonly string[] = [
   'What specifically is unclear — the need, your capacity, or your role?',
   'Remove your attention from the purpose: does the work still appear to need doing ' +

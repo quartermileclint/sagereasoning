@@ -34,6 +34,10 @@
  */
 
 import type { KatorthomaProximity } from '@/lib/translation-sandwich/layer2-mechanisms'
+import {
+  ORIENTATION_ENTRY_TEXT,
+  ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+} from '@/lib/translation-sandwich/orientation-reading'
 import type { TrustVerdict } from './harness-integration'
 import type { EffectiveDomainTrust, VirtueTrustDomain } from './types'
 
@@ -102,6 +106,25 @@ export interface TrustRecordReflectView {
   note: string
 }
 
+/**
+ * Agent-circles C2c (2026-08-08) — one served orientation-reading entry. The
+ * NAMED, BOUNDED exception to S10's state-fold-only posture (the C2c placement
+ * ruling + scope §4.5; the reflect-summary cap precedent): a capped
+ * recent-entries list composed from the three orientation-reading-* ledger
+ * events. Every entry carries the not-attestable clause INLINE — "the entry is
+ * the unit that will be read in isolation" (the ruling's structural addition).
+ * The entry describes ONE examination's direction, never the agent's standing;
+ * nothing here is an aggregation, a trend, or a score.
+ */
+export interface TrustRecordOrientationEntry {
+  reading: 'toward' | 'away' | 'indeterminate'
+  /** ORIENTATION_ENTRY_TEXT[reading] — the examination-not-agent template. */
+  entry_text: string
+  /** ORIENTATION_NOT_ATTESTABLE_CLAUSE, verbatim, EVERY entry. */
+  not_attestable_clause: string
+  occurred_at: string
+}
+
 export interface TrustRecordPayload {
   schema: 'sage-trust-record/v1'
   subject: { agent_id: string }
@@ -115,6 +138,10 @@ export interface TrustRecordPayload {
     unevaluated_cardinal_domains: string[]
     sparse: boolean
     reflect_record: TrustRecordReflectView | null
+    /** C2c: ABSENT entirely while SUBSTRATE_ORIENTATION_READING_ENABLED is
+     *  unset (byte-identical payload — the established optional-field
+     *  pattern); flag-on, the capped recent-entries list (newest first). */
+    orientation_readings?: TrustRecordOrientationEntry[]
   }
   envelope: typeof TRUST_RECORD_ENVELOPE
   evidence: {
@@ -178,6 +205,13 @@ export interface ComposeTrustRecordInput {
     latestHonestReflectAt: string | null
     capped?: boolean
   } | null
+  /** C2c (2026-08-08): the capped orientation-readings ledger slice.
+   *  `undefined` ⇒ the orientation surface is dark (flag off) — the payload
+   *  carries NO orientation_readings key at all (byte-identity). `null` ⇒ the
+   *  flag is on but the read failed honestly — the field is omitted this read
+   *  with an honest note (the reflect-summary outage posture). A value ⇒
+   *  composed entries, each carrying the inline not-attestable clause. */
+  orientationReadings?: { entries: { reading: string; occurredAt: string }[]; capped: boolean } | null
   /** Injected read time (the route passes new Date(); tests pin it). */
   generatedAt: Date
 }
@@ -206,6 +240,34 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
     notes.push(
       'honest_reflect_count is capped at the bounded read window (older events not counted — under-reporting, the safe direction)',
     )
+  }
+  // C2c: compose the orientation entries (flag-on only — `undefined` means the
+  // surface is dark and the key must be absent entirely). Defensive filter to
+  // the three known readings so a future vocabulary widening can never render
+  // an entry with no template text.
+  let orientationEntries: TrustRecordOrientationEntry[] | undefined
+  if (input.orientationReadings === null) {
+    notes.push(
+      'orientation readings unavailable (fail-honest) — orientation_readings omitted this read',
+    )
+  } else if (input.orientationReadings !== undefined) {
+    orientationEntries = input.orientationReadings.entries
+      .filter(
+        (e): e is { reading: 'toward' | 'away' | 'indeterminate'; occurredAt: string } =>
+          e.reading === 'toward' || e.reading === 'away' || e.reading === 'indeterminate',
+      )
+      .map((e) => ({
+        reading: e.reading,
+        entry_text: ORIENTATION_ENTRY_TEXT[e.reading],
+        not_attestable_clause: ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+        occurred_at: e.occurredAt,
+      }))
+    if (input.orientationReadings.capped) {
+      notes.push(
+        'orientation_readings is capped at the bounded read window (older readings not listed); ' +
+          'each entry describes one examination only — see its inline not-attestable clause',
+      )
+    }
   }
   if (profile.unevaluatedCardinalDomains.length > 0) {
     notes.push(
@@ -257,6 +319,9 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
             note: REFLECT_MODULATE_ONLY_NOTE,
           }
         : null,
+      // C2c: attached ONLY when composed (spread-omitted otherwise — the key is
+      // structurally absent flag-off, byte-identical payload).
+      ...(orientationEntries !== undefined ? { orientation_readings: orientationEntries } : {}),
     },
     envelope: TRUST_RECORD_ENVELOPE,
     evidence: {

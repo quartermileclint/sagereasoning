@@ -183,6 +183,11 @@ import {
 import { practiceSuggestionFor } from '@/lib/substrate/practice-suggestion'
 import { computeTrajectoryDelta, activeRegimeBoundaries } from '@/lib/substrate/trajectory-delta'
 import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
+import {
+  isOrientationReadingEnabled,
+  engagedCircleNames,
+} from '@/lib/translation-sandwich/orientation-reading'
+import { emitOrientationReadingTrustEvent } from '@/lib/substrate/trust-core/emission-hooks'
 import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
 import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
@@ -914,6 +919,38 @@ export async function POST(request: NextRequest) {
         })
       }
       preExtractedLayer1Schema = supplied.schema
+    }
+
+    // Agent-circles C2a (2026-08-08): a SUPPLIED extraction may never carry
+    // orientation observations. The orientation reading is the anti-gaming
+    // half of the fifth-circle criterion — a caller-supplied schema claiming
+    // 'genuine_examination_markers' would let an agent mint its own
+    // toward-readings onto the public trust record (the extraction-trust
+    // locus-2 class, structurally closed here rather than disclosed). Refusing
+    // loudly (not silently ignoring) follows the CF-2 no-false-affordance
+    // precedent. Flag-off: byte-identical (no check; the validator's C1b-style
+    // always-on shape validation of the optional field is the only delta, the
+    // same posture reasoning_integrity_signals shipped with). The emission
+    // hook independently requires layer1Source === 'server' — two independent
+    // gates on the same class.
+    if (
+      isOrientationReadingEnabled() &&
+      preExtractedLayer1Schema !== undefined &&
+      preExtractedLayer1Schema.orientation_observations !== undefined
+    ) {
+      return await respond({
+        body: {
+          error: 'orientation_observations_not_suppliable',
+          detail:
+            'orientation_observations is a server-extracted signal: the fifth-circle ' +
+            'orientation reading derives only from SageReasoning\'s own extraction of ' +
+            'your submitted text. Remove the field and resubmit; the reading (when ' +
+            'enabled) appears only on the public trust record, never on this response.',
+        },
+        status: 400,
+        headers: corsHeaders(),
+        isBillable: false, // Pre-substrate validation error — no LLM cost incurred.
+      })
     }
 
     // M1-CP4e (2026-05-06): continuation_token is optional, present on
@@ -1728,7 +1765,7 @@ export async function POST(request: NextRequest) {
         // AE-1 (KG1): when the delta block already resolved this consult's
         // context, reuse it — never two PK reads for one consult.
         const credCtx =
-          sharedCredCtx ?? (await resolveCredentialContext(apiKey.api_key_id))
+          sharedCredCtx ?? (sharedCredCtx = await resolveCredentialContext(apiKey.api_key_id))
         ownerUserId = credCtx.owner_user_id
         declaredAgentId =
           credCtx.agent_id !== null && isAcceptedAgentId(credCtx.agent_id)
@@ -1958,6 +1995,70 @@ export async function POST(request: NextRequest) {
       meta.layer1_source =
         preExtractedLayer1Schema !== undefined ? 'supplied' : 'server'
       output.meta = meta
+    }
+    // Agent-circles C2/C1c (2026-08-08): the fifth-circle orientation reading.
+    // Flag-off (SUBSTRATE_ORIENTATION_READING_ENABLED unset — production
+    // default): this whole block is a no-op and the response is byte-identical
+    // (the extraction never carries the field flag-off — the prompt never
+    // solicits it). Flag-on, in this order (load-bearing):
+    //   (1) EMIT the C1c ledger event from the extraction IN HAND — server
+    //       extractions on credential-bearing consults with an accepted K1
+    //       agent identity only. Awaited (KG1) + never-throws (measure mode;
+    //       the response is unaffected by any failure). The hook re-verifies
+    //       the signed assessment (R18f-parallel) and refuses layer1Source
+    //       'supplied' independently of the 400 at intake.
+    //   (2) STRIP orientation_observations from the wire extraction echo — the
+    //       C2c placement ruling: neither the reading nor its trivially-
+    //       countable antecedents may ride the consult response ("regular
+    //       receipt of a reading about one's own orientation creates the
+    //       optimisation pressure"). The reading is sought on the public
+    //       trust record, never received here.
+    if (isOrientationReadingEnabled()) {
+      const wireExtraction = output.extraction as Record<string, unknown> | null | undefined
+      const rawObservations =
+        wireExtraction && Array.isArray(wireExtraction.orientation_observations)
+          ? (wireExtraction.orientation_observations as { observed: string; evidence: string }[])
+          : undefined
+      if (
+        // PR19 first-hand fold F-1 (2026-08-08): the emission ALSO requires the
+        // agent-circles flag, mirroring the prompt's own AND — an orientation
+        // event must never derive from an extraction that was never ASKED the
+        // orientation question (an orientation-only misconfiguration would
+        // otherwise ledger 'insufficient evidence' readings the instrument
+        // never actually looked for).
+        isAgentCirclesEnabled() &&
+        apiKey !== null &&
+        apiKey.valid === true &&
+        sandwichResult.error === null &&
+        sandwichResult.tier1_trigger === null &&
+        output.assessment !== undefined &&
+        output.assessment !== null
+      ) {
+        const credCtx =
+          sharedCredCtx ?? (sharedCredCtx = await resolveCredentialContext(apiKey.api_key_id))
+        const orientAgentId =
+          credCtx.agent_id !== null && isAcceptedAgentId(credCtx.agent_id)
+            ? credCtx.agent_id
+            : null
+        if (orientAgentId !== null) {
+          await emitOrientationReadingTrustEvent({
+            agentId: orientAgentId,
+            credentialId: apiKey.api_key_id,
+            ownerUserId: credCtx.owner_user_id,
+            signedAssessment: output.assessment,
+            observations: rawObservations,
+            engagedCircles: wireExtraction
+              ? engagedCircleNames(
+                  wireExtraction as unknown as Parameters<typeof engagedCircleNames>[0],
+                )
+              : [],
+            layer1Source: preExtractedLayer1Schema !== undefined ? 'supplied' : 'server',
+          })
+        }
+      }
+      if (wireExtraction && 'orientation_observations' in wireExtraction) {
+        delete wireExtraction.orientation_observations
+      }
     }
     // M5 CI-13 (2026-06-13): the reflect-at-close practice hint on the completed
     // consult. Absent entirely when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is

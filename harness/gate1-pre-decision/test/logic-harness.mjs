@@ -463,11 +463,53 @@ mode = "ok";
   check("17 depth: justice latch → at least standard", calibratedDepthFloor({ aggregateLevel: "principled", justiceCapped: true }) === "standard");
   check("17 depth: mid-session bump honoured", calibratedDepthFloor({ aggregateLevel: "sage_like", depthFloorBump: "standard" }) === "standard");
 
-  const { resolveDeclaredPurpose, renderCallingElicitation, renderPurposeOrientation } = await import("../claude-code/hooks/lib/discernment.mjs");
+  const { resolveDeclaredPurpose, renderCallingElicitation, renderPurposeOrientation, TELOS_LINE, telosLineEnabled } = await import("../claude-code/hooks/lib/discernment.mjs");
   check("17 calling: config purpose resolves", resolveDeclaredPurpose({ orchestratorProfile: { purpose: "serve" } }).declared === "serve");
   check("17 calling: no purpose resolves null", resolveDeclaredPurpose({ orchestratorProfile: {} }).declared === null);
   check("17 calling: elicitation is review-shaped (nothing to call/send)", renderCallingElicitation().includes("nothing to call and nothing to send"));
   check("17 calling: orientation names the purpose", renderPurposeOrientation("serve x", "config").includes("serve x"));
+
+  // ── Agent-circles C2e (2026-08-08): the fifth-circle telos line ────────────
+  // Q7 (binding): "The calling moment carries the telos, not the criterion";
+  // the at-action moment stays SILENT on the fifth circle. The line is
+  // env-gated DEFAULT OFF (GATE1_TELOS_LINE_ENABLED) because the hooks
+  // hot-reload into the live loop — dark until the C2 activation walk.
+  {
+    const savedTelos = process.env.GATE1_TELOS_LINE_ENABLED;
+    delete process.env.GATE1_TELOS_LINE_ENABLED;
+    const off = renderPurposeOrientation("serve x", "config");
+    check("17 telos: default OFF — byte-identical to the pre-C2 frame",
+      off === `[SageReasoning Calling — declared purpose (config)]\nThis session's examination is oriented against the declared purpose: serve x\n`);
+    check("17 telos: default OFF — no rational-order language", !off.includes("rational order"));
+    check("17 telos: flag reader exact-string discipline", telosLineEnabled() === false);
+    process.env.GATE1_TELOS_LINE_ENABLED = "true";
+    const on = renderPurposeOrientation("serve x", "config");
+    check("17 telos: flag ON — carries the mentor's line VERBATIM", on.includes(TELOS_LINE));
+    check("17 telos: the line is the mentor's exact words",
+      TELOS_LINE === "The reasoning this session serves is oriented toward the rational order. What does this session's work require of that reasoning?");
+    check("17 telos: a question, never a target (no score/optimise language)", !/score|optimi[sz]e|target/i.test(TELOS_LINE));
+    if (savedTelos === undefined) delete process.env.GATE1_TELOS_LINE_ENABLED; else process.env.GATE1_TELOS_LINE_ENABLED = savedTelos;
+
+    // AT-ACTION SILENCE (Q7, pinned structural): the Gate-1 frame body — which
+    // the at-action hook re-titles into the Gate-2 frame — never names the
+    // fifth circle or the rational order, under EITHER telos-flag state.
+    process.env.GATE1_TELOS_LINE_ENABLED = "true";
+    const { renderFrame } = await import("../claude-code/hooks/lib/framing-core.mjs");
+    const frameOn = renderFrame({
+      katorthoma_proximity: "deliberate",
+      is_kathekon: true,
+      kathekon: { quality: "moderate", justification: "role obligation engaged" },
+      oikeiosis: { relevant_circles: [{ circle: "cosmopolis" }] },
+      reasoning: "examined",
+    });
+    check("17 at-action silence: the frame body never names the rational order (telos flag ON)",
+      !/rational order|fifth circle|fifth-circle|orientation reading/i.test(frameOn));
+    if (savedTelos === undefined) delete process.env.GATE1_TELOS_LINE_ENABLED; else process.env.GATE1_TELOS_LINE_ENABLED = savedTelos;
+
+    // The elicitation branch is telos-free too (the line belongs to the
+    // DECLARED-purpose orientation only).
+    check("17 telos: the purposeless elicitation is unchanged", !renderCallingElicitation().includes("rational order"));
+  }
 }
 
 // ── 18. S11b — the examined-input recomposition (composer purity + hook wire) ──

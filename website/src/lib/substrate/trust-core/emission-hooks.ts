@@ -28,10 +28,17 @@ import {
   deriveSuppressionWatchEvents,
   deriveStoaContradictionEvents,
   deriveStoaCallingDivergenceEvent,
+  deriveOrientationReadingEvent,
   type SurfacedPassion,
   type StoaContradictionAssertion,
 } from './derive-trust-events'
-import { emitTrustEvents, emitStoaGatedTrustEvents } from './trust-core-store'
+import {
+  emitTrustEvents,
+  emitStoaGatedTrustEvents,
+  emitLedgerOnlyTrustEvents,
+} from './trust-core-store'
+import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
+import type { OrientationObservation } from '@/lib/translation-sandwich/layer1-extractor'
 
 /** Extract the provenance.signed_assessments array from a parsed write body,
  *  defensively (returns [] on any shape mismatch). */
@@ -363,5 +370,84 @@ export async function emitStoaCallingDivergenceTrustEvent(
     const error = `emitStoaCallingDivergenceTrustEvent threw: ${(e as Error).message}`
     console.error('[trust-core] ' + error)
     return { error }
+  }
+}
+
+export interface OrientationReadingEmissionInput {
+  agentId: string
+  credentialId: string
+  /** The credential's resolved owner (the route's sharedCredCtx — resolved ONCE
+   *  per consult, the AE-1/AE-2 KG1 dedup discipline; this hook performs no
+   *  resolveCredentialContext read of its own). */
+  ownerUserId: string | null
+  /** The signed Layer-2 assessment of THIS examination (from the consult
+   *  response's own assessment envelope — re-verified in the deriver). */
+  signedAssessment: unknown
+  /** The SERVER-side extraction's orientation observations (absent ⇒
+   *  'indeterminate'). */
+  observations: readonly { observed: string; evidence: string }[] | null | undefined
+  /** Engaged circle names from the same extraction (the C2(ii) seed's
+   *  population condition). */
+  engagedCircles: readonly string[]
+  /** TRUE Layer-1 provenance ('supplied' iff preExtractedLayer1Schema was set —
+   *  the AE-1 stamp's own rule). The hook refuses 'supplied': a caller-supplied
+   *  extraction can never mint an orientation reading (the gaming ceiling's
+   *  structural half; the route additionally 400s the field on the l1_supply
+   *  path flag-on). */
+  layer1Source: 'server' | 'supplied'
+  now?: Date
+}
+
+/**
+ * Agent-circles C1c (2026-08-08) — emit the per-examination orientation-reading
+ * event from a credential-bearing /api/reason consult. Gated behind BOTH
+ * SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ORIENTATION_READING_ENABLED.
+ * Fully guarded; returns void; never throws (measure mode — the consult
+ * response is unaffected by any failure here, and carries no trace of the
+ * reading either way per the C2c placement ruling).
+ *
+ * EMISSION PATH (load-bearing): emitLedgerOnlyTrustEvents — INSERT-ONLY, never
+ * the generic emitTrustEvents, whose null-domain branch would stamp the reflect
+ * timestamp and grant half-rate decay (see trust-core-store.ts). Idempotency:
+ * `orient:<sha256 digest of the assessment signature>` — one examination, at
+ * most one ledgered reading, dedup enforced by the uq_ate_correlation index
+ * (COALESCE(virtue_domain,'__agent_wide__') covers the NULL domain).
+ */
+export async function emitOrientationReadingTrustEvent(
+  input: OrientationReadingEmissionInput,
+): Promise<void> {
+  try {
+    if (!isTrustCoreEnabled() || !isOrientationReadingEnabled()) return
+    if (input.layer1Source !== 'server') return // supplied extractions never mint a reading
+
+    const signed = input.signedAssessment as SignedLayer2Assessment | null | undefined
+    if (!signed || typeof signed.signature !== 'string' || signed.signature.length === 0) return
+
+    const now = input.now ?? new Date()
+    // PR19 first-hand fold F-2 (2026-08-08): the digest includes the agent id
+    // (the emitAccreditationTrustEvents precedent) — Ed25519 is deterministic,
+    // so two agents submitting byte-identical content in the same signed_at
+    // second could share a signature; without the agent id the uq_ate index
+    // (which omits agent_id — the audited D-1 bound) would silently drop the
+    // second agent's reading.
+    const sigDigest = createHash('sha256')
+      .update(input.agentId + '|' + signed.signature)
+      .digest('hex')
+      .slice(0, 32)
+
+    const event = deriveOrientationReadingEvent({
+      agentId: input.agentId,
+      ownerUserId: input.ownerUserId,
+      credentialRef: `api_key:${input.credentialId}`,
+      signedAssessment: signed,
+      observations: input.observations as readonly OrientationObservation[] | null | undefined,
+      engagedCircles: input.engagedCircles,
+      now,
+      correlationId: `orient:${sigDigest}`,
+    })
+    if (event === null) return // unverifiable artifact — no event (R18f-parallel)
+    await emitLedgerOnlyTrustEvents([event])
+  } catch (e) {
+    console.error('[trust-core] emitOrientationReadingTrustEvent error:', (e as Error).message)
   }
 }

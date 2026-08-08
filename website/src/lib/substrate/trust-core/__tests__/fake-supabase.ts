@@ -22,7 +22,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 type Row = Record<string, unknown>
-type Filter = { kind: 'eq' | 'lt'; col: string; val: unknown }
+type Filter = { kind: 'eq' | 'lt' | 'in'; col: string; val: unknown }
 
 export interface FakeSupabase {
   client: SupabaseClient
@@ -104,6 +104,12 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       this.filters.push({ kind: 'lt', col, val })
       return this
     }
+    /** C2c (2026-08-08): .in() support for readOrientationReadings' three-type
+     *  event filter. Additive — no existing chain changes. */
+    in(col: string, vals: unknown[]) {
+      this.filters.push({ kind: 'in', col, val: vals })
+      return this
+    }
     order(col: string, cfg?: { ascending?: boolean }) {
       this.orders.push({ col, asc: cfg?.ascending !== false })
       return this
@@ -121,7 +127,9 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       return this.filters.every((f) =>
         f.kind === 'eq'
           ? r[f.col] === f.val
-          : String(r[f.col]) < String(f.val),
+          : f.kind === 'in'
+            ? Array.isArray(f.val) && (f.val as unknown[]).includes(r[f.col])
+            : String(r[f.col]) < String(f.val),
       )
     }
 

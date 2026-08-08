@@ -66,6 +66,18 @@ export const EVENT_EFFECT: Record<TrustEventType, TrustEventEffect> = {
   'stoa-claim-contradicted-oversight': 'decrease',
   'stoa-claim-contradicted-dikaiosyne': 'decrease',
   'stoa-declaration-diverges-from-calling': 'flag',
+  // Agent-circles C1c (2026-08-08). All three orientation readings are 'flag' —
+  // a genuine no-op on trust state (the stoa divergence precedent, reused per
+  // the storage-home ruling). The reading binds nothing: it is MEASURE-only,
+  // never an S4 input, and structurally excluded from per-domain aggregation
+  // (virtue_domain NULL). NOTE these events never reach applyTrustEvent in
+  // practice — they are emitted via the INSERT-ONLY store path (a NULL-domain
+  // event through the generic fold would mis-route to the reflect machinery);
+  // the entries here keep EVENT_EFFECT total over TrustEventType and pin the
+  // no-op reading if a future caller ever folds one.
+  'orientation-reading-toward': 'flag',
+  'orientation-reading-away': 'flag',
+  'orientation-reading-indeterminate': 'flag',
 }
 
 /**

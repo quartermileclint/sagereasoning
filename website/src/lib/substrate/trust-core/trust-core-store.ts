@@ -281,6 +281,49 @@ export async function emitStoaGatedTrustEvents(
   }
 }
 
+/**
+ * Agent-circles C1c (2026-08-08) — INSERT-ONLY emission for the orientation-
+ * reading events. Ledger row only: NEVER folds agent_trust_state, NEVER
+ * touches a reflect timestamp, NEVER seeds a domain row.
+ *
+ * Why a dedicated path (load-bearing, not convenience): the ruling gives these
+ * events virtue_domain NULL (the reflect-completed-honest agent-wide
+ * precedent), but emitTrustEvents' null-domain branch routes to
+ * applyReflectAcrossDomains — which stamps reflect_last_honest_at and would
+ * silently grant the agent HALF-RATE DECAY across every domain from an
+ * orientation reading. The reading must bind nothing (C2c: "the practice
+ * measures, it does not bind"), so its emission path is structurally incapable
+ * of touching state — the same insert-only shape emitStoaGatedTrustEvents'
+ * held branch already uses. S10's capped orientation list reads the LEDGER
+ * (readOrientationReadings below), so insert-only is fully sufficient.
+ */
+export async function emitLedgerOnlyTrustEvents(
+  events: TrustEvent[],
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<{ written: number }>> {
+  try {
+    let written = 0
+    for (const event of events) {
+      const inserted = await insertEvent(event, client)
+      if (!inserted.ok) {
+        console.error(
+          `[trust-core] emitLedgerOnlyTrustEvents: insert failed at ${event.eventType} — events lost:`,
+          inserted.error,
+        )
+        return inserted
+      }
+      if (!inserted.value.inserted) continue // duplicate — benign (idempotent)
+      written++
+      // Deliberately NO fold and NO reflect update — insert-only by design.
+    }
+    return { ok: true, value: { written } }
+  } catch (e) {
+    const error = `emitLedgerOnlyTrustEvents threw: ${(e as Error).message}`
+    console.error('[trust-core] ' + error)
+    return { ok: false, error }
+  }
+}
+
 async function insertEvent(
   event: TrustEvent,
   client: SupabaseClient,
@@ -400,6 +443,22 @@ async function applyReflectAcrossDomains(
   event: TrustEvent,
   client: SupabaseClient,
 ): Promise<void> {
+  // C1c defence-in-depth (2026-08-08): this fold exists for the TWO reflect
+  // event types alone. Any other null-domain event reaching it (the
+  // orientation-reading class, or a future agent-wide type) would be stamped
+  // as an honest reflect and grant half-rate decay — refuse loudly instead.
+  // Byte-identical for every live caller today (only reflect events arrive
+  // here); the orientation events never enter emitTrustEvents at all
+  // (emitLedgerOnlyTrustEvents is their only path — battery-pinned).
+  if (
+    event.eventType !== 'reflect-completed-honest' &&
+    event.eventType !== 'reflect-screened-honest'
+  ) {
+    console.error(
+      `[trust-core] applyReflectAcrossDomains: refusing a non-reflect null-domain event (${event.eventType}) — a reflect timestamp must never be stamped from it.`,
+    )
+    return
+  }
   const retainUntil = new Date(Date.parse(event.occurredAt) + RETENTION_MS).toISOString()
   const timestampColumn =
     event.eventType === 'reflect-screened-honest'
@@ -547,6 +606,66 @@ export async function readHonestReflectSummary(
     }
   } catch (e) {
     return { ok: false, error: `readHonestReflectSummary threw: ${(e as Error).message}` }
+  }
+}
+
+/**
+ * Agent-circles C2c (2026-08-08) — the bounded orientation-readings read backing
+ * S10's named, scoped exception to its state-fold-only posture (the C2c ruling +
+ * scope §4.5; the reflect-summary cap precedent directly above). Ledger read
+ * ONLY — event_type + occurred_at, nothing else: the reading is derivable from
+ * the event_type suffix, and the payload (whose observation spans quote the
+ * submitted text) is deliberately never selected, so a public composition
+ * cannot leak consult content by construction.
+ *
+ * Cap: a build-time parameter (the ruling: "a capped recent-entries list...
+ * mirrors the reflect-summary cap, not proposed here"). 50 — smaller than the
+ * reflect cap's 500 because each entry here is individually RENDERED on the
+ * public payload (entry text + inline clause), not folded to one count; 50
+ * recent readings bound the payload while keeping a meaningful window. Newest
+ * first; `capped` set at the bound so the payload can say so honestly.
+ */
+export const ORIENTATION_READINGS_ROW_CAP = 50
+
+export interface OrientationReadingLedgerEntry {
+  /** 'toward' | 'away' | 'indeterminate' — parsed from the event_type suffix. */
+  reading: string
+  occurredAt: string
+}
+
+export async function readOrientationReadings(
+  agentId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<{ entries: OrientationReadingLedgerEntry[]; capped: boolean }>> {
+  try {
+    const { data, error } = await client
+      .from(EVENTS_TABLE)
+      .select('event_type, occurred_at')
+      .eq('agent_id', agentId)
+      .in('event_type', [
+        'orientation-reading-toward',
+        'orientation-reading-away',
+        'orientation-reading-indeterminate',
+      ])
+      .order('occurred_at', { ascending: false })
+      .limit(ORIENTATION_READINGS_ROW_CAP)
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: { entries: [], capped: false } }
+      }
+      return { ok: false, error: `readOrientationReadings: ${error.message}` }
+    }
+    const rows = (data ?? []) as { event_type: string; occurred_at: string }[]
+    const entries: OrientationReadingLedgerEntry[] = rows.map((r) => ({
+      reading: r.event_type.replace('orientation-reading-', ''),
+      occurredAt: r.occurred_at,
+    }))
+    return {
+      ok: true,
+      value: { entries, capped: rows.length >= ORIENTATION_READINGS_ROW_CAP },
+    }
+  } catch (e) {
+    return { ok: false, error: `readOrientationReadings threw: ${(e as Error).message}` }
   }
 }
 

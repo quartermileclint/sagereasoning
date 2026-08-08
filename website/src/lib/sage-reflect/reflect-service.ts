@@ -94,6 +94,11 @@ import {
   readDevelopmentalObservations as realReadDevelopmentalObservations,
   type StoreResult as TrustCoreStoreResult,
 } from '@/lib/substrate/trust-core/trust-core-store'
+// Agent-circles C2e (2026-08-08) — the Q6 orientation mandatory sub-question,
+// appended at this service's surfacing seam behind
+// SUBSTRATE_ORIENTATION_READING_ENABLED (see withOrientationSubquestion below).
+import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
+import { ORIENTATION_REFLECT_QUESTION } from './question-bank'
 
 // ============================================================================
 // MIRROR PRINCIPLE (SR-8 / R19d) — mandatory on every completion output
@@ -125,6 +130,25 @@ function buildContext(
   sage_assent_agreement_streak = 0,
 ): ReflectContext {
   return { session_summary: summary, prior_sessions, sage_assent_agreement_streak }
+}
+
+/**
+ * Agent-circles C2e (2026-08-08) — append the mentor's Q7 orientation question
+ * to Q6's mandatory sub-questions at the SURFACING seam (the engine + the
+ * question bank stay pure/static; the flag lives here). Flag-off (production
+ * default): returns the bank's array untouched — byte-identical. Applied at
+ * every question-decision site so the open path, the advance path, and the peek
+ * path surface the same content. A QUESTION only, never the computed reading
+ * (the C2c placement ruling: the reading is never rendered in any
+ * practice-voiced surface — the reflect answer and the reading are two separate
+ * things the instrument never compares).
+ */
+function withOrientationSubquestion(
+  questionId: string,
+  mandatory: readonly string[],
+): readonly string[] {
+  if (questionId !== 'Q6' || !isOrientationReadingEnabled()) return mandatory
+  return [...mandatory, ORIENTATION_REFLECT_QUESTION]
 }
 
 // ============================================================================
@@ -310,7 +334,7 @@ export async function openReflection(
         question: step.question,
         text: step.default_text,
         subquestions: step.subquestions,
-        mandatory_subquestions: step.mandatory_subquestions,
+        mandatory_subquestions: withOrientationSubquestion(step.question, step.mandatory_subquestions),
       },
       billable_cost_cents: 0,
       loop_headers: metered.headers,
@@ -629,7 +653,7 @@ export async function answerReflection(
           question: next.question,
           text: next.default_text,
           subquestions: next.subquestions,
-          mandatory_subquestions: next.mandatory_subquestions,
+          mandatory_subquestions: withOrientationSubquestion(next.question, next.mandatory_subquestions),
         },
         billable_cost_cents: cost,
         loop_headers: metered.headers,
@@ -698,7 +722,7 @@ export async function peekReflection(
         question: pending.question,
         text: pending.default_text,
         subquestions: pending.subquestions,
-        mandatory_subquestions: pending.mandatory_subquestions,
+        mandatory_subquestions: withOrientationSubquestion(pending.question, pending.mandatory_subquestions),
       },
     }
   }

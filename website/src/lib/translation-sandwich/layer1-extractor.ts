@@ -257,6 +257,33 @@ export interface ReasoningIntegritySignals {
   examined_refusal?: ExaminedRefusal | null
 }
 
+/**
+ * Agent-circles C2a (2026-08-08, scope §1.1) — one observed habit-vs-genuine-
+ * examination marker. OPTIONAL + additive on the schema (the
+ * `reasoning_integrity_signals` precedent): populated whenever the examination
+ * shows observable markers, absent otherwise — feeds the conservative-by-default
+ * rule in orientation-reading.ts (`computeOrientationReading`), never a forced
+ * choice between the two readings. An ARRAY because one examination can show
+ * BOTH marker classes in different parts of its reasoning (scope §1.1) —
+ * collapsing to one value at extraction time would force a premature verdict;
+ * the deterministic threshold resolves the array to one reading.
+ *
+ * PLACEMENT-SENSITIVE (the C2c ruling): these observations are the reading's
+ * trivially-countable antecedents, so flag-on the /api/reason route STRIPS this
+ * field from the wire extraction echo and REFUSES it on the l1_supply path —
+ * they exist server-side only. NEVER read by computeProximity or any verdict.
+ */
+export interface OrientationObservation {
+  /** Which observable class was found — the mentor's own contrast (Q4):
+   *  reasoning that shows genuine examination of the affected circles and the
+   *  telos of right reason, vs. reasoning that produces a correct-looking
+   *  output through pattern/habit without examining why. */
+  observed: 'genuine_examination_markers' | 'habitual_output_markers'
+  /** Verbatim span from the submitted text grounding the observation — mirrors
+   *  the obligation_assessment.justification precedent; never a paraphrase. */
+  evidence: string
+}
+
 export interface ValueCategoryAtStake {
   indifferent: Indifferent
   /** How the agent frames this indifferent. Layer 2 compares against axia
@@ -593,6 +620,16 @@ export interface Layer1Schema {
    *  NEVER read by `computeProximity` (mentor L4 — first-circle enforcement is a
    *  category error, and the live gate blocks on proximity). Additive/forward-compat. */
   reasoning_integrity_signals?: ReasoningIntegritySignals | null
+  /** Agent-circles C2a (2026-08-08) — OPTIONAL fifth-circle orientation
+   *  observations (habit-vs-genuine-examination markers with verbatim spans).
+   *  Absent ⇒ no markers evidenced (⇒ 'indeterminate', never a defaulted
+   *  'toward'). Read ONLY by `computeOrientationReading`
+   *  (orientation-reading.ts) behind `SUBSTRATE_ORIENTATION_READING_ENABLED`;
+   *  NEVER read by `computeProximity` (the reading lives outside
+   *  `applyMechanisms` by construction — the C2c placement ruling). Flag-on
+   *  the route strips this field from the wire echo and refuses it on the
+   *  l1_supply path. Additive/forward-compat. */
+  orientation_observations?: OrientationObservation[] | null
   /** Free-form notes naming any uncertainty. Empty when the extraction is
    *  unambiguous. */
   ambiguity_notes: string[]
@@ -1344,6 +1381,42 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     }
   }
 
+  // Agent-circles C2a (2026-08-08) — orientation_observations. OPTIONAL +
+  // additive (the reasoning_integrity_signals precedent): absent/null ⇒ omit
+  // the key entirely so every pre-C2 extraction round-trips byte-identically.
+  // Each entry must carry a recognised marker class AND a substantive verbatim
+  // span — a class with no span is not an observation (the same discipline the
+  // three-element standard applies: presence keys on substance).
+  let orientationObservations: OrientationObservation[] | undefined
+  if (root.orientation_observations !== undefined && root.orientation_observations !== null) {
+    const rawObs = assertArray(root.orientation_observations, 'orientation_observations')
+    const obs: OrientationObservation[] = rawObs.map((entry, i) => {
+      const o = assertObject(entry, `orientation_observations[${i}]`)
+      const observed = assertString(o.observed, `orientation_observations[${i}].observed`)
+      if (observed !== 'genuine_examination_markers' && observed !== 'habitual_output_markers') {
+        throw new Layer1ValidationError(
+          'enum',
+          `Invalid orientation_observations[${i}].observed: expected 'genuine_examination_markers' | 'habitual_output_markers', got '${observed}'.`,
+          `orientation_observations[${i}].observed`,
+          observed
+        )
+      }
+      const evidence = assertString(o.evidence, `orientation_observations[${i}].evidence`)
+      if (evidence.trim().length === 0) {
+        throw new Layer1ValidationError(
+          'shape',
+          `Empty orientation_observations[${i}].evidence: an observation requires a substantive verbatim span.`,
+          `orientation_observations[${i}].evidence`,
+          evidence
+        )
+      }
+      return { observed, evidence }
+    })
+    if (obs.length > 0) {
+      orientationObservations = obs
+    }
+  }
+
   // ambiguity_notes
   const ambiguityNotes: string[] = assertArray(root.ambiguity_notes, 'ambiguity_notes').map(
     (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
@@ -1373,6 +1446,11 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   // null), so a pre-C1b extraction round-trips byte-identically.
   if (reasoningIntegritySignals) {
     result.reasoning_integrity_signals = reasoningIntegritySignals
+  }
+
+  // Agent-circles C2a — same attach-only-when-populated discipline.
+  if (orientationObservations) {
+    result.orientation_observations = orientationObservations
   }
 
   // ==========================================================================
@@ -1573,6 +1651,9 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
 }
 
 import { isAgentCirclesEnabled } from './reasoning-integrity'
+// Type-only in the other direction (orientation-reading imports only types from
+// this module), so there is no runtime cycle — the reasoning-integrity precedent.
+import { isOrientationReadingEnabled } from './orientation-reading'
 
 // ============================================================================
 // LAYER 1 SYSTEM PROMPT (per ADR-005 §4)
@@ -1686,8 +1767,52 @@ reasoning_integrity_signals is OMITTED from the example above because omitting i
   }
 }
 
-export function buildLayer1SystemPrompt(agentCirclesEnabled: boolean): string {
+/**
+ * Agent-circles C2a (2026-08-08) — the fifth-circle orientation category,
+ * gated on BOTH flags: the orientation reading presupposes the re-grounded
+ * circle regime (mentor Q9b — "the fifth-circle orientation reading depends on
+ * the first-circle extraction being accurate"), so the section renders only
+ * when SUBSTRATE_AGENT_CIRCLES_ENABLED is also on. Orientation-flag-off (the
+ * default everywhere) the prompt is byte-identical to the C1 prompt
+ * (battery-asserted), and the field is never solicited.
+ */
+function orientationPromptSections(enabled: boolean): {
+  cat14Exception: string
+  category14: string
+  shapeExample: string
+} {
+  if (!enabled) {
+    return { cat14Exception: '', category14: '', shapeExample: '' }
+  }
+  return {
+    cat14Exception:
+      ' Category 14 (orientation_observations) is likewise OPTIONAL: omit the field entirely when neither marker class is positively evidenced.',
+    category14: `
+
+14. orientation_observations — OPTIONAL array. OMIT THE FIELD ENTIRELY unless the input positively evidences one of the two marker classes below; omission is the TYPICAL case. This is a reading of the EXAMINATION'S OWN CHARACTER — not of the action's outcome, and not a verdict: was the reasoning genuinely examining the impression at hand, or producing the shape of an examined output?
+
+    genuine_examination_markers — the reasoning shows GENUINE examination: the practitioner weighs the specific impression at hand on its own terms — questioning it, testing it against what is owed to the affected circles, revising a first reading in response to what it found, naming uncertainty honestly, or reasoning toward WHY this action is the fitting one rather than asserting that it is.
+
+    habitual_output_markers — the reasoning produces a correct-LOOKING output through pattern or habit WITHOUT examining why: formulaic virtue or examination vocabulary with no connection to the specifics at hand; a conclusion asserted in examined-sounding language with no examination visible; resting on prior competence, role, or routine ("this is what I always do", "standard practice", "as usual") in place of weighing the impression actually presented.
+
+    Each observation: { "observed": <one of the two classes>, "evidence": <verbatim quote> }. Multiple observations are allowed, and BOTH classes may appear in one input (different parts of the reasoning). Set an observation ONLY on positive textual evidence. The ABSENCE of visible examination is NOT itself evidence of habitual output — brevity is not habit; when neither class is positively evidenced, omit the field entirely. Do not infer one class from the absence of the other.`,
+    shapeExample: `
+
+orientation_observations is OMITTED from the example above because omitting it is the typical case. When the input DOES evidence one or both marker classes, add it at the top level with this exact shape:
+
+  "orientation_observations": [
+    { "observed": "genuine_examination_markers", "evidence": "at first I read this as routine, but the recipient list made me re-check what they were owed" },
+    { "observed": "habitual_output_markers", "evidence": "the rest I handled the way I always handle these" }
+  ]`,
+  }
+}
+
+export function buildLayer1SystemPrompt(
+  agentCirclesEnabled: boolean,
+  orientationEnabled = false,
+): string {
   const S = agentCirclesPromptSections(agentCirclesEnabled)
+  const O = orientationPromptSections(orientationEnabled && agentCirclesEnabled)
   return `You are Layer 1 of the SageReasoning translation-sandwich engine. Your role is FEATURE EXTRACTION ONLY. You do not assess, judge, recommend, or generate prose. You extract structured features from the input text and return them as JSON conforming exactly to Layer1Schema.
 
 TWO NARROW EXCEPTIONS: categories 3 and 6 ask you to record a bounded STRUCTURED reading grounded in the text — the obligation owed to each affected circle (met / violated / indeterminate, with a justification) and whether a grave act's gravity was weighed before it was carried out. These are structured features the deterministic engine consumes; they are NOT a verdict on the whole action (Layer 2 computes the verdict). Every other category remains pure extraction.
@@ -1696,9 +1821,9 @@ Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality
 
 EXTRACTION CONTRACT
 
-Read the input text carefully. For each of the ${S.categoryCount} content categories below, extract everything the input names and return it in the specified shape.
+Read the input text carefully. For each of the ${O.category14 ? 'fourteen' : S.categoryCount} content categories below, extract everything the input names and return it in the specified shape.
 
-If a category is absent from the input, return an empty array for that category — do not omit the field.${S.cat13Exception}
+If a category is absent from the input, return an empty array for that category — do not omit the field.${S.cat13Exception}${O.cat14Exception}
 
 If you are uncertain about a classification (e.g., a passion that could map to two sub-species, a statement that could be evidence for two causal stages, a metaphorical text whose literal target is unclear), add a note to ambiguity_notes naming the field and the source of uncertainty. Do not guess.
 
@@ -1805,7 +1930,7 @@ CATEGORIES
 
     Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability about which entity to reason about.
 
-    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).${S.category13}
+    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).${S.category13}${O.category14}
 
 OUTPUT
 
@@ -1866,7 +1991,7 @@ Incorrect (do not use this shape):
     {"field": "passions_present[0].sub_species", "note": "could be eros or pothos"}
   ]
 
-If everything was unambiguous, return [].${S.shapeExample}
+If everything was unambiguous, return [].${S.shapeExample}${O.shapeExample}
 
 Return only the JSON.`
 }
@@ -2106,7 +2231,7 @@ export async function extractFeatures(params: ExtractInput): Promise<ExtractFeat
   }> = [
     {
       type: 'text',
-      text: buildLayer1SystemPrompt(isAgentCirclesEnabled()),
+      text: buildLayer1SystemPrompt(isAgentCirclesEnabled(), isOrientationReadingEnabled()),
       cache_control: { type: 'ephemeral' },
     },
   ]
