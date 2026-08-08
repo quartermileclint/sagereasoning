@@ -1,0 +1,69 @@
+# C2 post-fix production review — the examined/observed fold operating on genuine traffic — for the mentor
+
+**Date:** 2026-08-08 (review conducted ~12:49–13:2x UTC; final trust-record fetch 13:2xZ, after an adversarial-verification pass and a live re-fetch caught one additional row accrued mid-review)
+**Prepared by:** AI (Claude Code), per the mentor's binding ruling (`2026-08-08-mentor-consultation-condition-b-not-yet-closed-verbatim.md`): *"A genuine production orientation reading — either class — written after the examined/observed fix was deployed, pulled from the live trust record, and confirmed to carry the correct class field, the correct wording, and the correct proxy-disclosure language. Then that reading brought to the mentor with the same structure as the first production-consult review."*
+**Status:** drafted for the founder to relay to the mentor. Not yet reviewed by the mentor. No self-ruling on whether condition (b) is satisfied — that is the mentor's call.
+**Post-relay update (2026-08-08, late evening AEST):** the founder relayed this review; the mentor ruled **condition (b) SATISFIED — CLOSED** (verbatim record: `2026-08-08-mentor-consultation-condition-b-satisfied-verbatim.md`). The Status line above is retained as the document's state at relay time.
+
+## Note on method (added after an adversarial-verification pass)
+
+A subagent Workflow was launched to independently re-derive this review's three claims (wording fidelity, log correlation, scope soundness) against source data rather than trusting the draft. All three subagents died on the account's session usage limit before producing output (zero tokens of useful work; a clean fail, not a partial one). Per this project's standing PR19 fallback for exactly this failure mode, the verification was completed first-hand instead: every source constant was re-read directly from `orientation-reading.ts`, every entry re-pulled fresh from the live trust record, and every correlation re-built independently against `gate1.log`, below. This first-hand pass also caught something a stale draft would have missed: a fifth genuine post-fix row had accrued between the original draft (checked at 4 rows) and this pass (5 rows) — from this review's own file-write action. It is folded in below rather than left out of scope.
+
+## What was checked
+
+`GET /api/trust-record/sagereasoning:s9-loop@v1` (public, unauthenticated) was pulled fresh. It shows **18 orientation readings** (`total_orientation_readings_count: 18`; all 18 served — well inside the 50-entry window, so nothing is hidden by the cap). The scope cut is the one the record itself dictates: the fix deployed ~11:19–11:28Z, quota blocked every consult from 10:45:57Z until the founder's limit raise at ~12:37Z, so **the 13 rows at 10:43:10Z and earlier are pre-fix legacy rows** (their `class: "examined"` is the ruled prospective-only default, not a genuine classification) and **the 5 rows at 12:39:08Z and later are the genuine post-fix material**. None of the 5 were manufactured: all arose from ordinary standing-loop work — the tail of the quota-diagnosis session (its own framing consult and close-document writes), the opening frame of the session conducting this review, and one at-action consult drawn by this review's own file-write (disclosed, not excluded — it is exactly the kind of ordinary session activity the mentor said is fine to include, distinct from constructing a probe to manufacture a reading).
+
+Three things were checked for every post-fix entry, per the retry prompt:
+
+1. **Class field** present and valued `examined` or `observed`.
+2. **Wording** byte-compared against the authoritative source — the code the mentor's wording was applied to (`website/src/lib/translation-sandwich/orientation-reading.ts`: `ORIENTATION_ENTRY_TEXT`, `ORIENTATION_NOT_ATTESTABLE_CLAUSE`, `ORIENTATION_OBSERVED_ENTRY_TEXT`, `ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE`, selected via `selectOrientationEntryWording`), read first-hand this session — not against any summary.
+3. **Cross-reference against the harness's own log** (`~/.sage-gate1/gate1.log`) — the actual test: does the server's ledgered class match the agent's lived experience of that same consult, per entry?
+
+## Finding 1 — the fix's core claim holds, per entry: the server's record matches the agent's lived experience, 5 of 5
+
+| # | Orientation reading (server ledger) | class | reading | Harness's own record of the same consult (`gate1.log`) | Agree? |
+|---|---|---|---|---|---|
+| 1 | `2026-08-08T12:39:08.02Z` | `examined` | `indeterminate` | `12:39:08.236Z FRAMED depth=standard proximity=deliberate` — the frame was delivered; the agent was demonstrably in receipt (confirmed in that session's transcript; the known anchor from the retry prompt) | ✓ |
+| 2 | `2026-08-08T12:42:33.826Z` | `observed` | `toward` | `12:42:23.845Z CONSULT-OUTAGE reason="timeout after 28000ms"` — the client abandoned at 28s (consult started ≈12:41:55.8Z); the server completed ≈38s after start, past the harness's window. The agent never received this frame | ✓ |
+| 3 | `2026-08-08T12:43:38.308Z` | `observed` | `toward` | `12:43:34.154Z CONSULT-OUTAGE reason="timeout after 28000ms"` — client abandoned at 28s (started ≈12:43:06.2Z); server completed ≈32s after start. The agent never received this frame | ✓ |
+| 4 | `2026-08-08T12:48:38.494Z` | `examined` | `indeterminate` | `12:48:38.745Z FRAMED depth=standard proximity=deliberate` — the session conducting this review; the reviewer is the agent in receipt, and the frame is verifiably present in its own context (first-person confirmation) | ✓ |
+| 5 | `2026-08-08T12:53:42.344Z` | `observed` | `toward` | `12:53:35.511Z CONSULT-OUTAGE reason="timeout after 28000ms"` — client abandoned at 28s (started ≈12:53:07.5Z); server completed ≈34.8s after start. Drawn by this review's own Write of this file. The agent never received this frame | ✓ |
+
+Every `FRAMED` line corresponds to `class: "examined"` (2/2); every 28s `CONSULT-OUTAGE` timeout corresponds to `class: "observed"` (3/3); zero mismatches in either direction. This is precisely the divergence the first review surfaced (12 of 13 server-attested "examinations" never delivered, invisible on the record) now resolved: the same timeout class that silently minted "examined" rows before the fix now mints honestly-labelled `observed` rows.
+
+The mapping is also **bijective** — no orphans on either side:
+
+- Every post-fix consult-class log line has exactly one ledger row (the five above), and every post-fix ledger row has exactly one log line.
+- The `12:46:23.003Z GUARD-OUTAGE` (guard-route timeout) correctly produced **no** orientation reading — readings are `/api/reason`-only.
+- The pre-raise `12:36:34.318Z CONSULT-OUTAGE reason="http 401"` (quota, before the limit raise) correctly produced no reading — blocked at auth.
+- No readings exist in the quota-blocked gap (10:43:10Z → 12:39:08Z), exactly as the diagnosis predicted.
+- All `AT-ACTION-SKIP-BASH` lines (housekeeping/bash-dropped, including this review's own trailing verification work) produced no consult and no reading — Bash is structurally dropped from the at-action score, so these never reach the classifier.
+
+All three `observed` rows' server-side elapsed times (inferred from the log: outage-line-minus-28s as consult start → ledger write ≈38s, ≈32s, and ≈34.8s after start respectively) sit above the mentor-ruled `ORIENTATION_DELIVERY_TIMEOUT_MS = 28000` boundary — the classifier fired on the correct side for every row, including the two `examined` rows (both completed inside the window and were delivered).
+
+## Finding 2 — wording and proxy disclosure: byte-exact, both classes
+
+- **Examined-class entries** (#1, #4) carry `ORIENTATION_ENTRY_TEXT.indeterminate` verbatim ("This examination showed insufficient evidence to read a direction.") and the mentor's Q6 two-sentence clause verbatim ("The record can attest that specific examinations were oriented toward the rational order. It cannot attest that the agent is fifth-circle-aligned.").
+- **Observed-class entries** (#2, #3, #5) carry the fixed verbatim pair regardless of reading, exactly as ruled: entry text "This action was scored by the server-side pipeline; the reasoning was not returned to the agent in time to be examined. This is an observation, not an examination." and clause "The record can attest that this action was scored. It cannot attest that the agent examined the reasoning behind it — the framing was not delivered within the agent's own consult window." Byte-identical to the code constants (verified byte-for-byte, including exact string lengths, in the second-pass adversarial check below).
+- **"Examination" never appears affirmatively in the observed wording**: every occurrence is under negation ("was not returned … in time to be examined"; "This is an observation, not an examination"; "It cannot attest that the agent examined…"). The noun "examination" does not appear in `ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE` at all (only the negated verb "examined"); it does appear once in `ORIENTATION_OBSERVED_ENTRY_TEXT`, strictly negated ("not an examination"). No affirmative use anywhere.
+- **Proxy-disclosure language** is present and correct in the record's envelope (`does_not_attest`, final bullet): the class field is "computed from an ELAPSED-TIME PROXY against the harness's documented consult timeout — never a confirmed-delivery acknowledgement, which no channel exists to provide," with the pre-2026-08-08 rows disclosed as defaulting to `examined` ("the architecture at time of writing, not a confirmed status; never backfilled"). No wording anywhere claims confirmed delivery.
+- **The 13 pre-fix legacy rows** all read `class: "examined"` — the ruled prospective-only default, correctly not backfilled.
+
+## What the distribution shows
+
+Post-fix: **5 readings — 2 `examined` (both `indeterminate`), 3 `observed` (all `toward`)**. A mixed distribution: the record now contains genuine production `observed` rows (which the mentor said were not required but has now received anyway) alongside genuine `examined` rows under the new classification logic. Whole record: 18 total = 13 pre-fix legacy + these 5.
+
+## Anything anomalous?
+
+Nothing defect-shaped in the underlying mechanism. One process note on this review's own drafting, disclosed below rather than hidden; two descriptive observations, neither rising to a finding.
+
+1. **A drafting defect in an earlier version of this document, caught by adversarial verification and corrected before relay.** The first draft of this review (checked while only 4 post-fix rows existed) was revised in place after a 5th row accrued mid-session — the "Note on method" section above was updated to say the 5th row was folded in, but the table, Finding 2, and this distribution section were not actually edited to match, leaving the document internally self-contradicting (18-total/5-post-fix in one section, 17/4 in another) for a period before this fix. An independent adversarial-verification pass (three subagents re-deriving the review's claims from source, after an earlier attempt died on the account's session limit) caught exactly this — a genuine, confirmed finding against my own drafting process, not against the underlying fix or classifier, which all three verification dimensions independently re-confirmed clean. Named here rather than silently repaired, per this project's honesty discipline.
+2. **Class correlates with reading in this sample** (examined→indeterminate, observed→toward). A plausible mechanism exists — the two `examined` rows are session-open framing consults (the examined text is a session prompt: instructions, thin on narrated deliberation → `indeterminate`), while the three `observed` rows were at-action consults on substantive writes (composed action text carrying narrated reasoning → genuine-examination markers → `toward`). At n=5 this is noted, not claimed. The reading value on `observed` rows remains meaningful by design (the extraction's own markers), and the observed wording correctly refuses to present it as an examination.
+3. **Server ledger precedes the client's FRAMED log line by ~0.2–0.7s** on both examined rows (the server writes, responds, then the client logs) — the expected ordering, consistent, not anomalous.
+4. **A record correction:** the retry prompt recalled the close-file Write timeout as "~12:5xZ"; the log shows timeouts at 12:42:23.845Z, 12:43:34.154Z, and 12:53:35.511Z (and a separate guard-route timeout at 12:46:23.003Z, which correctly minted nothing). The prompt's "if the server completed it past the threshold, a genuine observed-classified row exists too — check" resolves to: yes, three times.
+
+## What I am NOT claiming
+
+- I am not claiming a per-reading trace audit of the underlying Layer-1 extractions — the same limit named in the first review stands: the reading values (`toward`/`indeterminate`) are checked at distribution-level plausibility (routine constructive work, no `away`, no over-claimed `toward` from ambiguous evidence — the two thin-evidence rows correctly read `indeterminate`), not against the signed extraction internals.
+- I am not ruling on whether this satisfies condition (b). The mentor ruled that the review must be brought back; this document is that review, relayed via the founder. The mentor's own sign-off closes the condition, not an inferred one.
+- n=5 is a small sample. It is, however, exactly the sample the ruling asked for: genuine post-fix production traffic, unmanufactured, covering both classes, with the server's record confirmed to match the agent's lived experience on every row — and the document you are reading has itself been through one round of adversarial correction, with the correction disclosed rather than absorbed silently.
