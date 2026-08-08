@@ -69,6 +69,12 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
      *  Backward-compatible: a single .order() call behaves exactly as before. */
     private orders: { col: string; asc: boolean }[] = []
     private limitN: number | null = null
+    /** C2c mentor §6(b) fold (2026-08-08): count-query support for the
+     *  orientation-readings total-count disclosure — `.select(cols, {count:
+     *  'exact', head:true})` returns the MATCHING row count with no data rows
+     *  (mirrors PostgREST's head+count semantics). */
+    private countMode: 'exact' | null = null
+    private headOnly = false
 
     constructor(private table: string) {}
 
@@ -92,8 +98,10 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       this.op = 'delete'
       return this
     }
-    select(_cols?: string) {
+    select(_cols?: string, opts?: { count?: 'exact'; head?: boolean }) {
       if (this.op === null) this.op = 'select'
+      if (opts?.count === 'exact') this.countMode = 'exact'
+      if (opts?.head === true) this.headOnly = true
       return this
     }
     eq(col: string, val: unknown) {
@@ -133,7 +141,7 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       )
     }
 
-    private run(): { data: unknown; error: unknown } {
+    private run(): { data: unknown; error: unknown; count?: number } {
       if (missing) return MISSING
       if (armedFailure && armedFailure.op === this.op && armedFailure.table === this.table) {
         const e = armedFailure.error
@@ -195,6 +203,9 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
         case 'select':
         default: {
           let out = rows.filter((r) => this.match(r))
+          // C2c mentor §6(b): count reflects the FULL matching set (before
+          // limit), mirroring PostgREST's exact-count semantics.
+          const matchCount = out.length
           if (this.orders.length > 0) {
             const orders = this.orders
             out = [...out].sort((a, b) => {
@@ -209,13 +220,16 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
           }
           if (this.limitN != null) out = out.slice(0, this.limitN)
           if (this.single) return { data: out.length ? out[0] : null, error: null }
+          if (this.countMode === 'exact') {
+            return { data: this.headOnly ? null : out, error: null, count: matchCount }
+          }
           return { data: out, error: null }
         }
       }
     }
 
     // Thenable — `await builder` resolves the query.
-    then<R>(onFulfilled: (value: { data: unknown; error: unknown }) => R): R {
+    then<R>(onFulfilled: (value: { data: unknown; error: unknown; count?: number }) => R): R {
       return onFulfilled(this.run())
     }
   }

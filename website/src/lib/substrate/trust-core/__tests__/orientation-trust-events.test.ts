@@ -404,11 +404,30 @@ async function main(): Promise<void> {
       exactRead.ok && exactRead.value.entries.length === ORIENTATION_READINGS_ROW_CAP && exactRead.value.capped === false,
       '§6.2a exactly CAP rows ⇒ capped:false (no false "not listed" — the off-by-one this fold closes)',
     )
+    // Mentor §6(b): at or below the cap the total IS the row count (no second
+    // query needed — the probe already proved nothing was excluded).
+    assert(
+      exactRead.ok && exactRead.value.totalCount === ORIENTATION_READINGS_ROW_CAP,
+      '§6.2a-ii exactly CAP rows ⇒ totalCount = CAP (the "of M" disclosure, no count query needed)',
+    )
     seedRows(ORIENTATION_READINGS_ROW_CAP + 1, 'sagereasoning:over-cap@v1')
     const overRead = await readOrientationReadings('sagereasoning:over-cap@v1', fake.client)
     assert(
       overRead.ok && overRead.value.entries.length === ORIENTATION_READINGS_ROW_CAP && overRead.value.capped === true,
       '§6.2b CAP+1 rows ⇒ capped:true, exactly CAP entries served',
+    )
+    // Mentor §6(b): above the cap the exact-count head query supplies the
+    // genuine total — "showing 50 of 51", never "showing 50" alone.
+    assert(
+      overRead.ok && overRead.value.totalCount === ORIENTATION_READINGS_ROW_CAP + 1,
+      '§6.2b-ii CAP+1 rows ⇒ totalCount = CAP+1 (the mentor-§6(b) honest-scope disclosure)',
+    )
+    // Below-cap: total mirrors the (complete) row set.
+    seedRows(3, 'sagereasoning:small@v1')
+    const smallRead = await readOrientationReadings('sagereasoning:small@v1', fake.client)
+    assert(
+      smallRead.ok && smallRead.value.totalCount === 3 && smallRead.value.capped === false,
+      '§6.2c below the cap ⇒ totalCount = row count, capped:false',
     )
 
     // §6.3 capEvidenceSpan (via deriveOrientationReadingEvent's payload) —

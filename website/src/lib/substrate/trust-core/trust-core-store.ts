@@ -636,7 +636,20 @@ export interface OrientationReadingLedgerEntry {
 export async function readOrientationReadings(
   agentId: string,
   client: SupabaseClient = getAdminClient(),
-): Promise<StoreResult<{ entries: OrientationReadingLedgerEntry[]; capped: boolean }>> {
+): Promise<
+  StoreResult<{
+    entries: OrientationReadingLedgerEntry[]
+    capped: boolean
+    /** Mentor §6(b) ruling (2026-08-08, C2d sign-off): the TOTAL count of
+     *  orientation-reading events for this agent, so the public payload can
+     *  say "showing 50 of 847" rather than "showing 50" and implying
+     *  completeness — the honest-scope disclosure the recency-ordered window
+     *  otherwise lacks. `null` when the count query failed transiently (the
+     *  list still serves; the payload omits the count honestly — the
+     *  reflect-summary outage posture, never fabricated). */
+    totalCount: number | null
+  }>
+> {
   try {
     // PR19 re-run fold (2026-08-08, CONFIRMED nit — inherited from
     // readHonestReflectSummary's identical `rows.length >= CAP` idiom): that
@@ -659,7 +672,7 @@ export async function readOrientationReadings(
       .limit(ORIENTATION_READINGS_ROW_CAP + 1)
     if (error) {
       if (isMissingTableError(error as { code?: string; message?: string })) {
-        return { ok: true, value: { entries: [], capped: false } }
+        return { ok: true, value: { entries: [], capped: false, totalCount: 0 } }
       }
       return { ok: false, error: `readOrientationReadings: ${error.message}` }
     }
@@ -671,7 +684,32 @@ export async function readOrientationReadings(
         reading: r.event_type.replace('orientation-reading-', ''),
         occurredAt: r.occurred_at,
       }))
-    return { ok: true, value: { entries, capped } }
+
+    // Mentor §6(b): the total count. Below the cap the row set IS the total
+    // (no second query — the probe already proves nothing was excluded);
+    // above it, one exact-count head query (PostgREST count, no data rows).
+    let totalCount: number | null = rows.length <= ORIENTATION_READINGS_ROW_CAP ? rows.length : null
+    if (totalCount === null) {
+      const countRes = (await client
+        .from(EVENTS_TABLE)
+        .select('id', { count: 'exact', head: true })
+        .eq('agent_id', agentId)
+        .in('event_type', [
+          'orientation-reading-toward',
+          'orientation-reading-away',
+          'orientation-reading-indeterminate',
+        ])) as { count?: number | null; error: { message?: string } | null }
+      if (countRes.error || typeof countRes.count !== 'number') {
+        // Fail-honest: the list still serves; the payload omits the count.
+        console.error(
+          '[trust-core] readOrientationReadings: total-count query failed (count omitted this read):',
+          countRes.error?.message ?? 'no count returned',
+        )
+      } else {
+        totalCount = countRes.count
+      }
+    }
+    return { ok: true, value: { entries, capped, totalCount } }
   } catch (e) {
     return { ok: false, error: `readOrientationReadings threw: ${(e as Error).message}` }
   }

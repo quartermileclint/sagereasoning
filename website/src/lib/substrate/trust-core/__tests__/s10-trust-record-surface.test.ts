@@ -568,6 +568,10 @@ async function main(): Promise<void> {
     const dark = composeTrustRecordPayload({ verdict, reflectSummary: null, generatedAt: NOW })
     assert(!('orientation_readings' in dark.record), 'S6-1 no input ⇒ no orientation_readings key (flag-off byte-identity)')
     assert(!dark.notes.some((n) => n.includes('orientation')), 'S6-1b no orientation note flag-off')
+    assert(
+      !('total_orientation_readings_count' in dark.record),
+      'S6-1c no total-count key flag-off (mentor §6(b) rides only with the list)',
+    )
 
     // S6-2: entries compose with the template + the INLINE clause on EVERY entry.
     const composed = composeTrustRecordPayload({
@@ -595,16 +599,46 @@ async function main(): Promise<void> {
       'S6-4 EVERY entry carries the not-attestable clause INLINE, verbatim (the placement ruling\'s structural addition)',
     )
 
-    // S6-5: capped ⇒ honest note.
+    // S6-5: capped WITH a total (mentor §6(b)) ⇒ the "showing N of M" note +
+    // the total_orientation_readings_count field.
     const capped = composeTrustRecordPayload({
       verdict,
       reflectSummary: null,
-      orientationReadings: { entries: [{ reading: 'toward', occurredAt: NOW_ISO }], capped: true },
+      orientationReadings: {
+        entries: [{ reading: 'toward', occurredAt: NOW_ISO }],
+        capped: true,
+        totalCount: 847,
+      },
       generatedAt: NOW,
     })
     assert(
-      capped.notes.some((n) => n.includes('orientation_readings is capped')),
-      'S6-5 capped read surfaces an honest note',
+      capped.record.total_orientation_readings_count === 847,
+      'S6-5 the mentor-§6(b) total count rides the payload',
+    )
+    assert(
+      capped.notes.some((n) => n.includes('most recent of 847 total readings')),
+      'S6-5b the capped note says "showing N of M", never bare "showing N"',
+    )
+    // S6-5c: capped but the count read failed (totalCount null) ⇒ the field is
+    // OMITTED (never fabricated) and the note honestly says the total was
+    // unavailable.
+    const cappedNoCount = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: {
+        entries: [{ reading: 'toward', occurredAt: NOW_ISO }],
+        capped: true,
+        totalCount: null,
+      },
+      generatedAt: NOW,
+    })
+    assert(
+      !('total_orientation_readings_count' in cappedNoCount.record),
+      'S6-5c a failed count is omitted, never fabricated',
+    )
+    assert(
+      cappedNoCount.notes.some((n) => n.includes('total count was unavailable')),
+      'S6-5d the count outage is disclosed in the note',
     )
 
     // S6-6: flag-on read failure ⇒ field omitted + honest note (the reflect-

@@ -142,6 +142,13 @@ export interface TrustRecordPayload {
      *  unset (byte-identical payload — the established optional-field
      *  pattern); flag-on, the capped recent-entries list (newest first). */
     orientation_readings?: TrustRecordOrientationEntry[]
+    /** Mentor §6(b) ruling (2026-08-08, C2d sign-off): the TOTAL count of
+     *  orientation-reading events, served alongside the capped list so a
+     *  reader sees "showing 50 of 847" rather than inferring completeness —
+     *  the honest-scope disclosure for the recency-ordered window. Present
+     *  whenever orientation_readings is present AND the count read succeeded
+     *  (omitted on a transient count failure — never fabricated). */
+    total_orientation_readings_count?: number
   }
   envelope: typeof TRUST_RECORD_ENVELOPE
   evidence: {
@@ -210,8 +217,13 @@ export interface ComposeTrustRecordInput {
    *  carries NO orientation_readings key at all (byte-identity). `null` ⇒ the
    *  flag is on but the read failed honestly — the field is omitted this read
    *  with an honest note (the reflect-summary outage posture). A value ⇒
-   *  composed entries, each carrying the inline not-attestable clause. */
-  orientationReadings?: { entries: { reading: string; occurredAt: string }[]; capped: boolean } | null
+   *  composed entries, each carrying the inline not-attestable clause, plus
+   *  the mentor-§6(b) total count (null ⇒ count omitted, never fabricated). */
+  orientationReadings?: {
+    entries: { reading: string; occurredAt: string }[]
+    capped: boolean
+    totalCount?: number | null
+  } | null
   /** Injected read time (the route passes new Date(); tests pin it). */
   generatedAt: Date
 }
@@ -263,8 +275,15 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
         occurred_at: e.occurredAt,
       }))
     if (input.orientationReadings.capped) {
+      // Mentor §6(b): the capped note names the total when available, so a
+      // reader sees "showing N of M" rather than inferring completeness.
+      const total = input.orientationReadings.totalCount
       notes.push(
-        'orientation_readings is capped at the bounded read window (older readings not listed); ' +
+        (typeof total === 'number'
+          ? `orientation_readings shows the ${orientationEntries?.length ?? 0} most recent of ` +
+            `${total} total readings (a recency window, not the full record); `
+          : 'orientation_readings is capped at the bounded read window (older readings not ' +
+            'listed; the total count was unavailable this read); ') +
           'each entry describes one examination only — see its inline not-attestable clause',
       )
     }
@@ -320,8 +339,13 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
           }
         : null,
       // C2c: attached ONLY when composed (spread-omitted otherwise — the key is
-      // structurally absent flag-off, byte-identical payload).
+      // structurally absent flag-off, byte-identical payload). The mentor-§6(b)
+      // total count rides alongside whenever the count read succeeded.
       ...(orientationEntries !== undefined ? { orientation_readings: orientationEntries } : {}),
+      ...(orientationEntries !== undefined &&
+      typeof input.orientationReadings?.totalCount === 'number'
+        ? { total_orientation_readings_count: input.orientationReadings.totalCount }
+        : {}),
     },
     envelope: TRUST_RECORD_ENVELOPE,
     evidence: {

@@ -101,7 +101,16 @@ export interface TrustRecordDeps {
   readOrientationReadings?: (
     agentId: string,
   ) => Promise<
-    | { ok: true; value: { entries: { reading: string; occurredAt: string }[]; capped: boolean } }
+    | {
+        ok: true
+        value: {
+          entries: { reading: string; occurredAt: string }[]
+          capped: boolean
+          /** Mentor §6(b): the total count for the "showing N of M" disclosure
+           *  (null ⇒ count read failed; omitted from the payload honestly). */
+          totalCount?: number | null
+        }
+      }
     | { ok: false; error: string }
   >
   now: () => Date
@@ -239,7 +248,11 @@ export async function runTrustRecordGet(
   //     Flag-on, an outage never blocks the record (null ⇒ omitted + honest
   //     note — the reflect-summary posture).
   let orientationReadings:
-    | { entries: { reading: string; occurredAt: string }[]; capped: boolean }
+    | {
+        entries: { reading: string; occurredAt: string }[]
+        capped: boolean
+        totalCount?: number | null
+      }
     | null
     | undefined
   if (deps.isOrientationEnabled?.() && deps.readOrientationReadings) {
