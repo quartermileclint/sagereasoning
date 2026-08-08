@@ -36,4 +36,14 @@ Add ONE line to `does_not_attest` (`website/src/lib/substrate/trust-core/trust-r
 - No claim of gaming-proofness: the reading is *harder* to game than proximity by design (no per-consult feedback; server-extraction-only), and still extraction-trust-bounded — the disclosure wording above keeps the A2-class ceiling named.
 - Nothing binds: MEASURE throughout; ENFORCE remains S11; the logos-on staging rules (W3) already pin that the orientation reading is never an enforcement input.
 
-*Prepared 2026-08-08 at the C2/C1c build session. The activation-walk prompt (`operations/handoffs/founder/2026-08-08-c2-c1c-activation-NEXT-SESSION-PROMPT.md`) carries the application order and the walk steps; it stops at a hard gate pointing back to this package.*
+## 6. Two open questions from the PR19 independent re-run — for explicit acknowledgement alongside the wording sign-off (added 2026-08-08)
+
+Neither of these was resolved by silent code change (per this arc's standing discipline of surfacing genuine ambiguity rather than improvising past it). Both are dark/inert regardless of your answer; neither blocks signing §1–§5 above if you'd rather decide these separately.
+
+**(a) The calling-moment telos line's branch scope.** The mentor's Q7 answer says the telos belongs at "the purpose-declaration gate at session open... where the agent orients itself." The build wired it ONLY into the branch that fires when a purpose is already declared (`renderPurposeOrientation`) — not the branch that fires when no purpose has been declared yet and the harness is eliciting one (`renderCallingElicitation`, "there is nothing to call and nothing to send"). Both readings are defensible; the mentor's text doesn't pick one. Options: (i) leave as built (declared-purpose only); (ii) also add it to the elicitation branch; (iii) put the question back to the mentor for an explicit ruling.
+
+**(b) S10's capped, recency-ordered `orientation_readings` list has a gaming residual the mentor's binding record doesn't name.** Because the served list is the 50 MOST RECENT readings (not a monotonic safe-direction undercount, unlike the reflect-summary's own cap), an agent could generate enough favorable `toward` consults to push unfavorable `away`/`indeterminate` entries out of the visible window — a curated-looking record without any single entry being dishonest. Options: (i) accept as a disclosed limitation of the MEASURE-only surface (no fix); (ii) add an aggregate note (e.g. a total-count or oldest-excluded-timestamp) alongside the capped list so a reader knows the window is partial; (iii) put the question to the mentor.
+
+---
+
+*Prepared 2026-08-08 at the C2/C1c build session; §6 added 2026-08-08 after the PR19 independent re-run. The activation-walk prompt (`operations/handoffs/founder/2026-08-08-c2-c1c-activation-NEXT-SESSION-PROMPT.md`) carries the application order and the walk steps; it stops at a hard gate pointing back to this package.*

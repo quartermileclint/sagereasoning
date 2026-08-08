@@ -734,6 +734,29 @@ export interface OrientationReadingInput {
 }
 
 /**
+ * PR19 re-run fold (2026-08-08, CONFIRMED — reproduced live: a 351-code-unit
+ * string with an astral-plane character positioned so its high surrogate
+ * lands exactly at index 299 produced, after a raw `.slice(0,300)`, a LONE
+ * SURROGATE — which Postgres's jsonb input parser rejects outright ("Unicode
+ * low surrogate must follow a high surrogate"), so the ledger INSERT for that
+ * examination's orientation-reading event would fail and be silently
+ * swallowed by the hook's total try/catch (measure-mode fail-honest — logged,
+ * never thrown — but the record is genuinely lost, contradicting this
+ * module's own "recomputable from the ledger row alone" claim, since with
+ * this bug there is no row at all).
+ *
+ * Fix: truncate by Unicode CODE POINT (`Array.from` iterates code points, not
+ * UTF-16 units), so a truncation can split a grapheme cluster but never a
+ * surrogate pair — the string stays well-formed UTF-16 in every case.
+ */
+function capEvidenceSpan(evidence: string, maxCodePoints: number): string {
+  const codePoints = Array.from(evidence)
+  return codePoints.length > maxCodePoints
+    ? codePoints.slice(0, maxCodePoints).join('') + '…'
+    : evidence
+}
+
+/**
  * Derive the orientation-reading event for ONE examination (C2/C1c scope §4).
  * Returns null when the signed assessment does not verify (R18f-parallel — no
  * event without a verifiable artifact).
@@ -771,7 +794,7 @@ export function deriveOrientationReadingEvent(
     // S10 (the public list carries reading/entry_text/clause/occurred_at only).
     payload.orientationObservations = input.observations.map((o) => ({
       observed: o.observed,
-      evidence: o.evidence.length > 300 ? o.evidence.slice(0, 300) + '…' : o.evidence,
+      evidence: capEvidenceSpan(o.evidence, 300),
     }))
   }
   if (generativePrompt !== undefined) {

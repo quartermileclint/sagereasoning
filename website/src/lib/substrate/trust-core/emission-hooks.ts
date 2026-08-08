@@ -38,6 +38,7 @@ import {
   emitLedgerOnlyTrustEvents,
 } from './trust-core-store'
 import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
+import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
 import type { OrientationObservation } from '@/lib/translation-sandwich/layer1-extractor'
 
 /** Extract the provenance.signed_assessments array from a parsed write body,
@@ -399,6 +400,31 @@ export interface OrientationReadingEmissionInput {
 }
 
 /**
+ * PR19 re-run fold (2026-08-08, `wf_63ff4a50-a2a`, CONFIRMED medium — F-2's
+ * fix "closes a real cross-agent collision" but "is unverified by any
+ * automated test... the digest-construction line is never independently
+ * exercised"; a reviewer mutation-tested this by reverting the fix and found
+ * both batteries stayed green). Extracted to a PURE, directly-testable
+ * function so a regression that drops the agent-id salt (silently reopening
+ * the exact cross-agent `uq_ate_correlation` collision the fold closes — that
+ * index is `(correlation_id, event_type, COALESCE(virtue_domain,...))`, no
+ * agent_id column) fails a battery instead of passing one.
+ *
+ * Injective on the LIVE call site's inputs: `agentId` is always pre-filtered
+ * through `isAcceptedAgentId` (neither CANONICAL_AGENT_ID_PATTERN nor
+ * LEGACY_AGENT_ID_PATTERN admits `|`) and `signature` is base64 (alphabet
+ * excludes `|`) — so the pipe delimiter cannot appear in either component on
+ * any path this codebase's own vocabulary accepts today. Not re-derived here
+ * (the PR19 re-run's own low-severity residual, disclosed, not re-litigated).
+ */
+export function computeOrientationCorrelationId(agentId: string, signature: string): string {
+  return (
+    'orient:' +
+    createHash('sha256').update(agentId + '|' + signature).digest('hex').slice(0, 32)
+  )
+}
+
+/**
  * Agent-circles C1c (2026-08-08) — emit the per-examination orientation-reading
  * event from a credential-bearing /api/reason consult. Gated behind BOTH
  * SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ORIENTATION_READING_ENABLED.
@@ -406,34 +432,32 @@ export interface OrientationReadingEmissionInput {
  * response is unaffected by any failure here, and carries no trace of the
  * reading either way per the C2c placement ruling).
  *
+ * PR19 re-run fold (2026-08-08, CONFIRMED low): the agent-circles AND was
+ * enforced only at the route.ts call site — "single-point-of-enforcement, not
+ * defense-in-depth". Re-checked HERE too, so the reusable exported hook is
+ * self-defending against any future second call site that omits the route's
+ * own guard.
+ *
  * EMISSION PATH (load-bearing): emitLedgerOnlyTrustEvents — INSERT-ONLY, never
  * the generic emitTrustEvents, whose null-domain branch would stamp the reflect
  * timestamp and grant half-rate decay (see trust-core-store.ts). Idempotency:
- * `orient:<sha256 digest of the assessment signature>` — one examination, at
- * most one ledgered reading, dedup enforced by the uq_ate_correlation index
- * (COALESCE(virtue_domain,'__agent_wide__') covers the NULL domain).
+ * `orient:<sha256 digest of agentId|signature>` (computeOrientationCorrelationId
+ * above) — one examination, at most one ledgered reading, dedup enforced by
+ * the uq_ate_correlation index (COALESCE(virtue_domain,'__agent_wide__')
+ * covers the NULL domain).
  */
 export async function emitOrientationReadingTrustEvent(
   input: OrientationReadingEmissionInput,
 ): Promise<void> {
   try {
-    if (!isTrustCoreEnabled() || !isOrientationReadingEnabled()) return
+    if (!isTrustCoreEnabled() || !isOrientationReadingEnabled() || !isAgentCirclesEnabled()) return
     if (input.layer1Source !== 'server') return // supplied extractions never mint a reading
 
     const signed = input.signedAssessment as SignedLayer2Assessment | null | undefined
     if (!signed || typeof signed.signature !== 'string' || signed.signature.length === 0) return
 
     const now = input.now ?? new Date()
-    // PR19 first-hand fold F-2 (2026-08-08): the digest includes the agent id
-    // (the emitAccreditationTrustEvents precedent) — Ed25519 is deterministic,
-    // so two agents submitting byte-identical content in the same signed_at
-    // second could share a signature; without the agent id the uq_ate index
-    // (which omits agent_id — the audited D-1 bound) would silently drop the
-    // second agent's reading.
-    const sigDigest = createHash('sha256')
-      .update(input.agentId + '|' + signed.signature)
-      .digest('hex')
-      .slice(0, 32)
+    const correlationId = computeOrientationCorrelationId(input.agentId, signed.signature)
 
     const event = deriveOrientationReadingEvent({
       agentId: input.agentId,
@@ -443,7 +467,7 @@ export async function emitOrientationReadingTrustEvent(
       observations: input.observations as readonly OrientationObservation[] | null | undefined,
       engagedCircles: input.engagedCircles,
       now,
-      correlationId: `orient:${sigDigest}`,
+      correlationId,
     })
     if (event === null) return // unverifiable artifact — no event (R18f-parallel)
     await emitLedgerOnlyTrustEvents([event])

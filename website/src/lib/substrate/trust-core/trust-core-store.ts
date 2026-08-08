@@ -638,6 +638,14 @@ export async function readOrientationReadings(
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<{ entries: OrientationReadingLedgerEntry[]; capped: boolean }>> {
   try {
+    // PR19 re-run fold (2026-08-08, CONFIRMED nit — inherited from
+    // readHonestReflectSummary's identical `rows.length >= CAP` idiom): that
+    // check cannot distinguish "exactly CAP rows exist, nothing older" from
+    // "CAP+1 or more exist, truncated" — both read rows.length === CAP. Fixed
+    // HERE (not in the pre-existing sibling, out of scope) by fetching one
+    // extra row as a genuine truncation probe: CAP+1 rows returned ⇒ real
+    // truncation ⇒ serve only the first CAP, honestly capped:true; CAP or
+    // fewer ⇒ nothing was truncated ⇒ capped:false, never a false "not listed".
     const { data, error } = await client
       .from(EVENTS_TABLE)
       .select('event_type, occurred_at')
@@ -648,7 +656,7 @@ export async function readOrientationReadings(
         'orientation-reading-indeterminate',
       ])
       .order('occurred_at', { ascending: false })
-      .limit(ORIENTATION_READINGS_ROW_CAP)
+      .limit(ORIENTATION_READINGS_ROW_CAP + 1)
     if (error) {
       if (isMissingTableError(error as { code?: string; message?: string })) {
         return { ok: true, value: { entries: [], capped: false } }
@@ -656,14 +664,14 @@ export async function readOrientationReadings(
       return { ok: false, error: `readOrientationReadings: ${error.message}` }
     }
     const rows = (data ?? []) as { event_type: string; occurred_at: string }[]
-    const entries: OrientationReadingLedgerEntry[] = rows.map((r) => ({
-      reading: r.event_type.replace('orientation-reading-', ''),
-      occurredAt: r.occurred_at,
-    }))
-    return {
-      ok: true,
-      value: { entries, capped: rows.length >= ORIENTATION_READINGS_ROW_CAP },
-    }
+    const capped = rows.length > ORIENTATION_READINGS_ROW_CAP
+    const entries: OrientationReadingLedgerEntry[] = rows
+      .slice(0, ORIENTATION_READINGS_ROW_CAP)
+      .map((r) => ({
+        reading: r.event_type.replace('orientation-reading-', ''),
+        occurredAt: r.occurred_at,
+      }))
+    return { ok: true, value: { entries, capped } }
   } catch (e) {
     return { ok: false, error: `readOrientationReadings threw: ${(e as Error).message}` }
   }

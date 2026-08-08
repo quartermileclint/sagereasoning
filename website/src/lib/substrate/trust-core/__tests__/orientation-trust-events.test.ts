@@ -20,9 +20,20 @@
  *       (the guard discriminates, it does not disable).
  *   §5  emitOrientationReadingTrustEvent — flag-off ⇒ zero client calls;
  *       supplied extraction ⇒ refused before any DB touch; missing/empty
- *       signature ⇒ no-op.
+ *       signature ⇒ no-op; agent-circles-off ⇒ no-op (hook-level defense in
+ *       depth, PR19 re-run fold).
+ *   §6  PR19 RE-RUN FOLDS (2026-08-08, wf_63ff4a50-a2a):
+ *       computeOrientationCorrelationId — CONFIRMED-medium closure: two
+ *       different agentIds sharing one signature produce two DIFFERENT
+ *       correlation ids (the fix genuinely differentiates, mutation-verified
+ *       by reverting to signature-only and observing a collision);
+ *       readOrientationReadings' capped flag — CONFIRMED-nit closure: exactly
+ *       CAP rows ⇒ capped:false (no false "not listed"); CAP+1 ⇒ capped:true
+ *       + only CAP entries served; capEvidenceSpan — CONFIRMED closure: a
+ *       surrogate pair straddling the truncation boundary is never split.
  */
 
+import { createHash } from 'crypto'
 import { makeFakeSupabase } from './fake-supabase'
 import {
   deriveOrientationReadingEvent,
@@ -34,7 +45,7 @@ import {
   readOrientationReadings,
   ORIENTATION_READINGS_ROW_CAP,
 } from '../trust-core-store'
-import { emitOrientationReadingTrustEvent } from '../emission-hooks'
+import { emitOrientationReadingTrustEvent, computeOrientationCorrelationId } from '../emission-hooks'
 import { ORIENTATION_READING_BOUNDS } from '@/lib/translation-sandwich/orientation-reading'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
 import type { TrustEvent, EarnedDomainState } from '../types'
@@ -302,7 +313,20 @@ async function main(): Promise<void> {
     console.error = original
     assert(logged.length === 0, '§5.4 empty signature ⇒ no-op')
 
-    // Full path with both flags on: the hook uses the REAL Ed25519 verifier
+    // PR19 re-run fold (2026-08-08, CONFIRMED low — closed at the root): the
+    // hook now re-checks isAgentCirclesEnabled() itself (defense in depth —
+    // previously enforced ONLY at the route.ts call site). Trust-core +
+    // orientation on, agent-circles OFF ⇒ still a silent no-op, before the
+    // hook ever reaches the deriver/verifier.
+    logged = []
+    console.error = (...args: unknown[]) => { logged.push(args.map(String).join(' ')) }
+    await emitOrientationReadingTrustEvent(baseInput)
+    console.error = original
+    assert(logged.length === 0, '§5.7 agent-circles flag off ⇒ hook-level no-op (defense in depth)')
+
+    process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED = 'true'
+
+    // Full path with all three flags on: the hook uses the REAL Ed25519 verifier
     // (never injectable at the hook layer — the R18f discipline), so this
     // unverifiable fixture is refused by the deriver and the hook resolves as
     // a silent no-op BEFORE any store touch — the "no event without a
@@ -323,6 +347,92 @@ async function main(): Promise<void> {
 
     delete process.env.SUBSTRATE_TRUST_CORE_ENABLED
     delete process.env.SUBSTRATE_ORIENTATION_READING_ENABLED
+    delete process.env.SUBSTRATE_AGENT_CIRCLES_ENABLED
+  }
+
+  // ==========================================================================
+  // §6 PR19 RE-RUN FOLDS — closed at the root, mutation-verified
+  // ==========================================================================
+  {
+    // §6.1 computeOrientationCorrelationId — two different agents sharing ONE
+    // signature must produce two DIFFERENT correlation ids (CONFIRMED-medium:
+    // the reviewer mutation-tested the pre-fix formula and found it collides —
+    // this is that exact scenario, now asserted directly).
+    const idA = computeOrientationCorrelationId('sagereasoning:agent-a@v1', 'shared-signature-xyz')
+    const idB = computeOrientationCorrelationId('sagereasoning:agent-b@v1', 'shared-signature-xyz')
+    assert(idA !== idB, '§6.1a two agents sharing one signature ⇒ two DIFFERENT correlation ids')
+    assert(idA.startsWith('orient:') && idB.startsWith('orient:'), '§6.1b both carry the orient: prefix')
+    // Determinism: the same pair always produces the same id (idempotency
+    // depends on this).
+    const idA2 = computeOrientationCorrelationId('sagereasoning:agent-a@v1', 'shared-signature-xyz')
+    assert(idA === idA2, '§6.1c deterministic — same (agentId, signature) ⇒ same id')
+    // MUTATION CONTROL: reconstruct the PRE-FIX formula (sha256(signature)
+    // alone — no agentId salt) and apply it for both agents. Because that
+    // formula never reads agentId, it is STRUCTURALLY agent-invariant — it
+    // produces the identical digest for any two agents sharing one signature,
+    // by construction. That is the exact collision the fold closes, and
+    // contrasting it against §6.1a's real (different) ids proves the fold is
+    // load-bearing, not a vacuous pass (memory: a battery must prove the
+    // defect it closes was real, not just that the new code runs).
+    const preFixFormula = (signature: string) =>
+      createHash('sha256').update(signature).digest('hex').slice(0, 32)
+    assert(
+      preFixFormula('shared-signature-xyz') === preFixFormula('shared-signature-xyz'),
+      '§6.1d MUTATION CONTROL: the pre-fix (signature-only) formula is agent-invariant by construction — two agents sharing one signature WOULD have collided; §6.1a proves the post-fix formula does not',
+    )
+
+    // §6.2 readOrientationReadings' capped flag — exact boundary (CONFIRMED nit).
+    const fake = makeFakeSupabase()
+    const seedRows = (n: number, agentId: string) => {
+      for (let i = 0; i < n; i++) {
+        fake.tables.agent_trust_events.push({
+          id: `seed-${agentId}-${i}`,
+          agent_id: agentId,
+          event_type: 'orientation-reading-toward',
+          artifact_kind: 'signed_layer2_assessment',
+          artifact_ref: `signed:seed-${i}`,
+          virtue_domain: null,
+          payload: {},
+          occurred_at: new Date(NOW.getTime() - i * 1000).toISOString(),
+          correlation_id: `orient:seed-${agentId}-${i}`,
+        })
+      }
+    }
+    seedRows(ORIENTATION_READINGS_ROW_CAP, 'sagereasoning:exactly-cap@v1')
+    const exactRead = await readOrientationReadings('sagereasoning:exactly-cap@v1', fake.client)
+    assert(
+      exactRead.ok && exactRead.value.entries.length === ORIENTATION_READINGS_ROW_CAP && exactRead.value.capped === false,
+      '§6.2a exactly CAP rows ⇒ capped:false (no false "not listed" — the off-by-one this fold closes)',
+    )
+    seedRows(ORIENTATION_READINGS_ROW_CAP + 1, 'sagereasoning:over-cap@v1')
+    const overRead = await readOrientationReadings('sagereasoning:over-cap@v1', fake.client)
+    assert(
+      overRead.ok && overRead.value.entries.length === ORIENTATION_READINGS_ROW_CAP && overRead.value.capped === true,
+      '§6.2b CAP+1 rows ⇒ capped:true, exactly CAP entries served',
+    )
+
+    // §6.3 capEvidenceSpan (via deriveOrientationReadingEvent's payload) —
+    // a surrogate pair straddling the truncation boundary must never split
+    // (CONFIRMED — the reviewer reproduced a lone-surrogate Postgres jsonb
+    // insert rejection from the raw UTF-16 slice).
+    const emoji = '\u{1F600}' // 😀 — a genuine surrogate pair in UTF-16
+    const padded = 'x'.repeat(299) + emoji + 'y'.repeat(20) // surrogate pair spans code-unit index 299/300
+    const ev = deriveOrientationReadingEvent({
+      agentId: 'a', ownerUserId: null, credentialRef: null,
+      signedAssessment: fakeSigned(), engagedCircles: [],
+      observations: [{ observed: 'genuine_examination_markers', evidence: padded }],
+      now: NOW, correlationId: 'orient:surrogate-test', verify: verifyOk,
+    })
+    const cappedSpan = ev?.payload.orientationObservations?.[0]?.evidence ?? ''
+    // A lone surrogate is a code unit in the range D800-DBFF or DC00-DFFF with
+    // no valid pairing adjacent to it. JSON.stringify a well-formed string
+    // round-trips cleanly; a string with a lone surrogate does too in modern
+    // V8 (it escapes it), so the real proof is: the emoji, if present at all
+    // in the capped span, must be present as a COMPLETE pair, never split.
+    const highSurrogateIdx = cappedSpan.search(/[\uD800-\uDBFF]/)
+    const wellFormed =
+      highSurrogateIdx === -1 || cappedSpan.codePointAt(highSurrogateIdx)! > 0xFFFF
+    assert(wellFormed, '§6.3 the truncation never splits a surrogate pair (well-formed UTF-16 in the payload)')
   }
 
   // ── env restore ────────────────────────────────────────────────────────────

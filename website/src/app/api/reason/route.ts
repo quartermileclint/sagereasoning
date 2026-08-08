@@ -1997,29 +1997,33 @@ export async function POST(request: NextRequest) {
       output.meta = meta
     }
     // Agent-circles C2/C1c (2026-08-08): the fifth-circle orientation reading.
-    // Flag-off (SUBSTRATE_ORIENTATION_READING_ENABLED unset — production
-    // default): this whole block is a no-op and the response is byte-identical
-    // (the extraction never carries the field flag-off — the prompt never
-    // solicits it). Flag-on, in this order (load-bearing):
-    //   (1) EMIT the C1c ledger event from the extraction IN HAND — server
-    //       extractions on credential-bearing consults with an accepted K1
-    //       agent identity only. Awaited (KG1) + never-throws (measure mode;
-    //       the response is unaffected by any failure). The hook re-verifies
-    //       the signed assessment (R18f-parallel) and refuses layer1Source
-    //       'supplied' independently of the 400 at intake.
-    //   (2) STRIP orientation_observations from the wire extraction echo — the
-    //       C2c placement ruling: neither the reading nor its trivially-
-    //       countable antecedents may ride the consult response ("regular
-    //       receipt of a reading about one's own orientation creates the
-    //       optimisation pressure"). The reading is sought on the public
-    //       trust record, never received here.
-    if (isOrientationReadingEnabled()) {
+    // PR19 RE-RUN FOLD (2026-08-08, wf_63ff4a50-a2a) — CONFIRMED HIGH/MEDIUM:
+    // validateLayer1Schema parses `orientation_observations` UNCONDITIONALLY
+    // (no flag check — the C1b `reasoning_integrity_signals` posture, which is
+    // fine for THAT field but not for this one: C2c binds this field to "never
+    // ride any consult response", not merely "dark by convention"). The prior
+    // code stripped the wire echo only INSIDE the `isOrientationReadingEnabled()`
+    // gate, so a caller reaching preExtractedLayer1Schema via the plugin path
+    // (unconditional) or the already-LIVE SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED
+    // key-path — and supplying `orientation_observations` — got it echoed back
+    // verbatim on `extraction.orientation_observations` even with the
+    // orientation flag OFF (a genuine byte-identity break, reachable in
+    // production today, independent of any C2 activation step).
+    //
+    // FIX: the strip is now UNCONDITIONAL (runs regardless of either flag) —
+    // the field NEVER rides the wire, full stop, restoring the true invariant
+    // (a caller-supplied `orientation_observations` is dropped from the
+    // response exactly as any other pre-C2 unrecognized key was). Only the
+    // LEDGER EMISSION (the C1c trust event) stays flag-gated — that is the
+    // part that is legitimately inert until activation.
+    {
       const wireExtraction = output.extraction as Record<string, unknown> | null | undefined
       const rawObservations =
         wireExtraction && Array.isArray(wireExtraction.orientation_observations)
           ? (wireExtraction.orientation_observations as { observed: string; evidence: string }[])
           : undefined
       if (
+        isOrientationReadingEnabled() &&
         // PR19 first-hand fold F-1 (2026-08-08): the emission ALSO requires the
         // agent-circles flag, mirroring the prompt's own AND — an orientation
         // event must never derive from an extraction that was never ASKED the
@@ -2027,6 +2031,12 @@ export async function POST(request: NextRequest) {
         // otherwise ledger 'insufficient evidence' readings the instrument
         // never actually looked for).
         isAgentCirclesEnabled() &&
+        // PR19 re-run fold (2026-08-08): skip the credential-context read +
+        // the hook call ENTIRELY on a supplied schema — the hook refuses
+        // layer1Source !== 'server' anyway, so resolving credCtx here was pure
+        // wasted work on every l1_supply consult once the flags are on (the
+        // M6-block sharedCredCtx-reuse discipline extended to this seam).
+        preExtractedLayer1Schema === undefined &&
         apiKey !== null &&
         apiKey.valid === true &&
         sandwichResult.error === null &&
@@ -2052,10 +2062,11 @@ export async function POST(request: NextRequest) {
                   wireExtraction as unknown as Parameters<typeof engagedCircleNames>[0],
                 )
               : [],
-            layer1Source: preExtractedLayer1Schema !== undefined ? 'supplied' : 'server',
+            layer1Source: 'server',
           })
         }
       }
+      // UNCONDITIONAL — see the fold note above. Never gated on any flag.
       if (wireExtraction && 'orientation_observations' in wireExtraction) {
         delete wireExtraction.orientation_observations
       }

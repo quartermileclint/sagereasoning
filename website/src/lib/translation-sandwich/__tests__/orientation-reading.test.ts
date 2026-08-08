@@ -290,10 +290,35 @@ function h(evidence = 'the way I always handle these'): OrientationObservation {
   assert(route.includes('isOrientationReadingEnabled()'), '§6.6 INV: the route block is flag-gated')
   // F-1 (PR19 first-hand fold): the emission requires the agent-circles flag
   // too — no reading from an extraction that was never asked the question.
-  const emissionBlock = route.slice(route.indexOf('if (isOrientationReadingEnabled()) {'))
+  const emissionMarkerIdx = route.indexOf('const wireExtraction = output.extraction as')
+  const emissionBlock = route.slice(emissionMarkerIdx)
   assert(
     emissionBlock.slice(0, 1500).includes('isAgentCirclesEnabled() &&'),
     '§6.6b INV: the emission ANDs the agent-circles flag (mirrors the prompt gate)',
+  )
+  // PR19 re-run fold (2026-08-08, CONFIRMED HIGH/MEDIUM, closed at the root):
+  // the strip must be UNCONDITIONAL — never re-gated behind either flag. A
+  // mutation that re-wraps the delete inside `if (isOrientationReadingEnabled())`
+  // would place that literal BETWEEN this marker and the delete call, which
+  // the negative assertion below catches (stronger than a bare presence pin —
+  // it fails on the exact regression class PR19 found).
+  const uncondMarkerIdx = route.indexOf('UNCONDITIONAL — see the fold note above')
+  assert(uncondMarkerIdx !== -1, '§6.6c INV: the unconditional-strip fold marker is present')
+  const uncondSlice = route.slice(uncondMarkerIdx, uncondMarkerIdx + 400)
+  assert(
+    uncondSlice.includes('delete wireExtraction.orientation_observations'),
+    '§6.6d INV: the strip follows the unconditional marker directly',
+  )
+  assert(
+    !uncondSlice.includes('isOrientationReadingEnabled()') &&
+      !uncondSlice.includes('isAgentCirclesEnabled()'),
+    '§6.6e INV: the strip is NOT re-gated behind either flag between the marker and the delete (the PR19 byte-identity fold)',
+  )
+  // PR19 re-run fold (2026-08-08, CONFIRMED nit): skip the credCtx read on a
+  // supplied schema (layer1Source would be 'supplied' and the hook no-ops).
+  assert(
+    emissionBlock.slice(0, 1500).includes('preExtractedLayer1Schema === undefined &&'),
+    '§6.6f INV: the emission skips work entirely on a supplied schema',
   )
 
   // INV-4: the gate strips its echo too (the at-action hook consumes the gate
