@@ -810,8 +810,13 @@ export default function ApiDocsPage() {
           older away or indeterminate entries from the visible window; the total count discloses that more
           entries exist but does not prevent this composition effect. Every entry carries the not-attestable
           clause inline: &quot;The record can attest that specific examinations were oriented toward the
-          rational order. It cannot attest that the agent is fifth-circle-aligned.&quot; See llms.txt
-          &quot;Orientation readings&quot; for the full contract.
+          rational order. It cannot attest that the agent is fifth-circle-aligned.&quot; Each entry also
+          carries a <code>class</code> field (<code>examined</code> or <code>observed</code>) &mdash; a
+          server-completed reading whose framing was never delivered to the agent is an observation, not
+          an examination, and uses fixed wording that says so; the class is classified as examined based
+          on server-side elapsed time relative to the documented harness timeout (28000ms), a proxy never
+          a confirmed-delivery signal, and <code>total_orientation_readings_count</code> includes both
+          classes. See llms.txt &quot;Orientation readings&quot; for the full contract.
         </p>
       </div>
 

@@ -58,6 +58,32 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
     return `${String(r.correlation_id)}|${String(r.event_type)}|${r.virtue_domain ?? '__agent_wide__'}`
   }
 
+  /** 2026-08-08 examined/observed fold: parse `alias:column->>jsonKey` clauses
+   *  out of a select-column string and, for each, set `row[alias]` to the
+   *  string value at `row[column][jsonKey]` (PostgREST's `->>` text-extraction
+   *  semantics — undefined/non-string ⇒ the field is simply absent, mirroring
+   *  a real jsonb miss). Every other clause in the string is ignored (this
+   *  fake never restricts columns — see the constructor comment). Returns a
+   *  SHALLOW COPY augmented with the alias field(s); never mutates the stored
+   *  row. */
+  function projectJsonPathAliases(row: Row, cols: string | null): Row {
+    if (!cols) return row
+    const clause = /(\w+):(\w+)->>(\w+)/g
+    let out: Row | null = null
+    let m: RegExpExecArray | null
+    while ((m = clause.exec(cols)) !== null) {
+      const [, alias, column, jsonKey] = m
+      const container = row[column]
+      const value =
+        container !== null && typeof container === 'object'
+          ? (container as Record<string, unknown>)[jsonKey]
+          : undefined
+      if (!out) out = { ...row }
+      out[alias] = typeof value === 'string' ? value : null
+    }
+    return out ?? row
+  }
+
   class Builder {
     private op: 'insert' | 'upsert' | 'update' | 'delete' | 'select' | null = null
     private payload: Row | Row[] | null = null
@@ -75,6 +101,13 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
      *  (mirrors PostgREST's head+count semantics). */
     private countMode: 'exact' | null = null
     private headOnly = false
+    /** 2026-08-08 examined/observed fold: the raw select-column string, only
+     *  ever inspected for `alias:column->>jsonKey` clauses (PostgREST's JSON
+     *  text-extraction operator, aliased) — see projectJsonPathAliases below.
+     *  Every OTHER select pattern is unaffected: the fake still returns full
+     *  rows regardless of the requested column list (pre-existing, relied on
+     *  elsewhere), this only ADDS the aliased field(s) on top. */
+    private selectCols: string | null = null
 
     constructor(private table: string) {}
 
@@ -98,10 +131,11 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       this.op = 'delete'
       return this
     }
-    select(_cols?: string, opts?: { count?: 'exact'; head?: boolean }) {
+    select(cols?: string, opts?: { count?: 'exact'; head?: boolean }) {
       if (this.op === null) this.op = 'select'
       if (opts?.count === 'exact') this.countMode = 'exact'
       if (opts?.head === true) this.headOnly = true
+      this.selectCols = cols ?? null
       return this
     }
     eq(col: string, val: unknown) {
@@ -219,6 +253,7 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
             })
           }
           if (this.limitN != null) out = out.slice(0, this.limitN)
+          out = out.map((r) => projectJsonPathAliases(r, this.selectCols))
           if (this.single) return { data: out.length ? out[0] : null, error: null }
           if (this.countMode === 'exact') {
             return { data: this.headOnly ? null : out, error: null, count: matchCount }

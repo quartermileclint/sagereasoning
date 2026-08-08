@@ -27,6 +27,7 @@ import type { OrientationObservation } from '@/lib/translation-sandwich/layer1-e
 import {
   computeOrientationReading,
   composeGenerativePrompt,
+  classifyOrientationDelivery,
   ORIENTATION_READING_BOUNDS,
 } from '@/lib/translation-sandwich/orientation-reading'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
@@ -729,6 +730,16 @@ export interface OrientationReadingInput {
    *  signature digest (`orient:<sha256(signature)[:32]>`) so one examination
    *  derives at most one ledgered reading. */
   correlationId: string
+  /** REQUIRED (2026-08-08 examined/observed fold, mentor ruling) — elapsed ms
+   *  from request receipt to this derivation (route.ts measures it:
+   *  `Date.now()` at the top of POST to `Date.now()` at the emission seam).
+   *  Feeds classifyOrientationDelivery, the mentor-ruled elapsed-time PROXY
+   *  for whether the framing plausibly reached the agent before the
+   *  harness's own client-side timeout fired. Required, not optional-with-a-
+   *  conservative-default — a call site that forgets to wire this in should
+   *  fail loudly (a type error) rather than silently mis-measure every
+   *  event as 'observed'. */
+  elapsedMs: number
   /** Injectable for tests; defaults to the real Ed25519 verifier. */
   verify?: VerifyFn
 }
@@ -780,11 +791,13 @@ export function deriveOrientationReadingEvent(
 
   const { reading, basis } = computeOrientationReading(input.observations)
   const generativePrompt = composeGenerativePrompt(reading, input.engagedCircles)
+  const deliveryClass = classifyOrientationDelivery(input.elapsedMs)
 
   const payload: TrustEvent['payload'] = {
     orientationReading: reading,
     orientationBasis: basis,
     orientationBounds: ORIENTATION_READING_BOUNDS,
+    orientationDeliveryClass: deliveryClass,
   }
   if (input.observations && input.observations.length > 0) {
     // Auditability (the "reproducible/auditable per the R18f-parallel

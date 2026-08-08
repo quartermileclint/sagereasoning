@@ -238,6 +238,16 @@ export interface TrustEventPayload {
   orientationObservations?: Array<{ observed: string; evidence: string }>
   generativePrompt?: string
   orientationBounds?: string
+  /** orientation-reading-* (2026-08-08 examined/observed fold, mentor ruling):
+   *  the elapsed-time-proxy delivery classification — 'examined' when the
+   *  framing plausibly reached the agent within the harness's documented
+   *  consult timeout, 'observed' when the server completed after that
+   *  window (a PROXY, never a confirmed-delivery signal — see
+   *  ORIENTATION_DELIVERY_TIMEOUT_MS). Absent on events emitted before this
+   *  fold (prospective-only, mentor-ruled — never backfilled); readers must
+   *  treat an absent value as 'examined' by default (the pre-fix
+   *  architecture's own, now-corrected, single-class posture). */
+  orientationDeliveryClass?: 'examined' | 'observed'
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }

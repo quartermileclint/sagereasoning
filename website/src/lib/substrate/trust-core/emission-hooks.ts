@@ -396,6 +396,11 @@ export interface OrientationReadingEmissionInput {
    *  structural half; the route additionally 400s the field on the l1_supply
    *  path flag-on). */
   layer1Source: 'server' | 'supplied'
+  /** REQUIRED (2026-08-08 examined/observed fold) — elapsed ms from request
+   *  receipt (route.ts's `requestReceivedAtMs`) to this call. Threaded
+   *  straight to the deriver's classifyOrientationDelivery; see
+   *  OrientationReadingInput.elapsedMs for the full rationale. */
+  elapsedMs: number
   now?: Date
 }
 
@@ -468,6 +473,7 @@ export async function emitOrientationReadingTrustEvent(
       engagedCircles: input.engagedCircles,
       now,
       correlationId,
+      elapsedMs: input.elapsedMs,
     })
     if (event === null) return // unverifiable artifact — no event (R18f-parallel)
     await emitLedgerOnlyTrustEvents([event])

@@ -34,10 +34,7 @@
  */
 
 import type { KatorthomaProximity } from '@/lib/translation-sandwich/layer2-mechanisms'
-import {
-  ORIENTATION_ENTRY_TEXT,
-  ORIENTATION_NOT_ATTESTABLE_CLAUSE,
-} from '@/lib/translation-sandwich/orientation-reading'
+import { selectOrientationEntryWording } from '@/lib/translation-sandwich/orientation-reading'
 import type { TrustVerdict } from './harness-integration'
 import type { EffectiveDomainTrust, VirtueTrustDomain } from './types'
 
@@ -59,7 +56,8 @@ export const TRUST_RECORD_ENVELOPE = {
     'Reasoning quality beyond what the signed artifacts carry. No claim rests on agent self-report alone; a reflect history is a modulate-only record, not a verified pattern of honesty.',
     'Future behaviour. Trust here is evaluative and present-looking; it decays without exercise and is never a prediction or a guarantee.',
     'Fitness as a training signal. Weights-tier claims are blocked.',
-    'Fifth-circle alignment: orientation_readings entries describe single examinations (each carries its own inline clause); the record cannot attest that the agent is fifth-circle-aligned (mentor Q6).',
+    'Fifth-circle alignment: orientation_readings entries describe a single examination or a single observation (each carries its own inline clause); the record cannot attest that the agent is fifth-circle-aligned (mentor Q6).',
+    'Confirmed delivery. An orientation_readings entry\'s class field (examined/observed) is computed from an ELAPSED-TIME PROXY against the harness\'s documented consult timeout — never a confirmed-delivery acknowledgement, which no channel exists to provide. Entries recorded before 2026-08-08 predate this classification and default to examined (the architecture at time of writing, not a confirmed status; never backfilled).',
   ],
   honest_limit:
     'This record is an attestation composed server-side from consumer-unforgeable trust events under a 90-day retention regime — not a cryptographic proof of the agent’s inner states, and not a certification of safety, ethics, or trustworthiness in any absolute sense (R18a). MEASURE mode: nothing in this record binds any decision; a human’s right to override is absolute regardless of any level shown here (R20c).',
@@ -119,9 +117,16 @@ export interface TrustRecordReflectView {
  */
 export interface TrustRecordOrientationEntry {
   reading: 'toward' | 'away' | 'indeterminate'
-  /** ORIENTATION_ENTRY_TEXT[reading] — the examination-not-agent template. */
+  /** 2026-08-08 examined/observed fold (mentor ruling): the elapsed-time-proxy
+   *  delivery classification. 'examined' ⇒ entry_text/not_attestable_clause
+   *  use the existing per-reading templates. 'observed' ⇒ both use the fixed
+   *  verbatim pair naming that the framing was not delivered in time — see
+   *  selectOrientationEntryWording. Defaults to 'examined' for events
+   *  emitted before this fold (prospective-only, never backfilled). */
+  class: 'examined' | 'observed'
+  /** selectOrientationEntryWording(reading, class).entryText. */
   entry_text: string
-  /** ORIENTATION_NOT_ATTESTABLE_CLAUSE, verbatim, EVERY entry. */
+  /** selectOrientationEntryWording(reading, class).notAttestableClause. */
   not_attestable_clause: string
   occurred_at: string
 }
@@ -221,7 +226,7 @@ export interface ComposeTrustRecordInput {
    *  composed entries, each carrying the inline not-attestable clause, plus
    *  the mentor-§6(b) total count (null ⇒ count omitted, never fabricated). */
   orientationReadings?: {
-    entries: { reading: string; occurredAt: string }[]
+    entries: { reading: string; occurredAt: string; deliveryClass: 'examined' | 'observed' }[]
     capped: boolean
     totalCount?: number | null
   } | null
@@ -266,15 +271,24 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
   } else if (input.orientationReadings !== undefined) {
     orientationEntries = input.orientationReadings.entries
       .filter(
-        (e): e is { reading: 'toward' | 'away' | 'indeterminate'; occurredAt: string } =>
-          e.reading === 'toward' || e.reading === 'away' || e.reading === 'indeterminate',
+        (
+          e,
+        ): e is {
+          reading: 'toward' | 'away' | 'indeterminate'
+          occurredAt: string
+          deliveryClass: 'examined' | 'observed'
+        } => e.reading === 'toward' || e.reading === 'away' || e.reading === 'indeterminate',
       )
-      .map((e) => ({
-        reading: e.reading,
-        entry_text: ORIENTATION_ENTRY_TEXT[e.reading],
-        not_attestable_clause: ORIENTATION_NOT_ATTESTABLE_CLAUSE,
-        occurred_at: e.occurredAt,
-      }))
+      .map((e) => {
+        const wording = selectOrientationEntryWording(e.reading, e.deliveryClass)
+        return {
+          reading: e.reading,
+          class: e.deliveryClass,
+          entry_text: wording.entryText,
+          not_attestable_clause: wording.notAttestableClause,
+          occurred_at: e.occurredAt,
+        }
+      })
     if (input.orientationReadings.capped) {
       // Mentor §6(b): the capped note names the total when available, so a
       // reader sees "showing N of M" rather than inferring completeness.

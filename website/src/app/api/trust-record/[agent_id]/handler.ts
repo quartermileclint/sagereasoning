@@ -104,7 +104,7 @@ export interface TrustRecordDeps {
     | {
         ok: true
         value: {
-          entries: { reading: string; occurredAt: string }[]
+          entries: { reading: string; occurredAt: string; deliveryClass: 'examined' | 'observed' }[]
           capped: boolean
           /** Mentor §6(b): the total count for the "showing N of M" disclosure
            *  (null ⇒ count read failed; omitted from the payload honestly). */
@@ -249,7 +249,7 @@ export async function runTrustRecordGet(
   //     note — the reflect-summary posture).
   let orientationReadings:
     | {
-        entries: { reading: string; occurredAt: string }[]
+        entries: { reading: string; occurredAt: string; deliveryClass: 'examined' | 'observed' }[]
         capped: boolean
         totalCount?: number | null
       }

@@ -167,6 +167,98 @@ export const ORIENTATION_NOT_ATTESTABLE_CLAUSE =
   'order. It cannot attest that the agent is fifth-circle-aligned.'
 
 // ============================================================================
+// THE EXAMINED/OBSERVED DELIVERY CLASS (post-activation mentor ruling,
+// 2026-08-08 — the production-consult review's finding: a server-completed
+// orientation reading whose framing was never delivered to the examined
+// agent is not an examination, it is an observation)
+// ============================================================================
+
+export type OrientationDeliveryClass = 'examined' | 'observed'
+
+/**
+ * The harness's own documented client-side consult timeout (28000ms —
+ * `harness/gate1-pre-decision/claude-code/hooks/lib/framing-core.mjs`'s
+ * `GATE1_TIMEOUT_MS` default; also `gate1.config.example.json`'s
+ * `timeoutMs`). MENTOR-RULED constant (2026-08-08): use this value EXACTLY,
+ * never a tighter bound — a tighter bound would misclassify consults that
+ * completed just under the harness timeout, and were genuinely delivered, as
+ * 'observed'.
+ *
+ * DEPENDENCY (name it, per the ruling): this constant tracks the harness's
+ * OWN documented default. If a future harness version changes
+ * `GATE1_TIMEOUT_MS`'s default, this constant must change with it — the
+ * server has no channel today by which a caller declares its own timeout
+ * (the mentor's ruling: extending the protocol to carry one is real but
+ * disproportionate to the problem this proxy solves).
+ */
+export const ORIENTATION_DELIVERY_TIMEOUT_MS = 28000
+
+/**
+ * Classify a server-completed orientation reading by DELIVERY LIKELIHOOD —
+ * an elapsed-time PROXY, never a confirmed-delivery signal (the server has
+ * no acknowledgement channel; mentor ruling, 2026-08-08). Pure, deterministic,
+ * no clock read here — `elapsedMs` is measured by the caller (route.ts, from
+ * request receipt to this seam) and passed in.
+ *
+ * `elapsedMs <= ORIENTATION_DELIVERY_TIMEOUT_MS` ⇒ 'examined' (the framing
+ * plausibly reached the agent's own consult window in time to be acted on).
+ * `elapsedMs > ORIENTATION_DELIVERY_TIMEOUT_MS` ⇒ 'observed' (the harness's
+ * own client-side timeout would have already fired and moved on before this
+ * completion — the conservative default when delivery cannot be confirmed).
+ */
+export function classifyOrientationDelivery(elapsedMs: number): OrientationDeliveryClass {
+  return elapsedMs <= ORIENTATION_DELIVERY_TIMEOUT_MS ? 'examined' : 'observed'
+}
+
+/**
+ * The 'observed'-class entry text (EXACT, verbatim from the mentor's ruling;
+ * battery-locked). Fixed regardless of the underlying `reading` value — the
+ * reading still reflects the extraction's own habit-vs-genuine-examination
+ * markers (still meaningful, still stored), but the primary fact this text
+ * communicates is that no examination, in the sense the 'examined'-class
+ * template uses the word, took place from the agent's own point of view.
+ */
+export const ORIENTATION_OBSERVED_ENTRY_TEXT =
+  'This action was scored by the server-side pipeline; the reasoning was not returned ' +
+  'to the agent in time to be examined. This is an observation, not an examination.'
+
+/**
+ * The 'observed'-class not-attestable clause (EXACT, verbatim from the
+ * mentor's ruling; battery-locked). The word "examination" does not appear
+ * anywhere in this text — the mentor's own Stoic distinction, structurally
+ * realised: an impression that does not reach the hegemonikon is not an
+ * examination, it is an event the agent was not present to.
+ */
+export const ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE =
+  'The record can attest that this action was scored. It cannot attest that the agent ' +
+  'examined the reasoning behind it — the framing was not delivered within the agent\'s ' +
+  'own consult window.'
+
+/**
+ * Select the entry_text + not_attestable_clause for ONE served entry, given
+ * its computed reading and delivery class. `class: 'examined'` reuses the
+ * existing per-reading templates (unchanged behaviour); `class: 'observed'`
+ * uses the fixed verbatim pair above regardless of reading. A pure selector,
+ * mirroring `ORIENTATION_ENTRY_TEXT`'s own template-selection discipline —
+ * never composed, never LLM-authored.
+ */
+export function selectOrientationEntryWording(
+  reading: OrientationReading,
+  deliveryClass: OrientationDeliveryClass,
+): { entryText: string; notAttestableClause: string } {
+  if (deliveryClass === 'observed') {
+    return {
+      entryText: ORIENTATION_OBSERVED_ENTRY_TEXT,
+      notAttestableClause: ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE,
+    }
+  }
+  return {
+    entryText: ORIENTATION_ENTRY_TEXT[reading],
+    notAttestableClause: ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+  }
+}
+
+// ============================================================================
 // THE GENERATIVE-PROMPT FIELD (C2(ii) — scope §2; ruling 5's settled format)
 // ============================================================================
 

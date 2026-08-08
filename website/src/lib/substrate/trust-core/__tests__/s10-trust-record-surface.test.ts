@@ -36,6 +36,8 @@ import { readHonestReflectSummary, readTrustProfile } from '../trust-core-store'
 import {
   ORIENTATION_ENTRY_TEXT,
   ORIENTATION_NOT_ATTESTABLE_CLAUSE,
+  ORIENTATION_OBSERVED_ENTRY_TEXT,
+  ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE,
 } from '@/lib/translation-sandwich/orientation-reading'
 import { PROXIMITY_RANK } from '../constants'
 import {
@@ -579,10 +581,10 @@ async function main(): Promise<void> {
       reflectSummary: null,
       orientationReadings: {
         entries: [
-          { reading: 'toward', occurredAt: '2026-08-08T09:00:00.000Z' },
-          { reading: 'away', occurredAt: '2026-08-08T08:00:00.000Z' },
-          { reading: 'indeterminate', occurredAt: '2026-08-08T07:00:00.000Z' },
-          { reading: 'sideways', occurredAt: '2026-08-08T06:00:00.000Z' }, // unknown — filtered
+          { reading: 'toward', occurredAt: '2026-08-08T09:00:00.000Z', deliveryClass: 'examined' },
+          { reading: 'away', occurredAt: '2026-08-08T08:00:00.000Z', deliveryClass: 'examined' },
+          { reading: 'indeterminate', occurredAt: '2026-08-08T07:00:00.000Z', deliveryClass: 'examined' },
+          { reading: 'sideways', occurredAt: '2026-08-08T06:00:00.000Z', deliveryClass: 'examined' }, // unknown — filtered
         ],
         capped: false,
       },
@@ -605,7 +607,7 @@ async function main(): Promise<void> {
       verdict,
       reflectSummary: null,
       orientationReadings: {
-        entries: [{ reading: 'toward', occurredAt: NOW_ISO }],
+        entries: [{ reading: 'toward', occurredAt: NOW_ISO, deliveryClass: 'examined' }],
         capped: true,
         totalCount: 847,
       },
@@ -626,7 +628,7 @@ async function main(): Promise<void> {
       verdict,
       reflectSummary: null,
       orientationReadings: {
-        entries: [{ reading: 'toward', occurredAt: NOW_ISO }],
+        entries: [{ reading: 'toward', occurredAt: NOW_ISO, deliveryClass: 'examined' }],
         capped: true,
         totalCount: null,
       },
@@ -667,7 +669,10 @@ async function main(): Promise<void> {
       isOrientationEnabled: () => true,
       readOrientationReadings: async () => ({
         ok: true,
-        value: { entries: [{ reading: 'away', occurredAt: NOW_ISO }], capped: false },
+        value: {
+          entries: [{ reading: 'away', occurredAt: NOW_ISO, deliveryClass: 'examined' }],
+          capped: false,
+        },
       }),
     }
     const resOn = await runTrustRecordGet(AGENT, orientDeps)
@@ -694,6 +699,64 @@ async function main(): Promise<void> {
     }
     const res404Orient = await runTrustRecordGet('test:unknown@v1', orient404Deps)
     assert(res404Orient.status === 404, 'S6-8b ENV-1 404 precedes the orientation read (bomb untripped)')
+
+    // S6-8c (2026-08-08 examined/observed fold, mentor ruling): composeTrustRecordPayload
+    // selects the FIXED observed-class wording regardless of the underlying
+    // reading — the examined class keeps the existing per-reading templates
+    // (S6-2/S6-3 above already cover examined; this covers observed).
+    const observedComposed = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: {
+        entries: [
+          { reading: 'toward', occurredAt: '2026-08-08T09:00:00.000Z', deliveryClass: 'observed' },
+          { reading: 'away', occurredAt: '2026-08-08T08:00:00.000Z', deliveryClass: 'observed' },
+          { reading: 'indeterminate', occurredAt: '2026-08-08T07:00:00.000Z', deliveryClass: 'observed' },
+        ],
+        capped: false,
+      },
+      generatedAt: NOW,
+    })
+    const observedEntries = observedComposed.record.orientation_readings ?? []
+    assert(observedEntries.length === 3, 'S6-8c-0 all three observed entries composed')
+    assert(
+      observedEntries.every((e) => e.class === 'observed'),
+      'S6-8c-1 every entry carries class:\'observed\'',
+    )
+    assert(
+      observedEntries.every((e) => e.entry_text === ORIENTATION_OBSERVED_ENTRY_TEXT),
+      'S6-8c-2 EVERY observed entry uses the FIXED observed entry text, regardless of its underlying reading (toward/away/indeterminate all identical)',
+    )
+    assert(
+      observedEntries.every((e) => e.not_attestable_clause === ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE),
+      'S6-8c-3 EVERY observed entry uses the FIXED observed not-attestable clause',
+    )
+    assert(
+      observedEntries.every((e) => e.entry_text !== ORIENTATION_ENTRY_TEXT[e.reading]),
+      'S6-8c-4 an observed entry NEVER uses the examined-class per-reading template (the two classes are never confused)',
+    )
+    // S6-8d: a MIXED batch (both classes in one read) composes each entry
+    // independently — the class is per-entry, never a batch-wide default.
+    const mixedComposed = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      orientationReadings: {
+        entries: [
+          { reading: 'toward', occurredAt: '2026-08-08T09:00:00.000Z', deliveryClass: 'examined' },
+          { reading: 'toward', occurredAt: '2026-08-08T08:00:00.000Z', deliveryClass: 'observed' },
+        ],
+        capped: false,
+      },
+      generatedAt: NOW,
+    })
+    const mixedEntries = mixedComposed.record.orientation_readings ?? []
+    assert(
+      mixedEntries[0]?.class === 'examined' &&
+        mixedEntries[0]?.entry_text === ORIENTATION_ENTRY_TEXT.toward &&
+        mixedEntries[1]?.class === 'observed' &&
+        mixedEntries[1]?.entry_text === ORIENTATION_OBSERVED_ENTRY_TEXT,
+      'S6-8d a mixed batch composes each entry by its OWN class, independently (identical reading, different wording)',
+    )
 
     // S6-9: handler flag-on + read outage ⇒ 200 still served (never blocks).
     const outageDeps: TrustRecordDeps = {

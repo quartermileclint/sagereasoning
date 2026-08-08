@@ -631,6 +631,16 @@ export interface OrientationReadingLedgerEntry {
   /** 'toward' | 'away' | 'indeterminate' — parsed from the event_type suffix. */
   reading: string
   occurredAt: string
+  /** 2026-08-08 examined/observed fold (mentor ruling): the elapsed-time-proxy
+   *  delivery classification, projected from `payload->>orientationDeliveryClass`
+   *  via a JSON-path select (never the whole payload column — preserves the
+   *  pre-existing structural guarantee that this read cannot leak consult
+   *  content). Absent on events emitted before this fold, or on any read
+   *  anomaly ⇒ defaults to 'examined' here at the read boundary (the
+   *  mentor-ruled prospective-only, never-backfilled posture: a pre-fix row
+   *  is honestly labelled examined by default, matching the architecture at
+   *  the time it was written, not a confirmed delivery status). */
+  deliveryClass: 'examined' | 'observed'
 }
 
 export async function readOrientationReadings(
@@ -659,9 +669,16 @@ export async function readOrientationReadings(
     // extra row as a genuine truncation probe: CAP+1 rows returned ⇒ real
     // truncation ⇒ serve only the first CAP, honestly capped:true; CAP or
     // fewer ⇒ nothing was truncated ⇒ capped:false, never a false "not listed".
+    // 2026-08-08 examined/observed fold: the JSON-path selector projects ONLY
+    // orientationDeliveryClass out of the payload column — never the whole
+    // payload (which carries orientationObservations' evidence spans, quoting
+    // the submitted text). PostgREST's `column->>key` text-extraction operator,
+    // aliased so the row comes back as `delivery_class` rather than a nested
+    // `payload` object. Absence (older rows; a read anomaly) is handled below,
+    // never assumed to be a syntax failure worth failing the whole read over.
     const { data, error } = await client
       .from(EVENTS_TABLE)
-      .select('event_type, occurred_at')
+      .select('event_type, occurred_at, delivery_class:payload->>orientationDeliveryClass')
       .eq('agent_id', agentId)
       .in('event_type', [
         'orientation-reading-toward',
@@ -676,13 +693,18 @@ export async function readOrientationReadings(
       }
       return { ok: false, error: `readOrientationReadings: ${error.message}` }
     }
-    const rows = (data ?? []) as { event_type: string; occurred_at: string }[]
+    const rows = (data ?? []) as {
+      event_type: string
+      occurred_at: string
+      delivery_class?: string | null
+    }[]
     const capped = rows.length > ORIENTATION_READINGS_ROW_CAP
     const entries: OrientationReadingLedgerEntry[] = rows
       .slice(0, ORIENTATION_READINGS_ROW_CAP)
       .map((r) => ({
         reading: r.event_type.replace('orientation-reading-', ''),
         occurredAt: r.occurred_at,
+        deliveryClass: r.delivery_class === 'observed' ? 'observed' : 'examined',
       }))
 
     // Mentor §6(b): the total count. Below the cap the row set IS the total

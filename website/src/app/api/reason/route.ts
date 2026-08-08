@@ -654,6 +654,14 @@ function validateSuppliedLayer1Schema(
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Agent-circles C2/C1c (2026-08-08 examined/observed fold): the request's
+  // own wall-clock start, captured as early as possible so the elapsed time
+  // at the orientation-reading emission seam approximates the FULL duration
+  // the calling client would have been waiting — not just the Layer-1
+  // extraction span. Read only at that one seam; never touches any other
+  // response field (byte-identity elsewhere is unaffected).
+  const requestReceivedAtMs = Date.now()
+
   // Rate limiting
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
@@ -2063,6 +2071,12 @@ export async function POST(request: NextRequest) {
                 )
               : [],
             layer1Source: 'server',
+            // 2026-08-08 examined/observed fold (mentor ruling): elapsed
+            // wall-clock time from request receipt to this seam — the
+            // elapsed-time PROXY for whether the framing plausibly reached
+            // the agent before the harness's own client-side consult
+            // timeout fired. See classifyOrientationDelivery.
+            elapsedMs: Date.now() - requestReceivedAtMs,
           })
         }
       }

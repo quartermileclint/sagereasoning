@@ -46,7 +46,10 @@ import {
   ORIENTATION_READINGS_ROW_CAP,
 } from '../trust-core-store'
 import { emitOrientationReadingTrustEvent, computeOrientationCorrelationId } from '../emission-hooks'
-import { ORIENTATION_READING_BOUNDS } from '@/lib/translation-sandwich/orientation-reading'
+import {
+  ORIENTATION_READING_BOUNDS,
+  ORIENTATION_DELIVERY_TIMEOUT_MS,
+} from '@/lib/translation-sandwich/orientation-reading'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
 import type { TrustEvent, EarnedDomainState } from '../types'
 
@@ -107,6 +110,7 @@ async function main(): Promise<void> {
       engagedCircles: ['household'],
       now: NOW,
       correlationId: 'orient:aaa',
+      elapsedMs: 1000,
       verify: verifyBad,
     })
     assert(none === null, '§1.1 unverifiable artifact ⇒ null (R18f-parallel)')
@@ -120,6 +124,7 @@ async function main(): Promise<void> {
       engagedCircles: ['local_community'],
       now: NOW,
       correlationId: 'orient:bbb',
+      elapsedMs: 1000,
       verify: verifyOk,
     })
     assert(ev !== null, '§1.2 verified ⇒ event')
@@ -138,14 +143,14 @@ async function main(): Promise<void> {
     const toward = deriveOrientationReadingEvent({
       agentId: 'a', ownerUserId: null, credentialRef: null,
       signedAssessment: fakeSigned(), observations: [gObs], engagedCircles: ['household'],
-      now: NOW, correlationId: 'orient:ccc', verify: verifyOk,
+      now: NOW, correlationId: 'orient:ccc', elapsedMs: 1000, verify: verifyOk,
     })
     assert(toward !== null && toward.eventType === 'orientation-reading-toward' && toward.payload.generativePrompt === undefined, '§1.11 toward ⇒ no seed')
 
     const indet = deriveOrientationReadingEvent({
       agentId: 'a', ownerUserId: null, credentialRef: null,
       signedAssessment: fakeSigned(), observations: undefined, engagedCircles: [],
-      now: NOW, correlationId: 'orient:ddd', verify: verifyOk,
+      now: NOW, correlationId: 'orient:ddd', elapsedMs: 1000, verify: verifyOk,
     })
     assert(indet !== null && indet.eventType === 'orientation-reading-indeterminate' && indet.payload.orientationObservations === undefined, '§1.12 no observations ⇒ indeterminate, no spans in payload')
 
@@ -154,7 +159,7 @@ async function main(): Promise<void> {
       agentId: 'a', ownerUserId: null, credentialRef: null,
       signedAssessment: fakeSigned(),
       observations: [{ observed: 'genuine_examination_markers', evidence: 'x'.repeat(400) }],
-      engagedCircles: [], now: NOW, correlationId: 'orient:eee', verify: verifyOk,
+      engagedCircles: [], now: NOW, correlationId: 'orient:eee', elapsedMs: 1000, verify: verifyOk,
     })
     const span = longEv?.payload.orientationObservations?.[0]?.evidence ?? ''
     assert(span.length === 301 && span.endsWith('…'), '§1.13 payload spans capped at 300')
@@ -281,6 +286,7 @@ async function main(): Promise<void> {
       observations: [gObs],
       engagedCircles: ['household'],
       layer1Source: 'server' as const,
+      elapsedMs: 1000,
     }
 
     // Flag(s) off ⇒ zero client calls (no console.error = no DB-layer touch).
@@ -440,7 +446,7 @@ async function main(): Promise<void> {
       agentId: 'a', ownerUserId: null, credentialRef: null,
       signedAssessment: fakeSigned(), engagedCircles: [],
       observations: [{ observed: 'genuine_examination_markers', evidence: padded }],
-      now: NOW, correlationId: 'orient:surrogate-test', verify: verifyOk,
+      now: NOW, correlationId: 'orient:surrogate-test', elapsedMs: 1000, verify: verifyOk,
     })
     const cappedSpan = ev?.payload.orientationObservations?.[0]?.evidence ?? ''
     // A lone surrogate is a code unit in the range D800-DBFF or DC00-DFFF with
@@ -452,6 +458,89 @@ async function main(): Promise<void> {
     const wellFormed =
       highSurrogateIdx === -1 || cappedSpan.codePointAt(highSurrogateIdx)! > 0xFFFF
     assert(wellFormed, '§6.3 the truncation never splits a surrogate pair (well-formed UTF-16 in the payload)')
+  }
+
+  // ==========================================================================
+  // §7 THE EXAMINED/OBSERVED DELIVERY CLASS (2026-08-08, mentor ruling) — the
+  // deriver stores the class on the payload, and the read path threads it
+  // through end-to-end, defaulting absent (pre-fold) rows to 'examined'.
+  // ==========================================================================
+  {
+    // §7.1 the deriver classifies from elapsedMs: at/under the threshold ⇒
+    // 'examined'; over it ⇒ 'observed'. Same fixture, only elapsedMs varies —
+    // isolates the classification from every other payload field.
+    const examinedEv = deriveOrientationReadingEvent({
+      agentId: 'a', ownerUserId: null, credentialRef: null,
+      signedAssessment: fakeSigned('sig-class-examined'), observations: [gObs],
+      engagedCircles: [], now: NOW, correlationId: 'orient:class-examined',
+      elapsedMs: ORIENTATION_DELIVERY_TIMEOUT_MS, verify: verifyOk,
+    })
+    assert(examinedEv?.payload.orientationDeliveryClass === 'examined', '§7.1a elapsedMs at the threshold ⇒ payload.orientationDeliveryClass = examined')
+
+    const observedEv = deriveOrientationReadingEvent({
+      agentId: 'a', ownerUserId: null, credentialRef: null,
+      signedAssessment: fakeSigned('sig-class-observed'), observations: [gObs],
+      engagedCircles: [], now: NOW, correlationId: 'orient:class-observed',
+      elapsedMs: ORIENTATION_DELIVERY_TIMEOUT_MS + 1, verify: verifyOk,
+    })
+    assert(observedEv?.payload.orientationDeliveryClass === 'observed', '§7.1b elapsedMs one ms over the threshold ⇒ payload.orientationDeliveryClass = observed')
+
+    // §7.2 end-to-end: emit both classes through the REAL ledger-only path,
+    // then read them back via readOrientationReadings — the JSON-path select
+    // must thread the class through as 'delivery_class', which the read
+    // function maps to deliveryClass on each served entry.
+    const fake = makeFakeSupabase()
+    assert(examinedEv !== null && observedEv !== null, '§7.2-precondition both fixtures derived')
+    if (examinedEv && observedEv) {
+      const r1 = await emitLedgerOnlyTrustEvents(
+        [{ ...examinedEv, agentId: 'sagereasoning:class-e2e@v1' }],
+        fake.client,
+      )
+      const r2 = await emitLedgerOnlyTrustEvents(
+        [{ ...observedEv, agentId: 'sagereasoning:class-e2e@v1' }],
+        fake.client,
+      )
+      assert(r1.ok && r1.value.written === 1 && r2.ok && r2.value.written === 1, '§7.2a both events ledgered')
+
+      const read = await readOrientationReadings('sagereasoning:class-e2e@v1', fake.client)
+      assert(read.ok, '§7.2b read succeeds')
+      if (read.ok) {
+        assert(read.value.entries.length === 2, '§7.2c both entries served')
+        // Both fixtures used identical observations (both 'toward'), so the
+        // sole discriminator on the served entries is deliveryClass — asserted
+        // as a SET (one of each), which only passes if the JSON-path select
+        // genuinely projects payload.orientationDeliveryClass per row (a
+        // constant-mapping bug — e.g. always 'examined' — would fail this).
+        const classes = read.value.entries.map((e) => e.deliveryClass).sort()
+        assert(
+          JSON.stringify(classes) === JSON.stringify(['examined', 'observed']),
+          '§7.2d the read path threads BOTH classes through correctly end-to-end (one examined, one observed — the JSON-path select genuinely projects payload.orientationDeliveryClass, not a vacuous pass)',
+        )
+      }
+    }
+
+    // §7.3 a LEGACY row (payload carries no orientationDeliveryClass key at
+    // all — every pre-fold event, incl. the 13 already on sagereasoning:
+    // s9-loop@v1's production record) reads as 'examined' by default (the
+    // mentor's prospective-only ruling: a pre-fix row is honestly labelled
+    // examined by default, never fabricated as observed, never backfilled).
+    const fakeLegacy = makeFakeSupabase()
+    fakeLegacy.tables.agent_trust_events.push({
+      id: 'legacy-1',
+      agent_id: 'sagereasoning:legacy-agent@v1',
+      event_type: 'orientation-reading-toward',
+      artifact_kind: 'signed_layer2_assessment',
+      artifact_ref: 'signed:legacy',
+      virtue_domain: null,
+      payload: { orientationReading: 'toward', orientationBasis: 'genuine_examination_markers_only' }, // NO orientationDeliveryClass key — the pre-fold shape
+      occurred_at: NOW.toISOString(),
+      correlation_id: 'orient:legacy-1',
+    })
+    const legacyRead = await readOrientationReadings('sagereasoning:legacy-agent@v1', fakeLegacy.client)
+    assert(
+      legacyRead.ok && legacyRead.value.entries.length === 1 && legacyRead.value.entries[0].deliveryClass === 'examined',
+      '§7.3 a pre-fold row (no orientationDeliveryClass key in payload) defaults to examined — never fabricated as observed, never dropped',
+    )
   }
 
   // ── env restore ────────────────────────────────────────────────────────────

@@ -648,6 +648,25 @@ Every served entry carries this clause inline, verbatim:
 > The record can attest that specific examinations were oriented toward the rational order. It
 > cannot attest that the agent is fifth-circle-aligned.
 
+Each entry also carries a `class` field, `examined` or `observed`. A server-completed reading
+whose framing was never delivered to the agent (the harness's own client-side consult timeout
+fires before the server finishes) is not an examination — it is an observation. `class:
+'examined'` entries use the wording above. `class: 'observed'` entries use fixed wording that
+never claims an examination took place:
+
+> This action was scored by the server-side pipeline; the reasoning was not returned to the
+> agent in time to be examined. This is an observation, not an examination.
+>
+> The record can attest that this action was scored. It cannot attest that the agent examined
+> the reasoning behind it — the framing was not delivered within the agent's own consult window.
+
+The class is classified as examined based on server-side elapsed time relative to the documented
+harness consult timeout (28000ms) — a PROXY, never a confirmed-delivery signal; the server has
+no channel by which a caller acknowledges receipt. `total_orientation_readings_count` includes
+both classes. Readings recorded before 2026-08-08 predate this classification and read as
+`examined` by default (the architecture at time of writing, not a confirmed delivery status;
+never backfilled).
+
 Like every server-side extraction signal, the orientation reading rests on the honest extraction
 of the submitted text and inherits the same extraction-trust ceiling as the corroboration check
 (reasoning narrated as examination reads as examination) and the same field limits as every other

@@ -33,6 +33,11 @@ import {
   ORIENTATION_READING_BOUNDS,
   engagedCircleNames,
   isOrientationReadingEnabled,
+  classifyOrientationDelivery,
+  selectOrientationEntryWording,
+  ORIENTATION_DELIVERY_TIMEOUT_MS,
+  ORIENTATION_OBSERVED_ENTRY_TEXT,
+  ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE,
 } from '../orientation-reading'
 import {
   buildLayer1SystemPrompt,
@@ -371,12 +376,32 @@ function h(evidence = 'the way I always handle these'): OrientationObservation {
 
   // INV-8: the S10 entry composition carries the inline clause on EVERY entry
   // (asserted behaviourally in the S10 battery; pinned here at the source so a
-  // refactor cannot drop the inline carry).
+  // refactor cannot drop the inline carry). Post the 2026-08-08 examined/
+  // observed fold, the clause is selected via selectOrientationEntryWording
+  // (class-dependent) rather than the bare ORIENTATION_NOT_ATTESTABLE_CLAUSE
+  // constant — the pin now checks for the SELECTOR call, not the old literal.
   const payload = readFileSync(
     join(__dirname, '../../substrate/trust-core/trust-record-payload.ts'),
     'utf8',
   )
-  assert(payload.includes('not_attestable_clause: ORIENTATION_NOT_ATTESTABLE_CLAUSE'), '§6.14 INV: every S10 entry carries the clause inline')
+  assert(payload.includes('selectOrientationEntryWording('), '§6.14 INV: every S10 entry\'s wording is selected via selectOrientationEntryWording (class-dependent)')
+  assert(payload.includes('not_attestable_clause: wording.notAttestableClause'), '§6.14b INV: not_attestable_clause is ALWAYS the selector\'s output — never a bare constant that could skip the observed-class branch')
+
+  // INV-9 (2026-08-08 examined/observed fold, mentor ruling): the route
+  // measures elapsed time from request receipt and threads it, unconditionally,
+  // to the orientation emission call — never an omitted/optional field a
+  // future edit could silently drop.
+  assert(route.includes('const requestReceivedAtMs = Date.now()'), '§6.15 INV: route captures the request-receipt timestamp')
+  assert(route.includes('elapsedMs: Date.now() - requestReceivedAtMs'), '§6.16 INV: route threads elapsedMs to the orientation emission call')
+
+  // INV-10: elapsedMs is REQUIRED (not optional) on both the emission-input and
+  // deriver-input types — a future edit widening either back to optional would
+  // silently reopen the class-defaults-to-examined-on-omission risk the mentor
+  // ruled must never happen unnoticed.
+  const emissionTypes = read('../../substrate/trust-core/emission-hooks.ts')
+  assert(/elapsedMs: number\b/.test(emissionTypes), '§6.17 INV: OrientationReadingEmissionInput.elapsedMs is required (not `elapsedMs?:`)')
+  const deriveTypes = read('../../substrate/trust-core/derive-trust-events.ts')
+  assert(/elapsedMs: number\b/.test(deriveTypes) && !/elapsedMs\?: number/.test(deriveTypes), '§6.18 INV: OrientationReadingInput.elapsedMs is required (not optional)')
 }
 
 // ============================================================================
@@ -389,6 +414,69 @@ function h(evidence = 'the way I always handle these'): OrientationObservation {
   assert(ORIENTATION_READING_BOUNDS.includes('never returned on the consult response'), '§7.3 bounds never-on-response clause')
   assert(ORIENTATION_READING_BOUNDS.includes('extraction-trust ceiling'), '§7.4 bounds gaming-ceiling disclosure')
   assert(ORIENTATION_READING_BOUNDS.endsWith(ORIENTATION_NOT_ATTESTABLE_CLAUSE), '§7.5 bounds carries the not-attestable clause verbatim')
+}
+
+// ============================================================================
+// §8 THE EXAMINED/OBSERVED DELIVERY CLASS (2026-08-08, mentor ruling on the
+// production-consult review's finding — an elapsed-time PROXY, never a
+// confirmed-delivery signal)
+// ============================================================================
+
+{
+  // §8.1 the threshold constant is EXACTLY the harness's documented default —
+  // the mentor ruled explicitly against a tighter bound.
+  assert(ORIENTATION_DELIVERY_TIMEOUT_MS === 28000, '§8.1 the delivery-classification threshold is EXACTLY 28000ms (mentor ruling: not a tighter bound)')
+
+  // §8.2 classifyOrientationDelivery — boundary behaviour, both directions.
+  assert(classifyOrientationDelivery(0) === 'examined', '§8.2a zero elapsed ⇒ examined')
+  assert(classifyOrientationDelivery(27999) === 'examined', '§8.2b just under the threshold ⇒ examined')
+  assert(classifyOrientationDelivery(28000) === 'examined', '§8.2c EXACTLY the threshold ⇒ examined (<=, never <)')
+  assert(classifyOrientationDelivery(28001) === 'observed', '§8.2d one ms over the threshold ⇒ observed')
+  assert(classifyOrientationDelivery(60000) === 'observed', '§8.2e well over the threshold ⇒ observed')
+
+  // §8.3 selectOrientationEntryWording — 'examined' reuses the existing
+  // per-reading templates (byte-identical to pre-fold behaviour); 'observed'
+  // uses the FIXED verbatim pair regardless of the underlying reading.
+  const towardExamined = selectOrientationEntryWording('toward', 'examined')
+  assert(towardExamined.entryText === ORIENTATION_ENTRY_TEXT.toward, '§8.3a examined+toward ⇒ the existing toward template')
+  assert(towardExamined.notAttestableClause === ORIENTATION_NOT_ATTESTABLE_CLAUSE, '§8.3b examined ⇒ the existing not-attestable clause')
+
+  for (const reading of ['toward', 'away', 'indeterminate'] as const) {
+    const observed = selectOrientationEntryWording(reading, 'observed')
+    assert(observed.entryText === ORIENTATION_OBSERVED_ENTRY_TEXT, `§8.3c observed+${reading} ⇒ the fixed observed entry text (never the per-reading template)`)
+    assert(observed.notAttestableClause === ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE, `§8.3d observed+${reading} ⇒ the fixed observed clause (never the examined clause)`)
+  }
+
+  // §8.4 VERBATIM LOCKS (mentor ruling, exact — battery-locked, never reworded).
+  assert(
+    ORIENTATION_OBSERVED_ENTRY_TEXT ===
+      'This action was scored by the server-side pipeline; the reasoning was not returned ' +
+        'to the agent in time to be examined. This is an observation, not an examination.',
+    '§8.4a the observed entry text is verbatim the mentor\'s ruling',
+  )
+  assert(
+    ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE ===
+      'The record can attest that this action was scored. It cannot attest that the agent ' +
+        'examined the reasoning behind it — the framing was not delivered within the agent\'s ' +
+        'own consult window.',
+    '§8.4b the observed not-attestable clause is verbatim the mentor\'s ruling',
+  )
+  // The mentor's own stated invariant (verbatim in the ruling): "the word
+  // 'examination' does not appear in the observed-class wording anywhere."
+  // The entry text uses "examined" (a verb, past tense, inside "not returned
+  // ... in time to be examined") and "examination" (inside "not an
+  // examination") — checked literally: the exact noun form 'examination'
+  // appears exactly once, inside the explicit negation "not an examination".
+  const entryOccurrences = ORIENTATION_OBSERVED_ENTRY_TEXT.match(/examination/gi) ?? []
+  assert(entryOccurrences.length === 1, '§8.4c the entry text uses the noun "examination" exactly once')
+  assert(
+    ORIENTATION_OBSERVED_ENTRY_TEXT.includes('not an examination'),
+    '§8.4d that one occurrence is inside an explicit negation ("not an examination") — never an affirmative claim',
+  )
+  assert(
+    !/\bexamination\b/i.test(ORIENTATION_OBSERVED_NOT_ATTESTABLE_CLAUSE),
+    '§8.4e the observed not-attestable clause never uses the noun "examination" at all (only the verb "examined", itself negated by "cannot attest")',
+  )
 }
 
 // ============================================================================
