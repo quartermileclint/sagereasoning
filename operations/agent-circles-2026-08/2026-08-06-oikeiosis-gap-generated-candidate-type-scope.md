@@ -2,7 +2,7 @@
 
 **Session:** 2026-08-06. Tier: `governance`/`code-elevated` — a type-shape scope document, no code written. Per the binding sequence (`D-IDEA-LOOP-PREBRIEF-RULINGS-C2-WIDENED-2026-08-05`), this is the item upstream of C2's own scope document. Per the same ruling: the generation step itself (the seven heuristics' implementation) is explicitly NOT scoped here — that remains queued for its own later session. This document also does not scope C2.
 
-**Status: APPROVED by the mentor, 2026-08-06, with one ruling and two clarifications — folded into this document below.** See `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06` in the decision log for the ruling verbatim and its disposition. **Amended 2026-08-06 (same day, config/shared-task-list scope review):** `cycleOutcome` gains a sixth value, `'dependency_unavailable'`, with a companion `unavailableDependency` field — see §2 below and `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`.
+**Status: APPROVED by the mentor, 2026-08-06, with one ruling and two clarifications — folded into this document below.** See `D-OIKEIOSIS-GAP-GENERATED-CANDIDATE-TYPES-APPROVED-2026-08-06` in the decision log for the ruling verbatim and its disposition. **Amended 2026-08-06 (same day, config/shared-task-list scope review):** `cycleOutcome` gains a sixth value, `'dependency_unavailable'`, with a companion `unavailableDependency` field — see §2 below and `D-IDEA-LOOP-CONFIG-AND-SHARED-TASKLIST-RULED-2026-08-06`. **Amended 2026-08-09 (design-brief rulings, Q6):** `cycleOutcome` gains a seventh value, `'terminated_by_timeout'` — the honest candidate-level status for candidates in-flight when a cycle hits `maximumDuration` (*"leaving them 'pending' indefinitely is a false impression the record would present"* — the mentor, verbatim record `2026-08-09-mentor-consultation-autonomous-loop-design-brief-rulings-verbatim.md`; `D-AUTONOMOUS-LOOP-DESIGN-BRIEF-RULED-2026-08-09`). It sits alongside, not instead of, the cycle-level timeout record on the (separately-scoped) per-cycle table. **Note:** the committed-but-dark `website/src/lib/substrate/idea-loop-types.ts` transcribes the pre-amendment six-value shape and now lags this ruled shape by the one value — a named small code follow-up for the next code session that touches the module (no code edited under the design-brief session's scoping boundary).
 
 **Method:** every field below is justified by an existing binding ruling (cited) or an existing architectural surface (cited, mechanism-level only, per PR20). Nothing here is invented past what the rulings already settled.
 
@@ -162,7 +162,13 @@ export interface GeneratedCandidate {
    * initialClassification: { kind: 'preferred_indifferent' } — it is not a
    * variant classification, it is the specific shape the fallback produces.
    */
-  cycleOutcome: 'pending' | 'rejected_by_guardrail' | 'rejected_by_novelty' | 'winner' | 'null_cycle' | 'dependency_unavailable'
+  /**
+   * ADDED by mentor ruling, 2026-08-09 (design-brief Q6): 'terminated_by_timeout' —
+   * set on candidates in-flight when the cycle hits maximumDuration; the honest
+   * candidate-level status, alongside the cycle-level timeout record on the
+   * (separately-scoped) per-cycle table. Never left 'pending' indefinitely.
+   */
+  cycleOutcome: 'pending' | 'rejected_by_guardrail' | 'rejected_by_novelty' | 'winner' | 'null_cycle' | 'dependency_unavailable' | 'terminated_by_timeout'
 
   /**
    * ADDED by mentor ruling, 2026-08-06 (config/shared-task-list scope review).
