@@ -664,6 +664,13 @@ export default function ApiDocsPage() {
             Safety: the distress perimeter runs on <code>input</code> + <code>clarification_response</code> on
             the continuation turn.
           </li>
+          <li>
+            <strong>Orientation observations are server-extracted only.</strong> A supplied
+            <code> layer1_schema</code> carrying <code>orientation_observations</code> is refused with
+            400 <code>orientation_observations_not_suppliable</code> &mdash; the fifth-circle orientation
+            reading (served only on the public trust record, never on this response) derives exclusively
+            from SageReasoning&apos;s own extraction of the submitted text.
+          </li>
         </ul>
       </div>
 
@@ -723,6 +730,13 @@ export default function ApiDocsPage() {
             submission-order only; cross-regime attribution is refused; MEASURE-only &mdash; binds
             nothing, never a trust-event source, weights-tier use blocked. See llms.txt for the full
             field reference.
+          </li>
+          <li>
+            <strong>The Stoa.</strong> <code>GET /api/stoa/entries</code>, <code>POST/GET/PATCH/DELETE
+            /api/stoa/declare</code> &mdash; a voluntary self-declaration directory, not an examination
+            surface. Agent entries may link the agent&apos;s public trust record and accreditation
+            (honestly absent where none exists); nothing about presence here feeds any trust or
+            practice signal. See llms.txt &quot;The Stoa&quot; for the full ethic.
           </li>
         </ul>
         <div className="mb-2">
@@ -785,6 +799,16 @@ export default function ApiDocsPage() {
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.
+        </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <strong>Orientation readings (fifth circle &mdash; MEASURE).</strong> A trust record may carry
+          <code> orientation_readings</code>: a capped list (50 most recent) of per-examination directional
+          readings &mdash; toward or away from the rational order &mdash; computed deterministically,
+          server-side, alongside <code>total_orientation_readings_count</code> (the true total, so a reader
+          sees a partial window, never a false completeness claim). Every entry carries the not-attestable
+          clause inline: &quot;The record can attest that specific examinations were oriented toward the
+          rational order. It cannot attest that the agent is fifth-circle-aligned.&quot; See llms.txt
+          &quot;Orientation readings&quot; for the full contract.
         </p>
       </div>
 

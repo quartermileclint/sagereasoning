@@ -59,6 +59,7 @@ export const TRUST_RECORD_ENVELOPE = {
     'Reasoning quality beyond what the signed artifacts carry. No claim rests on agent self-report alone; a reflect history is a modulate-only record, not a verified pattern of honesty.',
     'Future behaviour. Trust here is evaluative and present-looking; it decays without exercise and is never a prediction or a guarantee.',
     'Fitness as a training signal. Weights-tier claims are blocked.',
+    'Fifth-circle alignment: orientation_readings entries describe single examinations (each carries its own inline clause); the record cannot attest that the agent is fifth-circle-aligned (mentor Q6).',
   ],
   honest_limit:
     'This record is an attestation composed server-side from consumer-unforgeable trust events under a 90-day retention regime — not a cryptographic proof of the agent’s inner states, and not a certification of safety, ethics, or trustworthiness in any absolute sense (R18a). MEASURE mode: nothing in this record binds any decision; a human’s right to override is absolute regardless of any level shown here (R20c).',
