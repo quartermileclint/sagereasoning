@@ -1,5 +1,7 @@
 # Next-Session Prompt — The generation-step scope document (fourth item of the ruled post-brief sequence)
 
+> **SPENT — executed 2026-08-09, same conversation, through to the ruling fold.** This prompt governed the session that authored the scope document (`operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md`), ran its PR19 review (6/6 confirmed findings folded), and — when the mentor's three-part relay arrived mid-conversation — folded the ruling (`D-GENERATION-STEP-SCOPE-RULED-2026-08-09`; verbatim record `2026-08-09-mentor-consultation-generation-step-scope-rulings-verbatim.md`) and applied the ATRF/project-context instruction sets (`D-ATRF-AND-CONSCIOUSNESS-CONTINUITY-ADDED-2026-08-09`; `D-PROJECT-CONTEXT-ATRF-AND-RULING-UPDATE-APPLIED-2026-08-09`). Do not paste into a new session — the amended binding Q11 sequence now reads: **first build gate (OPEN, its own election) → runner scoping session → bounded validation run → standing-runner design.** Original content preserved below as the historical record.
+
 **Stream:** founder.
 **Tier:** `governance` / design (explore-scope) — a scope document offered for mentor review. **No code, schema, flag, credential, or public-surface change. No build.**
 **Governing frame:** `/adopted/standing-protocol-cache.md`.

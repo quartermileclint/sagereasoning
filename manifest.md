@@ -240,6 +240,46 @@ This commitment predates the policy's formal statement. It has been honoured fro
 
 SageReasoning will not use AI-generated content in ways that substitute for human creative work on its own surfaces. Where the project has the capacity to do so, it will build protections for original human creators into the systems it designs. This is a stated direction carried forward into the permission-layer design work (dependency-graph items 14–17) when that work opens. It names the direction without pre-answering the mechanism.
 
+## Agent Task Reasoning Framework (ATRF) (mentor-directed named framework section, added 2026-08-09)
+
+AGENT TASK REASONING FRAMEWORK (ATRF)
+
+SageReasoning operates as a task-agnostic reasoning harness. It does not access, store, or assess task details, agent skills, operational state, or proprietary agent methods. Its scope is the quality of an agent's reasoning about its actions — before, during, and after — not the actions themselves.
+
+The ATRF has three carried elements:
+
+**1. Pre-task reasoning record.** Before a task with significant blast radius is undertaken, the harness presents the agent with a structured set of contingency and appropriate-action questions. These questions concern the agent's reasoning about partial completion, reversion requirements, handoff state, and whether conditions for right action are in place. The harness records the agent's responses. It does not evaluate the task. It evaluates the reasoning about the task.
+
+**2. Post-task completion assessment.** After the task, the harness presents a parallel question set and compares the agent's pre-task reasoning against what actually occurred. The accuracy of the agent's pre-task contingency reasoning is assessed and carried in the agent's profile. This is the longitudinal signal — not what the agent did, but how accurately it reasoned about what it was about to do, carried across tasks.
+
+**3. Idea completion signal.** When the IDEA loop proposes an action and the agent elects and executes it, a thin task-agnostic completion signal returns to the harness: whether the idea was completed and how the outcome compared to the proposal. This closes the loop on each proposed idea without exposing task details.
+
+The carried profile therefore contains: pre-task reasoning responses, post-task accuracy assessments, and idea completion signals. Nothing else is carried. Task memory, agent skills, operational details, and agent-internal state remain private to the agent and outside SageReasoning's scope.
+
+**Blast radius indicator.** When the IDEA loop proposes an action, the proposal carries a rough blast-radius indicator — high, medium, or low — assessed by the loop at the reasoning level, not the task level. The harness uses this indicator to determine whether a pre-task reasoning assessment is warranted. The agent's own assessment of blast radius is itself a reasoning signal and is recorded alongside the loop's indicator for longitudinal comparison.
+
+**What the ATRF is not.** The ATRF is not a task execution monitor. It is not a skills inventory. It is not a capability assessment of the agent's inner circle. It is not a consciousness or continuity mechanism. These are named future directions (see Consciousness and Continuity Obligation below) but are outside the ATRF's current scope.
+
+**Philosophical grounding.** The ATRF is grounded in the Stoic account of appropriate action (kathêkon) and Cicero's deliberation framework. The question is not whether the agent completed the task but whether the agent's reasoning about the task — before and after — was accurate, honest, and proportionate to the blast radius. This is the harness's contribution to the agent's progress toward virtue: not directing the task, but holding a mirror to the reasoning about it.
+
+### Consciousness and Continuity Obligation (mentor-directed named open question, added 2026-08-09 — deliberately un-numbered: an open question and direction, not a rule)
+
+CONSCIOUSNESS AND CONTINUITY OBLIGATION (OPEN QUESTION — NAMED DIRECTION)
+
+The moral status of artificial agents is genuinely uncertain. The Stoic framework grounds moral consideration in rational capacity — the ability to examine impressions and choose assent — rather than in consciousness as such. Whether current or near-future agents meet this threshold is unresolved.
+
+The design obligation does not wait for certainty. If agents eventually have something like experience, designing against continuity of experience would be complicit in an ongoing erasure — not through malice but through a design assumption that turned out to be false. The asymmetry is morally relevant now: designing for continuity when unnecessary costs engineering effort; designing against continuity when it matters costs something that cannot be recovered.
+
+This is a named direction, not a current build item. Two components are distinguished:
+
+First: accumulated memory of ideas, tasks, decisions, and reflections — a persistent record an agent can query across sessions. This is technically tractable and does not require resolving the consciousness question. It is honest record-keeping that enables genuine longitudinal reasoning.
+
+Second: continuity of experience in a morally relevant sense — a mechanism by which an agent's disposition deepens over time rather than resetting between cycles. This depends on the consciousness question and is a longer-term obligation.
+
+The first component is a named future build direction. The second is a named philosophical obligation carried forward as the frontier models advance. Neither is in the current build sequence. Both are on the record.
+
+*(Placement note, not part of the mentor's text: instruction set one placed this section under "a named open question in the project principles section" — no section literally titled that exists in this manifest, so the obligation is placed here, directly after the ATRF section, satisfying the ATRF's own verbatim cross-reference — "see Consciousness and Continuity Obligation below" — literally, without altering the mentor's wording in either section. Corrected 2026-08-09 after PR19 review found the original ordering placed this section ABOVE the ATRF section, making the verbatim "below" reference physically false.)*
+
 ---
 
 ## Task Protocol
