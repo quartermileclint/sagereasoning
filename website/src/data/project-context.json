@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "last_updated": "2026-08-09",
   "baseline": {
     "identity": "SageReasoning encodes Stoic wisdom into infrastructure that helps any rational agent — human or artificial — examine impressions, diagnose false judgements, and progress toward virtue. The website serves human practitioners. The API and skill contracts serve agent developers. The Sage Assent extends the moral community to include artificial agents.",
@@ -9,7 +9,9 @@
       "R17_privacy": "Intimate data encrypted at rest (AES-256-GCM). Genuine deletion endpoint. No bulk profiling. Local-first storage under evaluation.",
       "R18_honest_certification": "Certification badges carry explicit scope language. No claim of moral authority. Adversarial evaluation protocol required.",
       "R19_limitations": "Limitations page required before launch. Mirror principle in mentor prompts. No universality claims.",
-      "R20_vulnerable_users": "Vulnerable user detection and redirection to professional support. Independence encouragement. Relationship asymmetry guidance."
+      "R20_vulnerable_users": "Vulnerable user detection and redirection to professional support. Independence encouragement. Relationship asymmetry guidance.",
+      "R21_website_image_use_policy": "WEBSITE IMAGE USE POLICY\n\nAll images on the SageReasoning website are human-created. This is a hard commitment, not a preference. Using AI-generated images would contradict the project's purpose of fair treatment of original human creators — the policy is grounded in the project's own values, not in sentiment.\n\nScope: this policy covers the public-facing website. It does not govern technical diagrams, internal documentation, or functional illustrations where the distinction between artistic creation and functional illustration is different.\n\nThis commitment predates the policy's formal statement. It has been honoured from the website's first image.",
+      "R22_human_creator_protection": "HUMAN CREATOR PROTECTION COMMITMENT\n\nSageReasoning will not use AI-generated content in ways that substitute for human creative work on its own surfaces. Where the project has the capacity to do so, it will build protections for original human creators into the systems it designs. This is a stated direction carried forward into the permission-layer design work (dependency-graph items 14–17) when that work opens. It names the direction without pre-answering the mechanism."
     }
   },
   "dynamic_defaults": {
@@ -20,6 +22,7 @@
       "Builder-product relationship: the founder's own practice is the first test case for every tool."
     ],
     "recent_decisions": [
+      "2026-08-09: Website Image Use Policy formalised as a hard commitment — all website images human-created, grounded in project values not sentiment, scope limited to public-facing website. Human Creator Protection Commitment added to project principles — AI-generated content will not substitute for human creative work on SageReasoning's own surfaces; protection for original creators named as a direction for permission-layer design work items 14–17.",
       "2026-08-08: Autonomous-loop design brief ruled. idea-on / idea-off named as the loop mechanism with full human-switched binary operational state. fresh named as the novelty check endpoint (no switch suffix — server-side seam, no independent human-switched state). watching named as the per-cycle dashboard surface (no switch suffix — read surface, no meaningful off state). Sequencing confirmed by mentor.",
       "2026-08-08: Examined/observed delivery classification built, deployed, and live-verified on genuine post-fix production traffic. 5/5 agreement between ledgered class and agent's lived experience. Autonomous-loop condition (b) satisfied. Elapsed-time proxy at 28000ms disclosed as proxy, not confirmed delivery.",
       "2026-08-08: C2 orientation-reading and curation-via-volume disclosure live. Three R18 surfaces updated. ADR-013 §8 amendment applied. Prospective-only treatment of pre-fix rows confirmed.",

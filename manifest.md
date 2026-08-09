@@ -228,6 +228,18 @@ b. **Independence, not dependence:** The system must be designed to encourage in
 c. **Human override supremacy:** No level of agent accreditation may make it harder for a human to override, correct, or disagree with an agent's reasoning. "I evaluated this through the 4-stage sequence and it scored at the principled level" must never be treated as sufficient grounds to override human judgement. A human's right to say "no" is absolute, regardless of the agent's accreditation level.
 d. **Relationship asymmetry awareness:** User-facing content must include guidance that the passion taxonomy and reasoning evaluation are tools for self-examination, not for diagnosing others. The system should actively discourage interpersonal application of the framework (e.g., "your partner is acting from epithumia") as this constitutes a misapplication with potential for psychological harm.
 
+### R21: Website Image Use Policy (mentor-directed, added 2026-08-09)
+
+All images on the SageReasoning website are human-created. This is a hard commitment, not a preference. Using AI-generated images would contradict the project's purpose of fair treatment of original human creators — the policy is grounded in the project's own values, not in sentiment.
+
+Scope: this policy covers the public-facing website. It does not govern technical diagrams, internal documentation, or functional illustrations where the distinction between artistic creation and functional illustration is different.
+
+This commitment predates the policy's formal statement. It has been honoured from the website's first image.
+
+### R22: Human Creator Protection Commitment (mentor-directed, added 2026-08-09)
+
+SageReasoning will not use AI-generated content in ways that substitute for human creative work on its own surfaces. Where the project has the capacity to do so, it will build protections for original human creators into the systems it designs. This is a stated direction carried forward into the permission-layer design work (dependency-graph items 14–17) when that work opens. It names the direction without pre-answering the mechanism.
+
 ---
 
 ## Task Protocol
