@@ -401,6 +401,12 @@ export interface OrientationReadingEmissionInput {
    *  straight to the deriver's classifyOrientationDelivery; see
    *  OrientationReadingInput.elapsedMs for the full rationale. */
   elapsedMs: number
+  /** QG-C (ruled 2026-08-09) — the caller's declared IDEA-loop instance label,
+   *  flag-gated + validated at the route (`substrate/loop-id-field.ts`).
+   *  Optional; threaded straight to the deriver, which stamps it verbatim as
+   *  its own payload field. This hook neither validates nor interprets it — a
+   *  passthrough label, per the ruling. */
+  loopId?: string
   now?: Date
 }
 
@@ -474,6 +480,10 @@ export async function emitOrientationReadingTrustEvent(
       now,
       correlationId,
       elapsedMs: input.elapsedMs,
+      // QG-C: passthrough only — note it is NOT an input to correlationId
+      // above (computed from agentId + signature alone). The two identities
+      // stay separate fields on one event, per the ruling.
+      loopId: input.loopId,
     })
     if (event === null) return // unverifiable artifact — no event (R18f-parallel)
     await emitLedgerOnlyTrustEvents([event])

@@ -740,6 +740,16 @@ export interface OrientationReadingInput {
    *  fail loudly (a type error) rather than silently mis-measure every
    *  event as 'observed'. */
   elapsedMs: number
+  /** QG-C (ruled 2026-08-09) — the calling runner's OWN declared IDEA-loop
+   *  instance label, already flag-gated and validated at the route (a
+   *  non-empty trimmed string ≤ MAX_LOOP_ID_CHARS; see
+   *  `substrate/loop-id-field.ts`). Optional: absent whenever the flag is off
+   *  or the caller did not supply one — the overwhelming majority of consults,
+   *  which are not runner-driven at all. Stamped onto the payload VERBATIM and
+   *  never interpreted here (passthrough label, not configuration); it rides
+   *  alongside — never concatenated with — the server-computed correlation
+   *  identity. */
+  loopId?: string
   /** Injectable for tests; defaults to the real Ed25519 verifier. */
   verify?: VerifyFn
 }
@@ -812,6 +822,14 @@ export function deriveOrientationReadingEvent(
   }
   if (generativePrompt !== undefined) {
     payload.generativePrompt = generativePrompt
+  }
+  // QG-C: the runner's declared loop label, stamped VERBATIM as its own field.
+  // Deliberately a separate `payload.loopId` — NEVER folded into
+  // `correlationId`, the artifact ref, or any other identifier: the ruling
+  // requires both identities "independently visible", so a reader can always
+  // ask "which runner instance?" and "which examination?" separately.
+  if (input.loopId !== undefined) {
+    payload.loopId = input.loopId
   }
 
   return {

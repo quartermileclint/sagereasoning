@@ -248,6 +248,27 @@ export interface TrustEventPayload {
    *  treat an absent value as 'examined' by default (the pre-fix
    *  architecture's own, now-corrected, single-class posture). */
   orientationDeliveryClass?: 'examined' | 'observed'
+  /** IDEA loop `loop_id` (QG-C, ruled 2026-08-09) — the calling runner's OWN
+   *  declared instance label, supplied on the consult request and stamped here
+   *  VERBATIM. A PASSTHROUGH LABEL the server never interprets: nothing
+   *  branches on it, it feeds no computation, and it never enters the signed
+   *  assessment (it is stamped onto the event payload, after signing).
+   *
+   *  Composition, per the ruling: `loopId` (runner-declared, this field) and
+   *  the event's own session-derived correlation identity (server-computed,
+   *  `computeOrientationCorrelationId`) ride the SAME event as SEPARATE
+   *  fields — never concatenated into one token, never a composite key, both
+   *  independently visible. The two name different layers: `loopId` names one
+   *  runner instance across many consults; the correlation identity names this
+   *  one examination.
+   *
+   *  Present only when the caller supplied a validated value AND
+   *  SUBSTRATE_LOOP_ID_FIELD_ENABLED was on for that consult — absent
+   *  otherwise, and never backfilled onto earlier events (the prospective-only
+   *  posture `orientationDeliveryClass` above already sets). Never served on
+   *  S10: the public trust-record read projects `event_type`, `occurred_at`
+   *  and a single JSON-path `delivery_class` — never the whole payload. */
+  loopId?: string
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }

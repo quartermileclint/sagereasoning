@@ -171,6 +171,15 @@ import {
   isSessionDeclineSignalEnabled,
 } from '@/lib/substrate/agent-assessment-history-store'
 import { computeSessionDeclineSignal, SESSION_MARKER_VALUES, type SessionMarker } from '@/lib/substrate/session-decline-signal'
+// QG-C (generation-step scope, ruled 2026-08-09): the IDEA loop's `loop_id`
+// passthrough label. Flag-gated by SUBSTRATE_LOOP_ID_FIELD_ENABLED; UNSET →
+// the field is NEVER INSPECTED OR VALIDATED (a destructuring read of the
+// property still occurs — see loop-id-field.ts's PR19 wording note — but it
+// is never acted upon), so an unknown `loop_id` key behaves exactly as any
+// other unrecognized body key did before this build — byte-identical. Adds no
+// LLM call, no DB read, and no schema change (the orientation event's payload
+// column is JSONB).
+import { isLoopIdFieldEnabled, validateLoopId } from '@/lib/substrate/loop-id-field'
 import {
   computeTrajectoryOverlay,
   type TrajectoryOverlay,
@@ -996,6 +1005,14 @@ export async function POST(request: NextRequest) {
       // otherwise (byte-identity with the flag unset). NEVER inferred by the
       // server — an absent field means B5 stays silent for this credential.
       session_marker,
+      // QG-C (ruled 2026-08-09): the calling runner's OWN declared IDEA-loop
+      // instance label for this consult. Read ONLY when
+      // SUBSTRATE_LOOP_ID_FIELD_ENABLED is on; ignored entirely otherwise
+      // (byte-identity with the flag unset). NEVER inferred by the server, and
+      // never interpreted — a passthrough label stamped onto the orientation
+      // event payload, distinct from and never concatenated with that event's
+      // own server-computed correlation identity.
+      loop_id,
     } = body
 
     // Validate required input
@@ -1071,6 +1088,27 @@ export async function POST(request: NextRequest) {
         })
       }
       validatedSessionMarker = session_marker as SessionMarker
+    }
+
+    // QG-C: validate loop_id's shape before it reaches the orientation event
+    // payload. Flag off → never read (byte-identical). A malformed value is a
+    // plain 400 (pre-substrate — no LLM cost incurred), never silently dropped
+    // or coerced: the B5 session_marker posture exactly. The validated value is
+    // the TRIMMED string, so surrounding whitespace cannot split one runner
+    // instance into two labels.
+    const loopIdFieldEnabled = isLoopIdFieldEnabled()
+    let validatedLoopId: string | undefined
+    if (loopIdFieldEnabled && loop_id !== undefined && loop_id !== null) {
+      const loopIdResult = validateLoopId(loop_id)
+      if (!loopIdResult.ok) {
+        return await respond({
+          body: { error: loopIdResult.error },
+          status: 400,
+          headers: {},
+          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+      validatedLoopId = loopIdResult.value
     }
 
     // R20a — Vulnerable user detection (before any LLM call)
@@ -2077,6 +2115,14 @@ export async function POST(request: NextRequest) {
             // the agent before the harness's own client-side consult
             // timeout fired. See classifyOrientationDelivery.
             elapsedMs: Date.now() - requestReceivedAtMs,
+            // QG-C (ruled 2026-08-09): the runner's declared loop label —
+            // passed ONLY when the flag is on AND the caller supplied a
+            // validated value (the B5 spread-conditional pattern at the M6
+            // trajectory write, mirrored exactly). Absent otherwise, so the
+            // payload of a non-runner consult is byte-identical to pre-QG-C.
+            ...(loopIdFieldEnabled && validatedLoopId !== undefined
+              ? { loopId: validatedLoopId }
+              : {}),
           })
         }
       }
