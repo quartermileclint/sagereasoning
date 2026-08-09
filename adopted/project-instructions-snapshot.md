@@ -590,7 +590,7 @@ Any "production state" summary (the CLAUDE.md block, plan tables, close blocks) 
 
 ## Cross-references
 
-- `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7)
+- `/manifest.md` — full manifest (R0–R22, AC1–AC13, KG1–KG7; R21/R22 added 2026-08-09)
 - `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR20; PR17 added 2026-05-27; PR18 added 2026-06-10; PR19 added 2026-07-21; PR20 added 2026-08-04)
 - `/adopted/build-sessions-protocol-cache.md` — build-arc-specific cache
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2)

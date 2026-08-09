@@ -13,7 +13,7 @@ Read in this order:
 1. `/adopted/standing-protocol-cache.md` — general session protocol (~3 min)
 2. `/adopted/build-sessions-protocol-cache.md` — build-arc context (when the session is a substrate-build session)
 3. `/adopted/project-instructions-snapshot.md` — operative project instructions (PR1–PR16; verification framework 0c; risk classification 0d-ii; signals)
-4. `/manifest.md` — rules + architectural constraints (R0–R20; AC1–AC13; KG1–KG7) — read targeted sections only, not in full
+4. `/manifest.md` — rules + architectural constraints (R0–R22; AC1–AC13; KG1–KG7) — read targeted sections only, not in full
 5. The most recent close in `/operations/handoffs/founder/` for the session's stream
 6. The day's primary deliverable in full
 

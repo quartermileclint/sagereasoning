@@ -18645,3 +18645,22 @@ New **§8 (Connection to blast_radius field)**: the orientation reading's `away`
 **Rules served:** PR15 (the dependency-graph document's own established addition style reused — "Note added by mentor ruling..." precedent — not a new format invented), PR20 (the PL-HCP-1/item-16-provenance cross-reference names an existing mechanism fact rather than leaving a silent gap), PR18.
 
 **Status:** Adopted. Cross-references: `D-WEBSITE-IMAGE-POLICY-AND-HUMAN-CREATOR-PROTECTION-ADOPTED-2026-08-09` (Part One, same session); the item 14/15/16 scope documents (`2026-08-07-second-order-impact-analysis-scope.md`, `2026-08-07-permission-scrutiny-layer-scope.md`, `2026-08-07-governance-permission-field-extension-scope.md`).
+
+## 2026-08-09 — D-CACHE-DRIFT-RESOLVED-2026-08-09
+
+**Decision:** Resolved cache drift caused by this session's own `D-WEBSITE-IMAGE-POLICY-AND-HUMAN-CREATOR-PROTECTION-ADOPTED-2026-08-09` — the manifest rule range grew from R0–R20 to R0–R22 (new rules R21, R22) but the three live, actively-synced references to that range were not updated in the same commit, contrary to the standing-protocol-cache's own update discipline ("When any of the following changes: Manifest rules… update this cache in the same session as the governance change"). Caught on a self-check prompted by the founder asking whether any next-session prompt needed updating — none did, but this did.
+
+**Files touched (all "R0–R20" → "R0–R22", with the addition dated inline):**
+- `adopted/standing-protocol-cache.md` — two citations (the cache-update-discipline trigger list; the manifest cross-reference).
+- `CLAUDE.md` — the session-open reading-order line.
+- `adopted/project-instructions-snapshot.md` — the manifest cross-reference.
+
+**Explicitly NOT touched (disclosed, out of scope):** `adopted/canonical-sources.md` (superseded by the standing-protocol-cache per the cache's own §"How to use this cache", already carrying a stale manifest version tag from April), and three dated ADRs + `adopted/build-sessions-protocol-cache.md` (all already stale on other dimensions — AC1–AC8 vs. the current AC1–AC13, PR1–PR9 vs. PR1–PR20 — pre-existing drift from before today, not newly caused by this session's edit; fixing only the R-range there would be a partial, inconsistent fix of a larger, older gap that is its own separate item).
+
+**Risk classification:** Standard under 0d-ii (`governance` — pure documentation, no code/schema/flag/credential change). AC7 not engaged.
+
+**Rollback path:** `git revert` for the records commit.
+
+**Rules served:** the standing-protocol-cache's own cache update discipline (quoted above); PR18.
+
+**Status:** Adopted. Cross-references: `D-WEBSITE-IMAGE-POLICY-AND-HUMAN-CREATOR-PROTECTION-ADOPTED-2026-08-09` (the change that caused the drift).
