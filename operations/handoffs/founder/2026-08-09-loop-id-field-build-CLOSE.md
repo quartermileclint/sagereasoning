@@ -32,8 +32,22 @@ Every hook consult either timed out at 28s (the known transient class — sessio
 
 ## Next
 
-**This closes the founder-approved three-item build-gate sequence** (fresh → watching → generation-side, all three done). Per the ruled Q11 sequence's amendment (generation-step scope §2.9): **the runner scoping session** is next — credential + dedicated K1 identity mint, `watching_write` provisioning (per the `watching` build's carry-forward), the `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit trigger, and the `frictionAssessment` PM-tool mapping decision. Its own prompt, not yet authored. Only after that: the bounded validation run, then any standing-runner design.
+**This closes the founder-approved three-item build-gate sequence** (fresh → watching → generation-side, all three done).
 
-Three flag activations remain carried, none pre-approved: `SUBSTRATE_FRESH_ENABLED`, `SUBSTRATE_WATCHING_ENABLED`, `SUBSTRATE_LOOP_ID_FIELD_ENABLED`.
+Mid-session, after the build was committed but before push, the founder relayed a **mentor prioritised instruction set** confirming the sequence from here (verbatim: `operations/agent-circles-2026-08/2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md`; adopted under `D-MENTOR-PRIORITISED-SEQUENCE-ADOPTED-2026-08-09`). The binding five-step order:
+
+1. **Complete this session** — done.
+2. **Runner scoping session** — four carry-forwards, explicitly *all of equal standing, none a rider on another*: the dedicated identity mint (`sagereasoning:idea-loop@v1`, 6e §A owner+agent binding); `watching_write` provisioning; the `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit; the `frictionAssessment` PM-tool mapping. **Plus GS-ATRF-1/2/3 carried in explicitly** as named inputs to that session's scope document (questions the runner design must answer before the validation run — not build items). Two binding sequencing instructions: `watching_write` provisioning is *"a Critical Change Protocol item — do not treat it as a quick configuration step"*, and *"open with the identity mint… then move to the capability provisioning with full attention. **Do not batch the two.**"*
+3. **Bounded validation run** — founder-attended, 20–40 cycles, brief §6 report to the mentor.
+4. **Standing-runner design** — opens only after that report lands.
+5. **ATRF scoping session** (NEW, named now so it is not lost) — pre-task question set design, completion-signal return path, oikeiosis extension metric for the runner. **Post-validation-run.**
+
+### Two gaps flagged for the mentor (PR20 — the instruction's premises, checked and found not to hold)
+
+**(a) The three items are NOT live — all are built dark.** `SUBSTRATE_FRESH_ENABLED`, `SUBSTRATE_WATCHING_ENABLED`, `SUBSTRATE_LOOP_ID_FIELD_ENABLED` are each unset; the two routes answer 503. Each activation is its own founder-walked `code-critical` step, none taken or pre-approved. **The bounded validation run cannot execute while `fresh`/`watching` return 503, and no session in the confirmed sequence owns those activations** — the same shape of gap that §2.9 surfaced for the runner scoping session itself, so its placement is the mentor's to confirm.
+
+**(b) The six Stoic items are not on the repo record.** The instruction routes two of them ("hegemonikon stability", "kathêkon/katorthoma at agent level") to the Consciousness and Continuity Obligation with *"they are on the record. Leave them there"* — but that section names only accumulated memory and continuity of experience, and a repo-wide grep finds no 2026-08-09 record of any of the six. "The previous review" appears never to have been transcribed. Recommended: the founder relays its text so the items have a "there" to be left in.
+
+Neither gap blocks the runner scoping session's four carry-forwards, which are fully specified and can proceed independently.
 
 *End of close.*
