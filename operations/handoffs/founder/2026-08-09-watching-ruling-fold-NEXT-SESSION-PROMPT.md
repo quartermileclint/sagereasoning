@@ -1,5 +1,7 @@
 # Next-Session Prompt — Fold the mentor's ruling on `watching` into the scope document (third item of the ruled post-brief sequence)
 
+> **SPENT — 2026-08-09, same day it was authored.** The mentor's ruling arrived in the same conversation that authored this prompt, so the fold executed there rather than in a fresh session (the `fresh` same-session precedent): ruling recorded verbatim (`operations/agent-circles-2026-08/2026-08-09-mentor-consultation-watching-scope-rulings-verbatim.md`), RULED annotations folded into the scope document, mirror updated, generation-step scope unblocked. Close: `operations/handoffs/founder/2026-08-09-watching-ruling-fold-CLOSE.md`. Decision: `D-WATCHING-SCOPE-RULED-2026-08-09`. **Do not paste this file into a new session. For the actual next session, use `operations/handoffs/founder/2026-08-09-generation-step-scoping-NEXT-SESSION-PROMPT.md`.** The text below is retained as the historical record.
+
 **Stream:** founder.
 **Tier:** `governance` / design (fold-in-a-ruling, same shape as the `fresh` ruling-fold) — Standard risk under 0d-ii. **No code, schema, flag, credential, or public-surface change. No build.**
 **Governing frame:** `/adopted/standing-protocol-cache.md`.
