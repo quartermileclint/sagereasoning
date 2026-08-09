@@ -2,11 +2,12 @@
  * idea-loop-types.ts — the IDEA loop's approved gap/candidate shapes + the C2(iii)
  * structural-novelty check (agent-circles C2, 2026-08-08).
  *
- * DARK / UNCONSUMED: no route, engine, or harness path imports this module —
- * it exists so C2(iii)'s novelty specification has its typed home ahead of the
- * generation step's own build (the C2 build prompt's "it can sit dark/
- * unconsumed" posture; the generation step remains separately queued and is
- * NOT built here).
+ * CONSUMED ONLY BY THE DARK `fresh` ROUTE (updated 2026-08-09 — the earlier
+ * "DARK / UNCONSUMED" claim is superseded): `/api/practice/fresh` (dark behind
+ * SUBSTRATE_FRESH_ENABLED, UNSET everywhere) wraps assessStructuralNovelty per
+ * the RULED endpoint scope. No live engine, harness, or measured path imports
+ * this module (pinned in the battery); the generation step remains separately
+ * queued and is NOT built here.
  *
  * BINDING SOURCES (verbatim wins):
  *   - `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md`
@@ -131,7 +132,11 @@ export interface GeneratedCandidate {
    *  actions won't be distinguished). */
   noveltyConfidence?: number
   /** The cycle's disposition of this candidate — a first-class, named outcome
-   *  (mentor clarification two + the config/shared-task-list amendment). */
+   *  (mentor clarification two + the config/shared-task-list amendment).
+   *  'terminated_by_timeout' ADDED 2026-08-09 (the Q6 seventh value, ruled in
+   *  the autonomous-loop brief §8 Q6 and carried as the named follow-up for the
+   *  first code session touching this module — elected at the `fresh` build's
+   *  open, per the build prompt's explicit-decision pre-condition). */
   cycleOutcome:
     | 'pending'
     | 'rejected_by_guardrail'
@@ -139,6 +144,7 @@ export interface GeneratedCandidate {
     | 'winner'
     | 'null_cycle'
     | 'dependency_unavailable'
+    | 'terminated_by_timeout'
   /** Present only when cycleOutcome === 'dependency_unavailable' — names which
    *  dependency was unreachable. */
   unavailableDependency?: string
@@ -198,11 +204,25 @@ export type NoveltyHistoryRow = Pick<
  * classification) cannot be structurally assessed at all — the check returns
  * { novel: true, confidence: 0 }: nothing in the window can match it, and the
  * zero confidence says the check has no basis, rather than manufacturing one.
+ *
+ * DATED AMENDMENT 2026-08-09 (the `fresh` endpoint scope's Q-C ruling — inside
+ * the confidence-curve latitude the C2-widening ruling left open; the query
+ * shape and EVIDENCE_FLOOR are untouched): a STARVED WINDOW no longer reads as
+ * a confident result. When the window itself carries fewer than EVIDENCE_FLOOR
+ * rows IN TOTAL, the check returns { novel: true, confidence: 0, basis:
+ * 'insufficient_history' } — mirroring the friction-candidate treatment (a
+ * true verdict, zero claimed confidence, the no-basis condition named). Per
+ * the ruling's own wiring detail, THIS CHECK READS TOTAL WINDOW SIZE
+ * (historyWindow.length), NOT the matching-row count computed below — a
+ * populated window with no matching rows is the genuinely-novel case (novel at
+ * curve confidence), not the starved-window case. `basis` is present ONLY on
+ * the starved-window outcome; the friction-candidate outcome is surfaced
+ * unchanged (ruled: "the existing behaviour ... surfaced unchanged").
  */
 export function assessStructuralNovelty(
   candidate: Pick<GeneratedCandidate, 'targetCircle' | 'initialClassification'>,
   historyWindow: readonly NoveltyHistoryRow[],
-): { novel: boolean; confidence: number } {
+): { novel: boolean; confidence: number; basis?: 'insufficient_history' } {
   const wantCircle = candidate.targetCircle
   const wantDomains =
     candidate.initialClassification.kind === 'virtue_domain'
@@ -211,6 +231,13 @@ export function assessStructuralNovelty(
 
   if (wantCircle === undefined && wantDomains === null) {
     return { novel: true, confidence: 0 }
+  }
+
+  // Q-C (ruled 2026-08-09): the starved-window honest outcome — TOTAL window
+  // size below the floor ⇒ the check has no evidential basis; never a
+  // confident verdict derived from absence of evidence.
+  if (historyWindow.length < EVIDENCE_FLOOR) {
+    return { novel: true, confidence: 0, basis: 'insufficient_history' }
   }
 
   let count = 0

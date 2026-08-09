@@ -10,6 +10,7 @@ import { join } from 'path'
 import {
   createOikeiosisGap,
   assessStructuralNovelty,
+  type GeneratedCandidate,
   type NoveltyHistoryRow,
 } from '../idea-loop-types'
 import { EVIDENCE_FLOOR } from '../trajectory-delta'
@@ -85,12 +86,40 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
   assert(c3.novel === true, '§2.5 below the floor ⇒ novel')
   assert(c3.confidence > 0 && c3.confidence < 1, '§2.6 near-floor confidence is partial')
 
-  // Empty window ⇒ confidently novel.
+  // Empty window — AMENDED 2026-08-09 per the fresh scope's Q-C ruling: a
+  // starved window must NEVER read as a confident result (the pre-ruling
+  // behaviour here was novel at confidence 1.0 — explicitly rejected by the
+  // mentor as "a false impression of evidential strength").
   const c4 = assessStructuralNovelty(
     { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['sophrosyne'] } },
     [],
   )
-  assert(c4.novel === true && c4.confidence === 1, '§2.7 empty window ⇒ novel at full confidence')
+  assert(
+    c4.novel === true && c4.confidence === 0 && c4.basis === 'insufficient_history',
+    '§2.7 empty window ⇒ novel with ZERO confidence + insufficient_history basis (Q-C ruled)',
+  )
+
+  // The ruled wiring detail: the basis check reads TOTAL window size, not the
+  // matching-row count. A POPULATED window (≥ floor rows) with ZERO matching
+  // rows is the genuinely-novel case — full curve confidence, NO basis field.
+  const c4b = assessStructuralNovelty(
+    { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['sophrosyne'] } },
+    window, // 6 rows, none matching circle-2/sophrosyne
+  )
+  assert(
+    c4b.novel === true && c4b.confidence === 1 && c4b.basis === undefined,
+    '§2.7b populated-but-non-matching window ⇒ genuinely novel at curve confidence, NOT insufficient_history',
+  )
+
+  // A below-floor-but-non-empty window is starved too (total size, not zero).
+  const c4c = assessStructuralNovelty(
+    { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['sophrosyne'] } },
+    [row('household', ['sophrosyne']), row('household', ['sophrosyne'])], // 2 < floor
+  )
+  assert(
+    c4c.novel === true && c4c.confidence === 0 && c4c.basis === 'insufficient_history',
+    '§2.7c two-row window (below floor) ⇒ insufficient_history even with matching rows',
+  )
 
   // Saturated: 6+ matches ⇒ confidently NOT novel.
   const saturated = Array.from({ length: 6 }, () => row('household', ['sophrosyne']))
@@ -101,31 +130,44 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
   assert(c5.novel === false && c5.confidence === 1, '§2.8 saturated ⇒ not novel, full confidence')
 
   // Friction candidate (no circle, preferred_indifferent): unassessable —
-  // novel:true at confidence 0, never a manufactured basis.
+  // novel:true at confidence 0, never a manufactured basis. Surfaced UNCHANGED
+  // by the Q-C amendment (ruled): no basis field, even on a starved window
+  // (the axes-free branch precedes the starvation check).
   const c6 = assessStructuralNovelty(
     { initialClassification: { kind: 'preferred_indifferent' } },
     window,
   )
-  assert(c6.novel === true && c6.confidence === 0, '§2.9 friction candidate ⇒ honest zero-confidence (no structural axis to assess)')
+  assert(c6.novel === true && c6.confidence === 0 && c6.basis === undefined, '§2.9 friction candidate ⇒ honest zero-confidence (no structural axis to assess), no basis field')
+  const c6b = assessStructuralNovelty(
+    { initialClassification: { kind: 'preferred_indifferent' } },
+    [], // starved window too — friction branch still wins (surfaced unchanged)
+  )
+  assert(c6b.novel === true && c6b.confidence === 0 && c6b.basis === undefined, '§2.9b friction candidate on a starved window ⇒ still the unchanged friction outcome')
 
-  // Monotone confidence away from the floor (both directions).
+  // Monotone confidence away from the floor (both directions) — AMENDED
+  // 2026-08-09: matching-count monotonicity is now asserted over POPULATED
+  // windows (each padded to ≥ floor total rows with non-matching rows), since
+  // a window whose TOTAL size is below the floor is the starved case (Q-C).
+  const pad = Array.from({ length: 3 }, () => row('cosmopolis', ['phronesis']))
   const counts = [0, 1, 2, 3, 4, 5, 6]
   const conf = counts.map((n) =>
     assessStructuralNovelty(
       { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['andreia'] } },
-      Array.from({ length: n }, () => row('household', ['andreia'])),
+      [...pad, ...Array.from({ length: n }, () => row('household', ['andreia']))],
     ).confidence,
   )
-  assert(conf[0] === 1 && conf[1] > conf[2] && conf[2] > conf[3] && conf[3] === 0 && conf[4] < conf[5] && conf[5] < conf[6], '§2.10 confidence is monotone distance-from-the-floor')
+  assert(conf[0] === 1 && conf[1] > conf[2] && conf[2] > conf[3] && conf[3] === 0 && conf[4] < conf[5] && conf[5] < conf[6], '§2.10 confidence is monotone distance-from-the-floor (populated windows)')
 }
 
 // ============================================================================
-// §3 Darkness pins — no live path imports this module
+// §3 Darkness pins — no LIVE/MEASURED path imports this module. AMENDED
+// 2026-08-09: the module is now consumed by exactly ONE route — the DARK
+// /api/practice/fresh handler (SUBSTRATE_FRESH_ENABLED unset ⇒ 503, zero
+// work) — so the pin now asserts (a) the measured/live paths stay clean AND
+// (b) the fresh handler genuinely is the consumer (wiring non-vacuity).
 // ============================================================================
 {
   const importers: string[] = []
-  const roots = ['../../../app/api', '../..']
-  void roots // enumerated below via targeted greps instead of a tree walk
   const files = [
     '../../../app/api/reason/route.ts',
     '../../guardrail-sandwich.ts',
@@ -137,7 +179,31 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
     const src = readFileSync(join(__dirname, f), 'utf8')
     if (src.includes('idea-loop-types')) importers.push(f)
   }
-  assert(importers.length === 0, `§3.1 INV: no live path imports idea-loop-types (dark/unconsumed) — found: ${importers.join(', ')}`)
+  assert(importers.length === 0, `§3.1 INV: no live/measured path imports idea-loop-types — found: ${importers.join(', ')}`)
+
+  const freshHandler = readFileSync(
+    join(__dirname, '../../../app/api/practice/fresh/handler.ts'),
+    'utf8',
+  )
+  assert(
+    freshHandler.includes("from '@/lib/substrate/idea-loop-types'") &&
+      freshHandler.includes('assessStructuralNovelty'),
+    '§3.2 INV: the dark fresh handler is the module\'s consumer (wiring pin, non-vacuous)',
+  )
+  assert(
+    freshHandler.includes("process.env.SUBSTRATE_FRESH_ENABLED === 'true'"),
+    '§3.3 INV: the fresh consumer is flag-gated (dark by default)',
+  )
+}
+
+// ============================================================================
+// §4 Q6 seventh cycleOutcome value ('terminated_by_timeout') — landed at the
+// fresh build (2026-08-09), per the ruled follow-up. Compile-time: the union
+// accepts it; runtime: assignment round-trips.
+// ============================================================================
+{
+  const outcome: GeneratedCandidate['cycleOutcome'] = 'terminated_by_timeout'
+  assert(outcome === 'terminated_by_timeout', '§4.1 cycleOutcome accepts the Q6 seventh value')
 }
 
 console.log(`\nidea-loop-types battery: ${passed} passed, ${failed} failed`)
