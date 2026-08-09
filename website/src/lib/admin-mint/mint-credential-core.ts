@@ -80,8 +80,9 @@ COMMANDS
                 [--monthly <n>] [--daily <n>] [--chain <n>]
                 [--examination-enforcement pre_decision_harness]
                 Mint an sr_prac_ Unified Practice Credential (CI-14). --capabilities is a
-                comma-separated subset of: consult,l1_supply,accreditation_write,calling,reflect
-                (write-class members are opt-in; agent-id binds write/calling/reflect)
+                comma-separated subset of: consult,l1_supply,accreditation_write,calling,reflect,
+                watching_write
+                (write-class members are opt-in; agent-id binds write/calling/reflect/watching_write)
                 (omitted limits use the adopted 30/1/1 server defaults — CI-6, same as mint api)
                 --examination-enforcement (Gate-1 Arc 1, operator-only) marks the credential
                 pre-decision-harness so its accreditation writes earn examination_mode:
@@ -207,7 +208,7 @@ function buildApiMintPlan(flags: Record<string, string>): PlanResult {
  * triggers UPC mode there (sr_prac_ prefix, purpose='unified_practice',
  * owner_kind, credential_provenance). --capabilities is a comma-separated subset
  * of the closed vocabulary; write-class members (accreditation_write/calling/
- * reflect) are opt-in. Limits are omitted so the route's CI-6 30/1/1 defaults
+ * reflect/watching_write) are opt-in. Limits are omitted so the route's CI-6 30/1/1 defaults
  * remain the single source of truth.
  */
 function buildPracticeMintPlan(flags: Record<string, string>): PlanResult {

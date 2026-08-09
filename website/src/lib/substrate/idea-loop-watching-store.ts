@@ -61,6 +61,31 @@ function getAdminClient(): SupabaseClient {
 const CYCLES_TABLE = 'idea_loop_cycles'
 const CANDIDATES_TABLE = 'idea_loop_candidates'
 
+/**
+ * The cycle→candidates embed, DISAMBIGUATED — do not simplify to
+ * `${CANDIDATES_TABLE} (*)`.
+ *
+ * FOUND LIVE 2026-08-09 (runner scoping session, at the SUBSTRATE_WATCHING_ENABLED
+ * activation smoke): there are TWO foreign keys between these tables —
+ *   idea_loop_candidates_cycle_id_fkey  candidates.cycle_id        -> cycles.id  (CASCADE)
+ *   fk_ilc_winner_candidate             cycles.winner_candidate_id -> candidates.id (SET NULL)
+ * so an UNQUALIFIED embed is ambiguous and PostgREST refuses it (PGRST201,
+ * "more than one relationship was found"). The unqualified form returned a
+ * hard error on every read: GET /api/founder/watching answered 503
+ * {"error":"service error"} and /api/user/export wrote {error} in place of the
+ * subject's cycle data. Writes were unaffected (no embed), which is why the
+ * defect stayed latent from the `watching` build until the first live read.
+ *
+ * The `!<constraint>` hint pins the parent->children direction both readers
+ * intend. Both FKs are legitimate; only one is the one these reads want.
+ *
+ * NOT BATTERY-DETECTABLE: the in-memory fake models result SHAPE, not
+ * PostgREST's relationship resolution, so it agrees with whatever the code
+ * asks for. Both suites were green while production reads were failing. Any
+ * change to this constant must be verified by a LIVE call, never by a suite.
+ */
+const CANDIDATES_EMBED = `${CANDIDATES_TABLE}!idea_loop_candidates_cycle_id_fkey (*)`
+
 /** Postgres unique_violation — a duplicate (loop_id, cycle_number). */
 const PG_UNIQUE_VIOLATION = '23505'
 
@@ -221,7 +246,7 @@ export async function getCyclesWithCandidates(
   try {
     let query = client
       .from(CYCLES_TABLE)
-      .select(`*, ${CANDIDATES_TABLE} (*)`)
+      .select(`*, ${CANDIDATES_EMBED}`)
       .order('created_at', { ascending: false })
       .limit(limit)
     if (opts.loopId) query = query.eq('loop_id', opts.loopId)
@@ -290,7 +315,7 @@ export async function getWatchingDataForOwner(
   try {
     const { data, error } = await client
       .from(CYCLES_TABLE)
-      .select(`*, ${CANDIDATES_TABLE} (*)`)
+      .select(`*, ${CANDIDATES_EMBED}`)
       .eq('owner_user_id', ownerUserId)
     if (error) {
       if (isMissingTableError(error as { code?: string; message?: string })) {
