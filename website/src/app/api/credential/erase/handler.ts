@@ -255,6 +255,8 @@ export async function runConsumerErasure(
       `sage_reflect_sessions (agent-scoped via the credential; ${result.value.reflect_deleted} rows)`,
       // Stoa ST2 (2026-08-03): the agent's standing declarations.
       `stoa_entries (credential-scoped: ${credentialRef}; ${result.value.stoa_deleted} rows)`,
+      // watching (agent-circles, ruled §2.7): the IDEA-loop per-cycle records.
+      `idea_loop_cycles (credential-scoped: ${credentialRef}; ${result.value.watching_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
@@ -269,6 +271,7 @@ export async function runConsumerErasure(
       collaboration_rows_deleted: result.value.collaboration_deleted,
       reflect_rows_deleted: result.value.reflect_deleted,
       stoa_rows_deleted: result.value.stoa_deleted,
+      watching_rows_deleted: result.value.watching_deleted,
       billing_rows_depersonalised: result.value.billing_depersonalised,
       credential: 'anonymised_and_revoked',
       retained_by_law: RETAINED_BY_LAW,

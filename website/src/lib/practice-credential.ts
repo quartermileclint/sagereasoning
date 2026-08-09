@@ -37,13 +37,18 @@ import { createHash } from 'node:crypto'
 // CAPABILITY VOCABULARY (closed set — mirrors the api_keys_capabilities_subset_check)
 // =============================================================================
 
-/** The closed capability vocabulary. A credential's capabilities[] is a subset. */
+/** The closed capability vocabulary. A credential's capabilities[] is a subset.
+ *  'watching_write' ADDED 2026-08-09 (agent-circles `watching` build, QW-B RULED —
+ *  a dedicated write-class capability for the IDEA loop's per-cycle record write;
+ *  the paired DB vocabulary widening is
+ *  supabase-api-keys-watching-write-capability-migration.sql §V). */
 export const PRACTICE_CAPABILITIES = [
   'consult',
   'l1_supply',
   'accreditation_write',
   'calling',
   'reflect',
+  'watching_write',
 ] as const
 
 export type PracticeCapability = (typeof PRACTICE_CAPABILITIES)[number]
@@ -51,15 +56,25 @@ export type PracticeCapability = (typeof PRACTICE_CAPABILITIES)[number]
 /**
  * The WRITE-CLASS capabilities — those that bind agent_id at the write boundary and
  * therefore REQUIRE owner+agent. This list MUST match the 6e-broadened DB CHECK
- * `api_keys_sage_assent_write_requires_owner_and_agent`
- * (capabilities && ARRAY['accreditation_write','calling','reflect']). Changing one
- * without the other re-opens the opaque-500-vs-clear-400 gap the mint pre-validation
- * closes.
+ * `api_keys_sage_assent_write_requires_owner_and_agent` — as widened 2026-08-09 by
+ * supabase-api-keys-watching-write-capability-migration.sql §W to
+ * (capabilities && ARRAY['accreditation_write','calling','reflect','watching_write']).
+ * Changing one without the other re-opens the opaque-500-vs-clear-400 gap the mint
+ * pre-validation closes.
+ *
+ * 'watching_write' ADDED 2026-08-09 (QW-B RULED): the IDEA loop's per-cycle record
+ * write (`POST /api/practice/watching`) is a durable-record write and carries the
+ * full write-class discipline — Bearer-only transport at its call-site (constraint 7)
+ * and the 6e §A owner+agent invariant at mint. NOTE (PR20, verified against the 6e
+ * migration): adding a value HERE does not extend the DB CHECKs by itself — the DB
+ * arrays are hard-coded, so the companion migration's §V (vocabulary) + §W (owner+
+ * agent overlap) must be applied founder-walked alongside any widening of this set.
  */
 export const WRITE_CLASS_CAPABILITIES: PracticeCapability[] = [
   'accreditation_write',
   'calling',
   'reflect',
+  'watching_write',
 ]
 
 /** Does this capability set include any write-class member ⇒ the row must carry

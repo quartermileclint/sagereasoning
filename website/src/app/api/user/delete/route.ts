@@ -25,6 +25,7 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 // events + state. Missing-table-benign (the migration is its own founder-walked step).
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+import { deleteWatchingDataForOwner } from '@/lib/substrate/idea-loop-watching-store'
 import { deleteAgentSessions } from '@/lib/sage-reflect/session-store'
 // Stoa ST2 (2026-08-03) — genuine deletion (R17c) of the practitioner's Stoa
 // entries, keyed by owner_user_id (= profiles.id). Wired at birth (the
@@ -158,6 +159,17 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // watching (agent-circles, R17c, ruled §2.7) — genuine deletion of the
+  // operator's IDEA-loop cycle records (candidates cascade via FK), keyed by
+  // owner_user_id. Always-on, missing-table-benign until the watching migration
+  // lands (the standing dark-built-table-read discipline).
+  {
+    const watchingDelete = await deleteWatchingDataForOwner(userId)
+    if (!watchingDelete.ok) {
+      deletionErrors.push(`idea_loop_cycles: ${watchingDelete.error}`)
+    }
+  }
+
   // Stoa ST2 (R17c) — the practitioner's Stoa entries (standing declarations;
   // no retention sweep exists for them, so erasure is one of their only two
   // exits — #24). TWO arms (PR19 fold F1, 2026-08-03 — the HIGH): the human
@@ -235,7 +247,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'sage_reflect_sessions', 'stoa_entries'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'idea_loop_cycles', 'sage_reflect_sessions', 'stoa_entries'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

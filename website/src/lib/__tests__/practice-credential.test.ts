@@ -289,16 +289,22 @@ test('flag: "false" → false (strict === "true")', () => {
   delete process.env.SUBSTRATE_UPC_CAPABILITY_AUTH_ENABLED
 })
 
-// ── capabilitiesIncludeWriteClass — must match the 6e §A DB CHECK set ───────────
-// (used by the api-keys UPC mint pre-validation; CI-14 Step 7).
-test('write-class: the set is exactly {accreditation_write, calling, reflect}', () => {
+// ── capabilitiesIncludeWriteClass — must match the 6e §A DB CHECK set, as
+// widened 2026-08-09 by supabase-api-keys-watching-write-capability-migration.sql
+// §W (agent-circles `watching`, QW-B RULED) ─────────────────────────────────
+// (used by the api-keys UPC mint pre-validation; CI-14 Step 7 + the watching build).
+test('write-class: the set is exactly {accreditation_write, calling, reflect, watching_write}', () => {
   assert(
-    WRITE_CLASS_CAPABILITIES.length === 3 &&
+    WRITE_CLASS_CAPABILITIES.length === 4 &&
       WRITE_CLASS_CAPABILITIES.includes('accreditation_write') &&
       WRITE_CLASS_CAPABILITIES.includes('calling') &&
-      WRITE_CLASS_CAPABILITIES.includes('reflect'),
-    'write-class set matches the 6e CHECK overlap array',
+      WRITE_CLASS_CAPABILITIES.includes('reflect') &&
+      WRITE_CLASS_CAPABILITIES.includes('watching_write'),
+    'write-class set matches the 6e/6e-watching-widened CHECK overlap array',
   )
+})
+test('write-class: watching_write alone → true (2026-08-09)', () => {
+  assert(capabilitiesIncludeWriteClass(['watching_write']), 'watching_write')
 })
 test('write-class: each member alone → true', () => {
   assert(capabilitiesIncludeWriteClass(['accreditation_write']), 'accreditation_write')

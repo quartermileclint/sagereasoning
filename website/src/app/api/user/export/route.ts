@@ -25,6 +25,7 @@ import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-h
 // + state. Missing-table-benign (the migration is its own founder-walked step).
 import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+import { getWatchingDataForOwner } from '@/lib/substrate/idea-loop-watching-store'
 // Trust Layer S10 rider (R17i, 2026-07-12) — portability of the operator's agents'
 // reflect sessions (agent_id-keyed; owner→agent_ids resolution mirrors /api/user/delete).
 import { getAgentSessionsForExport } from '@/lib/sage-reflect/session-store'
@@ -179,6 +180,18 @@ export async function GET(request: NextRequest) {
       exportData.collaboration_records = { error: collabExport.error }
     } else {
       exportData.collaboration_records = collabExport.value
+    }
+  }
+
+  // 2d-iii. watching (agent-circles, R17i, ruled §2.7) — the operator's IDEA-loop
+  //         cycle records with their candidate rows, keyed by owner_user_id.
+  //         Missing-table-benign until the watching migration lands.
+  {
+    const watchingExport = await getWatchingDataForOwner(userId)
+    if (!watchingExport.ok) {
+      exportData.idea_loop_cycles = { error: watchingExport.error }
+    } else {
+      exportData.idea_loop_cycles = watchingExport.value
     }
   }
 

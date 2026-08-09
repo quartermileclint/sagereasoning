@@ -45,6 +45,7 @@ import {
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
+import { deleteWatchingDataForCredential } from './substrate/idea-loop-watching-store'
 // Stoa ST2 (R17c, 2026-08-03) — genuine deletion of the agent's Stoa entries by
 // owning credential. Missing-table-benign until the migration lands.
 import { deleteStoaDataForCredential } from './stoa/stoa-store'
@@ -203,6 +204,9 @@ export interface ErasureResult {
   /** Stoa ST2 (R17c): stoa_entries rows hard-deleted for this credential
    *  (credential_ref-keyed standing declarations — no sweep covers them). */
   stoa_deleted: number
+  /** watching (agent-circles, R17c, ruled §2.7): idea_loop_cycles rows hard-deleted
+   *  for this credential (candidate rows cascade via FK). */
+  watching_deleted: number
   billing_depersonalised: number
   /** Non-fatal issues (e.g. the best-effort billing de-personalisation) — the
    *  personal data is gone regardless; these are surfaced for the audit record. */
@@ -245,6 +249,14 @@ export async function eraseExternalConsumerCredential(
   //     Missing-table-benign until the migration lands.
   const collab = await deleteCollaborationDataForCredential(credentialRef, client)
   if (!collab.ok) return { ok: false, error: `collaboration: ${collab.error}` }
+
+  // 1c-iii. watching (agent-circles, R17c critical — ruled §2.7: erase coverage
+  //         rides this build regardless of the runner credential's eventual
+  //         ownership shape): genuine deletion of this credential's IDEA-loop
+  //         cycle records (candidates cascade). Missing-table-benign until the
+  //         watching migration lands.
+  const watching = await deleteWatchingDataForCredential(credentialRef, client)
+  if (!watching.ok) return { ok: false, error: `watching: ${watching.error}` }
 
   // 1c-ii. Stoa ST2 (R17c critical — a fail is ok:false so erasure stays
   //        verifiable): genuine deletion of this credential's Stoa entries
@@ -340,6 +352,7 @@ export async function eraseExternalConsumerCredential(
       collaboration_deleted: collab.value,
       reflect_deleted,
       stoa_deleted: stoa.value,
+      watching_deleted: watching.value,
       billing_depersonalised,
       warnings,
     },
