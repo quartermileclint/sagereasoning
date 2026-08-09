@@ -1,5 +1,7 @@
 # Next-Session Prompt — `watching` (the per-cycle record table): SCOPING (second item of the ruled post-brief sequence)
 
+> **SPENT — 2026-08-09.** This prompt governed the `watching` scoping session and has already executed in full: the scope document was drafted, adversarially reviewed (PR19 — 8 confirmed findings folded), and offered for mentor relay. Close: `operations/handoffs/founder/2026-08-09-watching-per-cycle-record-table-scoping-CLOSE.md`. Decision: `D-WATCHING-PER-CYCLE-RECORD-TABLE-SCOPED-2026-08-09`. **Do not paste this file into a new session** — doing so would re-scope work already done. **For the actual next session, use `operations/handoffs/founder/2026-08-09-watching-ruling-fold-NEXT-SESSION-PROMPT.md`.** The text below is retained as the historical record of what this prompt asked for, per the project's standing spent-prompt convention (cf. `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, "the S11 activation prompt marked SPENT-on-deferral").
+
 **Stream:** founder.
 **Tier:** `governance` / design (explore-scope) — a scope document offered for mentor review. **No code, schema, flag, credential, or public-surface change. No build.**
 **Governing frame:** `/adopted/standing-protocol-cache.md`.

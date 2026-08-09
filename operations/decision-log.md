@@ -18664,3 +18664,22 @@ New **§8 (Connection to blast_radius field)**: the orientation reading's `away`
 **Rules served:** the standing-protocol-cache's own cache update discipline (quoted above); PR18.
 
 **Status:** Adopted. Cross-references: `D-WEBSITE-IMAGE-POLICY-AND-HUMAN-CREATOR-PROTECTION-ADOPTED-2026-08-09` (the change that caused the drift).
+
+## 2026-08-09 — D-WATCHING-RULING-FOLD-PROMPT-AUTHORED-2026-08-09
+
+**Decision:** Marked `operations/handoffs/founder/2026-08-09-watching-per-cycle-record-table-scoping-NEXT-SESSION-PROMPT.md` **SPENT** (it already governed and completed the `watching` scoping session — pasting it into a new session would re-scope work already done) and authored its successor, `operations/handoffs/founder/2026-08-09-watching-ruling-fold-NEXT-SESSION-PROMPT.md` — the actual prompt to paste into the next session, once the founder has the mentor's ruling on the `watching` scope in hand.
+
+**Reasoning:** the founder asked whether the `watching`-scoping prompt still needed updating; it didn't need updating, but it did need retiring — it is a completed, one-shot session prompt, not a standing document. The new prompt mirrors the `fresh` session's own same-day ruling-fold pattern (verbatim record first, inline RULED annotations, mirror update, then conditionally unblocking the generation-step scope document) and carries a hard pre-condition at its own top: if the mentor's ruling is not yet in hand, the session does nothing and ends immediately rather than guessing or pre-empting.
+
+**Files touched:**
+- `operations/handoffs/founder/2026-08-09-watching-per-cycle-record-table-scoping-NEXT-SESSION-PROMPT.md` — SPENT annotation added at the top; original content preserved below as the historical record (the project's standing spent-prompt convention, per the S11 "SPENT-on-deferral" precedent).
+- `operations/handoffs/founder/2026-08-09-watching-ruling-fold-NEXT-SESSION-PROMPT.md` — new; the prompt to use next.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii (`governance` — pure documentation). AC7 not engaged.
+
+**Rollback path:** `git revert` for the records commit.
+
+**Rules served:** PR17 (the founder's actual question — which file to use — answered directly rather than deferred), PR18.
+
+**Status:** Adopted. Cross-references: `D-WATCHING-PER-CYCLE-RECORD-TABLE-SCOPED-2026-08-09`; `D-CACHE-DRIFT-RESOLVED-2026-08-09`.
