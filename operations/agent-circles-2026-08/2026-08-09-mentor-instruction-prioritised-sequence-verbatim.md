@@ -79,6 +79,8 @@ Two statements in the instruction rest on premises that were checked first-hand 
 
 ### (1) "All three items — `fresh`, `watching`, `loop_id` — will be live."
 
+> **RESOLVED same session, 2026-08-09 — the mentor ruled on the gap.** The finding below was confirmed in full (*"The finding is confirmed. Three flags unset. Three routes dark. … The gap is real."*) and the three activations were given an owner and a position. **The ruling is transcribed verbatim in the FOLLOW-UP RULING section at the end of this file, and it amends the binding sequence.** The original finding is kept below unedited, as the record of what was checked and what prompted the ruling.
+
 **They are not live. All three are built DARK.** Verified at this session's close:
 
 | Item | Built | Flag | State |
@@ -104,3 +106,45 @@ The instruction's own stated purpose for the ATRF scoping session — *"Name tha
 *(Recommendation acted on the same session — see the RESOLVED note above. Gap (1), the activation-ownership question, remains open and is the one item still awaiting the mentor.)*
 
 *End of record.*
+
+---
+
+# FOLLOW-UP RULING — activation ownership (verbatim, 2026-08-09)
+
+**Status:** the mentor's answer to verification note (1) above, relayed by the founder the same session. Transcribed verbatim; **this record wins over any annotation.** It **amends the binding sequence** and takes the runner scoping session's confirmed carry-forwards from four to five. Adopted under `D-ACTIVATION-OWNERSHIP-RULED-2026-08-09`.
+
+## VERBATIM
+
+**The finding is confirmed.** Three flags unset. Three routes dark. The bounded validation run cannot execute while `fresh` and `watching` return 503. No session in the confirmed sequence owns those activations. The gap is real.
+
+---
+
+**Ruling on the gap.**
+
+Each flag activation is a founder-walked Critical step — the same discipline as the `watching_write` capability provisioning. They are not configuration details to be handled inside another session. They are their own named moment in the sequence.
+
+The three activations belong in the runner scoping session, immediately after the identity mint and the `watching_write` provisioning.
+
+The reasoning: the runner scoping session is already the session where the runner's operational environment is established — credential, identity, capability. Activating the endpoints the runner depends on is part of establishing that environment. It is not a separate session; it is the natural completion of the runner scoping session's purpose.
+
+The confirmed carry-forwards for the runner scoping session are therefore now five, not four:
+
+1. Dedicated identity mint — `sagereasoning:idea-loop@v1` — with 6e §A owner+agent binding.
+2. `watching_write` capability provisioning — founder-walked, Critical Change Protocol.
+3. Flag activations — `SUBSTRATE_FRESH_ENABLED`, `SUBSTRATE_WATCHING_ENABLED`, `SUBSTRATE_LOOP_ID_FIELD_ENABLED` — each a founder-walked Critical step, sequenced after the capability provisioning, not before.
+4. `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit trigger.
+5. `frictionAssessment` PM-tool mapping.
+
+The internal order within the runner scoping session matters. Identity mint first — clean, establishes the subject. Capability provisioning second — heaviest, most likely to surface surprises, deserves full attention. Flag activations third — only after the capability surface is confirmed correct, because the routes being activated depend on it. Then the remaining two carry-forwards.
+
+---
+
+**Updated sequence, now binding:**
+
+Brief ruled → `fresh` scoped and ruled → `watching` scoped and ruled → generation-step scoped and ruled → first build gate (`fresh` built dark, `watching` built dark, `loop_id` built dark) → runner scoping session (identity mint → `watching_write` provisioning → three flag activations → `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit → `frictionAssessment` mapping) → bounded validation run → standing-runner design.
+
+## END VERBATIM
+
+---
+
+**AI note (NOT part of the mentor's text):** this supersedes the Q11 sequence as recorded in the generation-step scope §2.9 (which placed the runner scoping session but did not know the activations were unowned). A dated amendment pointing here has been added to that document so a future session reading it at open does not act on the superseded form. **Both PR20 gaps raised against the prioritised instruction set are now closed** — (1) by this ruling, (2) by the founder's relay of the previous review (`2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md`).

@@ -18933,3 +18933,31 @@ New **§8 (Connection to blast_radius field)**: the orientation reading's `away`
 **Rules served:** PR15 (transcribed verbatim, not paraphrased), PR18, PR20 (the review's own mechanism-claim traced against live schema and found false — the third such catch in this arc, after `watching`'s "inherits automatically" and this session's "mirror the B5 test file"). The Q1 hard constraint untouched — this entry records; it builds nothing.
 
 **Status:** Adopted (as a record; nothing here licenses a build). Cross-references: `D-MENTOR-PRIORITISED-SEQUENCE-ADOPTED-2026-08-09`; `D-ATRF-AND-CONSCIOUSNESS-CONTINUITY-ADDED-2026-08-09`; `D-WATCHING-BUILT-AND-CAPABILITY-LIVE-2026-08-09`; `D-GENERATION-STEP-SCOPE-RULED-2026-08-09`.
+
+## 2026-08-09 — D-ACTIVATION-OWNERSHIP-RULED-2026-08-09
+
+**Decision:** The mentor **confirmed the activation-ownership gap in full** and ruled where the three flag activations belong. Verbatim record: `operations/agent-circles-2026-08/2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md` §FOLLOW-UP RULING (which wins over every annotation). Documents-only; **no flag was activated by this entry** — it assigns ownership and position, nothing more.
+
+**The gap, confirmed verbatim:** *"The finding is confirmed. Three flags unset. Three routes dark. The bounded validation run cannot execute while `fresh` and `watching` return 503. No session in the confirmed sequence owns those activations. The gap is real."*
+
+**The ruling:** each flag activation is a founder-walked Critical step — *"the same discipline as the `watching_write` capability provisioning. They are not configuration details to be handled inside another session. They are their own named moment in the sequence."* All three belong **in the runner scoping session, immediately after the identity mint and the `watching_write` provisioning**, because that session already establishes the runner's operational environment (credential, identity, capability) and *"activating the endpoints the runner depends on is part of establishing that environment. It is not a separate session; it is the natural completion of the runner scoping session's purpose."*
+
+**The runner scoping session's carry-forwards are now FIVE, not four, and their internal order is binding:** (1) dedicated identity mint `sagereasoning:idea-loop@v1` with 6e §A owner+agent binding — *"first, clean, establishes the subject"*; (2) `watching_write` capability provisioning — *"second, heaviest, most likely to surface surprises, deserves full attention"*, a Critical Change Protocol item, explicitly **not batched with (1)**; (3) the three activations `SUBSTRATE_FRESH_ENABLED` / `SUBSTRATE_WATCHING_ENABLED` / `SUBSTRATE_LOOP_ID_FIELD_ENABLED` — *"third, only after the capability surface is confirmed correct, because the routes being activated depend on it"*; (4) `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit; (5) `frictionAssessment` PM-tool mapping.
+
+**The binding sequence, as amended:** brief ruled → `fresh` scoped and ruled → `watching` scoped and ruled → generation-step scoped and ruled → **first build gate (`fresh`, `watching`, `loop_id` all built dark)** → **runner scoping session (identity mint → `watching_write` provisioning → three flag activations → `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit → `frictionAssessment` mapping)** → bounded validation run → standing-runner design.
+
+**Applied to the corpus so a future session cannot act on the superseded form:** a dated **AMENDED** annotation on the generation-step scope §2.9 (whose own Q11 sequence this supersedes — that document is read at open by every session in this arc, so leaving it stale was the live risk); the §FOLLOW-UP RULING transcription; verification note (1) in that same file marked RESOLVED with the original finding kept unedited as the record of what was checked; and the session close's Next + gaps sections rewritten.
+
+**Both PR20 gaps raised against the prioritised instruction set are now closed** — (a) by this ruling; (b) by the founder's relay of the previously-untranscribed review (`D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09`). **One finding remains carried, raised against that relayed review itself:** the watching candidate row does not persist `targetCircle` (type-only), so GS-ATRF-2's *"one additional nullable field"* is understated and both tables are already live — a founder-walked additive migration for whichever session first scopes the blast-radius indicator. It blocks nothing now.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md` (the §FOLLOW-UP RULING transcription + note (1) marked RESOLVED) · `operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md` (dated §2.9 amendment) · `operations/handoffs/founder/2026-08-09-loop-id-field-build-CLOSE.md` (Next + gaps rewritten) · `operations/decision-log.md` (this entry).
+
+**Risk classification:** Standard under 0d-ii (`governance` — pure documentation; no code path, no bundle, no flag set). AC7 not engaged; PR6 not engaged. **Note what this entry does NOT do:** it does not activate any flag. The three activations remain untaken and unapproved; each is its own founder-walked Critical step at the runner scoping session, under the full Critical Change Protocol.
+
+**Rollback path:** `git revert` the records commit. Nothing mechanical to unwind.
+
+**Open questions:** none from this ruling — it closes the last open gap of the relay. The carried `targetCircle` persistence question (above) is named and assigned by condition, not by session.
+
+**Rules served:** PR15 (transcribed verbatim; the superseded sequence annotated in place rather than silently overwritten — the house discipline of keeping the ruled text and dating the amendment), PR18, PR20 (the finding that produced this ruling came from checking the instruction's premise against live flag state rather than accepting it; the amendment was then applied to the document a future session actually reads at open, not only to the record of the ruling). The Q1 hard constraint untouched.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-PRIORITISED-SEQUENCE-ADOPTED-2026-08-09`; `D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09`; `D-LOOP-ID-FIELD-BUILT-DARK-REVIEW-FOLDED-2026-08-09`; `D-GENERATION-STEP-SCOPE-RULED-2026-08-09`.
