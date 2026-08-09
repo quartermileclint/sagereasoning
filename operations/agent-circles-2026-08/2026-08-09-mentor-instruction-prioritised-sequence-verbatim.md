@@ -93,10 +93,14 @@ Each activation is its own founder-walked `code-critical` step under 0d-ii ("dep
 
 ### (2) "The hegemonikon stability question and the kathêkon/katorthoma distinction at agent level … are on the record. Leave them there."
 
+> **RESOLVED same session, 2026-08-09.** The finding below was correct as written — the six items genuinely were not on the repo record. On being shown it, **the founder relayed the missing review**, now transcribed verbatim at `2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md`. All six items now have content on the record (not merely titles), and that record additionally carries **substantive mentor answers to GS-ATRF-1, GS-ATRF-2 and GS-ATRF-3** — which the prioritised instruction above does not contain, and which materially inform both the runner scoping session (GS-ATRF-1/2 as named inputs) and the ATRF scoping session (GS-ATRF-3's placement). The original finding is kept below unedited, as the record of what was checked and why the relay happened.
+
 **As far as can be verified, they are not on the repo record.** Searched: `manifest.md`'s Consciousness and Continuity Obligation section (which names exactly two components — accumulated memory of ideas/tasks/decisions/reflections; continuity of experience in a morally relevant sense — and neither is these two questions), the whole of `operations/`, `adopted/`, and the decision log. Grep for `hegemonikon stability`, `four-virtue pre-task`, `premeditatio malorum`, `synkatathesis assessment point`, and `oikeiosis extension metric` returns **no 2026-08-09 mentor-review record** — only unrelated older files.
 
 The likely reading: "the previous review" is a mentor communication the founder received that was never transcribed into the repo, so **none of the six Stoic items are recorded** — not the three routed to the ATRF scoping session, and not the two routed to the Consciousness and Continuity Obligation.
 
 The instruction's own stated purpose for the ATRF scoping session — *"Name that session now so it does not get lost"* — applies with equal force here. "Leave them there" is safe only if "there" exists. **Recommended: the founder relays the previous review's text (or at least the six items' statements) so they can be transcribed.** The three ATRF-scoping items are named by title in this instruction and so survive at that granularity; the two longer-horizon items are named by title only and have no content on the record at all.
+
+*(Recommendation acted on the same session — see the RESOLVED note above. Gap (1), the activation-ownership question, remains open and is the one item still awaiting the mentor.)*
 
 *End of record.*
