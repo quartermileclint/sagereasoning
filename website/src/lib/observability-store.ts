@@ -198,5 +198,81 @@ export function logThrottleEvent(params: ThrottleEventParams): void {
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// RETENTION SWEEP (C-1) — the enforcement half of the 90-day retain_until
+// ══════════════════════════════════════════════════════════════════════════
+//
+// Both tables above have carried a `retain_until` column AND an index on it
+// since their P-GL migrations (idx_route_errors_retain_until,
+// idx_throttle_events_retain_until) — the schema has always declared the
+// retention intent. Nothing enforced it: the 2026-08-01 regrounding audit
+// found the declared-but-unenforced gap (C-1), and neither table is reachable
+// by the user-JWT data-rights paths (both are service-role-only, and
+// throttle_events holds only a hashed IP), so this sweep is their ONLY
+// deletion mechanism.
+//
+// Mirrors purgeExpiredTrajectory (agent-assessment-history-store.ts) exactly:
+// a bounded, indexed DELETE; missing-table-benign so it is safe on a
+// deployment where a migration has not landed; fail-HONEST, never fail-closed
+// — a cron has no user-facing response to protect, so a failed DELETE is
+// reported in the JSON rather than thrown.
+//
+// The flag lives here rather than in the route so the route stays a thin
+// wrapper, matching the trajectory precedent (isTrajectorySweepEnabled).
+
+export const OBSERVABILITY_SWEEP_ENV_VAR = 'SUBSTRATE_OBSERVABILITY_SWEEP_ENABLED'
+
+/**
+ * True only when the flag is the exact string 'true'. Unset/other ⇒ the sweep
+ * route reports { flag_enabled: false } and does NO DB work. Read at call time
+ * (mirrors every sibling flag) so a test can set and unset it in-process.
+ */
+export function isObservabilitySweepEnabled(): boolean {
+  return process.env[OBSERVABILITY_SWEEP_ENV_VAR] === 'true'
+}
+
+/** Shared purge body — the two exports below differ only in table name. */
+async function purgeExpired(
+  table: 'route_errors' | 'throttle_events',
+  fnName: string,
+  client?: SupabaseClient,
+): Promise<{ deleted: number; error: string | null }> {
+  try {
+    const db = client ?? getAdminClient()
+    // No service-role credentials on this deployment — honest, not silent, and
+    // NOT reported as a successful zero-row purge.
+    if (!db) return { deleted: 0, error: `${fnName}: admin client unavailable` }
+    const { data, error } = await db
+      .from(table)
+      .delete()
+      .lt('retain_until', new Date().toISOString())
+      .select('id')
+    if (error) {
+      // Table not migrated on this deployment → nothing to purge, benign no-op.
+      // Deliberately the same narrow table-only classifier the writers use: a
+      // missing COLUMN must surface as a real error, never as a false "purged".
+      if (isMissingTableError(error.message)) return { deleted: 0, error: null }
+      return { deleted: 0, error: `${fnName}: ${error.message}` }
+    }
+    return { deleted: (data as unknown[] | null)?.length ?? 0, error: null }
+  } catch (e) {
+    return { deleted: 0, error: `${fnName} threw: ${(e as Error).message}` }
+  }
+}
+
+/** DELETE every route_errors row past its retain_until. Indexed; fail-honest. */
+export async function purgeExpiredRouteErrors(
+  client?: SupabaseClient,
+): Promise<{ deleted: number; error: string | null }> {
+  return purgeExpired('route_errors', 'purgeExpiredRouteErrors', client)
+}
+
+/** DELETE every throttle_events row past its retain_until. Indexed; fail-honest. */
+export async function purgeExpiredThrottleEvents(
+  client?: SupabaseClient,
+): Promise<{ deleted: number; error: string | null }> {
+  return purgeExpired('throttle_events', 'purgeExpiredThrottleEvents', client)
+}
+
 // Exposed for tests.
 export const __test = { isMissingTableError, truncate, hashIp }
