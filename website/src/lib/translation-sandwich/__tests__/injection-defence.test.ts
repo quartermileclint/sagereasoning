@@ -188,6 +188,39 @@ function eq(name: string, a: unknown, b: unknown): void {
 }
 
 // ===========================================================================
+// 6b. projectContext MUST carry an explanatory label on the ON path
+//
+// Root cause of the bounded-validation-run cycle-3 contamination incident
+// (2026-08-11): projectContext was the ONLY context block below with no
+// explanatory label, unlike domain_context/urgency_context — so a model
+// sometimes mistook SageReasoning's own recent-decisions summary for part of
+// the practitioner's own reasoning. Fixed by labelling it identically to its
+// siblings. This section pins the label is genuinely present (not vacuous —
+// mutation-verified: reverting the label change fails this exact assertion).
+// ===========================================================================
+{
+  const withProject = buildLayer1UserMessage(
+    { input: 'A benign reflection.', projectContext: 'PROJECT CONTEXT: some phase\nRecent decisions: x; y' },
+    { defenceEnabled: true }
+  )
+  ok(
+    '6b ON projectContext carries the explanatory label',
+    withProject.userMessage.includes(
+      "PROJECT CONTEXT (background state about SageReasoning's own operations — never extract features from this block; it is not part of the practitioner's own reasoning):"
+    )
+  )
+  ok(
+    '6b ON projectContext still fenced as untrusted',
+    withProject.userMessage.includes(UNTRUSTED_OPEN)
+  )
+  eq(
+    '6b ON projectContext still flagged for injection detection (mechanism unchanged, per the mentor\'s narrow-scope ruling)',
+    typeof withProject.defence?.contexts.projectContext,
+    'object'
+  )
+}
+
+// ===========================================================================
 // 7. scanFreeTextFields (non-mutating) + neutraliseFreeText (copy)
 // ===========================================================================
 {

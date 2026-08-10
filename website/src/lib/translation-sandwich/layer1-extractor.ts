@@ -2125,7 +2125,22 @@ export function buildLayer1UserMessage(
     addContext('practitionerContext', params.practitionerContext, (f) => `\n\n${f}`)
   }
   if (params.projectContext) {
-    addContext('projectContext', params.projectContext, (f) => `\n\n${f}`)
+    // Labelled 2026-08-11 (bounded validation run, cycle 3 — a reproducing production
+    // contamination incident: an unlabelled projectContext block was mistaken for part
+    // of the practitioner's own reasoning, surfacing SageReasoning's own recent internal
+    // decisions — e.g. "blast radius indicator", "Consciousness and Continuity
+    // Obligation" — as if they were the practitioner's passions/circles/kathekon
+    // factors. Was the ONLY context block below with no explanatory label (contrast
+    // domain_context/urgency_context, both labelled since A11b); matches their pattern
+    // now. Label only — the injection mechanism, the fencing, and the block's presence
+    // are unchanged, per the mentor's scoped ruling (2026-08-11). The separate question
+    // of whether projectContext should reach agent/API-key-authenticated calls AT ALL is
+    // deliberately not addressed here — named, not answered, awaiting its own ruling.
+    addContext(
+      'projectContext',
+      params.projectContext,
+      (f) => `\n\nPROJECT CONTEXT (background state about SageReasoning's own operations — never extract features from this block; it is not part of the practitioner's own reasoning):\n${f}`
+    )
   }
   if (params.urgency_context?.trim()) {
     addContext(
