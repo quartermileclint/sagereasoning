@@ -12,10 +12,8 @@ import { getSkillById } from '@/lib/skill-registry'
  *
  * Public endpoint — no authentication required.
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const startTime = Date.now()
   const { id } = params
 

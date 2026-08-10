@@ -18,10 +18,8 @@ import { getSkillById } from '@/lib/skill-registry'
  * R8d: Descriptions use plain English, outcome-focused language.
  * R10: Marketplace skills comply with R1, R2, R3, R7, R9.
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const startTime = Date.now()
   const { id } = params
 

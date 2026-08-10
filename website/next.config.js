@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // A12 (2026-06-03): enable the Next.js instrumentation hook so src/instrumentation.ts
-  // register() runs at server startup. register() is a STRICT no-op unless
-  // SUBSTRATE_OTEL_ENABLED='true' (unset in production), so enabling the hook is
-  // inert in production. Rollback: remove this experimental block (or unset the flag).
-  experimental: {
-    instrumentationHook: true,
-  },
+  // A12 (2026-06-03): src/instrumentation.ts register() runs at server startup.
+  // As of Next.js 16, instrumentation.ts runs by default — the prior
+  // experimental.instrumentationHook flag is removed (Next 16 rejects it as an
+  // unrecognized key). register() is a STRICT no-op unless SUBSTRATE_OTEL_ENABLED='true'
+  // (unset in production), so this remains inert in production either way.
 
   // Security headers
   async headers() {

@@ -642,7 +642,7 @@ function ConversationView({
   setComposeInput: (value: string) => void;
   onSendMessage: () => void;
   isLoading: boolean;
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <div style={styles.convoLayout}>
@@ -1116,7 +1116,7 @@ function TriggersView() {
   );
 }
 
-function TimelineView({ canvasRef }: { canvasRef: React.RefObject<HTMLCanvasElement> }) {
+function TimelineView({ canvasRef }: { canvasRef: React.RefObject<HTMLCanvasElement | null> }) {
   return (
     <div>
       <div style={{ ...styles.profileCard, gridColumn: '1 / -1' }}>
