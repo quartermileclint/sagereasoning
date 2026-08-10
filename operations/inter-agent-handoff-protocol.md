@@ -1,6 +1,52 @@
 # Inter-Agent Handoff Protocol
+
+> ## ⚠️ RETIRED — 2026-08-10
+>
+> **Status: RETIRED.** Founder decision 2026-08-10, recorded under
+> `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`. This document is kept as an
+> archived design record. **Do not implement it, and do not treat its
+> "resolve-before-P4" precondition as binding on any future session.**
+>
+> **Why retired, on the evidence found at the decision:**
+> 1. **It was never used.** In the four months since it was designed, **zero**
+>    agent-to-agent handoff files were written (no file anywhere matches its own
+>    `YYYY-MM-DD-{source}-to-{target}-{slug}.md` pattern), and no session has
+>    ever queried the `agent_handoffs` table. The migration file
+>    (`supabase/migrations/20260411_agent_handoffs.sql`) exists; nothing reads
+>    or writes it.
+> 2. **It coordinates the wrong system.** The protocol coordinates the five
+>    Sage "ring-architecture" agents. The P4 identities it was made a
+>    precondition for (`sagereasoning:org-tech@v1`, `org-ops@v1`,
+>    `org-growth@v1`) run on the *separate* Gate-1/UPC/trust-core architecture —
+>    the single most load-bearing finding of the P1 roster gap analysis
+>    (`operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md` §1:
+>    "finishing one does not finish the other"). Gating P4 on this protocol was
+>    gating a new system on an unrun mechanism belonging to an older one.
+> 3. **Its coordination need is met another way.** The org agents in practice
+>    coordinate through founder-facilitated sessions and the decision log, not
+>    through asynchronous agent-to-agent messages. The protocol solves a problem
+>    the current operating model does not have.
+>
+> **What the "resolve-before-P4" precondition was, and what replaces it:** P1 §4
+> recommendation 6 held that this protocol "should be either activated or
+> explicitly retired, not left in an ambiguous 'Designed but maybe used' state,"
+> and that the question was worth resolving before P4 harnessing. The 2026-08-01
+> regrounding audit found the precondition had been **silently bypassed** — P4
+> ran without it being resolved either way. This retirement resolves it in the
+> direction the evidence supports, and closes the bypass as a recorded decision
+> rather than an unnoticed omission. **Nothing replaces it**: no equivalent
+> precondition is imposed on future P-phase work.
+>
+> **If inter-agent coordination is ever genuinely needed**, design it against
+> the Gate-1/UPC architecture the org agents actually run on — do not revive
+> this document, whose Supabase table, status vocabulary, and session protocol
+> all assume the ring architecture.
+>
+> **Reversal:** `git revert` the retirement commit restores `Status: Designed`.
+> Nothing was deleted; the migration file is untouched and remains unapplied.
+
 **Date:** 11 April 2026 · Session 11  
-**Status:** Designed  
+**Status:** ~~Designed~~ **RETIRED 2026-08-10** (see the notice above)  
 **Purpose:** Simple structured format for agents (Tech, Growth, Support) to flag items for each other. Enables asynchronous coordination without requiring a shared session.
 
 ---

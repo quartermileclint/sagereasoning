@@ -564,7 +564,9 @@ Any "production state" summary (the CLAUDE.md block, plan tables, close blocks) 
 
 **Source:** the Agent-Organization + Evidence Program build plan's P3 election (`operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3, adopted under `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`), recorded under `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`. Recurrences cited, all 2026-07-19: `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (a same-session first-hand review called the self-circle-narrowing build clean; a freshly-launched independent Workflow, given the diff alone, found a HIGH double-counting defect the self-review's author had documented the discipline against in one file and violated in the very next); `D-AGENT-EXTENSION-AE2-INDEPENDENT-REREVIEW-FOLDED-2026-07-19` (a first-hand review of the AE-2 loop-fold called the core logic clean; an independent re-run after an account spend-limit reset found 7 confirmed defects, including a genuine spec-infidelity the first pass missed entirely); and `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` itself (a first-hand draft of this very build plan was independently critiqued and returned 23 confirmed findings, none refuted, before adoption). Same pattern, three independent domains, one day.
 
-**Rule:** any session materially changing trust-core / predicate / fold / engine surfaces, **and** any session drafting a build plan carrying live-op or org-safety consequences, closes only after one of:
+**Scope amendment (2026-08-10, `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`):** the rule's surface list is **widened** to add **auth / security / R20a-perimeter code** and **any code that deletes data**. Grounding instance, same session: the C-1 observability retention sweep was none of the original four surfaces — a new cron route — so PR19's letter did not engage; a review was launched on judgement anyway and returned **three confirmed defects the author's own 47-assertion battery had passed**, including a filter-value mutation that would have deleted live, in-retention rows rather than expired ones, and a `catch`-block cast that would itself throw on a non-`Error` rejection and escape uncaught as the fail-*closed* behaviour the route was written to avoid. The founder elected to add the data-deletion category on that evidence rather than only the audit's original auth/security/perimeter recommendation. Note that 0d-ii already classifies both new categories Critical; PR19's widened list and 0d-ii's Critical tier now substantially coincide, and where they differ, the broader of the two governs.
+
+**Rule:** any session materially changing trust-core / predicate / fold / engine surfaces, **auth / security / R20a-perimeter surfaces, or any code path that deletes data**, **and** any session drafting a build plan carrying live-op or org-safety consequences, closes only after one of:
 1. an **independently-launched review** — a fresh Workflow given the code or document itself, with **no visibility into the first review's conclusions or summary** (a review handed "here is what we already believe is fine" is not independent and does not satisfy this rule); or
 2. an **explicit founder waiver**, recorded at close, naming what was NOT independently reviewed.
 
@@ -586,12 +588,52 @@ Any "production state" summary (the CLAUDE.md block, plan tables, close blocks) 
 
 **Rationale:** the mentor reasons from the brief, not from the repository. A ruling given without visibility into how the existing machinery would carry it out is a ruling on an incomplete picture — not because the mentor reasoned poorly, but because the brief withheld a fact that changes the answer. PR19 catches this class of gap adversarially, after the build; PR20 is the cheaper, earlier catch — surfacing the same class of fact before the ruling is requested, so the mentor's first answer is already complete rather than needing a second round-trip once an adversarial review finds what the brief should have said. **Engagement:** any mentor-consultation brief (verbatim-record-producing sessions under the `operations/*/mentor-consultation-*.md` pattern) whose question concerns a change to the trust-core, practice, Stoa, or any other examined-record surface; not engaged for consultations that are purely philosophical/design-space questions with no landing mechanism (e.g. the original fourteen-question Stoa design-space consultation, which preceded any build).
 
+### PR21 — Reflect-Harvest: the Close-Turn's Findings Must Reach a Tracked Artifact (NEW; 2026-08-10)
+
+**Source:** the 2026-08-01 Fable-5 regrounding audit (`D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25` §4, carried forward), founder-adopted 2026-08-10 under `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`. The audit extracted 20 Sage Reflect close-turns from local transcripts and found them "genuine and repeatedly valuable" — while also finding that **none had ever reached a tracked artifact**, because the reflect turn fires *after* the session close is already written. The findings were real and the channel was a dead end.
+
+**Rule:** two halves, both binding.
+1. **Write side (close):** where the reflect close-turn surfaces a finding that would change future work — a defect in the session's own reasoning, a near-miss, an inherited assumption that proved false — the session **records it in the decision-log entry** (a `**Reflect finding:**` line is sufficient). Not every reflect turn produces one; the rule is to capture what is produced, not to manufacture material.
+2. **Read side (open):** the session opener **reads the prior session's reflect findings** for its stream before starting substantive work, alongside the predecessor close it already reads.
+
+**Grounding instance, same session as adoption:** this session's own reflect turn surfaced two findings that existed in no artifact — that the session had nearly inherited a predecessor prompt's false negative finding (the prompt asserted the mentor's website feedback was unrecorded; it was recorded, and one `ls inbox/` found it), and that the session had committed founder-authored binary assets on a preference-formed-before-examination basis. Both were visible only in the transcript. Under PR21 both land in the decision-log entry.
+
+**Rationale:** the practice already produces the examination; PR21 only stops the output falling on the floor. Note the asymmetry it corrects — the project spends real effort on the reflect turn and then discards it, which is worse than not running it, because it produces the *appearance* of a self-correction loop without the loop closing. **Engagement:** every session with a reflect close-turn (read side: every session open).
+
+### PR22 — Model and Effort Attribution on Every AI-Authored Commit (NEW; 2026-08-10)
+
+**Source:** the 2026-08-01 regrounding audit's process recommendations, founder-adopted 2026-08-10 under `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`. The audit reported 10/21 commits since 2026-07-19 carrying no model attribution. **The adoption session re-measured and found it substantially worse: of 128 commits in that window, 4 carried a `Model:` trailer — and 3 of those were authored the same day, by the adopting session itself.** The convention was effectively not in use.
+
+**Rule:** every commit authored by an AI session carries `Model: <exact model id>` and `Effort: <reasoning effort>` trailers. Founder-authored manual commits are out of scope. **Convention only — deliberately NOT hook-enforced** (founder election at adoption): the founder chose the documented-rule form over a pre-commit hook that rejects untrailed commits, accepting that a convention may erode where enforcement would not. If the rate does not improve, the hook is the named escalation, already scoped by this decision.
+
+**Rationale:** model attribution is not bookkeeping in this project — it is measurement infrastructure. The P2 rerun's leg B was confounded precisely because a model swap (`claude-opus-5` where `claude-fable-5` was expected) went unnoticed until a mandatory `model:` field caught it at handover, and the affected scenario's A-vs-B comparison had to be excluded from the verdict. Commits are the durable record of what was built by what; without the trailer, any future audit re-deriving model attribution must reconstruct it from session transcripts that may not survive. **Engagement:** every AI-authored commit.
+
+### PR23 — Memory-First: Consult the Memory Index Before Diagnosing a Recurring Class (NEW; 2026-08-10)
+
+**Source:** the 2026-08-01 regrounding audit's process recommendations, founder-adopted 2026-08-10 under `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`.
+
+**Rule:** before diagnosing a problem that belongs to a recurring class — a DB error classification, a build/route-export failure, a test that passes when it should not, a credential or auth failure — check the memory index for an existing entry on that class, and cite it if one applies.
+
+**Grounding instance, same session as adoption, in both directions.** The memory `nextjs-route-export-validation` **worked**: the session split the new sweep route's handler correctly on the first attempt because that memory named the trap. The memory `missing-table-benign-guards-load-bearing-writes` **did not**: the session wrote a new benign-error classifier carrying a comment that *asserted* the missing-column trap was handled, copied from a sibling, without checking whether its own implementation actually handled it — it did not, and a real Postgres 42703 message (`column "x" of relation "y" does not exist`, containing both "relation" and "does not exist") would have been silently swallowed as benign. The independent review found it. **The honest reading, recorded so the rule is not over-claimed:** the lesson was available and consulted-in-spirit; what failed was the step from *knowing the class* to *verifying this instance*. PR23's value is therefore in the verification it prompts, not in the recall — a memory citation that does not check the current code against the remembered failure discharges the letter of this rule and not its purpose.
+
+**Rationale:** the project's memory index exists because these classes recur across sessions with no continuity of context between them. **Engagement:** any diagnosis of a problem in a class a memory covers; and, per the grounding instance, any code being *written* in such a class — the failure mode observed was at writing time, not diagnosis time.
+
+### PR24 — Retention Parity: a Table Declaring `retain_until` Ships Its Sweep in the Same Session (NEW; 2026-08-10)
+
+**Source:** the 2026-08-01 regrounding audit's C-1 finding, founder-adopted 2026-08-10 under `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`.
+
+**Rule:** any migration introducing a table with a `retain_until` column **ships the purge function and its sweep wiring in the same session**. A `retain_until` column with nothing enforcing it is not a retention policy — it is a declared intention that reads, to any later auditor, exactly like an implemented one.
+
+**Grounding:** `route_errors` and `throttle_events` each carried `retain_until` **and an index on it** from their P-GL migrations (2026-07-20) with no sweep whatsoever until 2026-08-10 — nearly three weeks, on tables unreachable by the user-JWT data-rights paths, so the sweep was their *only* deletion mechanism. **The adoption session further found the gap still open on two more tables** — `agent_hold_observations` and `stoa_entries` both declare `retain_until` with no purge function — which is why the founder elected to adopt the rule **and queue the two existing gaps** rather than adopt the forward-looking rule alone.
+
+**Rationale:** R17c commits this project to genuine deletion on request and on schedule. A declared-but-unenforced `retain_until` is the most dangerous shape that commitment can take, because the schema *documents* compliance that the runtime does not deliver. **Engagement:** any `schema` or `code-*` session introducing a `retain_until` column.
+
 ---
 
 ## Cross-references
 
 - `/manifest.md` — full manifest (R0–R22, AC1–AC13, KG1–KG7; R21/R22 added 2026-08-09)
-- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR20; PR17 added 2026-05-27; PR18 added 2026-06-10; PR19 added 2026-07-21; PR20 added 2026-08-04)
+- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR24; PR17 added 2026-05-27; PR18 added 2026-06-10; PR19 added 2026-07-21 and scope-widened 2026-08-10; PR20 added 2026-08-04; PR21–PR24 added 2026-08-10)
 - `/adopted/build-sessions-protocol-cache.md` — build-arc-specific cache
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2)
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)
