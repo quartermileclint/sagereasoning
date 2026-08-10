@@ -140,10 +140,13 @@ per PR18** — it is a close-time artifact for what actually deploys, and nothin
   lint-erroring file also in the diff is `private-mentor/page.tsx`, error at line 275 vs this
   session's edits at 642/1116. **Not fixed** — 53 app-code issues, several needing behavioural
   `<a>`→`<Link>` changes, are out of scope for an isolated framework bump. Their own session.
-- **`react-simple-maps@3.0.0` peer override** — latest published version, peers cap at React 18,
-  installed against React 19 via `--legacy-peer-deps`. Renders correctly (verified live at
-  `/community`). **If the Vercel deploy fails on `ERESOLVE`, this is the cause** — add
-  `legacy-peer-deps=true` to an `.npmrc` or an `overrides` entry.
+- **`react-simple-maps@3.0.0` peer override — RESOLVED, same session.** The predicted `ERESOLVE`
+  materialised: you pushed, Vercel went red on exactly this. Reproduced locally with a plain
+  `npm install` (no flags) before touching anything, then fixed with a scoped `package.json`
+  `overrides` entry forcing `react-simple-maps`'s `react`/`react-dom` peers to the root's pinned
+  versions — narrower than a blanket `.npmrc legacy-peer-deps=true`, since it doesn't suppress
+  peer-conflict detection elsewhere. Verified: plain `npm install` exits 0; `tsc`/`build` clean,
+  169 routes; both safety batteries green. Committed as `7f897b6`. **Push this too.**
 - **`/community` map is empty (pre-existing, unrelated)** — its data fetch to
   `cdn.jsdelivr.net/npm/world-atlas` is blocked by the app's own CSP `connect-src` allowlist, which
   omits `jsdelivr.net`. Neither file is in this diff; it fails identically on 14.2.35.
@@ -168,8 +171,9 @@ npx tsx src/app/api/reason/__tests__/r20a-audience-rendering.test.ts
 Expected: tsc exit 0; build exit 0 with 169 routes; 249/0; 115/0; 66/66.
 `npm run lint` exits 1 with 53 pre-existing errors — expected, not a regression.
 
-Then push via GitHub Desktop. **Watch the Vercel build for `ERESOLVE`** — if it fails there, it is
-the `react-simple-maps` peer override, fixed with `legacy-peer-deps=true` in an `.npmrc`.
+Then push commit `7f897b6` (the `react-simple-maps` overrides fix — see above; it landed after
+your earlier push hit exactly the `ERESOLVE` this section originally warned about) via GitHub
+Desktop and confirm Vercel goes green.
 
 **Rollback:** `git revert` the upgrade commit, then **`rm -rf website/.next`** *before*
 `npm install --legacy-peer-deps` — skipping the cache clear produces a `PageNotFoundError` that
