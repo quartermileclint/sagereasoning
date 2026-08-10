@@ -267,7 +267,7 @@ async function run(): Promise<void> {
       '§4.1 cycle-level outcome CHECK is exactly the four ruled values',
     )
     assert(
-      CANDIDATE_LEVEL_OUTCOMES.length === 7 &&
+      CANDIDATE_LEVEL_OUTCOMES.length === 8 &&
         JSON.stringify([...CANDIDATE_LEVEL_OUTCOMES].sort()) ===
           JSON.stringify(
             [
@@ -278,9 +278,10 @@ async function run(): Promise<void> {
               'null_cycle',
               'dependency_unavailable',
               'terminated_by_timeout',
+              'not_selected',
             ].sort(),
           ),
-      '§4.2 candidate-level outcome CHECK is exactly the seven ruled values (Q6 seventh included)',
+      '§4.2 candidate-level outcome CHECK is exactly the eight ruled values (Q6 seventh + not_selected the eighth, 2026-08-10)',
     )
     assert(
       CYCLE_LEVEL_OUTCOMES.includes('terminated_by_timeout') &&

@@ -118,6 +118,19 @@ export const CANDIDATE_LEVEL_OUTCOMES = [
   'null_cycle',
   'dependency_unavailable',
   'terminated_by_timeout',
+  // 'not_selected' ADDED 2026-08-10 (bounded validation run, cycle 1 found the
+  // gap): passed guardrail filtering AND passed the novelty check, but was not
+  // the highest-proximity survivor. NOT a rejection by any filter — the
+  // ORDINARY outcome for every non-winner candidate in a winner cycle, so it is
+  // the most common candidate value in real run data, not an edge case.
+  // idea_loop_candidates.cycle_outcome's CHECK widened to match — see
+  // supabase-idea-loop-candidate-outcome-not-selected-migration.sql (§1) —
+  // migration-before-code, standing discipline: the widened CHECK is a
+  // backward-compatible superset, so it lands first and breaks nothing; this
+  // array change is what actually unblocks a write (the route 400s on an
+  // unrecognised value BEFORE any DB call is made — the CHECK alone would not
+  // have been sufficient).
+  'not_selected',
 ] as const
 
 export const GENERATION_HEURISTICS = [
