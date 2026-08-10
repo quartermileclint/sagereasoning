@@ -74,12 +74,29 @@ assert('RES-4 extra-header response still 503', resWithHeaders.status === 503)
 
 console.log('OBS — observability-store helpers')
 const { isMissingTableError, truncate, hashIp } = __test
-assert('OBS-1 "relation ... does not exist" is missing-table', isMissingTableError('relation "public.route_errors" does not exist'))
-assert('OBS-2 PostgREST "could not find the table" is missing-table', isMissingTableError("Could not find the table 'public.throttle_events' in the schema cache"))
-// The documented trap: a missing-COLUMN error also says "does not exist" but
-// must NOT be classified benign (it has no "relation" and isn't table-not-found).
-assert('OBS-3 missing COLUMN is NOT missing-table', !isMissingTableError('column "foo" does not exist'))
-assert('OBS-4 permission error is NOT missing-table', !isMissingTableError('permission denied for table route_errors'))
+assert('OBS-1 "relation ... does not exist" is missing-table', isMissingTableError({ message: 'relation "public.route_errors" does not exist' }))
+assert('OBS-2 PostgREST "could not find the table" is missing-table', isMissingTableError({ message: "Could not find the table 'public.throttle_events' in the schema cache" }))
+// The documented trap, hardened 2026-08-10: a REAL Postgres 42703 message is
+// shaped "column ... of relation ... does not exist" — it contains BOTH
+// "relation" and "does not exist", which a message-only classifier would
+// wrongly match as table-not-found. This fixture uses that realistic shape
+// (not the bare "column ... does not exist" the pre-hardening test used,
+// which happened to dodge the bug by not containing "relation" at all — a
+// weaker fixture that let the original defect ship undetected).
+assert(
+  'OBS-3 missing COLUMN (realistic Postgres 42703 shape) is NOT missing-table',
+  !isMissingTableError({ code: '42703', message: 'column "retain_until" of relation "route_errors" does not exist' }),
+)
+assert(
+  'OBS-3b missing COLUMN by message alone (no code) is NOT missing-table',
+  !isMissingTableError({ message: 'column "retain_until" of relation "route_errors" does not exist' }),
+)
+assert(
+  'OBS-3c PostgREST PGRST204 column-not-found is NOT missing-table',
+  !isMissingTableError({ code: 'PGRST204', message: "Could not find the 'retain_until' column of 'route_errors' in the schema cache" }),
+)
+assert('OBS-4 permission error is NOT missing-table', !isMissingTableError({ message: 'permission denied for table route_errors' }))
+assert('OBS-4b null error is NOT missing-table (no throw)', !isMissingTableError(null))
 assert('OBS-5 truncate long string', truncate('abcdefghij', 4) === 'abcd')
 assert('OBS-6 truncate keeps short string', truncate('ab', 4) === 'ab')
 assert('OBS-7 truncate null → null', truncate(null, 4) === null)

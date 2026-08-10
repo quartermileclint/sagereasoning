@@ -44,13 +44,28 @@ function getAdminClient(): SupabaseClient | null {
 /**
  * A missing TABLE (pre-migration) — NOT a missing column. We match the two
  * table-not-found forms (Postgres 42P01 "relation ... does not exist" and
- * PostgREST "Could not find the table ... in the schema cache") but NOT the
- * bare "schema cache" phrasing that a missing-COLUMN error (PGRST204) also
- * carries — a false-benign column classification is the documented trap. Since
- * these writers insert a fixed row shape into tables this module owns, column
- * drift cannot occur once the migration lands.
+ * PostgREST "Could not find the table ... in the schema cache") but NOT a
+ * missing-COLUMN error (Postgres 42703 / PostgREST PGRST204) — the documented
+ * false-benign trap (memory `missing-table-benign-guards-load-bearing-writes`).
+ *
+ * 2026-08-10 hardening: the message-only form of this check was NOT actually
+ * safe against the trap it names in its own comment — a real Postgres 42703
+ * message is shaped `column "foo" of relation "bar" does not exist`, which
+ * contains BOTH "relation" and "does not exist" as substrings and would have
+ * matched the table-not-found regex. Confirmed by adversarial review + direct
+ * mutation-test reproduction, not merely by inspection. Now takes the full
+ * error object (code + message) and applies the SAME code-first, /column/i-
+ * guarded pattern already used by the sibling stores (e.g.
+ * agent-assessment-history-store.ts's isMissingTableError) — checked here
+ * FIRST, before either substring form, so a column-shaped message can never
+ * fall through to the table-shaped regex regardless of its wording.
  */
-function isMissingTableError(message: string): boolean {
+function isMissingTableError(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false
+  if (error.code === '42703' || error.code === 'PGRST204') return false
+  const message = error.message ?? ''
+  if (/column/i.test(message)) return false
+  if (error.code === '42P01' || error.code === 'PGRST205') return true
   const m = message.toLowerCase()
   return (
     (m.includes('relation') && m.includes('does not exist')) ||
@@ -108,7 +123,7 @@ export async function recordRouteError(params: RouteErrorParams): Promise<{ ok: 
 
     const { error } = await admin.from('route_errors').insert(row)
     if (error) {
-      if (!isMissingTableError(error.message)) {
+      if (!isMissingTableError(error)) {
         console.warn('[observability] route_errors insert failed (non-fatal): ' + error.message)
       }
       return { ok: false }
@@ -174,7 +189,7 @@ export async function recordThrottleEvent(params: ThrottleEventParams): Promise<
 
     const { error } = await admin.from('throttle_events').insert(row)
     if (error) {
-      if (!isMissingTableError(error.message)) {
+      if (!isMissingTableError(error)) {
         console.warn('[observability] throttle_events insert failed (non-fatal): ' + error.message)
       }
       return { ok: false }
@@ -251,12 +266,19 @@ async function purgeExpired(
       // Table not migrated on this deployment → nothing to purge, benign no-op.
       // Deliberately the same narrow table-only classifier the writers use: a
       // missing COLUMN must surface as a real error, never as a false "purged".
-      if (isMissingTableError(error.message)) return { deleted: 0, error: null }
+      if (isMissingTableError(error)) return { deleted: 0, error: null }
       return { deleted: 0, error: `${fnName}: ${error.message}` }
     }
     return { deleted: (data as unknown[] | null)?.length ?? 0, error: null }
   } catch (e) {
-    return { deleted: 0, error: `${fnName} threw: ${(e as Error).message}` }
+    // 2026-08-10 hardening (adversarial review): `(e as Error).message` is
+    // unsafe — a real rejection can carry `undefined`/`null`/a non-Error value
+    // (e.g. `Promise.reject()` with no argument, or a thrown string), and
+    // accessing `.message` on it throws a FRESH error from inside this catch
+    // block, which nothing above wraps — it would have escaped uncaught,
+    // exactly the fail-CLOSED behaviour this function exists to avoid.
+    // Confirmed by direct reproduction. Matches the sibling writers' pattern.
+    return { deleted: 0, error: `${fnName} threw: ${e instanceof Error ? e.message : String(e)}` }
   }
 }
 

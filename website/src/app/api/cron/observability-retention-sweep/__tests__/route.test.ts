@@ -92,16 +92,20 @@ const SWEEP_FLAG = OBSERVABILITY_SWEEP_ENV_VAR
  */
 function makeFakeClient(outcome: {
   data?: unknown[] | null
-  error?: { message: string } | null
-}): { client: unknown; calls: { table: string; column: string }[] } {
-  const calls: { table: string; column: string }[] = []
+  error?: { code?: string; message: string } | null
+}): { client: unknown; calls: { table: string; column: string; value: string }[] } {
+  const calls: { table: string; column: string; value: string }[] = []
   const client = {
     from(table: string) {
       return {
         delete() {
           return {
-            lt(column: string, _value: string) {
-              calls.push({ table, column })
+            // `value` is CAPTURED, not discarded — a mutation that filters on
+            // a shifted timestamp (e.g. now()+90d instead of now(), which would
+            // delete active/live-retention rows rather than expired ones) must
+            // be catchable by asserting on `calls[].value`, not just `.column`.
+            lt(column: string, value: string) {
+              calls.push({ table, column, value })
               return {
                 select(_cols: string) {
                   return Promise.resolve({
@@ -264,21 +268,46 @@ async function main(): Promise<void> {
   // ==========================================================================
   {
     // (a) happy path — deletes filtered on retain_until, count from the rows.
+    const beforeRoute = Date.now()
     const okRoute = makeFakeClient({ data: [{ id: 1 }, { id: 2 }] })
     const rRoute = await purgeExpiredRouteErrors(okRoute.client as never)
+    const afterRoute = Date.now()
     assert(rRoute.deleted === 2 && rRoute.error === null, 'purgeExpiredRouteErrors → count from returned rows')
     assert(
       okRoute.calls.length === 1 && okRoute.calls[0].table === 'route_errors' && okRoute.calls[0].column === 'retain_until',
       'purgeExpiredRouteErrors DELETEs from route_errors filtered on retain_until (never unbounded)',
     )
+    // The FILTER VALUE, not just the column name, must be pinned — a mutation
+    // that filters on e.g. now()+90d (deleting rows NOT yet due, i.e. active
+    // data) would still pass a column-name-only assertion. Adversarial-review-
+    // found and reproduced directly: without this, that mutation silently
+    // passed all other assertions in this file. The captured value must parse
+    // as a real timestamp taken at call time (within this call's wall-clock
+    // window), not some other epoch.
+    {
+      const t = new Date(okRoute.calls[0].value).getTime()
+      assert(
+        Number.isFinite(t) && t >= beforeRoute && t <= afterRoute,
+        'purgeExpiredRouteErrors filters on the CURRENT time, not a shifted epoch (catches the now()+90d mutation)',
+      )
+    }
 
+    const beforeThrottle = Date.now()
     const okThrottle = makeFakeClient({ data: [{ id: 1 }] })
     const rThrottle = await purgeExpiredThrottleEvents(okThrottle.client as never)
+    const afterThrottle = Date.now()
     assert(rThrottle.deleted === 1 && rThrottle.error === null, 'purgeExpiredThrottleEvents → count from returned rows')
     assert(
       okThrottle.calls[0].table === 'throttle_events' && okThrottle.calls[0].column === 'retain_until',
       'purgeExpiredThrottleEvents DELETEs from throttle_events filtered on retain_until',
     )
+    {
+      const t = new Date(okThrottle.calls[0].value).getTime()
+      assert(
+        Number.isFinite(t) && t >= beforeThrottle && t <= afterThrottle,
+        'purgeExpiredThrottleEvents filters on the CURRENT time, not a shifted epoch',
+      )
+    }
 
     // (b) missing TABLE (pre-migration deployment) ⇒ benign no-op, no error.
     const missing = makeFakeClient({ error: { message: 'relation "public.route_errors" does not exist' } })
@@ -323,6 +352,34 @@ async function main(): Promise<void> {
     else process.env.NEXT_PUBLIC_SUPABASE_URL = priorUrl
     if (priorKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY
     else process.env.SUPABASE_SERVICE_ROLE_KEY = priorKey
+
+    // (e) a rejection carrying a NON-Error value (e.g. `Promise.reject()` with
+    //     no argument, which rejects with `undefined`) must not crash the
+    //     catch block itself. Adversarial-review-found: `(e as Error).message`
+    //     on a non-Error `e` throws a FRESH, uncaught error from inside the
+    //     handler that nothing above wraps — the exact fail-CLOSED escape this
+    //     function's whole design exists to prevent. Reproduced directly
+    //     before the fix; this pins the fix, not just the interface.
+    const throwsUndefined = {
+      from() {
+        return {
+          delete() {
+            return {
+              lt() {
+                return { select: () => Promise.reject(undefined) }
+              },
+            }
+          },
+        }
+      },
+    }
+    const rThrowsUndefined = await purgeExpiredRouteErrors(throwsUndefined as never)
+    assert(
+      rThrowsUndefined.deleted === 0 &&
+        typeof rThrowsUndefined.error === 'string' &&
+        /threw:\s*undefined/.test(rThrowsUndefined.error),
+      'a rejection with a non-Error value (undefined) is caught honestly, not re-thrown',
+    )
   }
 
   // ==========================================================================

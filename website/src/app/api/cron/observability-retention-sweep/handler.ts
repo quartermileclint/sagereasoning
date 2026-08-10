@@ -75,6 +75,12 @@ export async function runObservabilityRetentionSweep(
   // Sequential rather than Promise.all: two small indexed DELETEs on one
   // connection, and a serial order keeps the error attribution unambiguous.
   const routeErrors = await deps.purgeRouteErrors()
+  // INDEPENDENT — this call MUST run unconditionally, regardless of whether
+  // routeErrors above failed. Do not add an `if (routeErrors.error) return`/
+  // `skip` guard here: that would silently stop enforcing throttle_events'
+  // retention the moment route_errors' purge broke — reintroducing the exact
+  // declared-but-unenforced gap (C-1) this route exists to close, one layer
+  // up. Pinned by route.test.ts §6 (both failure orderings).
   const throttleEvents = await deps.purgeThrottleEvents()
 
   const errors: string[] = []
