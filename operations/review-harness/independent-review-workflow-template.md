@@ -56,6 +56,42 @@ Concrete failure mode, from this program's own build-plan critique (`wf_e55e52e4
 
 **Caught during adjudication** by re-checking each finding's actual content against what it claimed to be about, not by trusting the label. **Fix pattern:** tag each result with its dimension identity BEFORE any filtering (e.g. `{dimension: 'proactive-safety', result: ...}` pairs, filter the pairs, then destructure) — never rely on array position surviving a `filter`. This applies to any Workflow script combining `parallel()`/`pipeline()` output with a `.filter(Boolean)` (the standard pattern for handling agent errors) followed by anything that reads position as identity.
 
+## 5b. Named pitfall: independence must extend to the filesystem, not just the prompt
+
+**Never give a reviewer destructive or state-mutating git operations (`git stash`, `checkout`,
+`reset`, branch switches, `npm install`) while other reviewers read the same working tree
+concurrently.**
+
+Concrete failure mode, from the 2026-08-10 ARC2 Next.js 14→16 upgrade review
+(`D-ARC2-SESSION2-NEXTJS-14-EOL-UPGRADE-TO-16-2026-08-10`): five dimensions ran in parallel against
+one shared checkout. The rollback-integrity dimension was legitimately asked to *prove the revert
+path works* — which required `git stash` → `npm install` → build → `git stash pop`. The
+type-safety dimension read the tree during that window and reported, with complete internal
+consistency and real command output as evidence, that **`package.json` had never been bumped and
+the diff did not exist** — concluding the upgrade was not a coherent committable change. It was a
+race. The tree was correct before and after; only the mid-stash snapshot was not.
+
+Why this is worth a named entry rather than a footnote: the false finding was *more* alarming and
+*more* specific than most true findings, and it came with genuine evidence. Nothing in the report
+signalled "I may have read a transient state." A reviewer cannot detect this from inside its own
+run — only the orchestrator can prevent it.
+
+**Fix patterns, in order of preference:**
+1. **Read-only by default.** State in each reviewing prompt that the tree is shared and read-only,
+   and that the agent must not run any command that mutates git state or `node_modules`.
+2. **Isolate the one dimension that genuinely needs mutation.** Rollback/reproducibility checks are
+   legitimate and valuable — give that dimension its own copy (`git worktree add`, a clone, or
+   `isolation: "worktree"` if launching via the Workflow tool), not the shared tree.
+3. **Or serialise it.** Run the mutating dimension alone, before or after the read-only fan-out.
+4. **Adjudicate accordingly:** when one dimension contradicts the artifact's basic shape (a file
+   "doesn't exist", a diff "is empty") while other dimensions describe that same artifact in
+   detail, suspect a race and re-check the live state directly *before* treating either report as
+   authoritative. Convergence raises confidence (§2); a lone contradiction of physical fact
+   usually indicates a methodology fault, not a discovery.
+
+The general principle behind §1 holds here too: independence is about what a reviewer can *see*.
+§1 covers what it is told; this covers what it reads off disk.
+
 ## 6. What counts as a genuine finding vs. noise
 
 All three grounding runs found REAL, previously-invisible defects — not busywork, not style nits dressed up as findings. A useful bar, drawn from what these runs actually surfaced:
@@ -72,7 +108,7 @@ If a review's findings are all phrasing/formatting suggestions with no behaviora
 3. Launch fresh (no shared context with any prior review of the same artifact).
 4. Adjudicate every finding to CONFIRMED/REFUTED with reasoning (§3); fold confirmed findings at the root; re-run the regression battery.
 5. If the Workflow dies wholesale on a spend/session limit, apply §4 in full — first-hand completion, explicit disclosure, and a REQUIRED (not optional) independent re-run gating whatever activation/adoption step comes next.
-6. Before trusting any post-processing code that aggregates per-dimension results, check it against §5's pitfall.
+6. Before trusting any post-processing code that aggregates per-dimension results, check it against §5's pitfall. Confirm no reviewer has been given git-state-mutating or `npm install` operations on a shared tree while others read it (§5b) — isolate or serialise that dimension instead.
 7. Record the confirmed/refuted count and the before/after regression numbers in the decision-log entry, per PR19.
 
 ---
