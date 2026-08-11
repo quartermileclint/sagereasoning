@@ -174,6 +174,19 @@ Guardrail calls write no trust events (mechanism fact), so no composition questi
 
 > **AMENDED 2026-08-09 (dated amendment — the sequence above is SUPERSEDED; read this before acting on it).** After the first build gate closed (all three items built DARK), a PR19/PR20 check found that **no session in the sequence owned the three flag activations**, while the bounded validation run structurally depends on two of them (`fresh` and `watching` answer 503 flag-off). Put to the mentor, who **confirmed the gap** (*"Three flags unset. Three routes dark. … The gap is real."*) and ruled: **each flag activation is a founder-walked Critical step, and all three belong to the runner scoping session, immediately after the identity mint and the `watching_write` provisioning** — *"not a separate session; it is the natural completion of the runner scoping session's purpose."* **The runner session's carry-forwards are therefore FIVE, not four, and their internal order is binding:** (1) identity mint `sagereasoning:idea-loop@v1` — *"first, clean, establishes the subject"*; (2) `watching_write` provisioning — *"second, heaviest, most likely to surface surprises, deserves full attention"* (do NOT batch 1 and 2); (3) the three flag activations `SUBSTRATE_FRESH_ENABLED` / `SUBSTRATE_WATCHING_ENABLED` / `SUBSTRATE_LOOP_ID_FIELD_ENABLED` — *"third, only after the capability surface is confirmed correct, because the routes being activated depend on it"*; (4) `ORIENTATION_DELIVERY_TIMEOUT_MS` revisit; (5) `frictionAssessment` PM-tool mapping. **The binding sequence now reads:** brief ruled → `fresh` ruled → `watching` ruled → generation-step ruled → **first build gate (all three built dark)** → **runner scoping session (identity mint → `watching_write` provisioning → three flag activations → timeout revisit → friction mapping)** → bounded validation run → standing-runner design. Verbatim: `2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md` §FOLLOW-UP RULING; decision-log `D-ACTIVATION-OWNERSHIP-RULED-2026-08-09`. Separately, GS-ATRF-1/2/3 are carried into the runner scoping session's scope document as **named inputs** (not build items), and a new post-validation-run **ATRF scoping session** is named (`D-MENTOR-PRIORITISED-SEQUENCE-ADOPTED-2026-08-09`).
 
+> **Correction, added 2026-08-11 (see §2.12 below) — read alongside the paragraph above, which is now
+> partially superseded.** GS-ATRF-3's status has changed since this paragraph was written. Its
+> **return path** — transport, schema, what the harness does with it — remains exactly as this
+> paragraph describes: carried into the ATRF scoping session as a named input, not pre-answered here.
+> But GS-ATRF-3 also now has a **requirement**, ruled 2026-08-11 and stated in this document itself
+> (§2.12) — the completion signal must carry examination evidence, not a binary flag. That requirement
+> does not wait for the ATRF session; only its implementation does. GS-ATRF-1 (already ruled 2026-08-09,
+> the four-virtue answer, confirmed unchanged 2026-08-11) and GS-ATRF-2 (shape specified, not built —
+> see `operations/primal-substrate-2026-08/gs-atrf-2-shape.md`) are carried forward exactly as this
+> paragraph states; only GS-ATRF-3's placement changed. See
+> `operations/primal-substrate-2026-08/gs-atrf-corrections.md` for the full corrected reading of all
+> three.
+
 ### 2.10 What the generation step deliberately does NOT do
 
 - **No execution** — the Q1 hard constraint, restated at the exact point of temptation: the winner is surfaced for human election (Phase 6); no template, no selection function, and no runner path scoped here acts on, schedules, or begins any proposed action. Friction winners populate the shared task list *as candidate tasks* — entering a list a human reads is proposal, not execution.
@@ -187,6 +200,13 @@ Guardrail calls write no trust events (mechanism fact), so no composition questi
 - **MEASURE-only; weights blocked** — inherited unchanged; generation outputs (candidates, confidences, seeds) are not training signals.
 
 **RULED 2026-08-09 — §2.10 confirmed in full.**
+
+> **Added 2026-08-11 (cross-reference; see §2.12).** §2.12's completion-signal requirement is not an
+> exception to this list. **Stating what the completion signal must carry is not designing its return
+> path** — the same distinction this section already draws for the watching table (§1.8's
+> validation/standing-runner boundary; §2.9's "specifies what must be carried, not how the table is
+> built"). Transport, schema, endpoint, and storage for the completion signal remain the ATRF scoping
+> session's, exactly as this section states for the watching table's own construction.
 
 ### 2.11 Required review dimensions at the first build gate (generation-side)
 
@@ -203,6 +223,64 @@ Carried as requirements for whichever build session realises the runner-side cyc
 6. *"The additive `loop_id` field on `/api/reason` correctly implemented per the B5 `session_marker` precedent — optional declared field, validated flag-on, malformed → 400, ignored flag-off, byte-identical behaviour verified."*
 
 All six are required review dimensions at the first build gate.
+
+### 2.12 The completion signal's examination-evidence requirement (B1, dated amendment)
+
+> **AMENDED 2026-08-11 (dated amendment — adds a requirement to this document; nothing above is
+> deleted or reversed by it).** Put to the mentor as Q8-a of the S8 corrections-and-ruling-request scope
+> (`operations/primal-substrate-2026-08/S8-gs-atrf-corrections-and-ruling-request-scope.md`), which
+> asked whether the 2026-08-09 GS-ATRF-3 deferral (§2.9 above) should be held, reversed, or held with a
+> requirement stated at this document's own level. The mentor ruled the **middle** position, verbatim
+> (`operations/primal-substrate-2026-08/2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`, B1):
+>
+> *"The 2026-08-09 ruling rested on actor and moment: the completion signal is authored by a different
+> actor at a different moment from the generation-step. That reasoning survives. The synthesis's new
+> argument — that the signal must carry examination evidence, not a binary flag — is real and was not
+> before me on 2026-08-09. It addresses content, not actor or moment.
+>
+> Ruling: the generation-step document **states the requirement** — the completion signal must carry
+> examination evidence, not a binary flag, and the reason is that the signal is the primary
+> post-execution evidence of whether genuine examination occurred rather than simulation. The **return
+> path** — how the agent sends it, what the harness does with it, schema — is **scoped in the ATRF
+> session**. The Q1 hard constraint is preserved because the generation-step document is stating a
+> requirement on a downstream artefact, not designing that artefact's implementation. This is the same
+> relationship the generation-step document has to the watching table: it specifies what must be
+> carried, not how the table is built."*
+>
+> Decision-log: see the S8 amendment entry filed alongside
+> `operations/primal-substrate-2026-08/gs-atrf-corrections.md` and
+> `operations/primal-substrate-2026-08/gs-atrf-2-shape.md`, which this same ruling also authorised.
+
+**The requirement, stated and nothing more:**
+
+The idea completion signal (ATRF carried element 3, `manifest.md` ATRF section — *"a thin task-agnostic
+completion signal returns to the harness: whether the idea was completed and how the outcome compared
+to the proposal"*) must carry evidence of the agent's own examination of its completion — not a binary
+completed/not-completed flag. The reason, stated by the ruling: the signal is the **primary
+post-execution evidence of whether genuine examination occurred rather than simulation**. A signal that
+collapses to a boolean cannot carry that evidence — not because a boolean is the wrong data type in
+isolation, but because it discards exactly the content ("how the outcome compared to the proposal," in
+the manifest's own words) that would let a later reader distinguish genuine post-execution examination
+from a report that merely claims success.
+
+**The test applied to every sentence above, and to be applied by any future reader of this section:**
+*what must be carried* — yes, stated; *how it is built* — no, not stated. If a sentence would still be
+true were the return path implemented three different ways, it belongs in this requirement. If it
+constrains which implementation, it does not belong here.
+
+**What this section does NOT do, restated because the boundary is the one thing this amendment exists
+to hold:** it names no field, no schema, no endpoint, no transport, no payload shape, and no storage
+decision for the completion signal. It does not say how the agent sends it, what the harness does with
+it on receipt, or where — or whether — it is persisted. Those are the **ATRF scoping session's**,
+exactly as the watching table's *how it is built* was never this document's to decide (§1.8, §2.9,
+§2.10's cross-reference above).
+
+**The Q1 hard constraint is unaffected.** The completion signal is read post-execution, about an action
+a human already elected and a runner already generated only as a proposal (§2.10's "no execution").
+Stating that the signal must carry examination evidence does not give the generation step any role in
+executing, electing, or scheduling that action — it states a requirement on an artefact a different
+actor produces at a different moment, which is precisely the distinction the 2026-08-09 deferral's
+actor/moment reasoning drew and which this ruling confirms still holds.
 
 ---
 

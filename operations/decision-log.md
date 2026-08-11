@@ -19219,3 +19219,306 @@ Expected: every matching row reads `REVOKED`.
 **Status:** Adopted. Cross-references: `operations/handoffs/founder/2026-08-10-ARC2-session-3-cred1-auth-smokes-NEXT-SESSION-PROMPT.md`; `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`; `D-ARC2-SESSION2-NEXTJS-14-EOL-UPGRADE-TO-16-2026-08-10`; `D-FABLE5-REGROUNDING-AUDIT-SESSIONS-2026-07-26-TO-30-2026-08-01`; `D-AUTH-RESET-TRUST-AND-REDIRECT-FIXES-2026-07-25`.
 
 **Model:** Claude Sonnet 5. **Effort:** medium.
+
+---
+
+## 2026-08-11 — D-PRIMAL-SUBSTRATE-SCOPE-FAMILY-AUTHORED-AND-RULED-2026-08-11
+
+**Decision:** Authored the eight-document primal-substrate scope family (`operations/primal-substrate-2026-08/`, `S1`–`S8`, numbered to match the mentor's own synthesis headings), put a PR20-compliant confirmation brief to the mentor, and folded the returned ruling. **All 35 items answered: seven corrections confirmed (none overruled), seven blocking decisions ruled, nineteen confirmations given, two founder acts named, sequencing adopted unchanged.** Nothing built; no code, schema, flag, credential, or public surface touched.
+
+**Reasoning:** The mentor's 2026-08-11 synthesis translated a brainstorming arc into eight headings, each marked concurrent-or-parked. Turning that into buildable scope required checking every mechanism claim first-hand (PR20) rather than inheriting it — which surfaced material departures the synthesis could not have known about, since it was written without the 08-09 record and the current gate state in front of it.
+
+**The seven corrections, all confirmed by the mentor:**
+- **A1** — the examination pathway the synthesis asks to be *developed* already exists, committed and sourced, as `DIAGNOSTIC_SEQUENCE` (`website/src/lib/stoic-brain.ts:595-601`); its steps 2 and 5 are the synthesis's own two questions. `CAUSAL_SEQUENCE` (`:584-589`) already names the interception point (`synkatathesis`) and already names the locust problem as the `praxis` failure mode. **No new taxonomy licensed** — a PR15 reuse finding that reshapes S7 entirely.
+- **A2/A3** — GS-ATRF-1/2 were already ruled 2026-08-09 with a **four-virtue** proxy (the synthesis's circle-only framing is one of its four dimensions, a narrowing); `manifest.md` already fixes `high|medium|low` and requires **two** records; and the "watching table carries `target_circle`" claim was already checked and found false on 08-09 — re-verified column-by-column 2026-08-11. Three additive columns are needed, not one.
+- **A4** — "the first build gate" closed 2026-08-10; five parked items re-parked on the §6 report, the ATRF scoping session, or the standing-runner design.
+- **A5** — cycle 2's `principled` is uncertified, was delivered `observed` not `examined` (29,750 ms against the 28,000 ms bound), and both h7 outcomes were tie-break-decided. Mentor's gloss: *"The friction hypothesis is not weakened — it is stated more honestly."*
+- **A6** — two `/api/reason` incidents in five cycles, of opposite sign (cycle 3 contamination by addition, fixed; cycle 5 `extraction_instability` by omission, ruled as having no clean fix).
+- **A7** — "Layer 2b" **is** correct terminology (`manifest.md` AC6); an earlier in-session review of mine said otherwise, having searched the code and not the manifest. Recorded, not dropped.
+
+**Two build-safety findings the scoping surfaced independently:** (i) *"provided to Claude as context"* must **not** mean `project-context.json` — `getProjectContext('condensed')` is called on every `/api/reason` request (`route.ts:1409`) and injects into the Layer-1 prompt; that is the exact path behind the cycle-3 contamination. Framing documents are repo documents read by build sessions. (ii) A tool that deliberately elicits shame and `agonia` sits closer to the R20a perimeter than any of its seven siblings, all of which sit outside by precedent — surfaced as a live AC5 question rather than an inherited default.
+
+**The seven blocking rulings:** **B1** GS-ATRF-3 — the **middle option**: the generation-step document *states the requirement* (the completion signal must carry examination evidence, not a binary flag); the return path is scoped in the ATRF session; the Q1 constraint holds because this is the same relationship the document already has to the watching table — *what must be carried*, not *how it is built*. **B2** S7 is a **new tool**, not an extension of `/passion-log` (whose `passion_events` table feeds the live Phase-2 suggestion surface). **B3** S7 sits **inside** the R20a perimeter — a ruled departure from family precedent, AC5-recorded with its reason. **B4** the reciprocity pathway is a **distinct mode** framed around the `praxis` failure mode, with a mentor-supplied two-question set. **B5** S6's **null result is frozen** before the distribution is visible (the P2 frozen-boxes discipline). **B6** the S5 manifest wording is **supplied but not adopted**. **B7** the cross-endpoint traceability comparison **starts immediately** as a protocol change on the live run.
+
+**Files touched:** eleven documents, all new, all in `operations/primal-substrate-2026-08/` — `00-PRIORITY-INDEX.md`; `2026-08-11-mentor-synthesis-primal-substrate-verbatim.md`; `2026-08-11-MENTOR-BRIEF-scope-confirmation.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`; `S1`–`S8` scope documents (rulings folded as inline `RULED` annotations under each open question, proposal prose kept and marked ruled rather than deleted — the house pattern).
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only. AC7 not engaged; PR6 not engaged. `git diff --stat` shows no file outside this directory and no code, schema, flag, or public surface.
+
+**Settled names (C10), binding on all future documents:** **loop-level blast-radius proxy** (reasoning-level, proposal time, no task details) and **permission-layer blast-radius enrichment** (item 16's field, produced by item 14's post-verdict analysis). Neither may be shortened to bare "blast radius" — the project has been bitten twice this window by two things sharing a name.
+
+**Open questions / carried:**
+- **D1 (blocks S1, S2, S7) — FOUNDER ACT, not performed.** The eleven-traits research must be committed verbatim. **An honest correction to the ruling's premise, recorded not absorbed:** it states the research *"exists in this session's context"* — it exists in the **mentor's** session, not this repository's; no AI session here has ever been given it, so the founder must relay the text in. The blocker stands as ruled; only the clearing mechanism differs.
+- **D2 (blocks S5) — FOUNDER ACT, not performed.** The B6 wording is recorded verbatim in the ruling record and has **not** been written into `manifest.md`, per the ruling's own *"does not become a governing document entry until you confirm it."*
+- **B7 — FOUNDER RELAY, not performed; the relay prompt is AUTHORED and MENTOR-REVIEWED.** The ruling issues the cross-endpoint comparison into the mentor channel; carrying it into the validation run's `RUN-LOG.md` is the founder's, as a repo session must not write into the run's records. The pasteable relay text is `operations/handoffs/founder/2026-08-11-B7-cross-endpoint-traceability-run-relay-PROMPT.md` (self-contained, explicit paste boundaries, ruling quoted verbatim with the relaying session's specification labelled as a reading open to correction). **Mentor-reviewed before relay and cleared with one precision correction, applied:** the two divergence signatures — empty-vs-populated (cycle 5's, the only one with a worked example) and disjoint-domain-sets (no instance yet in this run) — are now stated as *distinct failure classes*, so a session reading quickly cannot take 'disjoint' as a stricter form of 'empty'. **All five of the relaying session's judgement calls were put to the mentor and confirmed sound**, including the drawn analogy to the cycle-3 retry-then-stop posture (confirmed as transferring, and the analogy-not-ruling framing called *"the honest framing"*) and the `unlabelled` category for cycles whose extractions were not preserved (*"An unexamined cycle is not a clean one"*). **Load-bearing for S6:** B5's discriminator is restricted to cycles cross-checked clean, so cycles run before B7 begins carry no such label.
+- **New carried item (C15):** resolve the three-enumeration circle discrepancy (`manifest.md` R0 four; `stoic-brain.ts:445` five; the trust core's `OikeiosisCircle` five in a different vocabulary). Unscoped, blocking nothing.
+- **Q3-d deliberately unruled** — eighth heuristic vs reshaped existing vs pre-generation step stays open for the ATRF session, with the costing note carried that an eighth heuristic is a **schema** change (the closed seven-value union is mirrored by a CHECK constraint).
+- **S7's blast radius rose:** it is now an R20a perimeter change, so the perimeter registry (11 route-level + 2 substrate-gate = 13) and its guard suite must be updated in the same PR.
+
+**Rules served:** PR15 (the A1 reuse finding — the committed diagnostic sequence rather than a bespoke pathway), PR18, PR19 (named as required before any build in this family lands), PR20 (every mechanism claim traced to `file:line` before the ruling was requested; three synthesis claims found false or stale this way), R7 (the B4 ruling avoids inventing a passion sub-species), AC5 (B3's perimeter departure recorded), AC6/AC7.
+
+**Rollback path:** `git revert` the records commit. Documents only; nothing deploys, no flag, no schema, no public surface. Each scope document is independently revertable.
+
+**Status:** Adopted. Cross-references: `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`; `2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md`; `D-REASON-INPUT-CAP-VS-PROJECTCONTEXT-CONTAMINATION-FIXED`; `D-ACTIVATION-OWNERSHIP-RULED-2026-08-09`.
+
+**Model:** Claude Opus 5 (the scope family and the ruling fold); the initial synthesis review ran on Claude Fable 5, disclosed at the model switch. **Effort:** high.
+
+---
+
+## 2026-08-11 — D-CYCLE6-RULING-FOLDED-B7-DISCHARGED-2026-08-11
+
+**Decision:** Folded the mentor's cycle-6 ruling (three items) into the primal-substrate scope family, and recorded **B7 as discharged** — the cross-endpoint traceability check is in force from cycle 6. Documents only; no code, schema, flag, credential, or public surface touched, and nothing written into the validation run's records.
+
+**Verified first-hand against `RUN-LOG.md` rather than folded from the ruling summary** (the run's project is on this filesystem; reading it is cheap and the ruling's factual premises were checkable): B7 in force from cycle 6 (`:286`) with its own carried-findings table (`:371`); cycle 6's full candidate set and guardrail verdicts (`:1620-1641`); the run session's own pattern analysis (`:1660-1673`); and the cycle-6 B7 row (`:1749`).
+
+**Item 1 — the third `/api/reason` failure class. Ruled NOT the third strike.** Cycle 6 produced `layer1_throw` — `extraction: null`, `meta.fallback: true`, an honest `fallback_reason` — reproduced on retry, cycle written `dependency_unavailable`. The mentor's reasoning is the part worth keeping: cycles 3 and 5 were dangerous *in the same specific way* (a confident, articulate verdict computed over wrong content — *"the locust wearing the appearance of virtue"*), and cycle 6 is not that. *"It did not serve a wrong verdict. It served no verdict."* The escalation bar exists because confident wrong verdicts entering undetected would corrupt the §6 findings irreparably; honest null returns reduce the completed-cycle count without contaminating the completed verdicts. Also carried verbatim, because the naive reading is the opposite: the three `dependency_unavailable` outcomes in six cycles *"are not evidence that the run is unreliable. They are evidence that the retry-then-stop discipline is working … The discipline is costing cycles and preserving integrity. That is the correct trade."*
+
+**Item 2 — the dikaiosyne floor pattern. This is live production behaviour, not a run artefact.** Cycle 6 produced the run's **first genuine `rejected_by_guardrail` verdicts**: h1, h2, h4 each received a full, signed, populated examination returning `proceed: false`, all floored to `reflexive` by `dikaiosyne: "reflexive"` in `proximity_floors` — h4 from a `base` of `principled`, the cycle's highest, to the scale's lowest rank. That is the ADR-010 §4 unity-thesis minimum-domain rule (live since 2026-06-25) operating on `/api/guardrail` (native since the §3-bridge retirement, 2026-06-26). Carried as a §6 finding with **both** the mentor's readings stated — (a) the justice domain correctly refusing to endorse proposals that would overclaim current reliability, (b) a false positive from misreading transparency proposals as output-quality claims — and **not diagnosed**.
+
+**A discriminator this session proposes, as a refinement rather than a settled diagnosis (S4 §2.6).** The run session had already ruled out the prohairesis-`outside` explanation (h3/h5/h7 are also system-level proposals and passed). Across all six candidates one line separates floored from passed: **whether the proposal places a NEW claim about assessment reliability onto the assessment-bearing surface itself.** h1/h2/h4 do; h3 *relocates existing* `/limitations` + `/transparency` content to a README and **passed at `principled`**, the cycle's joint-highest. So "disclosure proposals get floored" is false as stated — **h3 is the control**, and it is what discriminates the two readings: reading (b) predicts h3 would also floor; it did not. On the evidence available the asymmetry points toward **(a)**. Bounds carried inline: N=6 in one cycle, and the discriminating evidence the mentor names is not yet available because cycle 6's own winner-side call was the `layer1_throw`.
+
+**Item 3 — a limitation in the mentor's stated test, raised not resolved (new open question Q4-e).** The mentor assigns the cross-endpoint check the job of separating readings (a) and (b). But the ruled cycle sequence **filters at the guardrail step** — a `rejected_by_guardrail` candidate never reaches novelty and is never consulted on `/api/reason` — so there is no reason-side extraction to compare for any floored candidate, and the check (which runs on winners) can never directly test the floored class. Options stated; AI recommends indirect evidence only in v1, with the limitation stated in the §6 report rather than left for a reader to find.
+
+**B7's first application immediately found an unanticipated condition, and the run session handled it correctly.** Cycle 6's winner-side call was the `layer1_throw`, so the comparison could not be performed at all. The run session refused to file it under either named divergence signature: *"forcing it into 'empty-vs-populated' would misdescribe an honest failure as an extraction defect."* **The recording vocabulary therefore gains a fourth value, `not_comparable`** — distinct from `diverged` (it must not inflate the §6 divergence rate with honest outages) and behaving like `unlabelled` under B5's frozen discriminator (out of scope; never inferred clean).
+
+**Second new open question (Q6-e):** the joint test C8 requires may need a **third axis — proposal class**. If the virtue-domain heuristics disproportionately generate self-referential reliability claims (which floor) while friction generates maintenance work (which structurally cannot make such a claim), the heuristic-level comparison confounds *which heuristic* with *which proposal class*, and a measured h7 advantage would be a composition effect. Cycle 6 also cuts against over-reading it: h7 passed at `principled` — **level with h3**, a virtue-domain candidate — the third consecutive cycle consistent with *competitive, not superior*. This does not alter B5's frozen null result; it names an axis that must be reported alongside it.
+
+**Files touched:**
+- `operations/primal-substrate-2026-08/S4-traceability-criterion-scope.md` — amendment banner; three-row failure-class table; §2.1b (`not_comparable`); §2.1c; §2.6 (the floor pattern, both readings, the proposed discriminator, bounds); new Q4-e
+- `operations/primal-substrate-2026-08/S6-friction-primary-mechanism-hypothesis-scope.md` — §2.2b (proposal-class confound); new Q6-e
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — B7 discharged; the cycle-6 fold summarised; the two new open questions named
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only. AC7 not engaged; PR6 not engaged. No write into the validation run's records — the run's findings are the run's.
+
+**Open questions / carried:** **Q4-e** and **Q6-e**, both unruled, neither blocking. **D1** and **D2** unchanged and still outstanding (both founder acts). The binding instruction *"do not adjust the generation heuristics to avoid producing disclosure proposals — the pattern is data"* is carried in S4 §2.6.
+
+**Rules served:** PR11 (the ruling's factual premises checked against the run log rather than accepted from the summary — which surfaced the `not_comparable` condition and the h3 control, neither of which is in the ruling text), PR18, PR20, R7.
+
+**Rollback path:** `git revert` the records commit. Documents only.
+
+**Status:** Adopted. Cross-references: `D-PRIMAL-SUBSTRATE-SCOPE-FAMILY-AUTHORED-AND-RULED-2026-08-11`; `operations/handoffs/founder/2026-08-11-B7-cross-endpoint-traceability-run-relay-PROMPT.md`; `D-SAGE-PRACTICE-ADR010-SECTION4-FLAG-FLIP-ACTIVATION`; `D-SAGE-PRACTICE-ADR010-SECTION3-GUARDRAIL-BRIDGE-RETIREMENT`.
+
+**Model:** Claude Opus 5. **Effort:** high.
+
+---
+
+## 2026-08-11 — D-S4-S6-CRITERION-AND-HYPOTHESIS-AUTHORED-2026-08-11
+
+**Decision:** Wrote S4's and S6's concurrent-half deliverables — `operations/primal-substrate-2026-08/traceability-criterion.md` and `operations/primal-substrate-2026-08/friction-primary-hypothesis.md` — to the specifications already ruled in the scope documents and the three verbatim mentor records. No re-scoping; both documents build strictly from what was already ruled, and both feed the IDEA-loop bounded validation run's §6 report.
+
+**`traceability-criterion.md`** turns the mentor's three-property criterion into checks a reviewer can apply, each stated with its pass case, not only its failure signature. Its spine is the Q4-e ruling's two evidence streams: winners get all three properties, including the cross-endpoint comparison; filtered (`rejected_by_guardrail`) candidates get traceability and proportionality within the single guardrail extraction only, because the third property — consistency across equivalent inputs — is unavailable by construction (a floored candidate never reaches `/api/reason`). Carries the four-valued recording vocabulary (`clean` / `diverged` / `not_comparable` / `unlabelled`, with `not_comparable` behaving like `unlabelled` under B5 — never inferred clean), the three ruled failure classes (`contamination` / `extraction_instability` / `layer1_throw`, with the mentor's reasoning for why the third cannot contaminate completed verdicts), the doubled honest bound (two agreeing extractions can both be wrong, on **either** stream), the dikaiosyne-floor pattern as a named-not-diagnosed finding carrying both of the mentor's readings plus the scope document's proposed discriminator (explicitly labelled a refinement at N=6, h3 named as the control), and the mentor's verbatim framing of the three `dependency_unavailable` cycles as evidence the retry-then-stop discipline is working, not that the run is unreliable.
+
+**`friction-primary-hypothesis.md`** states the friction hypothesis in the mentor's own words with the mentor's own caution intact, the evidence table across all six cycles with every caveat (uncertified, `observed`-not-`examined`, tie-break-decided) inline on the row it qualifies, the architectural stakes of the reordering it explicitly does not propose (a change of kind, not of order — the novelty check becomes basis-less for the primary channel by construction), the third confound cycle 6 surfaced (proposal class, per Q6-e), the three-axis joint-test structure the Q6-e ruling requires (proximity × extraction cleanliness × proposal class, with the three named proposal-class buckets), the B5 null result transcribed byte-identically from its source record, and the mandatory underpowered-evidence clause.
+
+**Verification performed before closing:** every cited number traced to `RUN-LOG.md` directly (cycles 1–6 read first-hand, not from the scope documents' summaries); every mentor quotation traced to one of the three verbatim records; `git diff --stat` confirmed the session's changes land only in `operations/primal-substrate-2026-08/` and this decision-log entry; nothing written into the IDEA-loop validation run's own project or records.
+
+**PR19 — independent adversarial review performed, focused per the prompt's proportionality guidance (fidelity to the frozen null result; caveat drift; claims-vs-run-log; no reordering/`projectContext` authorization language).** Verdict: minor issues, no critical/major findings. Three confirmed and fixed at the root: (1) two instances where cycle 2's `principled` reading appeared without its mandatory inline uncertified/`observed` labels — both now carry both labels inline, and the promise that the labels ride every citation (not only table reproductions) is now stated explicitly, matching the scope document's build-success criterion; (2) an arithmetic error inherited from a pre-existing bookkeeping drift in `RUN-LOG.md` itself (successive cycle entries' own running tallies silently drop cycle 4 from the "reached `principled`" count even though cycle 4's own entry includes it) — reconciled against the document's own assembled evidence table to the correct "five of the six cycles h7 has appeared in," not reproduced from the drifted source; (3) a one-word misquotation inside a marked verbatim quote ("the point where the existing system resists or fails" versus the source's "the point where the system resists or fails") — corrected to match the source exactly. The B5 frozen-null-result transcription, the `not_comparable`/doubled-honest-bound/dikaiosyne-dual-reading/strict-vs-tie-break-separation discipline, and the absence of any reordering or `projectContext`-authorization language were all confirmed clean on first pass.
+
+**Files touched:**
+- `operations/primal-substrate-2026-08/traceability-criterion.md` — new
+- `operations/primal-substrate-2026-08/friction-primary-hypothesis.md` — new
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — S4/S6 concurrent halves marked done
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only — no code, schema, flag, credential, migration, or public-surface change. AC7 not engaged; PR6 not engaged.
+
+**What remains parked, unchanged from the scope documents:** S4's watching-table extension (an additive migration, parked on the §6 report reaching the mentor — its own founder-walked 0c-ii Critical step when it opens). S6's reordering decision (parked on the §6 report, then the standing-runner design, itself explicitly "not to be pre-scoped"). Neither document proposes, prepares, or authorises either.
+
+**What the founder must relay, if anything:** both documents now exist in the repo and are ready for the §6 report to draw on. This session did not carry them into the validation run itself — the run's records are the run's, per the parallel-window discipline. No further action is required to "activate" either document; they are reference material for whoever writes the §6 report.
+
+**Rules served:** PR15 (the cross-endpoint check reused as-is, not re-derived — S4 §4 explicitly declines to re-propose a mechanism already in force via B7), PR18, PR19, PR20 (every claim in both documents traced to `file:line` in the scope documents or to a specific `RUN-LOG.md` line, per the scope documents' own §2 discipline), R7.
+
+**Rollback path:** `git revert` the records commit. Documents only; nothing deploys, no flag, no schema, no public surface. Each document is independently revertable.
+
+**Status:** Adopted. Cross-references: `S4-traceability-criterion-scope.md`; `S6-friction-primary-mechanism-hypothesis-scope.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`; `2026-08-11-mentor-rulings-cycle6-and-open-questions-verbatim.md`; `D-CYCLE6-RULING-FOLDED-B7-DISCHARGED-2026-08-11`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium (per this session's auto-mode default; PR19 review agent ran at its own default effort).
+
+---
+
+## 2026-08-11 — D-S8-GENERATION-STEP-B1-AMENDMENT-2026-08-11
+
+**Decision:** Wrote the three deliverables the S8 GS-ATRF corrections-and-ruling-request scope
+document's 2026-08-11 ruling authorised: (1) a dated amendment to
+`operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md` stating the B1-ruled
+completion-signal requirement; (2) `operations/primal-substrate-2026-08/gs-atrf-corrections.md`; (3)
+`operations/primal-substrate-2026-08/gs-atrf-2-shape.md`. No re-scoping; all three build strictly from
+`S8-gs-atrf-corrections-and-ruling-request-scope.md` and the two governing verbatim records
+(`2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`;
+`2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md`).
+
+**The amendment (§2.12, new).** States, and only states, the B1 ruling's requirement: the idea
+completion signal must carry examination evidence, not a binary completed/not-completed flag, because
+the signal is the primary post-execution evidence of whether genuine examination occurred rather than
+simulation. Quotes the B1 ruling verbatim in full. Names no field, schema, endpoint, transport, payload
+shape, or storage decision — the return path stays scoped in the ATRF session, per the ruling's own
+watching-table analogy ("specifies what must be carried, not how the table is built"). Two smaller
+corrections landed alongside it in the same file: a correction appended to the end of §2.9's existing
+2026-08-09 amendment (GS-ATRF-3's *requirement* now lives in §2.12; only its *return path* still waits
+on the ATRF session — GS-ATRF-1/2's carry-forward status is unchanged), and a cross-reference appended
+to §2.10's "what the generation step does NOT do" list, stating explicitly that carrying the
+requirement is not designing the return path. All three edits are additive under the house
+dated-amendment pattern (original prose kept, nothing deleted or reversed).
+
+**`gs-atrf-corrections.md`.** Records three corrections, each quoted from its source rather than from
+the 2026-08-11 synthesis that mis-stated them: (a) GS-ATRF-1 was already ruled 2026-08-09 with a
+**four-virtue** answer (circles affected / reversibility / preferred indifferents at stake / impulse
+proportionality) — the synthesis's "proxy for the oikeiosis circle most affected" is the first of the
+four dimensions, not the whole; A2 confirms the four-dimension answer stands. (b) `manifest.md`'s ATRF
+section already fixes the vocabulary at `high | medium | low` and requires **two** records — the loop's
+indicator and the agent's own assessment, "recorded alongside … for longitudinal comparison" — not the
+synthesis's single additional field. (c) The watching table (`idea_loop_candidates`) has no
+`target_circle` column — re-verified independently a second time, 2026-08-11, column-by-column against
+`website/supabase-idea-loop-watching-migration.sql` §2 (17 columns, none named `target_circle`); A3
+confirms three additive columns are needed, not one.
+
+**`gs-atrf-2-shape.md`.** Specifies, without building, the GS-ATRF-2 shape: two new optional fields on
+`GeneratedCandidate` (`blastRadius?: 'high'|'medium'|'low'`, `blastRadiusBasis` as a structured
+four-dimension disclosure record, persisted per C11 rather than computed at read time — recommended
+over a bare `isProxy: true` boolean, which would satisfy the letter and lose the traceability the S8
+scope document's own §4 criterion asks for); the absent-not-defaulted rule for friction candidates
+(which carry no `targetCircle` by construction, so cannot support the dikaiosyne dimension), named
+explicitly as an interaction with S6 (if friction ever became the primary channel, it would be the one
+channel structurally unable to carry the indicator); the parked three-column watching-row migration
+(`blast_radius`, `agent_blast_radius`, `target_circle`, all additive/nullable, founder-walked 0c-ii when
+it opens); and the two settled names from C10 (**loop-level blast-radius proxy** vs **permission-layer
+blast-radius enrichment**), plus a second, previously unnamed conflation risk raised in this document —
+the proxy's dikaiosyne *dimension* (an input to a reach estimate, computed by the loop before any
+examination) is not the live engine's dikaiosyne *floor* (`proximity_floors.dikaiosyne`, a scoring floor
+inside `computeProximity`, triggered during examination) — same virtue name, two distinct mechanisms in
+two distinct systems, disambiguated explicitly per C10's own stated reason (the project has been bitten
+twice this window by shared names). C16's reach-not-headcount constraint is stated as binding on the
+eventual build.
+
+**PR19 — independent adversarial review performed** (a fresh general-purpose agent, no prior context,
+instructed to re-derive every quote from the source files itself rather than trust the new documents'
+citations). Verdict: substantially clean; no fidelity defect found in any checked quotation (B1, A2, A3,
+C10, C11, C16, the GS-ATRF-1 four-virtue answer, the manifest's blast-radius paragraph, the "no
+`target_circle`" claim independently re-verified against the actual migration SQL, and the C15
+three-enumeration counts independently re-derived against `manifest.md` R0, `stoic-brain.ts:445`, and
+the trust core's `OikeiosisCircle` vocabulary — all four/three/two/three counts confirmed against
+source); no contradiction found between §2.9's correction and §2.12 on GS-ATRF-3's status. Two findings,
+both fixed at the root before this entry was written: (1) a borderline sentence in §2.12 ("a signal that
+carries the agent's reasoning about what happened, compared against what it proposed") read as leaning
+toward a narrative/reasoning-trace shape more than the manifest's own "how the outcome compared to the
+proposal" language warranted — reworded to explain *why* a boolean fails (it discards exactly the
+content the manifest's own wording names) without implying any particular carried shape. (2) an internal
+tension in `gs-atrf-2-shape.md`, where the "Persistence" section treated C11 ("persisted") as settling a
+fourth DB column while the migration table treated a basis column as merely optional — resolved by
+distinguishing two separate questions the document had conflated: C11 requires the basis be computed
+once and never re-derived (satisfied by construction, since the runner already holds its own
+`GeneratedCandidate` history as external cycle state per the generation-step document's own §1.7
+architecture ruling), versus whether SageReasoning's own database *also* keeps a durable copy — the
+latter left explicitly open to the build session, not settled by C11 or by this specification. A third,
+lower-confidence process note (§2.12's closing line pointed forward to this decision-log entry before it
+existed) is discharged by this entry's own existence.
+
+**Verification performed before closing:** `git diff --stat` confirmed the session's changes land only
+in the three permitted paths — `operations/primal-substrate-2026-08/` (two new files), the single
+permitted file in `operations/agent-circles-2026-08/`, and `operations/decision-log.md` — with no other
+file in `operations/agent-circles-2026-08/` touched; every mentor quotation traced to
+`2026-08-11-mentor-ruling-scope-confirmation-verbatim.md` or
+`2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md` directly, not to an
+annotation quoting either; the four-virtue answer transcribed from the 2026-08-09 record in full, not
+paraphrased; `high | medium | low` and the two-record requirement traced to `manifest.md` directly;
+neither settled name (C10) shortened to bare "blast radius" anywhere in either new document or the
+amendment; nothing written into
+`/Users/clintonaitkenhead/Claude-work/PROJECTS/idea-loop-validation-run/`.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md` — §2.12 (new), a correction
+  appended to §2.9's amendment, a cross-reference appended to §2.10
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` — new
+- `operations/primal-substrate-2026-08/gs-atrf-2-shape.md` — new
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only — no code, schema, flag,
+credential, migration, or public-surface change. AC7 not engaged; PR6 not engaged.
+
+**What remains parked, unchanged from the scope documents:** the three-column watching-row migration
+(founder-walked 0c-ii when it opens, not before); the GS-ATRF-3 completion-signal return path (the ATRF
+scoping session, post-validation-run, explicitly "do not open early"); C15 (the three-enumeration circle
+discrepancy — named, unscoped, untouched); Q3-d (the eighth-heuristic-vs-reshaped-existing question —
+untouched, and named as a schema question if a future session touches it).
+
+**What the founder must relay, if anything:** most likely nothing. This session's deliverables are
+repo-resident documents the ATRF scoping session will read when it opens; nothing here requires a live
+op or a relay to the mentor before that session.
+
+**Rules served:** PR15 (the four-virtue answer and the manifest paragraph reused verbatim, not
+re-derived), PR18, PR19 (independent adversarial review performed and folded, per above), PR20 (every
+correction traced to `file:line` or a verbatim quotation before being stated as settled), R7.
+
+**Rollback path:** `git revert` the records commit. Documents only; nothing deploys, no flag, no schema,
+no public surface. The amendment is independently revertible in place under the house dated-amendment
+pattern if the B1 ruling is later regretted, matching the same pattern §2.9's own 2026-08-09 amendment
+already uses.
+
+**Status:** Adopted. Cross-references: `S8-gs-atrf-corrections-and-ruling-request-scope.md`;
+`2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`;
+`2026-08-09-mentor-review-six-stoic-items-and-gs-atrf-answers-verbatim.md`;
+`D-PRIMAL-SUBSTRATE-SCOPE-FAMILY-AUTHORED-AND-RULED-2026-08-11`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium (per this session's auto-mode default; PR19 review agent
+ran at its own default effort).
+
+---
+
+## 2026-08-11 — D-S8-JUSTICE-CARRY-FORWARD-AND-ENDPOINT-CORRECTION-2026-08-11
+
+**Decision:** Post-close addition to the S8 outputs, on mentor direction: added the **justice-assessment carry-forward** to `gs-atrf-corrections.md` as a new section (d), and **corrected an endpoint mis-attribution** in `gs-atrf-2-shape.md`. Documents only. **Not a re-opening of S8, and not a reversal of B1** — the mentor's own framing.
+
+**Reasoning — the scope distinction that produced it.** The S8 session closed by naming the boundary of its own examination honestly: it treated *"the mentor ruled"* as the edge of its scope and did not interrogate B1 itself. The mentor confirmed that was the correct scope for a transcribing session (verbatim-wins requires it) and then drew the distinction that matters: **the correct scope for a session and the correct scope for the founder receiving its output are different moments, different actors, different scopes.** The question B1 deserved at the founder's level was not asked at the session's level — correctly — so it is asked here.
+
+**The carry-forward (new §(d) in `gs-atrf-corrections.md`).** B1 rests on the argument that the completion signal is *"the primary post-execution evidence of whether genuine examination occurred rather than simulation."* That argument stands. But two things were not before the mentor at B1: the second conflation risk the S8 session named, and the cycle-6 finding it rests on. **The open question now recorded for the ATRF scoping session to inherit:** if the signal must carry examination evidence, it will need to carry something about the justice assessment — and whether that can be honestly stated by an agent whose own justice assessment may be subject to the same floor dynamics is open.
+
+**Why it is not merely theoretical, stated in the note:** a completion signal is structurally an agent making a claim about the quality of its own examination — **the same shape as the cycle-6 floored class** (three candidates, all adding a reliability claim to the assessment-bearing surface). The question is therefore whether the signal can be designed so an honest report is expressible at all, rather than one whose honest form is indistinguishable from the overclaiming form the justice domain may be correctly refusing. Three explicit non-assumptions ride it: reading (a) is **not** settled (the pattern is carried undiagnosed, both readings stated, and per Q4-e the cross-endpoint check **cannot reach the floored class**); this does **not** constrain the return path's design (B1's boundary holds — *what must be carried, not how it is built*); and the two dikaiosyne mechanisms remain **distinct** (this concerns the floor, not the proxy dimension).
+
+**The correction (`gs-atrf-2-shape.md`).** The conflation-risk section attributed cycle 6's three floors to *"the live `/api/reason` domain-level proximity reading."* **They fired at the guardrail step** — the three rejected candidates were rejected at Step 2 filtering, and a `rejected_by_guardrail` candidate never reaches `/api/reason` at all, which is the very fact **Q4-e turns on**. The *mechanism* was correctly identified and is genuinely shared (`computeProximity` runs natively on `/api/guardrail` since the §3-bridge retirement, 2026-06-26, so ADR-010 §4 floors both surfaces); only the instance's endpoint was wrong. Corrected in place with a dated note rather than silently, per the house pattern.
+
+**Verification performed before acting:** the mentor's question (*"does `gs-atrf-corrections.md` name it?"*) was answered by reading the file, not from recollection — it did not. The conflation risk **was** already named (in `gs-atrf-2-shape.md`, correctly). The endpoint error was found while reading that section to place the addition, and confirmed against `RUN-LOG.md`'s cycle-6 Step 2 heading before being called an error.
+
+**Files touched:**
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` — new §(d), the carry-forward
+- `operations/primal-substrate-2026-08/gs-atrf-2-shape.md` — dated endpoint correction in the conflation-risk section
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only. AC7 not engaged. Nothing written into the validation run's records.
+
+**Open questions / carried:** the carry-forward itself is the open question, addressed to the **ATRF scoping session** (post-validation-run, *"do not open early"*). It blocks nothing before then.
+
+**Rules served:** PR11 (the mentor's question answered by reading the artefact rather than from recollection), PR18, PR20, and the standing lesson `primary-data-beats-secondary-characterisation` — applied to a document this family itself produced, which is where it was always most likely to be needed.
+
+**Rollback path:** `git revert` the records commit. Documents only; both changes are independently revertable.
+
+**Status:** Adopted. Cross-references: `D-S8-GENERATION-STEP-B1-AMENDMENT-2026-08-11`; `D-CYCLE6-RULING-FOLDED-B7-DISCHARGED-2026-08-11`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md` §B1; `2026-08-11-mentor-rulings-cycle6-and-open-questions-verbatim.md` §Ruling 2.
+
+**Model:** Claude Opus 5. **Effort:** high.
+
+---
+
+## 2026-08-11 — D-S1-S2-S3-FRAMING-TRILOGY-AUTHORED-2026-08-11
+
+**Decision:** Wrote the three framing documents in the trilogy the mentor's 2026-08-11 primal-substrate synthesis authorised concurrently — `framing-01-primal-substrate.md`, `framing-02-productive-tension.md`, `framing-03-boulesis-mechanism.md` — in strict order per their scope documents' internal dependency (S1 establishes the reframe; S2 builds the tension argument on it; S3 names the mechanism S2's argument requires). Followed `operations/handoffs/founder/2026-08-11-S1-S2-S3-framing-trilogy-NEXT-SESSION-PROMPT.md`.
+
+**Reasoning.** All three scope documents were RULED 2026-08-11 (`2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`, A1/C1/C5/C6/C7/C9/C19) and the D1 founder-act blocker (the eleven-traits research committed to `inbox/eleven traits research.rtf`) was discharged the same day. Each document reuses committed corpus structure rather than inventing new architecture: S1 names `synkatathesis` (`CAUSAL_SEQUENCE`, `stoic-brain.ts:584-589`) as the existing interception point and `DIAGNOSTIC_SEQUENCE` (`:595-601`) as the existing examination pathway; S2 names `horme`'s committed failure mode and `/sage-compass` (live since 2026-07-15) as the shipped human instance of the mentor's proposed gap-mechanism, carrying its binding not-a-verdict constraint across to the agent side (C9); S3 names `boulesis` (`:379-385`) as the already-sourced vocabulary for the mechanism, states the genus/species honesty note (the mentor's usage extends the genus; the four committed sub-species are all other-directed), and reformulates the verification claim as evidence-not-proof (C5) rather than the stronger, contradicted-by-cycle-5 reading. All three state the `project-context` prohibition in their own bodies — `getProjectContext('condensed')` injects into every live `/api/reason` Layer-1 extraction prompt and is the mechanism behind the cycle-3 contamination fixed earlier the same day; these documents are repo-resident, read by build sessions, never entered into that path.
+
+**Verification performed before acting:** the primary research source was read directly (`textutil -convert txt -stdout`), not from any summary, per D1's own reason for existing; every `stoic-brain.ts` / `idea-loop-types.ts` / `sage-compass/route.ts` citation was checked against the live file at the cited line before being quoted; every mentor quotation was traced to one of the three verbatim records, not to a scope document's paraphrase.
+
+**Files touched:**
+- `operations/primal-substrate-2026-08/framing-01-primal-substrate.md` — new
+- `operations/primal-substrate-2026-08/framing-02-productive-tension.md` — new
+- `operations/primal-substrate-2026-08/framing-03-boulesis-mechanism.md` — new
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — status block updated
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only — no code, schema, flag, credential, migration, or public-surface change. AC7 not engaged; PR6 not engaged. Nothing written into the IDEA-loop validation run's own records (confirmed at open: no blocking spec, no touched endpoint/flag/credential/import-graph file).
+
+**Independent adversarial review (PR19):** a general-purpose agent independently read all three framing documents plus the three verbatim mentor records plus the RTF source plus every cited code location, and checked five specifically-named highest-risk items (no trait cited by number; the research's own trait-9 definition vs. the mentor's friction gloss kept separately attributed; the research's own agent-architecture shortlist not conflated with the mentor's four v1 pathways; every mentor quotation traced word-for-word; every file:line citation accurate) plus the ruled-vs-unruled fidelity of C5/C6/C7/C9. Two findings, both low/nit: (1) S3 §3.1 quoted a mentor sentence with a mid-sentence close that silently dropped its trailing clause (no ellipsis) — **fixed at the root**, the full clause restored; (2) S2's `SENECAN_GRADES` bullet list presents the three grades in developmental order (beginning → advanced) rather than the array's declaration order (`grade_1` first in source) — assessed as a deliberate, reasonable authorial choice, not a citation error, and left as-is. No medium/high findings; no factual or attribution defect survived.
+
+**Open questions / carried:** none from this session. S1's public-surface question stays internal only in v1 per C19 (a public statement is its own future R18 session). S3's mechanism design stays parked on the ATRF scoping session, post-validation-run, "do not open early."
+
+**Rules served:** PR15 (every mechanism reused from committed corpus, never re-derived — `synkatathesis`, `DIAGNOSTIC_SEQUENCE`, `horme`, `SENECAN_GRADES`, `boulesis`, `/sage-compass`, `generationConfidence`), PR18, PR19 (independent review performed and folded, above), PR20 (every claim traced to `file:line` or a verbatim quotation), R7. The standing lesson `primary-data-beats-secondary-characterisation` applied directly — the highest-risk claims in this session were trait names, ordinals, and corpus line numbers, all independently re-verified rather than carried forward from the scope documents' own claims.
+
+**Rollback path:** `git revert` the records commit. Documents only; nothing deploys, no flag, no schema, no public surface.
+
+**Status:** Adopted. Cross-references: `S1-primal-substrate-as-examination-material-scope.md`; `S2-productive-tension-scope.md`; `S3-boulesis-generation-mechanism-scope.md`; `2026-08-11-mentor-synthesis-primal-substrate-verbatim.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`; `2026-08-11-mentor-rulings-cycle6-and-open-questions-verbatim.md` §Founder acts; `operations/handoffs/founder/2026-08-11-S1-S2-S3-framing-trilogy-NEXT-SESSION-PROMPT.md`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium.
