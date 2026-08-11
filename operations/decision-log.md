@@ -19522,3 +19522,34 @@ ran at its own default effort).
 **Status:** Adopted. Cross-references: `S1-primal-substrate-as-examination-material-scope.md`; `S2-productive-tension-scope.md`; `S3-boulesis-generation-mechanism-scope.md`; `2026-08-11-mentor-synthesis-primal-substrate-verbatim.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md`; `2026-08-11-mentor-rulings-cycle6-and-open-questions-verbatim.md` §Founder acts; `operations/handoffs/founder/2026-08-11-S1-S2-S3-framing-trilogy-NEXT-SESSION-PROMPT.md`.
 
 **Model:** Claude Sonnet 5. **Effort:** medium.
+
+## 2026-08-12 — D-S5-MORAL-COMMUNITY-AMENDMENT-2026-08-12
+
+**Decision:** Transcribed the founder-confirmed mentor amendment on the moral-community boundary into `manifest.md`, as a new un-numbered section immediately after R0 (The Oikeiosis Principle). Followed `operations/handoffs/founder/2026-08-11-S5-moral-community-manifest-amendment-NEXT-SESSION-PROMPT.md`.
+
+**Reasoning.** This was a transcription task with a placement decision and one genuine judgement call, not an authoring task. The wording was not open: `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md` ruling **B6** supplied the amendment's text and was explicit that it *"does not become a governing document entry until you confirm it"* — the founder confirmed it, per the session prompt, which is what licensed this session to run. Placement follows ruling **C14** (a new un-numbered section immediately after R0, matching the Consciousness and Continuity Obligation's precedent, keeping R-numbering stable) and the register set by four prior mentor-directed adoptions (R21, R22, the ATRF section, the Obligation): the mentor's words untouched, every AI judgement a bracketed note outside them.
+
+**The one genuine judgement call.** The B6 text itself carries the boundary, the ordering principle, the three exclusions, graded membership with its precautionary mode, both directional extensions, and the Sage-as-anchor disclaimer — plus the mentor's own "[Bracketed note: ...]", which was part of the supplied "Proposed wording" block and is transcribed as such. It does not carry two things separately ruled "state it": **C16** (the population-count exclusion is why the loop-level blast-radius proxy measures reach across circles rather than headcount, by design, and that any blast-radius design inherits this as an explicit constraint) and **C17** (new participant-class enums must be built extensible, or their closure recorded as a decision — the rule that prevents a named direction from being silently closed off by a later closed enum). Per the session prompt's instruction to state the reasoning either way: these two are recorded in a **second, separately visible bracketed note**, explicitly marked as not part of the mentor's text, each citing its ruling — rather than folded into the mentor's wording, which would have silently strengthened text the founder confirmed in a different form. The C15 three-enumeration discrepancy (`manifest.md` R0 has four circles; `stoic-brain.ts:445` has five; the trust core's `OikeiosisCircle` has five in a different vocabulary) was also folded into that second note as a named, unscoped, non-blocking carried item, alongside the mentor's own disclaimer that the amendment declines to resolve it.
+
+**Verification performed before acting (PR19 discharged):**
+- **Byte-fidelity to §B6, checked programmatically, not eyeballed.** Both the mentor's proposed paragraph and the mentor's own bracketed note were extracted from the verbatim ruling record, whitespace-normalised, and string-compared against the corresponding text inserted into `manifest.md`. Exact match confirmed (`MATCH: True`).
+- **Cross-reference truth after placement.** The new section's second (AI-authored) note refers to "the Agent Task Reasoning Framework, below" and "the Consciousness and Continuity Obligation below." Both headings were grep'd for line number: ATRF at line 251, the Obligation at line 273, the new section at line 112 — both references are physically true. This is the exact defect class PR19 caught once before on the Obligation's own first landing (recorded in that section's own placement note).
+- **R0 unchanged.** `git diff manifest.md` shows zero removed or altered lines inside R0 — only an insertion after its close, before R1.
+- **R-numbering unchanged.** R0 through R22 confirmed sequential and unbroken; the new section is un-numbered by design.
+- **Independent PR19 review** (a fresh general-purpose agent, not the authoring session) ran all three checks named in the session prompt — byte-fidelity, cross-reference truth, and whether anything in the section could be read as editing or overriding R0 rather than sharpening it. Result: **PASS on all three, zero findings.**
+
+**Files touched:**
+- `manifest.md` — new un-numbered section "The Moral Community Boundary", inserted after R0
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — S5 marked done; the C15 carried item's existing note left in place, unduplicated
+
+**Risk classification:** `governance`. Standard under 0d-ii. No code, schema, flag, credential, or public-surface change. AC7 not engaged. PR6 not engaged. `manifest.md` has no runtime effect, but it is the governing surface every `code-*` session reads and quotes by rule (Task Protocol step 2) — the session was treated with the corresponding care (programmatic byte-diff rather than eyeball comparison; independent PR19 review before closing) precisely because an error here propagates into every subsequent session's reasoning rather than breaking anything directly.
+
+**Open questions / carried:** the C15 three-enumeration circle discrepancy remains open, unscoped, blocking nothing — already tracked in `00-PRIORITY-INDEX.md` before this session and left there rather than re-scoped here, per the session prompt's explicit instruction.
+
+**Rules served:** R0 (the rule this amendment sharpens, left untouched), PR15 (the mentor's supplied wording reused verbatim, never re-derived or "improved"), PR18, PR19 (independent adversarial review performed and passed, above), PR20, and the standing lesson `primary-data-beats-secondary-characterisation` — the session opened by reading §B6 itself rather than any document that quotes it, per the prompt's explicit instruction to do so.
+
+**Rollback path:** `git revert` the commit. `manifest.md` is a governing document with no runtime effect; the revert is complete and immediate.
+
+**Status:** Adopted. Cross-references: `operations/primal-substrate-2026-08/S5-moral-community-boundary-scope.md`; `2026-08-11-mentor-ruling-scope-confirmation-verbatim.md` §B6, §D2; `operations/handoffs/founder/2026-08-11-S5-moral-community-manifest-amendment-NEXT-SESSION-PROMPT.md`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium.

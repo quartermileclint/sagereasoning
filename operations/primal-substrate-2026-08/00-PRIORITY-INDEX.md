@@ -88,6 +88,17 @@
 > before); the GS-ATRF-3 completion-signal *return path* — transport, schema, endpoint, what the
 > harness does with it — on the **post-validation-run ATRF scoping session**, explicitly *"do not open
 > early."* `D-S8-GENERATION-STEP-B1-AMENDMENT-2026-08-11`.
+>
+> **S5 — DONE, 2026-08-12.** The founder-confirmed B6 wording is transcribed byte-identical (diffed
+> programmatically against §B6, not eyeballed) into `manifest.md`, as a new un-numbered section
+> immediately after R0. The mentor's own bracketed note (naming R0's Circle 4 clause and declining to
+> resolve the enumeration discrepancy — C15) is transcribed as part of that verbatim text. A second,
+> AI-authored bracketed note, visibly marked as not part of the mentor's text, records the two
+> operational consequences separately ruled "state it" (C16 — the loop-level blast-radius proxy inherits
+> the population-count exclusion as an explicit constraint; C17 — new participant-class enums are built
+> extensible or their closure is a recorded decision). R0 itself is unedited; both "below" cross-references
+> in the new note are physically true; R-numbering unchanged. PR19-reviewed (0 findings). **The C15
+> three-enumeration discrepancy remains carried, above, unscoped.** `D-S5-MORAL-COMMUNITY-AMENDMENT-2026-08-12`.
 
 **Session:** 2026-08-11. **Tier: `governance` / design (explore-scope). Documents only — no code,
 schema, flag, credential, migration, or public-surface change accompanies this directory.** Nothing
@@ -171,7 +182,7 @@ correct and adopted."*
 | 4 | **S1** | 1 — Primal substrate as examination material | Documents only | **RULED.** `DIAGNOSTIC_SEQUENCE` adopted; internal-only in v1 | **YES — D1** |
 | 5 | **S2** | 2 — Productive tension | Documents only | **RULED.** Two proposals, not one (C7); not-a-verdict constraint crosses over (C9) | **YES — D1**, and S1 |
 | 6 | **S3** | 3 — Boulesis generation mechanism | Documents only | **RULED.** Evidence-not-proof (C5); signal sources bounded to the runner's own state (C6). Mechanism parked on the ATRF session | **No** for the framing half; S2 precedes it |
-| 7 | **S5** | 5 — Moral community boundary | Governing-document change | **RULED, wording SUPPLIED** (B6) — richer than the brief asked (a third exclusion, graded membership, both directions, an R18-shaped disclaimer) | **YES — D2**, founder confirmation |
+| 7 | **S5** | 5 — Moral community boundary | Governing-document change | **DONE (2026-08-12).** Founder-confirmed B6 wording transcribed byte-identical into `manifest.md`, new un-numbered section immediately after R0; PR19-reviewed, 0 findings | **No — closed** |
 | 8 | **S7** | 7 — Practice activities | **Build** (`code-elevated` + schema + **R20a**) | **RULED on all five.** New tool (B2); **INSIDE the perimeter** (B3); reciprocity = distinct mode with a mentor-supplied question set (B4) | **YES — D1**, and S1 |
 
 **What changed materially for the builds:** S7 is now an **R20a perimeter change**, which raises its
