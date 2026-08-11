@@ -104,6 +104,10 @@ export async function gatherUserPersonalData(
     { key: 'circle_extension_entries', table: 'circle_extension_entries' },
     // Remaining Principles #14 — the sage-compass decision-support tool.
     { key: 'sage_compass_entries', table: 'sage_compass_entries' },
+    // S7 — the primal-impulse examination tool (/impulse). R17b intimate: the
+    // practitioner's own account of shame, fear, envy and status-seeking, in
+    // their own words. Access must return it in full.
+    { key: 'impulse_entries', table: 'impulse_entries' },
     // Earned virtue milestones — user_id-scoped (was missing from R17 coverage).
     { key: 'milestones', table: 'milestones' },
   ]

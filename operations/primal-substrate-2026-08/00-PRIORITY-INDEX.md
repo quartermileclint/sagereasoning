@@ -183,13 +183,79 @@ correct and adopted."*
 | 5 | **S2** | 2 — Productive tension | Documents only | **RULED.** Two proposals, not one (C7); not-a-verdict constraint crosses over (C9) | **YES — D1**, and S1 |
 | 6 | **S3** | 3 — Boulesis generation mechanism | Documents only | **RULED.** Evidence-not-proof (C5); signal sources bounded to the runner's own state (C6). Mechanism parked on the ATRF session | **No** for the framing half; S2 precedes it |
 | 7 | **S5** | 5 — Moral community boundary | Governing-document change | **DONE (2026-08-12).** Founder-confirmed B6 wording transcribed byte-identical into `manifest.md`, new un-numbered section immediately after R0; PR19-reviewed, 0 findings | **No — closed** |
-| 8 | **S7** | 7 — Practice activities | **Build** (`code-elevated` + schema + **R20a**) | **RULED on all five.** New tool (B2); **INSIDE the perimeter** (B3); reciprocity = distinct mode with a mentor-supplied question set (B4) | **YES — D1**, and S1 |
+| 8 | **S7** | 7 — Practice activities | **Build** (`code-elevated` + schema + **R20a**) | **BUILT DARK (2026-08-12).** `/impulse` — page, route, migration (**unapplied**), local vocabulary + drift pin, boundary test, per-route R20a test, data-rights + nav wiring. All five rulings built as ruled. **Nothing live**; PR19 review, the migration walk, and the flag activation are carried | **No — built; carried items below** |
 
 **What changed materially for the builds:** S7 is now an **R20a perimeter change**, which raises its
-blast radius — the perimeter registry (currently 11 route-level + 2 substrate-gate = 13) and its guard
-suite must be updated in the same PR, and AC5 requires the departure from family precedent to be
-recorded in both the route and the decision-log entry. S8's B1 ruling authorises a **dated amendment**
-to the generation-step scope document stating the completion-signal requirement — and nothing more.
+blast radius — the perimeter registry and its guard suite must be updated in the same PR, and AC5
+requires the departure from family precedent to be recorded in both the route and the decision-log
+entry. S8's B1 ruling authorises a **dated amendment** to the generation-step scope document stating
+the completion-signal requirement — and nothing more.
+
+> **⚠ Perimeter-count correction (2026-08-12).** This section previously said the registry was
+> "currently 11 route-level + 2 substrate-gate = 13", inherited from CLAUDE.md. **That was stale by
+> two** — both Stoa routes joined 2026-08-03. Counted first-hand in the authoritative registry
+> (`website/src/lib/__tests__/r20a-invocation-guard.test.ts`) it was **13 + 2 = 15** before this
+> build, and `/impulse` is the **fourteenth** route-level entry, making it **14 + 2 = 16** now.
+> **CLAUDE.md's own line is still stale and is a carried item** — it was outside S7's permitted paths.
+
+### S7 — what is DONE and what is CARRIED (2026-08-12)
+
+**Done (repo-only, nothing live):** `D-S7-PRIMAL-SUBSTRATE-IMPULSE-TOOL-BUILT-DARK`. `tsc` 0,
+`npm run build` 0, boundary 260/0 (**21/21 mutations red, 0 vacuous**), per-route R20a 55/0, registry
+126/0, all regressions green. Measurement neutrality verified by git byte-identity — `stoic-brain.ts`
+unchanged, no engine-graph file touched.
+
+**Mentor-cleared for the migration sequence, 2026-08-12** (relayed verbatim to
+`2026-08-12-MENTOR-BRIEF-S7-build-summary.md`): *"The build is clean. Cleared for the founder-walked
+migration sequence."* Three things named before/around activation, all now handled — see below.
+
+**Carried, in this order — none self-starts:**
+1. ~~PR19 independent adversarial review, BEFORE the migration is walked.~~ **DONE, same day**
+   (`D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN`) — five reviewers, zero critical/high findings, two
+   low-severity fixes landed (a migration comment, a `GET ?limit=` NaN guard), one medium **named but
+   not fixed** (an app-wide RLS-vs-route-enforcement gap, inherited from every sibling table, out of
+   scope for this session). **Mentor-confirmed the disposition is correct** — a local fix would be a
+   false guarantee, since the same client can write to any other intimate table the same way.
+2. **The migration, founder-walked TEST → prod**, with its `§VERIFY` block (six checks, incl. a
+   TEST-only behavioural probe that the mode CHECK genuinely bites).
+3. **`SUBSTRATE_IMPULSE_R20A_ENABLED` activation** with a live distress smoke (its own Critical step).
+4. **The stale CLAUDE.md perimeter count** (outside S7's permitted paths).
+5. **The app-wide RLS-vs-route-enforcement gap.** Unscoped, founder-elected session — but the mentor
+   named a sharpening on ordering, and it is recorded here rather than only in the review: **this
+   should be the FIRST item that future session addresses, not the last**, because `impulse_entries`
+   is *"the one table in the application where a route bypass reaches the exact population the
+   perimeter exists to protect"* — a practitioner writing about shame or dread and bypassing the
+   distress check via the public client is precisely the false negative the B3 ruling exists to
+   prevent. The gap does not block THIS migration (the architecture is consistent — the route is the
+   sole enforcement point everywhere, not inconsistently so here), but the future session's own
+   internal ordering should lead with this table, not treat it as one of several equally-weighted
+   items.
+
+**A page-copy addition made 2026-08-12, before activation, per the mentor's note.** The mentor flagged
+that the reciprocity pathway's distinction — *"a practitioner who completes it has examined the ground
+of an action, not a passion that preceded it"* — should be legible to the practitioner at the point of
+use, not only in build documentation. The page's reciprocity-mode intro copy
+(`website/src/app/impulse/page.tsx`) was sharpened to state this explicitly (the other three pathways
+trace an impulse to a passion; this one examines the ground of an action instead) rather than leaving it
+implicit in the `praxis`-failure-mode reference. Re-verified: `tsc` 0, boundary test unchanged at
+260/0.
+
+**A structural observation the mentor named, worth carrying forward as project discipline, not fixing:**
+the mutation harness caught a vacuous pin in this build's own boundary test (an existence check where a
+universal one was needed). The mentor identified this as the fourth instance of one recurring class this
+window — the framing trilogy's unmarked truncation, the S4/S6 "four of five" error, the S8 §2.12 drift,
+now a test-level instance of the same thing — and named the underlying property: *"local coherence and
+source-anchored accuracy are different properties, and the author cannot reliably check the second from
+inside the first."* Not a failure to eventually train out by more careful self-review — the independent
+review and the mutation harness exist BECAUSE of this property, and both worked as designed here. Recorded
+as a standing discipline note, not a to-do.
+
+**A correction S7 found and recorded rather than inherited:** the S7 scope document says
+`ROOT_PASSIONS` holds "4 roots / **25** sub-species". It holds **20** — counted first-hand,
+independently re-derived by a verification workflow, and corroborated by
+`D-RAG-MENTOR-ALT3-PHASE1-DRAFTS` (2026-05-01), which already said 20. The scope document's per-id
+line citations are all **correct**; only the total was wrong. The drift pin asserts against the
+source, never against the document.
 
 ### Dependency shape, stated plainly
 
@@ -286,8 +352,9 @@ A workable grouping, respecting the order above:
   with a brief to the mentor, not a build.
 - **Session C (documents):** S1 → S2 → S3 in order. Can be one sitting; the trilogy is short and
   reads better written together.
-- **Session D (build, `code-elevated` + schema, founder-walked migration):** S7. Independent; open it
-  whenever the research is committed and the founder wants a build rather than a documents session.
+- **Session D (build, `code-elevated` + schema, founder-walked migration):** S7. **BUILT DARK
+  2026-08-12** — see the S7 done/carried block above. What remains is not a build session: a PR19
+  independent review, then the founder-walked migration, then the flag activation.
 - **Session E (governing, small):** S5, once the mentor's wording is relayed.
 
 Sessions A–C and E are `governance`; only D is a build. **None self-starts — the founder sequences.**

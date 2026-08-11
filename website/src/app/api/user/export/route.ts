@@ -124,6 +124,8 @@ export async function GET(request: NextRequest) {
     { key: 'circle_extension_entries', table: 'circle_extension_entries', select: '*' },
     // Remaining Principles #14 — the sage-compass decision-support tool.
     { key: 'sage_compass_entries', table: 'sage_compass_entries', select: '*' },
+    // S7 — the primal-impulse examination tool (/impulse). R17b intimate.
+    { key: 'impulse_entries', table: 'impulse_entries', select: '*' },
     // Earned virtue milestones — user_id-scoped (was missing from R17i coverage).
     { key: 'milestones', table: 'milestones', select: '*' },
   ]

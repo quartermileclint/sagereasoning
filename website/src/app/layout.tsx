@@ -65,6 +65,7 @@ export default function RootLayout({
                   <a href="/sage-compass" className="block hover:text-sage-900">Sage Compass</a>
                   <a href="/oikeiosis" className="block hover:text-sage-900">Circle of Concern</a>
                   <a href="/passion-log" className="block hover:text-sage-900">Passion Log</a>
+                  <a href="/impulse" className="block hover:text-sage-900">Examining an Impulse</a>
                   <a href="/reflections" className="block hover:text-sage-900">Reflections</a>
                   <a href="/baseline" className="block hover:text-sage-900">Baseline Assessment</a>
                 </div>

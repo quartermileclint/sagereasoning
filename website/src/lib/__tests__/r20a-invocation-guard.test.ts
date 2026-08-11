@@ -30,7 +30,10 @@
  * Run: npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC4 (invocation
- * testing); AC5 (perimeter — eight route-level + one substrate-gate = nine).
+ * testing); AC5 (perimeter — 14 route-level + 2 substrate-gate = 16 as of
+ * 2026-08-12; this line previously read "eight route-level + one substrate-gate
+ * = nine", which had been stale for months while the accurate prose block
+ * below tracked the real counts — corrected rather than left to drift again).
  * Knowledge gaps addressed: KG3, KG7 (build-to-wire gap pattern).
  */
 
@@ -108,6 +111,33 @@ const HUMAN_FACING_POST_ROUTES = [
   // mirror-reading LLM call ever fires. Dark behind SUBSTRATE_STOA_ENABLED
   // AND SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED (both required).
   'src/app/api/mentor/stoa/draft-reflect/route.ts',
+  // S7 (2026-08-12; AC5 FOURTEENTH route-level protocol) — the primal-impulse
+  // examination tool.
+  //
+  // *** A RULED DEPARTURE FROM FAMILY PRECEDENT (mentor ruling B3). *** Every
+  // other Remaining-Principles human-practitioner tool (/premeditatio,
+  // /hupexairesis, /oikeiosis, /view-from-above, /morning, /sage-compass,
+  // /logos) sits OUTSIDE this perimeter, carrying SupportFooter as its crisis
+  // exit. /impulse is INSIDE it, deliberately, because it "deliberately
+  // elicits shame and agonia in the practitioner's own words, beside grief,
+  // envy, and jealousy" — `aischyne` (shame) and `agonia` (dread) are named,
+  // selectable sub-species of the exercise — and "the design premise is that
+  // the practitioner should not suppress this material, which means the tool
+  // is doing exactly what the perimeter exists to catch when it fires
+  // genuinely."
+  //
+  // Recorded here as well as in the route, in
+  // src/app/api/mentor/impulse/r20a.ts, and in the decision-log entry, because
+  // a reader comparing this tool to its siblings would otherwise read the
+  // membership as an error. DO NOT REMOVE THIS ENTRY on the assumption it was
+  // added by mistake.
+  //
+  // Screens BOTH write paths (POST create + PATCH revise — a revision carries
+  // the same free text) via the mandated
+  // `await enforceDistressCheck(detectDistressTwoStage(...))`, before the
+  // gate's LLM call AND before the route's own field validation. Dark behind
+  // SUBSTRATE_IMPULSE_R20A_ENABLED; flag-off is byte-identical.
+  'src/app/api/mentor/impulse/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -154,6 +184,16 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     route: 'src/app/api/mentor/stoa/draft-reflect/route.ts',
     flag: 'isStoaDraftReflectEnabled',
     flagSource: 'stoa-draft-reflect',
+  },
+  {
+    // S7 /impulse — the flag lives with its mechanism in a module COLOCATED
+    // with the route (src/app/api/mentor/impulse/r20a.ts) rather than in
+    // src/lib/, so the whole tool reverts as one unit. Imported as './r20a';
+    // route.ts cannot export it itself (Next.js rejects non-handler exports
+    // from route.ts at build — memory: nextjs-route-export-validation).
+    route: 'src/app/api/mentor/impulse/route.ts',
+    flag: 'isImpulseR20aEnabled',
+    flagSource: './r20a',
   },
 ]
 
@@ -271,7 +311,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 13 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 14 route-level routes (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
   // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
   // the AC5 eleventh-route protocol, flag-gated dark + the Stoa declaration
@@ -279,11 +319,24 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // dark behind SUBSTRATE_STOA_ENABLED + the Stoa draft-reflect route added
   // 2026-08-03 (ST6, the Q12 exception) under the AC5 thirteenth-route
   // protocol, flag-gated dark behind SUBSTRATE_STOA_ENABLED AND
-  // SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED) + 2 substrate-gate routes (Calling +
-  // Reflect-content added 2026-05-28 under Option A; see
-  // SUBSTRATE_GATE_ROUTES) = 15 routes in the R20a perimeter overall.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 13, `${label} (>=13 route-level)`)
+  // SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED + /impulse added 2026-08-12 (S7)
+  // under the AC5 fourteenth-route protocol, flag-gated dark behind
+  // SUBSTRATE_IMPULSE_R20A_ENABLED — a RULED DEPARTURE from the
+  // Remaining-Principles family precedent, see its entry above)
+  // + 2 substrate-gate routes (Calling + Reflect-content added 2026-05-28
+  // under Option A; see SUBSTRATE_GATE_ROUTES)
+  // = 16 routes in the R20a perimeter overall.
+  //
+  // The floors are bumped with each addition on purpose: a floor left at the
+  // PREVIOUS count stops guarding the newest member (13 >= 13 still passes
+  // after the 14th is deleted), which is the one most likely to be removed by
+  // someone who reads its perimeter membership as a mistake.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 14, `${label} (>=14 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
+  // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until now, so
+  // a flag-gated entry could be deleted silently. 5 flag-pairs across 4
+  // distinct routes (draft-reflect carries two flags, one entry each).
+  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 5, `${label} (>=5 flag-gated route-level flag-pairs)`)
 }
 
 // test('detectDistressTwoStage result is awaited (async safety)')
