@@ -152,10 +152,17 @@ perimeter, AE-1/AE-2, practice-suggestion, B5, the human practice-reminders arc)
   code comment already names it as *"potentially a mentor question"* (the withdraw→re-declare
   recency-cycling residual); it stays a named, unscheduled mentor question. **What actually remains
   to activate:** the **Q5c/Q13a trust-event wiring** (curator-flagged claim contradictions;
-  calling↔declaration divergence), built dark behind its own `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`,
-  genuinely unactivated. A second mentor ruling on "curation via volume" (the recency-window gaming
-  vector on S10, distinct from the already-shipped total-count disclosure) is a **named,
-  unscheduled** follow-up mentor consultation. **The process lesson, worth carrying forward: a
+  calling↔declaration divergence), built dark behind its own `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`.
+  **⚠ Mentor-confirmed 2026-08-12: nothing new to rule on, build/checklist/gate all clean — the
+  founder walks activation when ready, but the migration has NOT yet been applied to TEST**
+  (verified 2026-08-12 by a probe insert on TEST — rejected `23514`, teardown confirmed nothing
+  landed). That is the actual first step, not the smoke sequence. **"Curation via volume" is
+  CLOSED, not open — corrected 2026-08-12**, the same-day 2026-08-08 ruling already settled it (see
+  the CLAUDE.md Stoa bullet for the full account). **One residual surfaced by the mentor's own
+  follow-up question, unresolved:** the curation-via-volume disclosure sentence exists only in
+  `llms.txt`, not in the live `GET /api/trust-record/{agent_id}` payload's own `notes` array — a
+  reader arriving via a Stoa `trust_record_url` link never sees it unless they separately read the
+  docs. Worth a short follow-up to the mentor. **The process lesson, worth carrying forward: a
   shared base flag makes "dark" a per-flag claim, not a per-feature claim** — one flag set once for
   one sub-item (ST6) silently activated three siblings gating on the same flag, and every subsequent
   record described them as dark for nine days before anyone checked.
@@ -391,11 +398,15 @@ call.
 17. **Stoa activation — CORRECTED 2026-08-12, premise was false.** ST1/ST3/ST4/browse are already
     live and distress-check-verified (item 10, done). **What actually remains is the Q5c/Q13a
     trust-event activation only** (`SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`, genuinely dark — both it
-    and `SUBSTRATE_TRUST_CORE_ENABLED` required to emit, deliberately). Whether/when to run that
-    activation is the founder's call (a pre-activation checklist + a pre-built evidence-gate
-    cross-check query both exist and are ready, `operations/connective-layer-2026-08/`).
-18. **The Stoa "curation via volume" second mentor ruling request** — named, unscheduled, distinct
-    from the already-shipped total-count disclosure.
+    and `SUBSTRATE_TRUST_CORE_ENABLED` required to emit, deliberately). **Mentor-confirmed
+    2026-08-12: nothing new to rule on.** Whether/when to run that activation is the founder's call
+    (a pre-activation checklist + a pre-built evidence-gate cross-check query both exist and are
+    ready, `operations/connective-layer-2026-08/`) — **first actual step is the TEST migration**
+    (verified 2026-08-12 NOT yet applied), not the smoke sequence.
+18. ~~**The Stoa "curation via volume" second mentor ruling request**~~ — **CLOSED, mentor-confirmed
+    2026-08-12.** The 2026-08-08 ruling already settled it. **One residual, worth a short follow-up:**
+    the disclosure sentence lives only in `llms.txt`, not in the live trust-record payload's own
+    `notes` array — see the corrected Stoa bullet above.
 19. **The original build-plan C1c + D4** — both unscoped, both named, neither blocking anything.
 20. **Items 14–17 (second-order impact / permission scrutiny / governance permission field /
     the intent-vs-assessed-quality trust event)** — fully scoped and mentor-approved, not built, not
