@@ -293,11 +293,55 @@ The synthesis parks five items "until after the first build gate." **That gate h
 | Gate | What it is | What waits on it |
 | --- | --- | --- |
 | **§6 report** | The bounded validation run's own report, reaching the mentor | S6's reordering decision; S4's watching-table extension |
-| **ATRF scoping session** | Post-validation-run, explicitly *"do not open early"* | S3's mechanism design; S5's agent-profile architecture + completion-signal design; S8's GS-ATRF-3 build |
+| **ATRF scoping session** | Post-validation-run, explicitly *"do not open early"* | S3's mechanism design; S5's agent-profile architecture + completion-signal design; S8's GS-ATRF-3 build; **the sufficiency-examination content specification + the boulesis/normative-gap distinction (both added 2026-08-12 — see below)** |
 | **Standing-runner design** | Explicitly gated on the §6 report reaching the mentor; *"not to be pre-scoped"* | Any generation-channel reordering that survives S6 |
 
 Every scope document's §0 names which of these its parked half waits on, by name, rather than
 repeating "the first build gate."
+
+### The sufficiency-examination finding — four routings, added 2026-08-12
+
+**Origin:** a founder observation from a conversation about exam preparation, examined against the
+architecture and ruled the same day. **Full record (verbatim wins):**
+`operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`.
+**Decision-log:** `D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`.
+
+The finding: the moment a task *feels complete* is philosophically distinct from friction (nothing is
+wrong) and from a novelty gap (the question is not whether an idea is new). It is a
+**sufficiency-examination** moment — the impulse to stop is strongest there, and continuing past it is
+where the examined life does its distinctive work.
+
+**Four routings, each to a named home. None of them licenses a build.**
+
+1. **→ ATRF scoping session, as GS-ATRF-3 *content*.** Ruled: *"the completion signal should examine
+   whether apparent exhaustion is genuine, not merely count to three ... not just that a completion
+   signal must exist and carry examination evidence, but what the examination should ask."* GS-ATRF-3
+   previously had a *requirement* (generation-step scope §2.12, B1) and no content specification; it
+   now has both, and this session inherits them together. Cross-referenced at generation-step §2.12.
+2. **→ Generation-step scope, as a NEW open question (§2.13).** *"Examine the null cycle rather than
+   counting to three."* The null cycle is the runner's **own** completion-shaped moment — Q1-respecting,
+   C6-compliant, buildable — so GS-ATRF-3's actor/moment deferral does not reach it. **Open, not ruled;
+   the three-cycle counter stands until it is.**
+3. **→ Raised now, independently: the GS-ATRF-1 basis-lessness gap** (`gs-atrf-corrections.md` §(c-bis)).
+   A `friction_detection` candidate has neither of GS-ATRF-1's two named inputs (virtue domain,
+   targetCircle) **by construction**, so the blast-radius indicator inherits the exact basis-lessness
+   the novelty check already discloses at zero confidence — with **no disclosure branch specified**, and
+   a vocabulary (`high|medium|low`) that cannot express "no basis." Not contingent on the sufficiency
+   finding; **owned by the next session that touches GS-ATRF-1**.
+4. **→ HELD OPEN, and a build-blocker: is sufficiency-examination distinct from S3's normative-gap
+   (boulesis) mechanism?** (S3 §5-Q3-e.) Ruled: *"Do not build on that distinction until it has been
+   examined."* Both fire when nothing is broken; the offered distinction is order (first- vs.
+   second-order), named as fragile. **This blocks S3's Q3-d** — eighth heuristic vs. reshaped existing
+   one vs. pre-generation step cannot be answered while it is unknown whether there are one or two
+   mechanisms, and an eighth heuristic is a schema change to spend on a duplicate.
+
+**A design warning carried with routings 1 and 2, from the same session's source-verified analysis:** a
+sufficiency-examination mechanism **already exists** at another layer — `mapTraceFeaturesToL4Signals`'s
+Q4.3 `resolutionBeforeComplete`. Per the S9b **F-Q43** correction, its original predicate fired on *any*
+horme/praxis stage and had **zero discrimination**; it became useful only when narrowed to a causal-**order**
+signature. **Detecting apparent completion is free and worthless — every completed task looks complete.**
+The design problem is the discriminating signature, and any future build that merely re-detects
+completion reproduces F-Q43's original defect at a new layer.
 
 ---
 

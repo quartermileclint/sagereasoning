@@ -20295,3 +20295,147 @@ review that didn't happen).
 activation discipline this session followed).
 
 **Model:** Claude Sonnet 5. **Effort:** low.
+
+---
+
+## 2026-08-12 — D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12
+
+**Decision:** A founder observation — originating outside this repo, in a conversation about exam
+preparation — was put to the architecture as a proposed new generation trigger, analysed, and ruled
+by the mentor in four parts. **All four rulings are recorded and routed to named tracked homes. None
+licenses a build.** The finding: the moment a task *feels complete* is philosophically distinct from
+a friction point (nothing is wrong) and from a novelty gap (the question is not whether an idea is
+new) — it is a **sufficiency-examination** moment, where the impulse to stop is strongest and
+continuing past it is where the examined life does its distinctive work.
+
+**Tier: `governance`** — documents and rulings only. **No code, schema, flag, credential, migration,
+route, or public-surface change. Production untouched. AC7 not engaged. PR6 not engaged.**
+
+**Verbatim record (wins over this entry and over every routing annotation):**
+`operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`
+— carries the mentor's question, the analysis put to them, and the response, each verbatim.
+
+**The analysis offered (PR20 — every mechanism claim verified at source before being put to the
+mentor, none inherited from a summary):**
+
+1. **The actor boundary.** "The moment a task feels complete" belongs to the actor doing the work.
+   Under the Q1 hard constraint the loop proposes and never executes, so **the runner never has this
+   moment** — it has cycles that produce proposals. This is exactly the boundary GS-ATRF-3 was
+   deferred to protect (*"a different actor ... at a different moment"*; scoping it into the
+   generation-step document *"would blur the Q1 hard constraint"*). Not an honest addition to
+   generation-step scope **as posed** — but as an ATRF item, possibly the sharpest formulation of
+   GS-ATRF-3 yet offered.
+2. **A Q1-respecting version does exist: the null cycle.** The runner has exactly one
+   completion-shaped moment of its own. The existing backstop already answers *"is this apparent
+   exhaustion genuine?"* — **mechanically, by counting to three.** QW-A's ruling that a
+   `dependency_unavailable` cycle passes the counter transparently (*"a third thing"*) is the
+   precedent: the architecture has already declined to let the counter treat two kinds of
+   non-productive cycle alike.
+3. **A GS-ATRF-1 basis-lessness gap, verified and previously unconnected.** GS-ATRF-1's ruled answer
+   assesses its four dimensions *"from the candidate's virtue domain and targetCircle."*
+   `assessStructuralNovelty` (`idea-loop-types.ts:222`) computes over **exactly those two fields** and
+   returns `{ novel: true, confidence: 0 }` when both are absent, its docstring stating the zero
+   confidence *"says the check has no basis, rather than manufacturing one."* Both are absent **by
+   construction** for a `friction_detection` candidate. **So the blast-radius indicator inherits the
+   identical basis-lessness — with no disclosure branch specified, and a `high|medium|low` vocabulary
+   that cannot express "no basis."** `friction-primary-hypothesis.md` §2 names this consequence for
+   the *novelty check* in service of the reordering question; it was never connected to GS-ATRF-1's
+   own basis. Sharper than the already-carried `target_circle` persistence gap: that one says the
+   dikaiosyne dimension is not *recomputable from a stored row*; this says that for one whole channel
+   it is not *derivable at all*.
+4. **On blast radius: channel is evidence, never definition.** A continuation proposal has a genuine
+   empirical anchor on **one** dimension only (andreia/reversibility — the prior state was observed,
+   not derived). But blast radius is a property of the *proposed action*, not of *how the proposal was
+   generated*; if channel changes the indicator, the indicator has stopped measuring blast radius and
+   started measuring provenance — and becomes gameable by choice of channel. The test infrastructure
+   already exists in the ruled shape: `manifest.md` mandates **two** records for longitudinal
+   comparison, so channel belongs as a recorded covariate, not a fifth dimension.
+
+**Deferred to the mentor rather than resolved:** whether sufficiency-examination is genuinely distinct
+from S3's parked boulesis/normative-gap mechanism. The reading offered was that it differs in *order*
+(normative-gap asks about the object; sufficiency asks reflexively about the examination itself) while
+naming that distinction as fine enough to collapse. **The mentor's response confirmed the deferral was
+correct** — *"This is the mentor's call Claude deferred — and Claude was right to defer it."*
+
+**The four rulings, and where each is now tracked (PR7 — every item has a named home):**
+
+1. **Sufficiency finding → the ATRF scoping session, as GS-ATRF-3 *content specification*.** Ruled:
+   *"the completion signal should examine whether apparent exhaustion is genuine, not merely count to
+   three ... not just that a completion signal must exist and carry examination evidence, but what the
+   examination should ask."* **Homes:** `00-PRIORITY-INDEX.md` (the ATRF gate row + a new
+   four-routings section); cross-referenced at generation-step scope §2.12, so the ATRF session
+   inherits the *requirement* (B1) and the *content* together rather than finding them apart.
+2. **"Examine the null cycle rather than counting to three" → a NEW generation-step open question.**
+   Ruled: *"genuinely within the runner's own state, Q1-respecting, and buildable ... a real design
+   question for the generation-step document, distinct from GS-ATRF-3."* **Home:** generation-step
+   scope **§2.13** (new, dated). **Recorded as an OPEN QUESTION, not a ruling — the three-cycle
+   counter stands until it is itself ruled.** §3's now-false *"no other questions remain open"* line
+   was not silently edited; a dated note above it records that §2.13 supersedes it while the four
+   2026-08-09 rulings remain untouched.
+3. **The GS-ATRF-1 basis-lessness gap → raised now, independently.** Ruled: *"This is not contingent
+   on the sufficiency finding. It exists now, it affects the generation-step scope, and it should be
+   raised in the next session that touches GS-ATRF-1."* **Home:** `gs-atrf-corrections.md` **§(c-bis)**
+   (new), placed deliberately adjacent to §(c) with the distinction between them stated, so a reader
+   cannot mistake it for a restatement.
+4. **The boulesis/normative-gap distinction → HELD OPEN, and a build-blocker.** Ruled: *"Do not build
+   on that distinction until it has been examined."* **Home:** S3 **§5-Q3-e** (new). Recorded as
+   blocking **S3's Q3-d** (eighth heuristic vs. reshaped existing one vs. pre-generation step), since
+   that question cannot be answered while it is unknown whether there are one or two mechanisms — and
+   an eighth heuristic is a schema change (the closed seven-value union's CHECK) to spend on a
+   possible duplicate.
+
+**A design warning carried into routings 1 and 2, found in this session's own source verification and
+not previously connected to this question:** a sufficiency-examination mechanism **already exists** in
+this codebase — `mapTraceFeaturesToL4Signals`'s **Q4.3 `resolutionBeforeComplete`**
+(`trust-core/l4-passion-audit.ts`), *"resolution BEFORE the assessment completed."* Per the S9b
+**F-Q43** correction its original predicate fired on *any* horme/praxis stage — which *"every faithful
+mid-work trace narrating intended action carries"* — giving it **zero discrimination on the operative
+input class**, and it became useful only when narrowed to a causal-**order** signature. **Detecting
+apparent completion is free and worthless: every completed task looks complete.** Any future build
+answering routing 1 or 2 must supply the discriminating signature or it reproduces F-Q43's original
+defect at a new layer. Recorded in all three of the ATRF, generation-step, and priority-index homes.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md` (NEW — the verbatim record)
+- `operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md` (§2.12 cross-reference; NEW §2.13; the dated note above §3)
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` (NEW §(c-bis))
+- `operations/primal-substrate-2026-08/S3-boulesis-generation-mechanism-scope.md` (NEW §5-Q3-e)
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` (ATRF gate row; NEW four-routings section)
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only. **Nothing built,
+activated, or deployed. No ruled item re-opened** — the four QG questions ruled 2026-08-09 stand, B1's
+§2.12 requirement is unamended, the S6 frozen null result is untouched, and the ruled `high|medium|low`
+blast-radius vocabulary is not amended by §(c-bis) (which raises a gap, as ruled, and deliberately
+proposes no fourth value).
+
+**IDEA-loop parallel window:** pre-flight run per the standing prompt earlier this session (no blocking
+spec; run mid-flight; **Mode 2**). This work touches none of the fenced surfaces — no flag, no route
+contract, no credential, no `idea_loop_*` schema. It adds an open question *about* the null-cycle
+backstop without changing it, so the in-flight runner is unaffected.
+
+**Rollback path:** `git revert` the records commit. All five files are documents; the verbatim record
+would survive as the standing account of the consultation even if the four routing annotations were
+reverted, which is the intended asymmetry.
+
+**Open questions / carried (all four are themselves carried items, by design):** GS-ATRF-3's content
+specification (ATRF session); the null-cycle question (generation-step, unruled); the GS-ATRF-1
+basis-lessness gap (next session touching GS-ATRF-1); the boulesis/sufficiency distinction (ATRF
+session, **before** Q3-d, and blocking it).
+
+**Rules served:** PR7 (all four routings given named tracked homes; nothing left as prose in a
+transcript), PR11/PR12 (every mechanism claim — the novelty check's basis, `targetCircle`'s absence,
+the null-cycle backstop, Q4.3's calibration history — read at source, not inherited from any summary),
+PR15 (the ruled GS-ATRF-1 answer and the manifest's two-record requirement reused verbatim rather than
+re-derived), PR18 (this entry written from the session's own verified observations), PR20 (a
+mechanism-fact finding — the GS-ATRF-1 basis-lessness gap — surfaced for the mentor rather than
+quietly fixed or ignored).
+
+**Status:** Adopted. Cross-references:
+`2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md` (verbatim, governs);
+`D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09` (GS-ATRF-1's ruled four-virtue
+answer); `D-ACTIVATION-OWNERSHIP-RULED-2026-08-09` (the binding sequence placing the ATRF session
+post-validation-run); the S8 amendment entry (B1, generation-step §2.12);
+`operations/primal-substrate-2026-08/friction-primary-hypothesis.md` (§2, the novelty-check half of
+the §(c-bis) finding).
+
+**Model:** Claude Opus 5. **Effort:** high.

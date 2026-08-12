@@ -118,6 +118,72 @@ independently, so the ATRF scoping session does not have to re-discover it a thi
 
 ---
 
+## (c-bis) The friction channel has no GS-ATRF-1 basis AT ALL — and no disclosure branch
+
+**Added 2026-08-12** (`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`; record:
+`operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`).
+**Ruled to be raised independently, verbatim:** *"raise the GS-ATRF-1 basis-lessness gap now,
+independently ... This is not contingent on the sufficiency finding. It exists now, it affects the
+generation-step scope, and it should be raised in the next session that touches GS-ATRF-1."*
+
+**This is distinct from §(c) above and strictly sharper.** §(c) says the dikaiosyne dimension is not
+*recomputable from a persisted row*. This says that for one entire generation channel it is not
+*derivable at all* — not from the row, not from the type, not from anything.
+
+**The two facts, verified at source 2026-08-12:**
+
+1. **GS-ATRF-1's ruled answer names its inputs precisely.** The four dimensions are *"assessed from
+   the candidate's virtue domain and targetCircle"* (§(a) above, verbatim).
+2. **A `friction_detection` candidate has neither input, by construction — not by omission.**
+   `GeneratedCandidate.targetCircle` is optional and documented *"ABSENT for a friction_detection
+   candidate"*; `initialClassification` is a discriminated union whose friction branch is
+   `{ kind: 'preferred_indifferent' }` — the union existing *"so a friction candidate cannot be
+   forced into the virtue-domain shape"* (`idea-loop-types.ts:90`ff).
+
+**The parallel that makes this checkable rather than merely arguable.** `assessStructuralNovelty`
+(`idea-loop-types.ts:222`) computes over **exactly the same two fields** — and handles their joint
+absence honestly:
+
+```ts
+if (wantCircle === undefined && wantDomains === null) {
+  return { novel: true, confidence: 0 }
+}
+```
+
+with the committed docstring stating the reason: *"A candidate with NEITHER structural axis (a
+friction_detection candidate: no targetCircle, preferred_indifferent classification) cannot be
+structurally assessed at all — the check returns `{ novel: true, confidence: 0 }`: nothing in the
+window can match it, and the zero confidence says the check has no basis, rather than manufacturing
+one."*
+
+**The gap: GS-ATRF-1 inherits the identical basis-lessness, for the identical candidate class, from
+the identical two missing inputs — and unlike the novelty check, the ruled answer specifies no
+zero-confidence disclosure branch.** The vocabulary is fixed at `high | medium | low` (§(b) above);
+none of those three values can express *"this indicator has no basis."* A friction candidate assigned
+any of them would be manufacturing exactly what the novelty check was written to refuse.
+
+**Why the record did not already carry this.** `friction-primary-hypothesis.md` §2 names the
+basis-less consequence for the **novelty check**, but does so in service of the *reordering*
+question ("if friction becomes the primary generator, the novelty check becomes basis-less for the
+primary channel by construction"). It was not connected to GS-ATRF-1's own basis. The two documents
+each hold half of this finding; neither states it.
+
+**What this does NOT do.** It does not propose a disclosure branch, name a fourth enum value, or
+touch the ruled `high|medium|low` vocabulary — the vocabulary is fixed in `manifest.md` and is not
+this note's to amend. It raises the gap, which is what was ruled. **The next session that touches
+GS-ATRF-1 owns it**, and should treat the novelty check's zero-confidence posture as the available
+precedent, not as a pre-authorised answer.
+
+**A bound worth carrying with it, from the same ruling:** blast radius is a property of the *proposed
+action*, not of *how the proposal was generated*. Generation channel is legitimately **evidence
+about** blast radius; it must never become part of its **definition**, or the indicator becomes
+gameable by choice of channel. The infrastructure to test whether channel improves the estimate
+already exists in the ruled shape — `manifest.md` requires **two** records (the loop's indicator and
+the agent's own assessment, *"recorded alongside for longitudinal comparison"*), so channel belongs
+as a recorded covariate of that comparison, not as a fifth dimension.
+
+---
+
 ## (d) CARRY-FORWARD for the ATRF scoping session — the completion signal and the justice assessment
 
 **Added 2026-08-11, after the S8 session closed, on mentor direction. Not a correction of the

@@ -300,6 +300,50 @@ change and should be costed as one.
 > §4's costing note carried: an eighth heuristic is a **schema change** (the closed seven-value union is
 > mirrored by a CHECK constraint on `idea_loop_candidates.heuristic`), not a code-only edit.
 
+### §5-Q3-e — Is sufficiency-examination distinct from this mechanism? OPEN, and a build-blocker until examined
+
+**Added 2026-08-12** (`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`; full record:
+`operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`).
+
+**Ruled, verbatim — and note that the ruling's operative half is a prohibition, not a routing:**
+
+> *"hold the boulesis/normative-gap distinction as an open question, not a settled one. Claude named
+> the uncertainty honestly: sufficiency-examination may be second-order relative to normative-gap's
+> first-order question, but the distinction is fine enough to collapse under scrutiny. **Do not build
+> on that distinction until it has been examined.**"*
+
+**The question.** A separate 2026-08-12 finding proposed a *sufficiency-examination* trigger — firing
+at apparent completion, asking whether it is genuine exhaustion or a paused examination. Is that
+genuinely a different mechanism from this document's normative-gap (boulesis) mechanism, or a
+re-description of it?
+
+**The distinction offered, and its stated fragility.** The reading put to the mentor was that they
+differ in **order**, not merely in wording:
+
+- **This mechanism (normative-gap / boulesis) asks about the OBJECT** — *"where the current system's
+  capacity to support examined assent is most constrained ... not where it is broken, but where it is
+  most limited relative to the ideal"* (§1, verbatim). First-order: a question about the world.
+- **Sufficiency-examination asks reflexively about the EXAMINATION ITSELF** — *did I stop looking too
+  early?* Second-order: a question about the enquiry, not its object.
+
+**Both fire when nothing is broken**, which is what makes them easy to conflate and what distinguishes
+both from friction detection (h7), where something *is* wrong. That shared property is exactly why the
+distinction was named as fragile rather than asserted: it is fine enough to collapse under scrutiny,
+and if it does, the sufficiency finding is a re-description of this parked mechanism rather than a new
+one.
+
+**What this blocks, concretely.** §5's Q3-d (eighth heuristic vs. reshaped existing one vs.
+pre-generation step) **cannot be answered while this is open**, because the answer differs depending
+on whether there are one or two mechanisms here. Committing to an eighth heuristic for normative-gap
+and later discovering that sufficiency-examination is the same mechanism would leave the loop with a
+duplicated channel and a schema change (the closed seven-value union's CHECK constraint) spent on it.
+The costing note in §4 therefore now carries this dependency as well.
+
+**Not answered here, and explicitly not defaulted.** The ATRF scoping session inherits this question
+**before** it inherits Q3-d, not alongside it. Nothing in this document, the sufficiency record, or
+the generation-step scope's new §2.13 may be read as having settled it — and per the ruling's own
+words, **no build may rest on the distinction holding until it has been examined.**
+
 ---
 
 ## §6 Build-success criteria

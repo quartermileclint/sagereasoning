@@ -282,9 +282,73 @@ executing, electing, or scheduling that action — it states a requirement on an
 actor produces at a different moment, which is precisely the distinction the 2026-08-09 deferral's
 actor/moment reasoning drew and which this ruling confirms still holds.
 
+**Cross-reference added 2026-08-12 (`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`):** the
+ATRF session now inherits, alongside this requirement, a **content specification** for what the
+completion signal's examination should ask — *whether apparent exhaustion is genuine or the
+examination was merely paused*. Ruled, verbatim: *"the completion signal should examine whether
+apparent exhaustion is genuine, not merely count to three ... not just that a completion signal must
+exist and carry examination evidence, but what the examination should ask."* Record:
+`2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`. **This changes nothing
+in §2.12 above** — it is content for the ATRF session's own scope, named here only so the ATRF
+session inherits both halves together rather than finding them in separate places.
+
+### 2.13 The null cycle — examined or counted? (OPEN QUESTION, added 2026-08-12)
+
+> **ADDED 2026-08-12 as a dated amendment — this is an OPEN QUESTION, not a ruling, and nothing here
+> licenses changing the null-cycle backstop.** Origin and full record:
+> `2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`. Ruled, verbatim:
+> *"carry 'examine the null cycle rather than counting to three' as a separate generation-step
+> question. This is genuinely within the runner's own state, Q1-respecting, and buildable ... That is
+> a real design question for the generation-step document, distinct from GS-ATRF-3."*
+
+**The question.** The ruled null-cycle backstop (§1, settled ground; `S6-friction-primary-mechanism-hypothesis-scope.md`
+§2) fires after **three consecutive null cycles** from heuristics 1–6, shifting the loop to
+friction-only mode. That threshold answers a question — *is this apparent exhaustion genuine?* —
+**mechanically, by counting.** The open question is whether it should instead, or additionally,
+answer it **by examination**: is a null cycle genuine exhaustion of the channel, or an examination
+that paused early?
+
+**Why this is genuinely a generation-step question and not GS-ATRF-3 by another name.** The null
+cycle is the **runner's own** completion-shaped moment — the runner concluding it has nothing to
+propose. It is in the runner's own state (C6-compliant: bounded to the runner's own signals, not
+`getProjectContext`), it involves no execution, and it touches no downstream actor. GS-ATRF-3's
+deferral rests on actor and moment (*a different actor, post-execution*); this question has neither
+property, so the deferral's reasoning does not reach it.
+
+**The precedent the architecture already sets.** QW-A ruled that a `dependency_unavailable` cycle
+passes the fallback counter **transparently** — neither counting nor resetting — because it is *"a
+third thing — an honest record of infrastructure unavailability."* The architecture has therefore
+**already** distinguished one class of non-productive cycle from genuine emptiness, and declined to
+let the counter treat them alike. Distinguishing a *paused examination* from *genuine exhaustion* is
+the same move, one step further in.
+
+**The design difficulty, named now so no future session rediscovers it as a surprise.** A
+sufficiency-examination mechanism already exists in this codebase at a different layer:
+`mapTraceFeaturesToL4Signals`'s Q4.3 `resolutionBeforeComplete`
+(`website/src/lib/substrate/trust-core/l4-passion-audit.ts`) — *"resolution BEFORE the assessment
+completed."* Its calibration history is the warning: per the S9b **F-Q43** correction, the original
+predicate fired on *any* horme/praxis stage — which *"every faithful mid-work trace narrating
+intended action carries"* — giving it **zero discrimination on the operative input class**. It
+became useful only when narrowed to a specific causal-**order** signature. **Detecting apparent
+completion is free and worthless: every null cycle looks null.** Any answer to this question must
+supply the signature that discriminates a paused examination from a finished one; a mechanism that
+merely re-detects nullity would reproduce F-Q43's original defect at a new layer.
+
+**Not answered here, and deliberately not defaulted:** whether the examination replaces the counter,
+supplements it, or informs a third disposition (the QW-A shape); what signal in the runner's own
+state could carry the discriminating signature; and whether an examined null cycle should be
+recorded distinguishably from a counted one in the `watching` table. **The counter as ruled stands
+until this question is itself ruled.**
+
 ---
 
 ## 3. Open questions for the mentor — ALL FOUR RULED 2026-08-09
+
+> **DATED NOTE, 2026-08-12:** the "no other questions remain open" line at the end of this section was
+> true when written and is **no longer true**. §2.13 above adds one further open question (the null
+> cycle — examined or counted?), added by dated amendment under
+> `D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`. The four questions below remain ruled and
+> are not re-opened by it.
 
 - **QG-A — the guardrail fail-closed handling (the obligated named question — brief §3 item 1, re-confirmed open by the `watching` ruling).** **The failure surface, verified first-hand this session (PR20):** a guardrail call can fail four observably different ways — (i) **HTTP 503** `substrate_signing_unavailable` (signing throw; fail-closed); (ii) **HTTP 500** on a billing-write failure (CI-10; fail-closed); (iii) **network-level failure/timeout** (no response at all); (iv) a **served HTTP 200 conservative fallback** — `assessment_status: 'engine_unavailable'`, `proceed: false`, `katorthoma_proximity: null` (`api/guardrail/route.ts:216-231`) — which self-declares that **no examination occurred** and is machine-distinguishable from a genuine refusal. (A fifth 200 shape, `assessment_status: 'ambiguous_pause'` — the Tier-1 conservative pause — is a *genuine gate verdict* on an examined-but-ambiguous action, not a failure; the AI reads it as an honest `rejected_by_guardrail`, named here so the boundary of "fail closed" is explicit.) **Options for the affected candidate:**
   1. **`rejected_by_guardrail`** — treat any fail-closed as refusal. Named and argued **against**: it records a refusal that never examined — a false impression to the loop's own operator, the exact class Q7's ruling condemned; and it would poison the dashboard's guardrail-calibration reading (failures indistinguishable from refusals).
