@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/trust-core-retention-sweep",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/observability-retention-sweep",
+      "schedule": "0 8 * * *"
     }
   ]
 }
