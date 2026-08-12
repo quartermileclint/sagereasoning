@@ -24,6 +24,140 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 ---
 
+## 2026-08-12 — D-GROUNDING-RECORD-RECONCILIATION-2026-08-12
+
+**Decision:** Re-verified the two grounding records — `CLAUDE.md` and
+`operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md` — against primary
+sources rather than transcribing them forward, and corrected what did not hold. Followed
+`operations/handoffs/founder/2026-08-12-grounding-record-reconciliation-NEXT-SESSION-PROMPT.md`.
+**Five stale claims corrected, one of them a live-vs-dark production contradiction; eight new carried
+items recorded; three claims marked `unverified` rather than restated.**
+
+**Reasoning.** This was not housekeeping. The prompt opened on evidence that the drift had *already
+produced defects in real build work* — a stale R20a perimeter count in `CLAUDE.md` propagated into
+the S7 scope document, and the standing opener restated an applied amendment and two cleared
+blockers as outstanding, one of them inside a mentor relay. The grounding records are the highest-
+leverage instance of `primary-data-beats-secondary-characterisation` because **every session reads
+them first: an error there propagates rather than sits.** The session's discipline was therefore
+inverted from the usual one — nothing was carried forward because it was already written.
+
+**What was found stale and corrected** (the list the prompt asks for as the session's own evidence):
+
+1. **The R20a perimeter count — the motivating defect.** `CLAUDE.md` carried *"11 route-level + 2
+   substrate-gate = 13 routes"* as a live claim. **Stale by three.** Counted first-hand from the
+   arrays in `website/src/lib/__tests__/r20a-invocation-guard.test.ts` (`HUMAN_FACING_POST_ROUTES`
+   = 14 entries at `:73–147`; `SUBSTRATE_GATE_ROUTES` = 2 at `:224–227`), **not** from the file's own
+   header comment: **14 + 2 = 16.** Both Stoa routes joined 2026-08-03; `/impulse` 2026-08-12. Both
+   sites in `CLAUDE.md` now carry the correct figure *and* an instruction to re-derive it from the
+   arrays rather than quote either document.
+2. **`/impulse` was absent from `CLAUDE.md` entirely** — a **live R20a perimeter member** missing
+   from the production-state record, the sharpest single gap. Now a Live-list entry recording its
+   ruled departure from family precedent (mentor B3: inside the perimeter, deliberately, because it
+   elicits `aischyne` and `agonia` by design) so a future reader does not "correct" it as an error.
+3. **PR1–PR23 → PR1–PR24.** The opener understated the rule count. Enumerated in **both**
+   `adopted/project-instructions-snapshot.md` and `adopted/standing-protocol-cache.md`, which agree.
+   PR21–PR24 were adopted at ARC2 Session 1 (2026-08-10).
+4. **The "~60 decision-log entries" window count → ~80.** Re-derived: 80 entries whose ID carries an
+   August 2026 date, 86 headings mentioning one. The window was also extended 08-11 → 08-12.
+5. **The Stoa's ST2/ST3/ST4 "built, reviewed, and dark" claim — CONTRADICTED at source, and the most
+   consequential find.** See the honesty note below; this one was **not** found by the author.
+
+**Also corrected:** the `Production state` heading's as-of date (2026-06-25 → 2026-08-12, PR18, with
+the old parenthetical retained and explicitly marked historical); the absence of the Stoa, the
+IDEA-loop surfaces, R21/R22, the three un-numbered `manifest.md` sections, ARC2's closure, and the
+complete primal-substrate family from `CLAUDE.md`; the opener's Tier-2 manifest line (it named two
+un-numbered sections; there are three — the same correction applied to `CLAUDE.md`'s parallel line in
+the same session, initially applied to one document and not the other); a stale `git log --oneline -3`
+commit triple now four commits behind; and queue items 2/4/8, all done or subsumed.
+
+**The independent review found what the author missed — recorded as method, not as a footnote.**
+PR19 ran a fresh general-purpose reviewer against the artifacts themselves, told not to trust the
+session's conclusions. It returned **four confirmed findings**, and the headline one is that the
+Stoa's ST2/ST3/ST4 were described everywhere as dark while
+`D-STOA-ST6-DRAFT-MIRROR-READING-ACTIVATION-LIVE-2026-08-03` records the base
+`SUBSTRATE_STOA_ENABLED` as **already `true`** in production — and ST3
+(`api/mentor/stoa/route.ts:276/337/388/439`) and ST4 (`api/stoa/declare/route.ts:196/254/301/344`)
+gate on **nothing but `isStoaEnabled()`**. The self-contradiction sat inside a single sentence: ST6
+was described as live *because* it rides that same base flag. **The reconciliation session had
+copied the wrong claim straight into `CLAUDE.md` before the review caught it** — a session convened
+specifically to stop stale claims propagating nearly propagated one into the more consequential of
+the two documents. This is the property the mentor named at S7 and it held again here: *"local
+coherence and source-anchored accuracy are different properties, and the author cannot reliably
+check the second from inside the first."* The independent review is not a formality on a documents
+session. All four findings were verified first-hand at source before folding, then folded.
+
+**Marked `unverified` rather than restated** (a repo session cannot read the production
+environment, and saying so is more useful than a confident guess): the live state of
+**`SUBSTRATE_STOA_ENABLED`** — now queue item 10, a one-minute read-only Vercel check that settles
+which of two mutually exclusive records is right; **`SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED`**
+(code present, no activation record anywhere in the log); **Resend** provisioning; and the
+runner-scoping **`#smoke` teardown SQL** (`grep "#smoke" RUN-LOG.md` returns zero — the run log
+neither confirms nor denies execution).
+
+**New carried items recorded:** the `SUBSTRATE_STOA_ENABLED` confirmation (10); the app-wide
+RLS-vs-route-enforcement gap, with the mentor's ordering ruling that `impulse_entries` must be the
+**first** table that session addresses (11); the C15 three-enumeration circle discrepancy (12); the
+four items parked on the validation run's §6 report — S4's watching-table extension, S6's reordering
+decision, the GS-ATRF-2 migration, and the ATRF scoping session with its inherited justice
+carry-forward, *"do not open early"* (13); and a **new PR20-class item left behind by the live-page
+amendment itself** — the mentor's prescribed single formulation was true of the agent surfaces only,
+so a per-surface correction was applied and the collision is owed to the next consultation.
+
+**Verification performed:**
+- `git diff --stat` — the permitted paths only (`CLAUDE.md`, the standing opener, this log).
+- **Every count, ordinal, and "N of M" re-derived from a primary source**, per the prompt's §5.2:
+  the perimeter arrays counted by hand (not from the test file's own header comment, which happens to
+  agree); the PR range enumerated in both governing surfaces; the August entry count re-derived by
+  grep; the cycle count read from `RUN-LOG.md` (8, with its three distinct `dependency_unavailable`
+  failure classes stated separately) and explicitly labelled a snapshot that moves daily.
+- The opener's list numbering re-checked after two insertions: **sequential 0→22, no gaps, no
+  duplicates**, with the inner "Items 14–17" dependency-graph reference preserved (it is not a queue
+  number). A scripted renumber was verified line-by-line to have changed leading numbers only.
+- **PR19 independent adversarial review** across three dimensions (claims-vs-repo; stale items
+  carried forward unchecked; count/ordinal accuracy). Dimension (b) returned **clean** — no queue
+  item was restated open that the repo shows closed. Four findings from (a) and (c), all confirmed
+  first-hand, all folded.
+
+**Files touched:** `CLAUDE.md`; `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`;
+`operations/decision-log.md`.
+
+**Risk classification:** `governance`. Standard under 0d-ii. No code, schema, flag, credential,
+migration, or public-surface change. AC7 not engaged. PR6 not engaged. The IDEA-loop parallel-window
+pre-flight was run: no blocking spec in the scratch project (only the resolved cycle-1
+`NOT-SELECTED-CHANGE-SPEC.md`), the run at 8 cycles of its 20–40 target — **Mode 2**, and this
+session touches none of the fenced surfaces.
+
+**Session honesty note:** the standing opener was **uncommitted** in the working tree at session
+open — HEAD held the 2026-08-01 version while the 2026-08-11 rewrite sat unstaged, alongside an
+untracked `archive/2026-08-01_…`. This session amended that uncommitted work in place and commits
+both, which is the correct outcome but is recorded because the standing rule is not to treat another
+session's uncommitted records as one's own to stage. No separate archive artifact was created for
+the 08-11 version: it was never committed, so there is nothing to archive.
+
+**Open questions / carried:** the `SUBSTRATE_STOA_ENABLED` contradiction is **not resolved** by this
+session — it is recorded, marked unverified, and queued. Every ST2/ST3/ST4 status claim in any
+document should be treated as unverified until that check is made.
+
+**Rules served:** PR18 (the production-state block rewritten at close, from the decision log plus
+this session's own verified observations, carrying its as-of date), PR19 (independent adversarial
+review, four findings folded), PR15, and the standing lesson
+`primary-data-beats-secondary-characterisation` — which this session both applied and, on the Stoa
+claim, was itself caught by.
+
+**Rollback path:** `git revert` the commit. Both files are records with no runtime effect; the revert
+restores the prior text exactly, including its stale claims.
+
+**Status:** Adopted. Cross-references:
+`operations/handoffs/founder/2026-08-12-grounding-record-reconciliation-NEXT-SESSION-PROMPT.md`;
+`D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE`; `D-S5-MORAL-COMMUNITY-AMENDMENT-2026-08-12`;
+`D-STOA-ST6-DRAFT-MIRROR-READING-ACTIVATION-LIVE-2026-08-03`;
+`D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`;
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md`.
+
+**Model:** Claude Opus 5. **Effort:** high.
+
+---
+
 ## 2026-08-12 — D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE
 
 **Decision:** Executed both carried Critical steps from `D-S7-PRIMAL-SUBSTRATE-IMPULSE-TOOL-BUILT-DARK` /
