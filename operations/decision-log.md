@@ -20129,3 +20129,169 @@ ran at its own default effort).
 **Status:** Adopted. Cross-references: `D-C15-DOCTRINAL-SPLIT-FOLLOW-ON-EXECUTED-2026-08-12`; `website/supabase-oikeiosis-self-preservation-standardisation-migration.sql`.
 
 **Model:** Claude Sonnet 5. **Effort:** low.
+
+---
+
+## 2026-08-12 — D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12
+
+**Decision:** Activated the C-1 observability retention sweep in production —
+`SUBSTRATE_OBSERVABILITY_SWEEP_ENABLED=true` in Vercel Production plus a fifth
+`vercel.json` cron entry — closing the gap the 2026-08-01 Fable-5 regrounding
+audit named and `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10` built dark and
+independently reviewed. The first live activation smoke found a genuine,
+previously-undetected defect; it was disclosed and fixed at the root, not
+silently patched into the same breath as activation, per the session prompt's
+explicit instruction.
+
+**Session:** `operations/handoffs/founder/2026-08-12-observability-retention-sweep-activation-NEXT-SESSION-PROMPT.md`.
+**Tier:** `code-critical` (0d-ii — "env flags activating new surfaces," per the
+route's own header comment) — this activates a live, unattended data-deletion
+path against two production tables for the first time. **AC7 (Critical Change
+Protocol) engaged and discharged.** Every live step (Vercel flag flip,
+redeploy, both `curl` smokes, the `git push` of both commits) was
+founder-walked — the AI drafted commands and code, performed no live
+Vercel/GitHub op itself (a `git push` attempt from this session's environment
+failed on missing GitHub credentials; the founder pushed from their own
+terminal).
+
+**Pre-flight:** the standing IDEA-loop parallel-window prompt
+(`operations/handoffs/founder/2026-08-10-idea-loop-parallel-window-NEXT-SESSION-PROMPT.md`)
+was checked first — no blocking spec exists (`NOT-SELECTED-CHANGE-SPEC.md` is
+already closed/recorded), the bounded validation run is mid-flight — **Mode
+2**. None of this session's surfaces overlap the fenced list (`SUBSTRATE_FRESH_ENABLED`/
+`SUBSTRATE_WATCHING_ENABLED`/`SUBSTRATE_LOOP_ID_FIELD_ENABLED`, the outcome
+vocabularies, the idea-loop credential, or the four named routes) — confirmed,
+not merely assumed from the prompt's own reasoning.
+
+**What was done:**
+1. Re-verified the pre-existing battery clean (`route.test.ts` 50/0) before
+   touching anything.
+2. Added the fifth `vercel.json` cron entry (`/api/cron/observability-retention-sweep`,
+   `"0 8 * * *"`, matching the three sibling daily sweeps) — commit `bdc7a4c`.
+3. Founder set `SUBSTRATE_OBSERVABILITY_SWEEP_ENABLED=true` in Vercel
+   Production and redeployed green.
+4. **First live smoke returned two errors, not a clean 200:**
+   ```
+   { "ok": true, "flag_enabled": true,
+     "deleted": { "route_errors": 0, "throttle_events": 0 },
+     "errors": [
+       "route_errors: purgeExpiredRouteErrors: column route_errors.id does not exist",
+       "throttle_events: purgeExpiredThrottleEvents: column throttle_events.id does not exist"
+     ] }
+   ```
+5. **Root cause, verified against the migration files:** `purgeExpired()`'s
+   shared body (`observability-store.ts`) hardcoded `.select('id')` on the
+   DELETE for both tables. Neither table has a generic `id` column —
+   `route_errors`' primary key is `error_id`, `throttle_events`' is
+   `throttle_id` (`supabase-route-errors-migration.sql` §1,
+   `supabase-throttle-events-migration.sql` §1). A
+   `DELETE ... RETURNING id` against a nonexistent column is rejected by
+   Postgres **atomically** — the whole statement fails, nothing is deleted —
+   so this was fail-honest (correctly surfaced as an error, never a false
+   "purged" or a wrong/partial delete) but functionally dead: the sweep could
+   never delete anything, ever, until fixed. This directly defeats C-1's own
+   purpose.
+6. **Why the pre-activation battery (50/0) could not have caught this:** the
+   fake PostgREST test client's `select(_cols: string)` ignored its column
+   argument entirely — it returned the scripted outcome regardless of what
+   column was requested. A hardcoded wrong column name was therefore
+   indistinguishable from a correct one inside the test double. This is a new
+   instance of the "fake client masks a real schema mismatch" class this
+   codebase has hit before (see memory `missing-table-benign-guards-load-bearing-writes`
+   and its siblings) — not a repeat of either of the two review-hardened
+   defects from the predecessor session (the `isMissingTableError` false-benign
+   trap and the unsafe error-cast) — the `isMissingTableError` classifier
+   correctly did NOT swallow this as benign, which is exactly why it surfaced
+   as a real error instead of a silent no-op.
+7. **Disclosed to the founder as its own finding before touching code** (per
+   the activation prompt's explicit "fix it as a distinct, disclosed step, do
+   not silently patch-and-activate in the same breath"), founder said "fix
+   now."
+8. **Fix, mutation-verified:** a `PK_COLUMN` map (`route_errors → error_id`,
+   `throttle_events → throttle_id`) replaces the hardcoded string in
+   `purgeExpired()`. The test double was hardened to validate `select()`'s
+   requested column against the real per-table PK on any scripted-success
+   outcome (error-path fixtures are untouched — those deliberately test error
+   classification independent of the column asked for). Two new regression
+   pins added, asserting the real PK column was selected. **Mutation-tested:**
+   reverted the map back to the hardcoded `'id'`, re-ran the battery — exactly
+   4 failures (the 2 new pins + the 2 pre-existing "count from returned rows"
+   assertions), confirming the pins are load-bearing, not decorative. Restored
+   the fix; battery returned to green.
+9. Committed as `099acd3`. Founder pushed both commits (`bdc7a4c` + `099acd3`)
+   in one `git push` from their own terminal (this session's environment
+   cannot authenticate to GitHub — `fatal: could not read Username for
+   'https://github.com'` — disclosed rather than worked around silently).
+10. **Second live smoke, clean:**
+    ```
+    { "ok": true, "ran_at": "2026-08-12T09:04:32.651Z",
+      "flag_enabled": true,
+      "deleted": { "route_errors": 0, "throttle_events": 0 },
+      "errors": [] }
+    ```
+    The zero deletion counts are honest, not a sign of brokenness — both
+    tables are at most five weeks old (migrated 2026-07-20), so nothing has
+    genuinely reached its 90-day `retain_until` yet.
+
+**Files touched:** `website/vercel.json` (the cron entry);
+`website/src/lib/observability-store.ts` (`PK_COLUMN` map fix);
+`website/src/app/api/cron/observability-retention-sweep/__tests__/route.test.ts`
+(the test-double hardening + two new pins). No change to `route.ts` or
+`handler.ts` — both were already correct.
+
+**Verification performed:**
+- `npx tsx src/app/api/cron/observability-retention-sweep/__tests__/route.test.ts`
+  → **52/0** (was 50/0 pre-fix; +2 mutation-verified regression pins).
+- `npx tsx src/lib/__tests__/llm-outage.test.ts` → **38/0** (sibling suite over
+  the same store file; unaffected).
+- `npx tsc --noEmit` → clean.
+- Live smoke 5a (no auth header) → `401` (not independently re-confirmed this
+  session, since it was already exercised implicitly by the flag-off/flag-on
+  auth-gate logic in the battery; the founder's second live call used the
+  correct Bearer token throughout).
+- Live smoke 5b, post-fix → `200`, `flag_enabled: true`, `errors: []` (pasted
+  in full above).
+
+**Risk classification:** Critical (0d-ii), as the session prompt specified.
+AC7 engaged and discharged — every live Vercel/GitHub op was founder-performed;
+the AI drafted commands, wrote and mutation-verified the code fix, and
+disclosed the found defect before fixing it rather than folding the fix
+silently into the activation. No schema change (the two tables and their
+`retain_until` columns predate this session, unchanged). No perimeter, auth,
+or credential surface touched.
+
+**Rollback path:** unset `SUBSTRATE_OBSERVABILITY_SWEEP_ENABLED` in Vercel +
+redeploy — the route reverts to `{ ok: true, flag_enabled: false }`,
+byte-identical to its pre-activation behaviour, no DB work. The `vercel.json`
+cron entry can be removed independently (a scheduled call to a flag-off route
+is harmless) — the two rollback actions are independent and either-order-safe.
+No schema to reverse.
+
+**Open questions / carried:**
+- **PR24's other named gap** (`agent_hold_observations` and `stoa_entries`
+  both declare `retain_until` with no purge function) — deliberately not
+  folded into this session; still its own carried item.
+- The 5a auth-check (`401`, no header) was not independently re-run by me this
+  session after the fix — a minor honesty gap, disclosed rather than silently
+  assumed; the auth gate itself is unchanged code and covered by the battery's
+  own §1–2 assertions, so this is low-risk, not a live gap in the auth path
+  itself.
+
+**Rules served:** PR6 (not engaged directly by me — no live Vercel/Supabase op
+performed by the AI), PR10 ("I caused this" is not applicable here — the
+defect predates this session, found at first live exercise, not introduced by
+this session's own edit), PR11 (the found defect was verified against the
+actual migration files' primary-key columns, not assumed from the error
+message alone), PR17 (every live op founder-walked), PR18 (this entry written
+from this session's own verified observations), PR19 (not independently
+re-reviewed by a second pass — a single-session fix of a narrow, well-isolated,
+mutation-verified defect; disclosed as such rather than claiming independent
+review that didn't happen).
+
+**Status:** Adopted. Cross-references: `D-ARC2-SESSION1-PROCESS-ADOPTIONS-2026-08-10`
+(the predecessor build + independent review);
+`operations/handoffs/founder/2026-08-12-observability-retention-sweep-activation-NEXT-SESSION-PROMPT.md`;
+`D-MECHANISM-CORRECTION-TRAJECTORY-B1-ACTIVATION-2026-06-14` (the sibling
+activation discipline this session followed).
+
+**Model:** Claude Sonnet 5. **Effort:** low.
