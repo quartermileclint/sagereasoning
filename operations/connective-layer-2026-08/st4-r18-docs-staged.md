@@ -1,6 +1,31 @@
 # Stoa ST4 — R18 docs, STAGED (not applied)
 
-**Status: STAGED ONLY.** Nothing below has touched a live public surface. It
+**⚠ CORRECTED 2026-08-12 (Stoa live-state reconciliation session,
+`D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`) — the status
+line below is FALSE and was carried unchallenged for over a week.** The
+three edits described here **DID land on a live public surface**, verified
+first-hand against both the repo (`git log -S` on `website/public/llms.txt`)
+and production (`curl https://www.sagereasoning.com/llms.txt` /
+`/.well-known/agent-card.json`): they were committed
+`4dbd22f8bd4ae13ed6acb8a50ba68212661322d1`, 2026-08-08, **inside a commit
+whose own message never mentions Stoa** (titled "C2d — the fifth-circle
+orientation reading's honest-claims wording, applied live") and pushed to
+production the same day. The wording matches this staged draft's PR19-fixed
+form exactly (the isolated `STOA_ETHIC` blockquote + the separately-labelled
+"NEW authored text" paragraph), and `STOA_ETHIC` in
+`website/src/lib/stoa/stoa-copy.ts` still matches the applied blockquote
+byte-for-byte — no drift. The extension landed at position #21 exactly as
+this file's checklist anticipated (re-counted 2026-08-12: 22 total
+extensions live). **No decision-log entry records this landing as its own
+event** — it was folded into the C2d session's diff without being named,
+which is why every subsequent record kept treating it as unapplied. The R18
+docs are therefore **not a gap**: they are live, correct, and simply
+undocumented as their own act until this correction.
+
+**Original text below, retained for its content (the wording itself is
+still accurate) — read "STAGED ONLY" as historical, not current.**
+
+Nothing below has touched a live public surface. It
 is drafted here, ahead of ST5, so the founder can sign off on the wording
 *before* any file it names is edited — the standing R18 discipline (see the
 build plan's "R18 staging" phrase for ST4, and the M9/S10 precedent of

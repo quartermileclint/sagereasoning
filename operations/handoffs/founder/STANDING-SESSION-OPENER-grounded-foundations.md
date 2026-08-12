@@ -126,26 +126,39 @@ perimeter, AE-1/AE-2, practice-suggestion, B5, the human practice-reminders arc)
   (a) of the autonomous-loop's two-part blocking condition; part (b) (a genuine, mentor-reviewed
   post-fix production reading) closed the same day** — both conditions are now satisfied, and the
   autonomous-loop program below is the direct consequence.
-- **The Stoa (the connective layer / practitioner directory) — partially live.** ST1 (the
-  `/community` map, repaired and permanently **de-graded** — no alignment tier shown, ever, per a
-  binding mentor ruling that map opt-in never consented to directory-style display) is **live**.
-  ST6 (the optional draft-mirror self-reflection tool, `/api/mentor/stoa/draft-reflect`) is **live**
-  (`SUBSTRATE_STOA_DRAFT_REFLECT_ENABLED=true`, riding the base `SUBSTRATE_STOA_ENABLED=true`).
-  **⚠ CORRECTED 2026-08-12 — this next claim was wrong, and it is the fourth drift instance the
-  amendment found.** This line read: *"ST2 (schema)/ST3 (human surface, `/stoa`)/ST4 (agent surface,
-  `/api/stoa/declare`) are built, reviewed, and dark — an activation walk is ready and has not been
-  run."* **Contradicted at source:** `D-STOA-ST6-DRAFT-MIRROR-READING-ACTIVATION-LIVE-2026-08-03`
-  records the base **`SUBSTRATE_STOA_ENABLED` as already `true`** in production, and ST3
-  (`api/mentor/stoa/route.ts:276/337/388/439`) and ST4 (`api/stoa/declare/route.ts:196/254/301/344`)
-  gate on **nothing but `isStoaEnabled()`** — so they serve whenever that flag is set, and the same
-  sentence that called them dark also had ST6 riding that flag as live. **No activation-walk record
-  for the base flag exists in the decision log, and a repo session cannot read the production env:
-  the flag's live state is `unverified` — confirm it in Vercel before relying on either reading.**
-  ST3 is the twelfth R20a perimeter member, so this is not a cosmetic ambiguity. The Q5c/Q13a
-  trust-event wiring (curator-flagged claim contradictions; calling↔declaration divergence) is
-  built dark behind its own `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`, also not activated. A second
-  mentor ruling on "curation via volume" (the recency-window gaming vector on S10, distinct from the
-  already-shipped total-count disclosure) is a **named, unscheduled** follow-up mentor consultation.
+- **The Stoa (the connective layer / practitioner directory) — LIVE, and now verified, not merely
+  flag-confirmed.** **⚠ CORRECTED AGAIN 2026-08-12** (a second correction the same day, session
+  `D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`) — the amendment above this line
+  marked the flag's state `unverified` and left it as a founder-check item. **The founder confirmed
+  it directly: `SUBSTRATE_STOA_ENABLED` is `true` in production**, and that session did the
+  verification work the missing ST5 walk never did: **ST1** (`/community`, permanently de-graded) is
+  live. **ST3** (`POST/PATCH /api/mentor/stoa`, the twelfth R20a perimeter member) and **ST4**
+  (`/api/stoa/declare`, agent surface, correctly OUTSIDE the perimeter — its own recorded design
+  decision) and the **browse route** (`GET /api/stoa/entries`) are all live and **now
+  distress-check-verified live on production, both write paths, both directions** (a throwaway
+  practitioner account: benign POST saved and incremented the row count; acute PATCH redirected with
+  **zero write**, content and `updated_at` unchanged; benign PATCH saved correctly; acute POST on a
+  second fresh account redirected with **zero row created**; all test artifacts torn down, count
+  returned to baseline). **ST6** (the draft-mirror tool) remains live as before. **Real data exists**
+  — 2 rows, both from 2026-08-03: one is the founder's own genuine declaration (still active,
+  public, real email), the other a self-labelled agent smoke row (withdrawn). **The R18 public docs
+  are live too, not staged** — landed 2026-08-08 inside an unrelated commit
+  (`4dbd22f8b`, "C2d — the fifth-circle orientation reading..."), never recorded as its own event;
+  re-verified against production (`llms.txt`, `agent-card.json` — 22 extensions, Stoa at #21,
+  `STOA_ETHIC` byte-exact, no drift). The **anonymous-sign-ins-OFF** gate is confirmed (`false`, via
+  Supabase's public `/auth/v1/settings` endpoint). The **q-filter pagination bound** holds (`limit`
+  clamped to 200; the q-filter never scans beyond the fetched page). **Still genuinely open, and
+  deliberately NOT resolved by AI judgement:** the **row-level reactivation guard** — the route's own
+  code comment already names it as *"potentially a mentor question"* (the withdraw→re-declare
+  recency-cycling residual); it stays a named, unscheduled mentor question. **What actually remains
+  to activate:** the **Q5c/Q13a trust-event wiring** (curator-flagged claim contradictions;
+  calling↔declaration divergence), built dark behind its own `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`,
+  genuinely unactivated. A second mentor ruling on "curation via volume" (the recency-window gaming
+  vector on S10, distinct from the already-shipped total-count disclosure) is a **named,
+  unscheduled** follow-up mentor consultation. **The process lesson, worth carrying forward: a
+  shared base flag makes "dark" a per-flag claim, not a per-feature claim** — one flag set once for
+  one sub-item (ST6) silently activated three siblings gating on the same flag, and every subsequent
+  record described them as dark for nine days before anyone checked.
 - **R21 (Website Image Use Policy) and R22 (Human Creator Protection Commitment) — new manifest
   rules**, adopted 2026-08-09 verbatim from mentor instruction: all public-facing website imagery
   is human-created (a hard commitment, not sentiment); no AI-generated content substitutes for
@@ -346,15 +359,10 @@ call.
    Searched `RUN-LOG.md` for `#smoke` 2026-08-12: **no match**, so the run log neither confirms nor
    denies execution, and this cannot be settled from the repo. Confirming it needs a founder check
    or a production query. Do not restate it as either done or outstanding without one.
-10. **⚠ CONFIRM `SUBSTRATE_STOA_ENABLED`'s live state in Vercel — a one-minute check that settles a
-    contradiction in the records.** New 2026-08-12. Every grounding record called ST2/ST3/ST4 "dark";
-    the ST6 activation entry says the base flag was already `true` on 2026-08-03; ST3/ST4 gate on
-    nothing else. **Both cannot be true.** If the flag is set, `/stoa` and `/api/stoa/declare` are
-    serving — including a twelfth R20a perimeter member — and "Stoa activation" (item 16) is
-    partly moot. If it is unset, then ST6 is not live either and *that* record is wrong. **Until
-    checked, treat every ST2/ST3/ST4 status claim in any document as unverified.** This is a
-    read-only dashboard check, not a change; do not set or unset anything on the strength of this
-    note.
+10. ~~**CONFIRM `SUBSTRATE_STOA_ENABLED`'s live state in Vercel**~~ — **DONE 2026-08-12**
+    (`D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`). Confirmed `true`. ST1/ST3/ST4/
+    browse/ST6 are all live; ST3's distress-check was live-verified both directions, both write
+    paths, on production, retroactively. See the corrected Live-Stoa bullet above.
 11. **`/impulse` post-activation: the app-wide RLS-vs-route-enforcement gap** — new 2026-08-12,
     PR19-found at the S7 build and **mentor-confirmed as correctly dispositioned** (a local fix
     would be a false guarantee; the same client can write to any other intimate table the same way).
@@ -380,11 +388,12 @@ call.
 14. **The 0h call on P2's three branches** — unchanged, the standing gate above everything else.
 15. **The logos byte-identity guard — scope or retire.** Carried unchanged from 08-01.
 16. **Input-cap Steps 2/3** — carried unchanged from 08-01.
-17. **Stoa activation** — **⚠ read item 10 first: this item's premise may be partly false.** If
-    `SUBSTRATE_STOA_ENABLED` is already `true` in production, ST3/ST4 are serving and only the
-    Q5c/Q13a trust-event half remains to activate. As written below (unamended): ST3/ST4/Q5c-Q13a are built and reviewed; whether/when to run the
-    activation walk is the founder's call (a pre-activation checklist + a pre-built evidence-gate
-    cross-check query both exist and are ready).
+17. **Stoa activation — CORRECTED 2026-08-12, premise was false.** ST1/ST3/ST4/browse are already
+    live and distress-check-verified (item 10, done). **What actually remains is the Q5c/Q13a
+    trust-event activation only** (`SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`, genuinely dark — both it
+    and `SUBSTRATE_TRUST_CORE_ENABLED` required to emit, deliberately). Whether/when to run that
+    activation is the founder's call (a pre-activation checklist + a pre-built evidence-gate
+    cross-check query both exist and are ready, `operations/connective-layer-2026-08/`).
 18. **The Stoa "curation via volume" second mentor ruling request** — named, unscheduled, distinct
     from the already-shipped total-count disclosure.
 19. **The original build-plan C1c + D4** — both unscoped, both named, neither blocking anything.
