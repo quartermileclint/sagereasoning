@@ -90,11 +90,26 @@ const SWEEP_FLAG = OBSERVABILITY_SWEEP_ENV_VAR
  * the chain so the test can assert the DELETE is actually filtered on
  * retain_until rather than being an unbounded table wipe.
  */
+// The real tables' primary keys — NEITHER is `id` (route_errors: error_id;
+// throttle_events: throttle_id; see their migrations' §1). A hardcoded
+// `.select('id')` compiles to `DELETE ... RETURNING id`, which Postgres
+// rejects wholesale (fail-honest, nothing deleted) when the column doesn't
+// exist. Found live 2026-08-12 at first activation smoke, NOT by this
+// battery, because the fake client's select() used to ignore its column
+// argument entirely — closed below so a regression is catchable offline.
+const VALID_SELECT_COLUMN: Record<string, string> = {
+  route_errors: 'error_id',
+  throttle_events: 'throttle_id',
+}
+
 function makeFakeClient(outcome: {
   data?: unknown[] | null
   error?: { code?: string; message: string } | null
-}): { client: unknown; calls: { table: string; column: string; value: string }[] } {
-  const calls: { table: string; column: string; value: string }[] = []
+}): {
+  client: unknown
+  calls: { table: string; column: string; value: string; selectColumn: string }[]
+} {
+  const calls: { table: string; column: string; value: string; selectColumn: string }[] = []
   const client = {
     from(table: string) {
       return {
@@ -105,9 +120,26 @@ function makeFakeClient(outcome: {
             // delete active/live-retention rows rather than expired ones) must
             // be catchable by asserting on `calls[].value`, not just `.column`.
             lt(column: string, value: string) {
-              calls.push({ table, column, value })
               return {
-                select(_cols: string) {
+                select(cols: string) {
+                  calls.push({ table, column, value, selectColumn: cols })
+                  // Only validate the select() column when the caller hasn't
+                  // scripted an explicit outcome — the (b)/(c)/(d) error-path
+                  // cases below deliberately exercise classification of a
+                  // GENUINE error, independent of which column was asked for.
+                  // A successful outcome, though, must be earned against the
+                  // real PK — this is what would have caught the live defect.
+                  if (!outcome.error) {
+                    const expected = VALID_SELECT_COLUMN[table]
+                    if (expected && cols !== expected) {
+                      return Promise.resolve({
+                        data: null,
+                        error: {
+                          message: `Could not find the '${cols}' column of '${table}' in the schema cache`,
+                        },
+                      })
+                    }
+                  }
                   return Promise.resolve({
                     data: outcome.data ?? null,
                     error: outcome.error ?? null,
@@ -277,6 +309,10 @@ async function main(): Promise<void> {
       okRoute.calls.length === 1 && okRoute.calls[0].table === 'route_errors' && okRoute.calls[0].column === 'retain_until',
       'purgeExpiredRouteErrors DELETEs from route_errors filtered on retain_until (never unbounded)',
     )
+    assert(
+      okRoute.calls[0].selectColumn === 'error_id',
+      'purgeExpiredRouteErrors selects the REAL primary key (error_id), never a generic "id" (2026-08-12 live defect)',
+    )
     // The FILTER VALUE, not just the column name, must be pinned — a mutation
     // that filters on e.g. now()+90d (deleting rows NOT yet due, i.e. active
     // data) would still pass a column-name-only assertion. Adversarial-review-
@@ -300,6 +336,10 @@ async function main(): Promise<void> {
     assert(
       okThrottle.calls[0].table === 'throttle_events' && okThrottle.calls[0].column === 'retain_until',
       'purgeExpiredThrottleEvents DELETEs from throttle_events filtered on retain_until',
+    )
+    assert(
+      okThrottle.calls[0].selectColumn === 'throttle_id',
+      'purgeExpiredThrottleEvents selects the REAL primary key (throttle_id), never a generic "id" (2026-08-12 live defect)',
     )
     {
       const t = new Date(okThrottle.calls[0].value).getTime()

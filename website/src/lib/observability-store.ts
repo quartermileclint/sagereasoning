@@ -246,6 +246,20 @@ export function isObservabilitySweepEnabled(): boolean {
   return process.env[OBSERVABILITY_SWEEP_ENV_VAR] === 'true'
 }
 
+// Neither table has a generic `id` column — route_errors' primary key is
+// error_id, throttle_events' is throttle_id (see their migrations' §1). A
+// hardcoded .select('id') compiles to `DELETE ... RETURNING id`, which
+// Postgres rejects wholesale when the column doesn't exist — fail-honest
+// (nothing is deleted, the error is surfaced), never a wrong/partial delete,
+// but it also means the sweep could never delete anything until fixed. Found
+// live 2026-08-12 at first activation smoke; the fake test client's
+// select(_cols) ignored its argument entirely, so no battery could have
+// caught it — closed by PK_COLUMN below, not just the symptom.
+const PK_COLUMN: Record<'route_errors' | 'throttle_events', string> = {
+  route_errors: 'error_id',
+  throttle_events: 'throttle_id',
+}
+
 /** Shared purge body — the two exports below differ only in table name. */
 async function purgeExpired(
   table: 'route_errors' | 'throttle_events',
@@ -261,7 +275,7 @@ async function purgeExpired(
       .from(table)
       .delete()
       .lt('retain_until', new Date().toISOString())
-      .select('id')
+      .select(PK_COLUMN[table])
     if (error) {
       // Table not migrated on this deployment → nothing to purge, benign no-op.
       // Deliberately the same narrow table-only classifier the writers use: a
