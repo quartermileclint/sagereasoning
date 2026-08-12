@@ -6,7 +6,10 @@ import { resolveOikeiosisQuarterly } from '@/lib/practice-sequence'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const VALID_STAGES = ['self', 'household', 'community', 'humanity', 'cosmic'] as const
+// `self_preservation` is the canonical spelling per the mentor's C15 ruling
+// (2026-08-12); `self` is accepted for backward compatibility with any row
+// already written under the earlier spelling (none exist as of this change).
+const VALID_STAGES = ['self', 'self_preservation', 'household', 'community', 'humanity', 'cosmic'] as const
 const VALID_RETURNS = ['yes', 'no', 'partial'] as const
 
 /**

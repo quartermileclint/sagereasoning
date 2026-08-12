@@ -66,8 +66,11 @@ interface CircleExtensionEntry {
   created_at: string
 }
 
+// The `id` values round-trip to the API (stage / current_circle / extended_circle) —
+// `self_preservation` is the canonical underlying vocabulary per the mentor's C15
+// ruling (2026-08-12); `self` remains only as the human-readable display label.
 const STAGES = [
-  { id: 'self', label: 'Self', description: 'Concern for own character and virtue' },
+  { id: 'self_preservation', label: 'Self', description: 'Concern for own character and virtue' },
   { id: 'household', label: 'Household', description: 'Family, close friends, those in daily life' },
   { id: 'community', label: 'Community', description: 'Neighbours, colleagues, local community' },
   { id: 'humanity', label: 'Humanity', description: 'Fellow citizens, strangers, those far away' },
@@ -75,7 +78,7 @@ const STAGES = [
 ] as const
 
 const STAGE_COLORS: Record<string, string> = {
-  self: '#b85c38',
+  self_preservation: '#b85c38',
   household: '#9b7d4a',
   community: '#7d9468',
   humanity: '#5b7fa5',
@@ -84,7 +87,7 @@ const STAGE_COLORS: Record<string, string> = {
 
 // Circle rank, self → outward (mirrors the route's CIRCLE_RANK).
 const CIRCLE_RANK: Record<string, number> = {
-  self: 1, household: 2, community: 3, humanity: 4, cosmic: 5,
+  self_preservation: 1, household: 2, community: 3, humanity: 4, cosmic: 5,
 }
 // #15 — the cosmopolitan obligation check applies once the extension reaches the
 // fourth circle (all rational beings) or wider.

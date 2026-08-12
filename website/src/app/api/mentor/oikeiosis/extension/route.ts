@@ -7,11 +7,15 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // The five oikeiosis circles, self → outward. Reuses the live /oikeiosis
 // vocabulary (oikeiosis_reflections.stage) so the diagnostic and the practice
-// speak the same language.
-const CIRCLES = ['self', 'household', 'community', 'humanity', 'cosmic'] as const
+// speak the same language. `self_preservation` is the canonical spelling per
+// the mentor's C15 ruling (2026-08-12); `self` is accepted for backward
+// compatibility with any row already written under the earlier spelling
+// (none exist as of this change) and maps to the same rank.
+const CIRCLES = ['self', 'self_preservation', 'household', 'community', 'humanity', 'cosmic'] as const
 type Circle = (typeof CIRCLES)[number]
 const CIRCLE_RANK: Record<Circle, number> = {
   self: 1,
+  self_preservation: 1,
   household: 2,
   community: 3,
   humanity: 4,
@@ -176,7 +180,7 @@ async function readJsonBody(
  *
  * Body:
  *   situation                (required) — the current decision or situation
- *   current_circle           (required) — self | household | community | humanity | cosmic
+ *   current_circle           (required) — self_preservation | household | community | humanity | cosmic (self accepted for backward compatibility)
  *   extended_circle          (required) — a wider circle than current_circle
  *   extended_reasoning       (required) — reasoning about the situation from the wider circle
  *   assessment_shift         (required) — what changes in the action assessment when the circle expands
