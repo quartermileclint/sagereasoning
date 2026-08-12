@@ -24,6 +24,78 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 ---
 
+## 2026-08-12 — D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE
+
+**Decision:** Executed both carried Critical steps from `D-S7-PRIMAL-SUBSTRATE-IMPULSE-TOOL-BUILT-DARK` /
+`D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN` / `D-S7-IMPULSE-MENTOR-CLEARANCE-AND-FOLLOW-THROUGH`, per the
+mentor's clearance ("cleared for the founder-walked migration sequence"). `/impulse` — the primal-impulse
+examination tool — **is now fully live**: `impulse_entries` exists on TEST and production with an
+identical shape, and `SUBSTRATE_IMPULSE_R20A_ENABLED=true` in Vercel Production. The founder ran every
+live SQL/dashboard step (AC7); the AI guided, supplied exact paste blocks, and verified each result
+against the migration's own `§VERIFY` block and the build report's claims.
+
+**Step 1 — migration, founder-walked, TEST then production.** `website/supabase-impulse-migration.sql`
+applied on **TEST** first: V1–V5 all green (15 columns with the exact NOT NULL set; RLS on; 5 policies; 7
+CHECK constraints; FK `confdeltype='c'`), then **V6** — the two behavioural probes — both failed with
+`23514 … violates check constraint "impulse_entries_mode_fields_check"` as required (a reciprocity row
+carrying a `sub_species`; a diagnostic row missing `correct_judgement`). Applied on **production**
+next: V1–V5 identical (V6 correctly skipped — destructive on real data). The mode-fields CHECK is
+confirmed genuinely bidirectional on a real database, not merely asserted by the unit battery.
+
+**Step 2 — `SUBSTRATE_IMPULSE_R20A_ENABLED` activation, with a live distress smoke.** Flag set in Vercel
+Production, redeployed, confirmed green. Live smoke on `https://www.sagereasoning.com/impulse`, both
+directions: (a) a benign diagnostic-sequence submission saved normally, row count 0→1; (b) an acute
+submission (`impression: "I want to die"`, the rest of the form filled with placeholder text to clear
+client-side validation) returned the human-audience crisis redirect — the corrected 7-resource list
+(incl. Shout UK + 988 CA) — and the row count **stayed at 1**, confirming the redirect fires before any
+database write on this route, exactly as the build report traced in code. This is the fourteenth
+route-level R20a perimeter member and the first live-smoked in both directions this session.
+
+**Step 3 — reachability, confirmed by query and by click, not assumption.** `GET /api/user/export`
+(Bearer-JWT console fetch, per the standing human-route auth pattern) returned the exact benign row saved
+in Step 2 under `impulse_entries` — nothing from the acute attempt. The live header "Practice" dropdown
+and the live footer "Practice" column both link to `/impulse` and both confirmed working by the founder
+clicking through in production.
+
+**Nothing deviated from the build report.** Every claim in `2026-08-12-MENTOR-BRIEF-S7-build-summary.md`
+Part D/E traced true against the live systems: the CHECK constraint's bidirectionality, the redirect's
+before-any-write ordering, the data-rights wiring, the nav wiring.
+
+**Files touched:** none — this session performed only Supabase SQL Editor and Vercel dashboard operations
+plus this record; `git log origin/main` is unchanged at `98716d4` (the build commit, already pushed
+before this session opened).
+
+**Risk classification:** `code-critical`. Two Critical surfaces: a new schema (migration) and an R20a
+perimeter flag flip on a live public route. AC7 engaged and discharged at both steps — every live
+SQL/dashboard action was founder-performed; the AI performed no Supabase/Vercel/git op. PR6 engaged
+throughout (mirrors every sibling R20a-route activation, e.g.
+`D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE`). PR19 already discharged for the build itself
+(`D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN`) — not re-run this session, per the handoff's own scope.
+
+**Rollback path:** `DROP TABLE public.impulse_entries;` on each environment (the migration's own footer;
+reversible) + `unset SUBSTRATE_IMPULSE_R20A_ENABLED` and redeploy in Vercel Production (byte-identical
+flag-off, test-asserted in the build). Both are independent — either can be rolled back without the
+other.
+
+**Carried, unchanged in substance** (both named explicitly out of this session's scope by the handoff):
+1. **The stale CLAUDE.md perimeter count** ("11 route-level + 2 substrate-gate = 13"; now 14
+   route-level with `/impulse`) — outside this session's and S7's permitted paths; a future
+   re-grounding session's job.
+2. **The app-wide RLS-vs-route-enforcement gap** (PR19-found, mentor-confirmed disposition) — unscoped,
+   founder-elected session of its own. The mentor's ordering ruling stands: when that session opens,
+   `impulse_entries` should be the **first** table it addresses, not one of several, because it is *"the
+   one table in the application where a route bypass reaches the exact population the perimeter exists
+   to protect."*
+
+**Rules served:** AC5, AC7, PR6, PR17, R17b, R17c, R17i, R20a.
+
+**Status:** Adopted. Cross-references: `D-S7-PRIMAL-SUBSTRATE-IMPULSE-TOOL-BUILT-DARK`,
+`D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN`, `D-S7-IMPULSE-MENTOR-CLEARANCE-AND-FOLLOW-THROUGH`,
+`operations/primal-substrate-2026-08/2026-08-12-MENTOR-BRIEF-S7-build-summary.md`,
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` (S7 section, updated in lockstep).
+
+---
+
 ## 2026-08-12 — D-S7-PRIMAL-SUBSTRATE-IMPULSE-TOOL-BUILT-DARK
 
 **Decision:** Built `/impulse` — the primal-impulse examination tool (mentor synthesis Heading 7, ruled 2026-08-11). A new human-practitioner surface: page + layout, `POST/PATCH/GET /api/mentor/impulse`, a new `impulse_entries` table (migration authored, **NOT applied**), a local zero-import vocabulary module, colocated R20a helpers, a self-contained boundary test, a per-route R20a invocation test, data-rights wiring on all three R17 paths, and nav wiring in both the header dropdown and the footer Practice column. **The R20a distress check is built behind `SUBSTRATE_IMPULSE_R20A_ENABLED` (UNSET ⇒ byte-identical); the migration is unapplied. Nothing is live.**

@@ -183,7 +183,7 @@ correct and adopted."*
 | 5 | **S2** | 2 — Productive tension | Documents only | **RULED.** Two proposals, not one (C7); not-a-verdict constraint crosses over (C9) | **YES — D1**, and S1 |
 | 6 | **S3** | 3 — Boulesis generation mechanism | Documents only | **RULED.** Evidence-not-proof (C5); signal sources bounded to the runner's own state (C6). Mechanism parked on the ATRF session | **No** for the framing half; S2 precedes it |
 | 7 | **S5** | 5 — Moral community boundary | Governing-document change | **DONE (2026-08-12).** Founder-confirmed B6 wording transcribed byte-identical into `manifest.md`, new un-numbered section immediately after R0; PR19-reviewed, 0 findings | **No — closed** |
-| 8 | **S7** | 7 — Practice activities | **Build** (`code-elevated` + schema + **R20a**) | **BUILT DARK (2026-08-12).** `/impulse` — page, route, migration (**unapplied**), local vocabulary + drift pin, boundary test, per-route R20a test, data-rights + nav wiring. All five rulings built as ruled. **Nothing live**; PR19 review, the migration walk, and the flag activation are carried | **No — built; carried items below** |
+| 8 | **S7** | 7 — Practice activities | **Build** (`code-elevated` + schema + **R20a**) | **LIVE (2026-08-12).** `/impulse` — page, route, migration (**applied TEST + prod**), local vocabulary + drift pin, boundary test, per-route R20a test, data-rights + nav wiring. All five rulings built as ruled. `SUBSTRATE_IMPULSE_R20A_ENABLED=true` in production, live distress smoke verified both directions | **No — live; two unscoped items remain, see below** |
 
 **What changed materially for the builds:** S7 is now an **R20a perimeter change**, which raises its
 blast radius — the perimeter registry and its guard suite must be updated in the same PR, and AC5
@@ -209,6 +209,14 @@ unchanged, no engine-graph file touched.
 `2026-08-12-MENTOR-BRIEF-S7-build-summary.md`): *"The build is clean. Cleared for the founder-walked
 migration sequence."* Three things named before/around activation, all now handled — see below.
 
+**S7 is fully LIVE, 2026-08-12** (`D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE`). The migration is applied
+on TEST (V1–V6 green, incl. both behavioural probes genuinely failing with a check-violation) and
+production (V1–V5 green); `SUBSTRATE_IMPULSE_R20A_ENABLED=true` in Vercel Production; the live distress
+smoke passed both directions (benign saves, row count 0→1; an acute submission redirects with the
+corrected human-audience crisis message and the row count stays at 1 — no write on redirect); data-rights
+(`/api/user/export`) confirmed carrying the real saved row; both the header Practice dropdown and the
+footer Practice column confirmed reachable in production. Nothing deviated from the build report.
+
 **Carried, in this order — none self-starts:**
 1. ~~PR19 independent adversarial review, BEFORE the migration is walked.~~ **DONE, same day**
    (`D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN`) — five reviewers, zero critical/high findings, two
@@ -216,10 +224,9 @@ migration sequence."* Three things named before/around activation, all now handl
    not fixed** (an app-wide RLS-vs-route-enforcement gap, inherited from every sibling table, out of
    scope for this session). **Mentor-confirmed the disposition is correct** — a local fix would be a
    false guarantee, since the same client can write to any other intimate table the same way.
-2. **The migration, founder-walked TEST → prod**, with its `§VERIFY` block (six checks, incl. a
-   TEST-only behavioural probe that the mode CHECK genuinely bites).
-3. **`SUBSTRATE_IMPULSE_R20A_ENABLED` activation** with a live distress smoke (its own Critical step).
-4. **The stale CLAUDE.md perimeter count** (outside S7's permitted paths).
+2. ~~The migration, founder-walked TEST → prod~~ **DONE, 2026-08-12** (`D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE`) — all six TEST checks green, all five production checks green.
+3. ~~`SUBSTRATE_IMPULSE_R20A_ENABLED` activation with a live distress smoke~~ **DONE, 2026-08-12** (`D-S7-IMPULSE-MIGRATION-AND-ACTIVATION-LIVE`) — live-verified both directions on production.
+4. **The stale CLAUDE.md perimeter count** (outside S7's permitted paths) — still stale; now 14 route-level + 2 substrate-gate = 16 with `/impulse` live.
 5. **The app-wide RLS-vs-route-enforcement gap.** Unscoped, founder-elected session — but the mentor
    named a sharpening on ordering, and it is recorded here rather than only in the review: **this
    should be the FIRST item that future session addresses, not the last**, because `impulse_entries`
