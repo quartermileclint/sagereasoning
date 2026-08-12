@@ -82,7 +82,7 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 - `npx tsc --noEmit` — clean.
 - **Mutation-verified the new pin**: temporarily broke the inserted clause, confirmed the test genuinely failed (1 failed), restored, confirmed 129/0 again — the pin is non-vacuous.
 - **PR19 independent review** (fresh subagent, no context from this session): verdict **GO**. Confirmed the wording is genuinely verbatim against `llms.txt` (only the required `Because`→`because` case change and terminal `.`→`;` continuation differ), confirmed it reads consistently with the adjacent §6(b) note rather than duplicating or contradicting it, confirmed no type/interaction regression. One low-severity finding, not blocking: the totalCount-unknown branch still carries no composition-effect warning at all, even though the underlying gaming risk exists independent of whether this particular count read succeeded — carried below as a named follow-up, not fixed in this session (the fold was scoped to the total-known branch by explicit design, and widening the claim to the unknown branch would need its own, differently-worded sentence, not a straight copy).
-- **Live verification:** carried — pending the founder's push + a `curl` against a real capped trust record on production, per this thread's own closing instructions.
+- **Live verification: DONE, same session, after push+deploy.** `GET /api/trust-record/sagereasoning:s9-loop@v1` (591 real orientation-reading events, well over the 50 cap) confirmed on production: `notes` reads exactly "orientation_readings shows the 50 most recent of 591 total readings (a recency window, not the full record); because the served list is recency-ordered, an agent generating high volumes of toward-classified consults could displace older away or indeterminate entries from the visible window; the total count discloses that more entries exist but does not prevent this composition effect; each entry describes one examination only — see its inline not-attestable clause" — byte-for-byte the intended fold, live on the real public surface.
 
 **Files touched:**
 - `website/src/lib/substrate/trust-core/trust-record-payload.ts` — the fold.
@@ -98,7 +98,7 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 **Rollback path:** `git revert` this commit — the change is a pure string addition inside an existing conditional branch; reverting restores the prior, narrower note exactly.
 
-**Status:** Adopted (build); live-verification carried. Cross-references: `D-STOA-MENTOR-FOLLOWUP-ANSWERED-2026-08-12`; `operations/agent-circles-2026-08/2026-08-08-curation-via-volume-ruling-request.md`.
+**Status:** Adopted — build and live verification both complete. Cross-references: `D-STOA-MENTOR-FOLLOWUP-ANSWERED-2026-08-12`; `operations/agent-circles-2026-08/2026-08-08-curation-via-volume-ruling-request.md`.
 
 **Model:** Claude Sonnet 5. **Effort:** medium.
 

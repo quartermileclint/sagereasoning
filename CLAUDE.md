@@ -273,8 +273,10 @@ Refreshed at the **M1 consult-path activation close** (`D-MECHANISM-CORRECTION-M
   `llms.txt` — is now folded verbatim into the live `GET /api/trust-record/{agent_id}` payload's own
   `notes` array (the total-known branch only, by design; battery 129/0, mutation-verified,
   PR19-reviewed GO with one low-severity named follow-up: the total-unknown branch still carries no
-  composition-effect warning, since the wording as-is depends on the total being known). Live
-  `curl`-verification against production is carried to the next session that pushes this build.
+  composition-effect warning, since the wording as-is depends on the total being known). **Live
+  `curl`-verified same session, after push+deploy**, against `sagereasoning:s9-loop@v1` (591 real
+  orientation-reading events, well over the 50 cap) — the exact intended sentence confirmed present in
+  `notes` on the real public payload.
   **Process lessons recorded this session:** a shared base flag makes "dark" a per-flag claim, not a
   per-feature claim (memory `shared-flag-dark-is-per-flag-not-per-feature`); a migration's own §PRE
   step can catch staleness against a LATER, unrelated migration touching the same constraint, not just
