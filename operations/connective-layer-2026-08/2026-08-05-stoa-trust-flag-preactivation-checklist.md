@@ -21,16 +21,18 @@
 
 **File:** `website/supabase-agent-trust-events-stoa-vocabulary-migration.sql`
 
-**What it does:** widens two CHECK constraints on `agent_trust_events` — `event_type` (15 → 18 values, adding the three Stoa literals) and `artifact_kind` (4 → 5 values, adding `stoa_examined_artifact`). Both widenings are additive only — no existing row can be invalidated (the file's own `§PRE` section proves this before applying).
+**What it does:** widens two CHECK constraints on `agent_trust_events` — `event_type` (18 → 21 values, adding the three Stoa literals on top of the 15 original + the 3 `orientation-reading-*` values a separate, unrelated 2026-08-08 migration already added) and `artifact_kind` (4 → 5 values, adding `stoa_examined_artifact`). Both widenings are additive only — no existing row can be invalidated (the file's own `§PRE` section proves this before applying).
+
+**⚠ Corrected 2026-08-12, post-walk:** the file's original §A target (18 values, omitting `orientation-reading-*`) was stale relative to that later migration — applying it as originally written would have dropped `orientation-reading-*` from the constraint. The file and this checklist are now corrected to the true target (21). See the migration file's own corrected header and `D-STOA-Q5C-Q13A-MIGRATION-STALENESS-FOUND-AND-FIXED-2026-08-12` for the full account, including the discovery that production's `event_type` half was already silently correct going into that walk while `artifact_kind` was not, and a companion regression on TEST that was found and fixed in the same session.
 
 **Apply order (founder-performed, per PR17 — walked live):**
 1. Run `§PRE` on the TEST project first. Expect both counts to read 0.
 2. Apply `§A` and `§B` on TEST.
-3. Run `§VERIFY`. Expect `event_type` to list eighteen values ending with the three Stoa literals; `artifact_kind` to list five values ending with `stoa_examined_artifact`.
+3. Run `§VERIFY`. Expect `event_type` to list twenty-one values ending with the three `orientation-reading-*` types followed by the three Stoa literals; `artifact_kind` to list five values ending with `stoa_examined_artifact`.
 4. Run the file's own commented-out behavioural probe (insert three probe rows, confirm they're accepted, delete them) on TEST — this proves the new vocabulary is genuinely writable, not just present in the constraint definition.
-5. Repeat steps 1–4 on production.
+5. Repeat steps 1–4 on production. **Confirm the project name/header in the dashboard before every query** — a project mix-up mid-walk is exactly the failure mode the 2026-08-12 session hit and recovered from.
 
-**Rollback procedure:** reversible ONLY while no row actually uses the new values — i.e., while `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED` has never been set to `true`. To roll back: re-`DROP CONSTRAINT` + re-`ADD CONSTRAINT` with the original 15/4 values (the exact original lists are in the migration file's own header comment, §PRE). Once real Stoa events have been written under the new vocabulary, rolling the constraint back would strand those rows — at that point rollback means unsetting the flag (stops new writes) and leaving the existing rows in place, not reversing the schema.
+**Rollback procedure:** reversible ONLY while no row actually uses the *Stoa* values — i.e., while `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED` has never been set to `true`. To roll back: re-`DROP CONSTRAINT` + re-`ADD CONSTRAINT` with the 18 pre-Stoa values (15 original + the 3 `orientation-reading-*` values — NOT the bare 15; the exact list is in the migration file's own corrected header comment) for `event_type`, and the original 4 for `artifact_kind`. Once real Stoa events have been written under the new vocabulary, rolling the constraint back would strand those rows — at that point rollback means unsetting the flag (stops new writes) and leaving the existing rows in place, not reversing the schema.
 
 ## 3. Smoke test sequence — confirming the evidence gate on first real traffic
 

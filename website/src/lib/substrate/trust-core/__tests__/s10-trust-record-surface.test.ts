@@ -621,6 +621,18 @@ async function main(): Promise<void> {
       capped.notes.some((n) => n.includes('most recent of 847 total readings')),
       'S6-5b the capped note says "showing N of M", never bare "showing N"',
     )
+    // S6-5b2 (2026-08-12, curation-via-volume ruling fold): the composition-
+    // effect sentence — verbatim-sourced from llms.txt's "Orientation
+    // readings" section — rides in the SAME note as the total-count
+    // disclosure, since the claim depends on the total being known.
+    assert(
+      capped.notes.some(
+        (n) =>
+          n.includes('could displace older away or indeterminate entries from the visible window') &&
+          n.includes('does not prevent this composition effect'),
+      ),
+      'S6-5b2 the curation-via-volume composition-effect sentence is present when total is known',
+    )
     // S6-5c: capped but the count read failed (totalCount null) ⇒ the field is
     // OMITTED (never fabricated) and the note honestly says the total was
     // unavailable.

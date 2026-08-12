@@ -292,11 +292,23 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
     if (input.orientationReadings.capped) {
       // Mentor §6(b): the capped note names the total when available, so a
       // reader sees "showing N of M" rather than inferring completeness.
+      // 2026-08-08 curation-via-volume ruling (confirmed closed 2026-08-12;
+      // the sentence below is verbatim from the mentor-ruled llms.txt text,
+      // folded here — a residual found in the same 2026-08-12 follow-up —
+      // because the composition-effect claim itself leans on the total count
+      // being known, it rides only the total-known branch): the total-count
+      // disclosure alone does not prevent an agent from generating high
+      // volumes of toward-classified consults to displace older away or
+      // indeterminate entries from the visible recency window.
       const total = input.orientationReadings.totalCount
       notes.push(
         (typeof total === 'number'
           ? `orientation_readings shows the ${orientationEntries?.length ?? 0} most recent of ` +
-            `${total} total readings (a recency window, not the full record); `
+            `${total} total readings (a recency window, not the full record); because the ` +
+            'served list is recency-ordered, an agent generating high volumes of ' +
+            'toward-classified consults could displace older away or indeterminate entries ' +
+            'from the visible window; the total count discloses that more entries exist but ' +
+            'does not prevent this composition effect; '
           : 'orientation_readings is capped at the bounded read window (older readings not ' +
             'listed; the total count was unavailable this read); ') +
           'each entry describes one examination only — see its inline not-attestable clause',

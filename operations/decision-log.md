@@ -24,6 +24,86 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 ---
 
+## 2026-08-12 — D-STOA-Q5C-Q13A-ACTIVATION-LIVE-MIGRATION-STALENESS-FOUND-AND-FIXED-2026-08-12
+
+**Decision:** Activated the Q5c/Q13a Stoa trust-event flag end-to-end (`SUBSTRATE_STOA_TRUST_EVENTS_ENABLED=true` in Vercel Production, on top of the already-live `SUBSTRATE_TRUST_CORE_ENABLED`), following `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md` per the mentor's own instruction to trust it as mechanical. **In the course of the walk, found and fixed a real, pre-existing migration-staleness defect that the checklist's own §PRE step was specifically designed to catch — and it did.** The activation itself is now live; the six-step smoke sequence (including the mentor-designated hard gate) passed cleanly on both a fresh and a seeded throwaway agent; full teardown confirmed.
+
+**Reasoning.** Per `operations/handoffs/founder/2026-08-12-stoa-q5c-q13a-activation-and-curation-followup-NEXT-SESSION-PROMPT.md` Thread A — the mentor confirmed the same day that the checklist and build were sound and named the one open question ("has the migration landed on TEST?") as "no." This session ran the checklist as written, in order, founder-walked throughout (PR17).
+
+**The staleness finding.** The migration file (`website/supabase-agent-trust-events-stoa-vocabulary-migration.sql`, authored 2026-08-04) targeted an 18-value `event_type` CHECK (the 15 original values + 3 Stoa additions) as its §A. But a separate, unrelated migration on 2026-08-08 (the C2/C1c orientation-reading activation) had independently widened the SAME constraint to admit `orientation-reading-{toward,away,indeterminate}` — three values this file's target list did not know about. Running §A as originally written would have silently **dropped** `orientation-reading-*` from the constraint rather than merely failing to add the Stoa three. This was caught live: production's own §PRE query (checking row data, not the constraint definition) returned 587 rows "outside the old vocabulary" — a number that, on investigation, was entirely `orientation-reading-toward`/`orientation-reading-indeterminate` rows, not a data-integrity problem. Two real, distinct consequences followed and were both corrected in-session:
+
+1. **A regression this session caused on TEST**, applying the file's stale 18-value §A there before the staleness was understood — dropping `orientation-reading-*` from TEST's constraint (zero rows affected, since TEST had none of that type, but a genuine schema drift from production). Fixed by re-widening TEST's `event_type` CHECK to the true 21-value target.
+2. **A pre-existing, unrecorded partial application on production** — production's `event_type` CHECK already carried all 21 values (Stoa + orientation-reading) before this walk began, most likely from this same file's §A having been run against production by mistake in an earlier, undocumented session; `artifact_kind` was still genuinely at its original 4 values. `artifact_kind` was correctly widened to 5 in this session; `event_type` needed no further change on production.
+
+**Two genuine project-mix-up near-misses were caught and corrected before acting on a false premise** — first, the founder's own report that the pre-fix "TEST" and "production" §VERIFY reads were identical turned out to be both against production; second, after apparently applying the TEST fix, a full-constraint listing on what was believed to be production showed the widened `event_type` constraint had reverted, which on investigation was a tab/project mix-up (a `sagereasoning-test` read shown where a `sagereasoning-us` read was expected), not a real DDL reversion. Both were resolved by demanding unambiguous project confirmation (dashboard header check, plus a disambiguating row-count query) before any further write, rather than acting on an assumed identity. The migration file and its governing checklist were both corrected in-repo to reflect the true target state (21/5, not 18/5) and to document this finding, so a future re-run or reader does not repeat it.
+
+**The smoke sequence (checklist §3), all six steps, run against production with real throwaway identities (never a real practitioner's):**
+- **Setup:** minted `sagereasoning:stoa-q5c-smoke@v1` (capabilities `consult,accreditation_write`), declared a Stoa entry for it, ran one genuine `/api/reason` consult narrating a fair-dealing correction (clean `dikaiosyne` engagement, both circles `obligation_assessment: met`), and one genuine seed accreditation write submitting that signed assessment — landing real, verified prior trust state in `dikaiosyne` (`principled`) and `phronesis` (`deliberate`) while leaving `oversight` genuinely untouched.
+- **Step 1 (flag-echo):** an invalid body correctly 400'd naming the missing block.
+- **Step 2 (the hard gate) — required a second, genuinely untouched throwaway agent** (`sagereasoning:stoa-q5c-smoke-fresh@v1`), since the first agent's other domains already carrying real evidence would have made the overall trust-record read 200 regardless of whether `oversight` leaked. Flagging a contradiction against this fresh agent returned `written:1, held:1`; the subsequent `GET /api/trust-record/{agent_id}` correctly stayed **404** — the load-bearing check passed.
+- **Step 3 (seeded domain):** flagging a contradiction against the seeded agent's `dikaiosyne` returned `written:1, held:0`, and the domain's `effective_level` genuinely dropped one rank, `principled` → `deliberate`.
+- **Step 4 (idempotency):** resubmitting the exact step-3 body returned `written:0` on retry.
+- **Step 5 (Q13a divergence):** flagged against the fresh agent's `oversight` domain, returned `written:1, held:1`; the record stayed 404.
+- **Cross-check query** (`operations/connective-layer-2026-08/2026-08-05-stoa-evidence-gate-crosscheck.sql`) run once, post-smoke, on production: **0 rows** (the gate-leak signature the query exists to catch). **Honest note: the checklist calls for a baseline run before the smoke sequence too; this session only captured the post-smoke run** — the direct `written`/`held` observations at every step gave the same assurance the pre-smoke baseline exists to provide, but the query itself was not run twice as prescribed.
+- **Teardown:** both throwaway `agent_trust_events`/`agent_trust_state` rows and both throwaway `stoa_entries` rows deleted (verified 0/0/0 remaining); both credentials revoked (`is_active:false` confirmed). The one `/api/reason` consult's `loop_billing_events`/`agent_assessment_history`/`credential_audit` rows were left in place per this arc's standing precedent (real metering artifacts, excluded from any billing/trajectory sample rather than deleted).
+
+**Files touched:**
+- `website/supabase-agent-trust-events-stoa-vocabulary-migration.sql` — corrected §PRE/§A/§VERIFY/rollback to the true 18→21 target (was stale at 15→18); added a dated header note explaining the discovery.
+- `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md` — corrected the same stale counts; added a note on the project-mix-up near-misses and the "confirm the project name before every query" discipline.
+- `operations/decision-log.md` — this entry.
+- `CLAUDE.md` — the Stoa Live-in-production bullet, to be updated at session close per PR18.
+
+**Risk classification:** `code-critical` 0c-ii. AC7 engaged and discharged throughout — every live SQL statement (TEST and production, both projects), the Vercel flag flip and redeploy, every mint/consult/accreditation-write/flag/revoke HTTP call, and every teardown delete was founder-run and founder-pasted-back; the AI guided, verified each result against an explicit expectation before proceeding, and made the repo-file corrections. PR17 (walked live, step by step) and PR6 (Critical Change Protocol) both engaged.
+
+**Verification performed:** every SQL step's actual output compared against a stated expectation before the next step was given (never assumed from the checklist's own prose); the two anomalies (the 587-row surprise, the apparent constraint reversion) were investigated to a confirmed root cause before any further write, not patched through; the hard gate (step 2) was the load-bearing check named by the mentor and produced the exact `written:1, held:1` + 404 pattern required; the cross-check query ran clean; teardown counts independently re-queried at 0/0/0, not assumed from the DELETE statements' own success messages (per the standing `supabase-sql-editor-delete-no-count` lesson).
+
+**Open questions / carried:** the pre-smoke cross-check baseline was not captured (noted above, low-risk given the direct step-by-step observations); the R18 public-docs step for Q5c/Q13a is now unblocked per the checklist's own §5 trigger (the smoke passed end-to-end, cross-check returned zero rows) but is correctly not part of this activation — it is its own next named step; the historical question of exactly which earlier session partially applied §A to production's `event_type` constraint is not resolved and is not worth pursuing further (additive-only, no data harmed, now fully corrected).
+
+**Rules served:** PR6, PR17, PR15 (reused the existing checklist + cross-check query rather than re-deriving), PR19 (this entry documents the two anomalies investigated to ground truth rather than assumed), the standing lesson `primary-data-beats-secondary-characterisation` (re-derived the true constraint state from `pg_get_constraintdef` rather than trusting the migration file's own stale comments).
+
+**Rollback path:** unset `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED` + redeploy (byte-identical flag-off; `SUBSTRATE_TRUST_CORE_ENABLED` predates this and governs other event types too, left untouched). The schema widening itself is additive-only and does not need reverting (no row anywhere depends on the old, narrower constraints).
+
+**Status:** Adopted. Cross-references: `D-STOA-Q5C-Q13A-BUILT-DARK-EVIDENCE-GATE-FOLDED-2026-08-04`; `D-STOA-MENTOR-FOLLOWUP-ANSWERED-2026-08-12`; `D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`; `operations/connective-layer-2026-08/2026-08-05-stoa-trust-flag-preactivation-checklist.md`; `operations/connective-layer-2026-08/2026-08-05-stoa-evidence-gate-crosscheck.sql`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium.
+
+---
+
+## 2026-08-12 — D-CURATION-VIA-VOLUME-FOLDED-INTO-LIVE-PAYLOAD-2026-08-12
+
+**Decision:** Folded the curation-via-volume composition-effect disclosure sentence into the live `GET /api/trust-record/{agent_id}` payload's own `notes` array, resolving the residual named in `D-STOA-MENTOR-FOLLOWUP-ANSWERED-2026-08-12`. **The founder decided directly** (their own call, not the mentor's — the residual was explicitly framed as a founder/mentor call, not an AI judgement, and the founder chose fold-in when asked).
+
+**Reasoning.** The 2026-08-08 mentor ruling on "curation via volume" (`operations/agent-circles-2026-08/2026-08-08-curation-via-volume-ruling-request.md`) was applied to `llms.txt`/`agent-card.json` (developer documentation) but never to the live JSON payload a Stoa declaration's `trust_record_url` actually resolves to — a gap only found on 2026-08-12. A reader who fetches the raw endpoint and never separately consults `llms.txt` previously saw only the narrower pre-existing §6(b) "shows N of M" note, with no explanation of the specific volume-gaming risk.
+
+**What changed:** `website/src/lib/substrate/trust-core/trust-record-payload.ts`, inside `composeTrustRecordPayload`'s capped-orientation-readings branch — when `totalCount` is a known number, the existing note now additionally carries (verbatim-sourced from `llms.txt`'s existing "Orientation readings" section, not freehand-authored): "because the served list is recency-ordered, an agent generating high volumes of toward-classified consults could displace older away or indeterminate entries from the visible window; the total count discloses that more entries exist but does not prevent this composition effect;". The totalCount-unknown branch was deliberately left unchanged (the claim as worded depends on the total being known).
+
+**Verification performed:**
+- `website/src/lib/substrate/trust-core/__tests__/s10-trust-record-surface.test.ts` — new assertion S6-5b2 added; full battery **129 passed, 0 failed**.
+- `npx tsc --noEmit` — clean.
+- **Mutation-verified the new pin**: temporarily broke the inserted clause, confirmed the test genuinely failed (1 failed), restored, confirmed 129/0 again — the pin is non-vacuous.
+- **PR19 independent review** (fresh subagent, no context from this session): verdict **GO**. Confirmed the wording is genuinely verbatim against `llms.txt` (only the required `Because`→`because` case change and terminal `.`→`;` continuation differ), confirmed it reads consistently with the adjacent §6(b) note rather than duplicating or contradicting it, confirmed no type/interaction regression. One low-severity finding, not blocking: the totalCount-unknown branch still carries no composition-effect warning at all, even though the underlying gaming risk exists independent of whether this particular count read succeeded — carried below as a named follow-up, not fixed in this session (the fold was scoped to the total-known branch by explicit design, and widening the claim to the unknown branch would need its own, differently-worded sentence, not a straight copy).
+- **Live verification:** carried — pending the founder's push + a `curl` against a real capped trust record on production, per this thread's own closing instructions.
+
+**Files touched:**
+- `website/src/lib/substrate/trust-core/trust-record-payload.ts` — the fold.
+- `website/src/lib/substrate/trust-core/__tests__/s10-trust-record-surface.test.ts` — the new assertion.
+- `operations/decision-log.md` — this entry.
+- `CLAUDE.md` — the Stoa Live-in-production bullet, to correct the "residual, worth a short follow-up" framing to closed, at session close per PR18.
+
+**Risk classification:** `code-elevated`. Additive, no schema/flag/credential change; a small, well-scoped wording addition to an existing public read surface. AC7 not engaged (no live production write beyond the eventual code deploy, which is a normal push, not a database or credential operation).
+
+**Open questions / carried:** the totalCount-unknown branch's disclosure gap (PR19 finding, low severity) — a differently-worded, total-independent phrasing of the same risk is a small named follow-up, not scheduled.
+
+**Rules served:** PR15 (reused the mentor's own verbatim wording rather than re-authoring), PR19 (independent review before closing, one finding disclosed rather than silently accepted).
+
+**Rollback path:** `git revert` this commit — the change is a pure string addition inside an existing conditional branch; reverting restores the prior, narrower note exactly.
+
+**Status:** Adopted (build); live-verification carried. Cross-references: `D-STOA-MENTOR-FOLLOWUP-ANSWERED-2026-08-12`; `operations/agent-circles-2026-08/2026-08-08-curation-via-volume-ruling-request.md`.
+
+**Model:** Claude Sonnet 5. **Effort:** medium.
+
+---
+
 ## 2026-08-12 — D-GROUNDING-RECORD-RECONCILIATION-2026-08-12
 
 **Decision:** Re-verified the two grounding records — `CLAUDE.md` and
