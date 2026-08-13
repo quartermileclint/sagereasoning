@@ -20439,3 +20439,188 @@ post-validation-run); the S8 amendment entry (B1, generation-step §2.12);
 the §(c-bis) finding).
 
 **Model:** Claude Opus 5. **Effort:** high.
+
+---
+
+## 2026-08-12 — D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12
+
+**Decision:** Executed the mentor's rulings on **two same-day consultations** — the five-principles
+architectural examination (5 rulings) and the guide-function examination (3 rulings), **8 in total**.
+Three new `governance` scoping session records opened; two governing documents amended; one citation
+defect elevated; **two items found BLOCKED on the live byte-identity guard and surfaced rather than
+routed around.** **No build authorised. No schema, route, flag, credential, or corpus edit made.**
+
+**Tier: `governance`** — documents and session records only. **Production untouched. AC7 not engaged.
+PR6 not engaged.** **GS-ATRF-1, GS-ATRF-2 and GS-ATRF-3 remain open and are untouched by every item
+below.**
+
+**Verbatim records (each wins over this entry):**
+`operations/agent-circles-2026-08/2026-08-12-mentor-consultation-five-stoic-principles-verbatim.md`;
+`…-guide-function-agent-vs-human-verbatim.md`. **The analyses ruled on:**
+`…-five-stoic-principles-architectural-examination.md`; `…-guide-function-agent-vs-human-practitioner.md`.
+
+### The eight rulings, and what each produced
+
+**P1 — Prohairesis: gap confirmed, doctrinal correction ADOPTED.** A proposal is a **phantasia**, not
+a synkatathesis — the loop presents; the recipient assents (Epictetus, *Discourses* 1.1.7–12,
+1.28.1–2). **Q1 is a doctrinal necessity, not a policy choice**, and **Q1 and the L4 audit's Q4.3
+`resolutionBeforeComplete` are the same principle at two scales** — Q1 forbids architecturally what
+Q4.3 detects per-trace. **Applied to two governing documents** (locations + text below). **The
+reciprocal L4-header half is BLOCKED — see "Two blocked items".**
+
+**P2 — Kathêkon: gap confirmed, total not partial.** New session opened (below).
+
+**P3 — Sympatheia: already encoded**, `website/src/lib/logos-teaching.ts:275`, live at `/logos`. **No
+architectural addition.** Citation defect **ELEVATED to load-bearing** — see "Two blocked items".
+
+**P4 — Melete: already encoded** on the human surface (three live proactive tools: `/morning`,
+`/premeditatio`'s *Prepare a disposition*, `/sage-compass`). **Folds into P5's session; no separate
+session.**
+
+**P5 — Hegemonikon habituation drift: gap confirmed, precise and checkable.** The gap is **not** that
+drift detection is absent but that **uniformity reads as `stable`** — the healthy value. New session
+opened (below), with a **third scope item added by ruling**: whether M7 is the right measurement
+window for a variance signal — *"a measurement-honesty question, not a build question,"* settled
+**before** any build.
+
+**Guide-function F1 — Examination object: gap confirmed.** The guide's response is uncalibrated for
+practitioner type everywhere outside the R20a crisis path; the mechanism (Layer 3) is built, verified,
+and switched off by the recorded S7 decision. New session opened (below).
+
+**Guide-function F2 — Passion-diagnosis posture: already-encoded verdict CONFIRMED**, and stronger
+than the question assumed — both postures live (`reflect-service.ts` Q1–Q6 invitational;
+`l4-passion-audit.ts` forensic, out-of-band) and **cross-checked via G4**
+(`passion-unflagged-by-self-screen` / `self-screen-absent`; `reflect-service.ts:521-522`,
+`emission-hooks.ts:195-196`). The architecture does not choose a posture; it runs both and measures
+divergence. **Residual (invitational wording presuming interior access the architecture declines to
+trust) recorded as a carried item INSIDE F1's session record — not a separate item, by ruling.**
+
+**Guide-function F3 — Progress dimension: partly-already-encoded verdict CONFIRMED.** Senecan grades
+are live **agent-side** (`sage-assent-wrapper.ts:120,144,290`; `agent-hand-back-report.ts:694,780`) —
+a claim the analysis nearly got wrong and corrected by checking. Trajectory machinery is live and
+MEASURE-only (`trajectory-delta.ts` AE-1; B5; A3 decay). **Drift half collapses into P5's session**,
+which now additionally carries **Seneca *Letters* 75.8–9** as its criterion (the *proficientes* are
+graded by **relapse-resistance and stability under perturbation, not current level**) and an explicit
+**conflation warning**: the grade engine's hysteresis stabilises the *grade assignment* against noisy
+input — it does **not** measure the practitioner's stability, and a session conflating them *"would
+report the smoothing of its own measurement as evidence of the subject's steadiness."*
+
+### Three new `governance` scoping session records — all OPEN, awaiting ruling
+
+Each carries its session question **verbatim as ruled**, its inherited constraints named at opening,
+`Status: OPEN — awaiting ruling`, and an explicit "does not pre-answer" section. All three are
+**separate items and are not absorbed into any existing open question**, per the ruling.
+
+1. **`2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md`** — *should the IDEA
+   loop's candidate evaluation be role-relative, and if so by what mechanism, given `/api/guardrail`
+   takes no role input and the ruled winner rule is "highest proximity among novelty-passers"?*
+   Inherits **C6** (signal sources bounded to the runner's own state, explicitly not
+   `getProjectContext`) and **QG-D** as precedent (a selection-time weight was rejected as amending a
+   ruled rule). Carries the boundary that kathêkon-appropriateness is **not** a blast-radius question
+   and must not be folded into GS-ATRF-1.
+2. **`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md`** — three scope items: the
+   ADR-013 §8 `does_not_attest` question; melete's disposition-formation half (same axis, opposite
+   sign — scoped together or neither); and the M7-window honesty question. Constraints: **weights
+   remain BLOCKED** (MEASURE-only); Seneca 75.8–9 as criterion; the hysteresis conflation warning.
+3. **`2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md`** — *should the S7 "Layer 3
+   out of launch scope, internal-only" decision be re-opened…?* Inherits the **R20a auth-signal
+   discriminator** (`r20a-audience-renderer.ts:45`, `auth.user?.id` truthy/falsy) as the live
+   precedent any second discriminator **must reuse rather than duplicate**, because it is already
+   load-bearing for a safety surface. Carries F2's wording residual. **States explicitly that
+   `SUBSTRATE_LAYER3_ENABLED` activation is a founder-walked step and is NOT licensed.**
+
+### The two governing-document amendments (P1) — locations and text
+
+**(a) `operations/agent-circles-2026-08/2026-08-08-autonomous-loop-design-brief.md`, §8 Q1** — a dated
+amendment appended beneath the existing RULED annotation (which is left intact, nothing reversed).
+Added text states: the phantasia/synkatathesis/hormê sequence with its Epictetus loci; that a
+generated proposal is a phantasia and the election is the assent; that Q1 is therefore a doctrinal
+necessity rather than a policy choice; and that **Q1 and Q4.3 are the same principle at two scales**,
+quoting Q4.3's own committed description. It also records the blocked L4 half in place.
+
+**(b) `operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md`, §2.10 "No execution"** —
+a dated amendment appended to the bullet, stating the same correction compactly and naming the Q1/Q4.3
+identity, pointing at (a) for the full statement.
+
+### Two blocked items — surfaced, not routed around
+
+**This is a genuine collision between two standing instructions, and it is recorded rather than
+resolved unilaterally.**
+
+**(i) The L4 audit header amendment (P1's reciprocal half) — REQUIRED by ruling, NOT APPLIED.**
+`website/src/lib/substrate/trust-core/l4-passion-audit.ts` sits inside the live byte-identity guard's
+measured set: `GUARD_RE` in
+`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts:419` matches **both** `/substrate/`
+**and** `trust-core`. A comment-only edit turns that guard red (the guard tests `git status --short`,
+so any modification to a matching path fails it, regardless of content).
+
+**The exact text to apply when unblocked**, recorded here so the instruction is not lost:
+
+> Q1/Q4.3 — ONE PRINCIPLE AT TWO SCALES (named 2026-08-12, mentor ruling on principle 1 of the
+> five-principles examination). The IDEA loop's Q1 hard constraint — the loop proposes, it never
+> executes — is this same check at the architectural scale. A generated proposal is a *phantasia*
+> (an impression presented), and the election by the human or agent who will act is the
+> *synkatathesis* (Epictetus, *Discourses* 1.1.7–12, 1.28.1–2). A loop that executed its own
+> proposal would reach a commitment stage with no preceding assent stage — exactly the causal
+> structure Q4.3 detects inside a single trace. Q1 forbids architecturally what Q4.3 detects
+> per-trace.
+
+**Note the honest complication:** the guard's own header scopes it *"while the observation window
+runs,"* and that window is **stopped** — `GATE1_FALSE_HOLD_CAPTURE` has been unset since 2026-07-17
+and the 130-record buffer is frozen. The guard is nonetheless **unconditional in code** and would go
+red. **Whether it should still bind for a comment-only edit to a file outside the `/api/reason` import
+graph is a founder/mentor call, not one to take by editing anyway.**
+
+**(ii) The sympatheia citation defect — ELEVATED, NOT FIXED, exactly as ruled.**
+`website/src/lib/stoic-brain/stoic-brain.json:151` mis-cites the Marcus interweaving line as **4.26**;
+it is **7.9** (4.26 is the distinct *spun-for-you* fate chapter). The same entry's `DL 7.38` cite is
+also off. `/logos` itself was corrected 2026-07-16; the corpus root was named as a carried follow-up
+and remains open. **Now load-bearing rather than cosmetic**, because sympatheia carries explicit
+doctrinal weight in the moral-community reasoning. **The fix was NOT attempted** — `stoic-brain`
+matches the same guard. Elevated within its existing gate constraint, per the ruling's own wording.
+
+### Verification
+
+`npx tsx src/app/logos/__tests__/human-practitioner-boundary.test.ts` → **249 passed, 0 failed**, run
+after every edit in this session. **Every change is under `operations/`; no file in the measured set
+was touched**, which is why the guard stays green and why (i) and (ii) above are blocked rather than
+done.
+
+### Risk classification
+
+`governance`, Standard under 0d-ii. Documents and session records only. **Nothing built, activated, or
+deployed.** No ruled item re-opened: the four QG rulings, B1's §2.12 requirement, GS-ATRF-1's ruled
+four-virtue answer, the S6 frozen null result, and the `high|medium|low` blast-radius vocabulary all
+stand untouched. **Weights remain BLOCKED.**
+
+**IDEA-loop parallel window:** Mode 2 (pre-flight run earlier this session — no blocking spec, run
+mid-flight). Nothing here touches a fenced surface; the two generation-step amendments are dated
+annotations to ruled documents and change no route contract, flag, credential, or `idea_loop_*` schema.
+
+### Rollback path
+
+`git revert` the records commit. All eight artifacts are documents; the three session records would
+disappear as items, and the two governing-document amendments are appended blocks that revert cleanly
+without disturbing the RULED annotations they sit beneath.
+
+### Open questions / carried
+
+The three new sessions (all OPEN, awaiting ruling); the two blocked items above, both needing a
+founder/mentor call on the byte-identity guard's scope; and — unchanged — GS-ATRF-1/2/3, the ATRF
+scoping session's inherited content, and the null-cycle question added to generation-step §2.13
+earlier the same day.
+
+**Rules served:** PR7 (all eight rulings given tracked homes; the two blocked items carried with their
+exact pending text rather than dropped), PR10 ("I caused this" not applicable — both blocks are
+pre-existing standing constraints, not this session's doing), PR11/PR12 (the guard collision found by
+checking `GUARD_RE` at source rather than assuming a comment edit was safe; the Senecan-grades
+agent-side fact corrected by a second grep after a first was about to yield the wrong claim), PR18
+(written from this session's own verified observations), PR20 (the guard collision surfaced to the
+founder as a mechanism fact rather than resolved unilaterally).
+
+**Status:** Adopted. Cross-references: both 2026-08-12 verbatim consultation records; both analyses;
+`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12` (same-day companion, whose routing 1 shares the
+ATRF home with P1); `D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09` (GS-ATRF-1's
+ruled four-virtue answer, untouched); ADR-013 §8 (the honest-claims envelope the drift session tests).
+
+**Model:** Claude Opus 5. **Effort:** high.

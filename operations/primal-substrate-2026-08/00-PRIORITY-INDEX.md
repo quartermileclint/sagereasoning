@@ -343,6 +343,56 @@ signature. **Detecting apparent completion is free and worthless — every compl
 The design problem is the discriminating signature, and any future build that merely re-detects
 completion reproduces F-Q43's original defect at a new layer.
 
+### Eight further rulings — five principles + the guide-function question, 2026-08-12
+
+**Two consultations, same day, both ruled in full and executed.** Decision-log:
+`D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`. Analyses:
+`operations/agent-circles-2026-08/2026-08-12-five-stoic-principles-architectural-examination.md` and
+`…-guide-function-agent-vs-human-practitioner.md`, each with its own verbatim question record.
+**No build is authorised by any of the eight rulings.**
+
+**THREE NEW `governance` SCOPING SESSIONS — all OPEN, awaiting ruling, none absorbed into any existing
+open question:**
+
+| Session record (`operations/agent-circles-2026-08/`) | Opens | Status |
+| --- | --- | --- |
+| `2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md` | Should candidate evaluation be role-relative? Gap confirmed **total**: `/api/guardrail` takes **no role input**. Inherits C6 (bounded signal sources) + QG-D (amending a ruled rule) as precedent. | **OPEN** |
+| `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` | Does the trust record attest anything about **discriminative range**? Three scope items (the ADR-013 §8 question; melete's disposition-formation half — same axis, opposite sign; **and whether M7 is the right window for a variance signal**, added by ruling, settled *before* any build). Criterion: **Seneca *Letters* 75.8–9** — relapse-resistance, not level. | **OPEN** |
+| `2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md` | Re-open the S7 "Layer 3 internal-only" decision? The guide's response is **uncalibrated for practitioner type everywhere outside the R20a crisis path**. Inherits the R20a auth-signal discriminator (`r20a-audience-renderer.ts:45`) as the constraint any second discriminator must reuse. **`SUBSTRATE_LAYER3_ENABLED` activation is NOT licensed.** | **OPEN** |
+
+**Verdicts that required no new session:**
+- **Prohairesis (P1) — gap confirmed, doctrinal correction adopted.** A proposal is a **phantasia**,
+  not a synkatathesis; the loop presents, the recipient assents. **Q1 is a doctrinal necessity, not a
+  policy choice**, and **Q1 and the L4 audit's Q4.3 are the same principle at two scales.** Applied to
+  the design brief §8 Q1 and generation-step §2.10. **The reciprocal L4-header amendment is BLOCKED —
+  see the citation/guard note below.** Home otherwise: the ATRF session, alongside routing 1.
+- **Sympatheia (P3) — already encoded**, `logos-teaching.ts:275`. **No architectural addition.**
+  Citation defect **ELEVATED** — see below.
+- **Melete (P4) — already encoded** on the human surface (three live proactive tools). Folds into the
+  drift session; **no separate session.**
+- **Passion-diagnosis posture (guide-function F2) — already encoded**, and more completely than the
+  question assumed: both postures live and **cross-checked via G4**. Residual (invitational wording
+  presuming interior access the architecture declines to trust) **carried inside the Layer 3 session
+  record**, not as a separate item.
+- **Progress dimension (guide-function F3) — partly already encoded**; Senecan grades are agent-side
+  (`sage-assent-wrapper.ts:120,144,290`), AE-1 trajectory machinery is live. Drift half **collapses
+  into** the drift session, which now carries Seneca 75.8–9 **and** the hysteresis conflation warning.
+
+**TWO ITEMS BLOCKED ON THE BYTE-IDENTITY GUARD — both named, neither attempted:**
+
+1. **The sympatheia citation defect is now LOAD-BEARING, not cosmetic** (elevated by ruling). The
+   corpus mis-cites the Marcus interweaving line at `website/src/lib/stoic-brain/stoic-brain.json:151`
+   as **4.26**; it is **7.9** (4.26 is the distinct *spun-for-you* fate chapter), and the entry's DL
+   cite is also off. `/logos` itself was corrected 2026-07-16; the corpus root was not. Since
+   sympatheia now carries explicit doctrinal weight in the moral-community reasoning, the defect stops
+   being cosmetic. **The fix remains GATED and was NOT attempted** — `stoic-brain` matches the
+   byte-identity guard. **Elevated within its existing gate constraint, exactly as ruled.**
+2. **The L4 audit header amendment (P1's reciprocal half) is BLOCKED, not overlooked.**
+   `l4-passion-audit.ts` sits inside the guard's measured set (`GUARD_RE` matches both `/substrate/`
+   **and** `trust-core`), so a comment-only edit turns the guard red. The exact text to apply is
+   recorded in the decision-log entry. **A collision between two standing instructions — surfaced for
+   the founder, not routed around.**
+
 ---
 
 ## Preconditions that apply across the family

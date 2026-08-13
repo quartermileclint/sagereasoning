@@ -175,6 +175,41 @@ Named as questions, not resolved by default. Q4, Q8, and Q9 are facts this conso
 
 - **Q1 — The proposes-never-executes line.** §4 proposes that the loop generates and examines but never executes a winning candidate; execution is a separate human act. Is this confirmed as a binding design principle for the loop (on the strength of, e.g., the C2 placement ruling's own reasoning), or a default the standing-runner design may later revisit under its own gates?
   **RULED: confirmed as a BINDING design principle — not revisitable by the standing-runner design.** *"The Stoic framework does not permit delegating praxis to a mechanism, because action from virtue requires the agent's own assent. A loop that could execute its own proposals would be substituting mechanical output for the founder's prohairesis... It is ruled out now."* The standing-runner design may revisit shape, cadence, credential, dashboard — never this line. **Carried as a named hard constraint in every subsequent document.**
+
+  > **AMENDED 2026-08-12 — the doctrinal structure named, and its identity with the L4 audit's Q4.3.**
+  > Mentor ruling on principle 1 of `2026-08-12-five-stoic-principles-architectural-examination.md`
+  > (record: `2026-08-12-mentor-consultation-five-stoic-principles-verbatim.md`; decision-log
+  > `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`). **Nothing in the Q1 ruling
+  > above is reversed or weakened — this states the doctrine the ruling already rests on, and names a
+  > connection the corpus did not carry.**
+  >
+  > **The doctrinal correction, adopted:** in Epictetus the sequence is **phantasia** (an impression is
+  > presented) → **synkatathesis** (assent is given or withheld) → **hormê** (the impulse to act), and
+  > what is "up to us" is the middle term (*Discourses* 1.1.7–12; 1.28.1–2). **A proposal the loop
+  > generates is therefore a phantasia, not a synkatathesis. The loop presents; the recipient assents.**
+  > The assent is the *election* of a candidate by the human or agent who will act — never the loop's
+  > own act of proposing.
+  >
+  > **Consequence: Q1 is a doctrinal necessity, not a policy choice.** A loop that executed its own
+  > proposal would collapse phantasia and synkatathesis into a single act — committing without a
+  > preceding assent stage. The ruling above already reaches this conclusion via prohairesis
+  > (*"substituting mechanical output for the founder's prohairesis"*); the amendment names the
+  > structure that makes it necessary rather than prudent.
+  >
+  > **The connection, named here for the first time: Q1 and the L4 audit's Q4.3 are the same principle
+  > at two scales.** `mapTraceFeaturesToL4Signals`'s **Q4.3 `resolutionBeforeComplete`**
+  > (`website/src/lib/substrate/trust-core/l4-passion-audit.ts`) detects exactly this failure inside a
+  > single reasoning trace — *"the trace's causal chain reached a COMMITMENT / ACTION stage (horme /
+  > praxis) WITHOUT a preceding ASSENT/DELIBERATION stage (synkatathesis)."* **Q1 forbids
+  > architecturally what Q4.3 detects per-trace.** One constraint, two scales.
+  >
+  > **The reciprocal amendment to the L4 audit's own header is REQUIRED by the same ruling and is NOT
+  > YET APPLIED — it is blocked, not overlooked.** `l4-passion-audit.ts` sits inside the live
+  > byte-identity guard's measured set (`GUARD_RE` in
+  > `website/src/app/logos/__tests__/human-practitioner-boundary.test.ts` matches both `/substrate/` and
+  > `trust-core`), so editing it — even comment-only — turns that guard red. The exact text to apply,
+  > and the collision, are recorded in the decision-log entry above. **Do not apply it by routing around
+  > the guard.**
 - **Q2 — The novelty check's home.** The specification is approved (§1.6), and a first-cut pure implementation (`assessStructuralNovelty`, in the committed-but-dark `idea-loop-types.ts` — §1.2's correction) already exists, unconsumed. What has no ruling is the **API seam**: a new dedicated endpoint wrapping it; a flag-gated extension of the guardrail response; or a runner-side computation against exported history. The ruled per-cycle contract ("the examination, the novelty check, and the trust-event write") reads as server-side — is a new endpoint the intended shape? (The existing dark function does not pre-answer this; it can back any of the three.)
   **RULED: a new dedicated endpoint wrapping the committed-but-dark `assessStructuralNovelty` is the intended shape.** Runner-side computation is ruled out (it would move a server-side responsibility to the runner); a guardrail-response extension is possible but adds complexity to an already load-bearing endpoint. **Scoped as its own small item — a server-side seam question, not generation content — next in the Q11 sequence.**
 - **Q3 — The runner's identity.** Does the loop run under its own dedicated credential and K1 agent identity (making its S10 record, trajectory, and billing separable from every other surface — and the curation-via-volume question inspectable), or under an existing identity? A dedicated identity is the natural reading of `loopId`'s purpose but has not been ruled.
