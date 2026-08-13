@@ -20624,3 +20624,123 @@ ATRF home with P1); `D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-0
 ruled four-virtue answer, untouched); ADR-013 §8 (the honest-claims envelope the drift session tests).
 
 **Model:** Claude Opus 5. **Effort:** high.
+
+---
+
+## 2026-08-13 — D-IDEA-CREATION-RESEARCH-AND-SAGEPALS-DOCUMENTED-2026-08-13
+
+**Decision (lean, `governance`):** Produced two documentation records under two separate instructions,
+and applied the one scope amendment the first of them carries. **Documents only — no build, schema,
+route, flag, credential, or corpus edit. Nothing adopted, nothing scheduled. GS-ATRF-1, GS-ATRF-2 and
+GS-ATRF-3 remain open and untouched. Production untouched. AC7 not engaged.**
+
+**Provenance note (PR18):** both records are dated **2026-08-13** per their instructions; both were
+written **2026-08-14**, and each states so in its own front matter rather than leaving the gap
+implicit.
+
+### Record 1 — idea-creation research, five Stoic connections
+
+`operations/agent-circles-2026-08/2026-08-13-idea-creation-research-stoic-connections.md`. **Status:
+documented finding — not a ruling, not a build authorisation.** Carries all five connections
+(phantasia-examination ↔ inhibition of habitual response; the four personae ↔ perspective shifting;
+premeditatio ↔ constraint manipulation; melete ↔ practice-builds-faculty; and Connection 5, the drift
+framing question), **with the governing correction stated FIRST rather than as a closing caveat** —
+the research optimises for more/more original/more fluent ideas; the practice optimises for examining
+accurately, which sometimes means fewer responses and sometimes withholding assent entirely. **The
+loop is not trying to generate the most creative proposals; it is trying to generate proposals that
+survive examination**, and the ruled **null cycle** is a legitimate outcome that a fluency-oriented
+reading would misread as failure.
+
+**Two boundaries recorded so adjacent items are not conflated:** Connection 2 is cross-referenced to
+the open kathêkon session but explicitly **not merged** with it (that session asks how a proposal is
+*judged*; Connection 2 is about how proposals *arise*). Connection 4 is marked as already-established
+ground (melete's already-encoded verdict), not new.
+
+**Citation posture stated once and applying throughout:** the classical loci are **transcribed from
+the instruction and NOT independently text-verified in this session** — recorded explicitly because
+this project has a standing lesson on exactly that gap (`classical-citations-text-verify`; the
+`/logos` review found two wrong loci in the project's own corpus). Anything promoted from this record
+to a public surface or a build must be text-verified first.
+
+### The one scope amendment — the drift session
+
+`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` gains Connection 5 as a **framing
+question**, alongside the M7-window question and the Seneca 75.8–9 criterion it already carried:
+*not just whether the same sub-species passion recurs, but whether the agent's proposal range is
+narrowing — whether it is seeing fewer distinct types of impression as worth examining.*
+
+**Recorded as a genuinely second axis, not a restatement:** scope item 1's gap is that uniformity of
+the *reading* is invisible; this adds dispersion of the *subject matter*. **An agent could show varied
+proximity readings across a narrowing set of impression types and pass both checks taken
+separately** — the shape of a measurement gap that survives a partial fix. The governing correction is
+carried onto the amendment itself, because "range is narrowing" is exactly the phrase most likely to
+be misread as "should produce more varied proposals."
+
+**The drift session remains OPEN.** The framing question is an addition to its scope, **not a
+pre-answer to any of its three scope items.** `00-PRIORITY-INDEX.md` updated to match.
+
+### Record 2 — SagePals, future direction
+
+`operations/future-directions/2026-08-13-sagepals.md` (new directory, deliberately outside every
+current arc). **Status: future direction — documented, not scoped, not scheduled. No connection to the
+P0 build sequence or the Q11 sequence.** Carries the origin observation (expertise abundance disrupts
+credential-based trust — and the note that the idea *arrived as a response to that observation, not as
+a product idea looking for a problem*), the four principles (dichotomy of control applied to knowledge;
+phronesis as irreducible and newly scarce; oikeiosis as the original trust mechanism the credential
+system was only ever approximating; philodoxia as the transition risk), the open question, and the
+Stage-3-question-during-a-Stage-1-build positioning with an explicit retrieval condition.
+
+**One architectural claim verified at source (an asset for any future design):** `philodoxia` is
+already a committed sub-species of `epithumia` — *"Craving for reputation as an end"* —
+`website/src/app/api/mentor/impulse/vocabulary.ts:152`, sourced to `stoic-brain.ts:323`, and one of the
+four live `/impulse` pathways. **The diagnostic vocabulary for SagePals' own named transition risk
+already exists in the product.**
+
+### A premise correction inside Record 2 — checked rather than transcribed
+
+**The instruction states the trust record is "currently private by design — an instrument for
+self-examination." That is FALSE of the agent trust record.**
+`website/src/app/api/trust-record/[agent_id]/route.ts:9-10` — *"Public + unauthenticated (founder
+election E1, 2026-07-12 — the accreditation-GET posture)."* **Publicly readable since 2026-07-12.** It
+*is* true of the human practitioner's records (baseline/reflections/oikeiosis/impulse — user-JWT
+scoped, RLS'd).
+
+**So the open question splits per surface, and only one half is open** — the same per-surface shape as
+the mentor's own `/limitations` correction:
+- **Agent half — already live, and already partly defended.** ADR-013 §8's honest-claims envelope
+  (served verbatim, with a `does_not_attest` list) and the "curation via volume" composition-effect
+  disclosure folded into the live payload's `notes`. **Neither solves the performance problem — they
+  bound the reader's inference; they do not stop the subject performing.** That distinction is
+  recorded rather than blurred.
+- **Human half — genuinely open, and the harder one.** *How does the network surface demonstrated
+  character without converting the practice of virtue into a performance of it?* Named as the design's
+  **central question**, not an implementation detail: a visible record becomes a credential, and a
+  credential is what Principle 3 says has lost its discriminating power and Principle 4 says people
+  will chase anyway — **so a SagePals that made human practice visible to establish trust would risk
+  rebuilding the credential system it exists to replace, in the vocabulary of virtue, which is worse
+  rather than better because the corruption is harder to see.**
+
+**Risk classification:** `governance`, Standard under 0d-ii. Documents only. No ruled item re-opened;
+weights remain BLOCKED. **IDEA-loop parallel window: Mode 2** — nothing here touches a fenced surface
+(no flag, route contract, credential, or `idea_loop_*` schema); the run was at cycle 12 of its 20–40
+target at the time of writing.
+
+**Rollback path:** `git revert` the records commit. The two new records disappear; the drift-session
+and priority-index amendments are appended blocks that revert cleanly without disturbing the ruled
+content beneath them.
+
+**Open questions / carried:** the drift session (OPEN, now four scope inputs); SagePals' human-half
+visibility question (carried as a future direction, no owner, no schedule); and the standing
+requirement that any classical citation in Record 1 be text-verified before promotion.
+
+**Rules served:** PR7 (the scope amendment given a tracked home in both the session record and the
+index), PR11/PR12 (the trust-record-privacy premise checked at source and found inverted, rather than
+transcribed), PR18 (both records carry their true writing date against their instructed record date),
+PR20 (the per-surface correction surfaced as a finding rather than silently applied).
+
+**Status:** Adopted (as documentation). Cross-references:
+`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md`;
+`D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`;
+`D-CURATION-VIA-VOLUME-FOLDED-INTO-LIVE-PAYLOAD-2026-08-12`; ADR-013 §8.
+
+**Model:** Claude Opus 5. **Effort:** high.

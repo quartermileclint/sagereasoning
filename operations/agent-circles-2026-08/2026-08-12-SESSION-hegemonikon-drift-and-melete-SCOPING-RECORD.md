@@ -51,6 +51,38 @@ Added to this session's scope by the mentor's principle-5 ruling, verbatim in su
 overlay's own purposes; whether a window sized for *level and rate* is the right window for *variance*
 is exactly the open question, and it is to be settled before, not during, any build.
 
+## Framing question — is the proposal RANGE narrowing? (ADDED 2026-08-13)
+
+**Added to this session's scope by the idea-creation research findings**
+(`2026-08-13-idea-creation-research-stoic-connections.md`, Connection 5). **A framing question for the
+session's examination — not a build proposal, and not a pre-answer to scope items 1–3.**
+
+The alternative-uses task is **a direct measure of discriminative range** — how many non-habitual uses
+can be generated for a fixed object. Carried across:
+
+> Not just whether the same sub-species passion appears repeatedly in an agent's trace history, but
+> **whether the agent's proposal range is narrowing — whether it is seeing fewer and fewer distinct
+> types of impression as worth examining.**
+
+**Why this is a second axis and not a restatement of the gap.** Scope item 1's finding is that
+**uniformity reads as `stable`** — no signal measures variance or dispersion of the *reading*. This
+adds the dispersion of the *subject matter*: not only *"is the verdict always the same?"* but *"is the
+set of things being examined shrinking?"* **An agent could show varied proximity readings across a
+narrowing set of impression types and pass both checks taken separately** — which is the shape of a
+measurement gap that survives a partial fix, and precisely why this belongs in the session's framing
+rather than arriving after a build.
+
+**This is a measurement-honesty question**, in the same class as scope item 3's M7-window question,
+and it is to be examined in the same session.
+
+**The correction that governs it, carried from the source record and binding here:** the research it
+derives from is oriented toward *more and more original ideas*; **the practice is oriented toward
+examining accurately, which sometimes means generating fewer responses and sometimes withholding
+assent entirely.** A session that read "narrowing range" as "should produce more varied proposals"
+would have inverted the instrument. **The loop is not trying to generate the most creative proposals;
+it is trying to generate proposals that survive examination** — and the ruled **null cycle** is a
+legitimate outcome, not a failure to be optimised away.
+
 ---
 
 ## The finding that opened this session — gap confirmed, precise and checkable
