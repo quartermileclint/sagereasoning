@@ -20785,3 +20785,120 @@ predecessor version's discipline, inherited); the four decision entries + commit
 version folds in.
 
 **Model:** Claude Fable 5. **Effort:** high.
+
+---
+
+## 2026-08-15 — D-PRUDENCE-GROUP-AND-SAGEPALS-AMENDMENTS-DOCUMENTED-2026-08-15
+
+**Decision (lean, `governance`):** Executed the founder-relayed 2026-08-14 Prudence Group and
+SagePals session instruction (`inbox/mentors brainstorming instruction.rtf`) — three deliverables.
+**Documents only — no build, schema, route, flag, credential, or corpus edit. Nothing adopted into
+a build sequence, nothing scheduled. GS-ATRF-1, GS-ATRF-2 and GS-ATRF-3 remain open and untouched.
+The Q11 sequence is undisturbed. Weights remain BLOCKED. Production untouched. AC7 not engaged.**
+
+**Provenance note (PR18):** the new record and all amendments are dated **2026-08-14** per the
+instruction (the session date); all were written **2026-08-15**, and each states so in its own
+front matter or amendment text rather than leaving the gap implicit.
+
+### Deliverable 1 — the Prudence Group future-direction record (NEW)
+
+`operations/future-directions/2026-08-14-prudence-group.md`. **Status: future direction —
+documented, not scoped, not scheduled.** The practice layer SagePals exists to support: a Stoic
+circle (Epictetan diatribe form for the guide, Socratic question-only form for participants) with
+the opening/closing declarations verbatim, the six-stage sequence (Intend, Examine, Transcribe,
+Assure, Act, Reflect), the three-tier credential structure (bringer / observer with the
+three-session-type qualification / guide with revocable trust-record attestation), the four roles,
+the three records + source corpus, the spin-off mechanism (one examination at a time, even at
+computational speed), the examination-of-ideas posture (attachment examined before the idea), the
+**five operational forms**, eleven Stage 3/4 placeholder fields (named, not built), and five open
+questions carried — **question 1 (who convenes the circle in which the guide is the bringer)
+flagged most pressing: a circle whose guide is not subject to examination is a hierarchy with
+philosophical vocabulary.**
+
+**One instruction-internal discrepancy resolved rather than transcribed:** the instruction's first
+block is headed "The four operational forms" but lists five; its authoritative TASK B block reads
+"The five operational forms" with five specified. **Five forms recorded**, per the authoritative
+block.
+
+### Deliverable 2 — three amendments to the SagePals record
+
+`operations/future-directions/2026-08-13-sagepals.md` gains an **Amendment log** (all three dated
+2026-08-14 per instruction) plus inline pointers at the affected sections:
+
+- **A1** — North Star reformulated to **innovation in service to the truth**, with the precision
+  note kept sharp (aspiration ≠ criterion; the verifiable criterion is **examined assent** — the
+  task-authenticity criterion); the task-declaration mechanism (declaration unverified externally,
+  held against the trust record; declaration-vs-evidence divergence is itself a trust signal,
+  analogous to the G4 cross-check, verified at `emission-hooks.ts:195-196`); synkatathesis applied
+  to the output side, cross-referenced to the 2026-08-12 design-brief §8 Q1 amendment's input-side
+  doctrine.
+- **A2** — the instructed premise correction was **checked against the record and found already
+  present** (the 08-13 record was written with the per-surface split; re-verified at
+  `trust-record/[agent_id]/route.ts:9-10`) — recorded honestly as nothing-to-correct rather than
+  double-applied. What A2 adds: the sharpened defence boundary (ADR-013 §8 envelope +
+  curation-via-volume **bound the reader's inference; they do not stop the subject performing**),
+  the sharpened human-half formulation (the corruption *wears the language of the thing it is
+  corrupting*), and **the resolving design principle: visibility is relational, not broadcast —
+  the Seneca-to-Lucilius model — now the governing design constraint for all SagePals trust-signal
+  architecture.** The human-half question moves to *resolved at the design-principle level;
+  implementation remains future work.*
+- **A3** — the explicit two-way cross-reference to the Prudence Group record (one examined-assent
+  criterion, two applications; the Group develops the habit, the task-declaration step makes it
+  visible).
+
+### Deliverable 3 — the Layer 3 scoping session's Stage 2 reframing addition
+
+`operations/agent-circles-2026-08/2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md`
+gains a **scope addition (ADDED 2026-08-14)**: the session question is correct but incomplete —
+the fuller question is *what does the guide need to know about the practitioner's relational
+context to respond appropriately?* Minimum information: **the practitioner's role, not the
+relationship type** (four-personae, *De Officiis* 1.107–115), and **whether the impressions about
+the relationship are examined or assumed**. The guide's first move is the self-side question, per
+**R20d** (verified: relationship asymmetry — engage the self-side, decline the other-side); the
+Grok research's model-the-other-party framing is inverted, per instruction. Four Stage 2
+placeholder fields named as the session's design target (`relational_context`,
+`practitioner_role`, `relationship_type`, `examination_status`) — **named, not built; the session
+remains OPEN — awaiting ruling; the addition does not pre-answer it.** A boundary against the open
+kathêkon session is recorded (judgement-side vs rendering-side; cross-referenced, not merged).
+`00-PRIORITY-INDEX.md` row updated to match.
+
+**Premise checks (PR11/PR12) — all held this time:** `route.ts:9-10` (E1 public since
+2026-07-12) re-verified exact; R20d meaning verified; the G4 cross-check verified at
+`emission-hooks.ts:195-196`; ADR-013 §8 `does_not_attest` envelope verified at
+`trust-record-payload.ts`; the drift session's 2026-08-13 framing question verified in its record
+(the Prudence Group record borrows it as a diagnostic direction without pre-answering the OPEN
+session). **Citation posture:** classical loci (Meditations 9.1, *Letters* 75.1–2, *De Officiis*
+1.107–115) transcribed, **not text-verified** (`classical-citations-text-verify`); *Letters*
+75.1–2 explicitly distinguished from the drift session's 75.8–9 criterion so the two are not
+conflated.
+
+**Risk classification:** `governance`, Standard under 0d-ii (documentation, decision-log entries,
+deliverable drafts). AC7 not engaged. PR6 not engaged. PR19 not engaged (no trust-core/ predicate/
+fold/engine/auth/data-deletion surface touched — records only). **IDEA-loop parallel window: Mode
+2, freshly derived this session** — no blocking spec in the scratch project; the run at **15
+completed cycles** (11 winner / 3 dependency_unavailable / 1 null_cycle, live production query,
+latest cycle 2026-08-14 06:08 UTC); no fenced surface touched.
+
+**Rollback path:** `git revert` this records commit. The new record disappears; the SagePals
+amendment log, the Layer 3 scope addition, and the index-row extension are appended/bounded blocks
+that revert cleanly without disturbing the ruled content beneath them.
+
+**Open questions / carried:** the Prudence Group record's five (1 and 2 most pressing — the
+guide's own examination; the wiki second-order audit); the Stage 4 continuity-of-experience
+question (carried, explicitly not pre-answered); the three OPEN scoping sessions unchanged (the
+Layer 3 session now carries the wider scope); SagePals' human-half implementation architecture
+(design principle settled, build shape future).
+
+**Rules served:** PR7 (the scope amendment given a tracked home in both the session record and the
+index), PR11/PR12 (five premises checked at source before recording; one instructed correction
+found already-applied and recorded as such), PR18 (all records carry their true writing date
+against their instructed record date), PR22 (Model/Effort trailers on the commit).
+
+**Status:** Adopted (as documentation). Cross-references:
+`D-IDEA-CREATION-RESEARCH-AND-SAGEPALS-DOCUMENTED-2026-08-13` (the predecessor record + the
+premise-check discipline inherited); `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`
+(the §8 Q1 doctrine A1 cross-references; the ruling that opened the Layer 3 session);
+`2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md`;
+`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md`; ADR-013 §8.
+
+**Model:** Claude Fable 5. **Effort:** high.

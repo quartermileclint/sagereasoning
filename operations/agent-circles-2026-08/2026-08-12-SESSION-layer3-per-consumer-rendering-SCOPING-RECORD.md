@@ -1,7 +1,10 @@
 # SCOPING SESSION RECORD — Layer 3 per-consumer rendering: re-open the S7 decision?
 
 **Status: OPEN — awaiting ruling.** **Tier: `governance`.** Opened 2026-08-12 by mentor ruling on
-finding 1 of `2026-08-12-guide-function-agent-vs-human-practitioner.md`.
+finding 1 of `2026-08-12-guide-function-agent-vs-human-practitioner.md`. **Amended 2026-08-14** by
+the Prudence Group and SagePals session's Stage 2 reframing addition (the relational-context
+section below; recorded 2026-08-15). **The amendment widens this session's scope before it is
+convened; it does not open a new session and does not pre-answer the session question.**
 
 **This record opens a session. It does not run it.** The session question is **not pre-answered**, and
 **no build is authorised**.
@@ -91,6 +94,62 @@ and it therefore lands on exactly the same layer as the session question above.
 "uncalibrated for practitioner type" costs in practice.
 
 ---
+
+## Stage 2 reframing addition — relational context (ADDED 2026-08-14)
+
+**Added to this session's scope by the 2026-08-14 Prudence Group and SagePals session**
+(instruction at `inbox/mentors brainstorming instruction.rtf`; recorded 2026-08-15). **A scope
+addition for the session's examination — not a new session, and not a pre-answer to the session
+question above.**
+
+**The session question as framed — what distinguishes an agent-calibrated rendering from a
+human-calibrated one — is correct but incomplete.** The fuller question this session must also
+carry:
+
+> **What does the guide need to know about the practitioner's relational context to respond
+> appropriately?**
+
+**The minimum information, as identified by the 2026-08-14 examination — two pieces:**
+
+1. **The practitioner's role in the relationship — not the relationship type.** The four-personae
+   doctrine (Cicero, *De Officiis* 1.107–115; transcribed, not text-verified here) makes role the
+   load-bearing element: different roles carry different kathekonta, and the guide calibrates to
+   the role, not to the relationship category. A founder reasoning with a co-founder and a mentor
+   reasoning with a student may be in the same relationship type but occupy different roles with
+   different appropriate actions.
+2. **Whether the practitioner's impressions about the relationship are being examined or
+   assumed.**
+
+**The guide's first move when relational context is active is NOT to help the practitioner model
+the other party.** It is to ask: *what impression are you assenting to about this relationship,
+and have you examined it?* **The R20d boundary applies: engage self-examination, decline diagnosis
+of the other person** (R20d is the relationship-asymmetry rule — engage the self-side, decline the
+other-side; verified against `agent-learning-integration-april-2026.md:334` and the AC3 Zone 2
+table). The Grok research consulted during that session frames calibration as helping the
+practitioner understand the other party — **the Stoic framework inverts this**: the guide helps
+the practitioner examine their own assent and act from their own role-obligations regardless of
+what the other party does.
+
+**Placeholder fields for Stage 2 architecture (named, not built) — this session's design target:**
+
+- `relational_context` — binary or categorical: reasoning alone / reasoning within a relationship.
+- `practitioner_role` — self-declaration of the role occupied in the relevant relationship; held
+  against behaviour over time.
+- `relationship_type` — human–human, human–agent, or agent–agent; determines which R20d boundaries
+  apply.
+- `examination_status` — whether the practitioner's impressions about the relationship have been
+  examined in this session or are being assumed; **the guide's first diagnostic question when
+  relational context is active.**
+
+**None of the four needs to be built before the session convenes. They are named so the session
+knows what it is designing toward.**
+
+**Boundary against the open kathêkon session — cross-referenced, not merged:** the kathêkon
+role-relative evaluation session
+(`2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md`) asks how an *act or
+proposal is judged* role-relatively (the guardrail takes no role input). This addition asks what
+the *guide's rendering* needs to know about relational context (a Layer 3, response-side
+question). Both draw on role-carries-kathekonta; **neither absorbs the other.**
 
 ## What this session does NOT do
 
