@@ -146,6 +146,65 @@ This warning is recorded at the session's opening, not left to be rediscovered.
 
 ---
 
+## Observed data — one session's harness record, and a survivorship warning it raises (ADDED 2026-08-14)
+
+**Recorded at the mentor's direction** (*"the superseded-loop count is real data for the drift
+session"*). **This is n=1 session, offered as an observation, not as evidence for or against anything
+in scope items 1–4.** All figures below were re-derived from
+`~/.sage-gate1/gate1.log` and `~/.sage-gate1/<session>.loop.json` at source, **after an earlier
+in-conversation estimate proved wrong** (see the correction note).
+
+**Session `828ee5d0-…` (2026-08-12 → 08-14), the session that opened this record:**
+
+| Measure | Value |
+| --- | --- |
+| At-action consults **delivered** | **8** |
+| At-action consults **timed out** (`CONSULT-OUTAGE`, 28000ms) | **31** |
+| **Delivery rate** | **8 / 39 ≈ 21%** |
+| Loops **closed** (`closedRefs`) | **0** |
+| Loops **abandoned** (`abandonedRefs`) | **7** |
+| Loops **open** at time of writing | **1** |
+| Proximity of delivered consults | **7 `principled`, 1 `deliberate`** |
+
+**Correction to an earlier statement, recorded rather than quietly fixed:** this session first reported
+the outage as *"six of the last eight writes."* That was a local impression from what was visible
+in-turn and **understated the rate substantially** — the true session figure is **31 of 39 attempts**.
+The *"seven superseded redirections"* half was correct: `abandonedRefs` holds exactly seven.
+
+### Two things this shows, and one warning that matters more than both
+
+1. **A perfect instance of the open-loop class: zero closures, seven abandonments, one still open.**
+   Every delivered consult after the first read `loop=reopened carried-prior=yes`. The loop never
+   closed — and could not, because the examination that would close it failed to deliver four times
+   out of five.
+2. **Near-uniform proximity — 7 of 8 at `principled`.** On its face this is exactly the pattern scope
+   item 1 exists to catch: a reading that never varies, which every current signal would report as
+   `stable`.
+
+**⚠ But the warning is the contribution, and it cuts against reading (2) as drift at all.**
+
+**The 8 delivered consults are not a random sample of the 39 attempts.** They are the ones whose
+composed extraction completed inside the 28s bound. Composition time plausibly correlates with the
+size and complexity of the action being examined (the composer bounds narrated intent and payload,
+and the S11b record already documents composed extraction running 13–20s with live timeouts on larger
+writes). **If so, the surviving sample is systematically the simpler actions — and the near-uniform
+`principled` reading is a selection artifact, not evidence of narrowing discrimination.**
+
+**Generalised, this is a measurement-honesty finding about the data source itself, and it bears
+directly on scope item 3:** a variance or dispersion signal computed over a source with an ~80% loss
+rate **that correlates with the property being measured** is measuring the surviving subset, not the
+practice. **So the window question is not only *"how long a window?"* but *"over what, and with what
+survivorship?"*** A session that settled the window's *length* while leaving its *completeness*
+unexamined would have answered half of scope item 3.
+
+**Not scoped, named only:** the ~79% at-action outage rate is also an ordinary operational finding
+about the founder's own harness (the documented mitigation is the `GATE1_ACTION_TEXT_MODE=lean` knob,
+a fidelity-vs-availability tradeoff that has been the founder's open call since 2026-07-30). **It is
+not this session's to fix**, but a drift session drawing on harness data should know the channel's
+loss rate before trusting its distribution.
+
+---
+
 ## Inherited constraints — binding on this session
 
 1. **Weights remain BLOCKED.** Any signal contemplated here is **MEASURE-only** and carries no
