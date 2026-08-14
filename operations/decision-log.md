@@ -20744,3 +20744,44 @@ PR20 (the per-surface correction surfaced as a finding rather than silently appl
 `D-CURATION-VIA-VOLUME-FOLDED-INTO-LIVE-PAYLOAD-2026-08-12`; ADR-013 §8.
 
 **Model:** Claude Opus 5. **Effort:** high.
+
+---
+
+## 2026-08-15 — D-STANDING-OPENER-2026-08-15-UPDATE
+
+**Decision (lean, `governance`):** The standing session opener is updated to **Version 2026-08-15**,
+folding in the 2026-08-12 ~13:24 → 2026-08-15 window (the C-1 activation with its live-defect-and-fix;
+the twelve executed mentor rulings and the three OPEN scoping session records they produced; the
+byte-identity-guard collision now blocking six items; the two 08-13 documentation records with their
+premise corrections; the n=1 harness data + survivorship warning; the run at 15 cycles with Mode 3
+possibly imminent). The committed 2026-08-12 version is archived at
+`archive/2026-08-12_STANDING-SESSION-OPENER-grounded-foundations.md` per the file's own convention.
+A companion grounding prompt is authored at
+`operations/handoffs/founder/2026-08-15-informed-foundation-NEXT-SESSION-PROMPT.md` — a no-task
+opener whose sole job is verified grounding + a ≤15-line readback + "Grounded. Ready for the
+instruction," so a detailed complex instruction lands on a current foundation.
+
+**Method note (PR18):** every fact folded into the opener was re-derived this session from primary
+sources (`gate1.log`, `RUN-LOG.md` cycle headings, `git log origin/main..HEAD`, the session records
+themselves), not carried from conversation memory — the same session having produced two
+memory-vs-source corrections (31/39 not "six of eight"; `8efded6` not the fabricated `1a13ef6`)
+that are themselves recorded in the opener as fresh instances of
+`primary-data-beats-secondary-characterisation`.
+
+**Files:** the opener (amended in place, new version stamp + amendment box + new Part B window
+section + queue items 4/11/15 updated, 23/24 added + Part D measured-timeout figure); the archive
+copy (NEW); the informed-foundation prompt (NEW). Documents only; production untouched; AC7 not
+engaged; no fenced surface touched (Mode 2 held).
+
+**Known-stale item deliberately NOT fixed here:** CLAUDE.md's C15 Item 3 line (says
+"uncommitted/undeployed"; false since `3e26dc9`) — named in the opener's amendment box and queue
+item 24 for the next session that edits CLAUDE.md, rather than folded into this documents commit
+silently.
+
+**Rollback:** `git revert` the commit; the archived 08-12 version is the restore point.
+
+**Status:** Adopted. Cross-references: `D-GROUNDING-RECORD-RECONCILIATION-2026-08-12` (the
+predecessor version's discipline, inherited); the four decision entries + commit `0941a47` this
+version folds in.
+
+**Model:** Claude Fable 5. **Effort:** high.

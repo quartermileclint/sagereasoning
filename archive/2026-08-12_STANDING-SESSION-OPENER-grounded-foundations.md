@@ -1,62 +1,8 @@
 # Standing Session Opener — Grounded Foundations
 
-**Version 2026-08-15** (amends the 2026-08-12 version, which is archived at
-`archive/2026-08-12_STANDING-SESSION-OPENER-grounded-foundations.md`; the 2026-08-01 predecessor is
-at `archive/2026-08-01_STANDING-SESSION-OPENER-grounded-foundations.md`).
-
-> **⚑ The 2026-08-15 amendment — what changed between 2026-08-12 ~13:24 and this version.** One
-> long multi-day session (Opus 5 → Fable 5 at the end) produced eight commits, all verified-at-source
-> work. **Read the new "The window since 2026-08-12" section in Part B for the full account**; the
-> headlines, so nothing below is trusted stale:
->
-> 1. **C-1 (the observability retention sweep) is LIVE, scheduled, and smoke-verified** — no longer
->    "built dark." The first live smoke found a genuine defect (a wrong PK column name that made the
->    sweep permanently unable to delete; fail-honest, never wrong-delete), fixed at the root,
->    mutation-verified, re-smoked clean (`D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12`).
->    Standing-queue item 4's sweep half is DONE.
-> 2. **Twelve mentor rulings landed and were executed across three consultations** (the
->    sufficiency-examination trigger, 4 rulings; five Stoic principles, 5; the guide-function
->    question, 3). Products: **THREE NEW `governance` SCOPING SESSION RECORDS, all `OPEN — awaiting
->    ruling`** (kathêkon role-relative evaluation; hegemonikon drift + melete jointly; Layer 3
->    per-consumer rendering); a new generation-step **§2.13 open question** (examine the null cycle
->    rather than counting to three); the **GS-ATRF-1 friction-channel basis-lessness gap** raised
->    (`gs-atrf-corrections.md` §(c-bis)); the **boulesis/sufficiency distinction held open as a
->    build-blocker** (S3 §5-Q3-e, blocks Q3-d); and dated doctrinal amendments to the design brief
->    §8 Q1 + generation-step §2.10 (a proposal is a *phantasia*, the election is the assent; **Q1
->    and L4's Q4.3 are one principle at two scales**).
-> 3. **A byte-identity-guard collision is now a named founder/mentor decision** — the guard's
->    `GUARD_RE` (matching `/substrate/`, `trust-core`, `stoic-brain`, …) **blocks two
->    mentor-instructed edits** (the L4 audit header amendment; the sympatheia citation fix, now
->    ELEVATED to load-bearing) plus several carried items. The guard's own header scopes it "while
->    the observation window runs" and that window has been **stopped since 2026-07-17** — but it is
->    unconditional in code. **Resolving its scope is the highest-leverage single decision on the
->    queue** (item 15, sharpened).
-> 4. **Two documentation records** dated 2026-08-13: the idea-creation research (five connections,
->    the governing correction stated first — the loop generates proposals that *survive examination*,
->    not the most creative ones) and **SagePals** (a future direction, new
->    `operations/future-directions/` home, deliberately outside every arc). Two instruction premises
->    were **checked and found false** before recording: "Layer 3 verified live" (it is Verified,
->    NOT Live — 503, S7 decision) and "the trust record is private by design" (the **agent** trust
->    record has been public-unauthenticated since 2026-07-12; only the human records are private).
-> 5. **Real n=1 harness data recorded into the drift session** with a survivorship warning: this
->    session's own at-action channel delivered **8 of 39 consults (21%)** — 31 timed out at 28s —
->    with 0 loops closed / 7 abandoned, and near-uniform `principled` readings that may be a
->    **selection artifact** (the delivered sample skews simple). An earlier in-conversation
->    "six of eight" claim was found wrong at source and corrected in place. A fabricated commit
->    hash (`1a13ef6` stated for the real `8efded6`) was likewise caught and corrected — **both are
->    fresh instances of `primary-data-beats-secondary-characterisation`: read the line, don't
->    truncate past it.**
-> 6. **The IDEA-loop run reached 15 completed cycles** (cycle 15 = the run's **first `null_cycle`**,
->    breaking an eight-cycle winner streak 7–14; h7's first genuine `rejected_by_guardrail` with a
->    real `passions_detected` entry). **Un-ruled per-cycle findings are accumulating** (cycles 5, 6,
->    9, 10, 11, 13, 14, 15 all carry items awaiting mentor assessment — carried in `RUN-LOG.md`, not
->    in this repo). Re-derive the count fresh; do not trust 15.
-> 7. **CLAUDE.md has one known stale line as of this writing:** it still says C15 Item 3's code is
->    "uncommitted/undeployed" — **false**; the `self_preservation` code landed at `3e26dc9` and is
->    pushed. (Its C-1 line was corrected at activation.) Correct it when next editing CLAUDE.md.
-> 8. **Working tree at this version's writing:** two commits were unpushed (`02b6643`, `0941a47` —
->    the two documentation records + the harness data); the push needs the founder's terminal.
->    Re-derive with `git log origin/main..HEAD --oneline`.
+**Version 2026-08-12** (amends the 2026-08-11 version in place; that version was written but never
+committed, so there is no separate artifact to archive — the 2026-08-01 predecessor it supersedes is
+archived at `archive/2026-08-01_STANDING-SESSION-OPENER-grounded-foundations.md`).
 
 > **⚑ The 2026-08-12 amendment — read this before trusting any line below.** A grounding-record
 > reconciliation session (`D-GROUNDING-RECORD-RECONCILIATION-2026-08-12`) re-verified this document
@@ -107,17 +53,13 @@ project, and will keep running for days.** The IDEA-loop bounded validation run
 (`sagereasoning:idea-loop@v1#001`) started 2026-08-10, targets 20–40 completed cycles at a 4-hour
 minimum interval (so roughly 3.5–7 days of real elapsed time), and is calling live production
 `/api/guardrail`, `/api/practice/fresh`, `/api/reason`, `/api/practice/watching` on a real
-credential. **As of 2026-08-14: 15 cycles complete** — 3/5/6 = `dependency_unavailable` (three
-distinct, separately-diagnosed failure classes, all previously recorded); 7–14 = an **eight-cycle
-winner streak**; **15 = the run's first `null_cycle`** (zero of five candidates passed both gates;
-h7's first genuine `rejected_by_guardrail` carrying a real `passions_detected` entry; the first
-non-anomalous Step-5 skip). The cross-endpoint traceability check is in force **from cycle 6**.
-**Un-ruled per-cycle findings are accumulating in `RUN-LOG.md`** — cycles 5, 6, 9, 10, 11, 13, 14,
-and 15 each carry items awaiting mentor assessment; they live in the scratch project's log, not in
-this repo, and a session asked to "bring findings to the mentor" must read them there. **Do not take
-this count as current** — it is a snapshot; `RUN-LOG.md` is authoritative and moves daily. The
-20–40-cycle target range opens at 20, so **Mode 3 (report compilation) may become live within days
-of this writing** — run the parallel-window prompt's pre-flight rather than assuming Mode 2. **If your task
+credential. **As of 2026-08-12: 8 cycles complete** — 1/2/4/7/8 = `winner`; 3/5/6 =
+`dependency_unavailable` (three distinct, separately-diagnosed failure classes: `contamination`,
+root-caused/fixed/verified; `extraction_instability`, mentor-ruled **carry as a named finding, do
+not chase further**; and a `layer1_throw`, mentor-ruled **not** a third strike, because an honest
+null return is structurally unlike a confident-but-wrong verdict and cannot contaminate completed
+ones). The cross-endpoint traceability check is in force **from cycle 6**. **Do not take this count
+as current** — it is a snapshot; `RUN-LOG.md` is authoritative and moves daily. **If your task
 touches `/api/reason`, `/api/guardrail`, `/api/practice/{fresh,watching}`,
 the trust-core emission path, credential validation, or `project-context.ts`/`project-context.json`,
 read `operations/handoffs/founder/2026-08-10-idea-loop-parallel-window-NEXT-SESSION-PROMPT.md`
@@ -153,14 +95,14 @@ Read, in order:
 
 ### Production state
 
-The SageReasoning substrate is live at `www.sagereasoning.com`. **Updated 2026-08-15:** local
-`main`'s last three are now **`0941a47`** (the n=1 harness data + survivorship warning into the
-drift session) / **`02b6643`** (the idea-creation research + SagePals records) / **`8efded6`**
-(the eight mentor rulings executed) — **the first two were UNPUSHED at this version's writing**
-(`git log origin/main..HEAD` shows them; this environment cannot authenticate to GitHub, so pushes
-are the founder's). Behind them: `03230f1`/`dadf3c3` (the two analyses), `fbc907c` (sufficiency
-routings), `d97579d`/`099acd3`/`bdc7a4c` (the C-1 activation trio). **Re-derive this rather than
-trusting it — it goes stale every session that commits.** Beyond the 08-01 opener's list (still all live —
+The SageReasoning substrate is live at `www.sagereasoning.com`. Everything through this session's
+close is pushed and Vercel-green. **Updated 2026-08-12:** this line previously said `git log --oneline -3`
+"should show `c51b8c0`/`3a00351`/`f68d191`" — those are now four commits back (still *reachable*, but
+not in the last three, so a session following it literally sees a false mismatch). `origin/main`'s
+last three are now **`693ea65`** (S7 `/impulse` migration + R20a activation recorded) / **`98716d4`**
+(S7 built dark) / **`243536f`** (the S5 moral-community manifest amendment), with **`e6af2e9`** (the
+eleven-traits research, discharging D1) behind them. **Re-derive this rather than trusting it — it
+goes stale every session that commits.** Beyond the 08-01 opener's list (still all live —
 the examination engine, guardrail, accreditation, corroboration check, ADR-010 §4, S10, R20a
 perimeter, AE-1/AE-2, practice-suggestion, B5, the human practice-reminders arc), **new since
 2026-08-01:**
@@ -331,85 +273,6 @@ ruling ↔ build cycles, each verbatim record winning over every summary includi
    2026-07-19, now revoked) and one small named UX defect (a silent, message-less expired-reset-link
    failure state).
 
-### The window since 2026-08-12 (~13:24 → 2026-08-15) — one long session, eight commits
-
-*(New at the 2026-08-15 version. Everything here is from `D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12`,
-`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`, `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`,
-`D-IDEA-CREATION-RESEARCH-AND-SAGEPALS-DOCUMENTED-2026-08-13`, and commit `0941a47` — read those for
-anything load-bearing; this is the orientation summary.)*
-
-1. **C-1 activation, with a live-defect-and-fix worth knowing as method.** The sweep's first live
-   smoke returned `column route_errors.id does not exist` ×2 — `purgeExpired()` hardcoded
-   `.select('id')` but the PKs are `error_id`/`throttle_id`. Postgres rejects the whole DELETE
-   atomically, so it was fail-honest but the sweep could never delete anything. The 50/0
-   pre-activation battery could not have caught it: the fake client's `select(_cols)` ignored its
-   argument — a fresh instance of the "fake client masks a real schema mismatch" class. Fixed with a
-   `PK_COLUMN` map, the test double hardened to validate the column, two pins added,
-   mutation-verified (revert → exactly 4 failures), re-smoked clean (`errors: []`, zero deletions
-   honest — nothing is 90 days old yet). **Disclosed-then-fixed as a distinct step, per the
-   activation prompt's own instruction — the pattern to copy.**
-2. **Three mentor consultations ran and all twelve rulings were executed.** (a) The
-   **sufficiency-examination trigger** (a founder observation: the moment a task *feels complete* is
-   a distinct generative moment): routed 4 ways — ATRF session content (what the completion signal's
-   examination should ask); generation-step **§2.13** NEW open question (*examine the null cycle
-   rather than counting to three* — the counter stands until ruled); the **GS-ATRF-1
-   basis-lessness gap** (`gs-atrf-corrections.md` §(c-bis): a friction candidate has NEITHER of the
-   indicator's two named inputs, by construction, and `high|medium|low` cannot express "no basis");
-   and the **boulesis/sufficiency distinction HELD OPEN as a build-blocker** (S3 §5-Q3-e — *"do not
-   build on that distinction until it has been examined"*; blocks Q3-d). (b) **Five Stoic
-   principles**: prohairesis (gap; the phantasia/synkatathesis correction adopted — see the design
-   brief §8 Q1 amendment; **Q1 ≡ L4 Q4.3 at two scales**); kathêkon (gap **total** —
-   `/api/guardrail` takes no role input → new session record); sympatheia (already encoded;
-   citation defect elevated); melete (already encoded on the human surface; folds into drift);
-   drift (gap precise — **uniformity reads as `stable`** → new session record). (c) The
-   **guide-function question** (agent vs human practitioner): examination object (gap — the
-   calibration layer is Layer 3, which is **Verified NOT Live**, S7 decision → new session record);
-   passion-diagnosis posture (already encoded — both postures live and G4-cross-checked; wording
-   residual folded into the Layer 3 session); progress dimension (partly encoded — Senecan grades
-   ARE agent-side; drift half collapsed into the drift session + **Seneca 75.8–9** as criterion +
-   the hysteresis-vs-practitioner-stability conflation warning).
-3. **The three OPEN scoping session records** (`operations/agent-circles-2026-08/`, all
-   `governance`, all awaiting ruling, none absorbed into an existing question):
-   `2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md` (inherits C6 + QG-D as
-   precedent; kathêkon ≠ blast radius is a recorded boundary);
-   `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` (**four** scope inputs now:
-   the ADR-013 §8 `does_not_attest` question, melete's half, the M7-window question, and — added
-   08-13 — the *proposal-range narrowing* framing question; plus Seneca 75.8–9, the hysteresis
-   warning, and the n=1 harness data below);
-   `2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md` (inherits the R20a
-   auth-signal discriminator `r20a-audience-renderer.ts:45` as the must-reuse precedent;
-   **`SUBSTRATE_LAYER3_ENABLED` activation is NOT licensed**).
-4. **The byte-identity guard collision — now the sharpest open decision.** `GUARD_RE`
-   (`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts:419`) matches
-   `/substrate/`, `trust-core`, `stoic-brain` and more, and **blocks**: the mentor-instructed L4
-   header amendment (its exact pending text is preserved in
-   `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`), the sympatheia citation fix
-   (`stoic-brain.json:151`, 4.26 → 7.9, now load-bearing), register D4, the reflect-path `loop_id`
-   metering fix, and AE-3. The guard's own header scopes it *"while the observation window runs"*;
-   the window has been **stopped since 2026-07-17**; the guard is unconditional in code. **Deciding
-   its scope (still binds / retire / narrow) unblocks six items in one ~30-minute `governance`
-   call** — queue item 15, sharpened.
-5. **Two documentation records, two premise corrections.** The idea-creation research record
-   (five connections, correction first: *the loop is not trying to generate the most creative
-   proposals; it is trying to generate proposals that survive examination* — the ruled null cycle
-   is legitimate, not failure) and the **SagePals** future-direction record (new
-   `operations/future-directions/`, Stage-3 question carried during a Stage-1 build, retrieval
-   condition attached). Checked-and-corrected premises: **Layer 3 is Verified, not Live**; **the
-   agent trust record is public-unauthenticated since 2026-07-12** (only the human practitioner's
-   records are private) — so SagePals' visibility question **splits per surface**, and only the
-   human half is genuinely open. Bonus verified finding: `philodoxia` is already a committed
-   sub-species and a live `/impulse` pathway — the diagnostic vocabulary for SagePals' own named
-   transition risk already exists.
-6. **n=1 harness data, recorded with a survivorship warning** (mentor-directed): this session's
-   at-action channel delivered **8/39 consults (21%)**; 0 loops closed, **7 abandoned**; 7 of 8
-   delivered readings `principled`. The warning is the contribution: the delivered 8 are the ones
-   whose composed extraction fit inside 28s, so the sample plausibly skews simple and the uniform
-   reading may be **selection artifact, not drift** — generalised, *a variance signal over a source
-   with ~80% loss that correlates with the measured property measures the surviving subset, not the
-   practice* (bears directly on the drift session's window question). Also recorded: two
-   self-corrections against source (`six of eight` → 31/39; the fabricated hash `1a13ef6` → real
-   `8efded6`).
-
 ### The 0h launch hold-point
 
 **Still active, unchanged in substance from the 08-01 opener.** P2 (the bare-vs-harnessed value
@@ -478,13 +341,15 @@ call.
 3. **Resend email provisioning** — carried unchanged from 08-01. **No activation record exists in
    the decision log; the production environment cannot be read from a repo session, so its live
    status is `unverified`.** Note it now blocks a second thing: **Stoa subscriptions (ST7)**.
-4. ~~**07-25 audit §7 — the observability retention sweep**~~ — **the sweep half is DONE 2026-08-12**
-   (`D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12`): LIVE, scheduled (`0 8 * * *`,
-   fifth cron), smoke-verified, incl. a live-defect-and-fix at first smoke (see the window section
-   above). The **Next.js exposure assessment is SUBSUMED** by ARC2 Session 2. What survives of this
-   item: **PR24's two named retention-parity gaps** (`agent_hold_observations`, `stoa_entries`) —
-   note `agent_hold_observations`' store may sit inside the byte-identity guard's measured set;
-   check the path against `GUARD_RE` before scoping.
+4. **07-25 audit §7 — re-verified 2026-08-12; "never-run" is no longer accurate for two of three.**
+   The **observability retention sweep is BUILT DARK** (`GET /api/cron/observability-retention-sweep`,
+   handler-split, CRON_SECRET-gated, behind an unset `SUBSTRATE_OBSERVABILITY_SWEEP_ENABLED`, no
+   `vercel.json` entry; independently reviewed, three confirmed defects folded) — what remains is
+   its **activation**, not its build. The **Next.js exposure assessment is SUBSUMED** by the ARC2
+   Session 2 upgrade to Next 16 / React 19 — this half of the item is closed. The
+   **process-adoption governance session's remaining pieces** were largely discharged at ARC2
+   Session 1 (PROTO-1 retired on evidence; PR21–PR24 adopted); what survives is PR24's two named
+   retention-parity gaps (`agent_hold_observations`, `stoa_entries`).
 5. **The `/api/reason` status-masking fix** (429/503 API-key failures collapse to a misleading 401)
    — new this window, named, not built. `code-elevated`, AC7.
 6. **The reflect-path `loop_id` UUID metering bug** — new this window, named, not built. Small,
@@ -505,14 +370,13 @@ call.
     (`D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`). Confirmed `true`. ST1/ST3/ST4/
     browse/ST6 are all live; ST3's distress-check was live-verified both directions, both write
     paths, on production, retroactively. See the corrected Live-Stoa bullet above.
-11. **`/impulse` post-activation: the app-wide RLS-vs-route-enforcement gap** — PR19-found at the S7
-    build, **mentor-confirmed as correctly dispositioned**, and — **new since 08-12 — its
-    next-session prompt is AUTHORED and ready**:
-    `operations/handoffs/founder/2026-08-12-rls-vs-route-enforcement-gap-NEXT-SESSION-PROMPT.md`
-    (two phases: a read-only survey of the ~14 affected tables, then the `impulse_entries` fix —
-    Critical, PR19, AC7, migration-with-`§INVERSE`, before/after live bypass proof). The mentor's
-    ordering ruling is baked into it: `impulse_entries` FIRST. Concurrent-safe with the validation
-    run (clears both fences). The founder pastes it when electing this thread.
+11. **`/impulse` post-activation: the app-wide RLS-vs-route-enforcement gap** — new 2026-08-12,
+    PR19-found at the S7 build and **mentor-confirmed as correctly dispositioned** (a local fix
+    would be a false guarantee; the same client can write to any other intimate table the same way).
+    Unscoped, founder-elected, blocking nothing — **but the mentor ruled on its internal ordering:
+    when that session opens, `impulse_entries` must be the FIRST table it addresses**, because it is
+    *"the one table in the application where a route bypass reaches the exact population the
+    perimeter exists to protect."*
 12. **The C15 three-enumeration circle discrepancy** — new; `manifest.md` R0 has four oikeiosis
     circles, `stoic-brain.ts:445` has five, and the trust core's `OikeiosisCircle` has five in a
     different vocabulary. **Unscoped, blocking nothing.** The S5 amendment deliberately declined to
@@ -529,17 +393,7 @@ call.
 
 *Founder decision items (policy, not build):*
 14. **The 0h call on P2's three branches** — unchanged, the standing gate above everything else.
-15. **The logos byte-identity guard — scope or retire. SHARPENED 2026-08-15: now the
-    highest-leverage single decision on this queue.** The guard (`GUARD_RE`,
-    `human-practitioner-boundary.test.ts:419`) currently **blocks six items**, two of them
-    mentor-instructed: the L4 audit header amendment (exact pending text preserved in
-    `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`), the sympatheia citation
-    fix (`stoic-brain.json:151` — now **load-bearing**, elevated by ruling), register D4, the
-    reflect-path `loop_id` metering fix, AE-3, and possibly PR24's `agent_hold_observations` half.
-    Its own header scopes it "while the observation window runs"; the window has been stopped since
-    2026-07-17; the code is unconditional. A ~30-minute `governance` call (still binds / retire /
-    narrow to the actual `/api/reason`+`/api/guardrail` import graph) settles all six at once.
-    **This session deliberately did not decide it unilaterally — twice.**
+15. **The logos byte-identity guard — scope or retire.** Carried unchanged from 08-01.
 16. **Input-cap Steps 2/3** — carried unchanged from 08-01.
 17. **Stoa activation — CORRECTED 2026-08-12, premise was false.** ST1/ST3/ST4/browse are already
     live and distress-check-verified (item 10, done). **What actually remains is the Q5c/Q13a
@@ -562,16 +416,6 @@ call.
     sequencing; do not open early.
 22. **The standing-runner design** (what happens after the bounded validation run reports) —
     explicitly gated on the run's own §6 report reaching the mentor; not to be pre-scoped.
-23. **The three OPEN scoping sessions (new 2026-08-12/15)** — kathêkon role-relative evaluation;
-    hegemonikon drift + melete (four scope inputs); Layer 3 per-consumer rendering. All
-    `governance`, all `OPEN — awaiting ruling`, records in `operations/agent-circles-2026-08/`
-    (`2026-08-12-SESSION-*-SCOPING-RECORD.md`). **One ambiguity worth one line to the mentor before
-    running any of them: does "awaiting ruling" mean the AI runs the session and produces a scope
-    document for ruling, or does the mentor rule on the session questions directly?** Not assumed.
-24. **Housekeeping, next repo session (no decision needed):** push `02b6643` + `0941a47` if still
-    unpushed; correct CLAUDE.md's stale C15 Item 3 line ("uncommitted/undeployed" — false since
-    `3e26dc9`); dispose of `website/smoke_a_prod.json` + `a3-developmental-streak.py` strays per
-    founder election.
 
 *Trust-layer named steps (no prompts authored, unchanged from 08-01):* register **D4**; **AE-3**;
 register **P1**; eventually the S11 readiness re-examination.
@@ -632,14 +476,10 @@ false-positive class, engaged genuinely via the structured elicitation, not disc
 - **A calling-frame telos line** (the mentor's Q7 wording, on the declared-purpose branch only) is
   now observed firing live in the founder's own harness — a genuine, confirmed-correct behaviour,
   not a build defect (this was explicitly named as a thing to check, and it checked out).
-- **28-second at-action/consult timeouts remain extremely common — now with a measured figure:**
-  the 2026-08-12→14 session's channel delivered **8 of 39 at-action consults (21%)**, verified from
-  `gate1.log` at source (n=1 session; recorded with a survivorship warning in the drift session
-  record). Expect them, treat them as fail-open-honest, and do not treat a run of consecutive
-  401/timeout sessions as automatically a credential problem before checking the DB-level facts
-  (the quota-exhaustion-masked-as-401 root cause is the standing lesson: verify before diagnosing).
-  The `GATE1_ACTION_TEXT_MODE=lean` knob remains the documented mitigation — a
-  fidelity-vs-availability tradeoff that stays the founder's open call.
+- **28-second at-action/consult timeouts remain extremely common this window** — expect them, treat
+  them as fail-open-honest, and do not treat a run of several consecutive 401/timeout sessions as
+  automatically a credential problem before checking the DB-level facts first (the quota-exhaustion-
+  masked-as-401 root cause above is the standing lesson: verify before diagnosing).
 
 ---
 
