@@ -158,7 +158,7 @@ Run two of the three OPEN scoping sessions, producing scope documents for mentor
 The sessions produce the document. The mentor rules on the document. Execution folds into
 post-run sessions after the ruling." Both C2 sessions proceed as concurrent documents-only work.)*
 
-### ☑ C3 — Scoping session B [~~CONDITIONAL~~ **GO per M2, 2026-08-15**]
+### ☑ C3 — Scoping session B [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15** — `D-CONCURRENT-ARC-C3-SCOPE-DOCUMENT-LAYER3-PER-CONSUMER-RENDERING-2026-08-15`; scope document authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-layer3-per-consumer-rendering-FOR-RULING.md`); claims-vs-repo check run, 2 defects + 2 range imprecisions all folded; awaits the separate Ruling Set C consultation per the C2 rulings. *(Note: this checkbox was found already ☑ at C3's open — evidently ticked when the M2 GO was folded in — with no DONE annotation; this annotation is the actual close record.)*]
 *Tier: `governance`, documents only. Founder presence: none.*
 
 **Layer 3 per-consumer rendering** scoping with the WIDENED Stage 2 relational-context scope
