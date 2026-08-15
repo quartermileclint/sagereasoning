@@ -132,7 +132,8 @@ not-attestable clause'`. The branch fires when `orientationReadings.capped` is t
 `total_orientation_readings_count` field is then omitted, never fabricated — existing pin
 S6-5c, condition line `:650`; its `assert(` spans `:649-652`).
 
-**Insertion mechanics (recommended):** RETAIN the arm's existing operational clause and fold
+**Insertion mechanics (AI recommendation, for the founder's review — the alternative is
+permitted but buys nothing):** RETAIN the arm's existing operational clause and fold
 the M6 disclosure verbatim after it, before the `'); '` join — the existing clause states the
 mechanical fact (window capped, count unavailable this read) and M6 states the honest
 consequence. Rationale: the existing battery pin **S6-5d** (`:654` —
@@ -278,6 +279,26 @@ executing session copies it into its record before touching code.
 - **(b) A dedicated flag** (e.g. `SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED`; UNSET everywhere ⇒
   byte-identical, battery-asserted) with its own founder-walked activation at R4. Preserves
   the build-dark/activate-later discipline at the cost of one more flag.
+
+**AI recommendation (added 2026-08-16 at the founder's request; the election formally remains
+the founder's at R2/R3 open, and whichever way it goes it is recorded inside the 4.1 statement
+before the edit, per the ruling): (b) — the dedicated flag.** Three grounds: (1) the project's
+own nearest precedent — the B5 session-decline signal fed an EXISTING live surface (the A1
+suggestion composer) and still took its own flag (`SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED`)
+rather than riding the composer's; (2) the dispersion member is a genuinely NEW signal class
+(a variance reading, not another level/rate member), and its first live appearance deserves
+R4's atomic-activation shape — its own live smoke and its own stated one-line rollback
+(unset + redeploy), which riding the existing flag forfeits (rollback would then be a code
+revert on a live surface); (3) the cost is one env var and one flag-off byte-identity battery
+leg — the discipline the whole build history already pays everywhere else. Election (a) is
+defensible if the founder wants the flag count held down; nothing breaks either way.
+
+**AI recommendation on the schema-version note (same caveat): keep `agent-trajectory-delta-v1`.**
+The member is additive-optional with its own evidence floor — the delta's internal precedent
+(its members landed additively under v1), not the loop-fold's re-specification case (v1→v2
+changed the meaning of existing buckets). Bump only if the R18 pass elects to present the
+member as a contract change; decide and record at the edit alongside the extension-#18
+(`trajectory-delta/v1`) description update.
 
 ### 4.3 Ruled constraints that ride the member whichever way (from Ruling Set B, R-3/R-5)
 

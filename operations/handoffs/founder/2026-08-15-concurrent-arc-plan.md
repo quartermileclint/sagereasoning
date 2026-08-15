@@ -191,14 +191,24 @@ is the natural home, founder may re-slot; the verbatim record governs details:**
   pattern). The `relationship_type` distinctness constraint is binding (it must never be read
   as a practitioner-type signal — the discriminator-reuse constraint would be violated).
   Natural home: **R3** (the `/api/reason` route batch).
-- **D/O-C — the per-consumer rendering DESIGN question: opened, NOT licensed.** The path is
-  ruled: a separate scoping session (itself requiring a ruling before execution) → a design
-  document for its own ruling → only then any build → activation of the dormant route remains
-  a separately-walked founder step regardless. Design constraints already ruled for it: all
-  five distinction dimensions in scope; dimension (c) — honesty — load-bearing and FIRST; the
-  crisis precedent's relay pattern is "the precedent to follow, not to replace"; F-d (fields
-  as design target) is the correct state until this design session rules. **No session in
-  this plan is allocated to it; do not self-start.**
+- **D/O-C — the per-consumer rendering DESIGN question: ~~opened, NOT licensed~~ → the
+  SCOPING session is LICENSED, GATED (ruled 2026-08-16 — option (ii); verbatim:
+  `operations/agent-circles-2026-08/2026-08-16-mentor-ruling-oc-scoping-license-verbatim.md`,
+  recorded `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`).** The three-gate chain
+  is confirmed explicitly: Gate 1 — the §6 report compiled AND ruled on in mentor
+  consultation (the O-C scoping session opens only after this clears; the mentor's sequencing
+  rationale: the report carries the first real usage data the design should reason from);
+  Gate 2 — the scoping session (AI-run, documents-only, M2 shape) produces a scope document
+  for ruling; Gate 3 — the design session produces a design document for ruling; **route
+  activation is licensed at none of the three** (needs an explicit activation ruling + the
+  separately-walked founder step). Design constraints inherited verbatim: all five distinction
+  dimensions in scope; dimension (c) — honesty — load-bearing and FIRST; the discriminator-
+  reuse constraint + both named honest limits; the relay pattern "the precedent to follow";
+  the `relationship_type` distinctness constraint; the R20d boundary;
+  `SUBSTRATE_LAYER3_ENABLED` unset throughout the chain. F-d (fields as design target)
+  remains the correct state until the design session rules. **No session is allocated until
+  Gate 1 clears** (natural home once it does: a post-R1 governance sitting — R5's or its own;
+  founder slots it).
 - **Not adopted / out of reach, recorded so no session self-starts them:** F-c (human mentor
   tools — out of this arc's agent-first ordering, not ruled); `SUBSTRATE_LAYER3_ENABLED`
   activation (not licensed by Ruling Set D or any session executing it).
@@ -393,6 +403,7 @@ pre-scoped — deliberately.*
 | ~~Mentor vets the L-5 candidate Q1–Q6 wording~~ | **RESOLVED 2026-08-15** (same day) | Vetted verbatim in hand (`operations/agent-circles-2026-08/2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md` — the canonical strings; Q1 + Q3 amended, Q4 byte-identical with the alternative deferred pending G4 review). D/L-5 is now fully executable at its natural home (R2 or its own post-run step) under the mentor's execution-record requirements; until that post-run edit, `question-bank.ts` stays untouched |
 | Run reaches ≥20 + runner hand-back | live query + founder | Phase 2 opens (R1 first, always) |
 | Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
+| ~~Mentor rules on the O-C scoping-session licence (the C3b-drafted question)~~ | **RESOLVED 2026-08-16** | Option (ii): the O-C scoping session is LICENSED, gated behind the §6-report consultation — opens only after R1's report is compiled AND ruled on; three-gate chain confirmed (report-ruling → scope ruled → design ruled), route activation licensed at none; verbatim: `operations/agent-circles-2026-08/2026-08-16-mentor-ruling-oc-scoping-license-verbatim.md` |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |
 
 *End of plan. Tick session checkboxes at each close; supersede this file by name if the founder

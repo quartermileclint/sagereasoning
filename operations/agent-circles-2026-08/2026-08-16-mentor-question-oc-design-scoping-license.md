@@ -1,5 +1,14 @@
 # Mentor question — license the O-C per-consumer rendering design SCOPING session?
 
+> **✅ ANSWERED — 2026-08-16, same day (verbatim canonical:
+> `2026-08-16-mentor-ruling-oc-scoping-license-verbatim.md`; recorded
+> `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`). Ruling: option (ii) — licensed,
+> gated behind the §6-report consultation.** The O-C scoping session opens only after R1's §6
+> report is compiled AND ruled on in mentor consultation; the three-gate chain
+> (report-ruling → scope document ruled → design document ruled) is confirmed explicitly, with
+> route activation licensed at none of them; every carried constraint inherited verbatim;
+> nothing else opened, re-opened, or amended. This file is now historical.
+
 **Drafted:** 2026-08-16, concurrent-arc session C3b (Deliverable 3). **Rides the founder's
 next consultation at their cadence** — nothing gates on it; no session in the current arc plan
 is allocated to O-C and none self-starts (Ruling Set D's own instruction). **Prepared under

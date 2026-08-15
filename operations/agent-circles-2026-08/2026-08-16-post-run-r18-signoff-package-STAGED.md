@@ -298,24 +298,45 @@ deliberate abridgement to record or a check the applying session performs.
 
 ---
 
+## AI recommendations (added 2026-08-16 at the founder's request — every election remains the founder's; the mentor wordings themselves are fixed and not elected)
+
+| # | Election | Recommendation | Why (one line) |
+|---|---|---|---|
+| 1a | GET self-doc insertion | **ADOPT as proposed** (`kathekon_scope` key after `:613`) | one verbatim block sitting directly beside the two fields it qualifies; no response-shape change; `npm run build` gate applies |
+| 1b | llms.txt insertion after `:297` | **ADOPT as proposed** | the qualification is a sibling of the existing fact-checker honesty note — same paragraph class, same section |
+| 1c | agent-card #13 append | **ADOPT as proposed** | an amendment, not a new extension; count stays 23 |
+| 2a | llms.txt bullet style | **Verbatim capital "Discriminative"** | on an R18 surface, strict mentor-verbatim beats a one-character style match; the deviation is cosmetic, the verbatim discipline is not |
+| 2b | agent-card #17 form | **Full-verbatim append** | the abridged in-run insert would be the ONLY non-verbatim rendering of a mentor-fixed wording across all nine placements — an avoidable asymmetry |
+| 2c | api-docs parenthetical | **ADOPT abridged insert as proposed** | the api-docs list is already a deliberate abridgement that points at llms.txt for the full contract; a full-verbatim block would be out of register there |
+| 2-ord | B/M-A ordering | **Code half (Spec 1) first, or same push** | publishing the disclosure before the live envelope serves the item would make llms.txt claim an envelope entry production doesn't yet carry |
+| 3a | D/O-A llms.txt anchor | **Safety Behaviour section** | the disclosure's own reference point is the crisis path; it belongs beside the crisis-path description, not in the configuration-tier disclaimer |
+| 3b | D/O-A agent-card | **Amend #7** (count stays 23) | the disclosure qualifies exactly the claim #7 makes — a separate extension would detach the qualification from the claim it bounds |
+| 3c | D/O-A api-docs | **ADOPT as proposed** | Configuration Honesty is the page's honesty-disclosure home (the R19e pattern: document what a surface does not do) |
+| D-1 | abridgement lists | **Record-as-deliberate** | zero additional surface change; every "missing" item is genuinely covered elsewhere (verified); reconciliation would be a larger diff needing fresh per-surface wording sign-off for no honesty gain |
+
+Net extension-count under the recommended set: **23 (unchanged)**. Net form: all three mentor
+wordings land verbatim on every surface except the one deliberately-abridged api-docs
+parenthetical (2c), which points at the verbatim llms.txt contract.
+
 ## Sign-off lines
 
 **Item 1 — A/R-5 (three surfaces + the `kathekon_scope` key name):**
-☐ 1a GET self-doc as proposed · ☐ 1b llms.txt as proposed · ☐ 1c agent-card #13 append as
-proposed · Notes: ______
+☐ 1a GET self-doc as proposed *(AI rec: adopt)* · ☐ 1b llms.txt as proposed *(AI rec:
+adopt)* · ☐ 1c agent-card #13 append as proposed *(AI rec: adopt)* · Notes: ______
 
 **Item 2 — B/M-A R18 half (three surfaces + two elections + ordering):**
-☐ 2a llms.txt bullet as proposed (☐ verbatim capital / ☐ lowercase) · ☐ 2b agent-card #17
-(☐ full-verbatim append / ☐ abridged in-run) · ☐ 2c api-docs abridged parenthetical ·
-☐ confirmed: code half (Spec 1) lands first or same-push · Notes: ______
+☐ 2a llms.txt bullet as proposed (☐ verbatim capital *(AI rec)* / ☐ lowercase) · ☐ 2b
+agent-card #17 (☐ full-verbatim append *(AI rec)* / ☐ abridged in-run) · ☐ 2c api-docs
+abridged parenthetical *(AI rec: adopt)* ·
+☐ confirmed: code half (Spec 1) lands first or same-push *(AI rec: confirm)* · Notes: ______
 
 **Item 3 — D/O-A (three surfaces + two elections):**
-☐ 3a llms.txt (☐ Safety Behaviour / ☐ Configuration Honesty) · ☐ 3b agent-card
-(☐ amend #7 / ☐ new extension #24) · ☐ 3c api-docs Configuration Honesty paragraph ·
-Notes: ______
+☐ 3a llms.txt (☐ Safety Behaviour *(AI rec)* / ☐ Configuration Honesty) · ☐ 3b agent-card
+(☐ amend #7 *(AI rec)* / ☐ new extension #24) · ☐ 3c api-docs Configuration Honesty
+paragraph *(AI rec: adopt)* · Notes: ______
 
-**Drift item 1 (abridgement recording):** ☐ record-as-deliberate / ☐ reconcile-in-pass ·
-Notes: ______
+**Drift item 1 (abridgement recording):** ☐ record-as-deliberate *(AI rec)* /
+☐ reconcile-in-pass · Notes: ______
 
 ## Verification plan after application (the C1 template)
 
