@@ -402,4 +402,55 @@ founder-runnable check: whether the 10 in-window mentor turns actually show an a
   every message. The widget burns a real quick consult per message and displays constants.
   Flagged for a founder-elected fix (not fixed here — out of scope).
 
+## 2.7 — The mentor's context layers, itemised (founder follow-up, same day)
+
+- **Doctrine (same ancient records as the engine):** the mentor's Stoic context comes from
+  `src/data/stoic-brain-compiled.ts` — condensed renderings of the same 8 Stoic Brain JSON files
+  (full source `/stoic-brain/`, v3.0.0, 2026-03-31) the deterministic engine's mechanisms and
+  extraction vocabulary are built from. Same corpus; different consumption — the engine encodes it
+  as *code*, the mentor reads it as *prompt text* (six mechanism blocks, ~500–1000 tokens each).
+- **Engine temperature correction:** the engine's translation call runs at **0.2** (Layer 1,
+  `layer1-extractor.ts:2265`, per ADR-005 §5) and Layer-3 prose at 0.3 — not 0. Its
+  generic-advice immunity comes from **Layer 2 being deterministic code**, not from sampling
+  temperature. The retired §3 justice bridge was the temp-0 call.
+- **Generic-Stoic injection risk on the mentor page: structurally yes.** The mentor's words are
+  free generation; the corpus blocks are context, not a cage. The persona itself names the failure
+  mode as an *instruction* ("No L2b = generic Stoic = failure"), and the KB carries safeguard
+  labels ("all conclusions must be grounded exclusively in the Stoic Brain's ancient sources") —
+  instructions, not enforcement. Compounding it: at the 11:24 turn, **~85% of the in-window
+  history tokens were the mentor's own prior Sonnet outputs** (118,636 of 139,222 chars), so any
+  generic drift in past turns recirculates as authoritative-looking context for future ones — a
+  self-conditioning loop the engine architecture cannot have.
+- **The practitioner profile is the same one the engine uses:** `/api/reason` imports
+  `getPractitionerContext` from the identical `practitioner-context.ts` module (reason
+  `route.ts:9,1404`), reading the same stores — `mentor_profiles` (encrypted),
+  `mentor_journal_refs`, `mentor_interactions`, `mentor_profile_snapshots`, `analytics_events`.
+- **The private journal IS in the mentor's context — twice-distilled, and it is L2b practitioner
+  material, not doctrine:** the uploaded journal lives raw at `sage-mentor/journal-data/`
+  (transcribed + extractions + interpretation), was ingested into the profile, and is retrieved
+  per turn as **topic-matched indexed passages from `mentor_journal_refs`** (passage summaries
+  with topic tags and relevance triggers — not full text).
+- **"World context" = the Layer-5 Mentor Knowledge Base**, in the system block every turn: two
+  non-doctrinal briefings — *Stoic Historical Context* and *Global State of Humanity*
+  (demographics, technology, planetary systems, uncertainties), ~800–1200 tokens, safeguard-
+  labelled. **The weekly environmental scan (`environmental-context.json`) is NOT wired into the
+  mentor hub** — it feeds `sage-reason-engine.ts` (the human score routes) and two skill routes
+  only; the persona's "L4 Environmental (where present)" is unwired on this route. (Minor drift:
+  the KB loader's header says user-message injection; the hub places it in the system block.)
+- **The ring pattern engine is old-stack, mentor-side, and deterministic:** `sage-mentor`'s
+  pattern engine aggregates stored interaction data into `ring_summary` (no LLM). It is not part
+  of the new engine and the new engine does not use it; nor is it a generic-advice vector — but
+  what it aggregates originates from Sonnet-authored interactions.
+- **The 11:24 Haiku observation (retrieved from `mentor_observations_structured`,
+  01:24:55 UTC, category `progress_signal`, confidence high):** *"Founder demonstrates a
+  consolidating pattern of direct examination before tool-delegation, now yielding concrete
+  artifacts (two records, three amendments, scope addition). This marks progression from ideation
+  to disciplined execution with precision-oriented feedback loops."* — **Note what is absent: the
+  distillation channel captured nothing of the mentor's own self-examination.** The observation
+  pipeline records practitioner-directed observations only, and ring patterns aggregate
+  practitioner passions — so once the closing exchange slides out of the 20-message window, the
+  self-examination moment vanishes from the mentor's memory entirely. **This is a measured
+  demonstration of the P-A2 gap: the guide-reflection section is precisely the persistence channel
+  the architecture lacks.**
+
 *End of response (Parts 1–2).*
