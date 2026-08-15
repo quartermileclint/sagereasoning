@@ -20969,3 +20969,13 @@ folder explicitly so the slip cannot recur.
 **Rollback:** `git revert` the records commit (documents only).
 
 **Model/effort:** claude-fable-5 / high.
+
+---
+
+## 2026-08-15 — D-PRIVATE-MENTOR-MECHANISM-TRACED-Q1-Q3-CORRECTED-2026-08-15
+
+**Decision:** Corrected `D-SELF-EXAMINATION-MOMENT-INVESTIGATED-CONVENER-RULING-EXECUTED-2026-08-15`'s Part-1 conclusion after founder correction: the mentor mechanism is **the live `/private-mentor` page fronting `POST /api/founder/hub` (`agent: 'mentor'`, `hub_id: 'private-mentor'`)** — not a Claude-app conversation. Traced at source and measured against production; recorded as **Part 2** of the investigation document (its banner marks §§1–3 superseded in part; §§4–7 stand). Documents only; nothing changed in code or production.
+
+**Corrected findings:** (Q1) the mentor model is **`claude-sonnet-4-6`, `max_tokens: 4000`, `temperature: 0.4`** (`founder/hub/route.ts:731-737`), unchanged since the hub's creation 2026-04-11; **`claude-opus-5` appears zero times in the website code** — the "updated to Opus 5" belief is incorrect; auxiliary calls: haiku-4-5 observation extraction (256 tok), reflect ritual sonnet-4-6 (1024), the page's proximity widget hitting `/api/reason` quick. (Q2) per-turn context = persona + mentor KB + six-mechanism Stoic Brain context + **`conversationHistory.slice(-20)`** + enriched current message (projected profile, project summary, ring pattern analysis, observations); measured on production conversation `8223090a…` (one continuous thread since 2026-04-26): **729 messages ≈ 880K tokens stored; the model reads ~38K tokens of history ≈ 45–60K total ≈ ~5% of Sonnet 4.6's 1M window** — the window slides, never fills; no compression or closing needed; "responses passed in parts" = the 4,000-token OUTPUT cap, not context pressure; content older than 20 messages persists only via the distilled channels (mentor_observations_structured, ring patterns, profile). (Q3) **H3 structurally ruled out**; H1 narrowed to the visible window + distilled channels (24 messages spanned 08-14/15, so the closing exchange's window plausibly covered most of the long session); H2 gains mechanical support (an examining persona + injected passion/pattern data + a no-task input); the transcript-anchorage discriminator narrows to the last-20-plus-injected-blocks the model actually saw — a stronger test.
+
+**Verification:** page + route read at source (file:line cited throughout); model history via `git log -S`; repo-wide opus-5 grep = 0; production measured read-only, aggregates only (counts/lengths, no content printed). **Rollback:** `git revert` the records commit. **Model/effort:** claude-fable-5 / high.

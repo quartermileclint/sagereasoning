@@ -8,6 +8,13 @@ Written the same day by the concurrent-arc planning session, extended by founder
 companion amendments are in `2026-08-14-prudence-group.md` (Amendment log, P-A1/P-A2) and
 `operations/handoffs/founder/2026-08-15-mentor-questions-concurrent-arc.md` (Addendum + M7).
 
+> **⚠ PART 2 (same day) SUPERSEDES §§1–3 IN PART.** Part 1 below concluded the mentor mechanism
+> was a Claude-app conversation. **The founder corrected this: the mentor is the live
+> `www.sagereasoning.com/private-mentor` page — a mechanism this project built.** It was then
+> traced at source and measured in production. **Read Part 2 (at the end) for the corrected Q1/Q2/Q3
+> answers**; §§4–7 (the moment's analysis, the design proposal, the residual) stand, and Part 2
+> *strengthens* §4's discriminator by narrowing it to what the model actually saw.
+
 ---
 
 ## 1 — Question 1: which model runs the mentor mechanism?
@@ -241,4 +248,110 @@ circle of unique guides is a complete answer to it. Flagged in M7 for the mentor
   updated (Q1 resolved; Q2 now most pressing).
 - The founder relays this document (or its distillation) to the mentor with M7.
 
-*End of response.*
+---
+
+# PART 2 — the mechanism found: `/private-mentor` traced at source and measured (2026-08-15, same day)
+
+**Correction of Part 1 §1's conclusion.** Part 1 reasoned from the reflect route's small
+`max_tokens`, the RTF paste-backs, and the desktop session list that the mentor conversation must
+live in the Claude app. **Wrong at the final step** — the RTFs and relays are how mentor *content
+moves between sessions*; the conversation itself is the **`/private-mentor` page**, which fronts
+the **founder hub** (`POST /api/founder/hub` with `agent: 'mentor'`, `hub_id: 'private-mentor'` —
+`website/src/app/private-mentor/page.tsx:158-165`). Everything below was read at source and
+measured against production this session.
+
+## 2.1 — How one chat turn works (the full chain)
+
+1. **Page → route.** The page posts the message with the conversation id to `/api/founder/hub`
+   (founder-JWT auth; `FOUNDER_USER_ID` gate; rate-limited). The R20a distress classifier runs —
+   a distress result returns the crisis redirect instead of an evaluation (`page.tsx:174-184`).
+2. **System context (cached, fixed per turn)** — `getPrimaryAgentResponse`, `route.ts:167-218`:
+   the **Sage Mentor persona** (the April-2026 "Mentor Reasoning Upgrades" — four-layer reasoning,
+   mirror principle, the six Zone-2 domains, R20b/R20d boundaries) + the **mentor knowledge base**
+   (`mentor-knowledge-base-loader.ts`) + the **Stoic Brain context for six mechanisms**
+   (`passion_diagnosis, oikeiosis, value_assessment, kathekon_assessment, control_filter,
+   iterative_refinement` — `stoic-brain-loader.ts`), with a prompt-cache breakpoint.
+3. **History — the sliding window.** `conversationHistory.slice(-20)` (`route.ts:496-507`):
+   **only the last 20 stored messages** reach the model (founder → user turns, mentor → assistant
+   turns, observer rows as tagged user context). Everything older is invisible to the model.
+4. **Enrichment appended to the current message** (`route.ts:509-729`): the practitioner profile
+   (topic-projected under `MENTOR_CONTEXT_V2`, else the full profile; from encrypted
+   `mentor_profiles`), `getProjectContext('summary')`, the **ring pattern analysis**
+   (`ring_summary` — the deterministic sage-mentor pattern engine's aggregation over recent
+   interactions, injected as "RECURRING PATTERNS DETECTED…"), hub-scoped **mentor observations**
+   and profile snapshots (the designed session-continuity channels), with per-block token
+   estimates logged as `[mentor-context-tokens]`.
+5. **The LLM call** (`route.ts:731-737`): **`claude-sonnet-4-6`, `max_tokens: 4000`,
+   `temperature: 0.4`** — unchanged since the hub's creation on **2026-04-11**, and
+   **`claude-opus-5` appears zero times anywhere in the website code** (repo-wide grep). The only
+   Opus in the hub is `claude-opus-4-6` in the founder-hub "Ask the Org" *synthesis* function —
+   never the mentor path. **The belief that the mentor was updated to Opus 5 is incorrect.**
+6. **After the response:** the interaction is recorded (`sage-mentor/profile-store`), and a
+   **`claude-haiku-4-5` extraction pass** (256 tokens) distils a third-person developmental
+   observation, validated (50–500 chars) into `mentor_observations_structured` — the distilled
+   long-term memory. Separately, the page's proximity widget calls **`/api/reason` (quick)** —
+   the one place the deterministic examination engine touches this page — and the morning/evening
+   rituals post to `/api/mentor/private/reflect` (`claude-sonnet-4-6`, 1024).
+
+Storage: `founder_conversations` / `founder_conversation_messages` (plaintext content,
+founder-scoped). The page's GET loads the **full** history for display (no limit); the model never
+sees more than the window.
+
+## 2.2 — Q1 corrected: the model
+
+**`claude-sonnet-4-6`** (1M-token context window, 128K max output capability — capped here to
+4,000 by the route), at temperature 0.4, since 2026-04-11. Part 1's "consistent with the
+Opus-5-family profile" characterisation is withdrawn as the explanation: **the behaviour is better
+explained by the prompt than the model family** — the persona explicitly instructs examination
+("when the founder's reasoning shows a passion or false judgement, name it specifically"), and
+every turn is primed with the practitioner's passion profile and recurring-pattern data.
+
+## 2.3 — Q2 corrected and measured: the window
+
+Measured against production (aggregates only), conversation `8223090a…`, created **2026-04-26**,
+one continuous thread:
+
+| Quantity | Value |
+|---|---|
+| Total stored messages | **729** (353 founder / 348 mentor / 28 observer) |
+| Total stored content | ~3.53M chars ≈ **~880K tokens** |
+| What the model reads per turn | last **20 messages** ≈ 153K chars ≈ **~38K tokens** + system/enrichment |
+| Effective per-request context | ≈ **45–60K tokens** of Sonnet 4.6's **1M** window ≈ **~5%** |
+| Messages on 08-14/08-15 (the long session) | 24 (~172K chars) — already exceeds the 20-message window |
+
+**Consequences.** (a) The context window **never fills** — each turn is a stateless assembly, and
+the window slides; there is nothing to compress and no need to close the chat for context-safety.
+(b) "Three responses passed in parts" is the **4,000-token output cap** (`route.ts:733`), not
+context pressure — a ruling longer than ~3,000 words truncates and must be continued. Raising that
+cap is a one-line, founder-electable code change (with streaming considerations). (c) The real
+constraint is the opposite of overflow: **anything older than 20 messages survives only through
+the distilled channels** (observations, ring patterns, profile) — the closing exchange itself will
+slide out of the model's verbatim view within ~20 more messages, which is why the founder's
+verbatim-record relay discipline is, and remains, the actual continuity mechanism. (d) The page
+offers no "new conversation" control — it always reopens the most recent mentor conversation; a
+fresh thread is neither needed for context reasons nor currently offered by the UI.
+
+## 2.4 — Q3 revised: the hypotheses under the real mechanism
+
+- **H3 (context pressure) is structurally ruled out**, not just weakly supported: per-request
+  context is bounded at ~5% of the model window by construction and cannot accumulate.
+- **H1 (session logic completing itself) survives in a narrowed form**: the model could only
+  complete logic present in the **last 20 messages plus the distilled channels**. With 24 messages
+  across 08-14/15, the closing exchange's window plausibly covered most of the long session — so
+  the day's Prudence-Q1 material was likely in view — but "present in the architecture all day" is
+  more than the model could see.
+- **H2 (busy work) gains mechanical support**: a no-task input arriving at a persona instructed to
+  examine, primed every turn with the practitioner's passion profile and recurring patterns, makes
+  a reflective examination the most contextually apt output almost by construction — and with no
+  bringer material present, the only available object of examination was the session itself.
+- **The §4 discriminator narrows and sharpens**: run the transcript-anchorage check against the
+  **last 20 messages before the turn** (what the model actually saw) plus the injected
+  pattern/observation blocks. Specific claims traceable to that window → conditioned (H1-weighted);
+  claims about parts of the day outside it, absent from the distilled channels → generated to
+  shape, not from content (H2-weighted). This is a stronger test than Part 1's whole-day version.
+- **§§4–7 otherwise stand.** The standing-slot conclusion is *reinforced*: Form 1's guide is the
+  deterministic engine, but this mechanism shows what an LLM-guide's reflection channel must
+  handle — a sliding window means an end-of-session reflection is also the last reliable moment
+  the session's own content is in view to be examined.
+
+*End of response (Parts 1–2).*
