@@ -110,8 +110,40 @@ pause points (constraint 3 above).
    `human-practitioner-boundary.test.ts` §C and verified in all four states: dormant-clean PASS,
    dormant-dirty PASS with honest DORMANT log, armed-dirty FAIL on the probe, armed-clean PASS).
 
-### ☑ C2 — Scoping session A [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15** — `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`; both scope documents authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-{kathekon-role-relative,hegemonikon-drift-melete}-FOR-RULING.md`); claims-vs-repo check run, 12 findings all folded; execution awaits the mentor's ruling, post-run per M2]
+### ☑ C2 — Scoping session A [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15, and RULED same day** — `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`; both scope documents authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-{kathekon-role-relative,hegemonikon-drift-melete}-FOR-RULING.md`); claims-vs-repo check run, 12 findings all folded; **the mentor's Ruling Sets A + B arrived 2026-08-15** (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md`; recorded `D-MENTOR-RULINGS-C2-SCOPE-DOCUMENTS-RECORDED-2026-08-15`) — the kathêkon session is CLOSED; the hegemonikon session remains open ONLY for the uniformity-reads-as-stable family; execution items land post-run, see the ruled-additions block below]
 *Tier: `governance`, documents only. Founder presence: none.*
+
+**Ruled additions from the C2 scope-document rulings (2026-08-15) — execution post-run per M2;
+slotting below is the natural home, founder may re-slot; the verbatim record governs details:**
+
+- **A/R-5 — the kathêkon role-blindness qualification** on the guardrail GET self-doc +
+  `llms.txt` + the `agent-card.json` guardrail extension. Mentor wording IN HAND (verbatim
+  record); founder R18 sign-off required; no code-path change. Natural home: any post-run
+  session with an R18 close (R2's close or R4).
+- **A/R-3 — the runner remit statement** (runner-protocol change only: the loop states its
+  remit, derived from the human-authored protocol/task list, in the extraction user context on
+  each guardrail call; carried honest limit: self-report through extraction, unverifiable by
+  construction). Natural home: the standing-runner design (R8) or a post-run session. Option E
+  (mint-time `credential_provenance` role) is a future-direction note only.
+- **B/M-A — the `does_not_attest` discriminative-range item**: ADR-013 §8 dated amendment +
+  `trust-record-payload.ts:52-61` + the S10 battery **in the same edit** + the three R18
+  surfaces. Mentor wording IN HAND; founder sign-off required. Natural home: **R2** (a
+  code+battery+ADR edit).
+- **B/M-B — the AE-1 delta dispersion member** (credential-bearing consults only; never the
+  public trust record; the M7 window stands with the cannot-condition-on-delivery limit named).
+  **The flag-discipline statement must be in the implementation record BEFORE the edit** (a new
+  member riding `SUBSTRATE_TRAJECTORY_DELTA_ENABLED` is live on deploy; per-feature darkness
+  needs its own flag). Natural home: **R2 or R3**.
+- **B/R-6 — the loop-ledger range measure** (read-side, founder-facing run-analysis only; never
+  surfaced to the agent or the public record; post-run by fence; a *served* form needs its own
+  scoping session first). Natural home: alongside/after **R1**'s report analysis.
+- **Not adopted / deferred, recorded so no session self-starts them:** M-C (public payload
+  field — ruled out until the survivorship question is better understood); M-D (ledgered
+  observation class — needs its own scoping session; the emission-path/fold-seed choice is
+  load-bearing); melete measurement (deferred until an agent-side rehearsal surface exists —
+  reopened as part of that surface's session); the uniformity-reads-as-stable family (three
+  members, ruled together or not at all — remains open in the 08-12 hegemonikon scoping
+  record).
 
 Run two of the three OPEN scoping sessions, producing scope documents for mentor ruling:
 1. **Kathêkon role-relative evaluation**
@@ -298,6 +330,7 @@ pre-scoped — deliberately.*
 |---|---|---|
 | ~~M1 (guard ruling)~~ | **RESOLVED 2026-08-15** | Window-conditional (binds iff `GATE1_FALSE_HOLD_CAPTURE` set) — implemented + four-state verified; §C2 SHA freeze unconditional; R2 items land post-run under the window logic, no per-item exemptions |
 | ~~M2 (who runs scoping)~~ | **RESOLVED 2026-08-15** | AI runs all three sessions → scope documents → mentor rules on the documents; C2/C3 are GO |
+| ~~Mentor rules on the C2 scope documents~~ | **RESOLVED 2026-08-15** (same day) | Ruling Sets A + B (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md`); kathêkon session CLOSED, hegemonikon open only for the uniformity family; five execution items land post-run — see the ruled-additions block under C2 |
 | Run reaches ≥20 + runner hand-back | live query + founder | Phase 2 opens (R1 first, always) |
 | Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |

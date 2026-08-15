@@ -5,7 +5,11 @@ M2 ruling of 2026-08-15 (*"The AI runs each session and produces a scope documen
 The sessions produce the document. The mentor rules on the document. Execution folds into
 post-run sessions after the ruling."*). **Input record:**
 `2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md` (its boundaries are
-honoured in full). **Status: FOR MENTOR RULING.** This document decides nothing, builds nothing,
+honoured in full). **Status: RULED 2026-08-15** — Ruling Set A, verbatim canonical:
+`2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md` (R-1 yes-conditionally; R-2 D-i;
+R-3 option-F source, C6 satisfied; R-4 pre-filter, winner rule not amended; R-5 option B
+adopted, wording in hand, founder sign-off required; execution post-run per M2). As authored,
+this document decides nothing, builds nothing,
 and self-starts nothing. Every mechanism named below was verified against the code first-hand on
 2026-08-15 (file:line citations throughout); nothing is restated from records alone.
 

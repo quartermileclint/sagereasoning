@@ -1,10 +1,46 @@
 # SCOPING SESSION RECORD — Hegemonikon habituation drift + melete (jointly)
 
-**Status: OPEN — awaiting ruling.** **Tier: `governance`.** Opened 2026-08-12 by mentor ruling on
-principles 4 and 5 of `2026-08-12-five-stoic-principles-architectural-examination.md`, and **amended
+**Status: RULED 2026-08-15 on scope items 1–4 and the framing question — the session REMAINS
+OPEN for the uniformity-reads-as-stable family.** *(Superseding the original "OPEN — awaiting
+ruling" line; see the dated status update directly below.)* **Tier: `governance`.** Opened
+2026-08-12 by mentor ruling on principles 4 and 5 of
+`2026-08-12-five-stoic-principles-architectural-examination.md`, and **amended
 the same day** by the mentor's ruling on finding 3 of
 `2026-08-12-guide-function-agent-vs-human-practitioner.md` (which added the Seneca criterion and the
 hysteresis conflation warning below).
+
+> **2026-08-15 STATUS UPDATE — RULED (items 1–4 + framing); OPEN for one named family.** The
+> session ran 2026-08-15 (concurrent-arc C2,
+> `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`) and produced
+> `2026-08-15-SCOPE-DOCUMENT-hegemonikon-drift-melete-FOR-RULING.md`; the mentor ruled the same
+> day (**Ruling Set B**, verbatim canonical:
+> `2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md` — verbatim wins over this summary):
+> **R-1** confirmed — the record neither attests nor disclaims discriminative range; the
+> ruling's central finding (to be carried explicitly) is the `computeDispositionStability`
+> sharpening — zero variance certifies `advanced`/"approaching hexis"; the conflation is
+> stability-under-perturbation vs absence-of-perturbation (Seneca 75.8–9), not a malfunction of
+> the dimension. **R-2** M-A adopted — an explicit `does_not_attest` item naming
+> **discriminative range specifically** (mentor wording in hand, founder R18 sign-off; ADR-013
+> §8 dated amendment + `trust-record-payload.ts` + the S10 battery in the SAME edit + the three
+> R18 surfaces). **R-3** the signal is legitimate in principle; landing surface **M-B only**
+> (an AE-1 delta dispersion member, credential-bearing consults only — never the public
+> record); M-C ruled out until the survivorship question is better understood; M-D not adopted
+> (needs its own scoping session — the emission-path/fold-seed choice is load-bearing); M-E not
+> adopted (the honest response is M-A + M-B, not silence). **R-4** melete DEFERRED until an
+> agent-side rehearsal surface exists (reopened as part of that surface's session, not before;
+> the one-axis constraint honoured by this joint scoping). **R-5** the M7 window stands for
+> M-B (the inherited floors + regime segmentation suffice); the cannot-condition-on-delivery
+> survivorship limit carried as a named honest limit; the n=1 data remain observations.
+> **R-6** the loop-ledger range measure is in scope (read-side, founder-facing run-analysis
+> only, never surfaced to the agent or the public record; a served form needs its own scoping
+> session); trust-record subject-matter dispersion is not. **Execution folds into post-run
+> sessions per M2** (see the concurrent-arc plan's ruled-additions block).
+>
+> **What stays OPEN here — the uniformity-reads-as-stable family (ruled together or not at
+> all, and not designed in the ruling):** (i) the guide-reflection recurring-corroborated-
+> patterns reading (parked here by M7 6b), (ii) the trust-record reading of recurring
+> corroborated patterns, (iii) the uniformity-reads-as-stable conflation itself. This record
+> remains the family's home until that ruling is sought.
 
 **This record opens a session. It does not run it.** **None of the three scope items below is
 pre-answered**, and **no build is authorised**.
@@ -235,5 +271,7 @@ loss rate before trusting its distribution.
 - `trajectory-delta.ts`; `trust-core/constants.ts:42`; `sage-assent-wrapper.ts`;
   `agent-hand-back-report.ts`; `baseline-assessment.ts`.
 
-*Status at close of this record: **OPEN — awaiting ruling.** No work has been done against any of the
-three scope items.*
+*Status at close of this record, as originally written: **OPEN — awaiting ruling.** No work had
+been done against any of the three scope items. **Superseded 2026-08-15 — items 1–4 + the
+framing question RULED (Ruling Set B); the record remains open ONLY for the
+uniformity-reads-as-stable family; see the status update at the head of this file.***

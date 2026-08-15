@@ -1,7 +1,25 @@
 # SCOPING SESSION RECORD — Kathêkon: should candidate evaluation be role-relative?
 
-**Status: OPEN — awaiting ruling.** **Tier: `governance`.** Opened 2026-08-12 by mentor ruling on
-principle 2 of `2026-08-12-five-stoic-principles-architectural-examination.md`.
+**Status: RULED 2026-08-15 — CLOSED.** *(Superseding the original "OPEN — awaiting ruling"
+line; see the dated status update directly below.)* **Tier: `governance`.** Opened 2026-08-12 by
+mentor ruling on principle 2 of `2026-08-12-five-stoic-principles-architectural-examination.md`.
+
+> **2026-08-15 STATUS UPDATE — RULED.** The session ran 2026-08-15 (concurrent-arc C2,
+> `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`) and produced
+> `2026-08-15-SCOPE-DOCUMENT-kathekon-role-relative-FOR-RULING.md`; the mentor ruled the same
+> day (**Ruling Set A**, verbatim canonical:
+> `2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md` — verbatim wins over this summary):
+> **R-1** role-relativity yes, conditionally; **R-2** locus = option D-i, guardrail-local
+> threading only (D-ii ruled out — the shared-prompt/regime-boundary coupling decisive);
+> **R-3** source = the human-authored protocol/task list (C6 ruled satisfied, no re-opening;
+> the self-report-through-extraction verifiability limit carried as a named honest limit;
+> option E carried as a future-direction note, not adopted); **R-4** the remit gate is an
+> explicitly-ruled **permissible pre-filter** — the ruled winner rule is NOT amended (the QG-D
+> discipline discharged in the ruling's own words); **R-5** option B adopted — the
+> role-blindness qualification on all three R18 surfaces, mentor wording in hand, founder
+> sign-off required. The kathekon predicate is untouched; S11 flip-readiness is not re-opened.
+> **Execution folds into post-run sessions per M2** (see the concurrent-arc plan's ruled-
+> additions block). **This record is closed.**
 
 **This record opens a session. It does not run it.** Nothing here answers the session question, and
 **no build is authorised** by the ruling that opened it.
@@ -108,5 +126,6 @@ absorbing into it.
 - `2026-08-09-mentor-consultation-generation-step-scope-rulings-verbatim.md` QG-D (precedent).
 - `website/src/app/api/guardrail/route.ts`; `website/src/app/morning/page.tsx:174`.
 
-*Status at close of this record: **OPEN — awaiting ruling.** No work has been done against the session
-question.*
+*Status at close of this record, as originally written: **OPEN — awaiting ruling.** No work had
+been done against the session question. **Superseded 2026-08-15 — RULED and CLOSED; see the
+status update at the head of this file.***

@@ -6,7 +6,13 @@ The sessions produce the document. The mentor rules on the document. Execution f
 post-run sessions after the ruling."*). **Input record:**
 `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` (all four scope inputs, the
 Seneca criterion, the hysteresis warning, and the n=1 survivorship flag are carried in full).
-**Status: FOR MENTOR RULING.** Nothing here is a build, a design of record, or a
+**Status: RULED 2026-08-15** — Ruling Set B, verbatim canonical:
+`2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md` (R-1 confirmed with the
+disposition_stability sharpening as the central finding; R-2 M-A adopted, wording in hand;
+R-3 M-B only; R-4 melete deferred; R-5 window stands with the survivorship limit named;
+R-6 loop-ledger measure in scope, trust-record subject-matter dispersion not; the
+uniformity-reads-as-stable family remains open in the 08-12 scoping record; execution post-run
+per M2). As authored, nothing here is a build, a design of record, or a
 recommendation beyond what the input record licenses. Every mechanism named was verified against
 the code first-hand on 2026-08-15; the live honest-claims envelope is quoted from the wire
 module, not from records.
