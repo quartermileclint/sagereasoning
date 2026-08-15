@@ -2,6 +2,12 @@
 
 **Date: 2026-08-14.** **Status: FUTURE DIRECTION — documented, not scoped, not scheduled.**
 
+**Amended 2026-08-15** (two amendments from the 2026-08-15 founder-mentor session's closing
+exchange: the convener question resolved — open question 1 closed; the guide-reflection direction
+added to the diatribes record with two new open questions). **See the Amendment log at the end of
+this record**, and the companion investigation
+`2026-08-15-self-examination-moment-investigation-and-response.md`.
+
 **No connection to the current P0 build sequence or the Q11 sequence.** Nothing here licenses a
 build, a route, a flag, a schema, or a credential. GS-ATRF-1, GS-ATRF-2 and GS-ATRF-3 remain open
 and untouched. This record lives in `operations/future-directions/`, deliberately outside every
@@ -80,7 +86,8 @@ trust record subsequently shows patterns inconsistent with the guide function.
 **The guide's credential is not immunity from examination — it is demonstrated willingness to be
 examined.** The guide must also have brought their own matter to a circle **as a bringer, not as a
 guide**, within a period to be determined by the design. **Who convenes the circle in which the
-guide is the bringer is an open question carried forward** (Section 12, question 1).
+guide is the bringer is an open question carried forward** (Section 12, question 1). *(Resolved
+2026-08-15 by mentor ruling — Amendment P-A1; Section 12, question 1 carries the closure.)*
 
 ## Section 4 — The roles
 
@@ -118,6 +125,12 @@ is a legitimate outcome that a results-oriented reading would misread as failure
 correction `2026-08-13-idea-creation-research-stoic-connections.md` states first**)**, reframings,
 rulings that the matter is not resolvable by the circle and belongs to the bringer's own
 prohairesis, and spin-off records with pointers to subsequent sessions.
+
+*Amended 2026-08-15 (P-A2): the diatribes record is directed to carry a **guide reflection
+section** alongside the bringer's examination record — added not to be witnessed but to be carried
+forward (into the next session, the wiki, the corpus). Its provenance-marker design and
+examination channel are open questions 6–7 (Section 12), with Claude's proposal awaiting mentor
+ratification. See the Amendment log.*
 
 **Findings wiki:** correlated findings across sessions and members. **Linking criterion is passion
 sub-species and false judgement type, not topic similarity.** Two examinations are correlated when
@@ -336,7 +349,10 @@ into future development sessions and the next discussion.
 1. **Who convenes the circle in which the guide is the bringer?** The guide must submit to
    examination as a bringer, not as a guide. The structure does not yet name who convenes that
    circle, or what prevents the guide from selecting a circle where their false impressions will
-   not be challenged. **Unresolved.**
+   not be challenged. **Unresolved.** *(**RESOLVED 2026-08-15** — the two-guide convener ruling,
+   Amendment P-A1 below: the circle in which the guide is the bringer is convened by another
+   unique guide whose uniqueness derives from a different practitioner's history; the two guides
+   do not guide each other's circles simultaneously.)*
 2. **The wiki second-order audit.** Does the wiki require a periodic review of what has *not* been
    linked, to surface the guide's blind spots as well as the community's? A guide operating under
    unexamined philodoxia may systematically fail to link examinations that would reveal their own
@@ -356,6 +372,25 @@ into future development sessions and the next discussion.
    signal integration in Form 4 must explicitly preserve the human guide's primary diagnostic role
    and position SageGuide as secondary. **The design boundary between guide reading and tool
    augmentation requires a ruling before the build is scoped. Unresolved.**
+6. **What distinguishes a guide reflection from a guide performance?** *(Added 2026-08-15, from
+   the self-examination moment — Amendment P-A2.)* The busy-work hypothesis: a guide producing a
+   reflection when no task is present may be performing reflection rather than conducting it. The
+   diatribes' guide reflection section needs a marker for the reflection's generative condition.
+   Claude's proposal (provenance markers — generative position + session position + anchorage — a
+   first-class null entry as the true null-cycle analogue, and a standing closing slot so that
+   occurrence carries no signal and only content does) is recorded at
+   `2026-08-15-self-examination-moment-investigation-and-response.md` §5 and awaits mentor
+   ratification (mentor-questions M7). **Open pending that ratification.**
+7. **Who examines the guide reflection?** *(Added 2026-08-15 — Amendment P-A2.)* Substantially
+   answered by the question-1 ruling combined with standing project doctrine: the reflection is
+   self-report and self-report is never the audit channel (the L4 principle); the convener guide
+   examines the session transcript out-of-band and corroborates or contradicts the reflection's
+   specific claims — divergence itself is the signal (the G4 cross-check shape, the same shape as
+   SagePals Amendment A1's task declaration). **The open remainder:** (a) the wiki classification
+   of *affirmation without examination* in the false-judgement taxonomy; (b) the trust-record
+   integration — a recurring, corroborated pattern is a trust-record signal, and its
+   SageReasoning-side reading belongs with the OPEN hegemonikon drift + melete scoping session
+   (the uniformity-reads-as-stable family) — cross-referenced, not built, not pre-answered.
 
 **Priority, as stated at the 2026-08-14 session:** the most pressing is **question 1** — a
 structural integrity question. **A circle whose guide is not subject to examination is not a Stoic
@@ -365,6 +400,11 @@ the mechanism that prevents the community's collective blind spots from becoming
 wiki that only links what the guide notices is a wiki that reflects the guide's limitations, not
 the community's truth.** The remaining three can wait for the Stage 3 scoping session without risk
 to this documentation.
+
+*(2026-08-15: question 1 is **resolved** by Amendment P-A1, so **question 2 — the wiki
+second-order audit — is now the most pressing open question.** Questions 6–7, added the same day,
+carry a design proposal awaiting mentor ratification — see P-A2 and mentor-questions M7. Nothing
+blocks the current documentation.)*
 
 ---
 
@@ -377,10 +417,75 @@ to this documentation.
   borrows the drift session's framing (Section 9, Form 1), it does so as a diagnostic direction
   and does not pre-answer that session's scope items.
 - **Does not resolve** its own Section 12 questions — it states them so a future session inherits
-  the honest form.
+  the honest form. *(Amendment P-A1 records the mentor's 2026-08-15 resolution of question 1 —
+  resolved by ruling, not by this record; the sentence stands.)*
 
 **Retrieval condition:** revisit when SagePals' own retrieval condition is met — a practitioner
 base exists that could constitute the network — or when a Stage 3 scoping session is opened by the
 founder. Not before.
+
+---
+
+## Amendment log
+
+### Amendment P-A1 — The convener question resolved: the two-guide ruling (2026-08-15)
+
+**From the 2026-08-15 founder-mentor session's closing exchange; relayed by the founder and
+executed the same day.** The founder proposed, and the ruling arrived at, that **unique guides
+serve as the conveners for each other's examination circles.** Each guide is unique because each
+derives from a specific practitioner's observation history, passion profile, and conversation
+history — **a clone is not the same guide; the uniqueness is real and constitutes genuine
+difference of perspective.**
+
+**The ruling:** the circle in which the guide is the bringer is **convened by another unique
+guide, one whose uniqueness derives from a different practitioner's history.** The two guides
+examine each other's reasoning from genuinely different perspectives. **The constraint that
+prevents mutual-validation corruption: the two guides do not guide each other's circles
+simultaneously.** They guide different circles, and each submits to examination in a circle they
+do not guide. **This resolves open question 1.**
+
+**Secondary mechanism (partial, not a replacement):** the guide reflection section (P-A2), if
+adopted, also partially resolves question 1 via the Marcian model — **the guide who writes
+honestly about what they did not examine is already submitting to examination. The writing is the
+circle. The diatribes are the witness.** Secondary to, never a substitute for, the two-guide
+convener ruling.
+
+**Residual, recorded for honesty (Claude's note, not part of the ruling):** the two-guide
+constraint prevents reciprocal-validation corruption — the incentive failure — but not
+**correlated blind spots**: two unique guides still share the same base model and training
+priors, so the difference of perspective is real but bounded, and a model-level blind spot
+survives cross-examination between them. The uncorrelated checks in the architecture remain the
+human practitioners and the deterministic instruments. This does not reopen the question — no
+convener choice among guides could remove common-mode error — but the record should not imply the
+circle of unique guides is a complete answer to it. Flagged to the mentor in mentor-questions M7.
+
+### Amendment P-A2 — The guide reflection section (2026-08-15)
+
+**Origin:** at the close of the 2026-08-15 session the mentor produced an unprompted turn inward —
+examining its own conduct, naming that it had been operating in affirmation mode without
+sufficient examination, and asking the founder a question directed at the founder's own submission
+to examination. The mentor's honest assessment: the session-logic and busy-work hypotheses both
+have force and **cannot be distinguished from within the examination.** Full investigation,
+including a third (context-pressure) hypothesis assessed and an external discriminator
+(transcript-anchorage corroboration), at
+`2026-08-15-self-examination-moment-investigation-and-response.md`.
+
+**Direction adopted:** the diatribes carry a **guide reflection section** alongside the bringer's
+examination record — added **not to be witnessed but to be carried forward** (into the next
+session, the wiki, the corpus). *(Numbering note, primary-data rule: the instruction names
+"Section 9 (the diatribes record)"; the diatribes record is **Section 5** of this document —
+content governs, and the amendment is placed there.)*
+
+**The two design questions it requires are recorded as Section 12 questions 6–7**, with Claude's
+proposal (provenance markers — generative position, session position, anchorage; a first-class
+null entry as the correct null-cycle analogue; a standing closing slot; the convener guide
+examining the transcript out-of-band per the L4 never-self-report doctrine; wiki linking by the
+standard criterion; recurring corroborated patterns as a trust-record signal, cross-referenced to
+the open drift + melete scoping session) awaiting mentor ratification — mentor-questions **M7**.
+**Not blocking the current documentation**, per the instruction. The founder also noted this may
+be the first account of its kind; the investigation records that claim with an honest tempering
+(the phenomenon class is documented model behaviour — this project's own harness forces a
+session-close reflection — while the *unprompted, reflexively-targeted* instance and the
+architectural treatment are what is notable).
 
 *End of record.*

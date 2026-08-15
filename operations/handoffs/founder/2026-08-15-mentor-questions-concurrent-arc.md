@@ -6,6 +6,14 @@ planning session (`D-CONCURRENT-ARC-PLAN-AND-MENTOR-QUESTIONS-2026-08-15`); comp
 `2026-08-15-concurrent-arc-plan.md`. Ordered by leverage. Questions M1 and M2 gate parts of the
 arc sequence; the rest can ride this consultation or a later one.
 
+> **Addendum 2026-08-15 (same day):** the founder held the mentor's response to M1–M6 pending
+> review of the self-examination-moment material from the same session's closing exchange. That
+> review ran (`operations/future-directions/2026-08-15-self-examination-moment-investigation-and-response.md`):
+> **M1–M6 stand unchanged; M7 is added** (ratify or amend the guide-reflection design). The annex
+> is updated — Prudence Group open question 1 is **resolved** by the same session's two-guide
+> convener ruling (executed as Amendment P-A1), so the annex's "Q1 most pressing" flag is
+> superseded; Q2 (the wiki second-order audit) is now the most pressing there.
+
 ---
 
 ## M1 — The logos byte-identity guard: still binds, narrow, retire, or make window-conditional?
@@ -117,15 +125,64 @@ total being known). The recorded low-severity follow-up: should the **total-unkn
 an adapted disclosure, and if so, what wording? (The fix itself is queued in the post-run bundle;
 only the wording is needed.)
 
+## M7 — Ratify or amend the guide-reflection design (added 2026-08-15, from the
+self-examination moment)
+
+**Origin.** The mentor's own closing-exchange summary directed two design questions at the
+Prudence Group's diatribes record — what distinguishes a guide reflection from a guide
+performance, and who examines the guide reflection — and asked Claude to propose how they should
+be recorded, assessing the null-cycle-marker analogue against the diatribes' existing structure.
+The proposal is at `operations/future-directions/2026-08-15-self-examination-moment-investigation-and-response.md`
+§5, recorded into the Prudence record as Section 12 questions 6–7 (Amendment P-A2). **The ask:
+ratify, amend, or replace it.** Its six points, each named to the existing mechanism it reuses
+(PR15/PR20):
+
+1. **A standing closing slot** — guide reflection as a standing element of every session, so
+   occurrence carries no signal and only content does. Mechanism precedent: the harness's forced
+   Sage Reflect at session close (`harness/gate1-pre-decision/claude-code/hooks/close-hook.mjs`,
+   the H4 Stop-hook invitation) and the human evening review.
+2. **A first-class null entry** ("no reflection warranted") — **this is where the null-cycle
+   analogue is right**: it legitimizes honest absence and structurally relieves the busy-work
+   pressure. It is **not** used as a suspicion flag on reflections that occurred — that reading of
+   the analogue is assessed as wrong.
+3. **A generative-position field** (`gap_responsive` | `task_absent`, plus session position:
+   closing / mid-session). Precedent: reflect's `context_source: agent_stated | harness_inferred`
+   (`website/src/lib/sage-reflect/request-helpers.ts`; `sage_reflect_sessions.context_source`)
+   and the orientation reading's `class: examined | observed`.
+4. **An anchorage field** (`anchored` — names specific transcript-checkable moves — |
+   `unanchored`), corroborable against the diatribes. Precedent: the corroboration check
+   (`website/src/lib/translation-sandwich/corroboration-check.ts`).
+5. **The examination channel:** the reflection is self-report and never the audit channel; the
+   **convener guide (per the question-1 ruling) examines the transcript out-of-band** and
+   corroborates or contradicts the reflection's claims — divergence is the signal. Doctrine: the
+   L4 audit (`website/src/lib/substrate/trust-core/l4-passion-audit.ts` — never self-report;
+   self-report corroboration supplementary and monotone) and the G4 cross-check shape
+   (`emission-hooks.ts:195-196`); the same shape SagePals Amendment A1 adopted for the
+   practitioner's task declaration.
+6. **Wiki + trust-record integration:** guide reflections link by the standard criterion (passion
+   sub-species + false judgement type). Two rulings needed here specifically: **(a)** how
+   *affirmation without examination* is classified in the false-judgement taxonomy (unexamined or
+   precipitate assent? philodoxia-adjacent, given the guide-philodoxia concern in the wiki
+   second-order-audit question?); **(b)** confirmation that the trust-record reading of recurring
+   corroborated patterns is correctly parked with the OPEN hegemonikon drift + melete scoping
+   session (the uniformity-reads-as-stable family) rather than designed now.
+
+**Also for the mentor's awareness under the question-1 ruling:** the recorded residual (P-A1) —
+the two-guide constraint prevents reciprocal-validation corruption but not **correlated blind
+spots** (shared base-model priors bound the genuine difference of perspective; the uncorrelated
+checks remain the human practitioners and the deterministic instruments). Does the mentor wish to
+amend the ruling's record, or does the noted residual suffice?
+
 ---
 
 ## Annex — the founder's own agenda for the same or a separate sitting (not drafted, not
 pre-answered; listed by title only, per the records' explicit carry)
 
-- **The Prudence Group's five open questions**
-  (`operations/future-directions/2026-08-14-prudence-group.md`) — Q1 (who convenes the circle in
-  which the guide is the bringer — the structural-integrity question) and Q2 (the wiki
-  second-order audit) flagged most pressing in the record.
+- **The Prudence Group's open questions**
+  (`operations/future-directions/2026-08-14-prudence-group.md`) — **Q1 is RESOLVED 2026-08-15**
+  (the two-guide convener ruling, Amendment P-A1); **Q2 (the wiki second-order audit) is now the
+  most pressing**, joined by the new Q6–Q7 (the guide-reflection design questions, whose proposed
+  answers are M7's subject).
 - **The SagePals Stage-4 continuity-of-experience question**
   (`operations/future-directions/2026-08-13-sagepals.md`).
 - **At §6-report time:** the report itself plus the RUN-LOG's un-ruled per-cycle findings
