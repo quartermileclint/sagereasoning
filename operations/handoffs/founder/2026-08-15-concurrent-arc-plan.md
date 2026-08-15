@@ -158,8 +158,46 @@ Run two of the three OPEN scoping sessions, producing scope documents for mentor
 The sessions produce the document. The mentor rules on the document. Execution folds into
 post-run sessions after the ruling." Both C2 sessions proceed as concurrent documents-only work.)*
 
-### ☑ C3 — Scoping session B [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15** — `D-CONCURRENT-ARC-C3-SCOPE-DOCUMENT-LAYER3-PER-CONSUMER-RENDERING-2026-08-15`; scope document authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-layer3-per-consumer-rendering-FOR-RULING.md`); claims-vs-repo check run, 2 defects + 2 range imprecisions all folded; awaits the separate Ruling Set C consultation per the C2 rulings. *(Note: this checkbox was found already ☑ at C3's open — evidently ticked when the M2 GO was folded in — with no DONE annotation; this annotation is the actual close record.)*]
+### ☑ C3 — Scoping session B [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15, and RULED same day** — `D-CONCURRENT-ARC-C3-SCOPE-DOCUMENT-LAYER3-PER-CONSUMER-RENDERING-2026-08-15`; scope document authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-layer3-per-consumer-rendering-FOR-RULING.md`); claims-vs-repo check run, 2 defects + 2 range imprecisions all folded; pushed `1c9e17a`, Vercel green; **the mentor's Ruling Set D arrived 2026-08-15** (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`; recorded `D-MENTOR-RULING-SET-D-LAYER3-SCOPE-DOCUMENT-RECORDED-2026-08-15`) — the Layer 3 scoping session is CLOSED; the L-5 candidate wording was produced same day for mentor review; execution items land post-run, see the ruled-additions block below. *(Note: this checkbox was found already ☑ at C3's open — evidently ticked when the M2 GO was folded in — with no DONE annotation; this annotation is the actual close record.)*]
 *Tier: `governance`, documents only. Founder presence: none.*
+
+**Ruled additions from Ruling Set D (2026-08-15) — execution post-run per M2; slotting below
+is the natural home, founder may re-slot; the verbatim record governs details:**
+
+- **D/O-A — the practitioner-type calibration disclosure** on `llms.txt` +
+  `agent-card.json` + api-docs ("Outside the crisis path, the guide's response is not
+  currently calibrated for practitioner type…"). Mentor wording IN HAND (verbatim record);
+  founder R18 sign-off required; no code-path change, no event effects. Natural home:
+  alongside A/R-5 in any post-run session with an R18 close (R2's close or R4).
+- **D/L-5 — the reflect Q1–Q6 agent recalibration.** Concept ruled YES; **candidate wording
+  produced 2026-08-15 FOR MENTOR REVIEW**
+  (`operations/agent-circles-2026-08/2026-08-15-CANDIDATE-WORDING-reflect-q1-q6-agent-recalibration-FOR-MENTOR-REVIEW.md`)
+  — the founder takes it to the mentor; **mentor-vetted verbatim required before any edit to
+  `question-bank.ts`**; the edit lands post-run at a clean boundary, recorded so before/after
+  reads of reflect-derived event rates are segmentable. Untouchables bind: the
+  never-abbreviated sequence, FD-R3/FD-R4/C2e mandatory sub-questions, the G4 mechanism + its
+  3-part standard, the `SUB_SPECIES` vocabulary; the Q4 passion-naming shift risk is a named
+  constraint. Natural home: **R2** (with the vetted wording in hand) or its own small
+  post-run step.
+- **D/F-b — the four relational-context fields as additive-optional request fields** on
+  `/api/reason`'s request shape and the reflect open (absent ⇒ byte-identical). Post-run **by
+  fence** independently of M2. **R17 co-requisite:** any persisting form engages encryption-
+  where-intimate + data-rights wiring (access/export/delete), and the R17 obligation must be
+  **stated in the implementation record BEFORE the edit** (the B/M-B flag-discipline
+  pattern). The `relationship_type` distinctness constraint is binding (it must never be read
+  as a practitioner-type signal — the discriminator-reuse constraint would be violated).
+  Natural home: **R3** (the `/api/reason` route batch).
+- **D/O-C — the per-consumer rendering DESIGN question: opened, NOT licensed.** The path is
+  ruled: a separate scoping session (itself requiring a ruling before execution) → a design
+  document for its own ruling → only then any build → activation of the dormant route remains
+  a separately-walked founder step regardless. Design constraints already ruled for it: all
+  five distinction dimensions in scope; dimension (c) — honesty — load-bearing and FIRST; the
+  crisis precedent's relay pattern is "the precedent to follow, not to replace"; F-d (fields
+  as design target) is the correct state until this design session rules. **No session in
+  this plan is allocated to it; do not self-start.**
+- **Not adopted / out of reach, recorded so no session self-starts them:** F-c (human mentor
+  tools — out of this arc's agent-first ordering, not ruled); `SUBSTRATE_LAYER3_ENABLED`
+  activation (not licensed by Ruling Set D or any session executing it).
 
 **Layer 3 per-consumer rendering** scoping with the WIDENED Stage 2 relational-context scope
 (2026-08-14 amendment: relational context; role-not-relationship-type; examined-vs-assumed; the
@@ -331,6 +369,8 @@ pre-scoped — deliberately.*
 | ~~M1 (guard ruling)~~ | **RESOLVED 2026-08-15** | Window-conditional (binds iff `GATE1_FALSE_HOLD_CAPTURE` set) — implemented + four-state verified; §C2 SHA freeze unconditional; R2 items land post-run under the window logic, no per-item exemptions |
 | ~~M2 (who runs scoping)~~ | **RESOLVED 2026-08-15** | AI runs all three sessions → scope documents → mentor rules on the documents; C2/C3 are GO |
 | ~~Mentor rules on the C2 scope documents~~ | **RESOLVED 2026-08-15** (same day) | Ruling Sets A + B (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md`); kathêkon session CLOSED, hegemonikon open only for the uniformity family; five execution items land post-run — see the ruled-additions block under C2 |
+| ~~Mentor rules on the C3 scope document (Ruling Set C's awaited consultation)~~ | **RESOLVED 2026-08-15** (same day) | Ruling Set D (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`); the Layer 3 scoping session CLOSED; S7 stands for the route/flag; O-B + the O-A disclosure adopted; O-C opened as an unlicensed design question; execution items post-run — see the ruled-additions block under C3. The L-5 candidate wording awaits mentor vetting (its own conditional below) |
+| Mentor vets the L-5 candidate Q1–Q6 wording | mentor (founder relays the candidate document) | The vetted verbatim becomes executable at D/L-5's natural home (R2 or its own post-run step); until then no edit to `question-bank.ts` |
 | Run reaches ≥20 + runner hand-back | live query + founder | Phase 2 opens (R1 first, always) |
 | Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |

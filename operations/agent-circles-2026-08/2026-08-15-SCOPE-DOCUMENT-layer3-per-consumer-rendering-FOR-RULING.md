@@ -8,7 +8,15 @@ which explicitly awaits this document (*"The Layer 3 session remains OPEN — aw
 and is not ruled here. It will be ruled in a separate consultation once the scope document is
 produced under the M2 process."*). **Input record:**
 `2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md`, as amended 2026-08-14
-(the Stage 2 relational-context widening). **Status: FOR RULING.**
+(the Stage 2 relational-context widening). **Status: RULED 2026-08-15 — Ruling Set D,
+verbatim canonical: `2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`**
+(L-1: S7 stands for the route/flag; O-B adopted + the O-A disclosure with wording in hand;
+O-C opened as a design question only, its design session not licensed; L-2: all five
+dimensions in scope for O-C, dimension (c) load-bearing and first; L-3: the reuse constraint
+binding, both honest limits carried; L-4: F-d now, F-b opened post-run with the R17
+co-requisite, the `relationship_type` distinctness and R20d boundaries binding; L-5: yes to
+recalibration — candidate wording produced for mentor review, mentor-vetted verbatim required
+before any edit; execution post-run per M2 throughout).
 
 Nothing here is a build, a design of record, or a recommendation beyond what the input record
 licenses — and the input record licenses none (*"Not pre-answered. Nothing below proposes what

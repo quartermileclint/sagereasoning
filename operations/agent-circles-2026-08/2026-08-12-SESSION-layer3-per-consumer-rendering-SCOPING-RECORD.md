@@ -1,6 +1,30 @@
 # SCOPING SESSION RECORD — Layer 3 per-consumer rendering: re-open the S7 decision?
 
-**Status: OPEN — awaiting ruling.** **Tier: `governance`.** Opened 2026-08-12 by mentor ruling on
+> **STATUS UPDATE 2026-08-15 — RULED AND CLOSED.** The session ran as concurrent-arc C3 under
+> the M2 process and produced the scope document
+> (`2026-08-15-SCOPE-DOCUMENT-layer3-per-consumer-rendering-FOR-RULING.md`); the mentor's
+> **Ruling Set D** arrived the same day (verbatim canonical:
+> `2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`; recorded
+> `D-MENTOR-RULING-SET-D-LAYER3-SCOPE-DOCUMENT-RECORDED-2026-08-15`). Rulings in brief —
+> verbatim wins over this summary: **L-1** the S7 decision stands for the route/flag; **O-B
+> adopted** (calibration on live surfaces, wording-level first, beginning with L-5) + the O-A
+> disclosure adopted (mentor wording in hand, founder R18 sign-off, post-run); **O-C opened as
+> a design question only** — its design session is NOT licensed and requires its own scoping
+> session and ruling first. **L-2** all five distinction dimensions in scope for O-C's design;
+> dimension (c), honesty, is load-bearing and first. **L-3** the discriminator-reuse
+> constraint confirmed binding; both honest limits carried. **L-4** F-d now; **F-b opened
+> post-run** (additive-optional fields; R17 co-requisite stated in the implementation record
+> BEFORE any persisting edit); the `relationship_type` distinctness requirement and the R20d
+> boundary confirmed binding; the two minimum pieces confirmed as the design target. **L-5
+> ruled YES** — recalibration concept approved; candidate Q1–Q6 wording produced same day for
+> mentor review (`2026-08-15-CANDIDATE-WORDING-reflect-q1-q6-agent-recalibration-FOR-MENTOR-REVIEW.md`);
+> mentor-vetted verbatim required before any edit to `question-bank.ts`; execution post-run at
+> a clean boundary, recorded for segmentability; the untouchables list binds. **The flag
+> banner below still stands: `SUBSTRATE_LAYER3_ENABLED` remains unset and its activation is
+> licensed by nothing in this chain.** The original record follows unchanged.
+
+**Status: OPEN — awaiting ruling.** *(superseded 2026-08-15 — see the status update above)*
+**Tier: `governance`.** Opened 2026-08-12 by mentor ruling on
 finding 1 of `2026-08-12-guide-function-agent-vs-human-practitioner.md`. **Amended 2026-08-14** by
 the Prudence Group and SagePals session's Stage 2 reframing addition (the relational-context
 section below; recorded 2026-08-15). **The amendment widens this session's scope before it is
@@ -172,4 +196,5 @@ question). Both draw on role-carries-kathekonta; **neither absorbs the other.**
   `website/src/lib/substrate/trust-core/emission-hooks.ts:195-196` (the G4 cross-check).
 
 *Status at close of this record: **OPEN — awaiting ruling.** No work has been done against the session
-question.*
+question. (Superseded 2026-08-15: RULED AND CLOSED — Ruling Set D; see the status update at the head
+of this file.)*
