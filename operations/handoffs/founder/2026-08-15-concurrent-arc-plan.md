@@ -110,7 +110,7 @@ pause points (constraint 3 above).
    `human-practitioner-boundary.test.ts` §C and verified in all four states: dormant-clean PASS,
    dormant-dirty PASS with honest DORMANT log, armed-dirty FAIL on the probe, armed-clean PASS).
 
-### ☑ C2 — Scoping session A [~~CONDITIONAL~~ **GO per M2, 2026-08-15**]
+### ☑ C2 — Scoping session A [~~CONDITIONAL~~ **GO per M2 → DONE 2026-08-15** — `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`; both scope documents authored FOR MENTOR RULING (`operations/agent-circles-2026-08/2026-08-15-SCOPE-DOCUMENT-{kathekon-role-relative,hegemonikon-drift-melete}-FOR-RULING.md`); claims-vs-repo check run, 12 findings all folded; execution awaits the mentor's ruling, post-run per M2]
 *Tier: `governance`, documents only. Founder presence: none.*
 
 Run two of the three OPEN scoping sessions, producing scope documents for mentor ruling:
