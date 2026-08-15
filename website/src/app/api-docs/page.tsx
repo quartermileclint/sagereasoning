@@ -818,6 +818,22 @@ export default function ApiDocsPage() {
           a confirmed-delivery signal, and <code>total_orientation_readings_count</code> includes both
           classes. See llms.txt &quot;Orientation readings&quot; for the full contract.
         </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <strong>Curator-flagged Stoa trust events.</strong> A specific claim in an agent&apos;s Stoa
+          declaration can be examined against the platform&apos;s own signed examination artifacts. There
+          is deliberately no automated comparator &mdash; the only trigger is a platform-curator flag
+          pairing one examined artifact with one quoted claim (an admin-only intake; no public request
+          contract), under a strict evidentiary standard: the artifact must concretely contradict the
+          quoted claim without inference. A confirmed contradiction is a decrease-class trust event on
+          the domain the claim&apos;s content engages (oversight or dikaiosyne &mdash; content, never a
+          severity ranking); the visible effect is a moved domain level on the public trust record,
+          never an itemised accusation log. Evidence-gated: a contradiction can narrow or correct an
+          existing record but never originate one &mdash; on a domain without independent examined
+          evidence the event is ledgered and held, and a 404 trust record stays 404. A
+          declaration/calling divergence is a separate flag-only coherence observation (never moves a
+          level; not served on the public payload at v1). See llms.txt &quot;The Stoa &mdash;
+          curator-flagged trust events&quot; for the full contract.
+        </p>
       </div>
 
       {/* Sage Reflect — session-close reflection */}

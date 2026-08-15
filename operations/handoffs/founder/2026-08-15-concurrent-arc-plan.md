@@ -80,7 +80,7 @@ pause points (constraint 3 above).
 
 ## Phase 1 — concurrent with the run (agent-side first)
 
-### ☐ C1 — Agent-record integrity + Q5c/Q13a R18 docs
+### ☑ C1 — Agent-record integrity + Q5c/Q13a R18 docs [DONE 2026-08-15 — `D-CONCURRENT-ARC-C1-Q5C-Q13A-R18-DOCS-AND-RECORD-INTEGRITY-2026-08-15`; all four items; PR19 GO; docs live on the founder's push]
 *Tier: documents/`code-standard`. Founder presence: R18 wording sign-off + push at close only.*
 
 1. **Q5c/Q13a R18 public docs** — spend the authored prompt

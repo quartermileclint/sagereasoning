@@ -497,10 +497,12 @@ call.
    three un-numbered manifest sections, ARC2's closure, `/impulse`, and the primal-substrate family
    are all folded into CLAUDE.md's Live list and its `2026-08-12 refresh` block; the stale perimeter
    count is corrected at both sites and flagged as a re-derive-don't-quote number.
-9. **Teardown SQL for the runner-scoping session's `#smoke` test row** — **status `unverified`.**
-   Searched `RUN-LOG.md` for `#smoke` 2026-08-12: **no match**, so the run log neither confirms nor
-   denies execution, and this cannot be settled from the repo. Confirming it needs a founder check
-   or a production query. Do not restate it as either done or outstanding without one.
+9. ~~**Teardown SQL for the runner-scoping session's `#smoke` test row**~~ — **RESOLVED-CLEAN
+   2026-08-15 (errata, concurrent-arc C1):** the production query this item asked for has now been
+   run twice — 2026-08-15 (planning session) and again 2026-08-15 (C1, independently): production
+   `idea_loop_cycles` holds **zero rows outside the validation run's own
+   `sagereasoning:idea-loop@v1#001`** (read-only PostgREST query, `loop_id=neq.` filter, empty
+   result). Whatever the `#smoke` row's history, nothing stray remains; nothing to tear down.
 10. ~~**CONFIRM `SUBSTRATE_STOA_ENABLED`'s live state in Vercel**~~ — **DONE 2026-08-12**
     (`D-STOA-ST3-ST4-RETROACTIVE-ACTIVATION-RECONCILED-2026-08-12`). Confirmed `true`. ST1/ST3/ST4/
     browse/ST6 are all live; ST3's distress-check was live-verified both directions, both write
@@ -540,19 +542,28 @@ call.
     2026-07-17; the code is unconditional. A ~30-minute `governance` call (still binds / retire /
     narrow to the actual `/api/reason`+`/api/guardrail` import graph) settles all six at once.
     **This session deliberately did not decide it unilaterally — twice.**
+    **→ RULED 2026-08-15 errata (mentor M1, executed same day): the guard is now
+    WINDOW-CONDITIONAL — binds iff `GATE1_FALSE_HOLD_CAPTURE` is set (four-state verified; honest
+    DORMANT log while off). The §C2 `stoic-brain.ts` freeze + SHA pin stay UNCONDITIONAL. The six
+    blocked items are released to R2 (post-run, by founder election, unchanged by the ruling).
+    Nothing of this decision item remains open.**
 16. **Input-cap Steps 2/3** — carried unchanged from 08-01.
-17. **Stoa activation — CORRECTED 2026-08-12, premise was false.** ST1/ST3/ST4/browse are already
-    live and distress-check-verified (item 10, done). **What actually remains is the Q5c/Q13a
-    trust-event activation only** (`SUBSTRATE_STOA_TRUST_EVENTS_ENABLED`, genuinely dark — both it
-    and `SUBSTRATE_TRUST_CORE_ENABLED` required to emit, deliberately). **Mentor-confirmed
-    2026-08-12: nothing new to rule on.** Whether/when to run that activation is the founder's call
-    (a pre-activation checklist + a pre-built evidence-gate cross-check query both exist and are
-    ready, `operations/connective-layer-2026-08/`) — **first actual step is the TEST migration**
-    (verified 2026-08-12 NOT yet applied), not the smoke sequence.
+17. ~~**Stoa activation**~~ — **DONE 2026-08-15 errata (concurrent-arc C1): this item's premise is
+    now doubly stale.** The Q5c/Q13a trust-event activation it described as remaining **went LIVE
+    2026-08-12, later the same day this item was last edited**
+    (`D-STOA-Q5C-Q13A-ACTIVATION-LIVE-MIGRATION-STALENESS-FOUND-AND-FIXED-2026-08-12`:
+    `SUBSTRATE_STOA_TRUST_EVENTS_ENABLED=true` in production; migration applied TEST + prod with a
+    real staleness defect found and fixed; six-step smoke incl. the mentor's hard gate passed;
+    teardown confirmed). The R18 public-docs follow-up landed 2026-08-15 at C1 (founder-signed,
+    `operations/connective-layer-2026-08/2026-08-15-q5c-q13a-r18-docs-signoff-package.md`). Nothing
+    of this item remains.
 18. ~~**The Stoa "curation via volume" second mentor ruling request**~~ — **CLOSED, mentor-confirmed
-    2026-08-12.** The 2026-08-08 ruling already settled it. **One residual, worth a short follow-up:**
-    the disclosure sentence lives only in `llms.txt`, not in the live trust-record payload's own
-    `notes` array — see the corrected Stoa bullet above.
+    2026-08-12.** The 2026-08-08 ruling already settled it. ~~One residual, worth a short
+    follow-up~~ — **the residual was ALSO closed 2026-08-12, later the same day**
+    (`D-CURATION-VIA-VOLUME-FOLDED-INTO-LIVE-PAYLOAD-2026-08-12`: the disclosure sentence folded
+    verbatim into the live payload's `notes`, mutation-verified, live-curl-confirmed on production;
+    errata dated 2026-08-15). Only the totalCount-unknown-branch variant remains, and it is
+    guard-gated code — routed to arc session R2, not a loose follow-up.
 19. **The original build-plan C1c + D4** — both unscoped, both named, neither blocking anything.
 20. **Items 14–17 (second-order impact / permission scrutiny / governance permission field /
     the intent-vs-assessed-quality trust event)** — fully scoped and mentor-approved, not built, not
