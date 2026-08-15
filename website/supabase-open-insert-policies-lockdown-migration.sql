@@ -129,9 +129,18 @@ DROP POLICY IF EXISTS "Service role insert for document scores" ON public.docume
 --      the three: document_scores' anon SELECT is the public badge surface, and
 --      reflections' authenticated SELECT backs api/practice-calendar's user-JWT
 --      read. Revoking ALL here would break both.
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.reflections     FROM anon, authenticated, PUBLIC;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.milestones      FROM anon, authenticated, PUBLIC;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.document_scores FROM anon, authenticated, PUBLIC;
+-- REFERENCES and TRIGGER are included deliberately. They are Supabase default
+-- grants, they are DDL privileges rather than read/write ones, and they are not
+-- exploitable without CREATE on the schema (which anon/authenticated lack) — so
+-- this is not the defect. They are revoked for CONSISTENCY: the two sibling
+-- lockdowns applied earlier today (impulse_entries, founder_conversations) used
+-- REVOKE ALL and therefore removed them, and leaving two stray DDL privileges
+-- here would make a future audit re-derive why these three tables differ.
+-- Found by the TEST §VERIFY V3 output, which listed them; added before the
+-- production step rather than carried as a nit.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.reflections     FROM anon, authenticated, PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.milestones      FROM anon, authenticated, PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.document_scores FROM anon, authenticated, PUBLIC;
 
 GRANT ALL ON public.reflections     TO service_role;
 GRANT ALL ON public.milestones      TO service_role;
