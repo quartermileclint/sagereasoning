@@ -214,6 +214,7 @@ async function main() {
     },
     body: JSON.stringify({
       user_id: uid,
+      trait: 'reciprocity',
       mode: 'reciprocity',
       impression: marker,
       cooperation_ground: 'uncertain',
