@@ -1,8 +1,13 @@
 # Post-run R18 sign-off package — three mentor-worded DOC-surface items (STAGED)
 
 **Date staged:** 2026-08-16 · **Session:** concurrent-arc C3b (Deliverable 1) ·
-**Status: STAGED — NOTHING APPLIED.** This package awaits the **founder's signature at the
-post-run R18 close** (R2's close or R4, per the arc plan's ruled-additions blocks). No public
+**Status: SIGNED OFF 2026-08-16 (founder, in-conversation): "approved as recommended" — every
+election resolved to its AI-recommended option (see the recommendations table + the ticked
+sign-off lines below); all proposed wordings and insertion points approved. APPLICATION
+REMAINS POST-RUN per M2 — NOTHING IS APPLIED YET.** The applying session (R2's close or R4)
+proceeds under this signature: it re-derives every line cite at execution time and applies as
+approved; any drift or wording change discovered at application returns to the founder rather
+than proceeding under this signature. No public
 surface, code file, or ADR was changed in the staging session. Every insertion point, line
 number, extension count, and current-string claim below was **verified first-hand against the
 repo on 2026-08-16** (grep/awk re-measurement, per the citations lesson carried from C3 — line
@@ -318,25 +323,26 @@ Net extension-count under the recommended set: **23 (unchanged)**. Net form: all
 wordings land verbatim on every surface except the one deliberately-abridged api-docs
 parenthetical (2c), which points at the verbatim llms.txt contract.
 
-## Sign-off lines
+## Sign-off lines — **ALL SIGNED 2026-08-16 (founder: "approved as recommended")**
 
 **Item 1 — A/R-5 (three surfaces + the `kathekon_scope` key name):**
-☐ 1a GET self-doc as proposed *(AI rec: adopt)* · ☐ 1b llms.txt as proposed *(AI rec:
-adopt)* · ☐ 1c agent-card #13 append as proposed *(AI rec: adopt)* · Notes: ______
+☑ 1a GET self-doc as proposed · ☑ 1b llms.txt as proposed · ☑ 1c agent-card #13 append as
+proposed · Notes: elected as recommended, 2026-08-16.
 
 **Item 2 — B/M-A R18 half (three surfaces + two elections + ordering):**
-☐ 2a llms.txt bullet as proposed (☐ verbatim capital *(AI rec)* / ☐ lowercase) · ☐ 2b
-agent-card #17 (☐ full-verbatim append *(AI rec)* / ☐ abridged in-run) · ☐ 2c api-docs
-abridged parenthetical *(AI rec: adopt)* ·
-☐ confirmed: code half (Spec 1) lands first or same-push *(AI rec: confirm)* · Notes: ______
+☑ 2a llms.txt bullet — **verbatim capital "Discriminative"** · ☑ 2b agent-card #17 —
+**full-verbatim append** · ☑ 2c api-docs abridged parenthetical as proposed ·
+☑ ordering confirmed: **code half (Spec 1) lands first or same-push** · Notes: elected as
+recommended, 2026-08-16.
 
 **Item 3 — D/O-A (three surfaces + two elections):**
-☐ 3a llms.txt (☐ Safety Behaviour *(AI rec)* / ☐ Configuration Honesty) · ☐ 3b agent-card
-(☐ amend #7 *(AI rec)* / ☐ new extension #24) · ☐ 3c api-docs Configuration Honesty
-paragraph *(AI rec: adopt)* · Notes: ______
+☑ 3a llms.txt — **Safety Behaviour section** · ☑ 3b agent-card — **amend #7** (count stays
+23; no new extension) · ☑ 3c api-docs Configuration Honesty paragraph as proposed · Notes:
+elected as recommended, 2026-08-16.
 
-**Drift item 1 (abridgement recording):** ☐ record-as-deliberate *(AI rec)* /
-☐ reconcile-in-pass · Notes: ______
+**Drift item 1 (abridgement recording):** ☑ **record-as-deliberate** (the applying session
+adds the one-line record; no list reconciliation) · Notes: elected as recommended,
+2026-08-16.
 
 ## Verification plan after application (the C1 template)
 

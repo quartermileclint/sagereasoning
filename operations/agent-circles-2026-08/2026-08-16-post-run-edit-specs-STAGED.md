@@ -132,8 +132,8 @@ not-attestable clause'`. The branch fires when `orientationReadings.capped` is t
 `total_orientation_readings_count` field is then omitted, never fabricated — existing pin
 S6-5c, condition line `:650`; its `assert(` spans `:649-652`).
 
-**Insertion mechanics (AI recommendation, for the founder's review — the alternative is
-permitted but buys nothing):** RETAIN the arm's existing operational clause and fold
+**Insertion mechanics (AI-recommended; FOUNDER-APPROVED 2026-08-16, "approved as
+recommended"):** RETAIN the arm's existing operational clause and fold
 the M6 disclosure verbatim after it, before the `'); '` join — the existing clause states the
 mechanical fact (window capped, count unavailable this read) and M6 states the honest
 consequence. Rationale: the existing battery pin **S6-5d** (`:654` —
@@ -269,9 +269,13 @@ executing session copies it into its record before touching code.
 > (`agent-assessment-history-store.ts:111` `TRAJECTORY_DELTA_ENV_VAR`), **LIVE in production
 > since 2026-07-18**. A new member riding this flag is **live the moment it deploys** — there
 > is no dark state on the existing flag. Per-feature darkness needs its own flag. The
-> founder's election on this (below) was made before the edit: <RECORD THE ELECTION HERE>.
+> founder's election on this was made before the edit: **election (b), a dedicated flag**
+> (resolved 2026-08-16, founder: "approved as recommended" on the staged spec; suggested name
+> `SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED`, UNSET everywhere ⇒ byte-identical,
+> battery-asserted; activation is its own founder-walked R4 step with a live smoke and the
+> one-line rollback: unset + redeploy).
 
-### 4.2 The named founder decision (the R2/R3 session puts this to the founder at open; not pre-decided here)
+### 4.2 The named founder decision — **RESOLVED 2026-08-16: election (b), the dedicated flag** (founder: "approved as recommended"; the R2/R3 session copies the resolved 4.1 statement into its implementation record before the edit and need not re-open the election unless something has changed)
 
 - **(a) Ride `SUBSTRATE_TRAJECTORY_DELTA_ENABLED` → live-on-deploy.** The member appears on
   credential-bearing consults at the next deploy. Smaller surface; consistent with the delta's
@@ -280,9 +284,9 @@ executing session copies it into its record before touching code.
   byte-identical, battery-asserted) with its own founder-walked activation at R4. Preserves
   the build-dark/activate-later discipline at the cost of one more flag.
 
-**AI recommendation (added 2026-08-16 at the founder's request; the election formally remains
-the founder's at R2/R3 open, and whichever way it goes it is recorded inside the 4.1 statement
-before the edit, per the ruling): (b) — the dedicated flag.** Three grounds: (1) the project's
+**AI recommendation (added 2026-08-16 at the founder's request; FOUNDER-APPROVED same day —
+the election is resolved and recorded inside the 4.1 statement, per the ruling's requirement):
+(b) — the dedicated flag.** Three grounds: (1) the project's
 own nearest precedent — the B5 session-decline signal fed an EXISTING live surface (the A1
 suggestion composer) and still took its own flag (`SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED`)
 rather than riding the composer's; (2) the dispersion member is a genuinely NEW signal class
@@ -293,7 +297,8 @@ revert on a live surface); (3) the cost is one env var and one flag-off byte-ide
 leg — the discipline the whole build history already pays everywhere else. Election (a) is
 defensible if the founder wants the flag count held down; nothing breaks either way.
 
-**AI recommendation on the schema-version note (same caveat): keep `agent-trajectory-delta-v1`.**
+**AI recommendation on the schema-version note (FOUNDER-APPROVED 2026-08-16): keep
+`agent-trajectory-delta-v1`.**
 The member is additive-optional with its own evidence floor — the delta's internal precedent
 (its members landed additively under v1), not the loop-fold's re-specification case (v1→v2
 changed the meaning of existing buckets). Bump only if the R18 pass elects to present the
