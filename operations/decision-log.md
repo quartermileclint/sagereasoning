@@ -20902,3 +20902,12 @@ premise-check discipline inherited); `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULIN
 `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md`; ADR-013 §8.
 
 **Model:** Claude Fable 5. **Effort:** high.
+
+**Addendum (2026-08-15, same session, post-close):** the founder pushed `02b6643` / `0941a47` /
+`9c48c42` / `b993b04` and confirmed **Vercel green** — queue item 24's push half is discharged.
+A successor grounding prompt is authored at
+`operations/handoffs/founder/2026-08-15-post-prudence-group-informed-foundation-NEXT-SESSION-PROMPT.md`
+(supersedes the 2026-08-15 informed-foundation prompt; carries this session's deltas: push state
+clean through `b993b04`, the two future-directions records, the Layer 3 widened scope, the still-
+stale CLAUDE.md C15 line, the wider stray list, and the proven read-only pre-flight query method).
+Documents only; no fenced surface touched.
