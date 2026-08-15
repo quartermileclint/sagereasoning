@@ -58,9 +58,15 @@ pause points (constraint 3 above).
 
 ## External dependencies (not sessions)
 
-- **The mentor consultation** — the founder takes `2026-08-15-mentor-questions-concurrent-arc.md`
-  now. M1 (guard) unblocks the R2 bundle's execution shape; M2 (who runs scoping) decides whether
-  sessions C2/C3 exist. Neither blocks C1 or C4.
+- **The mentor consultation** — ~~the founder takes `2026-08-15-mentor-questions-concurrent-arc.md`
+  now~~ **ANSWERED 2026-08-15, same day** (verbatim:
+  `2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md`). **M1: window-conditional guard —
+  IMPLEMENTED + four-state-verified same day** (binds iff `GATE1_FALSE_HOLD_CAPTURE` is set; §C2
+  SHA freeze stays unconditional; the sympatheia fix requires an explicit SHA update regardless).
+  **M2: the AI runs all three scoping sessions producing scope documents for ruling — C2/C3 are
+  GO** as concurrent documents-only sessions. **M3 ruled** (see the new C5). **M5 released the
+  ATRF doctrinal blocker** (R5 note). **M6's exact wording is in hand** (R2 item 6). **M7 ratified
+  the guide-reflection design** (Prudence P-A3).
 - **The run completing** — Phase 2 triggers when `completed_cycles` ≥ 20 (live query, never a
   document) AND the founder confirms the runner has reported back per its own Part F. Snapshot at
   planning: 15 cycles, latest 2026-08-14 06:08 UTC.
@@ -99,10 +105,12 @@ pause points (constraint 3 above).
    R4's activations** — every guard-bundle edit changes the measured instrument, so the window
    must open on the new instrument state, not span the edits (a window contaminated mid-flight by
    instrument edits measures neither state).
-5. **Guard-ruling execution IF M1 has answered by then** (edit/narrow/retire the boundary test's
-   §C per the ruling — small; otherwise carries to the first post-ruling session).
+5. ~~**Guard-ruling execution IF M1 has answered by then**~~ — **DONE 2026-08-15 in the planning
+   session itself** (M1 ruled window-conditional; implemented in
+   `human-practitioner-boundary.test.ts` §C and verified in all four states: dormant-clean PASS,
+   dormant-dirty PASS with honest DORMANT log, armed-dirty FAIL on the probe, armed-clean PASS).
 
-### ☐ C2 — Scoping session A [CONDITIONAL on M2 = "the AI runs them"]
+### ☑ C2 — Scoping session A [~~CONDITIONAL~~ **GO per M2, 2026-08-15**]
 *Tier: `governance`, documents only. Founder presence: none.*
 
 Run two of the three OPEN scoping sessions, producing scope documents for mentor ruling:
@@ -114,10 +122,11 @@ Run two of the three OPEN scoping sessions, producing scope documents for mentor
    framing; plus Seneca 75.8–9 as criterion, the hysteresis-vs-practitioner-stability warning, and
    the n=1 survivorship-flagged harness data).
 
-If M2 = "the mentor rules directly", C2/C3 are skipped and the rulings' execution folds into
-Phase 2 sessions.
+*(M2 resolved 2026-08-15: "The AI runs each session and produces a scope document for ruling…
+The sessions produce the document. The mentor rules on the document. Execution folds into
+post-run sessions after the ruling." Both C2 sessions proceed as concurrent documents-only work.)*
 
-### ☐ C3 — Scoping session B [CONDITIONAL, same]
+### ☑ C3 — Scoping session B [~~CONDITIONAL~~ **GO per M2, 2026-08-15**]
 *Tier: `governance`, documents only. Founder presence: none.*
 
 **Layer 3 per-consumer rendering** scoping with the WIDENED Stage 2 relational-context scope
@@ -139,6 +148,19 @@ R20d self-side boundary; the four Stage 2 placeholder fields as design target). 
    (clears both fences).
 3. **Tail (droppable):** the journal build per the decisions from step 1 — small, human-side, not
    fenced. If the session runs hot, the tail carries to R4's tail instead.
+
+### ☐ C5 — Human-side: the Stoa row-level reactivation guard (NEW — ruled M3, 2026-08-15)
+*Tier: `code-critical` (live R20a-perimeter route behaviour change; PR19 with pause points).
+Founder presence: deploy + live smoke. Concurrent-safe (Stoa routes are not fenced).*
+
+Implement the ruled rule on the ST3 declaration surface (`/api/mentor/stoa`): **a re-declaration
+within 30 days of a withdrawal inherits the prior `declaredAt`** — `renewedAt` moves as designed,
+`declaredAt` does not reset; a genuine return after 30 days starts a new row with a new
+`declaredAt`. The ruling's rationale travels with the build: the curator-flagged trust-event
+divergence (Q5c/Q13a, live) makes the pattern *visible after* it occurs; this guard *prevents the
+structural exploit before* it occurs — "both are needed; they are not alternatives." Update the
+route's own "potentially a mentor question" comment (route.ts:104) to cite the ruling. Battery +
+mutation-verify the 30-day boundary both sides.
 
 ---
 
@@ -176,8 +198,11 @@ Founder presence: none (activations are R4). Prerequisite: the M1 guard ruling e
    M1 ruling's mechanism.
 5. **The reflect-path `loop_id` metering fix** (close-hook under `harness/gate1` → the
    loop-billing UUID contract; fails soft today).
-6. **The trust-record payload total-unknown composition note** (the recorded low-severity
-   follow-up; wording per M6 if the mentor has answered, else held out of this batch).
+6. **The trust-record payload total-unknown composition note** — **M6 wording ruled 2026-08-15,
+   verbatim in hand** (the verbatim record carries it): *"The trust record for this agent is
+   incomplete. The total number of interactions cannot be confirmed. Curation effects — where
+   high-volume interaction patterns may suppress individual signal visibility — cannot be assessed
+   at this time. This record should be read with that limitation in mind."*
 7. **PR24 retention parity, both named gaps** — `agent_hold_observations` (false-hold paths,
    guard-gated) + `stoa_entries` sweep coverage; built dark behind their flag.
 8. **P8a guard-path capture** (feeds the new false-hold window; window start is R4's last step).
@@ -271,10 +296,10 @@ pre-scoped — deliberately.*
 
 | Condition | Resolves | Effect |
 |---|---|---|
-| M1 (guard ruling) | mentor | Shape of the guard's future + how R2 items clear it; timing already fixed post-run |
-| M2 (who runs scoping) | mentor | C2/C3 exist (AI-runs) or vanish (mentor rules directly) |
+| ~~M1 (guard ruling)~~ | **RESOLVED 2026-08-15** | Window-conditional (binds iff `GATE1_FALSE_HOLD_CAPTURE` set) — implemented + four-state verified; §C2 SHA freeze unconditional; R2 items land post-run under the window logic, no per-item exemptions |
+| ~~M2 (who runs scoping)~~ | **RESOLVED 2026-08-15** | AI runs all three sessions → scope documents → mentor rules on the documents; C2/C3 are GO |
 | Run reaches ≥20 + runner hand-back | live query + founder | Phase 2 opens (R1 first, always) |
-| Mentor rules on §6 report | mentor | R5/R6/R8 open |
+| Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |
 
 *End of plan. Tick session checkboxes at each close; supersede this file by name if the founder

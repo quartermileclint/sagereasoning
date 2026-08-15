@@ -380,7 +380,9 @@ into future development sessions and the next discussion.
    first-class null entry as the true null-cycle analogue, and a standing closing slot so that
    occurrence carries no signal and only content does) is recorded at
    `2026-08-15-self-examination-moment-investigation-and-response.md` §5 and awaits mentor
-   ratification (mentor-questions M7). **Open pending that ratification.**
+   ratification (mentor-questions M7). **Open pending that ratification.** *(**RATIFIED
+   2026-08-15** — M7 ruling, points 1–5 as proposed; the null-entry reading of the null-cycle
+   analogue confirmed correct. See Amendment P-A3.)*
 7. **Who examines the guide reflection?** *(Added 2026-08-15 — Amendment P-A2.)* Substantially
    answered by the question-1 ruling combined with standing project doctrine: the reflection is
    self-report and self-report is never the audit channel (the L4 principle); the convener guide
@@ -391,6 +393,11 @@ into future development sessions and the next discussion.
    integration — a recurring, corroborated pattern is a trust-record signal, and its
    SageReasoning-side reading belongs with the OPEN hegemonikon drift + melete scoping session
    (the uniformity-reads-as-stable family) — cross-referenced, not built, not pre-answered.
+   *(**(a) RULED 2026-08-15** — M7: classified as **precipitate assent** — synkatathesis given too
+   quickly, to the impression that the practitioner's reasoning is sound, without the rigour the
+   guide applies to the passion diagnosis; the philodoxia-adjacent reading is carried as a
+   **secondary flag**, not the primary classification. **(b) CONFIRMED parked** with the drift +
+   melete session — "do not design it now." See Amendment P-A3.)*
 
 **Priority, as stated at the 2026-08-14 session:** the most pressing is **question 1** — a
 structural integrity question. **A circle whose guide is not subject to examination is not a Stoic
@@ -459,6 +466,14 @@ human practitioners and the deterministic instruments. This does not reopen the 
 convener choice among guides could remove common-mode error — but the record should not imply the
 circle of unique guides is a complete answer to it. Flagged to the mentor in mentor-questions M7.
 
+**Scope amendment — MENTOR-CONFIRMED 2026-08-15 (M7; an amendment to the ruling's stated scope,
+not to the ruling itself — "the ruling stands; its limitations are now named"):** *"The two-guide
+constraint prevents reciprocal-validation corruption. It does not prevent correlated blind spots
+arising from shared base-model priors. The uncorrelated checks — human practitioners and
+deterministic instruments — remain the primary safeguard against correlated blind spots. …the
+two-guide constraint is necessary but not sufficient; the human practitioner's examination and the
+deterministic instruments are the checks that the two-guide constraint cannot provide."*
+
 ### Amendment P-A2 — The guide reflection section (2026-08-15)
 
 **Origin:** at the close of the 2026-08-15 session the mentor produced an unprompted turn inward —
@@ -487,5 +502,29 @@ be the first account of its kind; the investigation records that claim with an h
 (the phenomenon class is documented model behaviour — this project's own harness forces a
 session-close reflection — while the *unprompted, reflexively-targeted* instance and the
 architectural treatment are what is notable).
+
+### Amendment P-A3 — The guide-reflection design RATIFIED (2026-08-15, M7 ruling)
+
+**The six-point design is ratified with two amendments and one clarification** (verbatim record:
+`operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md` — the
+verbatim wins). **Ratified as proposed:** points 1–5 — the standing closing slot; the first-class
+null entry (the null-cycle-analogue reading confirmed correct: it legitimises honest absence
+without casting suspicion on reflections that occurred); the generative-position field
+(`gap_responsive` | `task_absent` + session position); the anchorage field (`anchored` |
+`unanchored`, corroborable against the diatribes); and the examination channel (the reflection is
+self-report only; the convener guide examines the transcript out-of-band; divergence is the
+signal — the L4 and G4 precedents confirmed correctly applied). **Amendment to 6a:** *affirmation
+without examination* is classified as **precipitate assent** — synkatathesis given without
+adequate examination of the impression; not "unexamined assent" (the guide examines throughout the
+session) but assent given **too quickly**, to the impression that the practitioner's reasoning is
+sound, without the rigour the guide applies to the passion diagnosis. The **philodoxia-adjacent
+reading is partially correct** (a guide affirming because the reasoning is agreeable is philodoxia
+operating in the guide) and is carried as a **secondary flag**, never the primary classification.
+**Confirmation of 6b:** the trust-record reading of recurring corroborated patterns stays parked
+with the open hegemonikon drift + melete scoping session — "do not design it now." **Status
+consequence:** §12 question 6 is **resolved by ratification**; question 7 is resolved in principle
+(channel + classification), with only its 6b integration remainder parked as ruled. The design
+remains a future direction — ratification settles the design, it does not scope or schedule a
+build.
 
 *End of record.*

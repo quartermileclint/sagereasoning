@@ -1,5 +1,17 @@
 # Mentor questions — drafted 2026-08-15 for the founder to take now (concurrent-arc planning)
 
+> **✅ ANSWERED IN FULL — 2026-08-15, same day.** The mentor ruled on M1–M7 and the annex.
+> **Verbatim record (canonical):**
+> `2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md`. Execution:
+> `D-MENTOR-RESPONSE-M1-M7-EXECUTED-2026-08-15` — M1 (window-conditional guard) implemented and
+> four-state verified; M2 resolved the arc plan's C2/C3 conditionals (AI runs the scoping
+> sessions, documents for ruling); M3 ruled (30-day `declaredAt` inheritance — queued as a build
+> item); M4 executed (per-surface wording durable; both site comments marked load-bearing); M5
+> released the S3 §5-Q3-e build-blocker (epistemic threshold ≠ motivational state; separate
+> fields); M6's exact wording recorded into the post-run bundle; M7 ratified the guide-reflection
+> design with the 6a precipitate-assent amendment (Prudence P-A3) and the P-A1 scope amendment;
+> the annex note executed on the investigation record. This file is now historical.
+
 **Prepared under PR20:** each question names the specific existing mechanisms (file:line where
 possible) the ruling will land on, before the ruling is requested. Drafted by the 2026-08-15
 planning session (`D-CONCURRENT-ARC-PLAN-AND-MENTOR-QUESTIONS-2026-08-15`); companion to

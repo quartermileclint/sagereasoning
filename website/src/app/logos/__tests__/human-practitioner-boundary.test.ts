@@ -417,6 +417,19 @@ assert(
   // capture, and the reflect engine.
   const GUARD_RE = /api\/reason|api\/guardrail|guardrail-sandwich|sage-reason-engine|reasoning-receipt|translation-sandwich|\/substrate\/|trust-core|kathekon-engagement|false-hold|harness\/gate1|layer1-extractor|layer2-mechanisms|sage-reflect|stoic-brain/i
 
+  // M1 RULING (2026-08-15, mentor — verbatim record:
+  // operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md):
+  // the guard is WINDOW-CONDITIONAL — "the guard should bind if and only if
+  // GATE1_FALSE_HOLD_CAPTURE is set." It was written to protect measurement
+  // integrity during an active observation window (this section's own header
+  // says so); the window has been stopped since 2026-07-17. When a new window
+  // starts (the flag is set), the guard re-arms exactly when its rationale
+  // returns. The regex non-vacuity probes below run UNCONDITIONALLY so the
+  // guard machinery stays proven while dormant; only the working-tree binding
+  // is window-conditional. §C2/§C2b (the stoic-brain.ts freeze + SHA pin) are
+  // INDEPENDENT of this ruling and remain unconditional.
+  const observationWindowRunning = process.env.GATE1_FALSE_HOLD_CAPTURE === 'true'
+
   let statusOutput: string | null = null
   try {
     statusOutput = execFileSync('git', ['-C', repoRoot, 'status', '--short'], { encoding: 'utf-8' })
@@ -434,10 +447,19 @@ assert(
       .filter(Boolean)
       .filter((l) => GUARD_RE.test(l))
 
-    assert(
-      offending.length === 0,
-      `git byte-identity guard: NO file in the measured set may be modified while the observation window runs. Offending: ${offending.join(' | ')}`
-    )
+    if (observationWindowRunning) {
+      assert(
+        offending.length === 0,
+        `git byte-identity guard: NO file in the measured set may be modified while the observation window runs. Offending: ${offending.join(' | ')}`
+      )
+    } else if (offending.length > 0) {
+      // Dormant, and honestly so: name what would have been caught, so the
+      // conditional state is visible in the run output rather than silent.
+      console.log(
+        `git byte-identity guard: DORMANT (observation window not running — GATE1_FALSE_HOLD_CAPTURE unset; M1 ruling 2026-08-15). ` +
+          `${offending.length} measured-set modification(s) present and permitted: ${offending.join(' | ')}`
+      )
+    }
 
     // Non-vacuity: the guard regex must actually match the paths it claims to guard, or a
     // typo would render the check above permanently, silently green. The last four probes
@@ -479,10 +501,13 @@ assert(
 
   // C2b — the CONTENT-HASH pin (LOGOS-BT-5). git status compares against HEAD, so a
   // COMMITTED edit to stoic-brain.ts would pass C2 silently. This pin freezes the file's
-  // actual bytes for the observation window: any edit, committed or not, fails here.
-  // WINDOW-SCOPED BY DESIGN: when a legitimate post-window edit to stoic-brain.ts lands
-  // (e.g. alongside the stoic-brain.json 4.26→7.9 corpus fix), update this constant in
-  // the same PR — the failure is the deliberate-decision checkpoint, not an accident.
+  // actual bytes: any edit, committed or not, fails here. UNCONDITIONAL per the M1
+  // ruling (2026-08-15) — "the §C2 SHA-256 freeze on stoic-brain.ts is independent of
+  // the window-conditional ruling and remains unconditional." When a legitimate edit to
+  // stoic-brain.ts lands (e.g. alongside the stoic-brain.json 4.26→7.9 corpus fix),
+  // update this constant in the same PR — "that fix requires an explicit SHA update
+  // regardless of the guard ruling, which is the correct discipline for a load-bearing
+  // doctrinal source." The failure is the deliberate-decision checkpoint, not an accident.
   const STOIC_BRAIN_SHA256 = 'fa8895ec949b9f6d2f95b9e941a423a095e9c66abe600a1e13fa1b84469b4928'
   const sbBytes = fs.readFileSync(path.join(websiteRoot, 'src/lib/stoic-brain.ts'))
   const sbHash = createHash('sha256').update(sbBytes).digest('hex')

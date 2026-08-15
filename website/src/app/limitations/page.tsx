@@ -63,7 +63,15 @@ export default function LimitationsPage() {
             deterministic core for the practitioner tools would have replaced one
             false statement with another. Recorded as a PR20 finding for the
             mentor's next consultation. Do not "simplify" this back into a single
-            blanket claim in either direction. */}
+            blanket claim in either direction.
+
+            CONSULTED AND RULED — M4, 2026-08-15 (verbatim record:
+            operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md):
+            "The per-surface formulation stands as the durable wording. A single
+            formulation that is true of both surfaces is not achievable without
+            either overstating the agent surface or understating the human
+            surface." This comment is LOAD-BEARING DOCUMENTATION per that ruling,
+            not an advisory note. */}
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             Where the AI does the reasoning &mdash; and where it does not

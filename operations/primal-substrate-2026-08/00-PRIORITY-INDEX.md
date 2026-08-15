@@ -328,12 +328,19 @@ where the examined life does its distinctive work.
    the novelty check already discloses at zero confidence — with **no disclosure branch specified**, and
    a vocabulary (`high|medium|low`) that cannot express "no basis." Not contingent on the sufficiency
    finding; **owned by the next session that touches GS-ATRF-1**.
-4. **→ HELD OPEN, and a build-blocker: is sufficiency-examination distinct from S3's normative-gap
-   (boulesis) mechanism?** (S3 §5-Q3-e.) Ruled: *"Do not build on that distinction until it has been
-   examined."* Both fire when nothing is broken; the offered distinction is order (first- vs.
-   second-order), named as fragile. **This blocks S3's Q3-d** — eighth heuristic vs. reshaped existing
-   one vs. pre-generation step cannot be answered while it is unknown whether there are one or two
-   mechanisms, and an eighth heuristic is a schema change to spend on a duplicate.
+4. **→ ~~HELD OPEN, and a build-blocker~~ EXAMINED AND RELEASED 2026-08-15 (M5 ruling): is
+   sufficiency-examination distinct from S3's normative-gap (boulesis) mechanism?** (S3 §5-Q3-e.)
+   Originally ruled: *"Do not build on that distinction until it has been examined."* **The
+   examination has now run** (verbatim:
+   `operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md`):
+   **related but not identical** — boulesis is a *motivational state* (rational wish, the
+   eupatheic replacement for epithumia); sufficiency is an *epistemic threshold* (whether the
+   reasoning preceding action warrants it — katorthoma vs mere kathekon). Either can be present
+   without the other; both are required for a right action. **The build-blocker is released; the
+   ATRF scoping session may proceed** (post-run sequencing unchanged). Design directives: the
+   sufficiency-examination trigger is an **epistemic threshold check, not a motivational-state
+   check**; if the ATRF carries both conditions they are **separate fields, never one indicator**.
+   **S3's Q3-d is unblocked.** Full ruling block appended at S3 §5-Q3-e.
 
 **A design warning carried with routings 1 and 2, from the same session's source-verified analysis:** a
 sufficiency-examination mechanism **already exists** at another layer — `mapTraceFeaturesToL4Signals`'s

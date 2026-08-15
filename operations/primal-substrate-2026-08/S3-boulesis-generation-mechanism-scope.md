@@ -300,7 +300,7 @@ change and should be costed as one.
 > §4's costing note carried: an eighth heuristic is a **schema change** (the closed seven-value union is
 > mirrored by a CHECK constraint on `idea_loop_candidates.heuristic`), not a code-only edit.
 
-### §5-Q3-e — Is sufficiency-examination distinct from this mechanism? OPEN, and a build-blocker until examined
+### §5-Q3-e — Is sufficiency-examination distinct from this mechanism? ~~OPEN, and a build-blocker until examined~~ **EXAMINED AND RELEASED 2026-08-15 (M5 ruling — see the dated block below)**
 
 **Added 2026-08-12** (`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`; full record:
 `operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`).
@@ -316,6 +316,25 @@ change and should be costed as one.
 at apparent completion, asking whether it is genuine exhaustion or a paused examination. Is that
 genuinely a different mechanism from this document's normative-gap (boulesis) mechanism, or a
 re-description of it?
+
+**EXAMINED AND RELEASED — M5 ruling, 2026-08-15** (verbatim record:
+`operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md`; the
+verbatim wins over this summary). The mentor conducted the examination the hold required:
+**they are related but not identical.** Boulesis is a **motivational state** — rational wish, the
+eupatheic replacement for epithumia, directed at genuine goods, held with the understanding that
+the outcome is not fully up to us. Sufficiency is an **epistemic threshold** — whether the
+reasoning that precedes action meets the threshold for the action to be warranted. An agent can
+have boulesis without sufficient reasoning (wishing for the right thing, not yet adequately
+examined), and sufficient reasoning without boulesis (correctly examined, but acting from habit or
+convention rather than rational wish). The ATRF's sufficiency-examination trigger is therefore
+**not a test of boulesis** — it tests whether the reasoning preceding action meets the threshold
+for a katorthoma rather than a mere kathekon. **The ruling: the build-blocker is released; the
+ATRF scoping session may proceed** (its post-validation-run sequencing is unchanged). Design
+directives: the sufficiency-examination trigger is designed as an **epistemic threshold check,
+not a motivational-state check**; if the ATRF carries both conditions, **`boulesis present` and
+`sufficiency reached` are separate fields, never collapsed into a single indicator** — both are
+required for a right action, and neither substitutes for the other. Q3-d is unblocked
+accordingly.
 
 **The distinction offered, and its stated fragility.** The reading put to the mentor was that they
 differ in **order**, not merely in wording:

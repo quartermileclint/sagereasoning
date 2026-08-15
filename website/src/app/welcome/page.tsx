@@ -30,6 +30,13 @@
  * collision is recorded as a PR20 finding for the mentor's next consultation.
  * Do not "restore" the deterministic-core wording on this page without first
  * re-checking which engine the practitioner routes actually call.
+ *
+ * CONSULTED AND RULED — M4, 2026-08-15 (verbatim record:
+ * operations/handoffs/founder/2026-08-15-mentor-response-concurrent-arc-M1-M7-verbatim.md):
+ * "The per-surface formulation stands as the durable wording. A single
+ * formulation that is true of both surfaces is not achievable without either
+ * overstating the agent surface or understating the human surface." This
+ * comment is LOAD-BEARING DOCUMENTATION per that ruling, not an advisory note.
  */
 
 import type { Metadata } from 'next'
