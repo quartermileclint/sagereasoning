@@ -21190,6 +21190,8 @@ Expected: the survey's method + Class A/B/C structure.
 
 **Rules served:** KG1 (DB-write route), R20a (untouched, re-verified).
 
+**Reflect finding (PR21):** the journal pace gate had, and still has, **zero automated test coverage** — the change edited untested logic and left it untested (verified via tsc + `npm run build` + the R20a suite + code reading; the browser preview cannot exercise the gate without a signed-in same-day prior entry, so no live check was run). Not a defect introduced this session, but a coverage gap the change now sits in — a future session could add a pure-function test around the 16h threshold (the pace decision is currently inline in the POST handler; extracting it would make it testable, the `foldPracticeStatuses`/`foldDailyRhythm` precedent).
+
 **Status:** Adopted. Cross-references: `D-CONCURRENT-ARC-PLAN-AND-MENTOR-QUESTIONS-2026-08-15` (C4 Step 1/3), the reminders human-plan Phase 4 (`practice-sequence.ts` `EVENING_RHYTHM_KEYS`).
 
 ## 2026-08-16 — D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-STAGED-2026-08-16
