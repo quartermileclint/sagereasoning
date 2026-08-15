@@ -209,7 +209,7 @@ R20d self-side boundary; the four Stage 2 placeholder fields as design target). 
 `r20a-audience-renderer.ts:45` auth-signal discriminator as must-reuse precedent.
 **`SUBSTRATE_LAYER3_ENABLED` activation is NOT licensed by this session.**
 
-### ☐ C3b — Post-run staging (AI-only, documents) [FOUNDER-ELECTED 2026-08-15, added after the Set D + vetted-verbatim recordings; prompt: `2026-08-15-C3b-post-run-staging-NEXT-SESSION-PROMPT.md`]
+### ☑ C3b — Post-run staging (AI-only, documents) [FOUNDER-ELECTED 2026-08-15, added after the Set D + vetted-verbatim recordings; prompt: `2026-08-15-C3b-post-run-staging-NEXT-SESSION-PROMPT.md` — **DONE 2026-08-16**, `D-CONCURRENT-ARC-C3B-POST-RUN-STAGING-2026-08-16`: pre-flight Mode 2 (18/20 cycles, matching the authoring snapshot; no blocking spec — the new `MENTOR-REVIEW-REQUEST-cycles-10-18.md` in the scratch project is already RULED, not a hand-back); all three deliverables staged in `operations/agent-circles-2026-08/` (`2026-08-16-post-run-r18-signoff-package-STAGED.md` · `2026-08-16-post-run-edit-specs-STAGED.md` · `2026-08-16-mentor-question-oc-design-scoping-license.md`), every mechanical claim verified first-hand; claims-vs-repo check run and findings folded; nothing applied anywhere — the package awaits the founder's signature at the post-run R18 close, the edit-specs wait for R2/R3, the mentor question rides the founder's next consultation]
 *Tier: `governance`, documents only — preparation, NOT execution (M2 binds all ruled items
 post-run; C3b stages them). Founder presence: none; the sign-off package it produces awaits
 the founder's signature at the post-run R18 close.*
@@ -224,6 +224,8 @@ statement draft); (3) the **D/O-C licensing question** drafted for the mentor (t
 session itself needs a ruling first — Set D verbatim; not convened here). **Mode-3
 sensitivity: the run was at 18/20 at election — if ≥20 + runner hand-back at open, C3b
 defers to R1.**
+
+### ☐ C4 — Human-side: the RLS-vs-route-enforcement gap (+ journal) *(heading restored 2026-08-16 at C3b — the C3b block's insertion at `72dab66` had overwritten this heading line, orphaning C4's tier line and items below; restored verbatim from `1ebd95d`)*
 *Tier: `code-critical` (founder-walked migrations, PR19). Founder presence: full walk.*
 
 1. **Open with the journal decision block (~5 min):** the session presents options; the founder
