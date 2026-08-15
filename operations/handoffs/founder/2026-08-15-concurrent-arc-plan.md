@@ -169,16 +169,20 @@ is the natural home, founder may re-slot; the verbatim record governs details:**
   currently calibrated for practitioner type…"). Mentor wording IN HAND (verbatim record);
   founder R18 sign-off required; no code-path change, no event effects. Natural home:
   alongside A/R-5 in any post-run session with an R18 close (R2's close or R4).
-- **D/L-5 — the reflect Q1–Q6 agent recalibration.** Concept ruled YES; **candidate wording
-  produced 2026-08-15 FOR MENTOR REVIEW**
-  (`operations/agent-circles-2026-08/2026-08-15-CANDIDATE-WORDING-reflect-q1-q6-agent-recalibration-FOR-MENTOR-REVIEW.md`)
-  — the founder takes it to the mentor; **mentor-vetted verbatim required before any edit to
-  `question-bank.ts`**; the edit lands post-run at a clean boundary, recorded so before/after
-  reads of reflect-derived event rates are segmentable. Untouchables bind: the
-  never-abbreviated sequence, FD-R3/FD-R4/C2e mandatory sub-questions, the G4 mechanism + its
-  3-part standard, the `SUB_SPECIES` vocabulary; the Q4 passion-naming shift risk is a named
-  constraint. Natural home: **R2** (with the vetted wording in hand) or its own small
-  post-run step.
+- **D/L-5 — the reflect Q1–Q6 agent recalibration. VETTED VERBATIM IN HAND (2026-08-15,
+  same day)** — the mentor's review of the candidate wording arrived and constitutes the
+  required sign-off (verbatim canonical:
+  `operations/agent-circles-2026-08/2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md`
+  — its vetted text blocks are the canonical strings; the candidate document is historical).
+  Delta from candidate: Q1 one phrase amended; Q3 closing clause amended; Q2/Q5/Q6 as
+  proposed; **Q4 byte-identical adopted, its alternative DEFERRED pending G4 mechanism
+  review**. The edit to `question-bank.ts` lands post-run at a clean boundary, and its
+  **implementation record must carry** (mentor-required): the change date (segmentability of
+  reflect-derived event rates), the Q4 deferral as a deliberate hold not an oversight, the Q1
+  and Q3 amendments as the canonical forms, all other strings byte-identical to the candidate.
+  Untouchables bind: the never-abbreviated sequence, FD-R3/FD-R4/C2e mandatory sub-questions,
+  the G4 mechanism + its 3-part standard, the `SUB_SPECIES` vocabulary. Natural home: **R2**
+  (the vetted wording is in hand) or its own small post-run step.
 - **D/F-b — the four relational-context fields as additive-optional request fields** on
   `/api/reason`'s request shape and the reflect open (absent ⇒ byte-identical). Post-run **by
   fence** independently of M2. **R17 co-requisite:** any persisting form engages encryption-
@@ -370,7 +374,7 @@ pre-scoped — deliberately.*
 | ~~M2 (who runs scoping)~~ | **RESOLVED 2026-08-15** | AI runs all three sessions → scope documents → mentor rules on the documents; C2/C3 are GO |
 | ~~Mentor rules on the C2 scope documents~~ | **RESOLVED 2026-08-15** (same day) | Ruling Sets A + B (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md`); kathêkon session CLOSED, hegemonikon open only for the uniformity family; five execution items land post-run — see the ruled-additions block under C2 |
 | ~~Mentor rules on the C3 scope document (Ruling Set C's awaited consultation)~~ | **RESOLVED 2026-08-15** (same day) | Ruling Set D (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`); the Layer 3 scoping session CLOSED; S7 stands for the route/flag; O-B + the O-A disclosure adopted; O-C opened as an unlicensed design question; execution items post-run — see the ruled-additions block under C3. The L-5 candidate wording awaits mentor vetting (its own conditional below) |
-| Mentor vets the L-5 candidate Q1–Q6 wording | mentor (founder relays the candidate document) | The vetted verbatim becomes executable at D/L-5's natural home (R2 or its own post-run step); until then no edit to `question-bank.ts` |
+| ~~Mentor vets the L-5 candidate Q1–Q6 wording~~ | **RESOLVED 2026-08-15** (same day) | Vetted verbatim in hand (`operations/agent-circles-2026-08/2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md` — the canonical strings; Q1 + Q3 amended, Q4 byte-identical with the alternative deferred pending G4 review). D/L-5 is now fully executable at its natural home (R2 or its own post-run step) under the mentor's execution-record requirements; until that post-run edit, `question-bank.ts` stays untouched |
 | Run reaches ≥20 + runner hand-back | live query + founder | Phase 2 opens (R1 first, always) |
 | Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |

@@ -4,10 +4,17 @@
 `2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`): *"Claude should produce
 candidate wording for Q1 through Q6 — recalibrated for the agent practitioner, disclosing the
 forensic posture, naming honest 'I cannot determine' as legitimate — and return it for mentor
-review before any edit to question-bank.ts."* **Status: FOR MENTOR REVIEW — no edit to
-`question-bank.ts` has been made or is licensed by this document.** Execution of whatever the
-mentor vets lands post-run at a clean boundary, recorded for segmentability, per the ruling's
-own sequencing.
+review before any edit to question-bank.ts."* **Status: VETTED 2026-08-15 — the mentor's review arrived
+same day (verbatim canonical: `2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md`;
+recorded `D-MENTOR-VETTED-VERBATIM-REFLECT-Q1-Q6-RECORDED-2026-08-15`): all six design
+principles accepted; Q1 one phrase amended ("from what the record of this session lets you
+establish"); Q2/Q5/Q6 vetted as proposed; Q3 closing clause amended; Q4 byte-identical primary
+adopted with the alternative DEFERRED pending G4 mechanism review (the deferral is a required
+line in the implementation record); all three open points resolved (three-sentence Q1
+disclosure; grounded-report P3 reading confirmed). The vetted verbatim record's text blocks —
+not this candidate's — are the canonical strings for the edit. No edit to `question-bank.ts`
+has been made; execution lands post-run at a clean boundary, recorded for segmentability, per
+the ruling's own sequencing.** *(Original status: FOR MENTOR REVIEW.)*
 
 **Current-wording source:** `website/src/lib/sage-reflect/question-bank.ts` (`REFLECT_QUESTIONS`,
 `:46-127`), served verbatim on the wire (`reflect-service.ts:335,654,723`) — the exported
