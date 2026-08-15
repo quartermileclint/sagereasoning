@@ -1,0 +1,209 @@
+-- ============================================================================
+-- reflections + milestones + document_scores — close the open INSERT policies
+-- ============================================================================
+-- Concurrent-arc C4 follow-on — `code-critical` (AC7 + PR19).
+-- Survey: operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md
+--         (Class C, rows 25–27 — backlog item 3)
+-- Precedents, both applied and proven live 2026-08-16:
+--   supabase-impulse-rls-lockdown-migration.sql
+--   supabase-founder-conversations-rls-lockdown-migration.sql
+--
+-- ============================================================================
+-- *** THIS IS DELIBERATELY *NOT* THE SAME SHAPE AS THOSE TWO PRECEDENTS. ***
+-- ============================================================================
+-- Both earlier fixes revoked ALL privileges and left the table reachable only
+-- by service_role. Applying that pattern here would BREAK TWO WORKING FEATURES:
+--
+--   * `document_scores` has a DELIBERATE public SELECT policy — the badge
+--     surface (`/api/badge/[id]`) is meant to be publicly readable. Revoking
+--     anon's SELECT would break every published badge.
+--   * `reflections` has an owner SELECT policy that is LOAD-BEARING:
+--     `src/app/api/practice-calendar/route.ts` is the one consumer in this set
+--     that builds a USER-JWT client (anon key + forwarded Authorization header,
+--     route.ts:65-71) and SELECTs reflections through it. Dropping that policy,
+--     or revoking authenticated's SELECT, would silently empty the practice
+--     calendar's reflection strip.
+--
+-- So this migration closes ONLY the actual defect — the INSERT hole — and
+-- leaves every SELECT path exactly as it is. The instinct to "apply the same
+-- pattern" is precisely what this file exists to resist.
+--
+-- ============================================================================
+-- THE DEFECT, CONFIRMED LIVE BEFORE THIS MIGRATION WAS WRITTEN
+-- ============================================================================
+-- All three tables carry an INSERT policy of the form:
+--
+--   CREATE POLICY "Service role insert for <x>"
+--     ON <x> FOR INSERT WITH CHECK (true);
+--
+-- The NAME says service-role. The POLICY has no `TO` clause, so it applies to
+-- `public` — every role, including `anon` — and `WITH CHECK (true)` accepts any
+-- row whatsoever, for any user_id. Supabase's default INSERT grant to
+-- anon/authenticated was never revoked on these tables.
+--
+-- VERIFIED BEHAVIOURALLY, 2026-08-16, on TEST *and* PRODUCTION, before writing
+-- this file, by a probe that CANNOT write: an unauthenticated POST of an empty
+-- body `{}` to each table. Postgres evaluates privileges BEFORE constraints, so
+--   * `42501 permission denied`         => INSERT is closed
+--   * `23502 null value ... not-null`   => INSERT is PERMITTED, and only the
+--                                          (deliberately invalid) data was
+--                                          rejected — nothing written.
+-- All six probes (3 tables × 2 environments) returned the second. The INSERT
+-- hole is real and live in both environments.
+--
+-- WHAT IT PERMITS, concretely:
+--   * `reflections`      — forge evening-review rows for ANY user_id, fabricating
+--                          practice history that feeds /api/milestones and the
+--                          practice calendar.
+--   * `milestones`       — award ANY milestone to ANY user (bounded only by the
+--                          UNIQUE(user_id, milestone_id) constraint).
+--   * `document_scores`  — mint arbitrary public badge scores, served by the
+--                          public `/api/badge/[id]` endpoint.
+-- This is a FORGERY class, not a disclosure class: it writes fiction rather than
+-- reading secrets. Distinct from rows 23–24 (founder_conversations), which was
+-- an unauthenticated READ of real private content.
+--
+-- The `reflections` INSERT policy was ALREADY FLAGGED IN ITS OWN MIGRATION on
+-- 2026-08-02 (`supabase-reflections-migration.sql`), which named the exact
+-- defect and deliberately left it: "That is a founder-walked schema decision,
+-- not a side effect of a comment fix, so it is FLAGGED and left alone." This
+-- migration is that founder-walked decision.
+--
+-- ============================================================================
+-- WHY THIS FIX IS SAFE
+-- ============================================================================
+-- Every legitimate INSERT into all three tables goes through a service-role
+-- client, verified first-hand 2026-08-16 (grep of every `.from('<table>')` call
+-- site and every client construction in each consuming file):
+--   reflections      <- api/reflect, api/reflections, api/mentor/private/reflect,
+--                       api/milestones            — all service-role
+--   milestones       <- api/milestones            — service-role (supabaseAdmin)
+--   document_scores  <- api/score-document/[id]   — service-role
+-- `service_role` carries BYPASSRLS and retains its grants, so no legitimate
+-- write path is affected. The ONLY user-JWT consumer in this set
+-- (api/practice-calendar) performs SELECTs exclusively — never an INSERT.
+--
+-- No UPDATE or DELETE policy exists on any of the three tables, so those verbs
+-- are already denied by RLS for anon/authenticated. The write-verb REVOKEs below
+-- are belt-and-braces on that existing denial, not a behaviour change.
+
+-- ============================================================================
+-- §PRE — run BEFORE applying (TEST first, then production)
+-- ============================================================================
+-- P1. Confirm the three open INSERT policies exist, and note the SELECT policies
+--     that must SURVIVE (expect 5 rows: 3 × INSERT with_check=true, plus
+--     "Users can read own reflections", "Users can read own milestones",
+--     "Public read access for document scores" — 6 rows in total):
+--
+--   SELECT tablename, policyname, cmd, roles, qual, with_check
+--   FROM pg_policies
+--   WHERE schemaname = 'public'
+--     AND tablename IN ('reflections', 'milestones', 'document_scores')
+--   ORDER BY tablename, cmd;
+--
+-- P2. Record row counts, so §VERIFY can prove nothing was harmed:
+--
+--   SELECT 'reflections' AS t, count(*) FROM public.reflections
+--   UNION ALL SELECT 'milestones',      count(*) FROM public.milestones
+--   UNION ALL SELECT 'document_scores', count(*) FROM public.document_scores;
+--
+-- P3. BEHAVIOURAL PROOF, and it writes nothing (empty body violates NOT NULL):
+--
+--   curl -s -X POST "$URL/rest/v1/reflections" -H "apikey: $ANON" \
+--     -H "Content-Type: application/json" -d '{}'
+--
+--     BEFORE: `23502 null value in column ... violates not-null constraint`
+--             (i.e. the INSERT was PERMITTED; only the data was rejected).
+--     Repeat for milestones and document_scores.
+
+-- ============================================================================
+-- §APPLY
+-- ============================================================================
+-- §1 — Drop the three role-unrestricted INSERT policies. Nothing legitimate
+--      uses them (every real writer is service-role, which bypasses RLS).
+DROP POLICY IF EXISTS "Service role insert for reflections"     ON public.reflections;
+DROP POLICY IF EXISTS "Service role insert for milestones"      ON public.milestones;
+DROP POLICY IF EXISTS "Service role insert for document scores" ON public.document_scores;
+
+-- §2 — Revoke the WRITE verbs only. SELECT is deliberately NOT revoked on any of
+--      the three: document_scores' anon SELECT is the public badge surface, and
+--      reflections' authenticated SELECT backs api/practice-calendar's user-JWT
+--      read. Revoking ALL here would break both.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.reflections     FROM anon, authenticated, PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.milestones      FROM anon, authenticated, PUBLIC;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.document_scores FROM anon, authenticated, PUBLIC;
+
+GRANT ALL ON public.reflections     TO service_role;
+GRANT ALL ON public.milestones      TO service_role;
+GRANT ALL ON public.document_scores TO service_role;
+
+-- §3 — RLS stays ENABLED on all three (already is; asserted, not toggled).
+ALTER TABLE public.reflections     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.milestones      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.document_scores ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- §VERIFY — run AFTER applying (TEST first; all green before production)
+-- ============================================================================
+-- V1. The three INSERT policies are GONE and the three SELECT policies REMAIN
+--     (expect exactly 3 rows, all cmd = SELECT):
+--
+--   SELECT tablename, policyname, cmd FROM pg_policies
+--   WHERE schemaname = 'public'
+--     AND tablename IN ('reflections', 'milestones', 'document_scores')
+--   ORDER BY tablename;
+--
+-- V2. RLS still enabled on all three (expect three `true`):
+--
+--   SELECT relname, relrowsecurity FROM pg_class
+--   WHERE oid IN ('public.reflections'::regclass,
+--                 'public.milestones'::regclass,
+--                 'public.document_scores'::regclass);
+--
+-- V3. anon/authenticated retain NO write grants, but DO retain SELECT
+--     (expect ONLY rows with privilege_type = 'SELECT'; zero INSERT/UPDATE/
+--     DELETE rows). A missing SELECT row here is a REGRESSION, not a success:
+--
+--   SELECT table_name, grantee, privilege_type
+--   FROM information_schema.role_table_grants
+--   WHERE table_schema = 'public'
+--     AND table_name IN ('reflections', 'milestones', 'document_scores')
+--     AND grantee IN ('anon', 'authenticated')
+--   ORDER BY table_name, grantee, privilege_type;
+--
+-- V4. Data intact — re-run §PRE-P2; counts UNCHANGED.
+--
+-- V5. BEHAVIOURAL PROOF — the INSERT hole is closed. Re-run §PRE-P3's three
+--     curls. Each must now return `42501 permission denied for table <x>`,
+--     NOT `23502`.
+--
+-- V6. THE TWO SELECT PATHS THAT MUST STILL WORK (this is the step that catches
+--     an over-broad REVOKE — do not skip it):
+--     (a) Public badge read, unauthenticated, expect HTTP 200:
+--           curl -s -o /dev/null -w "%{http_code}\n" \
+--             "$URL/rest/v1/document_scores?select=id&limit=1" -H "apikey: $ANON"
+--     (b) The practice calendar, in the browser, signed in: load the dashboard
+--         / practice calendar and confirm reflection activity still renders.
+
+-- ============================================================================
+-- §INVERSE — full rollback (restores the pre-migration state exactly)
+-- ============================================================================
+-- Recreates the three INSERT policies verbatim from their original migrations
+-- (supabase-reflections-migration.sql, supabase-milestones-migration.sql,
+-- supabase-document-scores-migration.sql) and restores the write grants §2
+-- revoked. After running this, §PRE-P3's probe returns `23502` again — i.e. the
+-- forgery hole is reopened (the pre-fix behaviour).
+--
+--   GRANT INSERT, UPDATE, DELETE ON public.reflections     TO anon, authenticated;
+--   GRANT INSERT, UPDATE, DELETE ON public.milestones      TO anon, authenticated;
+--   GRANT INSERT, UPDATE, DELETE ON public.document_scores TO anon, authenticated;
+--
+--   CREATE POLICY "Service role insert for reflections"
+--     ON public.reflections FOR INSERT WITH CHECK (true);
+--   CREATE POLICY "Service role insert for milestones"
+--     ON public.milestones FOR INSERT WITH CHECK (true);
+--   CREATE POLICY "Service role insert for document scores"
+--     ON public.document_scores FOR INSERT WITH CHECK (true);
+--
+-- (The SELECT policies and the RLS-enabled state are untouched by §APPLY, so the
+--  inverse does not restate them.)
