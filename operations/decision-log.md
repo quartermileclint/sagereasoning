@@ -21147,3 +21147,77 @@ folder explicitly so the slip cannot recur.
 **Decision:** Recorded the mentor's ruling on Prudence Group Q2 (the findings-wiki second-order audit), asked at the founder's direction and relayed verbatim same day (verbatim canonical: `operations/future-directions/2026-08-16-mentor-ruling-prudence-q2-wiki-second-order-audit-verbatim.md` — verbatim wins over this summary; the O-C-pattern provenance note recorded: the ruling's own date line reads 2026-08-15 while the question was drafted and relayed 2026-08-16 — recorded as received, effective date the relay date). **The ruling: (Q2-1) the audit is REQUIRED** — a structural component of the wiki's design Stage-3 scoping must carry; the two-guide structure + deterministic instruments are insufficient because the linking step is the guide's and the guide's priors ARE the failure mode; recording the limitation instead would be "honest but insufficient." **(Q2-2) the two-stage proposal is ADOPTED** — Stage 1 a deterministic sweep enumerating unlinked same-signature pairs over the controlled vocabularies ("it does not reason; it computes"); Stage 2 an adjudicative reader deciding genuine correlation vs surface coincidence; the stages structurally separate — the sweep is never the guide's. **(Q2-3) readers:** deterministic layer at Stage 1; **human practitioners PRIMARY at Stage 2** (their adjudication is itself philosophical examination, "a substantive contribution to the wiki's integrity"); the second guide SUPPLEMENTARY only where no practitioner spans both examinations, with the correlated-priors residual named in the wiki's documentation on every guide-adjudicated link; guide-only Stage 2 ruled insufficient ("a correlated check on the dimension that matters most"). **(Q2-4) nothing gates now** — all four points fold into the Stage-3 scoping session's inputs as SETTLED (the scoping session designs the mechanism, it does not re-open the points); the linking criterion (passion sub-species + false-judgement type) confirmed for both stages.
 
 **Folded:** Amendment **P-A4** appended to `operations/future-directions/2026-08-14-prudence-group.md`; Section 12 question 2 + the Section 5 carry marked RESOLVED; the priority note gains the dated addition — **with Q1 (P-A1), Q2 (P-A4), and Q6–Q7 (P-A3/M7) resolved, no pressing open question remains outside the Stage-3 scoping session's own remit** (questions 3–5 wait there); the question document carries an ANSWERED banner. **Risk classification: `governance`** — documents only; the wiki and every mechanism named are design-stage (named, not built); no code, schema, flag, credential, or public-surface change; the Stage-3 scoping session is NOT convened or scheduled by this recording. **Rollback path:** `git revert` the records commit. **Status:** Adopted. Cross-references: `D-MENTOR-RESPONSE-M1-M7-EXECUTED-2026-08-15` (the M7 correlated-blind-spots residual this ruling builds on); `D-CONCURRENT-ARC-C3B-POST-RUN-STAGING-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16
+
+**Decision:** Ran concurrent-arc C4 Step 2 Phase 1 — the read-only, app-wide survey of the RLS-vs-route-enforcement gap (`code-standard`; per `operations/handoffs/founder/2026-08-12-rls-vs-route-enforcement-gap-NEXT-SESSION-PROMPT.md`, itself carried by the C4 wrapper `2026-08-16-C4-...-NEXT-SESSION-PROMPT.md`). Deliverable: `operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md` — a written, per-table verdict turning "unscoped" into a real backlog.
+
+**Reasoning:** Origin `D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN` + `D-S7-IMPULSE-MENTOR-CLEARANCE-AND-FOLLOW-THROUGH`. The gap is materially wider than the authoring prompt's estimate: re-deriving from scratch found **22 policy-bearing migration files, not 14**, and — the headline — a **second, worse defect class the survey went looking past and hit anyway (Class C):** several policies are role-UNRESTRICTED (`WITH CHECK (true)` / `USING (true)`, no `TO` clause) on tables that never REVOKE Supabase's default grants, so (subject to a live-grant confirmation) they are open to any anon-key holder for any row, no login required — where the owner-policy class at least needs a session and scopes to the caller's own rows. **`founder_conversations` (70 rows) and `founder_conversation_messages` (2,131 rows) — the founder's own private hub — sit in Class C**, with 2,201 real production rows exposed. Also in Class C: open-INSERT policies letting any anon-key holder forge `reflections`/`milestones`/`document_scores` rows for any user.
+
+**Verdicts (full table in the deliverable):** Class A — 18 tables `safe-to-fix-same-pattern` (per-verb owner policies, all routes service-role-exclusive, zero client-side `.from()` usage; `impulse_entries` is one of these and is Phase 2's target). Class B — `action_evaluations_v3`, `journal_entries`, `reflections` (SELECT) are `needs-route-change-first` (a real browser or user-JWT consumer relies on the owner policy); `profiles` location fields are an intentional own-row feature, not the gap. `journal_entries` additionally has **no migration file in the repo at all** — its live RLS state is unknowable from source and must be read in the SQL editor before any change. Class C — 5 tables/policies with their own verdicts; rows 23–24 (founder conversations) flagged urgent.
+
+**Files touched:** `operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md` (new).
+
+**Risk classification:** `code-standard`, Standard under 0d-ii. Read-only (grep + file reads + read-only production row counts via the service key; no live DB write, no schema/flag/code change). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit (documents only).
+
+**Verification step (founder-performable):**
+```
+head -60 operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md
+```
+Expected: the survey's method + Class A/B/C structure.
+
+**Open questions:** the whole surveyed backlog beyond `impulse_entries` is carried, not closed — the founder elects the order for a future session (the mentor ruled `impulse_entries` first; it ruled no order for the rest). The AI's recommended order is in the deliverable (founder conversations second, on the exposure severity). Every Class-C exposure carries a live-grants caveat: one anon-key-no-login behavioural probe on TEST per table confirms it before any fix.
+
+**Rules served:** R17, R20a, PR19 (origin), PR20.
+
+**Status:** Adopted. Cross-references: `D-S7-IMPULSE-PR19-INDEPENDENT-REVIEW-CLEAN`, `D-S7-IMPULSE-MENTOR-CLEARANCE-AND-FOLLOW-THROUGH`, `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` (item 5).
+
+## 2026-08-16 — D-CONCURRENT-ARC-C4-JOURNAL-DECISIONS-AND-PACE-GATE-2026-08-16
+
+**Decision:** Recorded the two C4 journal product decisions (Step 1) and built decision (a) (Step 3). **(a) The UTC-vs-local pace-gate mismatch — FIXED.** The founder elected the elapsed-hours gate (recommended). `/api/journal`'s pace control no longer compares UTC calendar dates (which fired a false "come back tomorrow" 429 through the next local morning east of Greenwich, and failed to fire at all west of it); it now blocks advancing to a higher `day_number` only when fewer than **16 hours** have elapsed since the last entry, with an honest, hours-remaining message. Timezone-free, server-only, no new request field, no client trust — preserves the "roughly one a day, no binging" intent. **(b) The day-55 evening-pole terminal case — RECORDED AS RESOLVED, no build.** The founder elected "record as resolved": the 2026-08-02 `/reflect` correction (`EVENING_RHYTHM_KEYS = ['reflections']`, journal deliberately excluded from the evening pole) already structurally resolved it, and the journal page already renders a terminal all-complete state ("The person making progress never arrives — they continue."). Nothing to build; the carried open decision is discharged.
+
+**Reasoning:** Both decisions were long-carried as named product-open items (the standing opener + the reminders human-plan's Phase 4 notes). Decision (a)'s prior gate was a genuine wart independent of the evening-pole nudge (which no longer points at the journal since 2026-08-02), so this is a standalone journal fix, not a nudge-collision fix.
+
+**Files touched:** `website/src/app/api/journal/route.ts` (pace-gate logic + comment; POST handler only).
+
+**Risk classification:** `code-standard`, Standard under 0d-ii. Changes existing user-facing behaviour on already-malformed/too-fast input only (a 429 message + threshold change); no auth/schema/flag/perimeter surface. The R20a distress check on the same route is untouched. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — the pace-gate change is self-contained in one POST handler block.
+
+**Verification step (founder-performable):** `tsc` 0 (run); the journal R20a suite re-run green (11/11, unchanged — the change does not touch the distress path). Live behaviour: a second journal entry advancing to a new day within 16h of the first returns 429 with an hours-remaining message; after 16h it succeeds.
+
+**Rules served:** KG1 (DB-write route), R20a (untouched, re-verified).
+
+**Status:** Adopted. Cross-references: `D-CONCURRENT-ARC-PLAN-AND-MENTOR-QUESTIONS-2026-08-15` (C4 Step 1/3), the reminders human-plan Phase 4 (`practice-sequence.ts` `EVENING_RHYTHM_KEYS`).
+
+## 2026-08-16 — D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-STAGED-2026-08-16
+
+**Decision:** Staged — did NOT apply — concurrent-arc C4 Step 2 Phase 2, the `impulse_entries` RLS lockdown (`code-critical`, AC7 + PR19). The migration and its behavioural-proof harness are authored, typechecked, and repo-committed; the six-point AC7 disclosure is prepared (below); **the PR19 independent adversarial review and the founder-walked TEST→production live walk are the remaining, founder-gated steps and were not performed this autonomous session** (the founder is required for: the two model-setting pauses around the PR19 review; the live TEST/production migration ops; the AC7 explicit approval; and the production apply — none available in an unattended session). **No live DB op, no schema change applied, no production change. `impulse_entries` is NOT yet fixed** — its bypass remains open until the walk completes.
+
+**Phase-1 gate confirmed satisfied for `impulse_entries` specifically** (the authored prompt's precondition for proceeding to Phase 2): its route (`api/mentor/impulse/route.ts`) uses `SUPABASE_SERVICE_ROLE_KEY` for every read and write (3 `createClient` sites, 0 anon — verified first-hand); no client/browser code references the table (grep of `src/app`, `src/components` — zero hits). So dropping the four owner policies cannot break the app's own legitimate path. Verdict `safe-to-fix-same-pattern`.
+
+**The migration** (`website/supabase-impulse-rls-lockdown-migration.sql`): `§APPLY` drops the four per-verb owner policies (keeps the service-role policy, keeps RLS enabled) and — belt-and-braces, matching the proven `stoa_entries`/`route_errors` target shape — REVOKEs anon/authenticated/PUBLIC grants and GRANTs service_role. The operative control is RLS-on + no-anon/authenticated-policy = deny-by-default on every verb (SELECT included, closing the read-bypass the write-bypass finding did not name); the REVOKE is defence in depth, not what does the closing. `§PRE`/`§VERIFY` are behavioural (the harness, before/after), not just policy-definition reads. `§INVERSE` recreates the four dropped policies verbatim and restores the grants — genuinely two-way reversible.
+
+**The harness** (`website/scripts/impulse-rls-bypass-proof.ts`, tsx, typechecks clean): signs in a throwaway TEST user via the public anon key, attempts a direct PostgREST INSERT for that user's own `user_id`, reports SUCCEEDED (bypass open, expected §PRE) vs DENIED (bypass closed, expected §VERIFY), checks the read-bypass too, and always cleans up its proof row via the service key. A TEST-only safety rail refuses to run the WRITE proof against a non-TEST URL unless `--force-nontest` (the production post-migration check, which must FAIL and write nothing).
+
+**AC7 six-point disclosure (0c-ii — for the founder's explicit, risk-specific approval at the walk):**
+1. **What is changing:** `impulse_entries` stops accepting direct database reads/writes from logged-in practitioners via the public anon key; only the server route (which runs the distress check first) can touch it. No practitioner-visible feature changes — the app already writes only through that route.
+2. **What could break (worst case):** if the impulse route were secretly relying on a user-scoped client (it is not — verified service-role-only), legitimate saves would start failing. The `§VERIFY` V5 step proves the real route still works end-to-end on TEST before any production step, so this cannot reach production undetected.
+3. **Existing sessions:** unaffected. No auth/session/token change; signed-in users stay signed in. The change is a database access-control policy, not an auth change.
+4. **Rollback:** run the migration's `§INVERSE` block (recreates the four policies + restores grants) — restores the exact pre-migration state, bypass and all. Founder-runnable from the SQL editor.
+5. **Verification:** the harness reports DENIED post-migration on TEST (bypass closed) and the legitimate route POST still returns 200 (V4 + V5); then the same DENIED result on production against a disposable account (writes nothing).
+6. **Explicit approval:** required, specific to the above, before the production `§APPLY`.
+
+**Files touched:** `website/supabase-impulse-rls-lockdown-migration.sql` (new), `website/scripts/impulse-rls-bypass-proof.ts` (new). Neither is applied or run against any database this session.
+
+**Risk classification:** `code-critical` under 0d-ii (auth/access-control/perimeter change to a live table) — but nothing Critical was *executed* this session; what landed is two repo files (Standard to commit). AC7 disclosure prepared (above), explicit approval PENDING. PR6 not engaged (no distress-classifier code changed). PR19 review PENDING (the mandatory independent adversarial pass, with the two founder model-setting pauses).
+
+**Rollback path:** `git revert` this commit removes the migration file and harness (nothing was applied, so no DB rollback is needed).
+
+**Open questions / carried:** the founder-walked live walk (TEST §PRE proof → TEST §APPLY → TEST §VERIFY → PR19 review → AC7 approval → production §APPLY → production proof) is the remaining Phase 2 work; until it completes, `impulse_entries`' bypass is open and Phase 2 is NOT discharged. The rest of the Phase-1 survey backlog (Class A/B/C tables beyond `impulse_entries`) is carried per `D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16`.
+
+**Rules served:** R17, R20a, PR19, AC7 (0c-ii), PR17 (founder-walked live ops).
+
+**Status:** Adopted (as a staging record). Phase 2 execution PENDING founder walk. Cross-references: `D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16`, `D-S7-IMPULSE-MENTOR-CLEARANCE-AND-FOLLOW-THROUGH`, `operations/handoffs/founder/2026-08-12-rls-vs-route-enforcement-gap-NEXT-SESSION-PROMPT.md`. Weights BLOCKED; the P0 0h hold stands.

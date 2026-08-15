@@ -78,7 +78,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Entry for this day already exists' }, { status: 409 })
     }
 
-    // Check pace control: can't submit next day until the next calendar day
+    // Pace control — an ELAPSED-HOURS gate, not a calendar-day one.
+    //
+    // The old gate compared UTC calendar dates, which is wrong in every
+    // timezone: an entry written at, say, 9pm local is already "tomorrow" in
+    // UTC west of Greenwich (so the gate never fires and pacing is defeated),
+    // and east of Greenwich the UTC day does not roll until mid-morning local
+    // (so a "come back tomorrow" 429 kept firing through the next local morning
+    // — false to the practitioner, who was looking at a new local day). Founder
+    // decision, C4 2026-08-16: replace it with a timezone-free elapsed-hours
+    // floor. The next day opens JOURNAL_PACE_MIN_HOURS after the last entry,
+    // which preserves the "roughly one a day, no binging" intent the pacing
+    // exists for and is honest in every timezone with no client tz signal.
     const { data: lastEntry } = await supabase
       .from('journal_entries')
       .select('day_number, created_at')
@@ -87,12 +98,14 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
 
-    if (lastEntry && day_number > 1) {
-      const lastDate = new Date(lastEntry.created_at).toISOString().slice(0, 10)
-      const today = new Date().toISOString().slice(0, 10)
-      if (lastDate === today && day_number > lastEntry.day_number) {
+    const JOURNAL_PACE_MIN_HOURS = 16
+    if (lastEntry && day_number > 1 && day_number > lastEntry.day_number) {
+      const hoursSince = (Date.now() - new Date(lastEntry.created_at).getTime()) / 3_600_000
+      if (hoursSince < JOURNAL_PACE_MIN_HOURS) {
+        const hoursRemaining = Math.max(1, Math.ceil(JOURNAL_PACE_MIN_HOURS - hoursSince))
         return NextResponse.json({
-          error: 'You can complete one new entry per day. Come back tomorrow for the next one.'
+          error: `You can move to the next day once a little time has passed — about ${hoursRemaining} more hour${hoursRemaining === 1 ? '' : 's'}. The path is walked at a steady pace, not rushed.`,
+          hours_remaining: hoursRemaining,
         }, { status: 429 })
       }
     }
