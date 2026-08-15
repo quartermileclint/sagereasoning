@@ -209,7 +209,21 @@ R20d self-side boundary; the four Stage 2 placeholder fields as design target). 
 `r20a-audience-renderer.ts:45` auth-signal discriminator as must-reuse precedent.
 **`SUBSTRATE_LAYER3_ENABLED` activation is NOT licensed by this session.**
 
-### ☐ C4 — Human-side: the RLS-vs-route-enforcement gap (+ journal)
+### ☐ C3b — Post-run staging (AI-only, documents) [FOUNDER-ELECTED 2026-08-15, added after the Set D + vetted-verbatim recordings; prompt: `2026-08-15-C3b-post-run-staging-NEXT-SESSION-PROMPT.md`]
+*Tier: `governance`, documents only — preparation, NOT execution (M2 binds all ruled items
+post-run; C3b stages them). Founder presence: none; the sign-off package it produces awaits
+the founder's signature at the post-run R18 close.*
+
+Three deliverables, every mechanical claim re-verified first-hand at session time:
+(1) the **R18 sign-off package** for the three in-hand DOC-surface wordings (A/R-5
+kathêkon qualification; B/M-A's R18 half; D/O-A calibration disclosure) with insertion
+points, drift check, and sign-off lines — nothing applied; (2) the **R2/R3 edit-spec staging
+document** (B/M-A same-edit spec; the M6 total-unknown-branch payload-note spec; the D/L-5
+implementation-record skeleton + current-strings byte-check; the B/M-B flag-discipline
+statement draft); (3) the **D/O-C licensing question** drafted for the mentor (the scoping
+session itself needs a ruling first — Set D verbatim; not convened here). **Mode-3
+sensitivity: the run was at 18/20 at election — if ≥20 + runner hand-back at open, C3b
+defers to R1.**
 *Tier: `code-critical` (founder-walked migrations, PR19). Founder presence: full walk.*
 
 1. **Open with the journal decision block (~5 min):** the session presents options; the founder
