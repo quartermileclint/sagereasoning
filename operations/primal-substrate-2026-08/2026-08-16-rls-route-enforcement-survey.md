@@ -65,7 +65,7 @@ match the target shape; `§INVERSE` recreates the dropped policies verbatim).
 
 | # | Table | Migration file | Owner policies | Route(s) — all service-role | Notes |
 |---|---|---|---|---|---|
-| 1 | `impulse_entries` | `supabase-impulse-migration.sql` | SELECT/INSERT/UPDATE/DELETE | `api/mentor/impulse` | **R20a perimeter member — the mentor-mandated FIRST fix (Phase 2, this session).** 1 real production row at survey time. |
+| 1 | ~~`impulse_entries`~~ **FIXED** | `supabase-impulse-migration.sql` | ~~SELECT/INSERT/UPDATE/DELETE~~ **dropped** | `api/mentor/impulse` | **CLOSED 2026-08-16** — locked down on TEST + production, bypass proven closed live both directions, legitimate path confirmed unbroken, PR19 clean, AC7 discharged (`D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE-2026-08-16`; migration `website/supabase-impulse-rls-lockdown-migration.sql`). The mentor-mandated first fix. 1 real production row, untouched throughout. |
 | 2 | `sage_compass_entries` | `supabase-sage-compass-migration.sql` | S/I/U/D | `api/mentor/sage-compass` | Named in the origin finding as the sibling shape. |
 | 3 | `morning_preparation_entries` | `supabase-morning-preparation-migration.sql` | S/I/U/D | `api/mentor/morning` | |
 | 4 | `view_from_above_entries` | `supabase-view-from-above-migration.sql` | S/I/U/D | `api/mentor/view-from-above` | Grief/catastrophising content — intimate. |
@@ -148,7 +148,7 @@ deliberate public SELECT (the public accreditation read surface). These are the 
 
 ## The recommended backlog order (the founder elects; the mentor ruled only item 1)
 
-1. **`impulse_entries`** — Phase 2 of this session (mentor-ruled first).
+1. ~~**`impulse_entries`**~~ — **DONE 2026-08-16**, live on production (mentor-ruled first). Everything below is the open backlog.
 2. **`founder_conversations` + `founder_conversation_messages`** (Class C rows 23–24) — the
    widest exposure found; mechanically simple; 2,201 real rows.
 3. **The three open-INSERT policies** (rows 25–27) — one small migration could close all three;
