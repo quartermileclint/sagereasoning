@@ -122,8 +122,8 @@ following session.
 
 | # | Table | Policy as written | Exposure if grants are live | Legitimate consumers | Verdict |
 |---|---|---|---|---|---|
-| 23 | `founder_conversations` | `"Service role full access on conversations" FOR ALL USING (true) WITH CHECK (true)` | Read/write/delete of the founder's private hub conversations by any anon-key holder. **70 real rows on production at survey time.** | `api/founder/hub` only (service-role) | **`safe-to-fix-same-pattern`** mechanically (no user-scoped consumer) — but behaviourally verify the exposure on TEST first, and treat as **urgent**, not as one of several equal items. |
-| 24 | `founder_conversation_messages` | same shape | Same — **2,131 real rows on production.** | same | same |
+| 23 | ~~`founder_conversations`~~ **FIXED** | `"Service role full access on conversations" FOR ALL USING (true) WITH CHECK (true)` | ~~Read/write/delete ... by any anon-key holder~~ **CLOSED** | `api/founder/hub` only (service-role) | **CLOSED 2026-08-16, same-day follow-on to the impulse fix** (`D-CONCURRENT-ARC-C4-FOUNDER-CONVERSATIONS-RLS-FIX-LIVE-2026-08-16`; migration `website/supabase-founder-conversations-rls-lockdown-migration.sql`). Live behavioural confirmation BEFORE the fix: an unauthenticated request (no login at all) returned `HTTP 200` with a real row on production — worse than the impulse case, which at least required a session. After: `42501 permission denied`, both tables, both directions, on TEST and production; 70/2131 row counts unchanged; PR19 review CLEAN (2 low, out-of-scope observations only — plaintext content at rest, not wired into data-rights export/delete). Founder-elected expedited sequencing (TEST → prod → review), recorded as a deliberate PR19 waiver-then-confirm, not an omission. |
+| 24 | ~~`founder_conversation_messages`~~ **FIXED** | same shape | ~~Same~~ **CLOSED** | same | Fixed in the same migration as row 23 — see above. |
 | 25 | `reflections` (INSERT policy) | `"Service role insert for reflections" FOR INSERT WITH CHECK (true)` | Any anon-key holder can insert reflection rows **for any user_id** (forged practice history; feeds milestones/practice-calendar reads). | Writes are all service-role; the open policy serves nobody | **`safe-to-fix-same-pattern`** for this single policy (drop it; service-role writes bypass RLS regardless). The table's SELECT policy stays (Class B row 21). |
 | 26 | `milestones` (INSERT policy) | `"Service role insert for milestones" FOR INSERT WITH CHECK (true)` | Any anon-key holder can award any milestone to any user. | Writes via `api/milestones` (service-role); owner SELECT is load-bearing for nothing user-scoped found (reads go through the route) | **`safe-to-fix-same-pattern`** for the INSERT policy; the owner SELECT policy can ride the same migration or stay — election at fix time. |
 | 27 | `document_scores` (INSERT policy) | `"Service role insert for document scores" FOR INSERT WITH CHECK (true)` (public SELECT is deliberate — the badge surface) | Forged public document scores behind `/api/badge/[id]`. | Writes via `api/score-document/[id]` (service-role) | **`safe-to-fix-same-pattern`** for the INSERT policy; keep the public SELECT. |
@@ -149,10 +149,15 @@ deliberate public SELECT (the public accreditation read surface). These are the 
 ## The recommended backlog order (the founder elects; the mentor ruled only item 1)
 
 1. ~~**`impulse_entries`**~~ — **DONE 2026-08-16**, live on production (mentor-ruled first). Everything below is the open backlog.
-2. **`founder_conversations` + `founder_conversation_messages`** (Class C rows 23–24) — the
-   widest exposure found; mechanically simple; 2,201 real rows.
-3. **The three open-INSERT policies** (rows 25–27) — one small migration could close all three;
-   forgery-class rather than disclosure-class.
+2. ~~**`founder_conversations` + `founder_conversation_messages`** (Class C rows 23–24)~~ —
+   **DONE 2026-08-16**, live on production, same day as item 1. The exposure was confirmed
+   worse than the survey estimated: reachable with **no login at all**, not merely by an
+   authenticated practitioner.
+3. **The three open-INSERT policies** (rows 25–27) — **now the top of the open backlog**; one
+   small migration could close all three; forgery-class rather than disclosure-class. **Each
+   needs its own live-grant confirmation probe first** — note that rows 23–24's probe found the
+   exposure genuinely live, so this class's "subject to live-grant confirmation" caveat should
+   be treated as likely-true rather than likely-theoretical.
 4. **`mentor_profiles` + the remaining Class A intimate tables** (rows 2–12) — batched by
    sibling shape, a few per session.
 5. **Class A lower-stakes** (rows 13–18).
@@ -160,4 +165,21 @@ deliberate public SELECT (the public accreditation read surface). These are the 
    its own route-change design first; `journal_entries` needs a live-state read before even
    that.
 
-*End of survey. Phase 2 of this session fixes `impulse_entries` only.*
+---
+
+## Status addendum — 2026-08-16, end of the C4 sitting
+
+**Two tables closed the same day this survey was written**, both live on production, both
+PR19-reviewed CLEAN: `impulse_entries` (backlog item 1, mentor-mandated first) and
+`founder_conversations` + `founder_conversation_messages` (item 2, the widest exposure found).
+Everything else in Classes A, B and C remains **open** and carried.
+
+**The finding this sitting adds to the survey's own method, worth stating for whoever picks up
+item 3:** the survey hedged Class C's exposure as "subject to a live-grant confirmation," on the
+reasoning that Supabase's default grants were *probably* still in place. When that probe was
+finally run against production, the exposure was not merely live — it was **wider than the survey
+had described**, reachable with no authentication whatsoever, where the survey's prose had framed
+Class C alongside a class that at least required a session. **Run the probe early on the
+remaining Class C rows; do not let a hedge stand in for a measurement.**
+
+*End of survey. Items 1 and 2 are closed; items 3–6 are the open backlog.*
