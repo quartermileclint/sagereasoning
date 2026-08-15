@@ -20933,3 +20933,21 @@ metadata only: this session's transcript/history is filed under the scratch proj
 list, and `sagereasoning`'s CLAUDE.md/settings were not auto-loaded (mitigated — the grounding
 prompt had every governing document read explicitly). The successor prompt now states the launch
 folder explicitly so the slip cannot recur.
+
+---
+
+## 2026-08-15 — D-CONCURRENT-ARC-PLAN-AND-MENTOR-QUESTIONS-2026-08-15
+
+**Decision:** Planning-only `governance` session (documents only; no code/schema/flag/production change; AC7 not engaged). Produced the concurrent-arc session sequence (`operations/handoffs/founder/2026-08-15-concurrent-arc-plan.md`) and the drafted mentor questions (`operations/handoffs/founder/2026-08-15-mentor-questions-concurrent-arc.md`) under the founder's in-session elections: ALL four agent electives in (input-cap Steps 2/3; projectContext+practitionerContext removal — **this election is the explicit founder ask the records required**; the new false-hold observation window P6/P8a/P8b; permission-scrutiny items 14–17); human side takes the RLS-gap session + the journal product decisions (website hardening bundle and Resend/ST7 parked); no housekeeping beyond task needs; the guard-blocked edit bundle lands **all post-run** regardless of the M1 ruling.
+
+**Why:** the founder directed a sequence that (i) runs concurrent-safe sessions during the IDEA-loop bounded validation run and defers fence-touching work to post-run, (ii) puts agent-user tasks before human-user tasks, (iii) groups AI-self-executable work and batches founder-walked activations separately, and (iv) fills each session to amortise open/close token overhead — codified in the plan's lean session protocol (arc sessions read the plan block + parallel-window pre-flight + task Tier-2 files, not the full opener; lean closes; PR19 reviews pause before/after for the founder's model-setting changes).
+
+**Grounding verified this session (read-only):** Mode 2 confirmed fresh (no blocking spec; live production query: 15 completed cycles — 11 winner / 3 dependency_unavailable / 1 null_cycle; latest 2026-08-14 06:08 UTC); push state clean (`git log origin/main..HEAD` empty). Four planning-relevant facts pinned at source: (1) Q5c/Q13a activation is DONE (decision log 2026-08-12) — the standing opener's queue item 17 is stale, correction queued to arc session C1; (2) **queue item 9 RESOLVED-CLEAN** — production `idea_loop_cycles` holds zero rows outside the run's loop_id, so no `#smoke` residue exists; (3) the harness `gate1.log` 401 profile is currently quiet — the credential-retry activation is genuinely low-urgency (slotted R4); (4) `GUARD_RE` read at source (`human-practitioner-boundary.test.ts:418`) matches MORE than prior lists recorded — also `harness/gate1`, `false-hold`, `sage-reflect`, blanket `/substrate/` — so the guard additionally gates the reflect-path metering fix, the `agent_hold_observations` retention half, the trust-record total-unknown note, and any new false-hold capture code; and the guard has been applied inconsistently since the window stopped (AE-2 07-19, B5 07-30, S7 + the payload fold 08-12 all landed guard-matched edits) — both facts folded into mentor question M1.
+
+**What changed:** two new documents (the arc plan; the mentor questions) + this entry. Nothing else touched (founder election: untracked strays untouched; CLAUDE.md corrections deliberately deferred to arc session C1, which edits it anyway).
+
+**Verification:** the two documents cross-checked against the standing opener (2026-08-15), the post-Prudence-Group prompt's delta list, the parallel-window prompt, CLAUDE.md's 2026-08-12 refresh, and the live queries above; every mentor question names its mechanism file:line per PR20.
+
+**Rollback:** `git revert` the records commit (documents only).
+
+**Model/effort:** claude-fable-5 / high. The session honoured the founder's standing instruction that adversarial reviews pause before launch and after completion for model-setting changes (none run this session; the discipline is encoded in every arc session block that carries a PR19 review).
