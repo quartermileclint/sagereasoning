@@ -142,7 +142,7 @@ across time.**
 what has **not** been linked — to surface the guide's blind spots as well as the community's? A
 guide operating under unexamined philodoxia may systematically fail to link examinations that
 would reveal their own recurring false judgements. **Unresolved. Carried forward** (Section 12,
-question 2).
+question 2). *(**RESOLVED 2026-08-16** — Amendment P-A4: required, two-stage, human-adjudicated.)*
 
 **Source corpus:** the Stoic Brain's ancient sources, available to the guide when no bringer steps
 forward.
@@ -357,7 +357,10 @@ into future development sessions and the next discussion.
    linked, to surface the guide's blind spots as well as the community's? A guide operating under
    unexamined philodoxia may systematically fail to link examinations that would reveal their own
    recurring false judgements. **The mechanism must be able to read absence as signal, not just
-   presence. Unresolved.**
+   presence. Unresolved.** *(**RESOLVED 2026-08-16** — the second-order audit ruling, Amendment
+   P-A4 below: the audit is REQUIRED; two-stage — deterministic sweep + adjudicative reader,
+   structurally separate; human practitioners primary at Stage 2, the second guide supplementary
+   with the correlated-priors residual documented; folds into Stage-3 scoping as settled inputs.)*
 3. **The minimum observer period qualification.** Three sessions with the three-session-type
    qualification proposed (Section 3). Whether three sessions is sufficient if the sessions
    observed were all of the same form, or examined the same passion sub-species, or all had the
@@ -412,6 +415,11 @@ to this documentation.
 second-order audit — is now the most pressing open question.** Questions 6–7, added the same day,
 carry a design proposal awaiting mentor ratification — see P-A2 and mentor-questions M7. Nothing
 blocks the current documentation.)*
+
+*(2026-08-16: question 2 is **resolved** by Amendment P-A4 — the audit is required, two-stage,
+human-adjudicated at Stage 2; all four points fold into Stage-3 scoping as settled inputs it does
+not re-open. **No pressing open question remains outside the Stage-3 scoping session's own
+remit** — questions 3–5 wait there as before.)*
 
 ---
 
@@ -526,5 +534,50 @@ consequence:** §12 question 6 is **resolved by ratification**; question 7 is re
 (channel + classification), with only its 6b integration remainder parked as ruled. The design
 remains a future direction — ratification settles the design, it does not scope or schedule a
 build.
+
+### Amendment P-A4 — Question 2 resolved: the second-order audit ruling (2026-08-16)
+
+**From the mentor's ruling on the Q2 question drafted and relayed 2026-08-16 at the founder's
+direction (verbatim canonical:
+`2026-08-16-mentor-ruling-prudence-q2-wiki-second-order-audit-verbatim.md` — verbatim wins
+over this summary; recorded
+`D-MENTOR-RULING-PRUDENCE-Q2-WIKI-SECOND-ORDER-AUDIT-RECORDED-2026-08-16`).**
+
+**The ruling, in four parts:**
+
+1. **The audit is REQUIRED** — a structural component of the wiki's design that Stage-3
+   scoping must carry, not an optional enhancement. The ground: the linking step is performed
+   by the guide and **the guide's priors are the failure mode** — the philodoxia failure the
+   question named is "the exact failure mode the architecture's forensic posture (L4 passion
+   audit, out-of-band cross-check) was designed to catch on the consult surface. The wiki
+   surface has no equivalent check." Recording the limitation instead would be "honest but
+   insufficient."
+2. **The two-stage shape is adopted as proposed.** Stage 1 — a **deterministic sweep**
+   enumerating all unlinked examination pairs sharing the same passion sub-species and
+   false-judgement type (fully enumerable over the controlled vocabularies; "it does not
+   reason; it computes" — an uncorrelated instrument in the M7-residual sense). Stage 2 —
+   an **adjudicative reader** determines genuine correlation (same distorted phantasia) vs
+   surface coincidence. **The two stages must remain structurally separate: the sweep must be
+   performed by the deterministic layer, never by the guide** — a collapsed design
+   reintroduces the failure mode at Stage 1.
+3. **The readers:** the deterministic layer performs Stage 1; **human practitioners are the
+   PRIMARY adjudicating reader at Stage 2** (they are the community whose truth the wiki
+   reflects; uncorrelated with the guide's priors on examinations they participated in; and
+   the adjudication is itself philosophical examination — "a substantive contribution to the
+   wiki's integrity," never an administrative task). The **second guide is a SUPPLEMENTARY
+   reader** only where no human practitioner has participated in both examinations being
+   compared, and **the correlated-priors residual is named explicitly in the wiki's own
+   documentation wherever a guide-adjudicated link appears.** A guide-only Stage 2 is ruled
+   insufficient ("a correlated check on the dimension that matters most"); the deterministic
+   layer alone cannot adjudicate Stage 2.
+4. **Sequencing: nothing gates now.** The four points above fold into the **Stage-3 scoping
+   session's inputs as SETTLED** — the scoping session does not re-open them; it designs the
+   mechanism that implements them. The linking criterion (passion sub-species +
+   false-judgement type, not topic similarity) is confirmed as the correct basis for both
+   stages.
+
+**This resolves open question 2.** With Q1 (P-A1), Q2 (this amendment), and Q6–Q7 (P-A3/M7)
+resolved, **no pressing open question remains outside the Stage-3 scoping session's own
+remit** — questions 3–5 wait there as before.
 
 *End of record.*

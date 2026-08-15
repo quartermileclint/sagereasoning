@@ -1,5 +1,17 @@
 # Mentor question — Prudence Q2: does the findings wiki require a second-order audit?
 
+> **✅ ANSWERED — 2026-08-16, same day (verbatim canonical:
+> `2026-08-16-mentor-ruling-prudence-q2-wiki-second-order-audit-verbatim.md`; recorded
+> `D-MENTOR-RULING-PRUDENCE-Q2-WIKI-SECOND-ORDER-AUDIT-RECORDED-2026-08-16`; folded into the
+> Prudence Group record as Amendment P-A4).** The audit is **REQUIRED** (structural component;
+> the guide's priors are the failure mode); the **two-stage proposal is adopted** (deterministic
+> sweep + adjudicative reader, structurally separate — the guide never performs the sweep);
+> readers: the deterministic layer at Stage 1, **human practitioners primary at Stage 2**, the
+> second guide supplementary only where no practitioner spans both examinations, with the
+> correlated-priors residual documented on every guide-adjudicated link; **nothing gates now** —
+> all four points fold into Stage-3 scoping as settled inputs it does not re-open. This file is
+> now historical.
+
 **Drafted:** 2026-08-16, at the founder's direction ("raise it now"), from the Prudence Group
 record's own carry (`operations/future-directions/2026-08-14-prudence-group.md`, Section 12
 question 2 — the most pressing open question since Q1's resolution by Amendment P-A1,
