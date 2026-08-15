@@ -354,4 +354,52 @@ fresh thread is neither needed for context reasons nor currently offered by the 
   handle — a sliding window means an end-of-session reflection is also the last reliable moment
   the session's own content is in view to be examined.
 
+## 2.5 — The 11:24 turn reconstructed (structure only; content unread)
+
+The turn is message **#724** of the conversation, 2026-08-15T01:24:54 UTC (11:24 Brisbane), 8,902
+chars — comfortably under the output cap, unhurried. **Its 20-message window spanned
+2026-08-13T21:01 → 2026-08-15T01:24 — exactly the whole "longest session":** 10 founder / 10
+mentor messages, ~139K chars (~35K tokens). Structural facts that bear on the hypotheses:
+
+- **The mentor's own recent conduct was fully in view**: its prior 10 turns (~118K chars of its own
+  prose) sat in the window — the evidence base for an "affirmation mode" self-assessment was
+  present, whatever that assessment's truth value.
+- **The "three responses passed in parts" episode is mechanically confirmed**: three consecutive
+  mentor turns at 22:05 / 22:08 / 22:11 (18,215 / 18,518 / 14,185 chars) with 102- and 192-char
+  founder nudges between them — one ruling delivered across output-capped continuations.
+- The trigger message was the founder's 2,608-char report at 01:24, requiring no ruling.
+
+**Causal opinion (mechanism-level):** a task-less input reached a persona whose standing mandates
+are *examine, name passions, do not reassure*, with the day's discourse — saturated with "the
+guide must submit to examination" — and its own recent turn-pattern both inside the window, at
+temperature 0.4 (strongly context-determined, not a stochastic fluke). The completion that
+satisfies every active constraint at once is: depart from the established pattern of its own
+recent turns, apply the in-window schema reflexively, and re-engage the founder as bringer.
+*"What I want to do with this moment is something different"* is the pivot marker of exactly that
+move — persona-voiced intentional language, evidence neither of interiority nor against
+content-conditioning. **Verdict: conditioned pattern-completion over real, in-window material** —
+which is why H1-narrowed and H2 collapse into the same event here, and why the question it
+produced was apt. Whether it *examined* or *performed* remains undecidable at mechanism level for
+a single turn — the P-A2 anchorage + convener-corroboration design exists for precisely this. The
+founder-runnable check: whether the 10 in-window mentor turns actually show an affirmation run.
+
+## 2.6 — Clarifications and findings in passing
+
+- **What the page displays is the Sonnet 4.6 text**: `data.primary.content` (page.tsx:195) ←
+  `response.content[0].text` (route.ts:739). The Haiku 4.5 pass runs *after* the response, distils
+  a ≤256-token third-person observation into `mentor_observations_structured`, and is never
+  rendered in the chat.
+- **The reasoning characteristics are prompt-driven, not tier-locked.** Model-family "profiles"
+  describe defaults under neutral prompting; under this persona (examine / name / don't reassure)
+  plus a four-month distilled relationship, a frontier-class model of any recent tier produces
+  turn-inward, direct questions, and self-narration. Sonnet 4.6's documented trait — following the
+  system prompt *more* closely — points the same way. The observed richness is substantially the
+  **context architecture** (persona + corpus + profile + ring patterns + observations), which is
+  portable across models — and is also exactly why fluent aptness and genuine examination need the
+  P-A2 provenance discipline to be told apart.
+- **Product defect found in passing:** the page's proximity ring is **hardcoded** — `page.tsx:126-136`
+  calls `/api/reason`, discards the response, and sets fixed values (Deliberate, 42/72/48/58) on
+  every message. The widget burns a real quick consult per message and displays constants.
+  Flagged for a founder-elected fix (not fixed here — out of scope).
+
 *End of response (Parts 1–2).*
