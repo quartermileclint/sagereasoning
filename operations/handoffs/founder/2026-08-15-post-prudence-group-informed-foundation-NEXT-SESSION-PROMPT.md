@@ -1,6 +1,17 @@
 # Next session — open on informed foundations, then receive the founder's instruction (post-Prudence-Group)
 
-**Paste this as the FIRST message of a new session.** This prompt has **no task of its own.** Its
+**Open the session in the `sagereasoning` repo root** — from a terminal:
+
+```bash
+cd /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning && claude
+```
+
+(not in `idea-loop-validation-run`, which is the runner's scratch project — the 2026-08-15
+documentation session was launched there by mistake; it wrote nothing into the scratch project and
+all its artifacts landed correctly in this repo, but the right launch folder gives the session
+this repo's CLAUDE.md, settings, and session history natively.)
+
+**Then paste this as the FIRST message of the new session.** This prompt has **no task of its own.** Its
 entire job is to bring the session to a verified, current grounding and then **stop and wait** —
 the founder will supply the instruction once grounding is confirmed. Do not guess at the
 instruction, do not pick an item off the standing queue, do not self-start anything.

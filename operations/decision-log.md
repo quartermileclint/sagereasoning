@@ -20911,3 +20911,25 @@ A successor grounding prompt is authored at
 clean through `b993b04`, the two future-directions records, the Layer 3 widened scope, the still-
 stale CLAUDE.md C15 line, the wider stray list, and the proven read-only pre-flight query method).
 Documents only; no fenced surface touched.
+
+**Addendum 2 (2026-08-15, launch-folder note):** this session was launched with its harness
+working directory in the runner's scratch project (`idea-loop-validation-run`) rather than this
+repo — a launch-folder slip, noticed by the founder post-close. Verified consequences: **none in
+either repo** — every artifact was written by absolute path into `sagereasoning` (all committed
+and now pushed through `ce5d589`), and a modified-today sweep of the scratch project confirms the
+session wrote **nothing** there (the runner's files are untouched). The residue is harness
+metadata only: this session's transcript/history is filed under the scratch project's session
+list, and `sagereasoning`'s CLAUDE.md/settings were not auto-loaded (mitigated — the grounding
+prompt had every governing document read explicitly). The successor prompt now states the launch
+folder explicitly so the slip cannot recur.
+
+**Addendum 2 (2026-08-15, launch-folder note):** this session was launched with its harness
+working directory in the runner's scratch project (`idea-loop-validation-run`) rather than this
+repo — a launch-folder slip, noticed by the founder post-close. Verified consequences: **none in
+either repo** — every artifact was written by absolute path into `sagereasoning` (all committed
+and now pushed through `ce5d589`), and a modified-today sweep of the scratch project confirms the
+session wrote **nothing** there (the runner's files are untouched). The residue is harness
+metadata only: this session's transcript/history is filed under the scratch project's session
+list, and `sagereasoning`'s CLAUDE.md/settings were not auto-loaded (mitigated — the grounding
+prompt had every governing document read explicitly). The successor prompt now states the launch
+folder explicitly so the slip cannot recur.
