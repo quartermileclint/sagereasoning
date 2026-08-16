@@ -21876,3 +21876,52 @@ AC7 (not engaged), KG1, KG7.
 `D-CONCURRENT-ARC-C3B-POST-RUN-STAGING-2026-08-16`,
 `D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`,
 `2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
+
+### Post-close addendum, 2026-08-16 — the three R2b Part-C decisions RESOLVED (founder)
+
+The founder reviewed the AI's recommendations on R2b's open questions and resolved all three the
+same day, before R2b was scheduled. **R2b's prompt is amended in place; its Part C now reads
+RESOLVED, not open.** The founder also **pushed R2a** (HEAD `5bdb2a9` on `origin/main`, Vercel
+green) — so R2a's three live surfaces (the S10 trust-record payload's ninth `does_not_attest` item
++ the M6 note; the reflect Q1–Q6 strings; the R18 doc surfaces + guardrail GET self-doc) are **LIVE
+as of 2026-08-16, ahead of R4**. This supersedes the close's "Production state at session close:
+UNCHANGED" line, which was true when written. **R4 step 1 ("push all R2/R3 builds FIRST") is
+partly discharged; R2b and R3 still require it.** Consequence for Spec 3 (recorded, no edit needed —
+its implementation record anticipated exactly this): **the segmentation boundary for reflect-derived
+event rates is 2026-08-16, the deploy date.**
+
+1. **PR24 scope — ACCEPT the correction, AND fix PR24's own wording** (the AI's recommendation).
+   Build the `agent_hold_observations` sweep only; record the `stoa_entries` half as a non-gap
+   resolved by ruling #24/Q9; **and correct PR24's factually wrong grounding sentence in
+   `adopted/project-instructions-snapshot.md`** so it stops misleading future sessions. **Plus a
+   verification the finding itself requires:** that `stoa_entries` is genuinely reachable by the
+   data-rights ERASURE paths — "no retention sweep" is only correct if erasure is actually wired;
+   if it is not, there is a gap of a different shape and it must be surfaced, not assumed closed.
+
+2. **AE-3 — DEFERRED out of R2b to its own scoping step** (the AI's recommendation). Grounds: its
+   first ADR-014 precondition, *structural cadence-provenance*, is **an unmade design decision, not
+   a build task** — the ADR names two candidate mechanisms and makes neither, and the harness today
+   runs a single consult credential, so every consult is mandated and the "excess consults" the
+   detector keys on is effectively zero. Building against that yields precisely what ADR-014 §3.4
+   warns of: *"simultaneously always-triggering and never-triggering: pure noise."* **R2b authors
+   the AE-3 scoping prompt at its close** so the item does not go quiet.
+
+3. **The Q1 null-suspicion fix — FOLDED INTO R2b.** *This went against the AI's recommendation of a
+   dedicated step, and is recorded as such.* The AI's ground was over-packing (R2b already carries
+   two `code-critical`-class items); the founder's election stands, and the trade is coherent —
+   deferring AE-3 frees the capacity, so **R2b carries six items, not seven.** Framing carried into
+   the prompt: the fix **COMPLETES the mentor's vetted-wording ruling** rather than amending it (the
+   mentor vetted Q1 on the premise that "I cannot determine" is legitimate; an extraction pipeline
+   that silently collapses it into "clean" partially defeats that intent). The prompt names the
+   surfaces it touches and instructs the session to **check whether the persistence path implies a
+   schema change before designing the fix** — if so, that is a founder-walked step to be split out,
+   not absorbed.
+
+**Order (the AI's call, stated):** D4+D1 → P8a → PR24 → item 5 → Spec 4 → the Q1 fix. D4+D1 first
+while context is freshest (a LIVE trust-event surface; ~15 battery pins move); **P8a second because
+it is a hard precondition for R4's LAST step** — without it the new false-hold observation window
+cannot start.
+
+**Status:** Adopted. Amends `D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16`.
+Cross-reference: `operations/handoffs/founder/2026-08-16-R2b-guard-bundle-NEXT-SESSION-PROMPT.md`
+(amended in place). Weights BLOCKED; the P0 0h hold stands.

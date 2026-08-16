@@ -39,6 +39,12 @@ R2a deliberately deferred them rather than rushing them at the end of a long ses
 **R2a surfaced three findings that change what this session should build. They are not optional
 context — two of them mean the arc plan's own wording is wrong.**
 
+**All four Part C decisions were reviewed and resolved by the founder on 2026-08-16, before this
+session was scheduled.** They are settled inputs. **The build list is: D4+D1, P8a, PR24
+(scope-corrected), item 5 (re-scoped), Spec 4, and the Q1 null-suspicion fix. AE-3 is deliberately
+NOT in this session** — it is deferred to its own scoping step, whose prompt this session authors at
+close.
+
 ---
 
 ## Part B — The three inherited scope findings (read before scoping any item)
@@ -59,9 +65,15 @@ in three independent places:
 PR24's own grounding sentence (`adopted/project-instructions-snapshot.md:621`ff) claims both tables
 declare it. **That claim is factually wrong for `stoa_entries`.**
 
-**→ FOUNDER DECISION (Part C.1).** Default: build the sweep for `agent_hold_observations` ONLY and
-record the `stoa_entries` half as a non-gap resolved by ruling #24/Q9. Changing the stoa posture
-"requires re-opening the mentor record, not a schema tweak" (the migration's own words).
+**→ RESOLVED 2026-08-16, founder: accept the correction AND fix PR24's own wording.** Build the
+sweep for `agent_hold_observations` ONLY; record the `stoa_entries` half as a non-gap resolved by
+ruling #24/Q9; **and correct PR24's wrong grounding sentence in
+`adopted/project-instructions-snapshot.md` (~:621ff)** so the false claim stops propagating to the
+next session that reads it. **Plus one verification the finding itself requires:** "no retention
+sweep" is correct only if `stoa_entries` is genuinely reachable by the data-rights ERASURE paths
+(the store header claims entries persist "until withdrawn or erased"). **Verify that claim
+first-hand** — if erasure is not actually wired, there IS a gap, just a different-shaped one than
+PR24 described, and it should be surfaced rather than assumed closed.
 
 **Build note if it proceeds:** `agent_hold_observations`' PK is a generic **`id`** — unlike its
 `route_errors`/`throttle_events` siblings. The **PK_COLUMN discipline** from the 2026-08-12 C-1 live
@@ -110,23 +122,31 @@ without a deliberate decision.**
 
 ---
 
-## Part C — Session-open decisions (state each in the record; do not decide silently)
+## Part C — Session-open decisions — **ALL RESOLVED 2026-08-16 (founder). Do not re-open.**
 
-1. **PR24 scope — FOUNDER'S CALL.** Accept the correction (build `agent_hold_observations` only,
-   record the stoa half as a non-gap), or escalate to re-open the mentor record. **Do not build a
-   `stoa_entries` sweep on the arc plan's wording alone.**
-2. **AE-3 (item 2) — is it buildable this session?** ADR-014 §7 gates it: *"Last; needs structural
-   cadence-provenance + a non-monoculture distribution."* Neither is verifiable from a repo session.
-   AE-3 is the **agent R20b dependence detector** (NOT the reflect projection — that gate belongs to
-   AE-1 and does not apply here; see the R2a research). Its own preconditions: a structural way to
-   distinguish harness-mandated from agent-elected consults (**never a client-supplied flag** —
-   §3.4), and the `deliberate`-monoculture resolved. **If the preconditions cannot be shown met,
-   the honest move is to scope-and-defer with the reason recorded, not to build a detector whose
-   inputs are known-degenerate.** The ADR also names no carrier surface and no flag for it —
-   both are open design choices.
-3. **Order and split.** Suggested: item 1 (D4+D1) → item 5 → item 7 → item 8 (P8a) → Spec 4 → item 2
-   (AE-3) last, per the ADR. Split again at the review boundary if context runs hot; say so.
-4. **The carried Q1 finding** (below) — fix here, or route to R3? State the choice.
+The founder reviewed and approved these before this session was scheduled. They are settled inputs,
+not questions to re-litigate at open.
+
+1. **PR24 scope — RESOLVED: accept the correction + fix PR24's wording.** See Part B.1 for the full
+   resolved scope, including the erasure verification.
+2. **AE-3 — RESOLVED: DEFERRED out of R2b to its own scoping step.** Grounds: its first precondition
+   (structural cadence-provenance) is **an unmade design decision, not a build task** — the ADR names
+   two candidate mechanisms (per-channel credentials; a derived per-task/per-loop measure) and makes
+   neither, and today the harness runs one consult credential so *every* consult is mandated and the
+   "excess consults" the detector keys on is effectively zero. Building against that produces exactly
+   what ADR-014 §3.4 warns of: *"simultaneously always-triggering and never-triggering: pure noise."*
+   **AE-3 is NOT built in this session.** Its successor is a short scoping step that (a) names the
+   cadence-provenance mechanism and (b) checks the live proximity distribution empirically — neither
+   answerable from a repo session. **Author that scoping prompt at this session's close so the item
+   does not go quiet.**
+3. **The Q1 null-suspicion finding — RESOLVED: FOLD INTO R2b** (item 6 below). *(This went against
+   the AI's recommendation of a dedicated step; the founder's call stands. The trade is coherent:
+   deferring AE-3 frees the capacity, so R2b still carries six items, not seven.)*
+4. **Order — the AI's call, stated:** **D4+D1 → P8a → PR24 → item 5 → Spec 4 → the Q1 fix.**
+   D4+D1 first while context is freshest (heaviest; a LIVE trust-event surface; ~15 battery pins
+   move). **P8a second because it is a hard precondition for R4's LAST step** — if it does not land,
+   the new false-hold observation window cannot start. Split again at the review boundary if context
+   runs hot, and say so rather than degrading the tail.
 
 ---
 
@@ -166,15 +186,27 @@ without a deliberate decision.**
    ride it (Set B R-3/R-5): served ONLY inside the AE-1 delta on credential-bearing `/api/reason`
    consults, **never on the public trust record**; the two named honest limits carried in its own
    disclosure; the M7 window stands; MEASURE-only.
-6. **AE-3** — per Part C.2.
-7. **The carried Q1 null-suspicion finding** (PR19-confirmed in R2a). Q1's recalibrated wording
-   invites *"I cannot determine"*; `reflect-extractor.ts`'s `mapQ1`/`Q1_SYSTEM` has **no field
-   distinguishing it from "examined, found nothing"** — both give `distortions: []`, so three
-   consecutive honest answers trip `null_reflection` (`engine.ts:479-488`) and elevate
-   `fabrication_risk` to `moderate`, surfacing a misdirected scrutiny note
-   (`response-builders.ts:187-188`). Bounded — never reaches `high`, so S1 emission is unaffected
-   (`derive-trust-events.ts:516`). Closing it means adding a cannot-determine signal to the Q1
-   extraction schema: **a live trust-event surface, its own scoped change.**
+6. **The Q1 null-suspicion fix** (PR19-confirmed in R2a; **folded in by founder election**). Q1's
+   recalibrated wording invites *"I cannot determine"*; `reflect-extractor.ts`'s `mapQ1`/`Q1_SYSTEM`
+   has **no field distinguishing it from "examined, found nothing"** — both give `distortions: []`,
+   so three consecutive honest answers trip `null_reflection` (`engine.ts:479-488`) and elevate
+   `fabrication_risk` to `moderate`, surfacing a misdirected scrutiny note on the completion
+   response (`response-builders.ts:187-188`). Bounded — never reaches `high`, so S1 emission is
+   unaffected (`derive-trust-events.ts:516`).
+
+   **Frame it correctly: this COMPLETES the mentor's vetted-wording ruling rather than amending it.**
+   The mentor vetted Q1 *on the premise* that "I cannot determine" is a legitimate answer; an
+   extraction pipeline that silently collapses it into "clean" partially defeats that intent. The
+   wording is not re-opened.
+
+   **Surfaces it touches — treat as a live trust-event elicitation change, not a typo fix:**
+   `reflect-extractor.ts` (`mapQ1` + the `Q1_SYSTEM` prompt — an LLM extraction contract),
+   `Q1Assessment`, `q1Clean` + the `null_reflection` branch in `engine.ts`, and `q1_clean`'s
+   persistence (`session-store.ts:458`, `arrLen(r.phantasia_distortion_log) === 0`). **Check whether
+   a schema/column change is implied by the persistence path before designing the fix** — if it is,
+   that is a founder-walked step and should be split out rather than absorbed.
+   **Do NOT weaken `q1Clean` for the genuine-clean case** — the null-suspicion mechanism is
+   legitimate for actual repeated nulls; the defect is only that it cannot see the third state.
 
 ---
 
@@ -213,8 +245,10 @@ production regardless of outcome; R4 is the separately-walked activation.
 
 ## Forecast
 
-Success = the six carried items built dark with clean batteries and mutation-verified pins, the two
-founder decisions recorded rather than assumed, one clean consolidated PR19 review with both pause
-points honoured, nothing activated — and R3 next.
+Success = the **six** items built dark with clean batteries and mutation-verified pins (D4+D1, P8a,
+PR24-corrected, item 5, Spec 4, the Q1 fix — **AE-3 is deliberately not among them**); PR24's own
+wrong grounding sentence corrected and the `stoa_entries` erasure claim verified rather than
+assumed; the AE-3 scoping prompt authored so that item does not go quiet; one clean consolidated
+PR19 review with both pause points honoured; nothing activated — and R3 next.
 
 *End of prompt.*
