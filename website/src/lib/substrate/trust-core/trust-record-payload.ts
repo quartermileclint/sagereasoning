@@ -69,6 +69,25 @@ export const TRUST_RECORD_ENVELOPE = {
     'This record is an attestation composed server-side from consumer-unforgeable trust events under a 90-day retention regime — not a cryptographic proof of the agent’s inner states, and not a certification of safety, ethics, or trustworthiness in any absolute sense (R18a). MEASURE mode: nothing in this record binds any decision; a human’s right to override is absolute regardless of any level shown here (R20c).',
 } as const
 
+/**
+ * M6 (mentor ruling 2026-08-15, VERBATIM + BINDING — the verbatim record wins
+ * over this comment). Served on the total-UNKNOWN branch of the capped
+ * orientation-readings note. The total-known branch discloses the composition
+ * effect and can quantify the gap; this branch cannot, so it names the
+ * inability to assess rather than staying silent about it.
+ *
+ * Note the vocabulary, recorded rather than adapted: M6 says "interactions"
+ * where the surrounding payload says "readings". The mentor wording lands
+ * verbatim — the surrounding note supplies the readings context, and M6's own
+ * logic (a branch that cannot quantify the curation effect names the inability)
+ * is vocabulary-independent.
+ */
+export const M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE =
+  'The trust record for this agent is incomplete. The total number of ' +
+  'interactions cannot be confirmed. Curation effects — where high-volume ' +
+  'interaction patterns may suppress individual signal visibility — cannot be ' +
+  'assessed at this time. This record should be read with that limitation in mind.'
+
 // ============================================================================
 // WIRE TYPES (sage-trust-record/v1)
 // ============================================================================
@@ -307,8 +326,9 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
       // volumes of toward-classified consults to displace older away or
       // indeterminate entries from the visible recency window.
       const total = input.orientationReadings.totalCount
-      notes.push(
-        (typeof total === 'number'
+      const totalKnown = typeof total === 'number'
+      let cappedNote =
+        (totalKnown
           ? `orientation_readings shows the ${orientationEntries?.length ?? 0} most recent of ` +
             `${total} total readings (a recency window, not the full record); because the ` +
             'served list is recency-ordered, an agent generating high volumes of ' +
@@ -317,8 +337,18 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
             'does not prevent this composition effect; '
           : 'orientation_readings is capped at the bounded read window (older readings not ' +
             'listed; the total count was unavailable this read); ') +
-          'each entry describes one examination only — see its inline not-attestable clause',
-      )
+        'each entry describes one examination only — see its inline not-attestable clause'
+      // M6 (2026-08-15 mentor ruling, verbatim + binding): the total-KNOWN arm
+      // above can name the composition effect because it can quantify the gap.
+      // This arm cannot — so it names the INABILITY TO ASSESS instead, rather
+      // than staying silent about a limitation it genuinely has. The existing
+      // operational clause is RETAINED (it states the mechanical fact; M6 states
+      // the honest consequence) — battery pin S6-5d rides that clause.
+      // ORDERING NOTE: the ruled sentence is folded AFTER the shared tail rather
+      // than mid-sentence before it, purely so the served prose does not read
+      // "…in mind. each entry describes…". The wording itself is untouched.
+      if (!totalKnown) cappedNote += `. ${M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE}`
+      notes.push(cappedNote)
     }
   }
   if (profile.unevaluatedCardinalDomains.length > 0) {

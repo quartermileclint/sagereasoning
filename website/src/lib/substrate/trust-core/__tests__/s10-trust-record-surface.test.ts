@@ -42,6 +42,7 @@ import {
 import { PROXIMITY_RANK } from '../constants'
 import {
   composeTrustRecordPayload,
+  M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE,
   REFLECT_MODULATE_ONLY_NOTE,
   TRUST_RECORD_ENVELOPE,
 } from '../trust-record-payload'
@@ -665,6 +666,25 @@ async function main(): Promise<void> {
     assert(
       cappedNoCount.notes.some((n) => n.includes('total count was unavailable')),
       'S6-5d the count outage is disclosed in the note',
+    )
+    // S6-5e/f (M6, mentor ruling 2026-08-15): the total-UNKNOWN branch cannot
+    // quantify the curation effect, so it names the inability to assess it.
+    // S6-5d above pins the RETAINED operational clause; these pin the ruled
+    // disclosure folded alongside it.
+    assert(
+      cappedNoCount.notes.some((n) => n.includes('cannot be assessed at this time')),
+      'S6-5e M6: the total-unknown branch names the un-assessable curation effect',
+    )
+    assert(
+      cappedNoCount.notes.some((n) => n.includes(M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE)),
+      'S6-5f M6: the ruled disclosure is served VERBATIM, not paraphrased',
+    )
+    // And the total-KNOWN branch must NOT carry it — it discloses the effect it
+    // can actually quantify (the 2026-08-12 curation-via-volume fold). A single
+    // shared note would make both branches claim the other's epistemic position.
+    assert(
+      !capped.notes.some((n) => n.includes('cannot be assessed at this time')),
+      'S6-5g M6 rides the total-unknown branch ONLY (the known branch quantifies instead)',
     )
 
     // S6-6: flag-on read failure ⇒ field omitted + honest note (the reflect-
