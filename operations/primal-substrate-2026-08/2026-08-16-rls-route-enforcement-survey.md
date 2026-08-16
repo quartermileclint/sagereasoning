@@ -76,7 +76,7 @@ match the target shape; `§INVERSE` recreates the dropped policies verbatim).
 | 9 | `passion_events` | `supabase-mentor-gaps-migration.sql` | S/I/U/D | `api/mentor/passion-log`, `api/mentor/passion-classify` | Passion sub-species content — intimate. |
 | 10 | `realtime_journal_entries` | `supabase-mentor-gaps-migration.sql` | S/I/U/D | `api/mentor/journal-feed`, `api/user/export`, `lib/user-data-gathering` | R17b-encrypted prose columns; a direct INSERT would also bypass encryption-at-write — plaintext rows. |
 | 11 | `mentor_baseline_appendix` | `supabase-mentor-appendix-migration.sql` | SELECT/INSERT/DELETE (no UPDATE) | `lib/mentor-appendix-store`, `api/user/export` | Partial verb set; same fix shape. |
-| 12 | `mentor_profiles` | `supabase-mentor-profiles-migration.sql` | SELECT/UPDATE/INSERT (no DELETE) | `api/founder/hub`, `api/mentor/private/*`, `api/mentor/founder/history`, `api/user/export` | The mentor profile — among the most intimate tables in the app. Recommended **second**, after `impulse_entries`. |
+| 12 | ~~`mentor_profiles`~~ **FIXED** | `supabase-mentor-profiles-migration.sql` | ~~SELECT/UPDATE/INSERT~~ **dropped** | 18 sites, 11 files (this survey named 4; re-enumerated from scratch — see verdict) | **CLOSED 2026-08-16 AT TWO LAYERS** (`D-CONCURRENT-ARC-C4-MENTOR-PROFILES-RLS-FIX-LIVE-2026-08-16`; migration `website/supabase-mentor-profiles-rls-lockdown-migration.sql`). **A NEW CLASS FOUND HERE, not present in this survey's original taxonomy:** a `SECURITY DEFINER` RPC (`increment_structured_observation_count`) writes to this table unscoped by `auth.uid()` and is **untouched by table-level RLS/grant fixes** — confirmed live, PUBLIC-executable, before this fix; closed in the same migration (`§4`). **Every table this survey still lists as open should be checked for the same class** (`grep SECURITY DEFINER` across `supabase/migrations/`, cross-referenced against table names) before being called closed by a table-only fix. Also confirmed live: an integrity hole, not disclosure — owner-scoped policies meant no cross-user read, but an authenticated user could self-forge `senecan_grade`/`proximity_level`/etc. |
 
 Also in this class, lower stakes:
 
@@ -156,8 +156,11 @@ deliberate public SELECT (the public accreditation read surface). These are the 
 3. ~~**The three open-INSERT policies** (rows 25–27)~~ — **DONE 2026-08-16**, live on production,
    one migration, same day as items 1 and 2. The probe found all six (3 tables × 2 environments)
    genuinely open, confirming the class's caveat was true, not theoretical.
-4. **`mentor_profiles` + the remaining Class A intimate tables** (rows 2–12) — batched by
-   sibling shape, a few per session.
+4. ~~**`mentor_profiles`** (row 12)~~ — **DONE 2026-08-16**, live on production, closed at TWO
+   independent layers (the table + a `SECURITY DEFINER` RPC found live mid-fix — see the addendum
+   below). The remaining Class A intimate tables (rows 2–11) are still open; batch by sibling shape,
+   a few per session, and **run the `SECURITY DEFINER` check (addendum below) on each before
+   calling any of them closed**.
 5. **Class A lower-stakes** (rows 13–18).
 6. **Class B** (`action_evaluations_v3`, `journal_entries`, `reflections` SELECT) — each needs
    its own route-change design first; `journal_entries` needs a live-state read before even
@@ -167,18 +170,19 @@ deliberate public SELECT (the public accreditation read surface). These are the 
 
 ## Status addendum — 2026-08-16, end of the C4 sitting
 
-**Backlog items 1, 2 and 3 all closed the same day this survey was written** — six tables in
-total, all live on production, each PR19-reviewed CLEAN:
+**Backlog items 1–4 all closed the same day this survey was written** — seven tables plus one
+`SECURITY DEFINER` function, all live on production, each PR19-reviewed CLEAN:
 
 | Item | Tables | Class | Decision-log entry |
 |---|---|---|---|
 | 1 | `impulse_entries` | A (owner policies) | `D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE-2026-08-16` |
 | 2 | `founder_conversations`, `founder_conversation_messages` | C (role-unrestricted, ALL) | `D-CONCURRENT-ARC-C4-FOUNDER-CONVERSATIONS-RLS-FIX-LIVE-2026-08-16` |
 | 3 | `reflections`, `milestones`, `document_scores` | C (role-unrestricted, INSERT) | `D-CONCURRENT-ARC-C4-OPEN-INSERT-POLICIES-FIX-LIVE-2026-08-16` |
+| 4 | `mentor_profiles` + `increment_structured_observation_count()` (RPC) | A (owner policies) + a NEW class (SECURITY DEFINER) | `D-CONCURRENT-ARC-C4-MENTOR-PROFILES-RLS-FIX-LIVE-2026-08-16` |
 
-**Classes A (rows 2–18), B, and Class C's row 28 remain open and carried.**
+**Class A rows 2–11 and 13–18, Class B, and Class C's row 28 remain open and carried.**
 
-### Two method findings this survey's own execution produced
+### Three method findings this survey's own execution produced
 
 **1. A hedge is not a measurement.** This document qualified Class C as *"subject to a live-grant
 confirmation,"* reasoning that Supabase's defaults were *probably* intact. Every probe eventually
@@ -197,4 +201,18 @@ their client type before reusing a shape.** Also note that item 3's PR19 review 
 five findings were errors in the *justification* while the SQL was correct — including two claims
 in this survey's own rows 25–27, now corrected in place.
 
-*End of survey. Items 1–3 closed; items 4–6 (Classes A, B, row 28) are the open backlog.*
+**3. A table-level fix can be genuinely correct and still incomplete, if a `SECURITY DEFINER`
+function writes to the same table.** Item 4's PR19 review found `increment_structured_observation_
+count()`, a `SECURITY DEFINER` RPC, writes `mentor_profiles` for a caller-supplied `p_profile_id`
+with no `auth.uid()` scoping — and because `SECURITY DEFINER` runs with the function OWNER's
+privileges, **no REVOKE or RLS policy change at the table level touches it at all.** Confirmed live
+on TEST (a non-writing garbage-UUID probe): `HTTP 204`, genuinely PUBLIC-executable, before the
+fix. **None of items 1–3's checks would have caught this** — they read policies, read grants, and
+ran table-scoped behavioural probes; a `SECURITY DEFINER` gap is invisible to all three. **Before
+calling ANY remaining table in this survey closed, grep `SECURITY DEFINER` across
+`supabase/migrations/` and `operations/migrations/` (repo-root, not just `website/`) and
+cross-reference against that table's name.** This is now load-bearing guidance for every remaining
+row in Classes A and B, not an isolated finding against `mentor_profiles` alone.
+
+*End of survey. Items 1–4 closed; the remaining Class A rows, Class B, and row 28 are the open
+backlog — check each for a `SECURITY DEFINER` writer before calling it closed.*

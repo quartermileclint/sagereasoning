@@ -21329,3 +21329,40 @@ Expected: the survey's method + Class A/B/C structure.
 **Rules served:** R17, AC7, PR17, PR19, PR21.
 
 **Status:** Adopted. Cross-references: `D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16`, `D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE-2026-08-16`, `D-CONCURRENT-ARC-C4-FOUNDER-CONVERSATIONS-RLS-FIX-LIVE-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-CONCURRENT-ARC-C4-MENTOR-PROFILES-RLS-FIX-LIVE-2026-08-16
+
+**Decision:** `mentor_profiles` is **CLOSED AND LIVE ON PRODUCTION AT TWO INDEPENDENT LAYERS** — a founder-walked `code-critical` 0c-ii (AC7 discharged for a combined disclosure; PR19 discharged, standard sequencing; PR17 throughout). **Production is intentionally NOT byte-equivalent.** The fourth and largest RLS fix of the day, and the only one this session found via an in-flight PR19 finding rather than the original survey alone.
+
+**The table-level defect (Class A — row 12).** Three owner policies (`auth.uid() = user_id` on SELECT/UPDATE/INSERT), no `TO` clause, over never-revoked default grants. **An INTEGRITY hole, not disclosure** (owner-scoped, so no cross-user read) — an authenticated practitioner could INSERT/UPDATE their own row directly, forging `senecan_grade`/`proximity_level`/`passions_count`/`weakest_virtue` or corrupting the encrypted profile blob.
+
+**A second, independent probe trap caught in-flight (worth its own line, distinct from the day's earlier one).** The straightforward proof — an authenticated own-user INSERT with an empty body — returned `42501 "new row violates row-level security policy"`, which reads as "closed". It was not: `42501` covers BOTH "permission denied" and "RLS policy violated by a role that HAS the privilege" — an empty body's null `user_id` fails the owner `WITH CHECK` regardless of grants. **Only a second probe, supplying the caller's OWN real `user_id` so the policy passes and only a NOT-NULL column stops it, distinguished them** — it returned `23502 null value in encrypted_profile`, unambiguous proof the write was permitted. **Match the message, never the bare code** — now stated twice in one day's records because it recurred once already resolved.
+
+**Consumers enumerated from scratch, not inherited from the survey.** The survey's row 12 named 4 files; this session found **18 call sites across 11 files**, all service-role, zero anon, zero client-side usage — the count itself corrected TWICE more during the PR19 process (first four missed files folded before production, then an 18th site found on the RPC re-fold review, `api/user/delete/route.ts:105`). None of the corrections changed the safety verdict; all sharpened the file's own audit trail.
+
+**A live PR19-found finding expanded scope mid-walk, with fresh AC7 for the addition.** The independent reviewer found `increment_structured_observation_count(uuid)` — a `SECURITY DEFINER` RPC writing `structured_observation_count`/`first_structured_observation_at` on `mentor_profiles` for a caller-supplied, unscoped `p_profile_id` — is **untouched by any table-level REVOKE**, because `SECURITY DEFINER` executes with the function owner's privileges, not the caller's. **Confirmed live on TEST, non-writing** (a garbage UUID matching no row): an unauthenticated RPC call returned `HTTP 204` — genuinely PUBLIC-executable; no `REVOKE`/`GRANT EXECUTE` had ever been run on it. **The founder was told before any fix, given the choice to close it in this same sitting or defer it, and elected "do both together."** Folded into the same migration (`§4`), same AC7 (a fresh six-point disclosure covering both changes), same PR19 continuity (the SAME reviewer agent re-verified the addition, given it already held full context on the finding — a legitimate independence choice, since the addition was ITS OWN discovery, not the original author's claim being re-marked).
+
+**The live walk, every DB step founder-run:**
+- **TEST `§PRE` (table):** 3 owner policies confirmed; count 0.
+- **TEST `§APPLY` + `§VERIFY` (table):** 0 policies remain; RLS `true`; 0 grants.
+- **TEST behavioural (table), both directions:** unauthenticated SELECT `200`→`42501`; authenticated own-`user_id` INSERT `23502`(permitted, by message)→`42501 "permission denied for table"`(denied, by message — the disambiguated pair).
+- **TEST `§PRE`/`§APPLY`/`§VERIFY` (RPC, added mid-walk):** unauthenticated non-writing probe `204`(open)→`42501 "permission denied for function"`(closed).
+- **TEST V6 (founder-confirmed live):** `/private-mentor` loads correctly.
+- **PRODUCTION `§PRE`:** 3 policies; count **1** (one real profile).
+- **PRODUCTION `§APPLY` + `§VERIFY` (both fixes together):** 0 policies; RLS `true`; 0 grants; count **1 — unchanged**.
+- **PRODUCTION behavioural, both fixes:** table `200`→`42501`; RPC `204`→`42501`.
+- **PRODUCTION V6 (founder-confirmed live):** `/private-mentor` loads correctly.
+
+**Files touched:** `website/supabase-mentor-profiles-rls-lockdown-migration.sql` (new; §1–3 authored, §4 added mid-review per the RPC finding; APPLIED to TEST + production), `operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md`, `CLAUDE.md`, this entry.
+
+**Risk classification:** `code-critical` under 0d-ii. AC7 **engaged and discharged twice** — once for the table fix, and a fresh six-point disclosure once the RPC finding expanded the change, before the founder's "do both together" was treated as approval of the combined production step. PR19 **discharged** (initial CLEAN on §1–3 with two CONFIRMED findings — the RPC gap, MEDIUM; the incomplete consumer count, LOW/nit — both folded; the §4 addition itself independently re-verified CLEAN by the same reviewer, which then found the count's remaining gap on re-read). PR6 not engaged.
+
+**Rollback path:** `§INVERSE`, now covering both layers — the three owner policies + grants restored, and `GRANT EXECUTE ... TO PUBLIC` restored on the RPC. Restores the exact pre-migration state at both layers together.
+
+**Reflect finding (PR21):** **a table-level RLS/grant fix does not close a table's attack surface by itself if the table is also reachable through a `SECURITY DEFINER` function** — that class of gap is invisible to every check this session's five earlier fixes used (policy reads, grant reads, table-scoped behavioural probes), because it operates at a completely different privilege layer. **The general lesson for the remaining survey backlog: before calling any table "closed," check for `SECURITY DEFINER` functions that write to it** (`grep SECURITY DEFINER` across `supabase/migrations/` and `operations/migrations/`, cross-referenced against every table's name) — a check none of today's five migrations performed except this one, and only because the reviewer happened to search wider than `website/src/`. **This finding should gate the Class A backlog (rows 2–18), not just be filed against this one table** — any of them could have the same class of gap.
+
+**Carried:** the rest of Class A (rows 2–18, minus `mentor_profiles` now closed) — the `SECURITY DEFINER` check above should run against each before it's called done; Class B; row 28. The application-layer `reflect` gap named at the previous fix remains carried, unrelated to this one.
+
+**Rules served:** R17, AC7, PR17, PR19, PR21.
+
+**Status:** Adopted. Cross-references: `D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16`, `D-CONCURRENT-ARC-C4-OPEN-INSERT-POLICIES-FIX-LIVE-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
