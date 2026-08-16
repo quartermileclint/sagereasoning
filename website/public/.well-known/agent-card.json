@@ -141,7 +141,7 @@
       },
       {
         "uri": "https://sagereasoning.com/extensions/safety-redirect/v1",
-        "description": "R20a distress-input behaviour. Agent-authenticated calls that contain acute-distress content return HTTP 200 with {status:'redirected', severity, developer_note, suggested_user_message, flow_terminated:true} instead of an assessment. Integrators MUST surface suggested_user_message to the end user verbatim and terminate the flow. Human-session surfaces render a crisis message directly. Contract behaviour, not an error. Practitioner-type calibration: Outside the crisis path, the guide's response is not currently calibrated for practitioner type. Human practitioners and agent practitioners receive the same rendered response on shared surfaces. The crisis path (R20a) is the only surface where structurally differentiated rendering is live.",
+        "description": "R20a distress-input behaviour. Agent-authenticated calls that contain acute-distress content return HTTP 200 with {status:'redirected', severity, developer_note, suggested_user_message, flow_terminated:true} instead of an assessment. Integrators MUST surface suggested_user_message to the end user verbatim and terminate the flow. Human-session surfaces render a crisis message directly. Contract behaviour, not an error. Outside the crisis path, the guide's response is not currently calibrated for practitioner type. Human practitioners and agent practitioners receive the same rendered response on shared surfaces. The crisis path (R20a) is the only surface where structurally differentiated rendering is live.",
         "required": false,
         "params": {
           "responseShape": {

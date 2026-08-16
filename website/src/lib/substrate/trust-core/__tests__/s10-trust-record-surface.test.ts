@@ -667,14 +667,14 @@ async function main(): Promise<void> {
       cappedNoCount.notes.some((n) => n.includes('total count was unavailable')),
       'S6-5d the count outage is disclosed in the note',
     )
-    // S6-5e/f (M6, mentor ruling 2026-08-15): the total-UNKNOWN branch cannot
+    // S6-5f (M6, mentor ruling 2026-08-15): the total-UNKNOWN branch cannot
     // quantify the curation effect, so it names the inability to assess it.
-    // S6-5d above pins the RETAINED operational clause; these pin the ruled
-    // disclosure folded alongside it.
-    assert(
-      cappedNoCount.notes.some((n) => n.includes('cannot be assessed at this time')),
-      'S6-5e M6: the total-unknown branch names the un-assessable curation effect',
-    )
+    // S6-5d above pins the RETAINED operational clause; this pins the ruled
+    // disclosure folded alongside it. (PR19 fold: a sibling substring pin,
+    // S6-5e, was dropped — the constant is appended whole at exactly one call
+    // site, so any note satisfying this VERBATIM check satisfies the weaker
+    // substring check by construction; it added no independent mutation
+    // coverage.)
     assert(
       cappedNoCount.notes.some((n) => n.includes(M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE)),
       'S6-5f M6: the ruled disclosure is served VERBATIM, not paraphrased',
