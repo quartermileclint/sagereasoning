@@ -21437,3 +21437,112 @@ session (Q10/Q11) and R5's ATRF scoping session remain gated behind R1 as design
 **Status:** Adopted. Cross-references: `2026-08-15-concurrent-arc-plan.md` (Phase 2 trigger, R1),
 `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16` (the downstream gate this discharges the
 precondition for). Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16
+
+**Decision:** Recorded the mentor's ruling on the runner's own self-caught correction to its h7
+win-record tally, relayed by the founder while ending the run. **Ruling: the §6 report splits h7's
+wins three ways** — contested tie-break (4: cycles 2, 11, 14, 20), uncontested (1: cycle 17),
+contested out-scoring (0) — replacing the frozen binary strict/tie-break discriminator, whose
+premise (an empty strict-win column) the correction found false. Verbatim canonical:
+`idea-loop-validation-run/MENTOR-CORRECTION-h7-win-record.md` (the runner's self-correction) + the
+mentor's response relayed by the founder (not separately filed verbatim; substance captured here
+and in the §6 report, §4).
+
+**What was wrong and how it was found.** The 2026-08-16 cycles-19/20 mentor review had been given
+"four wins, four tie-breaks, zero strict wins," and ruled on that basis that the empty strict-win
+column should be named explicitly (`D-MENTOR-RULING-...` folded into the cycle-19/20 review, not a
+separately-numbered entry). While closing the run, the runner re-derived h7's win list from each
+winner cycle's own Step 4 record rather than trusting the carried tally, and found **five wins, not
+four** — cycle 17 was the sole survivor of both filters, uncontested, no tie-break at all. The
+runner's own diagnosis of the error, quoted because it names a reusable pattern: *"I checked the
+tie-break count and never checked the win list I was counting over. A verified arithmetic operating
+on an unverified set."* — the second instance of this exact class in two cycles' worth of review.
+
+**The mentor's ruling, in substance.** The correction is accepted; the error's cause is judged the
+more useful finding for the §6 report's reconciliation section than either individual miscount. The
+frozen binary discriminator (strict wins vs. tie-break wins) has no category for cycle 17's shape —
+filing it as a strict win would overstate the friction channel's competitiveness in exactly the
+direction the discriminator exists to test honestly; filing it as a tie-break win is simply false.
+**Three-way split adopted.** The §4 ruling's *conclusion* (name an empty column, don't omit it)
+stands as good law and now applies to the genuinely-empty contested-out-scoring column rather than
+the strict-win column it was first (wrongly) applied to — annotated in the run log as "conclusion
+stands, premise withdrawn, disposition reopened and now re-ruled," confirmed by the mentor as the
+correct record-keeping posture. **The surviving finding is judged stronger than the one it
+replaces:** h7 has never won by out-scoring a contested field on proximity — four of five wins were
+phantasia-draw tie-breaks, the fifth uncontested because the novelty gate had emptied the pool
+around it.
+
+**Files touched:** `idea-loop-validation-run/MENTOR-CORRECTION-h7-win-record.md` (the runner's own,
+in the scratch project, not this repo), the run log's own §4 annotation (scratch project), the §6
+report `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md` (§4, incorporating the
+ruled three-way split), this entry.
+
+**Risk classification:** `governance` — documents only. No code, schema, flag, or credential
+touched. AC7 not engaged.
+
+**Rollback path:** `git revert` this commit (documents only, in this repo); the scratch-project
+files are outside git.
+
+**Rules served:** PR21 (a reporting-error pattern named for reuse — "re-derive any carried tally
+from its underlying set at report time, never trust a remembered count").
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`
+(the same close-out session that surfaced this correction). Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16
+
+**Decision:** Ran concurrent-arc **R1** — compiled the bounded validation run's §6 report from
+production data, per the standing parallel-window prompt's Mode 3 procedure and the plan's own R1
+step. Deliverable: `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`.
+
+**Method, per the standing prompt's own instruction — real numbers, never reconstructed.** Every
+figure in the report was pulled live from `idea_loop_cycles` + `idea_loop_candidates` (service-role,
+read-only), independently cross-checked where the run log carried its own tally (h7's win-by-
+heuristic table matched exactly, confirmed via `winner_candidate_id` join, not trusted from the log
+alone). **Cost:** $6.82 total / $0.341 mean across 20 cycles, no null rows. **Timestamps:** 17 of 20
+cycles carry `started_at`/`ended_at`; **cycles 5, 6, 13 are null on both — confirmed by direct
+query**, matching the run log's own prior note; no elapsed-time figure is reported for the full
+20-cycle set rather than silently imputing or dropping the gap. **`ORIENTATION_DELIVERY_TIMEOUT_MS`**
+(the standing prompt's own explicit ask): a direct `agent_trust_events` query for this agent_id's
+`orientation-reading-*` events returns 22 rows, **19 `observed` / 3 `examined`** — the scoping
+analysis's prediction (every winner consult classifies `observed`, since consults exceed the
+28,000ms bound) is confirmed as the *predominant* pattern (86%) but **not universal**; the 3
+counter-instances are named, not explained away. **`not_selected`** confirmed still live and wired
+(`handler.ts`'s accepted-values list carries it).
+
+**What the report folds in from the run log, per the plan's instruction not to overwrite the
+runner's own account:** the guardrail calibration limit (with an honest statement that the
+remediation-shaped-candidate hypothesis is **NOT** fully tested against the full 120-candidate
+record in this report — a mechanical classifier for "remediation-shaped" doesn't exist and a
+qualitative read of all 9 guardrail-rejected candidates was out of this session's scope; named as a
+gap rather than answered with a guess); the settled domain-pairing finding, verbatim wording; GS-
+ATRF-1/2 from the run log's Part D; the credential-path stability finding (five blockers, two fully
+evidenced, one genuinely unresolved — a same-session, same-configuration call refused then
+succeeded, with the runner's own account declining to credit the fix); the two mechanisms ruled into
+force and never exercised live (the fourth B7 signature, friction-only mode's sustained operation);
+the reconciliation section naming the h7 tally-error's root cause as a reusable pattern; and every
+still-un-ruled finding from the run log, listed so a future session doesn't have to re-derive them.
+
+**Files touched:** `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md` (new), this
+entry.
+
+**Risk classification:** `code-standard` per the standing prompt's own classification (a pure
+report-compilation read; no live-op, no write to any production table — the SQL used was
+`SELECT`-only throughout, verified before each query). AC7 not engaged.
+
+**Rollback path:** `git revert` this commit (documents only).
+
+**Open questions carried into the report itself (§11):** nine named un-ruled findings from the run
+log, plus the reach-vs-irreversibility decoupling pattern's full implication and the remediation-
+shaped-candidate hypothesis — none gates the report's own delivery to the mentor.
+
+**Rules served:** the standing parallel-window prompt's Mode 3 (real numbers, fold-not-overwrite,
+name every deviation honestly); PR20 (the report itself functions as the mechanism-fact brief for
+whatever mentor consultation follows).
+
+**Status:** Adopted. **The report has NOT yet been brought to the mentor** — that is the founder's
+next action (this session compiled it; the plan's R1 step requires it reach the mentor "before any
+standing-runner design opens," which is a separate, still-pending step). Cross-references:
+`D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`,
+`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.

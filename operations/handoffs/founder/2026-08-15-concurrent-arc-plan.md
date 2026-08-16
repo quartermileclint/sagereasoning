@@ -269,7 +269,7 @@ mutation-verify the 30-day boundary both sides.
 (its Part F hand-back, including its GS-ATRF-1/2 answer). A Mode 1 blocking spec at any point
 preempts everything.*
 
-### ☐ R1 — Mode 3: the §6 report (the gate for everything after it)
+### ◐ R1 — Mode 3: the §6 report (the gate for everything after it) — **COMPILED 2026-08-16, NOT YET RULED ON** (`D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16`; report: `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`). The run closed at 20 cycles on the mentor's own stop-at-20 ruling (`D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`); the h7 win-record correction was folded in per its own three-way-split ruling (`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`). **Outstanding: the report must reach the mentor and be ruled on before R5/R6/R8 open** — this is the founder's next action, not yet done.
 *Tier: `code-standard` (read/report). Founder presence: relays the report to the mentor.*
 
 Per the parallel-window prompt's Mode 3, steps 1–5 verbatim: real numbers from production (never
