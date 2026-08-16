@@ -476,6 +476,42 @@ routeState.reason = "ok";
   routeState.guard = "proceed";
 }
 
+// 5c-P8a — PR19 FOLD (2026-08-17): the guard-outage record. Register P5's own words
+// are "the guard path writes no record" — the P8a build fixed that for the deny/
+// caution/proceed branches but an independent review found guardOutage() itself was
+// left uncaptured, silently dropping precisely the failure category (engine-
+// unavailable) most relevant to coverage/reliability accounting, and directly
+// contradicting buildGuardHoldRecord's own docstring promise that such verdicts are
+// "recorded as no_assessment ... rather than silently dropped." This is that record.
+{
+  const stateDir = mkdtempSync(join(tmpdir(), "p8a-outage-capture-"));
+  const capEnv = { GATE1_FALSE_HOLD_CAPTURE: "true", GATE1_STATE_DIR: stateDir };
+  const recPath = join(stateDir, "false-hold-record.jsonl");
+  const readRecs = () => {
+    try {
+      return readFileSync(recPath, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    } catch {
+      return [];
+    }
+  };
+
+  routeState.guard = "error";
+  const open = await runHook(AT_ACTION_HOOK, ptEvent("p8a-out1", "Bash", { command: "drop table users" }), { ...capEnv, GATE1_GUARD_FAIL_MODE: "open" });
+  check("P8a-outage: open mode still allows (no deny)", permOf(open.out) === null);
+  const openRecs = readRecs().filter((r) => r.path === "guard" && r.session.includes("p8a-out1"));
+  check("P8a-outage: open-mode outage WRITES a guard record (was silently dropped)", openRecs.length === 1)
+  check("P8a-outage: it carries captureBasis no_assessment (no engine verdict was available)", openRecs[0]?.captureBasis === "no_assessment")
+  check("P8a-outage: guardHold is false in open mode (the tool was allowed through)", openRecs[0]?.guardHold === false)
+
+  const strict = await runHook(AT_ACTION_HOOK, ptEvent("p8a-out2", "Bash", { command: "drop table users" }), { ...capEnv, GATE1_GUARD_FAIL_MODE: "strict" });
+  check("P8a-outage: strict mode still denies", permOf(strict.out) === "deny");
+  const strictRecs = readRecs().filter((r) => r.path === "guard" && r.session.includes("p8a-out2"));
+  check("P8a-outage: strict-mode outage ALSO writes a guard record", strictRecs.length === 1)
+  check("P8a-outage: strict outage counts as a hold (the action was blocked)", strictRecs[0]?.guardHold === true)
+
+  routeState.guard = "proceed";
+}
+
 // 5d — S1 OVER-FIRE FIX (build-plan §3.1, 2026-06-22): a NON-irreversible, NON-housekeeping Bash is
 // allowed SILENTLY (Bash is dropped from the auto-CONSULT trigger — its wire payload carries no
 // intent). No consult, no guard. This is the direct fix for the run that consulted before `date`.

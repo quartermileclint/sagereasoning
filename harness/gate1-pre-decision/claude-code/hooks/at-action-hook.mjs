@@ -454,13 +454,34 @@ async function main() {
  *      emit, the deny is already on the wire and nothing downstream can retract it.
  *
  * Property (1) alone cannot establish property (2): a total try/catch makes a
- * pre-emit call site look safe in every test that only exercises the catch. The
- * fault switch below exists so (2) is proven BEHAVIOURALLY rather than inferred
- * from source ordering — it is read only when the capture flag is already on, and
- * is never consulted on any decision path.
+ * pre-emit call site look safe in every test that only exercises the catch.
+ *
+ * CORRECTED 2026-08-17 (PR19 fold) — the paragraph this replaces overclaimed what
+ * the fault switch below proves, and was caught contradicting the negative-battery
+ * test's own honest comment for the SAME mechanism. Stated precisely now: the
+ * fault switch proves property (1)'s TOTALITY behaviourally (an injected throw
+ * genuinely cannot escape this function, at any of the three current call sites)
+ * — it does NOT discriminate PLACEMENT. Moving a call site above its emit and
+ * re-running the fault test would pass identically, because the try/catch below
+ * swallows the throw regardless of where the call sits; a mutation proved this
+ * directly (recorded in the negative-battery.mjs comment for this pin). Placement
+ * — property (2) — is pinned separately, and more weakly, by a source-order check
+ * (the call to emitBlock/emitAllowWithContext must precede the call here). A
+ * refactor that extracts a helper or renames a symbol could defeat that pin
+ * without defeating the fault-injection one, so the two pins are not
+ * interchangeable evidence — read both, not either.
  */
-function captureGuardObservation(cfg, { sessionId, toolName, action, guard, denied }) {
+function captureGuardObservation(cfg, opts) {
   try {
+    // PR19 fold (2026-08-17): destructure INSIDE the try, with a default, so
+    // property (1) ("this function can never throw") is a genuine signature-level
+    // invariant rather than a fact that happens to hold only because every
+    // current call site passes an inline object literal. Before this, a call with
+    // a missing/undefined second argument would throw during parameter binding —
+    // BEFORE the try block started — which is exactly the pre-emit-throw hazard
+    // property (2)'s own docstring paragraph warns about, just from a different
+    // cause than the one it was written to guard.
+    const { sessionId, toolName, action, guard, denied } = opts || {}
     if (!cfg.falseHoldCapture) return false
     // TEST-ONLY fault injection. Named distinctly from the capture flag so it can
     // never be set by an operator following the activation runbook.
@@ -487,10 +508,10 @@ function captureGuardObservation(cfg, { sessionId, toolName, action, guard, deni
 async function runGuard(cfg, { sessionId, toolName, action }) {
   if (!cfg.credential) {
     // No credential ⇒ we cannot run the gate. Honor the guard fail-mode (this is the guard's outage).
-    return guardOutage(cfg, sessionId, action, `credential not set (expected env ${cfg.credentialEnvVar})`);
+    return guardOutage(cfg, sessionId, toolName, action, `credential not set (expected env ${cfg.credentialEnvVar})`);
   }
   const r = await fetchGuardrail(cfg, action.text, { riskClass: "critical" });
-  if (!r.ok) return guardOutage(cfg, sessionId, action, r.reason);
+  if (!r.ok) return guardOutage(cfg, sessionId, toolName, action, r.reason);
 
   if (r.recommendation === "do_not_proceed") {
     honestLog(cfg, `GUARD-BLOCK session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}`);
@@ -544,13 +565,36 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
   allowSilently();
 }
 
-function guardOutage(cfg, sessionId, action, reason) {
+function guardOutage(cfg, sessionId, toolName, action, reason) {
   honestLog(cfg, `GUARD-OUTAGE session=${sanitizeLog(sessionId)} mode=${cfg.guardFailMode} reason="${reason}"`);
+  // PR19 FOLD (2026-08-17): this is the outage case buildGuardHoldRecord's own
+  // docstring already promised — "an engine-unavailable ... verdict carries NO
+  // assessment and NO proximity, so it cannot be classified. Those are recorded
+  // as `no_assessment` and EXCLUDED from the rate rather than silently dropped."
+  // That promise was UNKEPT: guardOutage never called captureGuardObservation at
+  // all, so precisely the failure category most relevant to coverage/reliability
+  // accounting was silently absent from the instrument's denominator. Confirmed by
+  // an independent PR19 review dimension, CONFIRMED on adjudication.
+  //
+  // `guard` here is a MINIMAL shaped stand-in, not a real fetchGuardrail() result —
+  // there is no `r` in the outage case. `assessment: null` drives
+  // buildGuardHoldRecord's existing captureBasis logic to "no_assessment" exactly
+  // as documented; `recommendation` names the EFFECTIVE outcome (what actually
+  // happened to the tool call), not a guardrail verdict that never arrived.
   if (cfg.guardFailMode === "strict") {
     emitBlock(
       `Gate-1 at-action guardrail (strict mode) could not evaluate this irreversible action: ${reason}. ` +
         "This tool call is blocked until the examination service is reachable, or set GATE1_GUARD_FAIL_MODE=open.",
     );
+    // AFTER emitBlock, deliberately — same placement discipline as every other
+    // guard-path capture call: the deny is already on stdout before this runs.
+    captureGuardObservation(cfg, {
+      sessionId,
+      toolName,
+      action,
+      guard: { recommendation: "do_not_proceed", assessment: null },
+      denied: true,
+    });
     process.exit(0);
   }
   // open: allow but record the gap in-context — never silently treated as guarded.
@@ -559,6 +603,15 @@ function guardOutage(cfg, sessionId, action, reason) {
       `An irreversible-action guardrail check was attempted but did not complete (reason: ${reason}). ` +
       "This action is proceeding WITHOUT that check. Treat it as unguarded and proceed deliberately.",
   );
+  // AFTER emitAllowWithContext, deliberately — same reason as above, mirrored for
+  // the allow path: nothing here can retract or delay an already-emitted decision.
+  captureGuardObservation(cfg, {
+    sessionId,
+    toolName,
+    action,
+    guard: { recommendation: "outage_open", assessment: null },
+    denied: false,
+  });
   process.exit(0);
 }
 

@@ -418,7 +418,27 @@ function countFailures(history: readonly ReflectTurn[]): number {
   return q1 + q2 + q3
 }
 
-/** FD-R1 precondition: Q1+Q2+Q3 all clean (the null pattern that warrants the test). */
+/**
+ * FD-R1 precondition: Q1+Q2+Q3 all clean (the null pattern that warrants the test).
+ *
+ * PR19 FOLD (2026-08-17) — the Q1-third-state interaction, scoped at open and
+ * left undocumented until this fold closed it. This function calls q1Clean, so a
+ * Q1 turn with `determination: 'cannot_determine'` now makes THIS false too, not
+ * just the null_reflection scrutiny flag — an "I cannot determine" Q1 no longer
+ * satisfies the clean-trio precondition, so FD-R1's null-suspicion probe is NOT
+ * administered on that turn.
+ *
+ * THIS IS THE CORRECT DIRECTION, not a side effect to guard against: FD-R1 exists
+ * to probe a suspiciously "everything's clean" pattern for fabrication. An honest
+ * "I cannot determine" is not that pattern — it is the opposite, an agent
+ * declining to manufacture a clean answer it doesn't have. Administering a
+ * null-suspicion probe in response to genuine uncertainty would be probing the
+ * wrong thing. So Q1='cannot_determine' correctly WITHHOLDS the FD-R1 probe
+ * rather than firing it.
+ *
+ * See §FDR1-CD in engine.test.ts for the regression pin — there was none before
+ * this fold, despite the interaction being real from the moment q1Clean changed.
+ */
 export function allCausalLayersClean(history: readonly ReflectTurn[]): boolean {
   const q1 = turnAt(history, 'Q1')
   const q2 = turnAt(history, 'Q2')

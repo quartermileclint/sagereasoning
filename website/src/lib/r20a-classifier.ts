@@ -289,16 +289,21 @@ async function writeClassifierDownMarker(
     const { supabaseAdmin } = await import('@/lib/supabase-server')
 
     // ⚠ FINDING RECORDED 2026-08-17 (R2b item 5) — NOT FIXED HERE, DELIBERATELY.
+    // WIDENED 2026-08-17 (PR19 fold) — an independent review found the ORIGINAL
+    // scope of this note materially understated the gap; both corrections below.
     //
     // THIS INSERT HAS NEVER SUCCEEDED, FOR ANY CALLER, AND NO id-SHAPING CAN REPAIR
     // IT. It was scoped as a UUID-fragility sibling of the classifier_cost_log
     // defect; reading the DDL first-hand shows it is worse and different.
     // `public.vulnerability_flag` (supabase/migrations/20260416_r20a_vulnerability_flag.sql:22-66)
-    // requires THREE NOT NULL columns this insert never supplies —
-    //   • user_id  UUID NOT NULL REFERENCES auth.users(id)
-    //   • session_id UUID NOT NULL   (this sends `sessionId || null`, and the live
-    //     callers' ids are free-form strings, so it fails on BOTH the null and the cast)
-    //   • severity INTEGER NOT NULL  CHECK (severity BETWEEN 1 AND 3)
+    // requires THREE NOT NULL columns this insert can never satisfy —
+    //   • user_id  UUID NOT NULL REFERENCES auth.users(id)   — OMITTED entirely,
+    //     no key in the payload at all
+    //   • session_id UUID NOT NULL — IS SENT (`sessionId || null`), just invalid:
+    //     the live callers' ids are free-form strings, so it fails on BOTH the
+    //     null path and the UUID-cast path
+    //   • severity INTEGER NOT NULL  CHECK (severity BETWEEN 1 AND 3)  — OMITTED
+    //     entirely, no key in the payload at all
     // — and sends TWO columns that DO NOT EXIST on the table at all: `flag_type`
     // and `metadata`.
     //
@@ -309,12 +314,33 @@ async function writeClassifierDownMarker(
     // on acute/moderate — so it is a FALSE FACT on every row ever written, and will
     // remain so until this is fixed.
     //
+    // THE GAP IS LARGER THAN "THE ONE INSERT FAILS" — stated precisely so a future
+    // session scoping the fix from this note alone does not rediscover it as a
+    // surprise. `writeClassifierDownMarker` (this function) is called from EXACTLY
+    // ONE call site: the outer catch-all in `evaluateBorderlineDistress`, reached
+    // ONLY when the classifier call itself throws — i.e. a classifier OUTAGE. That
+    // is the same branch that sets `flag_written: false`. The THREE branches that
+    // set `flag_written: true` (a regex hit at moderate/acute; a genuine Haiku
+    // detection at moderate/acute; a non-JSON Haiku response treated as distress)
+    // never call this function, or any insert into `vulnerability_flag`, AT ALL.
+    // So the table — whose own migration comment describes it as the human-review
+    // queue for "mentor sessions where the user's reasoning faculty may be
+    // compromised" — has ZERO write attempts for the actual distress-DETECTED
+    // case. The only write path that exists is for outages, and even that path
+    // always fails. Aligning the columns here (adding real user_id/session_id/
+    // severity) would fix the outage-marker write, but would NOT create any write
+    // path for genuine detections — because none exists to begin with.
+    //
     // NOT fixed in this session because it cannot be fixed by shaping: the
     // agent-facing surfaces hold no `auth.users` id to put in user_id, and no
     // severity in 1-3 truthfully denotes "the classifier was unavailable" — which
     // is a different thing from a graded distress signal. Making this write
-    // correctly is a design question about what a classifier-outage marker even IS,
-    // and it belongs in its own scoped step, not absorbed here.
+    // correctly — AND wiring a genuine insert on the flag_written=true branches,
+    // which today do not exist — is a design question about what a distress-flag
+    // review queue should actually look like, and belongs in its own scoped step
+    // (its own founder-walked plumbing: an auth.users id from the calling routes,
+    // a severity mapping from the classifier's own severity levels), not absorbed
+    // here.
     await supabaseAdmin
       .from('vulnerability_flag')
       .insert({

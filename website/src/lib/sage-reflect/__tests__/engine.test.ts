@@ -180,6 +180,48 @@ const isQuestion = (s: ReflectStep, id: string): boolean => s.kind === 'question
   // Dirty trio does not fire FD-R1.
   const dirty: ReflectTurn[] = [q1(false), q2(true, { admitted: false, account_given: true }), q3(true)]
   assert('FDR1-5  dirty trio does NOT fire FD-R1', !allCausalLayersClean(dirty) && isQuestion(nextStep(dirty, baseCtx), 'Q4'))
+
+  // §FDR1-CD — PR19 fold (2026-08-17): a Q1 "cannot determine" turn also does NOT
+  // fire FD-R1, and this is the FIRST pin on that interaction. Scoped at open,
+  // never pinned until an independent review caught it undocumented. Correct
+  // direction: an honest inability is not the suspiciously-clean pattern FD-R1
+  // exists to probe.
+  const undeterminedQ1: ReflectTurn = {
+    step: 'Q1',
+    assessment: { distortions: [], determination: 'cannot_determine' },
+    response: 'I cannot determine what my impressions were here',
+  }
+  const undeterminedTrio: ReflectTurn[] = [
+    undeterminedQ1,
+    q2(true, { admitted: false, account_given: true }),
+    q3(true),
+  ]
+  assert(
+    'FDR1-CD1  Q1=cannot_determine ⇒ allCausalLayersClean is FALSE (not the suspiciously-clean pattern)',
+    !allCausalLayersClean(undeterminedTrio),
+  )
+  assert(
+    'FDR1-CD2  and FD-R1 does NOT fire ⇒ the next step is Q4, not the null-suspicion probe',
+    isQuestion(nextStep(undeterminedTrio, baseCtx), 'Q4'),
+  )
+  // Contrast: an ORDINARY clean Q1 (determination:'determined', explicitly) still
+  // fires FD-R1 exactly like the undetermined-field case (FDR1-1/2) — the field's
+  // PRESENCE-as-'determined' must not be mistaken for the third state.
+  const determinedCleanQ1: ReflectTurn = {
+    step: 'Q1',
+    assessment: { distortions: [], determination: 'determined' },
+    response: 'no distortions',
+  }
+  const determinedCleanTrio: ReflectTurn[] = [
+    determinedCleanQ1,
+    q2(true, { admitted: false, account_given: true }),
+    q3(true),
+  ]
+  assert(
+    "FDR1-CD3  Q1={distortions:[],determination:'determined'} is STILL clean ⇒ FD-R1 fires (the hard constraint)",
+    allCausalLayersClean(determinedCleanTrio) &&
+      nextStep(determinedCleanTrio, baseCtx).kind === 'fabrication_test',
+  )
 }
 
 // ============================================================================

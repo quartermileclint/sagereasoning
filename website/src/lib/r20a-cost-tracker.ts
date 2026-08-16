@@ -141,10 +141,18 @@ function getAdminClient(): SupabaseClient {
  *
  * Postgres rejects the whole INSERT on the cast — so it is not merely a lost
  * correlation id: the token counts, the cost cents and the severity for that run are
- * lost with it. The failure is then swallowed TWICE (the console.error below, and
- * logClassifierRunSafe's fire-and-forget), so reflect persists, loop billing
- * succeeds, and the cost row is PERMANENTLY ABSENT. R20a cost/coverage telemetry has
- * been silently undercounting both surfaces.
+ * lost with it. CORRECTED 2026-08-17 (PR19 fold — the original text here claimed
+ * this was "swallowed TWICE", which overstated the path): `logClassifierRun`
+ * below never THROWS on a Supabase query-level error — it awaits the insert and,
+ * on `{error}`, only `console.error`s and resolves normally. So
+ * `logClassifierRunSafe`'s `.catch()` (r20a-classifier.ts) is DEAD CODE for this
+ * specific defect — it never fires, because there is no rejection to catch. The
+ * failure is swallowed ONCE, by the internal console.error below. (The `.catch()`
+ * remains live for a genuinely different failure class — a synchronous throw
+ * before the query resolves, e.g. `getAdminClient()` itself throwing — just not
+ * this one.) Net effect unchanged either way: reflect persists, loop billing
+ * succeeds, and the cost row is PERMANENTLY ABSENT. R20a cost/coverage telemetry
+ * has been silently undercounting both surfaces.
  *
  * NOT the reflect route's `loop_id`, which has been UUID-safe since that route's
  * creation (`extractLoopId(request) ?? generateLoopId()`, present from 0eb36c8).
