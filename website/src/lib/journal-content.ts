@@ -180,7 +180,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     question:
       'Consider a situation where you felt at odds with how things were going — a plan that fell apart, a relationship that changed, a circumstance beyond your control. What would it look like to accept the situation without surrendering your agency? How might you align your choices with what is, rather than fighting against what you cannot change?',
     sourceFile: 'stoic-brain.json',
-    sourceCitation: 'DL Lives 7.38; Marcus Aurelius Meditations 4.26',
+    sourceCitation: 'DL Lives 7.138-139; Marcus Aurelius Meditations 7.9',
   },
   {
     day: 7,
