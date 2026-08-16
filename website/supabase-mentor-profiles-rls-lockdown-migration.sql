@@ -22,13 +22,15 @@
 -- blanket revoke would have broken the practice calendar and the badge surface.
 -- So every consumer of THIS table was enumerated first, and the answer differs:
 --
---   17 call sites across 10 files, EVERY ONE service-role, verified 2026-08-16:
+--   18 call sites across 11 files, EVERY ONE service-role, verified 2026-08-16
+--   (corrected same-day, PR19 review re-fold — see the §4 header below for the
+--   count's own revision history):
 --     api/founder/hub/route.ts:1407              api/user/export/route.ts:272
 --     api/mentor/founder/history/route.ts:42     api/mentor/private/history/route.ts:42
 --     api/mentor/private/baseline-response:197   api/mentor/ring/proof/route.ts:350
 --     api/mentor/private/reflect:363,497,744     lib/mentor-profile-store.ts:125,247,276,283
 --     lib/context/mentor-context-private.ts:150,401,448
---     lib/user-data-gathering.ts:162
+--     lib/user-data-gathering.ts:162              api/user/delete/route.ts:105
 --   ZERO anon-key client constructions in any of them; ZERO client/browser
 --   references to `mentor_profiles` anywhere in src/app/**.tsx or src/components
 --   (the private-mentor page issues no Supabase table query at all).
@@ -38,6 +40,15 @@
 -- lib/user-data-gathering.ts and api/mentor/ring/proof. All four are
 -- service-role, so the verdict is unchanged — but the enumeration was re-run
 -- from scratch rather than inherited, which is why the gap was visible.
+--
+-- THE COUNT ITSELF WAS RE-DERIVED TWICE MORE, both times by the PR19 reviewer,
+-- not the author: first raising the four sites just named (folded into the
+-- "17/10" figure this comment originally stated), then — on the re-fold review
+-- of §4 below — finding an 18th, `api/user/delete/route.ts:105` (also
+-- service-role; the R17c account-deletion path's `tablesToDelete` loop). Both
+-- corrections are folded here rather than left as a standing drift; the count
+-- was never load-bearing for the safety verdict (every site found has been
+-- service-role), only for the honesty of this file's own audit trail.
 --
 -- ============================================================================
 -- THE DEFECT, CONFIRMED LIVE BEFORE THIS MIGRATION WAS WRITTEN
@@ -211,7 +222,7 @@ GRANT  EXECUTE ON FUNCTION public.increment_structured_observation_count(uuid)
 --
 -- V6. LEGITIMATE PATH UNBROKEN — in the browser, signed in: load
 --     `/private-mentor` and confirm the profile/history renders, and that a
---     mentor reflection still completes. (All 17 call sites are service-role, so
+--     mentor reflection still completes. (All 18 call sites are service-role, so
 --     this should be unchanged; confirm rather than assume.)
 --
 -- V7. THE RPC — closed. Re-run §PRE-P5's curl: must now return `42501
