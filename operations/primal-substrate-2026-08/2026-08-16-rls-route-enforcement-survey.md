@@ -124,9 +124,9 @@ following session.
 |---|---|---|---|---|---|
 | 23 | ~~`founder_conversations`~~ **FIXED** | `"Service role full access on conversations" FOR ALL USING (true) WITH CHECK (true)` | ~~Read/write/delete ... by any anon-key holder~~ **CLOSED** | `api/founder/hub` only (service-role) | **CLOSED 2026-08-16, same-day follow-on to the impulse fix** (`D-CONCURRENT-ARC-C4-FOUNDER-CONVERSATIONS-RLS-FIX-LIVE-2026-08-16`; migration `website/supabase-founder-conversations-rls-lockdown-migration.sql`). Live behavioural confirmation BEFORE the fix: an unauthenticated request (no login at all) returned `HTTP 200` with a real row on production — worse than the impulse case, which at least required a session. After: `42501 permission denied`, both tables, both directions, on TEST and production; 70/2131 row counts unchanged; PR19 review CLEAN (2 low, out-of-scope observations only — plaintext content at rest, not wired into data-rights export/delete). Founder-elected expedited sequencing (TEST → prod → review), recorded as a deliberate PR19 waiver-then-confirm, not an omission. |
 | 24 | ~~`founder_conversation_messages`~~ **FIXED** | same shape | ~~Same~~ **CLOSED** | same | Fixed in the same migration as row 23 — see above. |
-| 25 | `reflections` (INSERT policy) | `"Service role insert for reflections" FOR INSERT WITH CHECK (true)` | Any anon-key holder can insert reflection rows **for any user_id** (forged practice history; feeds milestones/practice-calendar reads). | Writes are all service-role; the open policy serves nobody | **`safe-to-fix-same-pattern`** for this single policy (drop it; service-role writes bypass RLS regardless). The table's SELECT policy stays (Class B row 21). |
-| 26 | `milestones` (INSERT policy) | `"Service role insert for milestones" FOR INSERT WITH CHECK (true)` | Any anon-key holder can award any milestone to any user. | Writes via `api/milestones` (service-role); owner SELECT is load-bearing for nothing user-scoped found (reads go through the route) | **`safe-to-fix-same-pattern`** for the INSERT policy; the owner SELECT policy can ride the same migration or stay — election at fix time. |
-| 27 | `document_scores` (INSERT policy) | `"Service role insert for document scores" FOR INSERT WITH CHECK (true)` (public SELECT is deliberate — the badge surface) | Forged public document scores behind `/api/badge/[id]`. | Writes via `api/score-document/[id]` (service-role) | **`safe-to-fix-same-pattern`** for the INSERT policy; keep the public SELECT. |
+| 25 | ~~`reflections` (INSERT policy)~~ **FIXED** | `"Service role insert for reflections" FOR INSERT WITH CHECK (true)` | ~~Insert reflection rows for any user_id~~ **CLOSED** | Writes all service-role; **SELECT is user-JWT load-bearing** (see verdict) | **CLOSED 2026-08-16** (`D-CONCURRENT-ARC-C4-OPEN-INSERT-POLICIES-FIX-LIVE-2026-08-16`; migration `website/supabase-open-insert-policies-lockdown-migration.sql`). **The survey's own "same-pattern" verdict was RIGHT to be qualified and would have been WRONG if taken literally:** `api/practice-calendar` reads this table through a **user-JWT client**, so the sibling `REVOKE ALL` shape would have silently emptied the practice calendar. Only the INSERT policy was dropped and only write verbs revoked. |
+| 26 | ~~`milestones` (INSERT policy)~~ **FIXED** | `"Service role insert for milestones" FOR INSERT WITH CHECK (true)` | ~~Award any milestone to any user~~ **CLOSED** | `api/milestones` (service-role) | **CLOSED 2026-08-16**, same migration. Owner SELECT policy retained (the election named here; retaining it is harmless and preserves any future user-scoped read). |
+| 27 | ~~`document_scores` (INSERT policy)~~ **FIXED** | `"Service role insert for document scores" FOR INSERT WITH CHECK (true)` | ~~Forge public badge scores~~ **CLOSED** | **NO writer exists** — see verdict | **CLOSED 2026-08-16**, same migration; public SELECT kept. **Two corrections from the PR19 review, recorded because this row asserted both:** (a) `/api/badge/[id]` reads via `supabaseAdmin` (service-role), NOT the anon key — no consumer reads this table via anon/authenticated at all, so the public SELECT is preserved because it is deliberate-by-design, not because anything would break; (b) this row named `api/score-document/[id]` as the writer — that route is **GET-only** and **no writer to this table exists anywhere today** (live scoring writes `document_evaluations_v3`). |
 | 28 | `environmental_context` | public SELECT `USING (true)`; writes service-role-only | Public read of the weekly environmental scan — low sensitivity, possibly intentional. | service routes | **`needs-further-investigation`** (intent question, not a mechanics question). |
 
 **The live-grants caveat, stated once for the whole class:** whether `anon` actually holds
@@ -153,11 +153,9 @@ deliberate public SELECT (the public accreditation read surface). These are the 
    **DONE 2026-08-16**, live on production, same day as item 1. The exposure was confirmed
    worse than the survey estimated: reachable with **no login at all**, not merely by an
    authenticated practitioner.
-3. **The three open-INSERT policies** (rows 25–27) — **now the top of the open backlog**; one
-   small migration could close all three; forgery-class rather than disclosure-class. **Each
-   needs its own live-grant confirmation probe first** — note that rows 23–24's probe found the
-   exposure genuinely live, so this class's "subject to live-grant confirmation" caveat should
-   be treated as likely-true rather than likely-theoretical.
+3. ~~**The three open-INSERT policies** (rows 25–27)~~ — **DONE 2026-08-16**, live on production,
+   one migration, same day as items 1 and 2. The probe found all six (3 tables × 2 environments)
+   genuinely open, confirming the class's caveat was true, not theoretical.
 4. **`mentor_profiles` + the remaining Class A intimate tables** (rows 2–12) — batched by
    sibling shape, a few per session.
 5. **Class A lower-stakes** (rows 13–18).
@@ -169,17 +167,34 @@ deliberate public SELECT (the public accreditation read surface). These are the 
 
 ## Status addendum — 2026-08-16, end of the C4 sitting
 
-**Two tables closed the same day this survey was written**, both live on production, both
-PR19-reviewed CLEAN: `impulse_entries` (backlog item 1, mentor-mandated first) and
-`founder_conversations` + `founder_conversation_messages` (item 2, the widest exposure found).
-Everything else in Classes A, B and C remains **open** and carried.
+**Backlog items 1, 2 and 3 all closed the same day this survey was written** — six tables in
+total, all live on production, each PR19-reviewed CLEAN:
 
-**The finding this sitting adds to the survey's own method, worth stating for whoever picks up
-item 3:** the survey hedged Class C's exposure as "subject to a live-grant confirmation," on the
-reasoning that Supabase's default grants were *probably* still in place. When that probe was
-finally run against production, the exposure was not merely live — it was **wider than the survey
-had described**, reachable with no authentication whatsoever, where the survey's prose had framed
-Class C alongside a class that at least required a session. **Run the probe early on the
-remaining Class C rows; do not let a hedge stand in for a measurement.**
+| Item | Tables | Class | Decision-log entry |
+|---|---|---|---|
+| 1 | `impulse_entries` | A (owner policies) | `D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE-2026-08-16` |
+| 2 | `founder_conversations`, `founder_conversation_messages` | C (role-unrestricted, ALL) | `D-CONCURRENT-ARC-C4-FOUNDER-CONVERSATIONS-RLS-FIX-LIVE-2026-08-16` |
+| 3 | `reflections`, `milestones`, `document_scores` | C (role-unrestricted, INSERT) | `D-CONCURRENT-ARC-C4-OPEN-INSERT-POLICIES-FIX-LIVE-2026-08-16` |
 
-*End of survey. Items 1 and 2 are closed; items 3–6 are the open backlog.*
+**Classes A (rows 2–18), B, and Class C's row 28 remain open and carried.**
+
+### Two method findings this survey's own execution produced
+
+**1. A hedge is not a measurement.** This document qualified Class C as *"subject to a live-grant
+confirmation,"* reasoning that Supabase's defaults were *probably* intact. Every probe eventually
+run — 2 tables at item 2, 6 more at item 3 — found the exposure genuinely live, and item 2's was
+**wider than this survey described** (reachable with no authentication at all, where the prose had
+framed Class C alongside a class needing a session). The confirming probe was free and available
+at survey time. **Take the measurement in the session that raises the question.**
+
+**2. A precedent is a hypothesis about the next case, not a template for it.** Item 3 looked like
+a third repetition of items 1 and 2 and was not: `reflections` has a **user-JWT SELECT consumer**
+(`api/practice-calendar`) and `document_scores` a **deliberately public read**, so the proven
+`REVOKE ALL` shape would have closed the real defect while silently breaking two working features.
+Item 3's fix is therefore surgical — INSERT policies and write verbs only, SELECT untouched. The
+cheap disconfirming check, and the one that caught it: **enumerate each table's own consumers and
+their client type before reusing a shape.** Also note that item 3's PR19 review found three of its
+five findings were errors in the *justification* while the SQL was correct — including two claims
+in this survey's own rows 25–27, now corrected in place.
+
+*End of survey. Items 1–3 closed; items 4–6 (Classes A, B, row 28) are the open backlog.*
