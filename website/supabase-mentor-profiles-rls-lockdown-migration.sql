@@ -120,6 +120,15 @@
 --     On TEST additionally, with a real signed-in JWT (see the trap note above —
 --     read the MESSAGE): `POST {user_id: <own uuid>}` must return 23502
 --     (permitted) BEFORE, and 42501 **"permission denied for table"** AFTER.
+--
+-- P5. THE RPC — behavioural proof, non-writing (a UUID matching no row):
+--
+--   curl -s -w "\nHTTP %{http_code}\n" \
+--     -X POST "$URL/rest/v1/rpc/increment_structured_observation_count" \
+--     -H "apikey: $ANON" -H "Content-Type: application/json" \
+--     -d '{"p_profile_id":"00000000-0000-0000-0000-000000000000"}'
+--
+--     BEFORE: HTTP 204 (the RPC ran — PUBLIC-executable).
 
 -- ============================================================================
 -- §APPLY
@@ -140,6 +149,37 @@ GRANT  ALL ON public.mentor_profiles TO   service_role;
 
 -- §3 — RLS stays ENABLED (already is; asserted, not toggled).
 ALTER TABLE public.mentor_profiles ENABLE ROW LEVEL SECURITY;
+
+-- §4 — ADDED AFTER PR19 REVIEW, before this migration was ever applied to
+-- production (§APPLY §1–§3 were TEST-verified and reviewed first; this section
+-- was found, confirmed live, and added in the same walk, before the production
+-- step — see the decision-log entry for the sequence).
+--
+-- A SECOND, INDEPENDENT forgery path into this table was found: the RPC
+-- function `increment_structured_observation_count(uuid)`
+-- (repo-root `supabase/migrations/20260413_observation_tracking.sql`) is
+-- `SECURITY DEFINER` and writes `structured_observation_count` +
+-- `first_structured_observation_at` on `mentor_profiles` for a caller-supplied
+-- `p_profile_id`, with NO auth.uid() scoping whatsoever. SECURITY DEFINER means
+-- it executes with the FUNCTION OWNER's privileges, not the caller's — so §1–§3
+-- above, which act entirely at the table-grant/RLS layer, do NOT touch it.
+--
+-- CONFIRMED LIVE on TEST, non-writing (a garbage UUID matching no real row):
+-- an UNAUTHENTICATED POST to
+--   /rest/v1/rpc/increment_structured_observation_count
+-- returned HTTP 204 (success) — the function is PUBLIC-executable. No
+-- `REVOKE EXECUTE`/`GRANT EXECUTE` has ever been run on it anywhere in this
+-- repo (grepped repo-wide); Postgres grants EXECUTE to PUBLIC by default on
+-- `CREATE FUNCTION`, and nothing here overrides that default.
+--
+-- The single legitimate caller (`website/src/lib/logging/
+-- mentor-observation-logger.ts:248`) invokes it via `supabaseAdmin.rpc(...)`
+-- (service-role), so closing this is the identical safety argument as §1–§3:
+-- service_role is unaffected, nothing legitimate loses access.
+REVOKE EXECUTE ON FUNCTION public.increment_structured_observation_count(uuid)
+  FROM PUBLIC, anon, authenticated;
+GRANT  EXECUTE ON FUNCTION public.increment_structured_observation_count(uuid)
+  TO service_role;
 
 -- ============================================================================
 -- §VERIFY — run AFTER applying (TEST first; all green before production)
@@ -173,14 +213,24 @@ ALTER TABLE public.mentor_profiles ENABLE ROW LEVEL SECURITY;
 --     `/private-mentor` and confirm the profile/history renders, and that a
 --     mentor reflection still completes. (All 17 call sites are service-role, so
 --     this should be unchanged; confirm rather than assume.)
+--
+-- V7. THE RPC — closed. Re-run §PRE-P5's curl: must now return `42501
+--     permission denied for function increment_structured_observation_count`
+--     (or equivalent), NOT HTTP 204.
+--
+-- V8. THE RPC's LEGITIMATE CALLER UNBROKEN — a genuine mentor-observation log
+--     (any action that triggers `logMentorObservation()` —
+--     `website/src/lib/logging/mentor-observation-logger.ts`) should still
+--     complete without error; it calls the RPC via `supabaseAdmin`.
 
 -- ============================================================================
 -- §INVERSE — full rollback (restores the pre-migration state exactly)
 -- ============================================================================
 -- Recreates the three owner policies verbatim from
--- supabase-mentor-profiles-migration.sql:39-49 and restores the grants §2
--- revoked. After running this, §PRE-P1 returns the original 3 rows and the
--- self-forgery hole is open again (the pre-fix behaviour).
+-- supabase-mentor-profiles-migration.sql:39-49, restores the grants §2
+-- revoked, and restores the RPC's EXECUTE grant §4 revoked. After running
+-- this, §PRE-P1 returns the original 3 rows, §PRE-P5's probe returns HTTP 204
+-- again, and both forgery paths are open again (the pre-fix behaviour).
 --
 --   GRANT ALL ON public.mentor_profiles TO anon;
 --   GRANT ALL ON public.mentor_profiles TO authenticated;
@@ -194,6 +244,9 @@ ALTER TABLE public.mentor_profiles ENABLE ROW LEVEL SECURITY;
 --   CREATE POLICY "Users can insert own profile"
 --     ON public.mentor_profiles FOR INSERT
 --     WITH CHECK (auth.uid() = user_id);
+--
+--   GRANT EXECUTE ON FUNCTION public.increment_structured_observation_count(uuid)
+--     TO PUBLIC;
 --
 -- (The RLS-enabled state is untouched by §APPLY, so the inverse does not
 --  restate it.)
