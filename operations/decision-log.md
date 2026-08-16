@@ -22098,3 +22098,62 @@ engaged), PR6 (not engaged), PR15, PR18, PR19, PR22, PR23, PR24, KG1, KG7, D1, D
 `D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16`,
 `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md`,
 `2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
+
+### Post-close addendum, 2026-08-17 — R2b PUSHED, and the M-5(b) sequencing question RESOLVED (founder)
+
+**R2b was pushed after the close was written** (HEAD `9ac6f71` on `origin/main`, Vercel green). This
+**supersedes the close's "Production state at session close: UNCHANGED / nothing pushed" line**,
+which was true when written. Same pattern as R2a's own post-close addendum.
+
+**What the push actually changed in production — verified, not assumed:** effectively nothing
+behavioural. All four new flags remain UNSET, and every item is flag-off byte-identical by
+construction (battery-asserted): `shapeClassifierSessionId` returns the pre-fix `v || null`;
+`Q1_SYSTEM` and `mapQ1` are byte-identical with the flag off, so `q1Clean`'s new branch is
+unreachable; the dispersion member is absent from the delta block; `deriveWorstJusticeOutcome`
+takes its pre-D4 path. **The one real delta is that
+`GET /api/cron/agent-hold-observations-retention-sweep` now EXISTS** — CRON_SECRET-gated,
+flag-unset, answering `{ ok: true, flag_enabled: false }` with zero DB work, and carrying **no
+`vercel.json` cron entry**, so nothing invokes it. The harness changes (P8a) are local hook files
+and do not deploy at all.
+
+**R4 step 1 ("push all R2/R3 builds FIRST") is now discharged for R2a AND R2b. Only R3 remains.**
+
+**THE M-5(b) SEQUENCING QUESTION IS RESOLVED (founder, 2026-08-17) — the AI's recommendation
+adopted in full.** The question was whether M-5(b)'s P0 obligation blocks R4 entirely or only
+R20a-claiming expansions. The ruling's operative clause is narrow — *"before any agent-facing
+surface that carries the R20a perimeter claim is **expanded further**"* — and R4's activations were
+tested individually against it: the Q1 flag, the D4 flag and the sweep are **corrections or
+obligations, not expansions** (three of them reduce false signal), and none expands an
+R20a-claiming agent-facing surface.
+
+**Resolved shape of R4:**
+
+1. **Q1 third state — FIRST, unblocked.** It closes an *active* mislabelling; the mentor-vetted
+   wording went live 2026-08-16, so the misreading is happening in production now.
+2. **Retention sweep — unblocked** (plus its `vercel.json` entry; **not** concurrently with an
+   active false-hold observation window).
+3. **D4 reducer — unblocked**, with the walk BEGINNING on a founder-run `SELECT` of
+   `justice_floor_active` for `sagereasoning:s9-loop@v1`/dikaiosyne.
+4. **Classifier session-id shaping — GATED, but NOT on the full P0 build.** Activating it makes
+   reflect and calling start writing cost rows that have never existed, every one carrying
+   `flag_written` — the field the mentor named *"a false fact on every row"* and *"a named integrity
+   failure."* The gate is the mentor's own cheap remedy, not the write path: **mark
+   `flag_written`'s semantics** (that its historical and current values reflect the
+   outage-branch-only write path). A column comment and a doc note, not a P0 build.
+5. **Spec 4 dispersion — BLOCKED by M-4**, independently of all of the above.
+6. **M-5(a), the claims amendment — before or alongside R4 regardless.** The ruling is explicit that
+   the claims half does not wait on the build half, and it needs R18 founder sign-off on wording.
+
+**M-5(b) itself keeps its P0 footing and gets its own session soon — it simply does not have to
+precede R4.**
+
+**Interpretive risk, stated rather than buried:** this rests on reading *"expanded further"* as "new
+agent-facing capability or claim" rather than "any further deployment at all." A stricter reading
+is available — R4 redeploys reflect, which IS an R20a perimeter member. The ambiguity is in the
+ruling's wording, not the code. **If the founder wants it settled by its author rather than
+adjudicated here, the one-line question is: "Does 'expanded further' mean new capability/claims on
+those surfaces, or any further deployment to them at all?"**
+
+**Status:** Adopted. Amends `D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`.
+Cross-reference: `operations/handoffs/founder/2026-08-17-R2b-mentor-rulings-successor-NEXT-SESSION-PROMPT.md`
+(amended in place). Weights BLOCKED; the P0 0h hold stands.

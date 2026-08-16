@@ -165,10 +165,31 @@ outage-branch-only write path."*
    **retiring** `disposition_stability` from agent-facing surfaces — i.e. removing it from the AE-1
    delta's `dimension_trends` — as the ruled interim? That is a live-surface removal.
 3. **M-2's column shape** (see above).
-4. **Whether M-5(b) preempts R4 entirely.** The ruling says the write path should be built *"before
-   any agent-facing surface that carries the R20a perimeter claim is expanded further."* R4 expands
-   agent-facing surfaces. **The founder should decide whether M-5(b) blocks R4, or only blocks
-   R20a-claiming expansions specifically.** This is the single sharpest sequencing question here.
+4. **~~Whether M-5(b) preempts R4 entirely.~~ RESOLVED 2026-08-17 (founder) — do not re-open.**
+   **M-5(b) does NOT block R4.** The ruling's operative clause is narrow (*"before any agent-facing
+   surface that carries the R20a perimeter claim is **expanded further**"*), and R4's activations
+   were tested individually against it: the Q1 flag, the D4 flag and the sweep are **corrections or
+   obligations, not expansions** — three of them reduce false signal. Resolved shape:
+   **Q1 first, then the sweep, then D4**, all unblocked; **classifier-shaping GATED** only on
+   marking `flag_written`'s semantics (the mentor's own cheap remedy — a column comment and a doc
+   note — NOT the P0 write path, because activating it would multiply rows carrying a field the
+   mentor named "a false fact on every row"); **Spec 4 BLOCKED by M-4** independently; and
+   **M-5(a) before or alongside R4 regardless**, since the claims half does not wait on the build
+   half. **M-5(b) keeps its P0 footing and gets its own session soon — it simply need not precede
+   R4.** Full reasoning in the 2026-08-17 post-close addendum to
+   `D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`.
+
+   **One interpretive risk carried forward, not buried:** this rests on reading *"expanded
+   further"* as "new capability or claim" rather than "any further deployment." A stricter reading
+   is available — R4 redeploys reflect, which IS an R20a perimeter member. If it matters to the
+   session, the one-line question back to the mentor is: *"Does 'expanded further' mean new
+   capability/claims on those surfaces, or any further deployment to them at all?"*
+
+5. **NEW, arising from decision 4: is the `flag_written` semantic marking in THIS session's scope?**
+   It is small (a column comment + a doc note stating those rows reflect the outage-branch-only
+   write path), it is the gate on R4's classifier-shaping flag, and it is a fragment of M-5(b)'s
+   own remedy. **Recommendation: take it here** — it unblocks an R4 activation for very little, and
+   leaving it stranded between two sessions is how small gating items go quiet.
 
 ---
 
