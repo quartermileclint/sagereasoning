@@ -49,6 +49,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { COST_HEALTH } from '@/lib/stripe'
+import { deterministicLoopId } from '@/lib/loop-cost-tracker'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -126,6 +127,72 @@ function getAdminClient(): SupabaseClient {
  * Cost is auto-calculated from token counts if LLM was invoked,
  * or zero if only the rule stage fired.
  */
+/**
+ * THE DEFECT THIS EXISTS TO CLOSE (R2b item 5, 2026-08-17), which every prior record
+ * MIS-NAMED as "the reflect-path loop_id metering bug":
+ *
+ * `classifier_cost_log.session_id` is a **UUID** column
+ * (supabase/migrations/20260417_r20a_classifier_cost_tracking.sql:45). Two live
+ * surfaces hand the R20a gate a FREE-FORM session id and it arrives here unshaped:
+ *   • /api/practice/reflect (route.ts:413) — ids shaped `reflect-<uuid>`
+ *   • /api/calling         (route.ts:462) — an unrecorded adjacent instance
+ * Both parse only as `typeof === 'string' && trim().length > 0`, and both tables
+ * store the id as `text`, so the value is genuinely free-form by design.
+ *
+ * Postgres rejects the whole INSERT on the cast — so it is not merely a lost
+ * correlation id: the token counts, the cost cents and the severity for that run are
+ * lost with it. The failure is then swallowed TWICE (the console.error below, and
+ * logClassifierRunSafe's fire-and-forget), so reflect persists, loop billing
+ * succeeds, and the cost row is PERMANENTLY ABSENT. R20a cost/coverage telemetry has
+ * been silently undercounting both surfaces.
+ *
+ * NOT the reflect route's `loop_id`, which has been UUID-safe since that route's
+ * creation (`extractLoopId(request) ?? generateLoopId()`, present from 0eb36c8).
+ * Verified; deliberately untouched.
+ *
+ * WHY SHAPE AT THIS CHOKEPOINT rather than thread a real UUID from each route: this
+ * is the single write into the column, so it defends all three current gate call
+ * sites AND every future one, where per-route threading defends only the callers
+ * someone remembers to update — the exact fragility that let /api/calling go
+ * unrecorded. The shaping is DETERMINISTIC (`deterministicLoopId`, the proven S9b
+ * fix), so the same session id always yields the same UUID and rows remain
+ * correlatable to each other; it is one-way, so the original id is not recoverable
+ * from the column — an honest trade, named rather than hidden.
+ *
+ * DARK: gated by SUBSTRATE_CLASSIFIER_SESSION_ID_SHAPING_ENABLED. Unflagged this
+ * would be a live behaviour change on push — two surfaces would begin writing rows
+ * they have NEVER written, stepping up the numerator of the R5 classifier-cost ratio
+ * against a live alert threshold. Flagged, activation is its own small founder-walked
+ * step with a real before/after row-count observation.
+ */
+export const CLASSIFIER_SESSION_ID_SHAPING_ENV_VAR =
+  'SUBSTRATE_CLASSIFIER_SESSION_ID_SHAPING_ENABLED'
+
+/** True only for the exact string 'true'. Read at call time, per the house pattern. */
+export function isClassifierSessionIdShapingEnabled(): boolean {
+  return process.env[CLASSIFIER_SESSION_ID_SHAPING_ENV_VAR] === 'true'
+}
+
+/** A canonical UUID v4 matcher — an id already in UUID shape is passed through
+ *  UNCHANGED, so existing well-formed callers keep their real, joinable id. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Shape a caller-supplied session id into something the UUID column accepts.
+ * Flag-off ⇒ returns exactly what the previous code passed (`v || null`), so the
+ * insert is byte-identical, including its failure.
+ *
+ * The seed prefix is FIXED and recorded here rather than only in code, because
+ * changing it later would silently break every prior row's recoverability.
+ */
+export function shapeClassifierSessionId(sessionId: string | null | undefined): string | null {
+  const v = sessionId || null
+  if (!isClassifierSessionIdShapingEnabled()) return v
+  if (v === null) return null
+  if (UUID_RE.test(v)) return v
+  return deterministicLoopId(`classifier-session|${v}`)
+}
+
 export async function logClassifierRun(run: ClassifierRunLog): Promise<void> {
   const admin = getAdminClient()
 
@@ -137,7 +204,7 @@ export async function logClassifierRun(run: ClassifierRunLog): Promise<void> {
   const { error } = await admin
     .from('classifier_cost_log')
     .insert({
-      session_id: run.session_id || null,
+      session_id: shapeClassifierSessionId(run.session_id),
       rule_stage_hit: run.rule_stage_hit,
       llm_stage_ran: run.llm_stage_ran,
       llm_input_tokens: run.llm_input_tokens || null,

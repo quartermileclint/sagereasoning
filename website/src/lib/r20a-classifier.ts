@@ -288,6 +288,33 @@ async function writeClassifierDownMarker(
     // Dynamic import to avoid circular dependency with supabase-server
     const { supabaseAdmin } = await import('@/lib/supabase-server')
 
+    // ⚠ FINDING RECORDED 2026-08-17 (R2b item 5) — NOT FIXED HERE, DELIBERATELY.
+    //
+    // THIS INSERT HAS NEVER SUCCEEDED, FOR ANY CALLER, AND NO id-SHAPING CAN REPAIR
+    // IT. It was scoped as a UUID-fragility sibling of the classifier_cost_log
+    // defect; reading the DDL first-hand shows it is worse and different.
+    // `public.vulnerability_flag` (supabase/migrations/20260416_r20a_vulnerability_flag.sql:22-66)
+    // requires THREE NOT NULL columns this insert never supplies —
+    //   • user_id  UUID NOT NULL REFERENCES auth.users(id)
+    //   • session_id UUID NOT NULL   (this sends `sessionId || null`, and the live
+    //     callers' ids are free-form strings, so it fails on BOTH the null and the cast)
+    //   • severity INTEGER NOT NULL  CHECK (severity BETWEEN 1 AND 3)
+    // — and sends TWO columns that DO NOT EXIST on the table at all: `flag_type`
+    // and `metadata`.
+    //
+    // Verified: this is the ONLY write to vulnerability_flag anywhere in the
+    // codebase (repo-wide grep). CONSEQUENCE, recorded because this session is
+    // about to make MORE rows carrying it: `classifier_cost_log.flag_written` is
+    // documented as "true if a vulnerability_flag row was created" and is set true
+    // on acute/moderate — so it is a FALSE FACT on every row ever written, and will
+    // remain so until this is fixed.
+    //
+    // NOT fixed in this session because it cannot be fixed by shaping: the
+    // agent-facing surfaces hold no `auth.users` id to put in user_id, and no
+    // severity in 1-3 truthfully denotes "the classifier was unavailable" — which
+    // is a different thing from a graded distress signal. Making this write
+    // correctly is a design question about what a classifier-outage marker even IS,
+    // and it belongs in its own scoped step, not absorbed here.
     await supabaseAdmin
       .from('vulnerability_flag')
       .insert({
