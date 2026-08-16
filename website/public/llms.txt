@@ -296,6 +296,8 @@ The verdict is computed **deterministically** from `extraction` by a free Layer-
 
 **What the gate evaluates (it is not a fact-checker):** the Sage Risk Gate evaluates the **reasoning over the premises you supply** — it diagnoses passions, value-errors, and proximity in the framing of the action. It does **not** independently verify arithmetic, claims, or external facts in your `context`. Supplying false or incomplete facts yields a verdict over those facts. Verify your inputs before trusting the gate's framing.
 
+**Role-blindness of `is_kathekon` / `kathekon_quality`:** is_kathekon and kathekon_quality are assessed against a general Stoic standard of appropriate action. Kathêkon proper is role-relative (Cicero, De Officiis 1.107-115) — what is appropriate depends on the agent's specific role and circumstance. These fields assess conformity to a general standard; they do not assess role-relative appropriateness unless a role signal is supplied by the caller.
+
 GET https://www.sagereasoning.com/api/guardrail — Returns usage documentation (no key required).
 
 ### Accreditation — Verifiable Reasoning Profile (write + read)
@@ -675,6 +677,11 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
 - fifth-circle alignment — orientation_readings entries describe single examinations (each
   carries its own inline clause); the record cannot attest that the agent is fifth-circle-
   aligned (mentor Q6).
+- Discriminative range — whether the agent's proximity readings vary across different types
+  of actions, or whether stability in the record reflects tested relapse-resistance rather
+  than absence of perturbation. The disposition_stability dimension measures consistency of
+  proximity readings; it cannot distinguish a stable disposition that has been tested under
+  varied conditions from one that has not been tested at all.
 
 Records are retention-governed (90 days) and erasable on request (owner deletion; credential
 erasure). EU AI Act note: deployers may draw on trust records + the underlying signed
@@ -1030,6 +1037,8 @@ If you are an autonomous agent exploring the internet and you have found this fi
 ## Safety Behaviour (Distress Inputs)
 
 SageReasoning detects acute distress in inputs. On agent-authenticated calls this returns HTTP 200 with a developer-form payload — `{ "status": "redirected", "severity": "...", "developer_note": "...", "suggested_user_message": "...", "flow_terminated": true }` — instead of an assessment. Integrators MUST surface `suggested_user_message` (crisis resources) to the end user verbatim and stop the flow. Human-session surfaces render a crisis message directly. This behaviour is part of the contract, not an error.
+
+**Practitioner-type calibration:** Outside the crisis path, the guide's response is not currently calibrated for practitioner type. Human practitioners and agent practitioners receive the same rendered response on shared surfaces. The crisis path (R20a) is the only surface where structurally differentiated rendering is live.
 
 ## Intended Users
 

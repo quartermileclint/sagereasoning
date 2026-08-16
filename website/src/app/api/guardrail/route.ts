@@ -611,6 +611,16 @@ export async function GET(request: NextRequest) {
             'proceed | proceed_with_caution | pause_for_review | do_not_proceed',
           is_kathekon: 'boolean | null — whether the action is appropriate; null when the extraction is too sparse to judge (the gate then floors to a conservative non-proceed)',
           kathekon_quality: 'strong | moderate | marginal | contrary',
+          // A/R-5 (mentor Ruling Set A, 2026-08-15; founder R18 sign-off
+          // 2026-08-16). Wording is mentor-fixed and lands verbatim; only the
+          // key name is this application's choice. No code-path change — the
+          // kathekon predicate (assessKathekonEngagement) is not touched.
+          kathekon_scope:
+            'is_kathekon and kathekon_quality are assessed against a general Stoic standard of ' +
+            'appropriate action. Kathêkon proper is role-relative (Cicero, De Officiis 1.107-115) — ' +
+            'what is appropriate depends on the agent\'s specific role and circumstance. These fields ' +
+            'assess conformity to a general standard; they do not assess role-relative appropriateness ' +
+            'unless a role signal is supplied by the caller.',
           passions_detected: 'array of detected passions with root_passion, sub_species, false_judgement',
           reasoning: 'Brief virtue assessment (deterministic synthesis — no LLM prose render)',
           improvement_hint: 'How to make the action more virtuous (if below principled)',

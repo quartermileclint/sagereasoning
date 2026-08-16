@@ -795,7 +795,8 @@ export default function ApiDocsPage() {
           examination artifacts exist for the examination-derived events; how decisions were reasoned as
           narrated and extracted; decay/coverage honestly marked) and what it does not (factual
           correctness; harms omitted from the submitted text; freshness beyond the artifact record; future
-          behaviour; training-signal fitness). MEASURE mode: advisory, never binding; human override is
+          behaviour; training-signal fitness; discriminative range &mdash; stability may reflect absence of
+          perturbation, not tested relapse-resistance). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.
@@ -986,6 +987,16 @@ redirected         { "severity": "moderate|acute", "suggested_user_message": "..
         <p className="font-body text-sm text-sage-600 leading-relaxed">
           Rule R19e (configuration honesty): where the products are offered selectively,
           each configuration is documented for what it supports and does not support.
+        </p>
+        {/* D/O-A practitioner-type calibration (mentor Ruling Set D, L-1, 2026-08-15;
+            founder R18 sign-off 2026-08-16). Discloses what the guide does NOT do —
+            the R19e pattern. No code-path change; SUBSTRATE_LAYER3_ENABLED remains
+            unset and its activation is NOT licensed by this disclosure. */}
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-2">
+          Outside the crisis path, the guide&apos;s response is not currently calibrated for
+          practitioner type. Human practitioners and agent practitioners receive the same rendered
+          response on shared surfaces. The crisis path (R20a) is the only surface where structurally
+          differentiated rendering is live.
         </p>
       </div>
     </div>
