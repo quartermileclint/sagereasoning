@@ -278,6 +278,29 @@ async function main(): Promise<void> {
   eq(payload.envelope, TRUST_RECORD_ENVELOPE, 'S2-37 the payload ships THE envelope object')
   eq(payload.interop.published_externally, false, 'S2-38 interop: nothing published externally')
 
+  // ═══ S2-41/S2-42 — Spec 4 / B/M-B: the dispersion member must NEVER reach
+  // this surface. Ruling Set B R-3 adopted M-B (the AE-1 delta, agent-facing)
+  // and did NOT adopt M-C (a public trust-record field): a public per-agent
+  // claim about range would need the §8 envelope amendment as a CO-REQUISITE,
+  // and even with it the survivorship bounds make the claim premature.
+  //
+  // This is TRUE BY CONSTRUCTION today — trust-record-payload.ts has no
+  // trajectory import at all — which is exactly why it is worth pinning: a
+  // constraint that holds only by nobody having added the import yet is one
+  // refactor away from silently becoming false on a maximal-honesty-stakes
+  // public surface.
+  {
+    const wire = JSON.stringify(payload)
+    assert(
+      !wire.includes('proximity_dispersion') && !wire.includes('dispersion'),
+      'S2-41 the public trust record carries NO dispersion member (R-3: M-C not adopted)',
+    )
+    assert(
+      !wire.includes('stddev') && !wire.includes('distinct_levels'),
+      'S2-42 nor any dispersion-derived statistic by another name',
+    )
+  }
+
   // ═══ §3 — sparse honesty ══════════════════════════════════════════════════
   const AGENT_B = 'test:sparse@v1'
   fake.tables.agent_trust_state.push(

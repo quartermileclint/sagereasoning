@@ -119,6 +119,25 @@ export function isTrajectoryDeltaEnabled(): boolean {
   return process.env[TRAJECTORY_DELTA_ENV_VAR] === 'true'
 }
 
+/** Spec 4 / B/M-B (2026-08-17) — the proximity-dispersion member's OWN flag.
+ *
+ *  DEDICATED, not a reuse of TRAJECTORY_DELTA_ENV_VAR, and that is a mentor-stated
+ *  requirement rather than a preference: the delta's flag has been LIVE in
+ *  production since 2026-07-18, so "a new member riding
+ *  SUBSTRATE_TRAJECTORY_DELTA_ENABLED is live the moment it deploys; per-feature
+ *  darkness needs its own flag" (Ruling Set B, sequencing). Founder election (b),
+ *  2026-08-16.
+ *
+ *  UNSET ⇒ the member is absent from the delta block, byte-identical
+ *  (battery-asserted). Activation is its own founder-walked R4 step; rollback is
+ *  one line — unset + redeploy. Requires the delta flag to already be on: this
+ *  flag alone changes nothing. */
+export const TRAJECTORY_DISPERSION_ENV_VAR = 'SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED'
+
+export function isTrajectoryDispersionEnabled(): boolean {
+  return process.env[TRAJECTORY_DISPERSION_ENV_VAR] === 'true'
+}
+
 // ============================================================================
 // FLAG (SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED) — UNSET = byte-identical
 // ============================================================================

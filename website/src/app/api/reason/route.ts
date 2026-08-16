@@ -164,6 +164,7 @@ import {
   // layer1_source write stamp, no extra select column (byte-identical). The
   // delta consumes the SAME M7 window (no second windowed query — KG1).
   isTrajectoryDeltaEnabled,
+  isTrajectoryDispersionEnabled,
   // B5 (practice reminders, 2026-07-29 mentor verdict): the declared
   // session-boundary marker. Flag-gated by SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED;
   // UNSET → no session_marker write stamp, no extra select column, no B5
@@ -1743,6 +1744,11 @@ export async function POST(request: NextRequest) {
                 layer1Sources: windowResult.value.readRows?.map(
                   (r) => r.layer1_source ?? null,
                 ),
+                // Spec 4 / B/M-B: the dispersion member's OWN flag, read HERE and
+                // threaded in — trajectory-delta.ts is pure and its battery
+                // source-greps for `process.env` to keep it that way. UNSET ⇒ the
+                // member is absent ⇒ the block is byte-identical.
+                dispersionEnabled: isTrajectoryDispersionEnabled(),
                 // Mentor ruling (PR19 Q1, 2026-08-02): the regime-boundary
                 // marker must be gated by the SAME flag as the prompt change
                 // it marks — this call is the one impure env read.

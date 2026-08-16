@@ -137,12 +137,16 @@ function delta(
     identity?: LongitudinalIdentity
     boundaries?: readonly RegimeBoundary[]
     layer1Sources?: (('supplied' | 'server') | null | undefined)[]
+    // Spec 4 / B/M-B: threaded through so the new section can exercise BOTH
+    // states. Every existing call site omits it and is byte-identical.
+    dispersionEnabled?: boolean
   } = {},
 ): TrajectoryDeltaBlock {
   return computeTrajectoryDelta(win(actions), {
     identity: opts.identity ?? PAIR_IDENTITY,
     boundaries: opts.boundaries,
     layer1Sources: opts.layer1Sources,
+    dispersionEnabled: opts.dispersionEnabled,
   })
 }
 
@@ -900,6 +904,102 @@ function fakeClient(
   )
 
   // Summary
+  // ==========================================================================
+  // §12 — Spec 4 / B/M-B: the proximity-dispersion member (dedicated flag).
+  // ==========================================================================
+  {
+    // §12.1-11.2 FLAG OFF ⇒ byte-identical. Two pins, copying §10's template:
+    // key-absence AND JSON-byte-absence. Key-absence alone would pass if the key
+    // were present with an undefined value, which still changes the payload shape.
+    const off = delta(postRows(12))
+    assert(
+      !('proximity_dispersion' in off),
+      '§12.1 flag off: the member key is ABSENT',
+    )
+    assert(
+      !JSON.stringify(off).includes('proximity_dispersion') &&
+        !JSON.stringify(off).includes('Interpretation bound'),
+      '§12.2 flag off: no dispersion bytes anywhere in the block',
+    )
+
+    // §12.3-11.7 FLAG ON over a window with genuine variation.
+    const varied = delta(
+      postRows(12, (i) => ({ proximity: (i % 3 === 0 ? 'reflexive' : i % 3 === 1 ? 'deliberate' : 'principled') as EvaluatedAction['proximity'] })),
+      { dispersionEnabled: true },
+    )
+    const vr = varied.proximity_dispersion?.reading
+    assert(
+      varied.proximity_dispersion !== undefined,
+      '§12.3 flag on: the member is PRESENT',
+    )
+    assert(
+      vr !== 'insufficient_extraction' && typeof vr === 'object',
+      '§12.4 a varied window yields a reading (not the starvation value)',
+    )
+    assert(
+      typeof vr === 'object' && vr.distinct_levels === 3 && Object.keys(vr.level_counts).length === 3,
+      '§12.5 it reports distinct levels and per-level counts (a bare stddev is not interpretable)',
+    )
+    assert(
+      typeof vr === 'object' && vr.stddev > 0,
+      '§12.6 the stddev is > 0 on a genuinely varied window',
+    )
+    // The member must NOT grade. A second graded variance signal beside the
+    // already-defective computeDispositionStability would double the error.
+    assert(
+      typeof vr === 'object' &&
+        !('level' in vr) && !('band' in vr) && !('grade' in vr) &&
+        !JSON.stringify(vr).includes('advanced') && !JSON.stringify(vr).includes('hexis'),
+      '§12.7 the member carries NO level/band/grade (it observes, never certifies)',
+    )
+
+    // §12.8 THE INVERTED-VALENCE CASE — the one this member exists for. A window
+    // of thirty identical readings is exactly what computeDispositionStability
+    // certifies as `advanced` / "approaching hexis". Here it must read as ZERO
+    // variation with the bound attached, and still not be graded.
+    const uniform = delta(postRows(12, () => ({ proximity: 'deliberate' as EvaluatedAction['proximity'] })), {
+      dispersionEnabled: true,
+    })
+    const ur = uniform.proximity_dispersion?.reading
+    assert(
+      typeof ur === 'object' && ur.stddev === 0 && ur.distinct_levels === 1,
+      '§12.8 a UNIFORM window reads stddev 0 / 1 distinct level (never "advanced")',
+    )
+    assert(
+      typeof ur === 'object' &&
+        ur.interpretation_bound.includes('TESTED') &&
+        ur.interpretation_bound.includes('never perturbed'),
+      '§12.9 and carries the interpretation bound naming what it CANNOT distinguish',
+    )
+    assert(
+      typeof ur === 'object' &&
+        ur.delivery_bound.includes('fail server-side produce no') &&
+        ur.delivery_bound.includes('never delivered to the agent') &&
+        ur.delivery_bound.includes('cannot condition on delivery'),
+      '§12.10 and the R-3 delivery bound, verbatim in substance',
+    )
+
+    // §12.11 EVIDENCE FLOOR — a starved window certifies nothing.
+    const starved = delta(postRows(4), { dispersionEnabled: true })
+    assert(
+      starved.proximity_dispersion?.reading === 'insufficient_extraction',
+      '§12.11 below the per-half floor ⇒ insufficient_extraction (never a defaulted reading)',
+    )
+    assert(
+      typeof starved.proximity_dispersion?.basis?.floor === 'number',
+      '§12.12 and the basis is still reported (the floor is visible, not silent)',
+    )
+
+    // §12.13 DETERMINISM — the member carries a float, so the block's
+    // byte-identity guarantee has to cover it explicitly.
+    const a = JSON.stringify(delta(postRows(12), { dispersionEnabled: true }))
+    const b = JSON.stringify(delta(postRows(12), { dispersionEnabled: true }))
+    assert(
+      a === b,
+      '§12.13 the flag-on block is byte-identical on replay (the float is rounded)',
+    )
+  }
+
   console.log(`\ntrajectory-delta.test.ts: ${passed} passed, ${failed} failed`)
   if (failed > 0) {
     console.error('\nFailures:')

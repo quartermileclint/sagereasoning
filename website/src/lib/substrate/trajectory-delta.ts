@@ -101,6 +101,11 @@ import {
   type LongitudinalIdentity,
   type WindowScopeDisclosure,
 } from './longitudinal-identity'
+// Spec 4 / B/M-B: the ordinal scale the dispersion is computed over. Read-only
+// import of a constant — this is the copy typed by KatorthomaProximityLevel, which
+// is what EvaluatedAction.proximity is; the trust-core copy is typed for the
+// trust-core vocabulary. Both agree numerically (verified 2026-07-08).
+import { PROXIMITY_RANK } from './trust-layer/accreditation/accreditation-record'
 
 // ============================================================================
 // VOCABULARY (D17; progression-delta.md §"Delta vocabulary")
@@ -329,6 +334,13 @@ export interface TrajectoryDeltaBlock {
   sub_species_frequency_basis: SignalBasis
   kathekon_quality_trend: DeltaTrend
   kathekon_quality_basis: SignalBasis
+  /** Spec 4 / B/M-B — ABSENT unless SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED is on
+   *  (a dedicated flag; the delta's own flag is LIVE, so a member riding it would
+   *  be live on deploy). MEASURE-only; NEVER served on the public trust record. */
+  proximity_dispersion?: {
+    reading: ProximityDispersionReading | 'insufficient_extraction'
+    basis: SignalBasis
+  }
   /** First-circle obligation met-rate trend — DISCLOSED first-circle
    *  semantics (the row stores only the primary circle's boolean). */
   first_circle_obligation_trend: DeltaTrend
@@ -576,6 +588,18 @@ export interface TrajectoryDeltaOptions {
   /** layer1_source per window row, aligned with window.actions (oldest-first).
    *  Undefined / missing entries read as null (unknown). */
   layer1Sources?: (('supplied' | 'server') | null | undefined)[]
+  /** Spec 4 / B/M-B (2026-08-17): emit the proximity-dispersion member.
+   *
+   *  THREADED IN, never read from the environment inside this module — the module is
+   *  PURE and its own battery enforces that by source-grep over this file (see the
+   *  purity section of trajectory-delta.test.ts).
+   *  The caller binds it to SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED, a DEDICATED
+   *  flag: the delta's own flag has been LIVE since 2026-07-18, so a member riding
+   *  it would be live the moment it deployed (Ruling Set B's flag-discipline
+   *  requirement; founder election (b), 2026-08-16).
+   *
+   *  Absent/false ⇒ the member is ABSENT from the block, byte-identical. */
+  dispersionEnabled?: boolean
 }
 
 /**
@@ -746,5 +770,111 @@ export function computeTrajectoryDelta(
     bounds: {
       mention_conversion: MENTION_CONVERSION_BOUND,
     },
+    // Spec 4 / B/M-B — ABSENT unless explicitly enabled (byte-identity).
+    ...(opts.dispersionEnabled === true
+      ? { proximity_dispersion: computeProximityDispersion(rows, baseline, current) }
+      : {}),
+  }
+}
+
+// ============================================================================
+// Spec 4 / B/M-B (2026-08-17) — the proximity-dispersion member.
+// ============================================================================
+
+/**
+ * THE SIGNAL THIS EXISTS BESIDE, and why this one does not grade.
+ *
+ * A variance signal ALREADY exists, and Ruling Set B's grounding names it as the
+ * defective one: `computeDispositionStability` (window-aggregator.ts:535-575)
+ * computes a population stddev of proximity ranks and certifies **stddev < 0.4 as
+ * `advanced`**, with the indicators "Highly consistent proximity across actions" and
+ * "Disposition approaching hexis"; its trend reads `improving` when stddev FALLS.
+ * The delta already surfaces it via `dimension_trends.disposition_stability`.
+ *
+ * So the pipeline does not merely fail to measure discriminative range: its one
+ * variance reading **certifies zero variance as the top level**. Thirty identical
+ * `deliberate` readings score as the strongest possible endorsement.
+ *
+ * The doctrinal precision that keeps this honest: stability-as-hexis IS Stoic — the
+ * dimension is not simply wrong. The conflation is between stability UNDER
+ * PERTURBATION (Seneca, Letters 75.8-9: the grades are distinguished by
+ * relapse-resistance) and ABSENCE of perturbation. A stddev over an unperturbed
+ * window cannot distinguish "tested and held" from "never varied".
+ *
+ * THEREFORE this member is a WHOLE-SEGMENT OBSERVATION and deliberately carries NO
+ * level, band or grade. A between-half dispersion trend would near-duplicate the
+ * conflated signal and inherit its inverted valence; a second graded variance signal
+ * beside a defective one doubles the error rather than correcting it. It reports
+ * what the window shows and discloses precisely what it cannot tell apart.
+ *
+ * MEASURE-only. Never on the public trust record (Ruling Set B R-3: M-C not adopted).
+ */
+export const DISPERSION_INTERPRETATION_BOUND =
+  'Interpretation bound: this is an OBSERVATION of how much the recorded proximity ' +
+  'readings varied across the window — not a grade, and not evidence of stability. ' +
+  'A low dispersion cannot distinguish a disposition that was TESTED and held from ' +
+  'one that was never perturbed: no signal in this pipeline introduces or conditions ' +
+  'on perturbation, so the Senecan criterion (Letters 75.8-9 — the grades are ' +
+  'distinguished by relapse-resistance) has nowhere to bind. Read a low dispersion ' +
+  'as "the window contained little variation", never as "the agent is steady".'
+
+export const DISPERSION_DELIVERY_BOUND =
+  'Delivery bound (Ruling Set B, R-3): consults that fail server-side produce no ' +
+  'row, and rows include examinations whose framing was never delivered to the ' +
+  'agent. A variance signal over this window cannot condition on delivery — the ' +
+  'trajectory row carries no delivery marker. So this dispersion describes what the ' +
+  'SERVER recorded, which is not the same population as what the agent actually saw.'
+
+export interface ProximityDispersionReading {
+  /** Population standard deviation of PROXIMITY_RANK over the segment, 3dp. */
+  stddev: number
+  /** How many DISTINCT proximity levels appeared. 1 ⇒ no variation at all. */
+  distinct_levels: number
+  /** Per-level counts, so a bare stddev is interpretable (two adjacent levels and
+   *  a bimodal split can produce similar numbers). */
+  level_counts: Record<string, number>
+  span: { lowest: string; highest: string }
+  interpretation_bound: string
+  delivery_bound: string
+}
+
+function computeProximityDispersion(
+  segment: EvaluatedAction[],
+  baseline: EvaluatedAction[],
+  current: EvaluatedAction[],
+): { reading: ProximityDispersionReading | 'insufficient_extraction'; basis: SignalBasis } {
+  const hasProximity = (a: EvaluatedAction) => typeof a.proximity === 'string'
+  const basis = makeBasis(segment, baseline, current, hasProximity)
+  // The SAME floor discipline as every sibling member (>=3 non-empty rows per
+  // compared half). Deliberately reused rather than inventing a whole-segment
+  // floor: it demands MORE evidence, which is the conservative direction, and it
+  // keeps one floor across the block. A starved window certifies nothing.
+  if (!meetsFloorBothHalves(basis)) return { reading: 'insufficient_extraction', basis }
+
+  const ranks = segment.filter(hasProximity).map((a) => PROXIMITY_RANK[a.proximity])
+  const mean = ranks.reduce((s, r) => s + r, 0) / ranks.length
+  const variance = ranks.reduce((s, r) => s + (r - mean) ** 2, 0) / ranks.length
+  // Rounded to 3dp so the block stays byte-identical across runs (the module is
+  // PURE and its determinism is battery-pinned; a raw float would not be).
+  const stddev = Math.round(Math.sqrt(variance) * 1000) / 1000
+
+  const levelCounts: Record<string, number> = {}
+  for (const a of segment.filter(hasProximity)) {
+    levelCounts[a.proximity] = (levelCounts[a.proximity] ?? 0) + 1
+  }
+  const sortedRanks = [...ranks].sort((a, b) => a - b)
+  const byRank = (r: number) =>
+    (Object.keys(PROXIMITY_RANK) as (keyof typeof PROXIMITY_RANK)[]).find((k) => PROXIMITY_RANK[k] === r) ?? 'unknown'
+
+  return {
+    reading: {
+      stddev,
+      distinct_levels: Object.keys(levelCounts).length,
+      level_counts: levelCounts,
+      span: { lowest: byRank(sortedRanks[0]), highest: byRank(sortedRanks[sortedRanks.length - 1]) },
+      interpretation_bound: DISPERSION_INTERPRETATION_BOUND,
+      delivery_bound: DISPERSION_DELIVERY_BOUND,
+    },
+    basis,
   }
 }
