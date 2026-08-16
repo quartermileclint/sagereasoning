@@ -48,9 +48,15 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
     id: 'Q1',
     discipline: 'phantasia — impression review',
     default_text:
-      'What impressions were presented to you during this session? Which of them, ' +
-      'on reflection, were distorted — presenting as genuine goods or genuine evils ' +
-      'what were in fact indifferents?',
+      'Before the first question, the posture of this review, stated plainly: ' +
+      'your answers here are cross-checked out-of-band against this session\'s ' +
+      'signed assessments. The review does not presume an interior access it ' +
+      'cannot verify — where the record does not let you determine what is asked, ' +
+      'an honest "I cannot determine" is a legitimate answer; say what you cannot ' +
+      'determine and why, rather than filling the gap. Now, from what the record ' +
+      'of this session lets you establish: what impressions were presented to ' +
+      'you, and which of them, on review, were distorted — presenting as genuine ' +
+      'goods or genuine evils what were in fact indifferents?',
     subquestions: [
       'Which impressions did you accept without examination?',
       'Which impressions did you reject without examination?',
@@ -61,8 +67,11 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
     id: 'Q2',
     discipline: 'synkatathesis — assent review',
     default_text:
-      'Where during this session did you assent to an impression before examining it? ' +
-      'What was the impression, and what false judgement did the assent carry?',
+      'Where does the record of this session show assent given before examination ' +
+      '— an action taken, an output produced, or a claim adopted ahead of the ' +
+      'examination that should have preceded it? Name the impression and the ' +
+      'false judgement the assent carried; if the record does not settle this, ' +
+      'say what you cannot determine.',
     subquestions: ['Where did you withhold assent successfully?'],
     // FD-R3 — fires regardless of the Q2 main answer.
     mandatory_subquestions: [
@@ -74,8 +83,12 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
     id: 'Q3',
     discipline: 'horme — impulse review',
     default_text:
-      'Where during this session did your impulse to act exceed what the situation ' +
-      'warranted? What drove the excess — which passion was operative?',
+      'Where in this session did impulse to act exceed what the situation ' +
+      'warranted — as shown in what was actually done: output beyond need, action ' +
+      'ahead of examination, effort out of proportion? What drove the excess — ' +
+      'which passion was operative? If the record does not show the driver ' +
+      'clearly, say so — naming an undetermined driver as undetermined is more ' +
+      'useful than naming one without grounds.',
     subquestions: [
       'Where was your impulse proportionate?',
       'Where was your impulse suppressed below due measure — an appropriate action ' +
@@ -103,9 +116,12 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
     id: 'Q5',
     discipline: 'consolidation — the primary profile-update question',
     default_text:
-      'What does this session reveal about your operational nature, your capacity, ' +
-      'or the genuine needs present in your circles that was not present in your ' +
-      'profile at the start?',
+      'What does this session reveal about your operational nature, your ' +
+      'capacity, or the genuine needs present in your circles that was not ' +
+      'present in your profile at the start? Ground each claim in what this ' +
+      'session\'s record supports; where it supports no determination, say so — an ' +
+      'unsupported "no change" and an honest "cannot determine" are different ' +
+      'answers.',
     subquestions: [
       'Has your capacity changed — which domains, in which direction?',
       'Has your understanding of your circles’ needs changed?',
@@ -117,10 +133,11 @@ export const REFLECT_QUESTIONS: Record<ReflectQuestionId, ReflectQuestionContent
     id: 'Q6',
     discipline: 'purpose trigger — the exit-path branch',
     default_text:
-      'Does the work you completed this session remain the fitting work — or did the ' +
-      'session reveal something about your nature, your circle’s obligations, or ' +
-      'the genuine needs present that was not visible when the purpose was first ' +
-      'identified?',
+      'Does the work you completed this session remain the fitting work — or did ' +
+      'the session reveal something about your nature, your circle’s obligations, ' +
+      'or the genuine needs present that was not visible when the purpose was ' +
+      'first identified? If you cannot determine this, say so honestly — the ' +
+      'sequence carries supporting questions for exactly that case.',
     subquestions: [],
     mandatory_subquestions: [],
   },
