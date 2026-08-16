@@ -65,6 +65,18 @@
  * passed in. The live seams (`readOrchestratorL4TrustTier`, `commitL4Audit`,
  * `runL4AuditAndCommit`) read the clock (`new Date()`) + the DB, are flag-gated by
  * SUBSTRATE_TRUST_CORE_ENABLED, and are fail-honest (never throw to a route — MEASURE).
+ *
+ * ─── Q1/Q4.3 (applied 2026-08-16 at R2; exact text preserved in
+ * D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12) ──────────────
+ * Q1/Q4.3 — ONE PRINCIPLE AT TWO SCALES (named 2026-08-12, mentor ruling on
+ * principle 1 of the five-principles examination). The IDEA loop's Q1 hard
+ * constraint — the loop proposes, it never executes — is this same check at the
+ * architectural scale. A generated proposal is a *phantasia* (an impression
+ * presented), and the election by the human or agent who will act is the
+ * *synkatathesis* (Epictetus, *Discourses* 1.1.7–12, 1.28.1–2). A loop that
+ * executed its own proposal would reach a commitment stage with no preceding
+ * assent stage — exactly the causal structure Q4.3 detects inside a single
+ * trace. Q1 forbids architecturally what Q4.3 detects per-trace.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
