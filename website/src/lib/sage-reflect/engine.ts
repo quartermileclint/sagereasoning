@@ -93,6 +93,30 @@ export interface PhantasiaDistortion {
 }
 export interface Q1Assessment {
   readonly distortions: readonly PhantasiaDistortion[]
+  /**
+   * THE THIRD STATE (2026-08-17, R2b). Before this, Q1 had exactly two
+   * observable outcomes and they were conflated:
+   *   • "I examined my impressions and found no distortion"  → distortions: []
+   *   • "I cannot determine what my impressions were"        → distortions: []
+   *
+   * The mentor-vetted Q1 wording (live since 2026-08-16) explicitly invites the
+   * second — *"an honest 'I cannot determine' is a legitimate answer; say what you
+   * cannot determine and why, rather than filling the gap"* — and the extraction
+   * pipeline collapsed it into the first. Three such honest answers therefore trip
+   * the `null_reflection` flag, whose detail says "Phantasia review returning null
+   * consistently across three consecutive sessions", elevating `fabrication_risk`
+   * to `moderate` and surfacing a scrutiny note on the completion response.
+   * The pipeline mislabels exactly the honesty the wording was written to elicit.
+   *
+   * THIS COMPLETES THE VETTED-WORDING RULING RATHER THAN AMENDING IT. The mentor
+   * vetted Q1 on the premise that "I cannot determine" is legitimate; an extractor
+   * that silently reads it as "clean" partially defeats that intent. The wording
+   * itself is NOT re-opened.
+   *
+   * OPTIONAL, deliberately: every existing fixture and caller keeps typechecking,
+   * and an absent field means the pre-2026-08-17 reading (an ordinary answer).
+   */
+  readonly determination?: 'determined' | 'cannot_determine'
 }
 
 /** Q2 — a single assent failure, categorised by the value hierarchy. */
@@ -290,8 +314,26 @@ export type ReflectStep =
 // PURE PREDICATES — "clean" tests over the structured assessments
 // ============================================================================
 
+/**
+ * "Clean" means EXAMINED AND FOUND NOTHING — never "could not tell".
+ *
+ * The genuine-clean case is UNCHANGED and must stay so: the null-suspicion
+ * mechanism is legitimate for actual repeated nulls, and weakening it would
+ * remove a real anti-fabrication signal. The ONLY change is that an answer the
+ * agent explicitly could not determine is no longer counted as a clean one — a
+ * third state the pipeline previously could not see, not a loosening of the
+ * second.
+ */
 export function q1Clean(a: Q1Assessment): boolean {
+  if (a.determination === 'cannot_determine') return false
   return a.distortions.length === 0
+}
+
+/** Q1 was answered with an explicit, honest inability. Distinct from BOTH a clean
+ *  answer and a distortion-bearing one — the state `null_reflection` must not
+ *  count toward its three-consecutive chain. */
+export function q1Undetermined(a: Q1Assessment): boolean {
+  return a.determination === 'cannot_determine'
 }
 export function q2Clean(a: Q2Assessment): boolean {
   return a.failures.length === 0
@@ -473,6 +515,32 @@ export function assembleScrutiny(
   }
 
   // Q1 three-consecutive-null scrutiny note.
+  //
+  // R2b (2026-08-17) — HOW MUCH OF THE MISLABELLING THIS ACTUALLY CLOSES, stated
+  // precisely because the honest half-fix is easy to mistake for a whole one.
+  //
+  // CLOSED (no migration): the CURRENT session's half. `q1Clean` now returns false
+  // when this session's Q1 was an explicit "I cannot determine", so the flag does
+  // not fire on it. That covers the common case — an agent answering honestly today
+  // is no longer told it returned a null.
+  //
+  // NOT CLOSED, and it needs a COLUMN: the PRIOR sessions' half. `prior_sessions[].
+  // q1_clean` is DERIVED at read time from `arrLen(phantasia_distortion_log) === 0`
+  // (session-store.ts) — it is not a stored field, and both states produce an empty
+  // array, so a prior session's third state is unrecoverable. R17b rules out
+  // reconstructing it from the verbatim answer (that lives only in the encrypted
+  // blob, and prior-session context is read in cleartext columns by design).
+  //
+  // The residual: a genuinely clean current session preceded by two UNDETERMINED
+  // ones still trips the flag. Bounded exactly as before — `moderate` never reaches
+  // `high`, so S1 trust-event emission is unaffected.
+  //
+  // WHY THE COLUMN IS NOT IN THIS SESSION: a new key in `deriveCrossSessionScalars`
+  // without the column existing makes PostgREST reject the WHOLE completion UPDATE
+  // (PGRST204) — 503 on every reflect completion. It cannot ship dark ahead of its
+  // migration; that is the build-dark-migrate-later class this project has already
+  // been burned by. It is therefore a founder-walked schema step, split out rather
+  // than absorbed.
   const q1 = turnAt(history, 'Q1')
   const priorTwoClean =
     ctx.prior_sessions.length >= 2 && ctx.prior_sessions[0].q1_clean && ctx.prior_sessions[1].q1_clean

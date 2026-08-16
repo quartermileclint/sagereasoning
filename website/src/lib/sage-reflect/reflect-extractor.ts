@@ -46,6 +46,7 @@
 import { getClient } from '@/lib/sage-reason-engine'
 import { MODEL_DEEP } from '@/lib/model-config'
 import { extractJSON } from '@/lib/json-utils'
+import { isReflectQ1DeterminationEnabled } from './reflect-flags'
 import { sonnetCostMicrocents } from '@/lib/translation-sandwich/parallel-run'
 import type {
   RootPassionId,
@@ -247,6 +248,20 @@ function mapQ1(raw: unknown): Q1Assessment {
     if (!root) continue // drop invalid-vocabulary entries (conservative)
     distortions.push({ impression: asString(e.impression), root_passion: root, examined: asBool(e.examined) })
   }
+  // R2b (2026-08-17) — the third state. Read ONLY when the flag is on, so the
+  // extraction contract is byte-identical while dark. `cannot_determine` is
+  // accepted NARROWLY: only that exact token from the model, never inferred from
+  // an empty distortions array (which is the genuine-clean case) and never from
+  // hedging. Narrow is the conservative direction — it under-fires, leaving some
+  // honest inabilities still read as clean, which is TODAY'S behaviour and
+  // therefore safe. A broad reading would teach an agent that hedging suppresses
+  // scrutiny, which is a fabrication surface in a product whose whole point is
+  // anti-fabrication.
+  if (isReflectQ1DeterminationEnabled()) {
+    const d = asString(obj.determination)
+    if (d === 'cannot_determine') return { distortions, determination: 'cannot_determine' }
+    if (d === 'determined') return { distortions, determination: 'determined' }
+  }
   return { distortions }
 }
 
@@ -365,7 +380,18 @@ const Q1_SYSTEM =
   'Return: {"distortions":[{"impression":string,"root_passion":"epithumia"|"hedone"|"phobos"|"lupe","examined":boolean}]}\n' +
   'root_passion: epithumia=future apparent good, hedone=present apparent good, ' +
   'phobos=future apparent evil, lupe=present apparent evil. examined=whether the ' +
-  'agent reports having examined the impression before accepting/rejecting it.'
+  'agent reports having examined the impression before accepting/rejecting it.' +
+  // R2b (2026-08-17): appended ONLY when the flag is on, so the live contract is
+  // byte-identical while dark. The vetted Q1 wording invites "I cannot determine";
+  // without this field the extractor cannot distinguish that from "examined, found
+  // nothing" and the honest answer is scored as a null.
+  (isReflectQ1DeterminationEnabled()
+    ? '\ndetermination: "cannot_determine" ONLY IF the agent explicitly states it ' +
+      'cannot determine what its impressions were (the Q1 wording invites this as a ' +
+      'legitimate answer). Otherwise "determined". An empty distortions array with a ' +
+      'substantive answer is "determined", NOT "cannot_determine" — examining and ' +
+      'finding nothing is a determination. Do NOT infer it from hedging or brevity.'
+    : '')
 
 const Q2_SYSTEM =
   `${SHARED_SYSTEM_PREAMBLE}\n\n` +
