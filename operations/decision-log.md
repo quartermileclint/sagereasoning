@@ -21545,4 +21545,87 @@ whatever mentor consultation follows).
 next action (this session compiled it; the plan's R1 step requires it reach the mentor "before any
 standing-runner design opens," which is a separate, still-pending step). Cross-references:
 `D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`,
-`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
+`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`. **SUPERSEDED same day by
+`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16` — the report was brought to the mentor and
+accepted in full.** Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16
+
+**Decision:** Recorded the mentor's ruling on the §6 report
+(`operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`), relayed by the founder the
+same day it was compiled. **The report is accepted in full. The R1 gate clears. The O-C
+per-consumer-rendering scoping session is now OPEN** (Gate 1 of Ruling Set D's three-gate chain —
+"the §6 report compiled AND ruled on in mentor consultation" — is discharged).
+
+**Method confirmed sound, verbatim:** *"Live re-derivation from production, honest gaps named
+rather than papered over (the three null timestamps, the three examined orientation events, the
+remediation-shaped-candidate hypothesis untested against the full record), and the two reporting
+errors carried in the reconciliation section with their root cause named rather than just their
+corrections. This is the epistemic standard the project has been building toward."*
+
+**Every named finding in the report confirmed, several elevated to load-bearing standing-runner
+design inputs.** In substance (verbatim in `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`'s
+companion mentor-response, relayed inline, not separately filed — this entry is the durable
+record):
+- **h5's zero wins despite consistent high-reach status** is confirmed as "the run's clearest
+  evidence that reach and competitiveness are decoupled in this architecture" — a **design
+  question about the selection mechanism's weighting, not a calibration error.**
+- **h6's zero candidates across 20 cycles** confirmed as "the run's cleanest negative result and
+  its most actionable finding" — a **hard infrastructure requirement** (persistent runner history
+  across sessions), not a design question about h6 itself.
+- **h7's corrected three-way split** confirmed exactly as reported; carried forward as: "the work
+  it is doing is not competitive out-scoring… whether that is the right kind of work for the
+  friction channel is a design question," not a verdict on this run.
+- **The reach-vs-irreversibility decoupling (§7)** accepted as a flagged emergent finding, carried
+  as a named open question: is the friction channel's structural advantage a feature of the
+  mechanism's design, or an artefact of this run's bounded conditions.
+- **The guardrail calibration limit** confirmed, and its honestly-untested remediation-shaped-
+  candidate hypothesis is given **a defined, tractable follow-up task, NOT assigned to this
+  session:** *"read the nine rejected candidates, classify each as remediation-shaped or not, and
+  report the distribution… should be done before the standing-runner design session closes."*
+- **The domain-pairing hypothesis** — no further disposition needed, settled stands.
+- **GS-ATRF-2's clean-field decision** confirmed correct and elevated to "a named constraint, not a
+  preference" for the standing-runner design: any future design that appends runner commentary to
+  `proposed_action` corrupts the exact surface the Q7 ruling exists to keep honest.
+- **§9's two designed-but-unexercised mechanisms** (the fourth B7 signature; friction-only mode's
+  sustained operation) confirmed as "hypotheses about how the mechanisms will behave, not
+  confirmed operational behaviour" — carried, not treated as proven.
+- **§11's un-ruled list** accepted as inherited open questions for the standing-runner design
+  session; none gates R1's close or the O-C session.
+- **§12's `ORIENTATION_DELIVERY_TIMEOUT_MS` divergence** (3 of 22 `examined`) confirmed as "a
+  genuine named gap," carried as an open question — "not derivable from the aggregate numbers
+  alone."
+- **§13's `not_selected` note** — no further disposition needed.
+- **§10's reconciliation root cause** elevated: "any tally the standing runner reports should be
+  re-derived from the underlying set at report time" — now **a design constraint on the standing
+  runner's own reporting mechanism**, not merely a lesson from this run.
+
+**One genuinely new fact this ruling introduces, not previously stated anywhere in this arc — recorded
+explicitly rather than absorbed silently.** The ruling's closing line: *"The standing-runner design
+session opens after the O-C scoping session produces its document for ruling, per Ruling Set D's
+sequencing."* This **cross-gates two previously-independent tracks**: R8 (the standing-runner
+design session, per the concurrent-arc plan) and the O-C per-consumer-rendering scoping session
+(Layer 3 rendering — an entirely different subsystem). The arc plan's own R8 entry, prior to this
+ruling, named only "the mentor has ruled on the §6 report" as R8's prerequisite. **That prerequisite
+is now insufficient — R8 also waits on O-C's Gate 2 (its scope document being produced), not merely
+R1's clearance.** Folded into the arc plan in the same edit as this entry.
+
+**Files touched:** `operations/handoffs/founder/2026-08-15-concurrent-arc-plan.md` (R1 ticked
+closed with the ruling; the O-C conditional resolved to OPEN; R8's prerequisite updated to the new
+cross-gating; the nine-candidate qualitative-classification task named as an R8 input),
+`operations/handoffs/founder/2026-08-16-post-R1-arc-continuation-NEXT-SESSION-PROMPT.md` (Step 1
+superseded — R1's status is now known, not to be re-checked), this entry.
+
+**Risk classification:** `governance` — documents only. No code, schema, flag, or credential
+touched. AC7 not engaged.
+
+**Rollback path:** `git revert` this commit (documents only).
+
+**Rules served:** PR20 (naming the new cross-gating explicitly rather than letting it sit implicit
+in a mentor-response block only), PR17 (record kept precise for a founder with no independent way
+to verify mentor-relay accuracy except this record).
+
+**Status:** Adopted. The O-C scoping session is licensed to open. The standing-runner design
+session (R8) is licensed to open only once the O-C scoping session's own document is produced.
+Cross-references: `D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16`, `D-MENTOR-RULING-OC-SCOPING-
+LICENSE-RECORDED-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.

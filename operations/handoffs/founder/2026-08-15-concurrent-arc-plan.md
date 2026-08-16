@@ -206,9 +206,12 @@ is the natural home, founder may re-slot; the verbatim record governs details:**
   reuse constraint + both named honest limits; the relay pattern "the precedent to follow";
   the `relationship_type` distinctness constraint; the R20d boundary;
   `SUBSTRATE_LAYER3_ENABLED` unset throughout the chain. F-d (fields as design target)
-  remains the correct state until the design session rules. **No session is allocated until
-  Gate 1 clears** (natural home once it does: a post-R1 governance sitting — R5's or its own;
-  founder slots it).
+  remains the correct state until the design session rules. **Gate 1 CLEARED 2026-08-16**
+  (`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`) — **the O-C scoping session is now
+  OPEN.** No session convened yet; founder slots it. **A cross-gate discovered at the same
+  ruling, not previously stated anywhere in this plan: R8 (standing-runner design, below) now
+  waits on THIS session's own Gate 2 (its scope document being produced), not merely on R1** —
+  see R8's own entry for the corrected prerequisite.
 - **Not adopted / out of reach, recorded so no session self-starts them:** F-c (human mentor
   tools — out of this arc's agent-first ordering, not ruled); `SUBSTRATE_LAYER3_ENABLED`
   activation (not licensed by Ruling Set D or any session executing it).
@@ -269,7 +272,7 @@ mutation-verify the 30-day boundary both sides.
 (its Part F hand-back, including its GS-ATRF-1/2 answer). A Mode 1 blocking spec at any point
 preempts everything.*
 
-### ◐ R1 — Mode 3: the §6 report (the gate for everything after it) — **COMPILED 2026-08-16, NOT YET RULED ON** (`D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16`; report: `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`). The run closed at 20 cycles on the mentor's own stop-at-20 ruling (`D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`); the h7 win-record correction was folded in per its own three-way-split ruling (`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`). **Outstanding: the report must reach the mentor and be ruled on before R5/R6/R8 open** — this is the founder's next action, not yet done.
+### ☑ R1 — Mode 3: the §6 report (the gate for everything after it) — **DONE + RULED, 2026-08-16** (`D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16` + `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`; report: `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`). The run closed at 20 cycles on the mentor's own stop-at-20 ruling (`D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`); the h7 win-record correction was folded in per its own three-way-split ruling (`D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`). **The mentor accepted the report in full, method confirmed sound.** The R1 gate clears. **One new tractable task named, gating R8's own CLOSE (not its open): read the nine guardrail-rejected candidates, classify each remediation-shaped or not, report the distribution — before the standing-runner design session closes.**
 *Tier: `code-standard` (read/report). Founder presence: relays the report to the mentor.*
 
 Per the parallel-window prompt's Mode 3, steps 1–5 verbatim: real numbers from production (never
@@ -375,8 +378,14 @@ Builds follow the existing scoped-and-mentor-approved documents. The Q1 hard con
 restated at each session open: the loop proposes; it never executes.
 
 ### ☐ R8 — Standing-runner design
-*Tier: set at open. Prerequisite: the mentor has ruled on the §6 report (Q10/Q11's gate). Not
-pre-scoped — deliberately.*
+*Tier: set at open. Prerequisite, CORRECTED 2026-08-16
+(`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`): the §6 report ruling alone is no longer
+sufficient — R1 is ruled (Q10/Q11's original gate, discharged), but the SAME ruling introduced a
+new cross-gate: this session waits on the O-C scoping session's own Gate 2 (its scope document
+being produced), per the mentor's closing line, "per Ruling Set D's sequencing." Not pre-scoped —
+deliberately. **One named input, gating this session's CLOSE, not its open:** read the nine
+guardrail-rejected candidates from the bounded validation run, classify each remediation-shaped
+or not, report the distribution — before this session closes.*
 
 ---
 
@@ -401,8 +410,8 @@ pre-scoped — deliberately.*
 | ~~Mentor rules on the C2 scope documents~~ | **RESOLVED 2026-08-15** (same day) | Ruling Sets A + B (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-rulings-C2-scope-documents-verbatim.md`); kathêkon session CLOSED, hegemonikon open only for the uniformity family; five execution items land post-run — see the ruled-additions block under C2 |
 | ~~Mentor rules on the C3 scope document (Ruling Set C's awaited consultation)~~ | **RESOLVED 2026-08-15** (same day) | Ruling Set D (verbatim: `operations/agent-circles-2026-08/2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`); the Layer 3 scoping session CLOSED; S7 stands for the route/flag; O-B + the O-A disclosure adopted; O-C opened as an unlicensed design question; execution items post-run — see the ruled-additions block under C3. The L-5 candidate wording awaits mentor vetting (its own conditional below) |
 | ~~Mentor vets the L-5 candidate Q1–Q6 wording~~ | **RESOLVED 2026-08-15** (same day) | Vetted verbatim in hand (`operations/agent-circles-2026-08/2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md` — the canonical strings; Q1 + Q3 amended, Q4 byte-identical with the alternative deferred pending G4 review). D/L-5 is now fully executable at its natural home (R2 or its own post-run step) under the mentor's execution-record requirements; until that post-run edit, `question-bank.ts` stays untouched |
-| ~~Run reaches ≥20 + runner hand-back~~ | **RESOLVED 2026-08-16** | Mentor-ruled: **stop at 20** rather than continue to 40 (verbatim: `idea-loop-validation-run/MENTOR-RULING-cycle-20-stop-verbatim.md`; recorded `D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`). The literal Part F hand-back is licensed to be replaced by a post-hoc compilation from the run log ("a compilation task, not a reasoning task"). **Outstanding: the founder ends the run (does not open cycle 21) — their action alone, in the runner's own session, not this repo. R1 (the §6 report itself) has NOT yet been compiled or run.** Phase 2 opens once R1 runs and its report is ruled on (unchanged) |
-| Mentor rules on §6 report | mentor | R5/R6/R8 open. **M5 (2026-08-15) already released the ATRF session's doctrinal blocker** (S3 §5-Q3-e — sufficiency = epistemic threshold, boulesis = motivational state, separate fields); the report gate is the only remaining gate on R5 |
+| ~~Run reaches ≥20 + runner hand-back~~ | **RESOLVED 2026-08-16** | Mentor-ruled: **stop at 20** rather than continue to 40 (verbatim: `idea-loop-validation-run/MENTOR-RULING-cycle-20-stop-verbatim.md`; recorded `D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16`). The literal Part F hand-back was licensed to be replaced by a post-hoc compilation from the run log — done, see below |
+| ~~Mentor rules on §6 report~~ | **RESOLVED 2026-08-16** | R1 compiled (`D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16`, incl. the h7 win-record correction folded per `D-MENTOR-RULING-H7-WIN-RECORD-THREE-WAY-SPLIT-2026-08-16`) and accepted in full by the mentor same day (`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`). **R5 unblocked** (M5's 2026-08-15 doctrinal-blocker release + this ruling clear R5 fully). **The O-C scoping session is now OPEN** (its Gate 1 discharged by this same ruling). **R8 is NOT yet open** — the same ruling introduced a new cross-gate: R8 now waits on the O-C scoping session's own Gate 2 (its scope document produced), not on this alone — see R8's own corrected prerequisite. One named task gates R8's close, not its open: classify the nine guardrail-rejected candidates as remediation-shaped or not |
 | ~~Mentor rules on the O-C scoping-session licence (the C3b-drafted question)~~ | **RESOLVED 2026-08-16** | Option (ii): the O-C scoping session is LICENSED, gated behind the §6-report consultation — opens only after R1's report is compiled AND ruled on; three-gate chain confirmed (report-ruling → scope ruled → design ruled), route activation licensed at none; verbatim: `operations/agent-circles-2026-08/2026-08-16-mentor-ruling-oc-scoping-license-verbatim.md` |
 | A `*-CHANGE-SPEC.md`/`*-BLOCKED.md` appears | runner | Mode 1 preempts everything |
 
