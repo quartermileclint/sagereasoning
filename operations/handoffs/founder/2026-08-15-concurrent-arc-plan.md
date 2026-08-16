@@ -292,7 +292,16 @@ RUN-LOG's un-ruled per-cycle findings (cycles 5, 6, 9, 10, 11, 13, 14, 15, plus 
 since) for the same mentor sitting** — read from the scratch project's `RUN-LOG.md`, fresh.
 **The report reaches the mentor before any standing-runner design opens** (Q10/Q11, ruled).
 
-### ☐ R2 — Agent build batch 1: trust-core + harness (dark; the guard bundle)
+### ◐ R2 — Agent build batch 1: trust-core + harness (dark; the guard bundle) — **SPLIT 2026-08-16 into R2a (☑ DONE) + R2b (☐ CARRIED)**
+
+**☑ R2a — the disclosure/wording/corpus half — DONE 2026-08-16** (`D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16`). Six items, six commits (`15f8bc0` item 3 L4 header · `547c24c` item 4 corpus citations · `5cc2827` Spec 1 B/M-A code half, same-edit · `8d1ee81` item 6/Spec 2 M6 · `9bfd69e` Spec 3 reflect Q1–Q6 + implementation record · `be5c760` the signed R18 package, 9 placements) + `2e73ca7` the PR19 fold. **PR19 run at high effort, 8 finder angles: 4 confirmed, 3 fixed at the root** (DL-locus dash mismatch vs `logos-teaching.ts`; an unauthorized label on `agent-card.json` #7 that the signed package scoped to `llms.txt` alone; a redundant S6-5e pin), **1 confirmed and CARRIED** (Q1's new "cannot determine" wording collides with the pre-existing null-suspicion flag — the extraction pipeline cannot distinguish it from a clean answer; bounded, never reaches `fabrication_risk: high`, but surfaces a misdirected scrutiny note). Both new pins mutation-verified. Batteries: s10 133/0, boundary 248/0, all 11 reflect 0-failed, `tsc` 0, build green, agent-card 23 extensions. **No flag set, no schema, nothing pushed.**
+
+**THREE SCOPE FINDINGS from R2a that bind R2b — read before opening it:** (1) **PR24's `stoa_entries` half does not exist** — that table has NO `retain_until` by *binding mentor ruling* #24/Q9, pinned in three places incl. a battery; building the sweep as the plan words it would contradict an adopted ruling. (2) **Item 5's defect is mis-named everywhere** — the real sink is `classifier_cost_log.session_id`, not `loop_billing_events.loop_id`, plus an unrecorded adjacent instance on `/api/calling`. (3) **The stoic-brain compiler has diverged from its checked-in artifact** (+1565/−375 if run); item 4's recompile was correctly skipped as unnecessary *and* destructive.
+
+**SPLIT DEVIATION, stated plainly:** this is NOT the plan's own pre-authorised split (items 1–4 / 5–8). R2a grouped by *nature* — disclosure/wording vs the code-critical guard bundle — because the plan's numbering predates the C3b staged specs and because Specs 1 and 2 both edit `trust-record-payload.ts`, which the plan's split would have divided across two reviews. **The founder may reject this grouping.**
+
+**☐ R2b — the code-critical guard bundle — CARRIED.** Prompt: `operations/handoffs/founder/2026-08-16-R2b-guard-bundle-NEXT-SESSION-PROMPT.md`. Items: 1 (D4+D1), 2 (AE-3), 5 (loop_id, re-scoped), 7 (PR24, scope-corrected to `agent_hold_observations` only), 8 (P8a), Spec 4 (dispersion member, election already resolved to a dedicated flag), + the carried Q1 null-suspicion finding.
+
 *Tier: `code-elevated`→`code-critical` class builds, all dark/additive, no flag set in-session.
 Founder presence: none (activations are R4). Prerequisite: the M1 guard ruling executed.*
 

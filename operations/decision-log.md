@@ -21694,3 +21694,185 @@ design both wait for a ruling on it).
 `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`,
 `2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`,
 `2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-16 — D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16
+
+**Decision:** Executed **R2a** — the disclosure/wording/corpus half of the R2 agent build batch:
+six items built, verified, and committed dark, then a consolidated **PR19 adversarial review** run
+across the whole batch with **3 confirmed findings fixed at the root** and a fourth confirmed and
+surfaced-not-fixed. **R2 is SPLIT; R2b (the code-critical guard bundle) is carried with its own
+prompt.** **No flag was set. No schema was touched. Nothing was activated. Nothing was pushed** —
+the push is R4 step 1 per the arc plan.
+
+**Tier: `code-elevated`** — three live surfaces are changed **on push** (the S10 public trust-record
+payload; the reflect Q1–Q6 elicitation strings; the three R18 public doc surfaces + the guardrail
+GET self-doc). All changes are additive/disclosure-class: no auth, no encryption, no R20a perimeter,
+no env-flag activation, no data deletion, no migration. **AC7 not engaged. PR6 not engaged.**
+**Weights remain BLOCKED. The P0 0h hold stands.**
+
+**Governing records (each wins over this entry):** the R2 prompt
+(`operations/handoffs/founder/2026-08-16-R2-agent-build-batch-1-NEXT-SESSION-PROMPT.md`); the two
+staged specs (`operations/agent-circles-2026-08/2026-08-16-post-run-edit-specs-STAGED.md`,
+`…-post-run-r18-signoff-package-STAGED.md`, the latter **founder-signed 2026-08-16**); the mentor
+verbatim records for Ruling Sets A/B/D, M6, and the vetted reflect Q1–Q6.
+
+### What was built — six items, six commits
+
+| Commit | Item | Substance |
+|---|---|---|
+| `15f8bc0` | **item 3** — L4 audit header | The 2026-08-12 ruling's exact pending text (Q1/Q4.3 one principle at two scales) applied verbatim from its decision-log preservation. Comment-only. |
+| `547c24c` | **item 4** — corpus citations | `Meditations 4.26 → 7.9` (the ELEVATED-to-load-bearing sympatheia defect) + `DL 7.38 → 7.138–139`, in the corpus root and its one derived copy. |
+| `5cc2827` | **Spec 1** — B/M-A code half | ADR-013 §8 dated amendment + the ninth `does_not_attest` item + a new S10 pin, **all in ONE commit** per the ruling's same-edit rule. |
+| `8d1ee81` | **item 6 / Spec 2** — M6 | The total-unknown-branch curation disclosure, verbatim, as an exported byte-checked constant. |
+| `9bfd69e` | **Spec 3** — reflect Q1–Q6 | Four `default_text` changes (Q1/Q2/Q3 replace, Q5/Q6 append, Q4 untouched) + the four-element implementation record the ruling requires. |
+| `be5c760` | **R18 package** | All 9 placements across 4 surfaces, exactly as signed; extension count held at 23. |
+| `2e73ca7` | **PR19 fold** | 3 confirmed findings fixed. |
+
+### Part C decisions (stated, not taken silently)
+
+1. **Spec 3 TAKEN UP.** Its clean-boundary requirement is satisfied structurally: no sibling item in
+   R2a, and nothing queued for the R4 deploy, touches a reflect surface — so a before/after read of
+   reflect-derived event rates across the deploy is attributable to it alone. **Caveat recorded in
+   the implementation record: the boundary is the DEPLOY date, not the commit date.**
+2. **Spec 4 (B/M-B dispersion member) DEFERRED to R2b** — named, not dropped. Its election (a
+   dedicated `SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED` flag) is already resolved and needs no
+   re-opening.
+3. **The signed R18 package APPLIED this session**, so the consolidated PR19 review covered it and
+   the code-half-first ordering for B/M-A is structurally guaranteed (Spec 1 committed first;
+   nothing pushes before R4).
+4. **THE SPLIT — and it is NOT the arc plan's pre-authorised one, which is why it is stated here.**
+   The plan pre-authorised R2a = items 1–4 / R2b = items 5–8 + specs. This session split by NATURE
+   instead: **R2a = disclosure/wording/corpus; R2b = the code-critical guard bundle.** Grounds: the
+   plan's split predates the C3b staged specs (2026-08-16) and so could not anticipate them; Specs 1
+   and 2 both edit `trust-record-payload.ts`, so the plan's numbering would have divided one file's
+   work across two separate reviews. **The deviation is deliberate and the founder may reject it.**
+
+### Three findings that changed scope — surfaced, not routed around
+
+1. **PR24 (item 7) is half-wrong at source, and building it as written would contradict an adopted
+   ruling.** `stoa_entries` has **NO `retain_until`** — its absence is a **binding mentor ruling**
+   (#24, Q9: standing declarations, *"silent expiry is prohibited"*), pinned in the migration header
+   (`website/supabase-stoa-entries-migration.sql:21-26`), the store header
+   (`stoa-store.ts:29-33` — *"Never add this table to any retention sweep"*), and a battery
+   assertion (`stoa-boundary.test.ts:305`). PR24's own grounding sentence
+   (`adopted/project-instructions-snapshot.md:621`ff) claims both tables declare it. **The
+   `stoa_entries` half of PR24's gap does not exist.** Scope corrects to `agent_hold_observations`
+   only (PK is a generic `id`, unlike its `route_errors`/`throttle_events` siblings — the PK_COLUMN
+   discipline from the 2026-08-12 C-1 live defect still applies). **Changing the stoa posture would
+   require re-opening the mentor record, not a schema tweak — a founder call, not an AI one.**
+2. **Item 5's registered defect is mis-named in every record that carries it.** The reflect route's
+   `loop_billing_events.loop_id` has been UUID-safe since the route's creation (`route.ts:304`,
+   `extractLoopId(request) ?? generateLoopId()`, present from commit `0eb36c8`). The actual sink for
+   the founder-observed `invalid input syntax for type uuid: "reflect-<session_id>"` is
+   **`classifier_cost_log.session_id`** (a UUID column) receiving the caller-supplied free-form id
+   through the R20a gate (`reflect/route.ts:415` → `r20a-gate.ts:490` → `r20a-cost-tracker.ts:140`).
+   Same class, different table. **Plus an unrecorded adjacent instance:** `/api/calling`
+   (`calling/route.ts:462-466`) passes a free-form `session_id` to the same gate and would die
+   identically. Fix precedent is in-repo (`deterministicLoopId`, the 2026-07-12 S9b fix).
+3. **The stoic-brain compiler has DIVERGED from its checked-in artifact.** The arc plan's item 4
+   says to recompile "into `website/src/lib/stoic-brain.ts`". The compiler
+   (`scripts/compile-stoic-brain.ts`, repo root) actually writes
+   `website/src/data/stoic-brain-compiled.ts`, and running it produces **+1565/−375** against the
+   checked-in file — because the artifact is a hand-condensed context-injection file while the
+   compiler emits a full raw dump. Two live consumers read it
+   (`context/stoic-brain-loader.ts`, `rag/retrieve-passages.ts`). **The recompile was run, inspected,
+   and reverted.** It was also unnecessary: the compiled artifact carries **zero** occurrences of
+   either defective locus (the condensation drops the `sources` arrays). **No SHA-freeze update was
+   needed either** — the §C2b pin covers `stoic-brain.ts` (SHA
+   `fa8895ec…4928`, unchanged), not the JSON corpus; the M1 ruling's comment anticipated the fix
+   might touch that file, and it does not.
+
+### PR19 adversarial review — 8 finder angles, 4 confirmed, 3 fixed
+
+Run at high effort over `a538a6d..be5c760`. **3 CONFIRMED and fixed at the root** in `2e73ca7`:
+
+- **The DL locus dash mismatch.** Item 4's own commit message claimed the corrected citation
+  "matches what /logos already uses" — it did not, at the character level:
+  `logos-teaching.ts:151` renders `7.138–139` with an **en dash (U+2013)**; the fix wrote an ASCII
+  hyphen. Both files now match byte-for-byte.
+- **An unauthorized label on `agent-card.json` #7.** The signed package's Surface 3b specifies a
+  pure verbatim append with no label (contrast 1c and 2b, which DO specify their own prefixes). The
+  apply step wrongly reused the bold-lead the package scoped to `llms.txt` alone (§3a, explicitly
+  "packaging" there). Removed.
+- **A redundant test pin.** `S6-5e` was fully subsumed by `S6-5f` — independently verified that the
+  M6 constant is appended whole at exactly one call site and `S6-5e`'s substring is a literal
+  substring of it, so no mutation could separate them. Dropped, with the reasoning in-comment.
+
+**1 CONFIRMED, deliberately NOT fixed — carried:** **Q1's new wording collides with the pre-existing
+null-suspicion mechanism.** The recalibrated Q1 explicitly invites *"I cannot determine"* as a
+legitimate answer; the extraction pipeline (`reflect-extractor.ts` `mapQ1` / `Q1_SYSTEM`) has **no
+field distinguishing that from "examined, found nothing"** — both yield `distortions: []`. Three
+consecutive honest such answers therefore trip the unchanged `null_reflection` flag
+(`engine.ts:479-488`), elevating `fabrication_risk` to `moderate` and surfacing a misdirected
+scrutiny note on the completion API response (`response-builders.ts:187-188`) — **mislabelling
+exactly the honest behaviour the new wording was written to elicit.** Bounded: `moderate` never
+blocks S1 trust-event emission (which gates on `fabrication_risk !== 'high'`,
+`derive-trust-events.ts:516`). **Not fixed because it is a pre-existing extraction-pipeline gap the
+recalibration EXPOSED rather than introduced, and closing it means changing the Q1 extraction schema
+— a live trust-event surface, its own scoped step, not a same-session fold.** Carried to R2b/R3.
+
+**1 REFUTED:** `stoic-brain.ts:450`'s remaining `Meditations 4.26` was raised as an unfixed
+duplicate; it is a deliberate, already-disclosed scoping decision (the mentor ruled on the
+sympatheia interweaving locus; `:450` supports a different cosmopolitan-citizenship claim).
+
+**A review-agent error worth recording:** the conventions finder justified its (correct) verdict by
+inventing a *calendar* window for the byte-identity guard ("ran 2026-07-12→07-19, long closed"). The
+guard is not calendar-based — it binds iff `GATE1_FALSE_HOLD_CAPTURE === 'true'`
+(`human-practitioner-boundary.test.ts:431`, the M1 ruling). Right answer, wrong mechanism. Verified
+first-hand instead: the flag was unset all session and the guard reported **DORMANT** at every run,
+naming its permitted modifications honestly.
+
+### Verification
+
+`s10-trust-record-surface` **133/0** (134 pre-fold; one redundant pin removed) · `trust-core` 98/0 ·
+`kathekon-engagement` 105/0 · `emission-hooks` 19/0 · `guardrail-sandwich` 91/91 ·
+`human-practitioner-boundary` **248/0** · `r20a-invocation-guard` 126/0 · all **11** `sage-reflect`
+batteries 0 failed · `tsc` **0** · `npm run build` **green** (`/api-docs` + `/api/guardrail`
+registered — the standing route/page gate) · `agent-card.json` parses, **23** extensions.
+
+**Both new pins mutation-verified** (each proven capable of failing, then restored): Spec 1's
+S2-39/S2-40 (131→129/2 on removing the envelope item); Spec 2's S6-5e/S6-5f (134→132/2 on removing
+the fold, while S6-5d and S6-5g correctly held — proving they test different things).
+
+**A bug in the AI's own Spec 3 applying script was caught by that script's own post-condition and is
+recorded rather than quietly fixed:** the first-run regex omitted each literal's trailing-comma
+line, so every replacement would have left the old final line dangling in a live elicitation
+surface. The round-trip assertion failed, the file was restored from backup, the regex corrected,
+the run repeated clean. **Standing lesson: a transformation over source text must assert its own
+round-trip — a partially-matched block fails silently and looks like success.**
+
+### Risk classification
+
+`code-elevated` under 0d-ii (changes to existing user-facing functionality, on push). **Critical
+Change Protocol NOT engaged** — no auth/encryption/perimeter/env-flag/schema/deletion surface.
+**AC7 not engaged. PR6 not engaged.** PR19 discharged (independent adversarial review run, findings
+folded). PR22 honoured (Model/Effort trailers on every commit).
+
+### Rollback path
+
+Every item is an independent `git revert` — they touch disjoint files except where Spec 1's
+same-edit rule binds its three components (revert `5cc2827` as one unit). **Nothing is live in
+production regardless of outcome**: no flag was set, no schema applied, and nothing pushed. R4 is
+the separately-walked activation.
+
+### Carried
+
+**R2b** — the code-critical guard bundle, with its own prompt
+(`operations/handoffs/founder/2026-08-16-R2b-guard-bundle-NEXT-SESSION-PROMPT.md`): item 1 (D4+D1),
+item 2 (AE-3), item 5 (loop_id, re-scoped per the finding above), item 7 (PR24, scope-corrected to
+`agent_hold_observations` only), item 8 (P8a), Spec 4 (dispersion member). **Plus the carried Q1
+null-suspicion finding.** **Two founder calls named there:** whether to accept the PR24 scope
+correction, and whether AE-3's two ADR-014 preconditions ("structural cadence-provenance + a
+non-monoculture distribution") are met — neither verifiable from a repo session.
+
+**Rules served:** R18, PR6 (not engaged), PR15, PR17, PR18, PR19, PR22, PR24, AC5 (not engaged),
+AC7 (not engaged), KG1, KG7.
+
+**Status:** Adopted. Cross-references: `2026-08-16-R2-agent-build-batch-1-NEXT-SESSION-PROMPT.md`,
+`2026-08-16-post-run-edit-specs-STAGED.md`, `2026-08-16-post-run-r18-signoff-package-STAGED.md`,
+`2026-08-16-reflect-q1-q6-recalibration-implementation-record.md`,
+`D-CONCURRENT-ARC-C3B-POST-RUN-STAGING-2026-08-16`,
+`D-FIVE-PRINCIPLES-AND-GUIDE-FUNCTION-RULINGS-EXECUTED-2026-08-12`,
+`2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
