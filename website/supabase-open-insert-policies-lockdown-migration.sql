@@ -12,17 +12,26 @@
 -- *** THIS IS DELIBERATELY *NOT* THE SAME SHAPE AS THOSE TWO PRECEDENTS. ***
 -- ============================================================================
 -- Both earlier fixes revoked ALL privileges and left the table reachable only
--- by service_role. Applying that pattern here would BREAK TWO WORKING FEATURES:
+-- by service_role. Applying that pattern here would BREAK ONE WORKING FEATURE
+-- and is unnecessary for the other:
 --
---   * `document_scores` has a DELIBERATE public SELECT policy — the badge
---     surface (`/api/badge/[id]`) is meant to be publicly readable. Revoking
---     anon's SELECT would break every published badge.
---   * `reflections` has an owner SELECT policy that is LOAD-BEARING:
+--   * `reflections` has an owner SELECT policy that is GENUINELY LOAD-BEARING:
 --     `src/app/api/practice-calendar/route.ts` is the one consumer in this set
 --     that builds a USER-JWT client (anon key + forwarded Authorization header,
 --     route.ts:65-71) and SELECTs reflections through it. Dropping that policy,
 --     or revoking authenticated's SELECT, would silently empty the practice
 --     calendar's reflection strip.
+--   * `document_scores` has a DELIBERATE public SELECT policy. **CORRECTED
+--     2026-08-16, PR19 independent review:** the badge surface
+--     (`/api/badge/[id]/route.ts`) in fact reads this table via `supabaseAdmin`
+--     (service-role), not the anon key — the earlier draft of this comment
+--     wrongly claimed revoking anon's SELECT would break it. No consumer
+--     anywhere in this codebase reads `document_scores` via anon/authenticated
+--     today. Its SELECT is left open anyway, because it was always
+--     deliberately public by design (`USING (true)`, no `user_id`/PII column,
+--     the table exists specifically to back a public badge) and the confirmed
+--     defect under this migration is INSERT-only — touching a policy that was
+--     never the problem is unnecessary scope, not a required safeguard.
 --
 -- So this migration closes ONLY the actual defect — the INSERT hole — and
 -- leaves every SELECT path exactly as it is. The instinct to "apply the same
@@ -75,10 +84,20 @@
 -- Every legitimate INSERT into all three tables goes through a service-role
 -- client, verified first-hand 2026-08-16 (grep of every `.from('<table>')` call
 -- site and every client construction in each consuming file):
---   reflections      <- api/reflect, api/reflections, api/mentor/private/reflect,
---                       api/milestones            — all service-role
---   milestones       <- api/milestones            — service-role (supabaseAdmin)
---   document_scores  <- api/score-document/[id]   — service-role
+--   reflections      <- api/reflect:214, api/mentor/private/reflect:662
+--                                                — both service-role
+--                       (api/reflections + api/milestones READ it, service-role)
+--   milestones       <- api/milestones:176       — service-role (supabaseAdmin)
+--   document_scores  <- NO WRITER EXISTS         — see the correction below
+--
+-- **CORRECTED 2026-08-16, PR19 independent review:** an earlier draft named
+-- `api/score-document/[id]` as document_scores' writer. That route exports only
+-- a GET handler; it never writes. There is NO writer to `document_scores`
+-- anywhere in the codebase today — live document scoring writes to a different
+-- table (`document_evaluations_v3`, via api/score-document/route.ts:261). This
+-- makes the fix strictly safer than the original rationale claimed, but the
+-- audit trail named the wrong file and is corrected here rather than left.
+--
 -- `service_role` carries BYPASSRLS and retains its grants, so no legitimate
 -- write path is affected. The ONLY user-JWT consumer in this set
 -- (api/practice-calendar) performs SELECTs exclusively — never an INSERT.
@@ -91,9 +110,12 @@
 -- §PRE — run BEFORE applying (TEST first, then production)
 -- ============================================================================
 -- P1. Confirm the three open INSERT policies exist, and note the SELECT policies
---     that must SURVIVE (expect 5 rows: 3 × INSERT with_check=true, plus
---     "Users can read own reflections", "Users can read own milestones",
---     "Public read access for document scores" — 6 rows in total):
+--     that must SURVIVE. **EXPECT EXACTLY 6 ROWS** — 3 × INSERT (with_check=true)
+--     plus 3 × SELECT ("Users can read own reflections", "Users can read own
+--     milestones", "Public read access for document scores"). (An earlier draft
+--     of this line opened with "expect 5 rows" and then listed six; corrected
+--     2026-08-16 per the PR19 review, so a correct result is not second-guessed
+--     against a wrong expectation.)
 --
 --   SELECT tablename, policyname, cmd, roles, qual, with_check
 --   FROM pg_policies
@@ -177,10 +199,20 @@ ALTER TABLE public.document_scores ENABLE ROW LEVEL SECURITY;
 --   FROM information_schema.role_table_grants
 --   WHERE table_schema = 'public'
 --     AND table_name IN ('reflections', 'milestones', 'document_scores')
---     AND grantee IN ('anon', 'authenticated')
+--     AND grantee IN ('anon', 'authenticated', 'PUBLIC')
 --   ORDER BY table_name, grantee, privilege_type;
 --
--- V4. Data intact — re-run §PRE-P2; counts UNCHANGED.
+--     (`PUBLIC` added to the filter 2026-08-16 per the PR19 review: §APPLY
+--      revokes from anon, authenticated AND PUBLIC, but this check previously
+--      inspected only the first two — an asymmetry between what is changed and
+--      what is verified. Low risk, since REVOKE has no partial-failure mode,
+--      but a verify step should cover everything its apply step touches.)
+--
+-- V4. Data intact — re-run §PRE-P2; counts UNCHANGED. **Note this check is
+--     WEAK on TEST**, where all three tables are empty (0/0/0 before and after,
+--     so it cannot distinguish "unharmed" from "emptied"). It is meaningful only
+--     on production, where real rows exist — do not treat the TEST pass as
+--     evidence for the production apply.
 --
 -- V5. BEHAVIOURAL PROOF — the INSERT hole is closed. Re-run §PRE-P3's three
 --     curls. Each must now return `42501 permission denied for table <x>`,
@@ -203,9 +235,13 @@ ALTER TABLE public.document_scores ENABLE ROW LEVEL SECURITY;
 -- revoked. After running this, §PRE-P3's probe returns `23502` again — i.e. the
 -- forgery hole is reopened (the pre-fix behaviour).
 --
---   GRANT INSERT, UPDATE, DELETE ON public.reflections     TO anon, authenticated;
---   GRANT INSERT, UPDATE, DELETE ON public.milestones      TO anon, authenticated;
---   GRANT INSERT, UPDATE, DELETE ON public.document_scores TO anon, authenticated;
+--   (Corrected 2026-08-16, PR19 independent review: this list previously read
+--    INSERT, UPDATE, DELETE only — fewer privileges than §APPLY revokes — while
+--    the heading claimed to restore the prior state "exactly". It now mirrors
+--    §APPLY's full revoke list.)
+--   GRANT INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.reflections     TO anon, authenticated;
+--   GRANT INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.milestones      TO anon, authenticated;
+--   GRANT INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.document_scores TO anon, authenticated;
 --
 --   CREATE POLICY "Service role insert for reflections"
 --     ON public.reflections FOR INSERT WITH CHECK (true);
