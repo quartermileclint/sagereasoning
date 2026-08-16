@@ -46,3 +46,27 @@ export const STOA_TRUST_EVENTS_ENV_VAR = 'SUBSTRATE_STOA_TRUST_EVENTS_ENABLED'
 export function isStoaTrustEventsEnabled(): boolean {
   return process.env[STOA_TRUST_EVENTS_ENV_VAR] === 'true'
 }
+
+/** Register D4 (2026-08-17, R2b) — the REDUCER half of the 2026-07-19 self-circle
+ *  ruling. A DEDICATED flag, never a reuse of SUBSTRATE_TRUST_CORE_ENABLED, per the
+ *  standing lesson that darkness is per-flag and not per-feature (memory
+ *  `shared-flag-dark-is-per-flag-not-per-feature`): the trust core is LIVE in
+ *  production, so riding its flag would make this narrowing live the moment it
+ *  deploys, on a surface that writes PERMANENT ledger rows.
+ *
+ *  UNSET ⇒ `deriveWorstJusticeOutcome` behaves byte-identically to its pre-D4 form
+ *  (battery-asserted). SET ⇒ a self-preservation-only assessment stops deriving
+ *  `justice-surface-{unevaluated,indeterminate,transparently-handled}`; a VIOLATED
+ *  obligation still derives regardless of circle identity (the conservative
+ *  direction — see the asymmetry note in derive-trust-events.ts).
+ *
+ *  Activation is its own founder-walked `code-critical` step (D3): the reducer is a
+ *  LIVE trust-event emitter. The walk must ALSO re-check D1's `justice_floor_active`
+ *  re-latch on `sagereasoning:s9-loop@v1` BEFORE the flip, deploy-and-verify first,
+ *  and pre-write the rollback UPDATE — the S11b Part-3 ordering guard. */
+export const JUSTICE_SELF_CIRCLE_NARROWING_ENV_VAR =
+  'SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED'
+
+export function isJusticeSelfCircleNarrowingEnabled(): boolean {
+  return process.env[JUSTICE_SELF_CIRCLE_NARROWING_ENV_VAR] === 'true'
+}

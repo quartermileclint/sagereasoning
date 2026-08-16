@@ -534,12 +534,24 @@ console.log('\n§8 — the self-circle narrowing (2026-07-19 mentor ruling), bot
   check('§8.8b the A2 bound is UNCHANGED (extraction responsibility, not predicate breadth — mentor #5)',
     NARROWED_ARM_BOUNDS.a2Omission.includes('omitted'))
 
-  // §8.9 THE DELIBERATE PREDICATE⊂REDUCER DIVERGENCE — on a self-only input
-  // the engine reducer still derives a justice outcome (it does not read
-  // circle identity; it is a LIVE trust-event surface — D3/register D4 make
-  // its narrowing a separate code-critical step), while the predicate's Arm 1
-  // correctly refuses. Pinned as INTENTIONAL so a future "fix" in either
-  // direction is a conscious decision, not drift.
+  // §8.9 THE PREDICATE⊂REDUCER DIVERGENCE — AMENDED 2026-08-17 (register D4).
+  //
+  // The reducer CAN now close this divergence: `deriveWorstJusticeOutcome` reads
+  // circle identity behind an opt-in (`requireBeyondSelfCircle`), bound at the one
+  // live emission site to SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED.
+  //
+  // This pin is AMENDED rather than inverted, deliberately. A flat inversion
+  // ("the reducer now refuses") would assert something FALSE while the flag is
+  // unset — which is the whole of production today. So the divergence is pinned
+  // in BOTH states: still present flag-off (§8.9), closed flag-on (§8.9c). A
+  // future change in either direction stays a conscious decision, which is what
+  // the original pin existed to guarantee.
+  //
+  // §8.9b is unchanged and is now load-bearing in a second way: the predicate
+  // must keep reading the UN-narrowed reducer, because `selfCircleOnlySuppression`
+  // derives from `justice !== null` on exactly these inputs. If someone passes the
+  // narrowing through the predicate's delegation, §8.9b fails here first — before
+  // loop-fold's live `self_regarding` bucket silently empties.
   const selfOnlyAssessment = {
     katorthoma_proximity: 'deliberate',
     virtue_domains_engaged: ['phronesis', 'dikaiosyne'],
@@ -554,10 +566,30 @@ console.log('\n§8 — the self-circle narrowing (2026-07-19 mentor ruling), bot
   const predReading = assessKathekonEngagement(
     kathekonSignalsFromAssessment(selfOnlyAssessment as unknown as Parameters<typeof kathekonSignalsFromAssessment>[0]),
   )
-  check('§8.9 reducer still derives a justice outcome on self-only (live surface, untouched this session)',
+  check('§8.9 FLAG-OFF: reducer still derives a justice outcome on self-only (production today)',
     reducerOutcome !== null && reducerOutcome.obligationStatus === 'indeterminate')
-  check('§8.9b the predicate refuses the same input (deliberately narrower than the reducer)',
+  check('§8.9b the predicate refuses the same input (narrower than the un-narrowed reducer)',
     !predReading.justiceSurfacePresent && predReading.selfCircleOnlySuppression)
+  // §8.9c FLAG-ON: the divergence CLOSES — predicate and reducer now agree that a
+  // self-only circle is not a justice surface (the 2026-07-19 ruling, both halves).
+  check('§8.9c FLAG-ON: the reducer refuses too ⇒ predicate and reducer converge (D4)',
+    deriveWorstJusticeOutcome([selfOnlyAssessment], { requireBeyondSelfCircle: true }) === null)
+  // §8.9d THE ASYMMETRY SURVIVES THE CONVERGENCE: a VIOLATED obligation on the
+  // self circle still derives even flag-on, and the predicate still engages it via
+  // Arm 2. Adverse justice evidence is never dropped on either side.
+  const selfOnlyViolatedAssessment = {
+    katorthoma_proximity: 'deliberate',
+    virtue_domains_engaged: ['phronesis', 'dikaiosyne'],
+    oikeiosis: {
+      relevant_circles: [
+        { circle: 'self_preservation', obligation_assessment: { status: 'violated' } },
+      ],
+    },
+    passion_diagnosis: { passions_detected: [] },
+  } as unknown as Parameters<typeof deriveWorstJusticeOutcome>[0][number]
+  check('§8.9d FLAG-ON: self-only VIOLATED still derives (adverse evidence never dropped)',
+    deriveWorstJusticeOutcome([selfOnlyViolatedAssessment], { requireBeyondSelfCircle: true })
+      ?.obligationStatus === 'violated')
 
   // §8.10 VIOLATED-ON-UNKNOWN-CIRCLE (first-hand review, battery-adequacy):
   // adverse justice evidence must engage regardless of circle IDENTITY — a

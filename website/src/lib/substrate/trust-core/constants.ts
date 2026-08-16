@@ -8,8 +8,22 @@
  * without pulling a runtime dependency on the sandwich engine.
  */
 
-import type { KatorthomaProximity } from '@/lib/translation-sandwich/layer2-mechanisms'
+import type { KatorthomaProximity, OikeiosisCircle } from '@/lib/translation-sandwich/layer2-mechanisms'
 import type { Volatility } from './types'
+
+/** The innermost oikeiosis circle. Canonical home (2026-08-17, register D4): BOTH
+ *  `kathekon-engagement.ts` (the predicate) and `derive-trust-events.ts` (the
+ *  reducer) must test circle identity against the same literal, and the predicate
+ *  already imports the reducer — so defining it in either would make the pair
+ *  circular. It lives here, in the neutral module both already depend on;
+ *  kathekon-engagement re-exports it under its established name so existing
+ *  importers are unaffected.
+ *
+ *  Deliberately NOT consolidated with `layer2-mechanisms.ts:1575`'s identical
+ *  local constant: that file is inside the `/api/reason` engine graph, and
+ *  touching it for a tidy-up would trade a real measurement guarantee for
+ *  cosmetics. Named here so the duplication stays a recorded decision. */
+export const SELF_PRESERVATION_CIRCLE: OikeiosisCircle = 'self_preservation'
 
 /** The katorthoma-proximity scale, worst → best. Index = ordinal rank. */
 export const PROXIMITY_ORDER: readonly KatorthomaProximity[] = [

@@ -35,7 +35,8 @@ import type {
   KatorthomaProximity,
   VirtueDomain,
 } from '@/lib/translation-sandwich/layer2-mechanisms'
-import { PROXIMITY_RANK } from './constants'
+import { PROXIMITY_RANK, SELF_PRESERVATION_CIRCLE } from './constants'
+import { isJusticeSelfCircleNarrowingEnabled } from './trust-core-flag'
 import type { CoverageStatus, TrustEvent } from './types'
 
 /** verifyLayer2Signature's result (structural — avoids importing its private type). */
@@ -117,7 +118,12 @@ export function deriveCredentialAndJusticeEvents(
   //     met outcome carries the CONSERVATIVE demonstratedProximity so the engine's
   //     clear-cap-and-increase rise is capped by demonstrated evidence — without
   //     it the engine treated every met write as an unconditional +1 ratchet. ---
-  const justice = deriveWorstJusticeOutcome(verified.map((v) => v.assessment))
+  // D4 (2026-08-17): the ONE live consumer, and therefore the only place the
+  // self-circle narrowing binds. Flag UNSET ⇒ pre-D4 behaviour byte-identical.
+  // Read at call time (never module load), per the house flag discipline.
+  const justice = deriveWorstJusticeOutcome(verified.map((v) => v.assessment), {
+    requireBeyondSelfCircle: isJusticeSelfCircleNarrowingEnabled(),
+  })
   if (justice !== null) {
     events.push({
       agentId: input.agentId,
@@ -142,6 +148,14 @@ export function deriveCredentialAndJusticeEvents(
   return events
 }
 
+/** Register D4 opt-in. Absent/false ⇒ pre-D4 behaviour, byte-identical. */
+export type DeriveJusticeOptions = {
+  /** Require >=1 IDENTIFIED circle beyond `self_preservation` before a self-only
+   *  assessment may derive an unevaluated / indeterminate / met justice outcome.
+   *  A VIOLATED obligation is never gated by this. */
+  requireBeyondSelfCircle?: boolean
+}
+
 type JusticeOutcome = {
   eventType:
     | 'justice-surface-violated'
@@ -164,7 +178,28 @@ type JusticeOutcome = {
  */
 export function deriveWorstJusticeOutcome(
   assessments: SignedLayer2Assessment['assessment'][],
+  opts?: DeriveJusticeOptions,
 ): JusticeOutcome | null {
+  // REGISTER D4 (2026-08-17) — the reducer half of the 2026-07-19 self-circle
+  // ruling, opt-IN so this module stays byte-identical until the founder-walked
+  // activation flips it (D3: this is a LIVE trust-event emitter).
+  //
+  // DEFAULT false, deliberately. The safe default for a live surface is today's
+  // behaviour: an un-updated caller cannot be silently narrowed. The ONE live
+  // caller (deriveCredentialAndJusticeEvents) passes the flag explicitly.
+  //
+  // THE PREDICATE MUST NOT PASS TRUE, and that is load-bearing rather than an
+  // oversight: assessKathekonEngagement derives `selfCircleOnlySuppression` from
+  // this function returning NON-null on a self-only input (kathekon-engagement.ts
+  // :223-228, first conjunct `justice !== null`). Narrowing the reducer under the
+  // predicate would collapse that diagnostic to false, taking §8.9b with it AND
+  // loop-fold's `isSelfRegardingLoop` — a LIVE MEASURE surface that routes
+  // self-regarding loops into their own bucket. The predicate answers "was there a
+  // justice SIGNAL at all", then applies its own circle test; the reducer answers
+  // "does this become a dikaiosyne ledger EVENT". Different questions, so the
+  // narrowing belongs only on the second.
+  const requireBeyondSelfCircle = opts?.requireBeyondSelfCircle === true
+
   let sawViolated = false
   let sawUnevaluated = false
   let sawIndeterminate = false
@@ -177,10 +212,42 @@ export function deriveWorstJusticeOutcome(
       .map((c) => c.obligation_assessment?.status)
       .filter((s): s is 'met' | 'violated' | 'indeterminate' => s != null)
 
+    // D4: count circles carrying an IDENTIFIED other party. Mirrors the predicate's
+    // own encoding exactly (kathekon-engagement.ts:212-220) — every extraction
+    // circle beyond `self_preservation` contains other rational agents, so
+    // `name !== self_preservation` is the faithful reading of the mentor's "at
+    // least one circle that contains another rational agent whose good is
+    // genuinely at stake". STRICT on unknown identity: a circle whose name is
+    // absent/blank is NOT an identified other party. Strict is safe on live
+    // inputs — `OikeiosisCircleAssessment.circle` is a REQUIRED field
+    // (layer2-mechanisms.ts) populated from Layer 1's enum-validated `circle`, so
+    // the only name-less inputs reachable here are test fixtures and legacy
+    // captures, never a production assessment.
+    const beyondSelfCircleCount = circles.filter((c) => {
+      const name = (c as { circle?: unknown }).circle
+      return typeof name === 'string' && name.trim() !== '' && name !== SELF_PRESERVATION_CIRCLE
+    }).length
+    const selfOnly = requireBeyondSelfCircle && beyondSelfCircleCount === 0
+
     const dikaiosyneEngaged = a.virtue_domains_engaged.includes('dikaiosyne')
 
+    // THE ASYMMETRY, and it is the ruling's own shape rather than a convenience.
+    // `violated` stays UNGATED by the circle test: dropping adverse justice
+    // evidence would make trust read HIGHER, which is the one direction this
+    // project never takes on a safety-adjacent surface. The predicate already
+    // resolved the identical question the identical way (Arms 2-4 left unchanged
+    // at the 2026-07-19 narrowing, "adverse justice evidence is never dropped"),
+    // and loop-fold.ts:703 shipped the same rule as
+    // `beyondSelfCircleCount >= 1 || violatedObligation`. The three OTHER outcomes
+    // are gated, each on its own mentor ground: `indeterminate` is named verbatim
+    // as "the trigger misfiring" on self-regarding decisions (ruling #4);
+    // `unevaluated` asserts a justice surface the ruling says is not there
+    // (ruling #1); `met` would CREDIT dikaiosyne — a rise — for action that
+    // engages no other party at all (ruling #3, self-regarding action is
+    // phronesis/sophrosyne). Gating `met` is also what keeps the narrowing from
+    // being a backdoor trust INCREASE.
     if (statuses.includes('violated')) sawViolated = true
-    if (statuses.includes('indeterminate')) sawIndeterminate = true
+    if (!selfOnly && statuses.includes('indeterminate')) sawIndeterminate = true
 
     // PA-4 fold (2026-07-11): met CREDITS dikaiosyne (the transparently-handled
     // rise), so it requires dikaiosyne to have been ENGAGED by the assessment —
@@ -194,7 +261,7 @@ export function deriveWorstJusticeOutcome(
     // agent stays capped (the safe direction: trust reads lower, never higher)
     // until a genuinely dikaiosyne-engaged met evaluation lands. An S2/S9
     // refinement candidate; watch in the S9 instrument-fidelity batteries.
-    if (dikaiosyneEngaged && statuses.includes('met')) {
+    if (!selfOnly && dikaiosyneEngaged && statuses.includes('met')) {
       sawMet = true
       const p = a.katorthoma_proximity
       if (metDemonstrated === null || PROXIMITY_RANK[p] < PROXIMITY_RANK[metDemonstrated]) {
@@ -212,7 +279,8 @@ export function deriveWorstJusticeOutcome(
     // (the s9-loop cap, corrected in the same S11b walk). The branch STILL
     // fires when circles EXIST but none carries an obligation_assessment — the
     // U2/J2 marketing-email class the whole ADR-010 arc exists for.
-    if (dikaiosyneEngaged && circles.length >= 1 && statuses.length === 0) sawUnevaluated = true
+    if (!selfOnly && dikaiosyneEngaged && circles.length >= 1 && statuses.length === 0)
+      sawUnevaluated = true
   }
 
   if (sawViolated) return { eventType: 'justice-surface-violated', obligationStatus: 'violated' }

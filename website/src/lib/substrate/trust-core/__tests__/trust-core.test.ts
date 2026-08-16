@@ -316,10 +316,26 @@ function rank(p: KatorthomaProximity | null): number {
 // 4. Derivers (R18f-parallel)
 // ============================================================================
 
+// D4 (2026-08-17): every fixture circle now carries a NAME, defaulting to the
+// BEYOND-SELF `local_community`. Two reasons, and the second is the load-bearing
+// one:
+//
+//   (1) Faithfulness. `OikeiosisCircleAssessment.circle` is a REQUIRED field on
+//       every live assessment (populated from Layer 1's enum-validated `circle`),
+//       so a name-less circle was never a shape production can produce.
+//
+//   (2) NON-VACUITY. Before this, every reducer fixture here was name-less, so
+//       under the D4 narrowing they would all suppress — and the PA-1 e2e ratchet
+//       assertions below would have gone on PASSING while testing nothing at all
+//       (no justice event ⇒ "the latch is clear" is trivially true). A pin that
+//       cannot fail is not a pin. Naming the circles keeps each assertion testing
+//       the thing it was written to test under BOTH flag states.
+//
+// Pass `circle: 'self_preservation'` explicitly for the D4 suppression cases.
 function mkSigned(
   proximity: KatorthomaProximity,
   domains: ('phronesis' | 'dikaiosyne' | 'andreia' | 'sophrosyne')[],
-  circles: { status?: 'met' | 'violated' | 'indeterminate' }[] = [],
+  circles: { status?: 'met' | 'violated' | 'indeterminate'; circle?: string | null }[] = [],
 ): SignedLayer2Assessment {
   return {
     assessment: {
@@ -327,6 +343,9 @@ function mkSigned(
       virtue_domains_engaged: domains,
       oikeiosis: {
         relevant_circles: circles.map((c) => ({
+          // `circle: null` is written through verbatim so the strict
+          // unknown-identity case stays constructible.
+          circle: c.circle === undefined ? 'local_community' : c.circle,
           obligation_assessment: c.status ? { status: c.status, justification: 'x' } : null,
         })),
       },
@@ -451,6 +470,82 @@ const verifyFail = () => ({ valid: false as const, reason: 'bad_signature' })
   const states = foldTrustEvents(events, () => initialEarnedDomainState({ profilePrior: 'habitual' }))
   const ph = states.get('phronesis')!
   assert(ph.reflectLastHonestAt === plusMonths(T0, 0.5), 'fold: a later-touched domain inherits the earlier reflect timestamp')
+})()
+
+// ============================================================================
+// 4b. D4 — the reducer self-circle narrowing (register D4; the 2026-07-19
+//     mentor ruling's LIVE-surface half). Opt-in; UNSET ⇒ byte-identical.
+//     Ruling: "The self_preservation circle, standing alone with no other
+//     identified party, is NOT a justice surface" (#1); an indeterminate
+//     obligation on it is "the trigger misfiring" (#4); self-regarding action
+//     is phronesis/sophrosyne, not dikaiosyne (#3).
+// ============================================================================
+;(() => {
+  const selfOnly = (status: 'met' | 'violated' | 'indeterminate' | undefined) =>
+    [mkSigned('deliberate', ['phronesis', 'dikaiosyne'], [{ status, circle: 'self_preservation' }])]
+  const OFF = undefined
+  const ON = { requireBeyondSelfCircle: true }
+
+  // --- D4-1..4  FLAG-OFF BYTE-IDENTITY: every outcome still derives on self-only.
+  eq(deriveWorstJusticeOutcome(selfOnly('indeterminate').map((s) => s.assessment), OFF)?.obligationStatus,
+    'indeterminate', 'D4-1 flag-off: self-only indeterminate STILL derives (pre-D4 behaviour)')
+  eq(deriveWorstJusticeOutcome(selfOnly(undefined).map((s) => s.assessment), OFF)?.obligationStatus,
+    'unevaluated', 'D4-2 flag-off: self-only unevaluated STILL derives')
+  eq(deriveWorstJusticeOutcome(selfOnly('met').map((s) => s.assessment), OFF)?.obligationStatus,
+    'met', 'D4-3 flag-off: self-only met STILL derives')
+  eq(deriveWorstJusticeOutcome(selfOnly('violated').map((s) => s.assessment), OFF)?.obligationStatus,
+    'violated', 'D4-4 flag-off: self-only violated STILL derives')
+
+  // --- D4-5..7  FLAG-ON: the three gated outcomes are suppressed on self-only.
+  eq(deriveWorstJusticeOutcome(selfOnly('indeterminate').map((s) => s.assessment), ON), null,
+    'D4-5 flag-on: self-only INDETERMINATE ⇒ no justice event (ruling #4, the trigger misfiring)')
+  eq(deriveWorstJusticeOutcome(selfOnly(undefined).map((s) => s.assessment), ON), null,
+    'D4-6 flag-on: self-only UNEVALUATED ⇒ no justice event (ruling #1, not a justice surface)')
+  eq(deriveWorstJusticeOutcome(selfOnly('met').map((s) => s.assessment), ON), null,
+    'D4-7 flag-on: self-only MET ⇒ no dikaiosyne CREDIT for self-regarding action (ruling #3)')
+
+  // --- D4-8  THE ASYMMETRY. Adverse evidence is never dropped; suppressing it
+  //     would make trust read HIGHER, the one direction never taken here.
+  //     Mirrors the predicate's Arms 2-4 and loop-fold.ts's shipped
+  //     `beyondSelfCircleCount >= 1 || violatedObligation`.
+  eq(deriveWorstJusticeOutcome(selfOnly('violated').map((s) => s.assessment), ON)?.obligationStatus,
+    'violated', 'D4-8 flag-on: self-only VIOLATED STILL derives — adverse justice evidence is never dropped')
+
+  // --- D4-9..11  A BEYOND-SELF circle is untouched by the narrowing (the U2/J2
+  //     marketing-email class the whole ADR-010 arc exists for must survive).
+  const beyond = (status: 'met' | 'violated' | 'indeterminate' | undefined) =>
+    [mkSigned('deliberate', ['phronesis', 'dikaiosyne'], [{ status, circle: 'local_community' }])]
+  eq(deriveWorstJusticeOutcome(beyond(undefined).map((s) => s.assessment), ON)?.obligationStatus,
+    'unevaluated', 'D4-9 flag-on: beyond-self UNEVALUATED still derives (J2 KEPT)')
+  eq(deriveWorstJusticeOutcome(beyond('indeterminate').map((s) => s.assessment), ON)?.obligationStatus,
+    'indeterminate', 'D4-10 flag-on: beyond-self indeterminate still derives')
+  eq(deriveWorstJusticeOutcome(beyond('met').map((s) => s.assessment), ON)?.obligationStatus,
+    'met', 'D4-11 flag-on: beyond-self met still derives')
+
+  // --- D4-12  MIXED self + beyond-self ⇒ NOT self-only, so nothing suppresses.
+  eq(deriveWorstJusticeOutcome(
+    [mkSigned('deliberate', ['phronesis', 'dikaiosyne'], [
+      { status: 'indeterminate', circle: 'self_preservation' },
+      { status: 'indeterminate', circle: 'local_community' },
+    ])].map((s) => s.assessment), ON)?.obligationStatus,
+    'indeterminate', 'D4-12 flag-on: mixed self+beyond ⇒ derives (a real other party is present)')
+
+  // --- D4-13  STRICT on unknown identity, matching the predicate exactly
+  //     (kathekon-engagement.ts:212-220): an unidentified circle is not an
+  //     IDENTIFIED other party. Unreachable from live input (`circle` is
+  //     required on every live assessment) — this pins the policy, not a
+  //     production path.
+  eq(deriveWorstJusticeOutcome(
+    [mkSigned('deliberate', ['phronesis', 'dikaiosyne'], [{ status: 'indeterminate', circle: null }])]
+      .map((s) => s.assessment), ON), null,
+    'D4-13 flag-on: UNKNOWN-identity circle does not satisfy beyond-self (strict, predicate-matching)')
+
+  // --- D4-14  NON-VACUITY of the fixture change: mkSigned's default circle is
+  //     genuinely beyond-self, so the PA-1 ratchet block above tests the ratchet
+  //     under BOTH flag states rather than passing on an absent justice event.
+  assert(deriveWorstJusticeOutcome(
+    [mkSigned('deliberate', ['dikaiosyne'], [{ status: 'met' }])].map((s) => s.assessment), ON) !== null,
+    'D4-14 mkSigned default circle is BEYOND-self ⇒ the PA-1 pins stay non-vacuous flag-on')
 })()
 
 // ============================================================================

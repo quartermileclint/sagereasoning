@@ -51,11 +51,8 @@ import type {
   VirtueDomain,
   Layer2Assessment,
 } from '@/lib/translation-sandwich/layer2-mechanisms'
-import type {
-  ObligationStatus,
-  OikeiosisCircle,
-} from '@/lib/translation-sandwich/layer1-extractor'
-import { PROXIMITY_RANK } from './constants'
+import type { ObligationStatus } from '@/lib/translation-sandwich/layer1-extractor'
+import { PROXIMITY_RANK, SELF_PRESERVATION_CIRCLE } from './constants'
 import { deriveWorstJusticeOutcome } from './derive-trust-events'
 
 /**
@@ -66,7 +63,12 @@ import { deriveWorstJusticeOutcome } from './derive-trust-events'
  * 2026-07-19 narrowing prompt's verify-before-coding requirement — the live
  * probe read exactly this name).
  */
-export const SELF_PRESERVATION_CIRCLE: OikeiosisCircle = 'self_preservation'
+/** Re-exported from ./constants (2026-08-17, register D4). The literal moved to the
+ *  neutral module because the REDUCER now tests circle identity too, and the
+ *  predicate already imports the reducer — defining it in either would make the
+ *  pair circular. Kept exported under this name so existing importers
+ *  (practice-suggestion.ts) are untouched. */
+export { SELF_PRESERVATION_CIRCLE }
 
 /**
  * The lean, serializable projection of an at-action verdict that the predicate
@@ -164,17 +166,47 @@ export function assessKathekonEngagement(signals: KathekonEngagementSignals): Ka
   // faithful. It returns non-null iff a justice surface is present (violated /
   // unevaluated / indeterminate / met, dikaiosyne-gated exactly as the engine
   // gates it); the obligationStatus names which.
+  // D4 (2026-08-17): the reconstruction now carries circle NAMES too, because the
+  // reducer gained the ability to read them. Two things are deliberate here and
+  // must not be "tidied":
+  //
+  // 1. THE LENGTH IS UNCHANGED — still `obligationStatuses.length`, NOT the
+  //    `Math.max(statuses, names)` the predicate's own circle loop uses at :208.
+  //    That asymmetry is a real latent inconsistency (a circle carrying a NAME but
+  //    no obligation status is invisible to the reducer here) and it is left
+  //    ALONE deliberately: widening it would newly satisfy the reducer's
+  //    `unevaluated` branch (circles >= 1 && statuses === 0), flipping `justice`
+  //    from null to non-null and changing `engaged` on a LIVE MEASURE surface —
+  //    with no ruling behind it, in a dark session. Unreachable from live input
+  //    (`kathekonSignalsFromAssessment` :287/:293 maps BOTH arrays from the same
+  //    `relevant_circles`, so the lengths are always equal); reachable only from
+  //    hand-built signals. Carried as an observation, not fixed here.
+  //
+  // 2. NO NARROWING FLAG IS PASSED, so the reducer answers in its pre-D4 form.
+  //    That is load-bearing, not an omission: `selfCircleOnlySuppression` below
+  //    derives from `justice !== null` on precisely the self-only inputs D4
+  //    suppresses. Pass the narrowing here and that diagnostic collapses to
+  //    permanently false, taking §8.9b with it AND loop-fold's
+  //    `isSelfRegardingLoop` — the LIVE MEASURE surface whose `self_regarding`
+  //    bucket exists for exactly this class. The predicate asks "was there a
+  //    justice signal at all?" and then applies its OWN circle test at :221; the
+  //    reducer asks "does this become a ledger event?". Only the second narrows.
+  const reconNames = signals.circles ?? []
   const justice = deriveWorstJusticeOutcome([
     {
       katorthoma_proximity: signals.proximity,
       virtue_domains_engaged: signals.virtueDomainsEngaged ?? [],
       oikeiosis: {
-        relevant_circles: (signals.obligationStatuses ?? []).map((status) =>
-          status ? { obligation_assessment: { status } } : {},
-        ),
+        relevant_circles: (signals.obligationStatuses ?? []).map((status, i) => {
+          const circle = reconNames[i]
+          return {
+            ...(status ? { obligation_assessment: { status } } : {}),
+            ...(typeof circle === 'string' && circle.trim() !== '' ? { circle } : {}),
+          }
+        }),
       },
       // deriveWorstJusticeOutcome reads no other field; the cast is scoped to the
-      // three it does read (defensive optional reads at every access).
+      // four it does read (defensive optional reads at every access).
     } as unknown as Parameters<typeof deriveWorstJusticeOutcome>[0][number],
   ])
   // THE TWO ARM-1 NARROWINGS, layered (both mentor-mandated, both binding):
