@@ -64,7 +64,7 @@ import {
   decisionAlreadyFired,
   markDecisionFired,
 } from "./lib/session-state.mjs";
-import { appendFalseHoldRecord, buildFalseHoldRecord } from "./lib/false-hold-capture.mjs";
+import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord } from "./lib/false-hold-capture.mjs";
 import { composeAction, renderBareInputNote } from "./lib/action-composer.mjs";
 import {
   classifyConsult,
@@ -436,6 +436,54 @@ async function main() {
 // GUARD ROLE (D-A/D-F). NOT deduped — an irreversible action is rare and a previously-BLOCKED
 // command must re-block on a retry (dedup would silently allow it). Re-checking a proceed is cheap.
 // ---------------------------------------------------------------------------
+/**
+ * P8a (2026-08-17) — capture ONE guard-path observation. TWO INDEPENDENT SAFETY
+ * PROPERTIES, and they are not the same property stated twice:
+ *
+ *  (1) FAIL-SOFT CAPTURE — this function can never throw. Everything is inside a
+ *      total try/catch, and appendFalseHoldRecord is itself fail-soft. A broken
+ *      state dir, a full disk, a malformed verdict: all swallowed.
+ *
+ *  (2) FAIL-SAFE GUARD — a capture failure cannot ALTER, DELAY, or FAIL the deny.
+ *      This is a placement property, not a try/catch property, and it is why
+ *      every call site below sits AFTER its emit. The hazard is concrete: emitBlock
+ *      writes the deny JSON to stdout and runGuard then exits 0, while main()'s
+ *      catch-all writes NOTHING to stdout. So a capture that threw BEFORE emitBlock
+ *      would swallow the deny entirely and the irreversible action would proceed —
+ *      the capture would have converted a block into an allow. Called after the
+ *      emit, the deny is already on the wire and nothing downstream can retract it.
+ *
+ * Property (1) alone cannot establish property (2): a total try/catch makes a
+ * pre-emit call site look safe in every test that only exercises the catch. The
+ * fault switch below exists so (2) is proven BEHAVIOURALLY rather than inferred
+ * from source ordering — it is read only when the capture flag is already on, and
+ * is never consulted on any decision path.
+ */
+function captureGuardObservation(cfg, { sessionId, toolName, action, guard, denied }) {
+  try {
+    if (!cfg.falseHoldCapture) return false
+    // TEST-ONLY fault injection. Named distinctly from the capture flag so it can
+    // never be set by an operator following the activation runbook.
+    if (process.env.GATE1_FALSE_HOLD_CAPTURE_FAULT === "throw") {
+      throw new Error("injected capture fault (test-only)")
+    }
+    return appendFalseHoldRecord(
+      cfg,
+      buildGuardHoldRecord({
+        guard,
+        sessionId,
+        tool: toolName,
+        actionText: action && typeof action.summary === "string" ? action.summary : "",
+        regime: action ? action.regime : "unknown",
+        denied,
+      }),
+    )
+  } catch {
+    // Fail-soft: an observation is never load-bearing for safety or framing.
+    return false
+  }
+}
+
 async function runGuard(cfg, { sessionId, toolName, action }) {
   if (!cfg.credential) {
     // No credential ⇒ we cannot run the gate. Honor the guard fail-mode (this is the guard's outage).
@@ -452,6 +500,10 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
         (r.improvementHint ? ` Consider: ${r.improvementHint}` : "") +
         " This tool call is blocked. Re-examine the action, or adjust it, before retrying.",
     );
+    // P8a: AFTER emitBlock, deliberately. The deny JSON is already on stdout, so
+    // no failure here can retract it. Placing this line above emitBlock would
+    // make a capture fault suppress the block — see captureGuardObservation.
+    captureGuardObservation(cfg, { sessionId, toolName, action, guard: r, denied: true });
     process.exit(0); // the deny JSON is on stdout; exit 0.
   }
 
@@ -480,9 +532,15 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
         "\nThis is a caution, not a block — proceed deliberately.\n" +
         renderGate2ElicitationBlock(action.summary),
     );
+    // P8a: a caution ALLOWS the tool, so it is NOT a hold (guardHold:false) — but
+    // it is captured, because the coverage/loss accounting needs the attempts, not
+    // only the denials. Counting a caution as a hold would make this denominator
+    // incommensurable with the consult one.
+    captureGuardObservation(cfg, { sessionId, toolName, action, guard: r, denied: false });
     process.exit(0);
   }
   honestLog(cfg, `GUARD-PROCEED session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}`);
+  captureGuardObservation(cfg, { sessionId, toolName, action, guard: r, denied: false });
   allowSilently();
 }
 
@@ -578,8 +636,15 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   // at-action verdict's kathekon signals + the loop event to the durable false-hold record, for the
   // TS predicate (assessKathekonEngagement) to classify (false_positive vs correct_hold) over the
   // 7-day live distribution. Flag-gated (GATE1_FALSE_HOLD_CAPTURE, default off ⇒ byte-identical),
-  // fail-soft; never touches stdout/exit/frame. CONSULT path ONLY — the guard path (runGuard) is the
-  // already-proven irreversible deny, not the measure-mode intervention the S11 flip binds. MEASURE.
+  // fail-soft; never touches stdout/exit/frame. MEASURE.
+  //
+  // SCOPE AMENDED 2026-08-17 (P8a). This comment previously read "CONSULT path
+  // ONLY — the guard path (runGuard) is the already-proven irreversible deny, not
+  // the measure-mode intervention the S11 flip binds." That exclusion is REVERSED,
+  // deliberately: register P5 records that part (3) of the readiness standard has
+  // no denominator precisely BECAUSE "the genuinely dangerous actions are on the
+  // guard path, which writes no record". The guard path now captures too (see
+  // captureGuardObservation), on the opposite side of every emit.
   if (cfg.falseHoldCapture) {
     appendFalseHoldRecord(
       cfg,

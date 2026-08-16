@@ -384,6 +384,17 @@ export const NARROWED_ARM_BOUNDS = {
     'certify one.',
 } as const
 
+/** P8a (2026-08-17) — guard-path options. Absent ⇒ pre-P8a behaviour, byte-identical. */
+export interface ClassifyObservationOptions {
+  /** The observation came from the GUARD path and the guard DENIED the action.
+   *  The guard maintains no loop state, so its hold cannot be read from
+   *  `loopEvent`; the deny IS the hold. Only a deny — a caution/pause verdict
+   *  ALLOWS the tool (at-action-hook.mjs) and is an advisory, not an enforcement
+   *  hold, so counting it would make the guard denominator incommensurable with
+   *  the consult one. */
+  guardHold?: boolean
+}
+
 export interface ObservationClassification {
   isHold: boolean
   engagement: KathekonEngagement
@@ -403,9 +414,21 @@ export interface ObservationClassification {
 export function classifyObservation(
   signals: KathekonEngagementSignals,
   loopEvent: string | null | undefined,
+  opts?: ClassifyObservationOptions,
 ): ObservationClassification {
   const engagement = assessKathekonEngagement(signals)
-  const isHold = isHoldLoopEvent(loopEvent)
+  // P8a (2026-08-17): the GUARD path has no loop state to read. `runGuard` never
+  // calls readLoopState/advanceLoopState — those live only in `runConsult` — so a
+  // guard record always carries loopEvent 'none' and would classify `not_a_hold`,
+  // contributing ZERO to the denominator part (3) of the readiness standard needs.
+  // That is the whole reason register P5 says the guard path "writes no record":
+  // capturing it is necessary but NOT sufficient.
+  //
+  // The guard's hold is the DENY itself — the action was stopped. That is a
+  // stronger hold than a consult advisory opening a correction loop, not a weaker
+  // one. Passed explicitly by the caller rather than inferred, so the consult
+  // path's meaning is untouched and every existing 2-arg call site is byte-identical.
+  const isHold = opts?.guardHold === true || isHoldLoopEvent(loopEvent)
   const classification: HoldClassification = !isHold
     ? 'not_a_hold'
     : engagement.engaged

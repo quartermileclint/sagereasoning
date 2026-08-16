@@ -229,6 +229,27 @@ console.log('\n§4 — classifyObservation matrix (the hold definition)')
   const cc = classifyObservation(correctClose, 'closed')
   check('§4.11 build-plan §S11 correct close ⇒ engaged=true AND not_a_hold', cc.engagement.engaged && cc.classification === 'not_a_hold')
 
+  // §4.12-§4.16 P8a (2026-08-17) — THE GUARD-PATH HOLD. Register P5: part (3) of
+  // the readiness standard has no denominator because "the genuinely dangerous
+  // actions are on the guard path, which writes no record". Capturing the guard is
+  // necessary but NOT sufficient: runGuard maintains no loop state (no
+  // readLoopState/advanceLoopState — those live only in runConsult), so every guard
+  // record carries loopEvent 'none' and would classify not_a_hold, contributing
+  // ZERO. The guard's hold is the DENY itself, passed explicitly.
+  check('§4.12 P8a: a guard DENY is a hold DESPITE loopEvent none',
+    classifyObservation(fp, 'none', { guardHold: true }).isHold === true)
+  check('§4.13 P8a: guard deny + NO kathekon factor ⇒ false_positive (the measured class)',
+    classifyObservation(fp, 'none', { guardHold: true }).classification === 'false_positive')
+  check('§4.14 P8a: guard deny + a kathekon factor ⇒ correct_hold (the DENOMINATOR P5 lacked)',
+    classifyObservation(pc, 'none', { guardHold: true }).classification === 'correct_hold')
+  // guardHold:false must be inert — a caution ALLOWS the tool, so counting it would
+  // make the guard denominator incommensurable with the consult one.
+  check('§4.15 P8a: guardHold FALSE is inert (a caution is not a hold)',
+    classifyObservation(fp, 'none', { guardHold: false }).classification === 'not_a_hold')
+  // The option is OPTIONAL: every pre-P8a 2-arg call site is byte-identical.
+  check('§4.16 P8a: omitting the option ⇒ identical to the 2-arg call (consult path untouched)',
+    JSON.stringify(classifyObservation(fp, 'none', undefined)) === JSON.stringify(classifyObservation(fp, 'none')))
+
   // isHold is always computed even for not-a-hold (the record carries engagement regardless).
   check('§4.12 not-a-hold still carries an engagement reading', typeof cc.engagement.engaged === 'boolean')
 }

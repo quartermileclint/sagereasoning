@@ -370,6 +370,102 @@ routeState.reason = "ok";
   check("h3 guard: same irreversible Bash + proceed → allowed (no deny)", permOf(ok.out) === null && ok.code === 0);
 }
 
+// 5b-P8a — GUARD-PATH CAPTURE (register P8a). The requirement, verbatim: "prove by
+// test that a capture failure inside the guard hook CANNOT alter, delay, or fail the
+// deny decision (fail-soft capture, fail-safe guard — two independent properties,
+// both battery-pinned)." They are pinned SEPARATELY below because one does not imply
+// the other: a total try/catch (fail-soft) makes a PRE-emit call site look safe in any
+// test that only exercises the catch, while the deny it would have suppressed never
+// reaches stdout. Only the fault switch distinguishes placement from handling.
+{
+  const stateDir = mkdtempSync(join(tmpdir(), "p8a-guard-capture-"));
+  const capEnv = { GATE1_FALSE_HOLD_CAPTURE: "true", GATE1_STATE_DIR: stateDir };
+  const recPath = join(stateDir, "false-hold-record.jsonl");
+  const readRecs = () => {
+    try {
+      return readFileSync(recPath, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    } catch {
+      return [];
+    }
+  };
+
+  // (i) The capture happens at all, and carries what the denominator needs.
+  routeState.guard = "do_not_proceed";
+  const denied = await runHook(AT_ACTION_HOOK, ptEvent("p8a1", "Bash", { command: "rm -rf /repo/dist" }), capEnv);
+  check("P8a: a guard DENY still denies with capture on", permOf(denied.out) === "deny");
+  const dRecs = readRecs().filter((r) => r.path === "guard");
+  check("P8a: the guard deny wrote a guard-path record", dRecs.length === 1, `got ${dRecs.length}`);
+  check("P8a: guard record is schema v4 (consult records stay v3)", dRecs[0]?.schema === "false-hold-record-v4");
+  check("P8a: guard record marks guardHold=true (the deny IS the hold)", dRecs[0]?.guardHold === true);
+  check("P8a: guard record carries loopEvent 'none' honestly (guard keeps no loop state)", dRecs[0]?.loopEvent === "none");
+
+  // (ii) A caution ALLOWS, so it is captured but is NOT a hold — otherwise the guard
+  //      denominator would not be commensurable with the consult one.
+  routeState.guard = "pause"; // the mock's mode name; recommendation pause_for_review
+  await runHook(AT_ACTION_HOOK, ptEvent("p8a2", "Bash", { command: "rm -rf /repo/other" }), capEnv);
+  const cRecs = readRecs().filter((r) => r.path === "guard" && r.session.includes("p8a2"));
+  check("P8a: a guard CAUTION is captured but guardHold=false (a caution allows the tool)",
+    cRecs.length === 1 && cRecs[0].guardHold === false);
+
+  // (iii) PROPERTY 1 — FAIL-SOFT CAPTURE. An unwritable state dir must not break the
+  //       hook: the deny still lands, nothing throws.
+  routeState.guard = "do_not_proceed";
+  const softEnv = { GATE1_FALSE_HOLD_CAPTURE: "true", GATE1_STATE_DIR: "/dev/null/nope" };
+  const soft = await runHook(AT_ACTION_HOOK, ptEvent("p8a3", "Bash", { command: "rm -rf /repo/x" }), softEnv);
+  check("P8a PROPERTY 1 (fail-soft capture): an unwritable capture path still denies", permOf(soft.out) === "deny");
+  check("P8a PROPERTY 1: and exits cleanly (no crash surfaced)", soft.code === 0);
+
+  // (iv) PROPERTY 2 — FAIL-SAFE GUARD. A capture FAULT must not alter, delay, or
+  //      fail the deny. This is the register's requirement stated literally, and it
+  //      is what the fault switch proves.
+  //
+  //      HONEST SCOPE OF THIS PIN, established by mutation and recorded rather than
+  //      glossed: it does NOT discriminate the call site's PLACEMENT. Moving the
+  //      capture above emitBlock was tried and this pin still passed, because
+  //      captureGuardObservation is a total try/catch — the throw never escapes, so
+  //      pre- and post-emit placement are behaviourally identical under a throwing
+  //      fault. The try/catch is therefore what makes the property hold; placement
+  //      is defence-in-depth against a FUTURE fault class the catch cannot swallow
+  //      (a stray stdout write, an exit). Placement is pinned separately below by
+  //      source order — weaker than behaviour, but honest about which is which.
+  const faultEnv = { ...capEnv, GATE1_FALSE_HOLD_CAPTURE_FAULT: "throw" };
+  const fault = await runHook(AT_ACTION_HOOK, ptEvent("p8a4", "Bash", { command: "rm -rf /repo/y" }), faultEnv);
+  check("P8a PROPERTY 2 (fail-safe guard): a THROWING capture still denies", permOf(fault.out) === "deny",
+    `out=${JSON.stringify(fault.out).slice(0, 200)}`);
+  check("P8a PROPERTY 2: the deny reason is intact under the fault",
+    (parsed(fault.out)?.hookSpecificOutput?.permissionDecisionReason || "").includes("do_not_proceed"));
+  check("P8a PROPERTY 2: the fault produced NO record (the capture genuinely failed)",
+    readRecs().filter((r) => r.session.includes("p8a4")).length === 0);
+
+  // (iv-b) PLACEMENT, pinned by source order (the INV pattern used elsewhere in this
+  //        repo). The deny branch must call emitBlock BEFORE captureGuardObservation.
+  //        Behaviourally equivalent today; the guard is against a future capture that
+  //        can fail in a way try/catch cannot contain.
+  {
+    const hookSrc = readFileSync(AT_ACTION_HOOK, "utf8");
+    // Anchor on GUARD-BLOCK, the log line that OPENS the deny branch. Do not
+    // anchor on the deny message text: that string lives INSIDE the emitBlock(
+    // call, so searching forward from it skips the very call being checked and
+    // matches guardOutage's emitBlock instead (this pin caught exactly that
+    // mistake when first written).
+    const denyIdx = hookSrc.indexOf('GUARD-BLOCK');
+    const emitIdx = hookSrc.indexOf("emitBlock(", denyIdx);
+    const capIdx = hookSrc.indexOf("captureGuardObservation(", denyIdx);
+    check("P8a PLACEMENT: the deny branch emits the block BEFORE capturing",
+      denyIdx > 0 && emitIdx > 0 && capIdx > 0 && emitIdx < capIdx,
+      `emitIdx=${emitIdx} capIdx=${capIdx}`);
+  }
+
+  // (v) Flag OFF ⇒ byte-identical: no record written at all.
+  const offDir = mkdtempSync(join(tmpdir(), "p8a-off-"));
+  await runHook(AT_ACTION_HOOK, ptEvent("p8a5", "Bash", { command: "rm -rf /repo/z" }), { GATE1_STATE_DIR: offDir });
+  let offCount = 0;
+  try { offCount = readFileSync(join(offDir, "false-hold-record.jsonl"), "utf8").trim().length; } catch { offCount = 0; }
+  check("P8a: capture flag UNSET ⇒ no guard record written (byte-identical)", offCount === 0);
+
+  routeState.guard = "proceed";
+}
+
 // 5c — GUARD outage honors the guard fail-mode (D-F): open allows+notes, strict blocks.
 {
   routeState.guard = "error";

@@ -81,6 +81,20 @@ interface FalseHoldRecord {
   signals: RawCapturedSignals
   kathekon: { isKathekon: boolean | null; quality: string | null }
   carriedPrior: boolean
+  // ── P8a (2026-08-17) — GUARD-PATH fields, v4 only. All TOP-LEVEL and all
+  //    optional: anything added inside `signals` would change
+  //    JSON.stringify(r.signals) and re-hash every existing record.
+  /** 'guard' on v4 records; absent on every consult record (v1/v2/v3). */
+  path?: string
+  /** The guard DENIED the action. The guard keeps no loop state, so its hold
+   *  cannot be read from loopEvent — the deny IS the hold. A caution/pause
+   *  ALLOWS the tool and is therefore NOT a hold. */
+  guardHold?: boolean
+  /** The raw recommendation, for the human cross-check. */
+  guardOutcome?: string | null
+  /** 'no_assessment' ⇒ the guardrail's fail-safe branch returned no assessment,
+   *  so this observation is unclassifiable and is COUNTED but excluded. */
+  captureBasis?: string
 }
 
 /**
@@ -112,7 +126,20 @@ function legacyCompatSignals(s: KathekonEngagementSignals): KathekonEngagementSi
 
 function recordHash(r: FalseHoldRecord): string {
   const stable = [r.session, r.capturedAt, r.tool, r.loopEvent, JSON.stringify(r.signals), r.actionPreview].join('|')
-  return createHash('sha256').update(stable).digest('hex')
+  // P8a (2026-08-17): `path` is appended ONLY WHEN PRESENT. Two properties are
+  // both required and they pull against each other:
+  //
+  //  (a) EXISTING HASHES MUST NOT MOVE. Every v1/v2/v3 record has no `path`, so
+  //      the joined string is byte-identical to what it was before this line
+  //      existed and ingest stays idempotent. An unconditional `r.path ?? ''`
+  //      would append a trailing '|' and re-hash the entire frozen buffer.
+  //
+  //  (b) GUARD AND CONSULT RECORDS MUST NOT COLLIDE. The guard and consult for
+  //      one tool call can share session/tool/loopEvent/preview and land in the
+  //      same millisecond, and `schema` is deliberately NOT hashed — so without
+  //      this, one would silently dedup the other away.
+  const stableWithPath = r.path ? `${stable}|${r.path}` : stable
+  return createHash('sha256').update(stableWithPath).digest('hex')
 }
 
 const LOOP_EVENTS = new Set(['opened', 'reopened', 'closed', 'none'])
@@ -126,9 +153,13 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     // narrowing) adds signals.circles. All three parse; the regime split below
     // keeps them from being compared as one distribution (ADR-014), and the
     // bracket below keeps circle-less records from being certified one way.
+    // v4 (P8a, 2026-08-17) is the GUARD-path record. Consult records stay v3 —
+    // the bump is scoped to the new population, not applied uniformly, so the
+    // consult instrument and the frozen buffer are untouched.
     (r.schema === 'false-hold-record-v1' ||
       r.schema === 'false-hold-record-v2' ||
-      r.schema === 'false-hold-record-v3') &&
+      r.schema === 'false-hold-record-v3' ||
+      r.schema === 'false-hold-record-v4') &&
     typeof r.capturedAt === 'string' &&
     // Guard the DB constraints at the door (review fold, 2026-07-12): loop_event
     // against the table's CHECK enum, and captured_at against the TIMESTAMPTZ cast,
@@ -138,13 +169,22 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     !Number.isNaN(Date.parse(r.capturedAt)) &&
     !!r.signals &&
     typeof r.signals === 'object' &&
-    typeof r.signals.proximity === 'string' &&
+    // P8a: a guard record whose verdict carried NO assessment (the guardrail's
+    // engine-unavailable / tier-1 fail-safe branches return proximity null and no
+    // extraction) is UNCLASSIFIABLE but not malformed. Admitting it — marked
+    // `captureBasis: 'no_assessment'` — is what lets the report COUNT the loss
+    // instead of silently dropping it into `invalid`, which is the coverage
+    // accounting the new-window scoping note asks for. It is excluded from the
+    // rate downstream, never counted as a hold either way.
+    (typeof r.signals.proximity === 'string' ||
+      (r.schema === 'false-hold-record-v4' && r.captureBasis === 'no_assessment')) &&
     Array.isArray(r.signals.virtueDomainsEngaged) &&
     Array.isArray(r.signals.obligationStatuses) &&
     Array.isArray(r.signals.subSpeciesPassions) &&
-    // v3 must carry the circles field it introduced (a v3 record without it is
-    // malformed, not legacy).
-    (r.schema !== 'false-hold-record-v3' || Array.isArray(r.signals.circles))
+    // v3 and v4 must carry the circles field v3 introduced (a record without it at
+    // those versions is malformed, not legacy).
+    (!(r.schema === 'false-hold-record-v3' || r.schema === 'false-hold-record-v4') ||
+      Array.isArray(r.signals.circles))
   )
 }
 
@@ -197,11 +237,20 @@ function classifyAll(records: FalseHoldRecord[]): Classified[] {
     const signals = normalizeSignals(r.signals)
     // The CANONICAL classification (strict: unknown-identity circles never
     // satisfy the beyond-self requirement) — this is what is stored.
-    const c = classifyObservation(signals, r.loopEvent)
+    // P8a: a guard DENY is a hold even though loopEvent is 'none' — the guard
+    // path maintains no loop state, so without this every guard record would
+    // classify `not_a_hold` and the denominator part (3) needs would stay at zero.
+    // Consult records pass no option and are byte-identical.
+    const guardOpts = r.guardHold === true ? { guardHold: true } : undefined
+    const c = classifyObservation(signals, r.loopEvent, guardOpts)
     // The bracket's other end, computed ONLY for records with unknown circle
     // identity (for all others it is identical by construction).
     const compat = c.engagement.circleIdentityUnknown
-      ? classifyObservation(legacyCompatSignals(signals), r.loopEvent)
+      // P8a: the SAME guard option must ride the bracket's other end. Without it a
+      // guard deny with unknown circle identity would read as a hold canonically
+      // and `not_a_hold` in compat — an incoherent bracket rather than the two
+      // honest readings of one observation it is meant to be.
+      ? classifyObservation(legacyCompatSignals(signals), r.loopEvent, guardOpts)
       : c
     return {
       ...r,

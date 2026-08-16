@@ -126,6 +126,85 @@ export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEven
 }
 
 /**
+ * P8a (2026-08-17) — build one GUARD-PATH observation record.
+ *
+ * WHY THIS EXISTS: register P5 records that part (3) of the readiness standard has
+ * no denominator because "the genuinely dangerous actions are on the guard path,
+ * which writes no record". The capture was CONSULT-path only. This is the other
+ * half of the instrument.
+ *
+ * SCHEMA v4, GUARD RECORDS ONLY — `buildFalseHoldRecord` above is deliberately
+ * untouched and consult records stay v3. Grounds: the consult path is the
+ * measured instrument with 37 existing pins and a frozen evidence buffer; a
+ * uniform bump would put both at risk for no gain, since the report already
+ * carries a multi-version whitelist and `path` is what actually distinguishes the
+ * two populations. `recordHash` (false-hold-observation-report.ts) does not hash
+ * `schema`, so neither choice would have moved an existing hash — this one simply
+ * touches less.
+ *
+ * EVERY NEW FIELD IS TOP-LEVEL, and that is load-bearing rather than stylistic:
+ * `recordHash` hashes `JSON.stringify(r.signals)`, so anything added INSIDE
+ * `signals` would re-hash every existing v1/v2/v3 record and break ingest
+ * idempotency. Top-level additions leave all prior hashes byte-identical.
+ *
+ * `captureBasis` is honest about the guard's fail-safe branches: an
+ * engine-unavailable or tier-1 pause verdict carries NO assessment and NO
+ * proximity, so it cannot be classified. Those are recorded as
+ * `no_assessment` and EXCLUDED from the rate rather than silently dropped —
+ * the coverage/loss accounting the new-window scoping note asks for.
+ */
+export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIso, regime, denied }) {
+  const assessment = guard && typeof guard === "object" && guard.assessment && typeof guard.assessment === "object"
+    ? guard.assessment
+    : null;
+  const ka =
+    assessment && assessment.kathekon_assessment && typeof assessment.kathekon_assessment === "object"
+      ? assessment.kathekon_assessment
+      : {};
+  const signals = kathekonSignalsFromVerdict(assessment);
+  return {
+    schema: "false-hold-record-v4",
+    // The population marker. The consult and guard denominators are NOT
+    // commensurable (a consult hold is an advisory opening a correction loop; a
+    // guard hold is an enforced deny), so the report must be able to split them.
+    path: "guard",
+    capturedAt: typeof nowIso === "string" && nowIso ? nowIso : new Date().toISOString(),
+    session: sanitize(sessionId),
+    tool: typeof tool === "string" ? tool : "",
+    depth: "",
+    // The guard maintains NO loop state (readLoopState/advanceLoopState live only
+    // in runConsult), so there is no loop event to report. Recorded honestly as
+    // 'none'; the hold is carried by `guardHold` below, never inferred from this.
+    loopEvent: "none",
+    actionPreview: typeof actionText === "string" ? actionText.slice(0, 160) : "",
+    inputClass: "guard_action",
+    extractionRegime: typeof regime === "string" ? regime : "unknown",
+    composedChars: null,
+    signals,
+    kathekon: {
+      isKathekon:
+        typeof ka.is_kathekon === "boolean"
+          ? ka.is_kathekon
+          : typeof guard?.isKathekon === "boolean"
+            ? guard.isKathekon
+            : null,
+      quality:
+        typeof ka.quality === "string"
+          ? ka.quality
+          : typeof guard?.kathekonQuality === "string"
+            ? guard.kathekonQuality
+            : null,
+    },
+    carriedPrior: false,
+    // ONLY a deny is a hold. A caution/pause verdict ALLOWS the tool, so counting
+    // it would make this denominator incommensurable with the consult one.
+    guardHold: denied === true,
+    guardOutcome: typeof guard?.recommendation === "string" ? guard.recommendation : null,
+    captureBasis: assessment && typeof signals.proximity === "string" ? "assessment" : "no_assessment",
+  };
+}
+
+/**
  * Append one observation record to the durable JSONL. Fail-soft (mirrors
  * session-state.mjs): a failed capture NEVER breaks the hook. Returns whether the
  * append landed (for tests; the hook ignores it).

@@ -199,6 +199,87 @@ console.log('\n§5 — idempotency: recordHash is stable across two runs of the 
   check('§5.1 two runs of the same input produce IDENTICAL strict counts', out2.includes('false-positive holds (no kathekon factor): 2') && out2.includes('correct holds (kathekon-engaged):          1'), out2)
 }
 
+// ============================================================================
+console.log('\n§6 — P8a: v4 GUARD-path records ingest, and legacy hashes do not move')
+// ============================================================================
+// A SEPARATE records file, deliberately. The §1-§5 fixtures above assert exact
+// counts and are the byte-identity evidence that v4 acceptance did not disturb
+// legacy ingest — appending a v4 record to RECORDS would move those counts and
+// destroy exactly the evidence this section exists to preserve.
+{
+  const guardRecords = [
+    {
+      // A guard DENY with a kathekon factor ⇒ correct_hold. This is the record
+      // class register P5 says does not exist ("the guard path writes no record"),
+      // and therefore the denominator part (3) of the readiness standard lacked.
+      schema: 'false-hold-record-v4',
+      path: 'guard',
+      capturedAt: '2026-08-17T10:00:00.000Z',
+      session: 'sess-guard',
+      tool: 'Bash',
+      depth: '',
+      loopEvent: 'none', // the guard keeps no loop state — honest, not inferred
+      actionPreview: 'rm -rf /repo/dist',
+      inputClass: 'guard_action',
+      extractionRegime: 'at-action-v2-composed',
+      composedChars: null,
+      signals: {
+        proximity: 'reflexive',
+        virtueDomainsEngaged: ['dikaiosyne'],
+        obligationStatuses: ['violated'],
+        circles: ['local_community'],
+        subSpeciesPassions: [],
+      },
+      kathekon: { isKathekon: false, quality: 'contrary' },
+      carriedPrior: false,
+      guardHold: true,
+      guardOutcome: 'do_not_proceed',
+      captureBasis: 'assessment',
+    },
+    {
+      // A guard OUTAGE record: no assessment, so proximity is null. It must PARSE
+      // (so the loss is counted) rather than be silently dropped into `invalid`.
+      schema: 'false-hold-record-v4',
+      path: 'guard',
+      capturedAt: '2026-08-17T10:01:00.000Z',
+      session: 'sess-guard-outage',
+      tool: 'Bash',
+      depth: '',
+      loopEvent: 'none',
+      actionPreview: 'drop table users',
+      inputClass: 'guard_action',
+      extractionRegime: 'unknown',
+      composedChars: null,
+      signals: {
+        proximity: null,
+        virtueDomainsEngaged: [],
+        obligationStatuses: [],
+        circles: [],
+        subSpeciesPassions: [],
+      },
+      kathekon: { isKathekon: null, quality: null },
+      carriedPrior: false,
+      guardHold: false,
+      guardOutcome: null,
+      captureBasis: 'no_assessment',
+    },
+  ]
+  const guardPath = join(dir, 'guard-records.jsonl')
+  writeFileSync(guardPath, guardRecords.map((r) => JSON.stringify(r)).join('\n') + '\n')
+  const res = spawnSync(
+    process.execPath,
+    ['--import', 'tsx', scriptPath, '--records', guardPath, '--dry-run'],
+    { encoding: 'utf8', cwd: join(__dirname, '..', '..') },
+  )
+  const gOut = (res.stdout || '') + (res.stderr || '')
+  check('§6.1 a v4 guard record is ACCEPTED (not counted invalid)', !/invalid[^0-9]*[1-9]/i.test(gOut), gOut)
+  check(
+    '§6.2 a guard DENY counts as a HOLD despite loopEvent none (the denominator P5 lacked)',
+    /correct holds \(kathekon-engaged\):\s+1/.test(gOut),
+    gOut,
+  )
+}
+
 rmSync(dir, { recursive: true, force: true })
 
 console.log(`\nfalse-hold-observation-report battery: ${passed} passed, ${failed} failed`)

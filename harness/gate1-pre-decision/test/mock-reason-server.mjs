@@ -95,11 +95,36 @@ function guardrailBody(mode) {
     pause: { proceed: false, recommendation: "pause_for_review", katorthoma_proximity: "habitual" },
   };
   const r = map[mode] || map.proceed;
+  // P8a (2026-08-17): the fixture now carries the assessment fields the LIVE
+  // /api/guardrail has served since the ADR-010 §3 bridge retirement (route.ts
+  // builds is_kathekon, kathekon_quality, extraction and the signed assessment).
+  // Without them the guard-path capture could only ever exercise its degenerate
+  // `no_assessment` branch, and the pins would look green while testing nothing
+  // of the classifiable path. A BEYOND-SELF circle is used deliberately so the
+  // record is classifiable under the narrowed Arm 1.
+  const assessment = {
+    katorthoma_proximity: r.katorthoma_proximity,
+    virtue_domains_engaged: ["phronesis", "dikaiosyne"],
+    oikeiosis: {
+      relevant_circles: [
+        { circle: "local_community", obligation_assessment: { status: "violated", justification: "mock" } },
+      ],
+    },
+    passion_diagnosis: { passions_detected: [] },
+    kathekon_assessment: {
+      is_kathekon: r.recommendation !== "do_not_proceed",
+      quality: r.recommendation === "do_not_proceed" ? "contrary" : "moderate",
+    },
+  };
   return {
     result: {
       ...r,
       threshold: "deliberate",
       passions_detected: [],
+      is_kathekon: assessment.kathekon_assessment.is_kathekon,
+      kathekon_quality: assessment.kathekon_assessment.quality,
+      extraction: { version: "v3", mock: true },
+      signed_assessment: { assessment, signature: "mock-sig", key_id: "substrate-layer2-2026Q2" },
       reasoning: "Mock guardrail verdict for the in-sandbox battery.",
       improvement_hint: r.recommendation === "do_not_proceed" ? "Reconsider whether this irreversible action is necessary." : undefined,
       disclaimer: "mock",

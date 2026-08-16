@@ -605,7 +605,51 @@ export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
     proximity: result.katorthoma_proximity ?? null,
     reasoning: typeof result.reasoning === "string" ? result.reasoning : "",
     improvementHint: typeof result.improvement_hint === "string" ? result.improvement_hint : "",
+    // P8a (2026-08-17) — ADDITIVE. Until now this function flattened the verdict to
+    // five payload fields and threw away everything the kathekon predicate needs,
+    // which is why the guard path could write no classifiable record (register P5:
+    // "the genuinely dangerous actions are on the guard path, which writes no
+    // record"). The gap was purely CLIENT-SIDE: since the ADR-010 §3 bridge
+    // retirement the live /api/guardrail response already carries all of this
+    // (route.ts builds is_kathekon, kathekon_quality, extraction and the signed
+    // assessment). `fetchFrame` already returns its full body; this is the same
+    // move for the guard.
+    //
+    // Defensive by default: every field is optional on the wire, so a deployment
+    // that omits one yields null rather than throwing. NOTHING existing reads
+    // these — the five fields above are untouched and byte-identical, so the
+    // guard's own decision path cannot be affected by this addition.
+    isKathekon: typeof result.is_kathekon === "boolean" ? result.is_kathekon : null,
+    kathekonQuality: typeof result.kathekon_quality === "string" ? result.kathekon_quality : null,
+    extraction: result.extraction && typeof result.extraction === "object" ? result.extraction : null,
+    signed: extractSignedAssessment(body),
+    assessment: extractGuardrailAssessment(body),
   };
+}
+
+/**
+ * The Layer2Assessment out of a guardrail response, or null. The guard signs its
+ * verdict (`signed_assessment.assessment`), but a signing outage still returns a
+ * bare `assessment` — read both, prefer the signed one. Never invents a shape: an
+ * unrecognised body yields null and the caller records "no assessment" honestly
+ * rather than a fabricated clean reading.
+ */
+export function extractGuardrailAssessment(body) {
+  if (!body || typeof body !== "object") return null;
+  const signed = body.signed_assessment;
+  if (signed && typeof signed === "object" && signed.assessment && typeof signed.assessment === "object") {
+    return signed.assessment;
+  }
+  const result = body.result && typeof body.result === "object" ? body.result : body;
+  if (result && typeof result === "object") {
+    const sa = result.signed_assessment;
+    if (sa && typeof sa === "object" && sa.assessment && typeof sa.assessment === "object") return sa.assessment;
+    if (result.assessment && typeof result.assessment === "object") {
+      const a = result.assessment;
+      return a.assessment && typeof a.assessment === "object" ? a.assessment : a;
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
