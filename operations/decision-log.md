@@ -21925,3 +21925,176 @@ cannot start.
 **Status:** Adopted. Amends `D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16`.
 Cross-reference: `operations/handoffs/founder/2026-08-16-R2b-guard-bundle-NEXT-SESSION-PROMPT.md`
 (amended in place). Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-17 — D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED
+
+**Decision:** Executed **R2b** — the code-critical guard bundle: **six items built dark**, one
+consolidated **PR19 adversarial review** (7 findings, **7 CONFIRMED, 0 REFUTED**, all fixed at the
+root), then **five mentor rulings (M-1…M-5) adopted as binding**, one of which **OVERTURNED a
+decision already committed in this session** and was corrected the same day. **No flag was set. No
+schema was applied. Nothing was activated. Nothing was pushed.**
+
+**Tier: `code-elevated` → `code-critical` per item, all dark/additive.** Four new flags, all UNSET
+everywhere. **AC7 not engaged** (no live op performed; the AI ran no Supabase/Vercel/git-push/mint
+operation). **PR19 discharged.** Weights BLOCKED; the P0 0h hold stands.
+
+**Governing records (each wins over this entry):** the R2b prompt; the R2a entry's three inherited
+scope findings; the 2026-07-19 self-circle mentor verbatim; Ruling Set B; and the NEW
+`operations/trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`.
+
+### What was built — six items, six commits, then two folds
+
+| Commit | Item | Substance |
+|---|---|---|
+| `96d0a14` | **1 — D4+D1** | Reducer self-circle narrowing behind a dedicated flag, opt-in, wired only at its one live emission caller. |
+| `3e8f231` | **8 — P8a** | Guard-path capture, so readiness part (3) gains a denominator. |
+| `fa5b932` | **7 — PR24** | `agent_hold_observations` retention sweep + PR24's own wrong grounding sentence corrected in BOTH the snapshot and the cache. |
+| `577ebab` | **5** | `classifier_cost_log.session_id` shaped at the write chokepoint, flag-gated. |
+| `4b88189` | **Spec 4** | AE-1 proximity-dispersion member, dedicated flag, whole-segment and deliberately ungraded. |
+| `5331d1b` | **Q1** | The "cannot determine" third state, Phase 1 (no migration). |
+| `315794f` | **PR19 fold** | 7 confirmed findings fixed at the root. |
+| `a256b59` | **M-1 fold** | The mentor correction (below). |
+
+### The scope corrections R2a handed forward — all three honoured
+
+1. **PR24's `stoa_entries` half does not exist.** Verified against all three pins; the sweep was
+   built for `agent_hold_observations` ONLY, and **PR24's factually wrong grounding sentence was
+   corrected in both `project-instructions-snapshot.md` and `standing-protocol-cache.md`** (a
+   corrected snapshot beside an uncorrected cache reproduces the very drift class this fixes). The
+   erasure claim was **verified first-hand rather than assumed**: `stoa_entries` IS genuinely wired
+   into owner-delete, export, and credential-erase — so "no retention sweep" is correct and there is
+   no differently-shaped gap.
+2. **Item 5's defect was mis-named everywhere.** Confirmed: the reflect route's
+   `loop_billing_events.loop_id` has been UUID-safe since `0eb36c8` and was left untouched; the real
+   sink is `classifier_cost_log.session_id`. Fixed at the chokepoint, not per-route.
+3. **The stoic-brain compiler was not run.**
+
+### Findings this session surfaced that no record carried
+
+- **`writeClassifierDownMarker` has NEVER written a row, for any caller**, and no id-shaping repairs
+  it (omits three NOT NULL columns, sends two that do not exist). It is the only write path to
+  `vulnerability_flag` repo-wide. **Consequence: `classifier_cost_log.flag_written` is a false fact
+  on every row ever written.** PR19 then widened this further — see finding 4 below.
+- **`stoa-boundary` has been RED since 2026-08-03** (83/3), not caused by this session. ST6's
+  `stoa-draft-reflect.ts` imports five specifiers absent from the exact allowlist, two flagged
+  forbidden-class. **Constraint #20 is a mentor ruling, so this was NOT silently greened** —
+  extending a ruled allowlist to silence a battery is the laundering move. Carried for a ruling.
+- **`llms.txt:418` publicly documents the `self_regarding` bucket** gated by
+  `selfCircleOnlySuppression` — so item 1's predicate opt-out does not merely prevent an internal
+  regression, it prevents a PUBLISHED claim going false on deploy.
+
+### PR19 — 7 findings, 7 CONFIRMED, 0 REFUTED
+
+Six dimensions, each with its own finder + adversarial refuter. Dimensions 1 (D4-reducer), 3
+(PR24-sweep), 5 (Spec4-dispersion) returned clean. **Dimension 6 (Q1) failed structured output
+after 5 retries and was completed FIRST-HAND per the codified fallback** — which is how finding 7
+surfaced. All fixed at the root in `315794f`:
+
+1. *(medium)* `guardOutage()` never captured, silently dropping the engine-unavailable denominator
+   and contradicting `buildGuardHoldRecord`'s own docstring. Both branches now capture; new coverage
+   proves a record lands in each `guardFailMode`. **243 → 250/0.**
+2. *(medium)* The docstring claimed the fault switch proves the FAIL-SAFE placement property —
+   directly contradicted by the battery's own honest comment. Corrected.
+3. *(low)* `captureGuardObservation`'s destructuring sat outside the try, so "can never throw" was
+   not a signature-level invariant. Moved inside with an `opts || {}` fallback.
+4. *(medium)* The `vulnerability_flag` disclosure understated its own scope: the three branches that
+   set `flag_written: true` never attempt ANY insert — there is no write path for a genuine
+   detection at all, not merely one that fails. Comment widened.
+5. *(low)* "Swallowed twice" overstated the path — `logClassifierRunSafe`'s `.catch()` is dead code
+   for this defect. Corrected to once.
+6. *(nit)* "Never supplies" imprecise for `session_id`, which IS sent (just invalid).
+7. *(low, first-hand)* `allCausalLayersClean` also consumes `q1Clean`, so the Q1 third state
+   suppresses the FD-R1 probe — correct in effect, but undocumented and unpinned. Disclosure +
+   three regression pins added. **48 → 51/0.**
+
+### The five mentor rulings — ADOPTED AS BINDING
+
+Verbatim at `operations/trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`.
+
+**M-1 OVERTURNED THIS SESSION'S OWN DECISION and was corrected same-day (`a256b59`).** The build
+left `violated` ungated on self-only circles, arguing that dropping adverse evidence makes trust
+read higher. The mentor rejected the reasoning precisely: *"the evidence is not being dropped; it
+is being correctly attributed."* Dikaiosyne is other-directed whether the obligation was met or
+violated; preserving the violated case *"is not conservative — it is preserving a category error in
+the direction that hard-floors the wrong domain."* **All four outcomes are now gated symmetrically.**
+The correct destination (phronesis/sophrosyne) is not reachable from this reducer, so the ruled
+interim posture — **withhold rather than mis-attribute** — is what shipped; the re-routing is
+carried. A deliberate predicate/reducer divergence now exists in the OPPOSITE direction from the
+pre-D4 one (the predicate still ENGAGES via Arm 2; engagement ≠ emission) and is pinned §8.9e.
+
+**M-2 (carried):** the Q1 third state is "half-right" — withholding the FD-R1 fabrication probe is
+correct, but withholding ALL examination is not. Repeated honest inability is itself a prosoche
+signal and needs its own distinct flag examining *the pattern of inability*. **Needs prior-session
+state ⇒ needs the Q1 Phase-2 column ⇒ M-2 gives Phase 2 a second purpose and should be built with it.**
+
+**M-3 (carried):** a guard deny and a consult advisory are different acts; part (3) must be reported
+as **two rates, never pooled**. The guard-denominator decision (denies only) is CONFIRMED correct;
+the consult denominator must be narrowed to loop-opening advisories.
+
+**M-4 (carried — AND IT BLOCKS SPEC 4's ACTIVATION):** adding an honest reading beside the defective
+`computeDispositionStability` does not neutralise it — *"carrying both is not a safe interim
+posture."* `disposition_stability` must be corrected (a perturbation-adjusted measure) or retired
+from agent-facing surfaces first. **The block is stated on `isTrajectoryDispersionEnabled()` itself
+so R4 cannot miss it.**
+
+**M-5 (carried, P0):** the R20a human-escalation claim is **not honest** in its current state. Two
+sequential obligations: **(a)** amend the public claim NOW — it does not wait on the build (R18
+founder sign-off required on wording); **(b)** build the genuine-detection write path as a **P0
+obligation**, correcting `flag_written`'s historical semantics in the same change (by marking what
+those rows actually record — never by retroactively writing flags, which would be fabrication).
+
+### Verification
+
+trust-core **112/0** · kathekon **113/0** · emission-hooks 19/0 · loop-fold 181/0 · S10 **135/0** ·
+trajectory-delta **99/0** · aah-store 120/0 · practice-suggestion 791/0 · r20a-invocation-guard
+126/0 · r20a-gate 33/33 · NEW sweep battery **26/0** · NEW classifier-session-id **15/0** · NEW
+q1-determination **13/0** · report **13/0** · engine **51/0** · boundary 248/0 ·
+**negative-battery 250/0 RELEASE GATE PASS** · logic-harness 171/0 · false-hold-capture 37/0 ·
+`tsc` **0** · `npm run build` **green** (both new routes registered).
+
+**Every new pin mutation-verified.** Notable: the PA-1 ratchet pins would have passed **vacuously**
+had `mkSigned`'s name-less fixture been left alone; the PK pin catches a wrong PK exactly as the
+C-1 live defect demands; and the Spec 4 section was initially placed **after** the battery's summary
+print, so 13 assertions ran uncounted — caught, moved, count went 86 → 99.
+
+**Frozen-buffer acceptance gate RUN before any report-script edit: `n=130, 129 FP / 0 CH`** —
+unchanged, so the predicate provably did not move.
+
+### Risk classification
+
+`code-elevated`→`code-critical` class under 0d-ii, all dark. **Critical Change Protocol NOT
+engaged** — no auth/encryption/perimeter/env-flag/schema/deletion surface was activated. AC7 not
+engaged. PR19 discharged. PR22 honoured. PR23 honoured (the `build-dark-migrate-later`,
+`shared-flag-dark-is-per-flag-not-per-feature`, and C-1 PK memories each bound a decision here).
+
+### Rollback path
+
+Every commit is an independent `git revert`. Nothing is live regardless of outcome: no flag set, no
+migration applied, nothing pushed. R4 is the separately-walked activation.
+
+### Carried
+
+**Ordered by the founder's own R4 election, amended by M-4:** (1) the Q1 flag FIRST — it closes an
+*active* mislabelling, the vetted wording having gone live 2026-08-16; (2) the classifier-shaping
+flag, observing the before/after row-count step-up; (3) the sweep flag + its `vercel.json` entry,
+**not** concurrently with an active observation window; (4) the D4 flag **last, and only after M-1's
+carried re-routing question is settled**, with the walk BEGINNING on a founder-run `SELECT` of
+`justice_floor_active` for `sagereasoning:s9-loop@v1`/dikaiosyne. **Spec 4's flag is BLOCKED on M-4.**
+
+Plus: M-2 (with Phase 2), M-3, M-4, M-5(a) and M-5(b); the AE-3 scoping step; the `stoa-boundary`
+#20 ruling; `classifier_cost_log`'s absence from every data-rights path (a named R17c item); and
+the sweep's two activation constraints (window tension; the report re-inserts purged rows from its
+local JSONL).
+
+**Rules served:** R13, R17c, R18, R18f (untouched), R20a (untouched), AC5 (not engaged), AC7 (not
+engaged), PR6 (not engaged), PR15, PR18, PR19, PR22, PR23, PR24, KG1, KG7, D1, D3, D4, P5, P8a.
+
+**Status:** Adopted. Cross-references:
+`operations/handoffs/founder/2026-08-16-R2b-guard-bundle-NEXT-SESSION-PROMPT.md`,
+`operations/trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`,
+`operations/agent-circles-2026-08/2026-08-17-spec4-dispersion-member-implementation-record.md`,
+`D-CONCURRENT-ARC-R2A-DISCLOSURE-BUNDLE-BUILT-PR19-FOLDED-2026-08-16`,
+`operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md`,
+`2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
