@@ -207,11 +207,18 @@ is the natural home, founder may re-slot; the verbatim record governs details:**
   the `relationship_type` distinctness constraint; the R20d boundary;
   `SUBSTRATE_LAYER3_ENABLED` unset throughout the chain. F-d (fields as design target)
   remains the correct state until the design session rules. **Gate 1 CLEARED 2026-08-16**
-  (`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`) — **the O-C scoping session is now
-  OPEN.** No session convened yet; founder slots it. **A cross-gate discovered at the same
-  ruling, not previously stated anywhere in this plan: R8 (standing-runner design, below) now
-  waits on THIS session's own Gate 2 (its scope document being produced), not merely on R1** —
-  see R8's own entry for the corrected prerequisite.
+  (`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`) — **Gate 2 (the O-C scoping session)
+  RAN the same day, DONE** (`D-CONCURRENT-ARC-OC-SCOPING-SESSION-GATE2-2026-08-16`; scope
+  document at `2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md`) —
+  five ruling questions (agenda ordering by evidentiary weight; whether L-5's disclosure
+  discipline generalises to the consult surface; the B7 cross-endpoint finding's audience;
+  whether the nine-candidate classification should be re-sequenced ahead of Gate 3; the
+  generalisability caveat), grounded against the §6 report's real data (delivery-classification
+  split, guardrail-rejection data, the B7 cross-endpoint mechanism verified first-hand against
+  the run log). **Awaiting mentor ruling — Gate 3 (the design session) does not open until
+  that ruling clears.** **The cross-gate this ruling introduced, restated: R8 (standing-runner
+  design, below) now waits on THIS Gate 2 having been produced — done — not on Gate 3 or its
+  ruling; R8's own prerequisite is therefore now satisfied** (see R8's own entry).
 - **Not adopted / out of reach, recorded so no session self-starts them:** F-c (human mentor
   tools — out of this arc's agent-first ordering, not ruled); `SUBSTRATE_LAYER3_ENABLED`
   activation (not licensed by Ruling Set D or any session executing it).
@@ -378,14 +385,15 @@ Builds follow the existing scoped-and-mentor-approved documents. The Q1 hard con
 restated at each session open: the loop proposes; it never executes.
 
 ### ☐ R8 — Standing-runner design
-*Tier: set at open. Prerequisite, CORRECTED 2026-08-16
-(`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`): the §6 report ruling alone is no longer
-sufficient — R1 is ruled (Q10/Q11's original gate, discharged), but the SAME ruling introduced a
-new cross-gate: this session waits on the O-C scoping session's own Gate 2 (its scope document
-being produced), per the mentor's closing line, "per Ruling Set D's sequencing." Not pre-scoped —
-deliberately. **One named input, gating this session's CLOSE, not its open:** read the nine
-guardrail-rejected candidates from the bounded validation run, classify each remediation-shaped
-or not, report the distribution — before this session closes.*
+*Tier: set at open. Prerequisite SATISFIED 2026-08-16: R1 is ruled AND the O-C scoping session's
+own Gate 2 (its scope document being produced) is done
+(`D-CONCURRENT-ARC-OC-SCOPING-SESSION-GATE2-2026-08-16`,
+`2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md`) — the ruling's exact
+wording gates R8 on the document being **produced**, not on its own ruling clearing. R8 is
+therefore licensed to open. Not pre-scoped — deliberately. **One named input, gating this
+session's CLOSE, not its open:** read the nine guardrail-rejected candidates from the bounded
+validation run, classify each remediation-shaped or not, report the distribution — before this
+session closes.*
 
 ---
 

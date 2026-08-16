@@ -21629,3 +21629,68 @@ to verify mentor-relay accuracy except this record).
 session (R8) is licensed to open only once the O-C scoping session's own document is produced.
 Cross-references: `D-IDEA-LOOP-R1-S6-REPORT-COMPILED-2026-08-16`, `D-MENTOR-RULING-OC-SCOPING-
 LICENSE-RECORDED-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-CONCURRENT-ARC-OC-SCOPING-SESSION-GATE2-2026-08-16
+
+**Decision:** Ran the O-C per-consumer-rendering scoping session (Gate 2 of the three-gate chain
+the mentor set at `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`), opened under
+`operations/handoffs/founder/2026-08-16-post-R1-arc-continuation-NEXT-SESSION-PROMPT.md`'s
+recommended default. Produced a scope document for the design session's own scope (Gate 3), not a
+design — per the ruling's own instruction ("no design is produced at this gate — only the scope
+document"). File:
+`operations/agent-circles-2026-08/2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-
+FOR-RULING.md`. **Status: FOR RULING — the design session (Gate 3) does not open until this
+document is ruled on.**
+
+**Reasoning:** Gate 1 (the §6 report compiled and ruled on) discharged same day
+(`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`). The mentor's sequencing rationale for gating
+O-C behind the §6 report named four real-usage data classes as directly relevant to weighting the
+five inherited L-2 distinction dimensions: proximity distributions, delivery classifications,
+passion readings, and cross-endpoint asymmetries. This session verified each against the §6 report
+first-hand — including one mechanism the report only names in passing (the B7 cross-endpoint
+traceability check, comparing `/api/guardrail` and `/api/reason` extractions of the same winner
+action text, running per-cycle since cycle 6), verified directly against the run log at
+`RUN-LOG.md:422-437` rather than taken on the report's summary alone — and mapped each data class
+onto the five L-2 dimensions per §3 of the scope document: dimension (c) (honesty, already ruled
+load-bearing) is directly evidenced by three convergent findings (the 14% delivery-timeout gap, the
+cross-endpoint divergence mechanism, and cycle 3's production contamination); dimension (d)
+(affordances named) is evidenced by the guardrail attribution-vs-conduct calibration limit; (a) is
+only indirectly evidenced (the run confirms direct agent-to-agent consumption but supplies no data
+on the relayed-human case); (b) and (e) are not evidenced by this run at all. The document poses
+this mapping as a scoping question (Q1: should Gate 3 sequence by evidentiary weight) rather than a
+design recommendation, consistent with M2's shape (AI runs the session and produces a document;
+the mentor rules on it).
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md` — new scope document, five questions for ruling (Q1–Q5), constraints inherited from Ruling Set D restated as binding-not-for-ruling.
+- `operations/handoffs/founder/2026-08-15-concurrent-arc-plan.md` — the D/O-C bullet under C3 updated (Gate 2 done, awaiting ruling); R8's own entry updated (its prerequisite — the O-C scope document being *produced*, not ruled — is now satisfied per the ruling's exact wording).
+
+**Risk classification:** `governance` — documents only. No code, schema, flag, or credential
+touched. AC7 not engaged. Verified before writing: no commit since 2026-08-15 touches
+`layer3-service.ts`, `layer3-prose.ts`, `/api/substrate/layer3/route.ts`, or `question-bank.ts`
+(`git log` checked at open); the four relational-context placeholder fields remain absent from
+`website/src` (grep re-run this session, zero matches); `route.ts:805`, `route.ts:1408`,
+`layer3-service.ts:200-213`, `layer3/route.ts:88-91`, `question-bank.ts:51`,
+`reflect-service.ts:535`, `emission-hooks.ts:199` all re-verified unchanged from the C3 scope
+document's citations.
+
+**Rollback path:** `git revert` this commit (documents only; no session, build, or ruling depends
+on this document existing before the mentor rules on it).
+
+**Verification step (founder-performable):** relay
+`2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md` to the mentor for
+ruling; nothing else is pending from this session.
+
+**Open questions:** the five questions posed in the scope document itself (§4, Q1–Q5) — all for
+the mentor's ruling, none decided here.
+
+**Rules served:** PR20 (every load-bearing mechanism cited by exact file/line, re-verified against
+current source rather than trusted from the C3 document's prior verification), PR17 (the B7
+cross-endpoint mechanism verified against the run log directly rather than relayed secondhand from
+the mentor's own summary), M2 (AI runs the scoping session and produces a document; execution and
+design both wait for a ruling on it).
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`,
+`D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`,
+`2026-08-15-mentor-ruling-set-d-layer3-scope-document-verbatim.md`,
+`2026-08-15-concurrent-arc-plan.md`. Weights BLOCKED; the P0 0h hold stands.
