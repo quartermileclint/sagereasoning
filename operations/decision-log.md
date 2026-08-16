@@ -21366,3 +21366,74 @@ Expected: the survey's method + Class A/B/C structure.
 **Rules served:** R17, AC7, PR17, PR19, PR21.
 
 **Status:** Adopted. Cross-references: `D-CONCURRENT-ARC-C4-RLS-SURVEY-2026-08-16`, `D-CONCURRENT-ARC-C4-OPEN-INSERT-POLICIES-FIX-LIVE-2026-08-16`. Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-16 — D-MENTOR-RULING-IDEA-LOOP-STOP-AT-20-RECORDED-2026-08-16
+
+**Decision:** Recorded the mentor's ruling on whether the IDEA-loop bounded validation run should
+stop at its just-reached 20-cycle floor or continue toward the ruled 40-cycle ceiling — asked at
+the founder's direction, mid-session, alongside this session's four RLS fixes, and relayed verbatim
+same day. **Ruling: option (a) — stop now, at 20** (verbatim canonical:
+`idea-loop-validation-run/MENTOR-RULING-cycle-20-stop-verbatim.md`, in the scratch project, not
+this repo — verbatim wins over this summary).
+
+**The brief that prompted it (`idea-loop-validation-run/MENTOR-QUESTION-cycle-20-stop-vs-continue.md`)
+surfaced a fact the founder's original framing did not have in view:** the parallel-window standing
+prompt's Mode 3 trigger is two-part — `completed_cycles` in the 20–40 range **AND** the runner's own
+Part F hand-back. Live re-derivation confirmed 20 cycles (15 winner / 3 dependency_unavailable / 2
+null_cycle) but found **no Part F hand-back anywhere**, and the runner's own cycle-20 resume-state
+row was actively primed to open cycle 21 (a computed timing gate, "nothing carried forward as
+blocking it"), with the mentor's own prior closing line on the cycle-19/20 review batch reading
+*"The run continues."* Rather than ask the founder's original question on an incomplete picture, the
+brief surfaced this first and asked the sharper one: given the run hasn't stopped itself, should the
+founder deliberately end it at the floor.
+
+**The mentor's reasoning, in substance (verbatim governs):** the outcome distribution at 20 cycles
+is coherent and interpretable; every §6 discriminator question already has enough observations; the
+domain-pairing hypothesis is settled, the friction-channel pattern resolved, the calibration finding
+named — **more cycles will replicate these findings, not sharpen them**; the marginal value of
+cycles 21–40 is low against the cost of deferring the arc's accumulated non-concurrent items (the
+O-C scoping session, the standing-runner design, the hegemonikon session, the C2 ruled-additions);
+**the runner's own primed-to-continue state is not itself a reason to continue** — "the founder ends
+the run; the runner does not. That is the standing design." Option (c) — letting the already-gated
+cycle 21 run as a compromise — was explicitly considered and rejected: "one more cycle does not
+change any finding… it delays Phase 2 by one cycle for no analytical gain."
+
+**The ruled sequence, verbatim:** founder ends the run (cycle 21's timing gate is not opened) → a
+Part F-equivalent closing summary is composed **from the run log, explicitly not requiring the
+runner's live session** ("a compilation task, not a reasoning task" — GS-ATRF-1/2 at Part D, findings
+tracked per-cycle throughout, anomalies in the cycle records) → the §6 report is compiled from 20
+cycles per the standing plan (`GET /api/founder/watching` + direct SQL) → the report returns to the
+mentor in consultation → the O-C scoping session opens once that gate clears, per Ruling Set D's
+sequencing (already on record, `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`).
+
+**This is the R1 trigger, discharged in substance.** The concurrent-arc plan's own Phase-2 trigger
+("live-queried `completed_cycles` ≥ 20 AND founder confirms the runner has reported back") is now
+satisfied by ruling rather than by a literal runner-authored Part F document — the mentor's own
+words license the compilation to proceed without one. **R1 itself (compiling the full §6 report) has
+NOT yet been run this session** — this entry records the ruling that licenses it, not its execution.
+
+**One outstanding action, the founder's alone, per the ruling's own words:** end the run in the
+runner's own scratch-project session (do not open cycle 21). Nothing in this repo-side session can
+do this — it is a different session entirely.
+
+**Files touched:** `idea-loop-validation-run/MENTOR-QUESTION-cycle-20-stop-vs-continue.md`,
+`idea-loop-validation-run/MENTOR-RULING-cycle-20-stop-verbatim.md` (both in the scratch project, not
+this repo — not committed here), this entry.
+
+**Risk classification:** `governance` — documents only; no code, schema, flag, or credential
+touched; the live production query that confirmed the cycle count was read-only. AC7 not engaged.
+PR20 discipline followed (the brief named the specific mechanism facts — the two-part trigger, the
+resume-state row, the mentor's own prior words — before asking, rather than after).
+
+**Rollback path:** `git revert` this commit (documents only, in this repo). The scratch-project
+files are outside git and are not affected by any repo action.
+
+**Open questions:** the founder has not yet confirmed the run is formally ended (cycle 21 not
+opened); R1 (the full §6 report compilation) has not yet been run; the standing-runner design
+session (Q10/Q11) and R5's ATRF scoping session remain gated behind R1 as designed.
+
+**Rules served:** PR20, PR19 (not engaged — no code), the concurrent-arc plan's own Phase-2 trigger.
+
+**Status:** Adopted. Cross-references: `2026-08-15-concurrent-arc-plan.md` (Phase 2 trigger, R1),
+`D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16` (the downstream gate this discharges the
+precondition for). Weights BLOCKED; the P0 0h hold stands.
