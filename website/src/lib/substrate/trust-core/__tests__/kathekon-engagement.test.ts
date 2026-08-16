@@ -595,9 +595,18 @@ console.log('\n§8 — the self-circle narrowing (2026-07-19 mentor ruling), bot
   // self-only circle is not a justice surface (the 2026-07-19 ruling, both halves).
   check('§8.9c FLAG-ON: the reducer refuses too ⇒ predicate and reducer converge (D4)',
     deriveWorstJusticeOutcome([selfOnlyAssessment], { requireBeyondSelfCircle: true }) === null)
-  // §8.9d THE ASYMMETRY SURVIVES THE CONVERGENCE: a VIOLATED obligation on the
-  // self circle still derives even flag-on, and the predicate still engages it via
-  // Arm 2. Adverse justice evidence is never dropped on either side.
+  // §8.9d INVERTED 2026-08-16 (mentor ruling M-1). This previously asserted that
+  // the asymmetry survived — a self-only VIOLATED obligation still deriving
+  // flag-on. M-1 overturned that: dikaiosyne is other-directed whether the
+  // obligation was met or violated, so the reducer withholds ALL FOUR outcomes on
+  // a self-only circle.
+  //
+  // WHAT SURVIVES, and it is the point of keeping this pin rather than deleting
+  // it: the PREDICATE still ENGAGES via Arm 2. Engagement (hold and examine?) and
+  // emission (a dikaiosyne ledger event?) are different questions — the
+  // 2026-07-19 ruling left Arms 2-4 untouched and M-1 rules only on emission. So
+  // the two now diverge on self-only violated BY DESIGN, in the opposite
+  // direction from the pre-D4 divergence, and this pin holds that line.
   const selfOnlyViolatedAssessment = {
     katorthoma_proximity: 'deliberate',
     virtue_domains_engaged: ['phronesis', 'dikaiosyne'],
@@ -608,9 +617,14 @@ console.log('\n§8 — the self-circle narrowing (2026-07-19 mentor ruling), bot
     },
     passion_diagnosis: { passions_detected: [] },
   } as unknown as Parameters<typeof deriveWorstJusticeOutcome>[0][number]
-  check('§8.9d FLAG-ON: self-only VIOLATED still derives (adverse evidence never dropped)',
-    deriveWorstJusticeOutcome([selfOnlyViolatedAssessment], { requireBeyondSelfCircle: true })
-      ?.obligationStatus === 'violated')
+  check('§8.9d FLAG-ON: the REDUCER withholds self-only VIOLATED too (M-1: all four gated)',
+    deriveWorstJusticeOutcome([selfOnlyViolatedAssessment], { requireBeyondSelfCircle: true }) === null)
+  check('§8.9e but the PREDICATE still ENGAGES it via Arm 2 (engagement ≠ emission)',
+    assessKathekonEngagement(
+      kathekonSignalsFromAssessment(
+        selfOnlyViolatedAssessment as unknown as Parameters<typeof kathekonSignalsFromAssessment>[0],
+      ),
+    ).engaged)
 
   // §8.10 VIOLATED-ON-UNKNOWN-CIRCLE (first-hand review, battery-adequacy):
   // adverse justice evidence must engage regardless of circle IDENTITY — a

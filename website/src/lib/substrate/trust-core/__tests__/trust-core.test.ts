@@ -504,12 +504,17 @@ const verifyFail = () => ({ valid: false as const, reason: 'bad_signature' })
   eq(deriveWorstJusticeOutcome(selfOnly('met').map((s) => s.assessment), ON), null,
     'D4-7 flag-on: self-only MET ⇒ no dikaiosyne CREDIT for self-regarding action (ruling #3)')
 
-  // --- D4-8  THE ASYMMETRY. Adverse evidence is never dropped; suppressing it
-  //     would make trust read HIGHER, the one direction never taken here.
-  //     Mirrors the predicate's Arms 2-4 and loop-fold.ts's shipped
-  //     `beyondSelfCircleCount >= 1 || violatedObligation`.
-  eq(deriveWorstJusticeOutcome(selfOnly('violated').map((s) => s.assessment), ON)?.obligationStatus,
-    'violated', 'D4-8 flag-on: self-only VIOLATED STILL derives — adverse justice evidence is never dropped')
+  // --- D4-8  INVERTED 2026-08-16 by mentor ruling M-1, which OVERTURNED this
+  //     build's original asymmetry. This pin previously asserted that a self-only
+  //     VIOLATED obligation still derived, on the ground that adverse evidence is
+  //     never dropped. The mentor rejected that: the evidence is not dropped, it
+  //     is correctly ATTRIBUTED — dikaiosyne is other-directed whether the
+  //     obligation was met or violated, so emitting here hard-floors a domain that
+  //     was never engaged. Interim posture per the ruling: WITHHOLD the dikaiosyne
+  //     emission rather than preserve a known mis-attribution (routing to
+  //     phronesis/sophrosyne is the correct destination and is carried separately).
+  eq(deriveWorstJusticeOutcome(selfOnly('violated').map((s) => s.assessment), ON), null,
+    'D4-8 flag-on: self-only VIOLATED does NOT derive either — all four gated symmetrically (M-1)')
 
   // --- D4-9..11  A BEYOND-SELF circle is untouched by the narrowing (the U2/J2
   //     marketing-email class the whole ADR-010 arc exists for must survive).

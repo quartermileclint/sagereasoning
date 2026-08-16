@@ -231,22 +231,43 @@ export function deriveWorstJusticeOutcome(
 
     const dikaiosyneEngaged = a.virtue_domains_engaged.includes('dikaiosyne')
 
-    // THE ASYMMETRY, and it is the ruling's own shape rather than a convenience.
-    // `violated` stays UNGATED by the circle test: dropping adverse justice
-    // evidence would make trust read HIGHER, which is the one direction this
-    // project never takes on a safety-adjacent surface. The predicate already
-    // resolved the identical question the identical way (Arms 2-4 left unchanged
-    // at the 2026-07-19 narrowing, "adverse justice evidence is never dropped"),
-    // and loop-fold.ts:703 shipped the same rule as
-    // `beyondSelfCircleCount >= 1 || violatedObligation`. The three OTHER outcomes
-    // are gated, each on its own mentor ground: `indeterminate` is named verbatim
-    // as "the trigger misfiring" on self-regarding decisions (ruling #4);
-    // `unevaluated` asserts a justice surface the ruling says is not there
-    // (ruling #1); `met` would CREDIT dikaiosyne — a rise — for action that
-    // engages no other party at all (ruling #3, self-regarding action is
-    // phronesis/sophrosyne). Gating `met` is also what keeps the narrowing from
-    // being a backdoor trust INCREASE.
-    if (statuses.includes('violated')) sawViolated = true
+    // ALL FOUR OUTCOMES ARE GATED SYMMETRICALLY — corrected 2026-08-16 by mentor
+    // ruling M-1, which OVERTURNED this build's original asymmetry.
+    //
+    // The original implementation left `violated` UNGATED on the safety-direction
+    // argument: dropping adverse justice evidence makes trust read HIGHER, the one
+    // direction this project does not take. The mentor rejected that reasoning here,
+    // and the rejection is precise: **the evidence is not being dropped, it is being
+    // correctly attributed.** Dikaiosyne is other-directed; a self-regarding
+    // obligation is governed by phronesis and sophrosyne whether it was MET or
+    // VIOLATED. Preserving the violated case while correcting the other three
+    // "is not conservative — it is preserving a category error in the direction
+    // that hard-floors the wrong domain." A false adverse signal is not safer than
+    // a false positive one; it is a different kind of error, and this kind
+    // corrupts the ledger by attributing a self-regarding failure to a virtue
+    // domain that was never engaged.
+    //
+    // THE HARD-FLOOR EXEMPTION IS NOT THE ISSUE — the domain attribution is. A
+    // `justice-surface-violated` event hard-floors dikaiosyne to `reflexive`,
+    // exempt from hysteresis; doing that on self-regarding conduct distorts any
+    // downstream reasoning that treats domain attribution as meaningful.
+    //
+    // THE CORRECT DESTINATION is phronesis or sophrosyne, depending on what the
+    // violation concerns. This reducer cannot route there — it emits into
+    // dikaiosyne by construction, and adding a cross-domain route is a separate
+    // design step. The mentor named the interim posture explicitly: "If the
+    // implementation cannot yet route to those domains, the correct interim
+    // posture is to WITHHOLD the dikaiosyne emission rather than preserve a known
+    // mis-attribution." That is what this does. The re-routing is carried as its
+    // own item, NOT silently absorbed here.
+    //
+    // NOTE the deliberate divergence this creates from the PREDICATE, which is
+    // correct and must not be "fixed" to match: the predicate's Arms 2-4 still
+    // ENGAGE on a self-only violated obligation. Engagement (should this be held
+    // and examined?) and emission (does this become a dikaiosyne ledger event?)
+    // are different questions; the 2026-07-19 ruling left Arms 2-4 unchanged and
+    // M-1 rules only on emission.
+    if (!selfOnly && statuses.includes('violated')) sawViolated = true
     if (!selfOnly && statuses.includes('indeterminate')) sawIndeterminate = true
 
     // PA-4 fold (2026-07-11): met CREDITS dikaiosyne (the transparently-handled

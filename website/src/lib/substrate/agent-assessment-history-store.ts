@@ -134,6 +134,29 @@ export function isTrajectoryDeltaEnabled(): boolean {
  *  flag alone changes nothing. */
 export const TRAJECTORY_DISPERSION_ENV_VAR = 'SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED'
 
+/**
+ * ⚠ ACTIVATION IS BLOCKED — mentor ruling M-4 (2026-08-16). DO NOT SET THIS FLAG
+ * until M-4 is resolved, even though the member itself is built and battery-green.
+ *
+ * The dispersion member was designed to sit BESIDE the existing
+ * `computeDispositionStability` (`window-aggregator.ts`), which certifies
+ * stddev < 0.4 as `advanced` / "Disposition approaching hexis" and is already
+ * surfaced through this same delta's `dimension_trends`. The build's reasoning was
+ * that an ungraded honest reading beside a graded defective one was a safe interim.
+ *
+ * M-4 rejected that: "Adding an honest reading beside a defective one does not
+ * neutralise the defective one — it creates a surface that carries two signals with
+ * contradictory implications, where the defective signal has the more
+ * authoritative-sounding name ... The defective signal will dominate precisely in
+ * the cases where it is most wrong." And: "Carrying both is not a safe interim
+ * posture."
+ *
+ * SO THE ORDER IS FIXED: correct `computeDispositionStability` (a
+ * perturbation-adjusted measure that distinguishes low variance UNDER perturbation
+ * from low variance in the ABSENCE of perturbation), or retire it from
+ * agent-facing surfaces — THEN activate this. Activating this first is the one
+ * sequence the ruling forbids.
+ */
 export function isTrajectoryDispersionEnabled(): boolean {
   return process.env[TRAJECTORY_DISPERSION_ENV_VAR] === 'true'
 }

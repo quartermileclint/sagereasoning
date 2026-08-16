@@ -56,9 +56,17 @@ export function isStoaTrustEventsEnabled(): boolean {
  *
  *  UNSET ⇒ `deriveWorstJusticeOutcome` behaves byte-identically to its pre-D4 form
  *  (battery-asserted). SET ⇒ a self-preservation-only assessment stops deriving
- *  `justice-surface-{unevaluated,indeterminate,transparently-handled}`; a VIOLATED
- *  obligation still derives regardless of circle identity (the conservative
- *  direction — see the asymmetry note in derive-trust-events.ts).
+ *  ANY justice event — all four outcomes (`unevaluated`, `indeterminate`,
+ *  `transparently-handled`, AND `violated`) are gated symmetrically.
+ *
+ *  CORRECTED 2026-08-16 by mentor ruling M-1. This build originally left `violated`
+ *  ungated on a safety-direction argument; the mentor overturned it, on the ground
+ *  that the evidence is not being DROPPED but correctly ATTRIBUTED — dikaiosyne is
+ *  other-directed whether the obligation was met or violated, and hard-flooring it
+ *  on self-regarding conduct corrupts the ledger's domain attribution. The correct
+ *  destination is phronesis/sophrosyne; this reducer cannot route there, so the
+ *  ruled interim posture is to WITHHOLD rather than mis-attribute. The re-routing
+ *  is carried as its own item.
  *
  *  Activation is its own founder-walked `code-critical` step (D3): the reducer is a
  *  LIVE trust-event emitter. The walk must ALSO re-check D1's `justice_floor_active`
