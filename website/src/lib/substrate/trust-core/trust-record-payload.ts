@@ -58,6 +58,12 @@ export const TRUST_RECORD_ENVELOPE = {
     'Fitness as a training signal. Weights-tier claims are blocked.',
     'Fifth-circle alignment: orientation_readings entries describe a single examination or a single observation (each carries its own inline clause); the record cannot attest that the agent is fifth-circle-aligned (mentor Q6).',
     'Confirmed delivery. An orientation_readings entry\'s class field (examined/observed) is computed from an ELAPSED-TIME PROXY against the harness\'s documented consult timeout — never a confirmed-delivery acknowledgement, which no channel exists to provide. Entries recorded before 2026-08-08 predate this classification and default to examined (the architecture at time of writing, not a confirmed status; never backfilled).',
+    // Ruling Set B, R-2 (2026-08-15; ADR-013 §8 dated amendment lands in the SAME
+    // edit, with the S10 battery pin — the ruling's own same-edit requirement).
+    // Named as DISCRIMINATIVE RANGE specifically, not variance or dispersion
+    // generically: the doctrinal concept is the Senecan relapse-resistance
+    // criterion (Seneca 75.8-9), not statistical variance as such.
+    'Discriminative range — whether the agent\'s proximity readings vary across different types of actions, or whether stability in the record reflects tested relapse-resistance rather than absence of perturbation. The disposition_stability dimension measures consistency of proximity readings; it cannot distinguish a stable disposition that has been tested under varied conditions from one that has not been tested at all.',
   ],
   honest_limit:
     'This record is an attestation composed server-side from consumer-unforgeable trust events under a 90-day retention regime — not a cryptographic proof of the agent’s inner states, and not a certification of safety, ethics, or trustworthiness in any absolute sense (R18a). MEASURE mode: nothing in this record binds any decision; a human’s right to override is absolute regardless of any level shown here (R20c).',

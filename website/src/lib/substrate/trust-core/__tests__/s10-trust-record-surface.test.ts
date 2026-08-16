@@ -262,6 +262,18 @@ async function main(): Promise<void> {
   assert(env.includes('Weights-tier claims are blocked'), 'S2-34 envelope: weights blocked')
   assert(env.includes('MEASURE'), 'S2-35 envelope: measure-mode disclosure')
   assert(env.includes('modulate-only'), 'S2-36 envelope: reflect modulate-only')
+  // S2-39: Ruling Set B R-2 (2026-08-15). S2-37 below is strict reference
+  // identity, so it passes by construction whenever the payload ships the same
+  // (mutated) object — it cannot detect a missing envelope ITEM. This substring
+  // pin is what actually holds the discriminative-range disclosure in place.
+  assert(
+    env.includes('Discriminative range'),
+    'S2-39 envelope: discriminative-range item (Ruling Set B R-2)',
+  )
+  assert(
+    env.includes('tested relapse-resistance rather than absence of perturbation'),
+    'S2-40 envelope: discriminative range names the Senecan relapse-resistance criterion, not generic variance',
+  )
   eq(payload.envelope, TRUST_RECORD_ENVELOPE, 'S2-37 the payload ships THE envelope object')
   eq(payload.interop.published_externally, false, 'S2-38 interop: nothing published externally')
 
