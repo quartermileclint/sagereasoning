@@ -1,0 +1,199 @@
+-- ============================================================================
+-- mentor_profiles — RLS lockdown to service-role-only (the target shape)
+-- ============================================================================
+-- Concurrent-arc C4 follow-on — `code-critical` (AC7 + PR19).
+-- Survey: operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md
+--         (Class A, row 12 — backlog item 4, the most intimate Class A table)
+-- Precedents applied and proven live 2026-08-16 (six tables, three migrations):
+--   supabase-impulse-rls-lockdown-migration.sql            (Class A, same shape)
+--   supabase-founder-conversations-rls-lockdown-migration.sql
+--   supabase-open-insert-policies-lockdown-migration.sql   (deliberately NOT this shape)
+--
+-- ============================================================================
+-- WHICH SHAPE THIS IS, AND WHY — checked, not assumed
+-- ============================================================================
+-- This one IS the full lockdown (the impulse_entries / founder_conversations
+-- shape): drop every owner policy, revoke all anon/authenticated grants, leave
+-- RLS enabled, service_role only.
+--
+-- That was NOT assumed from the precedent. The immediately preceding fix in this
+-- series (the three open-INSERT policies) looked identical and was not: two of
+-- its three tables had legitimate anon/authenticated SELECT consumers, and a
+-- blanket revoke would have broken the practice calendar and the badge surface.
+-- So every consumer of THIS table was enumerated first, and the answer differs:
+--
+--   17 call sites across 10 files, EVERY ONE service-role, verified 2026-08-16:
+--     api/founder/hub/route.ts:1407              api/user/export/route.ts:272
+--     api/mentor/founder/history/route.ts:42     api/mentor/private/history/route.ts:42
+--     api/mentor/private/baseline-response:197   api/mentor/ring/proof/route.ts:350
+--     api/mentor/private/reflect:363,497,744     lib/mentor-profile-store.ts:125,247,276,283
+--     lib/context/mentor-context-private.ts:150,401,448
+--     lib/user-data-gathering.ts:162
+--   ZERO anon-key client constructions in any of them; ZERO client/browser
+--   references to `mentor_profiles` anywhere in src/app/**.tsx or src/components
+--   (the private-mentor page issues no Supabase table query at all).
+--
+-- NOTE the survey's row 12 under-counted this: it named four consumers, missing
+-- lib/mentor-profile-store.ts, lib/context/mentor-context-private.ts,
+-- lib/user-data-gathering.ts and api/mentor/ring/proof. All four are
+-- service-role, so the verdict is unchanged — but the enumeration was re-run
+-- from scratch rather than inherited, which is why the gap was visible.
+--
+-- ============================================================================
+-- THE DEFECT, CONFIRMED LIVE BEFORE THIS MIGRATION WAS WRITTEN
+-- ============================================================================
+-- Three owner policies (`supabase-mentor-profiles-migration.sql:39-49`):
+--   "Users can read own profile"    SELECT USING       (auth.uid() = user_id)
+--   "Users can update own profile"  UPDATE USING       (auth.uid() = user_id)
+--   "Users can insert own profile"  INSERT WITH CHECK  (auth.uid() = user_id)
+-- over Supabase default grants the original migration never revoked. So an
+-- authenticated practitioner can reach the table DIRECTLY via PostgREST with
+-- the public anon key plus their own JWT, bypassing every route.
+--
+-- WHAT IT PERMITS: self-forgery and self-corruption of the mentor's own
+-- assessment record — writing `senecan_grade`, `proximity_level`,
+-- `passions_count`, `weakest_virtue` directly (fabricating a progression the
+-- engine never assessed), or overwriting `encrypted_profile`/`encryption_meta`
+-- with junk. It does NOT permit reading another practitioner's profile: the
+-- policies are owner-scoped, so this is an INTEGRITY hole, not a disclosure one
+-- — unlike founder_conversations (rows 23–24), which was an unauthenticated
+-- read of real private content.
+--
+-- VERIFIED BEHAVIOURALLY on TEST, 2026-08-16, by non-writing probes:
+--   * INSERT `{}`                       -> 42501 **"new row violates row-level
+--                                          security policy"**
+--   * INSERT `{user_id: <own uuid>}`    -> 23502 null value in
+--                                          "encrypted_profile"  => PERMITTED
+--   * UPDATE own rows, 0-match filter   -> HTTP 204               => PERMITTED
+--   * unauthenticated SELECT            -> HTTP 200 (TEST *and* PRODUCTION)
+--
+-- *** READ THE FIRST TWO TOGETHER — THIS IS THE TRAP. *** Taken alone, the
+-- empty-body INSERT's `42501` looks like "permission denied, already closed".
+-- It is not: 42501 covers BOTH "permission denied for table" AND "new row
+-- violates row-level security policy", and an empty body has a null user_id
+-- that fails the owner WITH CHECK regardless of grants. Only the second probe —
+-- supplying the caller's OWN user_id, so the policy passes and only a NOT NULL
+-- column stops it — distinguishes them, and it returns 23502: the write was
+-- permitted. **Match on the MESSAGE, never the bare code.** (This is the second
+-- instance in one day of a probe whose failure reported in the reassuring
+-- direction; the first is recorded at D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE.)
+--
+-- ============================================================================
+-- WHY THIS FIX IS SAFE
+-- ============================================================================
+-- `service_role` carries BYPASSRLS and retains its grants, so all 17 legitimate
+-- call sites are unaffected. Nothing user-scoped reads or writes this table, so
+-- unlike the previous fix there is no SELECT path to preserve.
+--
+-- R17b NOTE, for accuracy: the profile BODY is already encrypted at rest
+-- (`encrypted_profile` + `encryption_meta`). The columns this defect exposed to
+-- direct writes are the plaintext queryable metadata. The encryption is not
+-- what closes this hole, and this migration is not a substitute for it.
+
+-- ============================================================================
+-- §PRE — run BEFORE applying (TEST first, then production)
+-- ============================================================================
+-- P1. Confirm the three owner policies exist (expect 3 rows: SELECT/UPDATE/INSERT,
+--     roles={public}, each qual or with_check = (auth.uid() = user_id)):
+--
+--   SELECT policyname, cmd, roles, qual, with_check FROM pg_policies
+--   WHERE schemaname = 'public' AND tablename = 'mentor_profiles'
+--   ORDER BY cmd;
+--
+-- P2. Confirm RLS enabled (expect true):
+--
+--   SELECT relrowsecurity FROM pg_class
+--   WHERE oid = 'public.mentor_profiles'::regclass;
+--
+-- P3. Record the row count, so §VERIFY can prove no data was harmed:
+--
+--   SELECT count(*) FROM public.mentor_profiles;
+--
+-- P4. BEHAVIOURAL PROOF (writes nothing). Unauthenticated, from a terminal:
+--
+--   curl -s -w "\nHTTP %{http_code}\n" \
+--     "$URL/rest/v1/mentor_profiles?select=user_id&limit=1" -H "apikey: $ANON"
+--
+--     BEFORE: HTTP 200 (permitted at the privilege layer; empty only because
+--             auth.uid() is null so no owner row matches).
+--
+--     On TEST additionally, with a real signed-in JWT (see the trap note above —
+--     read the MESSAGE): `POST {user_id: <own uuid>}` must return 23502
+--     (permitted) BEFORE, and 42501 **"permission denied for table"** AFTER.
+
+-- ============================================================================
+-- §APPLY
+-- ============================================================================
+-- §1 — Drop the three owner policies. No policy is retained: service_role needs
+--      none (BYPASSRLS), matching route_errors / stoa_entries / founder_conversations.
+DROP POLICY IF EXISTS "Users can read own profile"   ON public.mentor_profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.mentor_profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.mentor_profiles;
+
+-- §2 — Revoke the default grants the original migration never revoked. Safe to
+--      revoke SELECT here (unlike the open-INSERT fix): no anon/authenticated
+--      consumer of this table exists.
+REVOKE ALL ON public.mentor_profiles FROM anon;
+REVOKE ALL ON public.mentor_profiles FROM authenticated;
+REVOKE ALL ON public.mentor_profiles FROM PUBLIC;
+GRANT  ALL ON public.mentor_profiles TO   service_role;
+
+-- §3 — RLS stays ENABLED (already is; asserted, not toggled).
+ALTER TABLE public.mentor_profiles ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- §VERIFY — run AFTER applying (TEST first; all green before production)
+-- ============================================================================
+-- V1. No policies remain (expect ZERO rows):
+--
+--   SELECT policyname, cmd FROM pg_policies
+--   WHERE schemaname = 'public' AND tablename = 'mentor_profiles';
+--
+-- V2. RLS still enabled (expect true):
+--
+--   SELECT relrowsecurity FROM pg_class
+--   WHERE oid = 'public.mentor_profiles'::regclass;
+--
+-- V3. anon/authenticated/PUBLIC hold no grants (expect ZERO rows):
+--
+--   SELECT grantee, privilege_type FROM information_schema.role_table_grants
+--   WHERE table_schema = 'public' AND table_name = 'mentor_profiles'
+--     AND grantee IN ('anon', 'authenticated', 'PUBLIC');
+--
+-- V4. Data intact — re-run §PRE-P3; count UNCHANGED.
+--
+-- V5. BEHAVIOURAL PROOF — closed. Re-run §PRE-P4's unauthenticated curl: must
+--     now be `42501 permission denied for table mentor_profiles`, not HTTP 200.
+--     On TEST, the authenticated `POST {user_id: <own uuid>}` must now return
+--     42501 **"permission denied for table"** — CHECK THE MESSAGE, not the code:
+--     the pre-fix state also returns 42501 for an empty body, for a different
+--     reason (see the trap note above).
+--
+-- V6. LEGITIMATE PATH UNBROKEN — in the browser, signed in: load
+--     `/private-mentor` and confirm the profile/history renders, and that a
+--     mentor reflection still completes. (All 17 call sites are service-role, so
+--     this should be unchanged; confirm rather than assume.)
+
+-- ============================================================================
+-- §INVERSE — full rollback (restores the pre-migration state exactly)
+-- ============================================================================
+-- Recreates the three owner policies verbatim from
+-- supabase-mentor-profiles-migration.sql:39-49 and restores the grants §2
+-- revoked. After running this, §PRE-P1 returns the original 3 rows and the
+-- self-forgery hole is open again (the pre-fix behaviour).
+--
+--   GRANT ALL ON public.mentor_profiles TO anon;
+--   GRANT ALL ON public.mentor_profiles TO authenticated;
+--
+--   CREATE POLICY "Users can read own profile"
+--     ON public.mentor_profiles FOR SELECT
+--     USING (auth.uid() = user_id);
+--   CREATE POLICY "Users can update own profile"
+--     ON public.mentor_profiles FOR UPDATE
+--     USING (auth.uid() = user_id);
+--   CREATE POLICY "Users can insert own profile"
+--     ON public.mentor_profiles FOR INSERT
+--     WITH CHECK (auth.uid() = user_id);
+--
+-- (The RLS-enabled state is untouched by §APPLY, so the inverse does not
+--  restate it.)
