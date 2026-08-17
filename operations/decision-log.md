@@ -22167,8 +22167,14 @@ with an R18 sign-off package drafted for the practitioner-facing disclosure gap 
 adjacent to it. **M-5(b) scoped**, not built. M-2 and M-3 carry, with their column-shape and tier
 questions resolved by founder election so a future session does not re-litigate them. **PR19 run,
 5 findings folded** (2 confirmed-wrong on an incomplete safety sweep, 3 minor wording imprecisions),
-**one self-correction** to the M-4 brief's own framing. **No code, no schema, no flag, nothing
-pushed.**
+**one self-correction** to the M-4 brief's own framing. **No code, no schema, no flag.**
+
+**⚠ CORRECTION 2026-08-17:** an earlier version of this line read *"nothing pushed"*. That was true
+when written and is now **FALSE** — this entry's own nine files were committed and pushed mid-session
+as **`18e033a`** on `origin/main`. Documents only (both `compliance/` corrections, the three M-4/M-5
+deliverables, this entry, the arc plan, the verbatim, the close); **no `website/` files, so production
+behaviour was unchanged by that push.** Corrected here rather than left to drift, because this project
+has a standing record-drift problem that an entire reconciliation session existed to clean up.
 
 **Tier: `governance` throughout** (two document corrections + three new scoping/consultation
 documents). **AC7 not engaged.** PR19 discharged. PR20 applied to a post-ruling situation, one step
@@ -22370,11 +22376,16 @@ rather than silently corrected).
    because the two defects affect *different populations*: perturbation affects agents never tested;
    mean-blindness affects agents whose consistent reasoning is consistently poor. *"An agent with
    consistently poor reasoning who is never perturbed has both defects working in their favour
-   simultaneously."* The correction: require the mean to meet an adequate floor before certifying
-   `advanced`. **Floor value is the builder's call; the binding part is that the mean must be
-   consulted.** Critically — *"This correction does not restore the dimension to agent-facing
-   surfaces"*; it prevents the second defect being carried forward when the dimension is eventually
-   restored.
+   simultaneously — the mean-blindness certifies the level as adequate, and the perturbation defect
+   certifies the consistency as stability."* The correction: require the mean to meet an adequate floor
+   before certifying `advanced`. **The binding part has TWO conjoined clauses, verbatim:** *"The
+   specific floor is the builder's call — the ruling is that the mean must be consulted, and that low
+   variance on a poor mean must not certify as advanced."* **Both clauses bind.** The second is the
+   operative prohibition: "the mean must be consulted" alone is satisfiable by reading the mean and
+   then not gating on it, which is exactly the defect. Critically — *"This correction does not restore
+   the dimension to agent-facing surfaces"*; it prevents the second defect being carried forward
+   *"when it is eventually restored — once a perturbation-adjusted measure is available."* **That
+   condition is what discharges restoration, and therefore what eventually unblocks Spec 4.**
 3. **Update the published disclosure to name BOTH defects**, accompanying the retirement, not waiting
    for the perturbation correction. The live disclosure names only the perturbation limit, so *"an
    agent reading it would not learn that consistently poor reasoning also certifies as advanced."*
@@ -22422,7 +22433,12 @@ behind one new flag, **UNSET everywhere**. PR19 run and fully folded, including 
 build itself introduced** and **two additional unprotected routes the review found**.
 
 **Tier: `code-critical`** (R20a perimeter + AC5) — but **nothing activated**: no flag set, no schema,
-no migration, nothing pushed. **AC7 not engaged** (no live op performed). **PR19 discharged.**
+no migration. **AC7 not engaged** (no live op performed). **PR19 discharged.**
+
+**Push state (recorded at close, per PR18):** committed as **`224e814`** and pushed; **Vercel green,
+founder-confirmed.** This commit DID trigger a rebuild (unlike `18e033a`) because it carries
+`website/` files — but every one of the six routes is byte-identical flag-off, verified per-route by an
+independent PR19 dimension, so **the deploy changed no behaviour.** The flag remains UNSET.
 
 ### The gap, and how it arose
 

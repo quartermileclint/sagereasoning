@@ -34,7 +34,7 @@
  * A practitioner could write acute distress into any of them and receive no
  * redirect and no crisis resources. This is the same defect class as the
  * /api/score-conversation gap closed 2026-07-07 (S8b blocker (c)) — except all
- * four were absent from the registry, so nothing was watching.
+ * six were absent from the registry, so nothing was watching.
  *
  * HOW THE GAP AROSE, recorded so the shape is not mistaken for a design
  * choice: the 13 sibling skill routes are built on
@@ -99,21 +99,21 @@
  * question and is NOT resolved here.
  *
  * ===========================================================================
- * WHY ONE FLAG AND NOT FOUR
+ * WHY ONE FLAG AND NOT SIX
  * ===========================================================================
  *
  * Every prior perimeter addition took its own flag
  * (SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED, SUBSTRATE_IMPULSE_R20A_ENABLED).
- * These four share ONE — `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` — deliberately:
+ * These six share ONE — `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` — deliberately:
  * they are one remediation of one gap, and a half-closed safety perimeter is a
  * worse state than a fully-open one, because it invites the belief that the
  * gap was handled. Atomic activation removes the failure mode where three
- * flags get set and the fourth is forgotten.
+ * flags get set and the sixth is forgotten.
  *
  * The standing memory `shared-flag-dark-is-per-flag-not-per-feature` warns
  * that a shared flag makes "dark" a per-flag claim rather than a per-feature
  * one. That lesson is respected and is the reason this is stated explicitly:
- * this flag governs EXACTLY these four routes and nothing else. It does not
+ * this flag governs EXACTLY these six routes and nothing else. It does not
  * ride on any existing base flag, and no other feature gates on it.
  *
  * If the founder prefers staged activation (e.g. the passion pair first, on
@@ -139,7 +139,7 @@ export const R20A_GAP_CLOSURE_ENV_VAR = 'SUBSTRATE_R20A_GAP_CLOSURE_ENABLED'
  * Defaults OFF. Only the literal string 'true' enables — mirroring
  * isImpulseR20aEnabled / isScoreConversationR20aEnabled exactly.
  *
- * Flag UNSET => all four routes are byte-identical to their pre-2026-08-17
+ * Flag UNSET => all six routes are byte-identical to their pre-2026-08-17
  * behaviour: no classifier call, no added latency, no wire-shape change, no
  * `support_resources` field. Activation is its own founder-walked Critical
  * step (AC5 + AC7).
@@ -219,7 +219,7 @@ export function composeDistressSubject(values: readonly unknown[]): string {
  *
  * IMPORTANT: this must track the route's own item-parsing shapes. If a future
  * shape is added there and not here, distress in the new shape goes unseen —
- * which is precisely how the four-route gap arose in the first place.
+ * which is precisely how this gap arose in the first place.
  */
 export function collectPrioritiseItemText(items: unknown): unknown[] {
   if (typeof items === 'string') {

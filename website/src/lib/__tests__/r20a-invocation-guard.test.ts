@@ -30,7 +30,7 @@
  * Run: npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC4 (invocation
- * testing); AC5 (perimeter — 14 route-level + 2 substrate-gate = 16 as of
+ * testing); AC5 (perimeter — 20 route-level + 2 substrate-gate = 22 as of
  * 2026-08-12; this line previously read "eight route-level + one substrate-gate
  * = nine", which had been stale for months while the accurate prose block
  * below tracked the real counts — corrected rather than left to drift again).
@@ -139,7 +139,8 @@ const HUMAN_FACING_POST_ROUTES = [
   // SUBSTRATE_IMPULSE_R20A_ENABLED; flag-off is byte-identical.
   'src/app/api/mentor/impulse/route.ts',
   // ── GAP CLOSURE (2026-08-17; AC5 fifteenth through EIGHTEENTH route-level
-  // protocol). Four routes found OUTSIDE this perimeter, each accepting human
+  // protocol). FOUR routes found in this pass; PR19 then found TWO MORE (the
+  // nineteenth + twentieth block below), so the gap totals SIX. Each accepts human
   // practitioner free text behind requireAuth (up to TEXT_LIMITS.medium per
   // field) with NO distress check of any kind, and each absent from this
   // registry — so this battery could not see them.
@@ -151,11 +152,15 @@ const HUMAN_FACING_POST_ROUTES = [
   // shared handler to inherit from.
   //
   // TWO DIFFERENT GROUNDS FOR MEMBERSHIP — do not flatten them:
-  //   • passion-classify / passion-log are inside on the mentor's B3 ground
-  //     (the same ruling that placed /impulse inside against family
-  //     precedent): their whole subject is the practitioner's own fear, anger,
-  //     grief and shame, and passion-log.false_judgement asks specifically for
-  //     the belief that drove it. Arguably a PURER instance than /impulse.
+  //   • passion-classify / passion-log (and the two baseline-response routes)
+  //     are ARGUED inside by extending the reasoning of the mentor's B3 ruling.
+  //     ⚠ B3 IS SCOPED TO /impulse (S7) ALONE — it says nothing about these
+  //     routes. The extension is the BUILDER'S judgement, not a mentor ruling;
+  //     ratification is an open mentor question (see r20a-gap-closure.ts, which
+  //     states this provenance before making the argument). The argument: their
+  //     whole subject is the practitioner's own fear, anger, grief and shame,
+  //     and passion-log.false_judgement asks specifically for the belief that
+  //     drove it — arguably a purer instance of B3's reasoning than /impulse.
   //   • sage-classify / sage-prioritise are inside on the ordinary ground that
   //     every human-facing free-text evaluation route is inside (the five
   //     score routes, /reflect, the journal routes). A practitioner in crisis
@@ -167,7 +172,7 @@ const HUMAN_FACING_POST_ROUTES = [
   // family precedent, carrying SupportFooter. That standing AC5 question is
   // NOT resolved by this closure.
   //
-  // All four share ONE flag (SUBSTRATE_R20A_GAP_CLOSURE_ENABLED) rather than
+  // All SIX share ONE flag (SUBSTRATE_R20A_GAP_CLOSURE_ENABLED) rather than
   // one each: they are one remediation of one gap, and a half-closed safety
   // perimeter is worse than a fully-open one because it invites the belief the
   // gap was handled. See src/lib/r20a-gap-closure.ts for the full rationale.
@@ -253,7 +258,7 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     flag: 'isImpulseR20aEnabled',
     flagSource: './r20a',
   },
-  // ── GAP CLOSURE (2026-08-17): all four share ONE flag, deliberately, so the
+  // ── GAP CLOSURE (2026-08-17): all SIX share ONE flag, deliberately, so the
   // perimeter cannot be half-closed by a forgotten flag. Unlike /impulse the
   // module lives in src/lib/ rather than colocated, because it serves routes in
   // two different trees (api/mentor/ and api/skill/).
@@ -404,7 +409,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 14 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 20 route-level routes (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
   // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
   // the AC5 eleventh-route protocol, flag-gated dark + the Stoa declaration
@@ -418,18 +423,27 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // Remaining-Principles family precedent, see its entry above)
   // + 2 substrate-gate routes (Calling + Reflect-content added 2026-05-28
   // under Option A; see SUBSTRATE_GATE_ROUTES)
-  // = 16 routes in the R20a perimeter overall.
+  // = 22 routes in the R20a perimeter overall (20 route-level + 2 substrate-gate;
+  // the six 2026-08-17 gap-closure routes took it from 14 to 20).
   //
   // The floors are bumped with each addition on purpose: a floor left at the
   // PREVIOUS count stops guarding the newest member (13 >= 13 still passes
   // after the 14th is deleted), which is the one most likely to be removed by
   // someone who reads its perimeter membership as a mistake.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 14, `${label} (>=14 route-level)`)
+  //
+  // ⚠ BUMPED 2026-08-17 (14 -> 20, 5 -> 11) — AND THE MISS IS RECORDED, because
+  // it is the exact failure this comment warns about. The six gap-closure routes
+  // were added to both registries while these floors were left at 14 and 5, so
+  // for a short window all six could have been deleted with the battery still
+  // passing. Caught by an independent records-verification pass, not by the
+  // battery itself. **Bump BOTH floors in the same edit as any registry
+  // addition — the comment above is not advisory.**
+  assert(HUMAN_FACING_POST_ROUTES.length >= 20, `${label} (>=20 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
-  // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until now, so
-  // a flag-gated entry could be deleted silently. 5 flag-pairs across 4
+  // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
+  // so a flag-gated entry could be deleted silently. 11 flag-pairs across 10
   // distinct routes (draft-reflect carries two flags, one entry each).
-  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 5, `${label} (>=5 flag-gated route-level flag-pairs)`)
+  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 11, `${label} (>=11 flag-gated route-level flag-pairs)`)
 }
 
 // test('detectDistressTwoStage result is awaited (async safety)')

@@ -64,6 +64,14 @@ remains blocked by M-4. AC7 not engaged at any point.
 
 ## Verification
 
+> **⚠ SUPERSEDED — read the CONTINUATION's "Revised verification" section instead.** The paragraph
+> below was true at the first close and is **FALSE after Phase 3**: eight TypeScript files are this
+> session's (the six `route.ts` files, `website/src/lib/r20a-gap-closure.ts`, and
+> `website/src/lib/__tests__/r20a-invocation-guard.test.ts`), all in commit `224e814`. **This is the most
+> dangerous stale line in the document, because it tells a reader no verification was needed.** It was
+> flagged by an independent records-verification pass and is marked rather than deleted so the
+> supersession is visible.
+
 `tsc` was clean at session open and **no TypeScript, SQL, or JSON file was modified**, so no
 re-verification is required — confirmed by `git status`: the only non-markdown entries in the working
 tree are pre-existing and not this session's.

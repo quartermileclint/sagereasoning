@@ -21,9 +21,13 @@ supersedes the close above it** → the two decision-log entries
 wins over every paraphrase, including this prompt** → `git status` / `git log --oneline -8`.
 
 **Re-check the byte-identity guard's posture FIRST-HAND at this session's open.** It binds iff
-`GATE1_FALSE_HOLD_CAPTURE === 'true'` (`human-practitioner-boundary.test.ts` §C). It was **DORMANT**
-throughout 2026-08-17, verified in both the process env and `.claude/settings.local.json`. **Never
-infer it from a date.**
+`GATE1_FALSE_HOLD_CAPTURE === 'true'`, and the guard lives in
+**`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts`** — flag read at line 431,
+binding at 450. **Two files share that basename**: the sibling under `website/src/app/reflect/__tests__/`
+contains **no reference to the flag at all** and its own comment redirects to the `logos` file, so a
+session grepping the bare basename can land on the wrong one and conclude the guard does not exist.
+The flag was **DORMANT** throughout 2026-08-17, verified in both the process env and
+`.claude/settings.local.json`. **Never infer it from a date.**
 
 **Expected state at open.** The 2026-08-17 session committed in **two** parts:
 
@@ -140,9 +144,29 @@ verbatim before building. Four obligations:
    advanced."* **R18: founder sign-off on wording before any public surface changes.**
 
 **Blast radius — re-derive it, do not trust this list:** six agent-facing surfaces; `llms.txt` lines
-324 / 682 / 982; `agent-card.json:312`; the `does_not_attest` sentence in `trust-record-payload.ts`
-**pinned object-identical by the S10 battery**; and three further producers of a same-named field
-including the agent-facing `/api/baseline/agent`.
+324 / 682 / 982; `agent-card.json:312`; the `does_not_attest` sentence in `trust-record-payload.ts`;
+`grade-transition-engine.ts` (`dimensionsMeetFloor` / `dimensionsMeetElevated`, named in the ruling's
+own "Binds" section — obligation 2 is to leave it ALONE); and three further producers of a same-named
+field including the agent-facing `/api/baseline/agent`.
+
+**⚠ HOW THE DISCLOSURE IS ACTUALLY PINNED — get this right before editing it.** An earlier draft of
+this prompt said "pinned object-identical by the S10 battery." **That is the wrong mechanism.** In
+`website/src/lib/substrate/trust-core/__tests__/s10-trust-record-surface.test.ts`:
+
+- **`S2-37`** is `eq(payload.envelope, TRUST_RECORD_ENVELOPE, ...)` — strict **reference** identity. The
+  test's own comment says it *"passes by construction whenever the payload ships the same (mutated)
+  object — it cannot detect a missing envelope ITEM."* **It does not pin the sentence.**
+- **`S2-39` and `S2-40`** are **substring** pins (`env.includes('Discriminative range')` and
+  `env.includes('tested relapse-resistance rather than absence of perturbation')`) — *these* are what
+  actually hold the disclosure text in place, and **these are what will fail** when you add the
+  mean-blindness half.
+
+So expect to update the substring pins alongside the disclosure, and **do not assume reference identity
+protects the wording** — it does not. Re-read the test before editing.
+
+**Also check the `/trust-layer` reference mirror tree** — it carries a second copy of
+`computeDispositionStability` which may have diverged. Retiring in one tree and not the other reproduces
+the exact same-name-means-different-things hazard M-4 is about.
 
 **⚠ SPEC 4 STAYS DEACTIVATED.** The ruling says *"until the dimension is restored"* — **retirement does
 NOT unblock it.** A tension with the original "carrying both" reasoning is recorded in the ruling file
@@ -164,8 +188,20 @@ walk over `src/app/api/` — so a seventh route with the same shape would be cau
 **Build the backstop:** a filesystem walk asserting every `route.ts` under `src/app/api/` that
 (a) authenticates a human and (b) accepts free text is **either** a registered perimeter member **or**
 on an explicit, documented exclusion list. The exclusion list must name the Remaining-Principles family
-(`/premeditatio`, `/hupexairesis`, `/oikeiosis` + `/extension`, `/view-from-above`, `/morning`,
-`/sage-compass`, `/logos`) and each agent-facing-by-design route.
+API routes — `/api/mentor/{premeditatio, hupexairesis, oikeiosis, oikeiosis/extension,
+view-from-above, morning, sage-compass}` — and each agent-facing-by-design route.
+
+**⚠ `/logos` has NO API route** — verified: `find website/src/app/api -ipath '*logos*'` returns nothing,
+consistent with CLAUDE.md's record that #12 shipped as a static server component with "no
+schema/route/table/gate/migration". **Do not put it in a route-path exclusion list** — an entry for a
+path that does not exist either dead-weights the list or, if the walk validates its own exclusions,
+fails. It belongs in the family's *prose* record, not the walk's data.
+
+**Also fold in a third PR19 carry not yet in this prompt's body:** the guard's import assertions are
+raw-source substring tests, so a route whose own *comment* quotes
+`enforceDistressCheck(detectDistressTwoStage(...))` would satisfy the import check even with the import
+deleted — `mentor-baseline-response` now contains exactly such a comment. The call-site assertions run
+on comment-stripped source and are sound; the **import** assertions are not. Strip comments there too.
 
 **Mutation-verify it**: add a fake unprotected route and confirm the battery fails.
 
