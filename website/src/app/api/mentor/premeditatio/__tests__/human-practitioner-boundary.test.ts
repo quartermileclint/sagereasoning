@@ -147,11 +147,47 @@ for (const rel of TARGET_FILES) {
     'route: suggested_practice is conditionally spread on the POST and the content-edit PATCH — absent field = honest silence'
   )
   assert(!src.includes('suggested_practice: null'), 'route: never suggested_practice: null — silence is an ABSENT field')
-  // The metadata-only PATCH branch carries no gate and therefore no suggestion:
-  // its return stays exactly { success: true, entry: data }.
+  // The metadata-only PATCH branch carries no gate and therefore no suggestion.
+  //
+  // ⚠ LOOSENED IN FORM, NOT IN INTENT (2026-08-18, practice-family R20a
+  // closure). This was a literal-equality match on
+  // `{ success: true, entry: data }`, which was the tightest available
+  // expression of "no suggestion" at the time BECAUSE no other additive field
+  // existed on this route. It does not distinguish a re-diagnosis from a
+  // crisis-support fold, and it began failing when R20a's mild-severity
+  // `support_resources` was added to every success path per the AC5 pattern.
+  //
+  // The intent is unchanged and is now asserted DIRECTLY: the branch must carry
+  // no suggestion. That guarantee is in fact stronger here than the literal
+  // match was, because it is stated about the branch's own text rather than
+  // inferred from the whole return being frozen. The suggested_practice SPREAD
+  // COUNT (=== 2, asserted above) remains the primary guard and is untouched.
+  //
+  // The mild fold IS reachable on this branch and is pinned below, so a future
+  // edit cannot quietly drop crisis support here: the branch is selected by
+  // `anticipated_event` being absent, NOT by the body being free of text, so a
+  // PATCH carrying e.g. `false_impression` alone screens and lands here.
+  // Isolated by slicing from the branch's own marker comment to the end of the
+  // PATCH handler, so the content-edit branch above it can never bleed into the
+  // match (a lazy regex spanning both returns is exactly how the first attempt
+  // at this assertion silently swallowed the wrong text).
+  const metadataMarker = '// Metadata-only update (behaviour_changed / linked_passion_event_id).'
+  const metadataStart = src.indexOf(metadataMarker)
+  const metadataEnd = src.indexOf("console.error('Premeditatio PATCH error:'", metadataStart)
+  const metadataBranch =
+    metadataStart >= 0 && metadataEnd > metadataStart ? src.slice(metadataStart, metadataEnd) : ''
+
   assert(
-    /return NextResponse\.json\(\{ success: true, entry: data \}\)/.test(src),
+    metadataBranch.length > 0,
+    'route: the metadata-only PATCH branch is locatable (guard non-vacuity — a rename must go red, not silently pass)'
+  )
+  assert(
+    metadataBranch.length > 0 && !metadataBranch.includes('suggested_practice'),
     'route: the metadata-only PATCH branch remains suggestion-free (no re-diagnosis, no suggestion)'
+  )
+  assert(
+    metadataBranch.includes('support_resources: mildSupport'),
+    'route: the metadata-only PATCH branch still carries the R20a mild fold (reachable — see the branch-selection note above)'
   )
   // Never persisted (BD-12): strip every known-good spread occurrence, then
   // require zero remaining mentions of suggested_practice (would catch a

@@ -3,6 +3,47 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightRes
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById } from '@/lib/skill-registry'
 import { SKILL_HANDLER_MAP, createSyntheticRequest } from '@/lib/skill-handler-map'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
+
+/**
+ * The R20a subject for this orchestrator — every string a caller puts inside
+ * `steps[].input`, at any depth.
+ *
+ * ⚠ WHY THIS ROUTE IS SCREENED AT ALL, given it only delegates. It was drafted
+ * as a perimeter EXCLUSION on the ground that SKILL_HANDLER_MAP imports each
+ * target route's own POST, so a screened target screens exactly as it does over
+ * HTTP. That is true and was verified — and it is incomplete. Not every target
+ * screens: /api/guardrail, /api/score-iterate, /api/assessment/* and
+ * /api/baseline/agent are agent-facing and deliberately outside the perimeter.
+ *
+ * The first reading was that those are unreachable for a human, since each takes
+ * validateApiKey and would 401 a forwarded Supabase JWT. But createSyntheticRequest
+ * forwards BOTH `Authorization` AND `X-Api-Key` (skill-handler-map.ts:109-113), so
+ * a caller holding a session AND an agent credential — which /api/keys lets any
+ * signed-in user mint — authenticates as a human here and as an agent downstream.
+ * Their text reaches an unscreened LLM.
+ *
+ * Screening at the orchestrator closes that at the point the human principal is
+ * established, and makes the downstream question moot.
+ *
+ * Walks nested values because `input` is an arbitrary per-skill payload shape and
+ * a fixed field list would silently miss whichever skill is added next.
+ */
+function collectStepText(value: unknown, depth = 0, acc: unknown[] = []): unknown[] {
+  if (depth > 4 || acc.length >= 20) return acc
+  if (typeof value === 'string') { acc.push(value); return acc }
+  if (Array.isArray(value)) { for (const v of value) collectStepText(v, depth + 1, acc); return acc }
+  if (value && typeof value === 'object') {
+    for (const v of Object.values(value as Record<string, unknown>)) collectStepText(v, depth + 1, acc)
+  }
+  return acc
+}
 
 /**
  * POST /api/compose — Execute a chain of skills sequentially
@@ -36,6 +77,26 @@ export async function POST(request: NextRequest) {
   try {
     const startTime = Date.now()
     const body = await request.json()
+    // ── R20a perimeter (AC5; added 2026-08-18) ───────────────────────────────
+    // Runs BEFORE steps validation and before any handler is invoked, so no
+    // downstream skill sees the text until it has been screened here.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject(collectStepText(body?.steps)))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('skill')
+      }
+    }
+
     const {
       steps,
       stop_on_failure = true,
@@ -206,7 +267,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(envelope, { headers: corsHeaders() })
+    return NextResponse.json(
+      mildSupport ? { ...envelope, support_resources: mildSupport } : envelope,
+      { headers: corsHeaders() }
+    )
   } catch (error) {
     console.error('Compose API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -52,6 +59,7 @@ type ParsedExtension =
  * a diagnostic — nothing here produces a verdict (mentor #6).
  */
 function parseExtensionContent(body: Record<string, unknown>): ParsedExtension {
+  // (see extensionDistressSubject below — KEEP THE TWO FIELD LISTS IN SYNC)
   const situation = body.situation as string | undefined
   const current_circle = body.current_circle as string | undefined
   const extended_circle = body.extended_circle as string | undefined
@@ -187,6 +195,27 @@ async function readJsonBody(
  *   cosmopolitan_obligations (optional) — subset of justice | mutual_aid | honest_dealing (#15; humanity+ only)
  *   cosmopolitan_note        (optional) — what is owed / which obligations the action engages (#15)
  */
+/**
+ * The R20a subject for this route — every practitioner-authored field, RAW.
+ *
+ * ⚠ KEEP IN SYNC with parseExtensionContent's field list above.
+ * `current_circle` / `extended_circle` are the controlled circle vocabulary and
+ * are deliberately omitted; everything else on this exercise is prose.
+ *
+ * `cosmopolitan_note` is included: at the fourth circle the practitioner is
+ * writing about obligations to all rational beings, which is where someone
+ * working through isolation or despair is most likely to say so plainly.
+ */
+function extensionDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([
+    b.situation,
+    b.extended_reasoning,
+    b.assessment_shift,
+    b.cosmopolitan_note,
+  ])
+}
+
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
@@ -197,6 +226,29 @@ export async function POST(request: NextRequest) {
 
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+
+  // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ────────
+  // RULED IN 2026-08-17. This is the GATE-FREE member of the family — it runs
+  // no quality classifier at all ("not a diagnostic — it does not produce a
+  // verdict"), so this distress check is the ONLY classifier the route calls.
+  // That does not make it a diagnostic: it screens for crisis and produces no
+  // judgement about the practitioner's extension of concern.
+  let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  if (isR20aGapClosureEnabled()) {
+    const gate = await enforceDistressCheck(
+      detectDistressTwoStage(extensionDistressSubject(parsedBody.body))
+    )
+    if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+      return NextResponse.json({
+        distress_detected: true,
+        severity: gate.result.severity,
+        redirect_message: gate.result.redirect_message,
+      })
+    }
+    if (gate.result.severity === 'mild') {
+      mildSupport = buildMildSupportResources('practice')
+    }
+  }
 
   try {
     const parsed = parseExtensionContent(parsedBody.body)
@@ -224,7 +276,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save circle-extension entry' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, entry: data })
+    return NextResponse.json({
+      success: true,
+      entry: data,
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
+    })
   } catch (err) {
     console.error('Circle extension API error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -248,6 +304,24 @@ export async function PATCH(request: NextRequest) {
 
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+
+  // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ─────────────
+  let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  if (isR20aGapClosureEnabled()) {
+    const gate = await enforceDistressCheck(
+      detectDistressTwoStage(extensionDistressSubject(parsedBody.body))
+    )
+    if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+      return NextResponse.json({
+        distress_detected: true,
+        severity: gate.result.severity,
+        redirect_message: gate.result.redirect_message,
+      })
+    }
+    if (gate.result.severity === 'mild') {
+      mildSupport = buildMildSupportResources('practice')
+    }
+  }
 
   const id = typeof parsedBody.body.id === 'string' ? parsedBody.body.id : ''
   if (!id) {
@@ -287,7 +361,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Entry not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, entry: data })
+    return NextResponse.json({
+      success: true,
+      entry: data,
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
+    })
   } catch (err) {
     console.error('Circle extension PATCH error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

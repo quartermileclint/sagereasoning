@@ -6,6 +6,13 @@ import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { resolvePremeditatio } from '@/lib/practice-sequence'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -40,6 +47,7 @@ type ParsedContent =
 function parsePremeditatioContent(body: Record<string, unknown>): ParsedContent {
   const kind: PremeditKind =
     body.entry_kind === 'prepared_disposition' ? 'prepared_disposition' : 'weekly_reflection'
+  // (see premeditatioDistressSubject below — KEEP THE TWO FIELD LISTS IN SYNC)
   const anticipated_event = body.anticipated_event as string | undefined
   const false_impression = body.false_impression as string | undefined
   const correct_judgement = body.correct_judgement as string | undefined
@@ -158,6 +166,31 @@ function qualityGateBlock(kind: PremeditKind, isGeneric: boolean) {
  *
  * @gap Gap 3 — Premeditatio Scheduling (extended for Remaining Principles #7-human)
  */
+/**
+ * The R20a subject for this route — every practitioner-authored field, RAW.
+ *
+ * ⚠ KEEP IN SYNC with parsePremeditatioContent's field list above. Only the
+ * free-text fields appear here: `virtue_domain` and `avoidance_behaviour_tag`
+ * are controlled vocabularies, and composeDistressSubject would harmlessly
+ * include them, but listing them would imply a practitioner writes prose there.
+ *
+ * Premeditatio malorum asks someone to name the adversity they most fear and
+ * the false impression it carries. That is, by construction, the material most
+ * likely to arrive with real weight behind it.
+ */
+function premeditatioDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([
+    b.anticipated_event,
+    b.false_impression,
+    b.correct_judgement,
+    b.within_control,
+    b.outside_control,
+    b.virtue_response,
+    b.prepared_disposition,
+  ])
+}
+
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
@@ -168,6 +201,26 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ──────
+    // RULED IN 2026-08-17. Before parsePremeditatioContent, before the quality
+    // gate's LLM call, before the insert. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(premeditatioDistressSubject(body))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
 
     const parsed = parsePremeditatioContent(body)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
@@ -203,6 +256,7 @@ export async function POST(request: NextRequest) {
       entry: data,
       quality_gate: qualityGateBlock(parsed.kind, isGeneric),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Premeditatio API error:', err)
@@ -232,6 +286,41 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ───────────
+    // Screened before the id check and before either branch below.
+    //
+    // ⚠ DELIBERATE DEVIATION from the passion-log pattern, and the reason is
+    // recorded so a reviewer does not read it as a conditional bypass: this
+    // PATCH has TWO branches, and the second is metadata-only
+    // (behaviour_changed / linked_passion_event_id — a boolean and an id, no
+    // practitioner prose). detectDistressTwoStage falls through to a Haiku call
+    // whenever stage-1 regex finds nothing (r20a-classifier.ts:246), so running
+    // it unconditionally would put an LLM call and its latency behind every
+    // checkbox toggle.
+    //
+    // Gating on a NON-EMPTY composed subject adds no bypass. The subject is
+    // composed by US from the body, not from any caller-supplied flag: submit
+    // prose in any screened field and the subject is non-empty. The only way to
+    // write text past this is to write it into a field missing from the helper
+    // below — which is the KEEP-IN-SYNC risk that exists with or without this
+    // guard, not a new one it introduces.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    const patchSubject = premeditatioDistressSubject(body)
+    if (isR20aGapClosureEnabled() && patchSubject.length > 0) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(patchSubject))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { id } = body
 
     if (!id) {
@@ -269,6 +358,7 @@ export async function PATCH(request: NextRequest) {
         entry: data,
         quality_gate: qualityGateBlock(parsed.kind, isGeneric),
         ...(suggested ? { suggested_practice: suggested } : {}),
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       })
     }
 
@@ -291,7 +381,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, entry: data })
+    // The mild fold rides this branch too, and it is REACHABLE here — not
+    // defensive boilerplate. The branch is selected by `anticipated_event`
+    // being absent, NOT by the body being text-free: a PATCH carrying, say,
+    // `false_impression` without `anticipated_event` composes a non-empty
+    // subject, runs the check, and lands here.
+    return NextResponse.json({
+      success: true,
+      entry: data,
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
+    })
   } catch (err) {
     console.error('Premeditatio PATCH error:', err)
     logRouteError({ route: '/api/mentor/premeditatio', method: 'PATCH', error: err, statusCode: 500 })

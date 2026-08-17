@@ -22814,3 +22814,109 @@ unchanged** so a later refactor cannot silently reintroduce the loosening.
 `2026-08-17-mentor-ruling-M4-return-verbatim.md` (scoped, not overturned, by ruling 2),
 `D-R20A-GAP-CLOSURE-ACTIVATED-LIVE-PLUS-TWO-MORE-ROUTES-M4-MEAN-FLOOR-PR19-FOLDED`.
 Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-18 — D-R20A-EXHAUSTIVENESS-SWEEP-BUILT-PRACTICE-FAMILY-WIRED-EVALUATE-GATED
+
+**Decision:** Built the mentor-RULED exhaustiveness sweep (twice — the second time to a proxy-free
+predicate the day's second ruling required); wired **14 of 17** routes into the R20a perimeter
+including the **entire ruled practice family**; and **GATED `/api/evaluate` behind `requireAuth`**,
+closing an unauthenticated public free-text Stoic evaluator that six prior passes had missed.
+**Two mentor rulings adopted as binding**, one of them obtained during this session.
+
+**Tier: `code-critical`** (R20a perimeter, AC5; an auth change on a live route). **AC7 NOT engaged** —
+no Vercel/Supabase/flag/credential operation was performed; the AI performed no live op and no push.
+**PR19 NOT YET RUN — this work is NOT yet verified to the project's standard.**
+
+### 1. The sweep — the ruled prerequisite
+
+`website/src/lib/__tests__/r20a-invocation-guard.test.ts` gains a filesystem walk. The pre-existing
+battery was **purely additive** and said so in its own words ("This test is a reminder, not an
+automated check"), which is why the unprotected-route count had moved 2 → 4 → 6 → 8.
+
+**The predicate is deliberately PROXY-FREE** (write verb + reads caller input; no auth term, no
+content term). The 2026-08-18 ruling named authentication as a failed proxy. A content-matching
+predicate was then built and **MEASURED** rather than assumed — it **dropped three already-registered
+members** (`gap4`, `founder-facts`, `stoa`), which store free text without validating length or
+calling an LLM. A content regex is simply another proxy. The content judgement therefore moved OUT of
+the predicate and INTO 25 reasoned exclusion entries.
+
+### 2. Three defects in the pre-existing battery, found and closed
+
+- **A latent vacuous-pass class**: `stripComments` strips comments but not STRING LITERALS, so a route
+  quoting the AC5 pattern in prose passed the "calls it" assertion **without calling it**.
+  `founder/hub` proves such text exists here. Closed by `stripCommentsAndStringLiterals` + a new
+  per-route assertion. (The 2026-08-03 fold closed this for comments and left it open for strings.)
+- **`SUBSTRATE_GATE_ROUTES` omitted** from the registered set — invisible under the auth-based
+  predicate, would have flagged two genuine members under the new one. Found by rebuilding.
+- **Stale prose** at ~lines 432/446 ("20 route-level ... = 22 overall") vs the `>= 22` assertion.
+  NOT yet fixed — carried.
+
+### 3. Routes found that no prior pass could see
+
+| Route | Why it was invisible |
+|---|---|
+| `/api/evaluate` | **Unauthenticated** — free text in, `katorthoma_proximity` + improvement path out, zero screening |
+| `/api/execute` | Uses `getUser()` not `requireAuth`; forwards free text to unscreened agent handlers |
+| `/api/compose` | Author wrote an exclusion; the assertion written to DEFEND it refuted it |
+
+`createSyntheticRequest` forwards **both** `Authorization` and `X-Api-Key`, so a caller holding a
+session and an agent credential (mintable at `/api/keys`) reaches unscreened agent routes through
+either orchestrator. Both are now perimeter members.
+
+### 4. `/api/evaluate` — gated, per binding ruling
+
+The ruling resolved B3 toward **removing a surface from public availability** — the first time it has
+resolved that way. Gating was its first preference; tractability was verified first-hand (absent from
+`llms.txt`/`agent-card.json`/api-docs, so NOT a published R18 contract; no UI page calls it; its only
+coupling was a `next_steps` hint in `/api/skills`, updated in the same change). Screening was added
+only AFTER gating — the ruling forbids screening an unauthenticated surface as a standalone fix.
+
+### 5. Wiring — 14 of 17
+
+Full ruled practice family (`view-from-above`, `morning`, `premeditatio`, `hupexairesis`,
+`sage-compass`, `oikeiosis`, `oikeiosis/extension`), plus `evaluate`, both `journal-week`, both
+`baseline`, `compose`, `execute`. A third `buildMildSupportResources` variant **`'practice'`** was
+added under **founder-signed wording**.
+
+**REMAINING: `mentor-appendix`, `mentor-profile`, `founder/hub`;** 3 registrations
+(`ring-proof` ×2, `support/agent/proof` — they screen but the battery asserts nothing about them);
+registry + **both floors in the same edit (22 → 42 route-level)**; `npm run build`; **PR19**.
+
+### 6. Verification
+
+`tsc` **0 after every edit**. Boundary tests green: view-from-above 697/0, morning 635/0,
+premeditatio 712/0, hupexairesis 697/0, sage-compass **789/0** (the #14 `distance` constraint holds —
+crisis screening is not quality classification), oikeiosis 754/0. `premeditatio`'s boundary assertion
+was **rewritten** to express its stated intent rather than literal equality, mutation-verified in both
+directions with a byte-restored tree. **`npm run build` NOT yet run. PR19 NOT yet run.**
+
+### 7. Honest limits
+
+- **The battery is RED (20 unclassified) and that is correct** — registration is deliberately batched
+  with the floor bump per the file's own standing lesson. Do not push expecting green.
+- **`/limitations` is unchanged** and must stay so until the corrected sweep runs green — the ruling
+  requires the re-run explicitly.
+- **The perimeter is partially closed.** `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` is already live, so the
+  14 wired routes protect on deploy. Real protection; NOT the gap being handled.
+- **Author-rewrote-a-test-that-caught-him** — flagged for PR19 to disprove rather than confirm.
+
+### Carried, not fixed
+
+`mentor-appendix`'s `refinement: {}` ordering bypass (founder elected screen-only); `founder/hub`'s
+embedded knowledge block still briefing agent personas that the perimeter is "the 8 human-facing POST
+routes"; `/api/guardrail` membership (deferred founder election, 2026-06-19); M-4 obligations 1 and 4.
+
+**Rollback:** `git revert` this commit. No flag, schema, credential or deploy change was made, so
+nothing in production changes until the founder pushes; on push, the 14 wired routes begin screening
+because the flag is already live.
+
+**Rules served:** R20a, AC5, R18, PR6, PR15, PR17, PR19 (pending), PR20, PR23.
+
+**Status:** Adopted. Cross-references:
+`2026-08-18-mentor-ruling-unauthenticated-public-surface-verbatim.md`,
+`2026-08-18-unauthenticated-public-surface-perimeter-FOR-RULING.md`,
+`2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`,
+`operations/handoffs/founder/2026-08-18-perimeter-completion-CONTINUATION-PROMPT.md`.
+Weights BLOCKED; the P0 0h hold stands.

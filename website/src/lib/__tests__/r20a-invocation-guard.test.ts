@@ -652,6 +652,434 @@ for (const { route, flag } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
   assert(hasFlagCall === true, label)
 }
 
+// ===========================================================================
+// EXHAUSTIVENESS BACKSTOP — the filesystem sweep (added 2026-08-18)
+// ===========================================================================
+//
+// WHY THIS EXISTS. Everything above this line is PURELY ADDITIVE: it verifies
+// the routes someone remembered to register. It cannot see a route that was
+// never added. The block at "No human-facing POST route is missing from the
+// registry" says so in its own words — "This test is a reminder, not an
+// automated check."
+//
+// The consequence is on the record. The count of unprotected human-facing
+// free-text routes moved FOUR times in two sessions — 2 → 4 → 6 → 8 — and each
+// move came from a human re-reading a different slice of src/app/api by hand.
+// The eighth was found by a REVIEW of the sixth, and one surface inside it
+// (founder-facts PUT) was found by the builder while wiring the review's
+// finding. Even the review undercounted.
+//
+// RULED A PREREQUISITE, 2026-08-17. The mentor, verbatim: "A filesystem-level
+// sweep that produces a definitive count is a prerequisite for publishing
+// 'every time' honestly… The honest claim is only as strong as the
+// verification behind it." No coverage claim may be published in any form
+// until this sweep exists and passes. Recorded at
+// operations/trust-layer-2026-07/
+//   2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md
+//
+// HOW IT WORKS. Default-DENY. Walk every route.ts under src/app/api. Any route
+// that (a) calls requireAuth — a human principal — and (b) reads a request
+// body on a write verb must be EITHER a registered perimeter member above OR
+// carry an explicit, reasoned entry in PERIMETER_EXCLUSIONS below. There is no
+// third state. A new route of the same shape fails this battery until someone
+// makes a decision about it and writes the reason down.
+//
+// Over-inclusion is deliberate and is the safe direction, per the same ruling's
+// asymmetry argument: a false positive costs a line in an exclusion list; a
+// false negative costs a practitioner in acute distress writing into a surface
+// that does not notice.
+
+// ---------------------------------------------------------------------------
+// Hardened source stripper — comments AND string/template literals
+// ---------------------------------------------------------------------------
+//
+// ⚠ THIS IS STRICTLY STRONGER THAN stripComments() ABOVE, AND THE GAP IT CLOSES
+// IS REAL, NOT THEORETICAL.
+//
+// stripComments() removes comments only. Its docstring enumerates "known
+// corruption classes" and argues they all fail SAFE (a swallowed call goes
+// loudly red, never a vacuous pass). That argument is sound for the classes it
+// names — but it does not cover PROSE INSIDE A STRING LITERAL, which fails in
+// the UNSAFE direction: it ADDS matching text rather than removing it, so a
+// route that merely QUOTES the AC5 pattern inside a template literal satisfies
+// the "calls it" assertion WITHOUT CALLING IT.
+//
+// Such text exists in this codebase today. src/app/api/founder/hub/route.ts
+// carries an embedded knowledge block containing the literal string
+// "enforceDistressCheck(detectDistressTwoStage(...))" as documentation prose.
+// That route is not currently registered, so no live assertion is vacuous — but
+// register it (or any route like it) under the old stripper and the guard would
+// certify it as protected while it screened nothing.
+//
+// The 2026-08-03 ST3 fold closed exactly this class for COMMENTS. This closes
+// it for STRINGS. Both were found the same way: by mutation, not by reading.
+//
+// Blanking a template literal also blanks any ${...} interpolation inside it.
+// That is accepted: a real call site inside an interpolation would become
+// invisible and go LOUDLY RED, which is the safe direction.
+function stripCommentsAndStringLiterals(ts: string): string {
+  return stripComments(ts)
+    .replace(/`(?:\\[\s\S]|[^\\`])*`/g, '``')
+    .replace(/'(?:\\[\s\S]|[^\\'\n])*'/g, "''")
+    .replace(/"(?:\\[\s\S]|[^\\"\n])*"/g, '""')
+}
+
+// ---------------------------------------------------------------------------
+// The explicit exclusion list — every entry carries a first-hand reason
+// ---------------------------------------------------------------------------
+//
+// An entry here is a DECISION, not a default. Each was reached by reading the
+// route's own body-destructuring first-hand on 2026-08-18, not by inferring
+// from its name. Adding an entry to silence this battery without reading the
+// route is the one way to defeat it.
+interface PerimeterExclusion {
+  readonly route: string
+  readonly reason: string
+}
+
+const AGENT_FACING =
+  'AGENT-FACING BY DESIGN — credential-authenticated (sr_* via validateApiKey / ' +
+  'validatePracticeCredential), not a human session. Agent surfaces do not carry human free text; ' +
+  'this is the standing recorded AC5 class, not a per-route judgement. A human reaching this ' +
+  'endpoint would need an agent credential, and the human-facing twin of each such surface is ' +
+  'itself a perimeter member. '
+
+const OPERATOR_ONLY =
+  'OPERATOR/ADMIN SURFACE — not reachable by a practitioner. Gated to the founder or an admin ' +
+  'identity, and its payload is configuration or credential metadata rather than anything a ' +
+  'person writes about their own life. '
+
+const PERIMETER_EXCLUSIONS: readonly PerimeterExclusion[] = [
+  // ── Agent-facing: credential-authenticated, never a human session ─────────
+  {
+    route: 'src/app/api/accreditation/[agent_id]/route.ts',
+    reason: AGENT_FACING + 'Accreditation write boundary; payload is a signed assessment chain.',
+  },
+  {
+    route: 'src/app/api/assessment/foundational/route.ts',
+    reason: AGENT_FACING + 'Body is { agent_id, responses } — an agent’s own structured assessment answers.',
+  },
+  {
+    route: 'src/app/api/assessment/full/route.ts',
+    reason: AGENT_FACING + 'Body is { agent_id, responses } — same class as its foundational sibling.',
+  },
+  {
+    route: 'src/app/api/baseline/agent/route.ts',
+    reason: AGENT_FACING + 'The agent baseline; its human twin /api/mentor-baseline-response IS a member.',
+  },
+  {
+    route: 'src/app/api/score-iterate/route.ts',
+    reason:
+      AGENT_FACING +
+      'Chain-revision surface (chain_id, action, revised_action, revision_rationale) — an agent ' +
+      'reconsidering its own prior action, not a person disclosing their situation.',
+  },
+  {
+    route: 'src/app/api/stoa/declare/route.ts',
+    reason:
+      AGENT_FACING +
+      'ST4, a RECORDED design decision: its free text (what_i_bring / what_i_seek) is AGENT-authored ' +
+      'over a credential-authenticated call. Its human twin /api/mentor/stoa IS a perimeter member.',
+  },
+  {
+    route: 'src/app/api/guardrail/route.ts',
+    reason:
+      AGENT_FACING +
+      '⚠ AND SEPARATELY RECORDED: whether the guardrail should join the human-distress perimeter is ' +
+      'a DEFERRED FOUNDER ELECTION from the 2026-06-19 ADR-009 port, not an oversight. It is named ' +
+      'here so a future reader does not read the omission as one. Reachable by a human only through ' +
+      '/api/compose or /api/execute — both of which are now perimeter members and screen first.',
+  },
+
+  // ── Operator / admin surfaces ────────────────────────────────────────────
+  {
+    route: 'src/app/api/admin/accreditation-credentials/route.ts',
+    reason: OPERATOR_ONLY + 'Credential minting and revocation.',
+  },
+  {
+    route: 'src/app/api/admin/api-keys/route.ts',
+    reason:
+      OPERATOR_ONLY +
+      'Body is limits and flags (is_active, suspended_reason, monthly_limit, daily_limit, tier, notes).',
+  },
+  {
+    route: 'src/app/api/admin/plugin-install-credentials/route.ts',
+    reason: OPERATOR_ONLY + 'Per-install credential minting.',
+  },
+  {
+    route: 'src/app/api/admin/stoa-trust-flag/route.ts',
+    reason: OPERATOR_ONLY + 'Curator trust-flag administration over existing Stoa rows.',
+  },
+  {
+    route: 'src/app/api/calling/approve/route.ts',
+    reason:
+      OPERATOR_ONLY +
+      'Approval authority is ADMIN ONLY by founder election (2026-05-21, the ADMIN_USER_ID gate).',
+  },
+  {
+    route: 'src/app/api/internal/retrieve/route.ts',
+    reason: OPERATOR_ONLY + 'Checks user.id === ADMIN_USER_ID explicitly before doing any work.',
+  },
+  {
+    route: 'src/app/api/substrate/layer3/route.ts',
+    reason:
+      OPERATOR_ONLY +
+      'Layer-3 per-consumer rendering, DARK: SUBSTRATE_LAYER3_ENABLED is unset so the route 503s. ' +
+      'Ruled OUT of launch scope at S7 and re-affirmed by Ruling Set D (2026-08-15).',
+  },
+  {
+    route: 'src/app/api/analytics/route.ts',
+    reason:
+      'TELEMETRY INGEST — the payload is a validated analytics event shape, and the caller IP is ' +
+      'hashed rather than stored. No practitioner prose field exists on it at all.',
+  },
+
+  // ── Human-authenticated, but structured input only ───────────────────────
+  {
+    route: 'src/app/api/baseline/route.ts',
+    reason:
+      'Structured selections only. `answers` is validated as exactly 5 answer IDs ' +
+      '(`answers.length !== 5` → 400) and `q6_answer` is a structured tie-break fed to ' +
+      'applyQ6(). No free-text field, and nothing typed reaches an LLM. NOTE the contrast ' +
+      'with /api/mentor-baseline-response, which IS a member — that route takes the ' +
+      'practitioner’s written responses; this one takes their choices.',
+  },
+  {
+    route: 'src/app/api/billing/checkout/route.ts',
+    reason: 'Payment intent only: `type` (enum) and `amount` (numeric, clamped 100–100000). No text field.',
+  },
+  {
+    route: 'src/app/api/billing/tidings/route.ts',
+    reason: 'Payment intent only: `recurring` (boolean) and `amount` (numeric, clamped 1–1000). No text field.',
+  },
+  {
+    route: 'src/app/api/keys/route.ts',
+    reason:
+      'Credential management: `label` (a short operator-chosen credential name) and `key_id`. ' +
+      'Not an examination surface — the label is stored as metadata and never reaches an LLM ' +
+      'or any scoring path.',
+  },
+  {
+    route: 'src/app/api/patterns/route.ts',
+    reason: 'Query parameters only: `agent_id`, `since`, `limit`. Read-shaped; no authored content.',
+  },
+  {
+    route: 'src/app/api/receipts/route.ts',
+    reason: 'Structured artifacts only: `receipt`, `agent_id`, `chain_id`. No practitioner-authored prose.',
+  },
+  {
+    route: 'src/app/api/user/delete/route.ts',
+    reason:
+      'Data-rights deletion. The only body field is `confirm`, compared against the literal ' +
+      'string "DELETE". No free text is accepted at all.',
+  },
+
+  // ── Reasoned exclusions: free text present, but screened elsewhere or
+  //    constrained to a non-examination allow-list ───────────────────────────
+  {
+    route: 'src/app/api/user/rectify/route.ts',
+    reason:
+      'GDPR rectification, constrained by an allow-list (see lib/rectifiable-fields.ts: ' +
+      'display_name, city, country). Values are short profile identifiers, not examination ' +
+      'content, and reach no LLM and no scoring path. A practitioner does not work through ' +
+      'distress in a city field.',
+  },
+  {
+    route: 'src/app/api/update-location/route.ts',
+    reason:
+      'Human-authenticated (via supabase.auth.getUser, NOT requireAuth) but structured only: ' +
+      '{ city, country, latitude, longitude, show_on_map } — two short place identifiers, two ' +
+      'numbers and a boolean, reaching no LLM. ⚠ WORTH NOTING FOR THE PREDICATE, NOT FOR THE ' +
+      'PERIMETER: this route is invisible to any requireAuth-based predicate, which is the same ' +
+      'proxy failure the 2026-08-18 ruling names, arriving from the opposite direction — a human ' +
+      'surface the old predicate could not see. It is excluded on CONTENT, not on auth.',
+  },
+  {
+    route: 'src/app/api/deliberation-chain/[id]/conclude/route.ts',
+    reason:
+      'Concludes an existing chain identified by the PATH parameter. It reads the body defensively ' +
+      'with `.catch(() => ({}))` and destructures no free-text field from it; the operative input ' +
+      'is the chain id from params. No practitioner prose is accepted or stored.',
+  },
+
+  // ⚠ /api/compose AND /api/execute WERE DRAFTED AS EXCLUSIONS HERE AND ARE NOT
+  // ONE. The reason they moved is recorded because the mistake is instructive.
+  //
+  // /api/execute is /api/compose's twin — same SKILL_HANDLER_MAP, same
+  // createSyntheticRequest forwarding, human-authenticated via
+  // supabase.auth.getUser, taking { skill_id, input } where `input` carries the
+  // practitioner's text. It screened nothing. It was invisible to the ORIGINAL
+  // auth-based predicate because it uses getUser() rather than requireAuth, and
+  // it surfaced the moment that predicate was rebuilt — which is the ruling's
+  // point about proxies, demonstrated a second time within the hour.
+  //
+  // The drafted reason argued compose "delegates rather than receives": its
+  // free text is `step.input`, forwarded via SKILL_HANDLER_MAP, and that map
+  // imports each route's OWN exported POST — so a screened target screens
+  // exactly as it does over HTTP. That much is true and was verified first-hand.
+  //
+  // It is also incomplete, and the assertion written to PROVE it is what
+  // exposed the hole. Not every SKILL_HANDLER_MAP target screens: /api/guardrail,
+  // /api/score-iterate, /api/assessment/foundational and /api/baseline/agent are
+  // agent-facing and deliberately outside the perimeter. The first reading was
+  // that this is unreachable for a human, since those routes take validateApiKey
+  // (an sr_* credential) and would 401 a forwarded Supabase JWT. But
+  // createSyntheticRequest forwards BOTH `Authorization` AND `X-Api-Key`
+  // (skill-handler-map.ts:109-113), so a caller holding a session AND an agent
+  // credential — which /api/keys lets any signed-in user mint — is authenticated
+  // as a human at compose and as an agent downstream. Their free text reaches an
+  // unscreened LLM.
+  //
+  // Screening at compose closes the class at the point the human principal is
+  // established, and makes every downstream question moot. It is therefore a
+  // PERIMETER MEMBER (see HUMAN_FACING_POST_ROUTES), not an exclusion, and the
+  // SKILL_HANDLER_MAP invariant that guarded the drafted exclusion has been
+  // removed with it — it existed only to defend a premise no longer being made.
+  // Removed because it became unnecessary, NOT because it was failing.
+]
+
+// ---------------------------------------------------------------------------
+// The walk
+// ---------------------------------------------------------------------------
+const API_ROOT = path.join(websiteRoot, 'src', 'app', 'api')
+
+function walkApiRoutes(dir: string, acc: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir)) {
+    const full = path.join(dir, entry)
+    if (fs.statSync(full).isDirectory()) walkApiRoutes(full, acc)
+    else if (entry === 'route.ts') {
+      acc.push(path.relative(websiteRoot, full).split(path.sep).join('/'))
+    }
+  }
+  return acc
+}
+
+// ---------------------------------------------------------------------------
+// THE PREDICATE — deliberately proxy-free (RULED 2026-08-18)
+// ---------------------------------------------------------------------------
+//
+// In scope = a write verb + reads caller-supplied input. That is ALL. No
+// authentication term, no content term, no heuristic of any kind.
+//
+// ⚠ THE FIRST VERSION OF THIS PREDICATE REQUIRED `requireAuth`, AND THE MENTOR
+// RULED THAT OUT BY NAME:
+//
+//   "The predicate should be rebuilt to match on human-facing content — free
+//    text input, natural language output, philosophical evaluation — rather
+//    than on authentication status. Authentication is a proxy for human-facing,
+//    and this surface demonstrates the proxy fails."
+//   (2026-08-18-mentor-ruling-unauthenticated-public-surface-verbatim.md)
+//
+// The surface that demonstrated it was /api/evaluate: unauthenticated, free
+// text in, Stoic evaluation out, no screening — invisible to six consecutive
+// passes because all six assumed human-facing implied authenticated.
+//
+// WHY NOT A CONTENT-MATCHING PREDICATE, WHICH IS WHAT THE RULING LITERALLY
+// DESCRIBES. It was built and MEASURED first, not assumed: matching on
+// `validateTextLength || TEXT_LIMITS || an LLM call` produced a predicate that
+// MISSED THREE ALREADY-REGISTERED MEMBERS — mentor/gap4, private/founder-facts,
+// and mentor/stoa — because each stores practitioner free text without
+// validating its length and without calling an LLM. Shipping it would have
+// silently stopped guarding three live perimeter members.
+//
+// So a content regex is simply another proxy, and it failed the superset check
+// on first contact. The ruling's PURPOSE — that no proxy stands between the
+// sweep and the truth — is served by removing the proxy entirely and moving the
+// content judgement OUT of the predicate, where it fails silently, and INTO
+// PERIMETER_EXCLUSIONS, where every call is written down, reasoned, and
+// reviewable. That is what "the honest claim is only as strong as the
+// verification behind it" asks for.
+//
+// The cost is a longer exclusion list. That cost is the point.
+//
+// `searchParams`/`formData` are included alongside a JSON body because caller
+// text does not have to arrive as JSON, and a predicate that assumed it did
+// would be one more proxy.
+function isInScopeForPerimeter(code: string): boolean {
+  const readsCallerInput =
+    /await\s+(?:request|req)\s*\.\s*json\s*\(/.test(code) ||
+    /searchParams/.test(code) ||
+    /formData/.test(code)
+  const hasWriteVerb = /export\s+async\s+function\s+(?:POST|PUT|PATCH|DELETE)\b/.test(code)
+  return readsCallerInput && hasWriteVerb
+}
+
+const allApiRoutes = walkApiRoutes(API_ROOT)
+
+// BOTH registries count as registered. The substrate-gate routes (/api/calling,
+// /api/practice/reflect) are perimeter members via enforceLayer2R20aGate rather
+// than the route-level pattern, and they are agent-credentialed — so under the
+// OLD auth-based predicate they were out of scope and this omission was
+// invisible. Under the proxy-free predicate they come into scope, and building
+// this set from HUMAN_FACING_POST_ROUTES alone would flag two genuine perimeter
+// members as unclassified. Found by rebuilding the predicate, not by review.
+const registeredRoutes = new Set<string>([
+  ...HUMAN_FACING_POST_ROUTES,
+  ...SUBSTRATE_GATE_ROUTES.map((e) => e.route),
+])
+const excludedRoutes = new Set<string>(PERIMETER_EXCLUSIONS.map((e) => e.route))
+
+const inScopeRoutes = allApiRoutes.filter((r) =>
+  isInScopeForPerimeter(stripCommentsAndStringLiterals(fs.readFileSync(path.join(websiteRoot, r), 'utf-8')))
+)
+
+// ── Non-vacuity floors ─────────────────────────────────────────────────────
+// A sweep that silently walks nothing reports zero violations and looks green.
+// These floors make a broken walk, a moved directory, or an over-narrow
+// predicate fail LOUDLY instead. Counts observed 2026-08-18: 124 route files,
+// 48 in scope. Floors sit below the observed values so ordinary growth does not
+// trip them, but a collapse does.
+{
+  const label = 'R20a Exhaustiveness Backstop: the walk is non-vacuous'
+  assert(allApiRoutes.length >= 100, `${label} (>=100 route.ts files found; got ${allApiRoutes.length})`)
+  assert(inScopeRoutes.length >= 40, `${label} (>=40 in-scope routes; got ${inScopeRoutes.length})`)
+}
+
+// ── The predicate must be a SUPERSET of the existing registry ──────────────
+// If a route someone deliberately registered does not match the in-scope
+// predicate, the predicate is too narrow and the sweep would miss its
+// look-alikes. Verified passing 2026-08-18 with zero misses.
+for (const routePath of HUMAN_FACING_POST_ROUTES) {
+  const label = `R20a Exhaustiveness Backstop: registered route ${routePath} matches the in-scope predicate (predicate is not too narrow)`
+  const code = stripCommentsAndStringLiterals(
+    fs.readFileSync(path.join(websiteRoot, routePath), 'utf-8')
+  )
+  assert(isInScopeForPerimeter(code) === true, label)
+}
+
+// ── THE BACKSTOP ITSELF ────────────────────────────────────────────────────
+for (const routePath of inScopeRoutes) {
+  const label = `R20a Exhaustiveness Backstop: ${routePath} is either a registered perimeter member or an explicitly reasoned exclusion`
+  const known = registeredRoutes.has(routePath) || excludedRoutes.has(routePath)
+  assert(known === true, label)
+}
+
+// ── The exclusion list must not rot ────────────────────────────────────────
+for (const { route, reason } of PERIMETER_EXCLUSIONS) {
+  const label = `R20a Exhaustiveness Backstop: exclusion ${route}`
+  assert(fs.existsSync(path.join(websiteRoot, route)) === true, `${label} (file still exists — stale exclusion)`)
+  assert(registeredRoutes.has(route) === false, `${label} (not ALSO registered — contradictory state)`)
+  assert(reason.trim().length >= 60, `${label} (carries a substantive reason, not a placeholder)`)
+}
+
+// ── Every registered route survives the HARDENED stripper ──────────────────
+// Closes the string-literal vacuous-pass class described above. The existing
+// assertions use stripComments(); this repeats the call check under
+// stripCommentsAndStringLiterals(). A route that only QUOTES the pattern in
+// prose passes there and fails HERE.
+for (const routePath of HUMAN_FACING_POST_ROUTES) {
+  const label = `R20a Exhaustiveness Backstop: ${routePath} calls the AC5 pattern in REAL CODE, not in a string literal`
+  const hardened = stripCommentsAndStringLiterals(
+    fs.readFileSync(path.join(websiteRoot, routePath), 'utf-8')
+  )
+  const bodySource = hardened
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('import '))
+    .join('\n')
+  assert(bodySource.includes(REQUIRED_GATE_FUNCTION) === true, `${label} (${REQUIRED_GATE_FUNCTION})`)
+  assert(bodySource.includes(REQUIRED_FUNCTION) === true, `${label} (${REQUIRED_FUNCTION})`)
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed')
 if (failed > 0) {
   console.error('\nFailures:')

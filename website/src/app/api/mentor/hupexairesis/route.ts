@@ -6,6 +6,28 @@ import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { resolveHupexairesis } from '@/lib/practice-sequence'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
+
+/**
+ * The R20a subject for this route — every practitioner-authored field, RAW.
+ *
+ * ⚠ KEEP IN SYNC with parseReserveContent's field list below.
+ *
+ * The reserve clause asks what outcome someone is pursuing and how they will
+ * meet its loss. "Prepared response" is where a practitioner writes what they
+ * would do if the thing they want most does not happen — which is exactly the
+ * sentence an acute disclosure arrives inside.
+ */
+function reserveDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([b.outcome_pursued, b.prepared_response, b.action_context])
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -84,6 +106,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ──────
+    // RULED IN 2026-08-17. Before parseReserveContent, before the separation
+    // gate's LLM call, before the insert. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(reserveDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const parsed = parseReserveContent(body)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
@@ -117,6 +157,7 @@ export async function POST(request: NextRequest) {
       entry: data,
       quality_gate: separationBlock(separates),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Reserve clause API error:', err)
@@ -144,6 +185,25 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ───────────
+    // A revision carries the same free text. Before the id check, before
+    // parseReserveContent, before the LLM call.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(reserveDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { id } = body
 
     if (!id) {
@@ -183,6 +243,7 @@ export async function PATCH(request: NextRequest) {
       entry: data,
       quality_gate: separationBlock(separates),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Reserve clause PATCH error:', err)

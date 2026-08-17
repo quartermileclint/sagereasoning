@@ -4,6 +4,32 @@ import { checkRateLimit, RATE_LIMITS, validateApiKey, corsHeaders, corsPreflight
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById } from '@/lib/skill-registry'
 import { SKILL_HANDLER_MAP, createSyntheticRequest } from '@/lib/skill-handler-map'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
+
+/**
+ * The R20a subject for this orchestrator — every string inside the caller's
+ * `input` payload, at any depth.
+ *
+ * Identical in purpose to /api/compose's collectStepText: `input` is an
+ * arbitrary per-skill shape, so a fixed field list would miss whichever skill
+ * is added next. See that route's header for the full reasoning on why an
+ * orchestrator that only delegates still needs its own screen.
+ */
+function collectExecuteText(value: unknown, depth = 0, acc: unknown[] = []): unknown[] {
+  if (depth > 4 || acc.length >= 20) return acc
+  if (typeof value === 'string') { acc.push(value); return acc }
+  if (Array.isArray(value)) { for (const v of value) collectExecuteText(v, depth + 1, acc); return acc }
+  if (value && typeof value === 'object') {
+    for (const v of Object.values(value as Record<string, unknown>)) collectExecuteText(v, depth + 1, acc)
+  }
+  return acc
+}
 
 /**
  * POST /api/execute — Unified Skill Execution Router
@@ -69,6 +95,39 @@ export async function POST(request: NextRequest) {
   try {
     const startTime = Date.now()
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18) ───────────────────────────────
+    // Runs before skill resolution and before any handler is invoked.
+    //
+    // ⚠ SCREENED ON THE HUMAN BRANCH ONLY, deliberately. This route has a DUAL
+    // auth path (see above): `authedUser` is a human Supabase session, `apiKey`
+    // is an agent credential. The R20a perimeter exists for human-facing
+    // surfaces — every agent-facing route in this codebase is outside it by
+    // recorded design — so screening an agent's payload would add a Haiku call
+    // and its latency to a class the perimeter does not cover.
+    //
+    // This is NOT a bypass a caller can choose: `authedUser` is resolved from a
+    // verified Supabase JWT above, not from anything in the body. A human
+    // cannot present as an agent without holding an agent credential, and a
+    // caller who holds one and uses it is, by this codebase's own definition,
+    // making an agent call.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled() && authedUser) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject(collectExecuteText(body?.input)))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('skill')
+      }
+    }
+
     let { skill_id, input: skillInput } = body
 
     // ── Intelligent routing: classify input to determine skill ────
@@ -131,7 +190,11 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      return NextResponse.json(envelope, { headers: corsHeaders() })
+      // Success path 1 of 2 — the intelligent-routing branch.
+      return NextResponse.json(
+        mildSupport ? { ...envelope, support_resources: mildSupport } : envelope,
+        { headers: corsHeaders() }
+      )
     }
 
     // ── Explicit routing: skill_id provided ──────────────────────
@@ -180,7 +243,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(envelope, { headers: corsHeaders() })
+    // Success path 2 of 2 — the explicit skill_id branch.
+    return NextResponse.json(
+      mildSupport ? { ...envelope, support_resources: mildSupport } : envelope,
+      { headers: corsHeaders() }
+    )
   } catch (error) {
     console.error('Execute API error:', error)
     return NextResponse.json(

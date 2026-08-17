@@ -3,7 +3,14 @@ import Anthropic from '@anthropic-ai/sdk'
 import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, validateTextLength, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, requireAuth, validateTextLength, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
@@ -16,11 +23,17 @@ const client = new Anthropic({
 
 
 /**
- * POST /api/evaluate — No-auth instant demo endpoint
+ * POST /api/evaluate — authenticated quick-evaluation endpoint
  *
- * Outcome: Try sage-reason instantly — no signup, no API key. Returns a
- *          quick-depth (core triad) evaluation of any decision input.
- * Cost + Speed: Free, ~2s. Rate-limited to prevent abuse.
+ * ⚠ WAS a no-auth public demo until 2026-08-18. Gated by binding mentor ruling
+ * (see the block inside POST for the full reasoning and the verbatim record).
+ * The "no signup, no API key" framing below is HISTORICAL and is retained only
+ * so the change is legible; it no longer describes the route.
+ *
+ * Outcome: Returns a quick-depth (core triad) evaluation of a decision input,
+ *          to an AUTHENTICATED practitioner. Screened by the R20a perimeter.
+ * Cost + Speed: ~2s. Rate-limited at the stricter setting inherited from its
+ *          unauthenticated period, deliberately.
  * Chains To: /api/reason (with auth for deeper analysis)
  *
  * This endpoint exists to let developers and agents experience sage-reason
@@ -80,15 +93,75 @@ Return ONLY valid JSON:
 }`
 
 export async function POST(request: NextRequest) {
-  // Rate limiting (stricter for no-auth)
+  // Rate limiting (retained from the pre-gating configuration — see below)
   const rateLimitError = checkRateLimit(request, EVALUATE_RATE_LIMIT)
   if (rateLimitError) return rateLimitError
 
-  // No authentication required
+  // ── AUTHENTICATION — ADDED 2026-08-18 BY BINDING MENTOR RULING ────────────
+  //
+  // This route was UNAUTHENTICATED. It accepted free text from anonymous
+  // visitors and returned a katorthoma_proximity rating, a philosophical
+  // reflection and an improvement path, with no distress screening of any kind.
+  //
+  // It was invisible to six consecutive passes over the perimeter — five by
+  // hand, one by the automated sweep — because every one of them assumed a
+  // human-facing surface is an authenticated surface. It was found only when
+  // the sweep's own predicate was tested for that assumption.
+  //
+  // THE RULING (2026-08-18-mentor-ruling-unauthenticated-public-surface-
+  // verbatim.md) resolved the B3 asymmetry argument toward REMOVING the surface
+  // from public availability rather than adding it to the perimeter — the first
+  // time B3 has resolved that way:
+  //
+  //   "A Stoic evaluation returned to an anonymous person in crisis is not
+  //    neutral. A proximity rating and an improvement path, returned to someone
+  //    who has typed the worst thing in their life into an evaluator, is a
+  //    response that presupposes the person is in a position to receive
+  //    philosophical guidance. That presupposition may be false in exactly the
+  //    cases where it matters most."
+  //
+  // Gating was the ruling's FIRST preference, with retirement as the fallback
+  // "if gating is not immediately tractable". Tractability was checked
+  // first-hand: this route is absent from llms.txt, agent-card.json and
+  // api-docs (NOT a published R18 contract) and no UI page calls it. Its only
+  // coupling was a next_steps hint in /api/skills, updated in the same change.
+  //
+  // ⚠ DO NOT REVERT THIS TO AN UNAUTHENTICATED DEMO. The ruling anticipated the
+  // argument: "If the demo purpose requires unauthenticated access, that purpose
+  // should be reconsidered — a demo that requires no account is a demo that
+  // cannot support anyone it reaches."
+  //
+  // The rate limit above is deliberately left at its stricter no-auth setting.
+  // It costs an authenticated caller nothing, and loosening it is a separate
+  // decision from the one this ruling made.
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
 
   try {
     const startTime = Date.now()
     const { input } = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18, in the SAME change as gating) ──
+    // The ruling is explicit that screening an UNAUTHENTICATED endpoint was NOT
+    // an acceptable standalone fix — "the screening would be doing the minimum
+    // while the more important question goes unanswered." Screening becomes
+    // appropriate only once the surface is authenticated, at which point it is
+    // added "on the same terms as the five score routes it twins", which is
+    // what this is. Runs before field validation and before the LLM call.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(composeDistressSubject([input])))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('skill')
+      }
+    }
 
     // Validate required input
     if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -142,7 +215,14 @@ Return only the JSON evaluation object.`
         },
       }).then(() => {})
 
-      return NextResponse.json(envelope, { headers: publicCorsHeaders() })
+      // The mild fold rides the CACHE-HIT path too. The cache is keyed on the
+      // input, so a mild-severity input that has been seen before still reaches
+      // this branch — omitting it here would drop crisis resources for exactly
+      // the second and subsequent practitioners to write the same thing.
+      return NextResponse.json(
+        mildSupport ? { ...envelope, support_resources: mildSupport } : envelope,
+        { headers: publicCorsHeaders() }
+      )
     }
 
     const message = await client.messages.create({
@@ -224,7 +304,10 @@ Return only the JSON evaluation object.`
       },
     }).then(() => {}) // Fire-and-forget
 
-    return NextResponse.json(envelope, { headers: publicCorsHeaders() })
+    return NextResponse.json(
+      mildSupport ? { ...envelope, support_resources: mildSupport } : envelope,
+      { headers: publicCorsHeaders() }
+    )
   } catch (error) {
     console.error('Evaluate API error:', error)
 

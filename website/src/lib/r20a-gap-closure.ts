@@ -371,7 +371,7 @@ export interface MildSupportResources {
 }
 
 /**
- * Two variants, because one wording cannot serve both families honestly.
+ * THREE variants, because one wording cannot serve these families honestly.
  *
  * 'passion' — for passion-classify / passion-log. Must reassure the
  * practitioner that the examination itself was not the problem. These tools
@@ -379,17 +379,36 @@ export interface MildSupportResources {
  * that reads as a reprimand for having answered honestly would undo the thing
  * the tool exists to do. Mirrors /impulse's reasoning for the same reason.
  *
- * 'skill' — for sage-classify / sage-prioritise. These are decision-support
- * surfaces; there is no examination to reassure anyone about, and pretending
- * otherwise would be a non-sequitur to someone who came to prioritise a
- * backlog. Neutral, brief, non-presumptuous.
+ * 'practice' — ADDED 2026-08-18 with the Remaining-Principles perimeter
+ * closure, under founder sign-off on the exact wording. Serves the practice
+ * family (premeditatio, hupexairesis, oikeiosis + extension, view-from-above,
+ * morning, sage-compass) and the mentor-examination surfaces (mentor-appendix,
+ * both journal-week routes, both baseline routes, mentor-profile).
  *
- * The RESOURCE DATA in both comes from the shared getCrisisResources() source
- * of truth, so a founder edit to the resource list propagates with no code
- * change here.
+ *   WHY IT IS NOT 'passion': these are examinations, so the reassurance is
+ *   owed — but the practitioner has usually examined no passion at all. Telling
+ *   someone who just wrote a morning preparation or a sage-compass bearing that
+ *   "examining a passion is not the same as being ruled by one" describes
+ *   something they did not do. The reassurance has to be true of the exercise
+ *   actually performed.
+ *
+ *   WHY IT IS NOT 'skill': /view-from-above exists to help someone reframe
+ *   catastrophic loss. The mentor named it the clearest case in the family —
+ *   "that is the wrong configuration" — and answering a grief disclosure in
+ *   decision-support register would be its own small failure.
+ *
+ * 'skill' — for sage-classify / sage-prioritise, /api/compose and
+ * /api/founder/hub. These are decision-support and orchestration surfaces;
+ * there is no examination to reassure anyone about, and pretending otherwise
+ * would be a non-sequitur to someone who came to prioritise a backlog or chain
+ * two skill steps. Neutral, brief, non-presumptuous.
+ *
+ * The RESOURCE DATA in all three comes from the shared getCrisisResources()
+ * source of truth, so a founder edit to the resource list propagates with no
+ * code change here.
  */
 export function buildMildSupportResources(
-  variant: 'passion' | 'skill'
+  variant: 'passion' | 'practice' | 'skill'
 ): MildSupportResources {
   const resources = getCrisisResources()
   const resourceList = resources.resources
@@ -398,10 +417,20 @@ export function buildMildSupportResources(
     )
     .join('\n')
 
+  // FOUNDER-SIGNED WORDING. Each string below was approved verbatim before it
+  // shipped ('passion' + 'skill' 2026-08-17; 'practice' 2026-08-18). Do not
+  // reword any of them without founder sign-off on the exact replacement text —
+  // this is crisis-adjacent copy shown to a practitioner the classifier has
+  // just flagged.
   const opening =
     variant === 'passion'
       ? `Your entry is saved, and naming this plainly was the right thing to do — ` +
         `examining a passion is not the same as being ruled by one. ` +
+        `Some of what you wrote sounds like it may be weighing on you beyond this exercise, ` +
+        `so the support below is here if any of it reflects your situation right now.`
+      : variant === 'practice'
+      ? `Your entry is saved, and working through this deliberately was the right thing to do — ` +
+        `examining something difficult is not the same as being overcome by it. ` +
         `Some of what you wrote sounds like it may be weighing on you beyond this exercise, ` +
         `so the support below is here if any of it reflects your situation right now.`
       : `Some of what you wrote sounds like it may be weighing on you beyond this task. ` +

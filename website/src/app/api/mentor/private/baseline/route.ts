@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
@@ -77,6 +84,30 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
+    // ── R20a perimeter (AC5; added 2026-08-18) ───────────────────────────────
+    // The private twin of /api/mentor-baseline, screened identically. Its own
+    // response twin (/api/mentor/private/baseline-response) joined the
+    // perimeter at the 2026-08-17 gap closure.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([body?.profile_summary]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { profile_summary } = body
 
     if (!profile_summary || typeof profile_summary !== 'string') {
@@ -116,6 +147,7 @@ export async function POST(request: NextRequest) {
         mentor_mode: 'private',
         usage_note: 'Present these questions to the practitioner after journal extraction. Their answers refine the MentorProfile before the mentor journey begins.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { headers: corsHeaders() }
     )

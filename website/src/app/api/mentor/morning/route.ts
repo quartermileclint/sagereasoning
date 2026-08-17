@@ -5,9 +5,37 @@ import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+/**
+ * The R20a subject for this route — every practitioner-authored field, RAW.
+ *
+ * ⚠ KEEP IN SYNC with parseMorningContent's field list. A field added there and
+ * not here is a field distress can be written into unseen.
+ *
+ * Morning preparation looks like the calmest surface in the family, which is
+ * exactly why it is screened: "what impressions do you expect today, and which
+ * will tempt hasty assent" is an invitation to name what the practitioner is
+ * dreading, and someone in acute distress does not schedule it for the tools
+ * designed to receive it.
+ */
+function morningDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([
+    b.roles_active,
+    b.expected_impressions,
+    b.prepared_virtue_response,
+  ])
+}
 
 // The quality-gate classification. The LLM is restricted to producing one of
 // these two values (a pure classification of the prepared virtue response's
@@ -108,6 +136,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ──────
+    // RULED IN 2026-08-17. Runs before parseMorningContent, before the LLM
+    // classification, and before the insert. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(morningDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const parsed = parseMorningContent(body)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
@@ -140,6 +186,7 @@ export async function POST(request: NextRequest) {
       success: true,
       entry: data,
       quality_gate: preparationBlock(quality),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Morning preparation API error:', err)
@@ -167,6 +214,25 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ───────────
+    // A revision carries the same free text. Screened before the id check,
+    // before parseMorningContent, and before the LLM call.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(morningDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { id } = body
 
     if (!id) {
@@ -206,6 +272,7 @@ export async function PATCH(request: NextRequest) {
       success: true,
       entry: data,
       quality_gate: preparationBlock(quality),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Morning preparation PATCH error:', err)

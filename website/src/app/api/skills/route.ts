@@ -34,7 +34,13 @@ export async function GET() {
     maxTokens: 0,
     isDeterministic: true,
     composability: {
-      next_steps: ['/api/skills/{id}', '/api/evaluate', '/api/reason'],
+      // /api/evaluate REMOVED from this hint 2026-08-18. It was gated behind
+      // requireAuth by binding mentor ruling (it was an unauthenticated
+      // free-text Stoic evaluator with no distress screening), so advertising
+      // it as a next step to an unauthenticated agent would now hand out a
+      // guaranteed 401. /api/reason is the credential-authenticated route an
+      // agent should reach for instead, and it remains listed.
+      next_steps: ['/api/skills/{id}', '/api/reason'],
       recommended_action: 'Fetch individual skill details with /api/skills/{id} for example_input and example_output.',
     },
   })

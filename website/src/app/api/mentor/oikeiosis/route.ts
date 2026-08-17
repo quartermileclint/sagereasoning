@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { resolveOikeiosisQuarterly } from '@/lib/practice-sequence'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -32,6 +39,30 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
+    // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ──────
+    // RULED IN 2026-08-17. `action_description` and `reputational_return` are
+    // the practitioner's prose about an action and what they hoped to be seen
+    // for; quarter/year/stage are structured. Before all field validation and
+    // before the insert. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(
+          composeDistressSubject([body?.action_description, body?.reputational_return])
+        )
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { quarter, year, stage, action_description, reputational_return, linked_passion_event_id } = body
 
     // Validate required fields
@@ -103,6 +134,7 @@ export async function POST(request: NextRequest) {
         ? 'This action was flagged for philodoxia review — reputational return detected. Examine whether the action extended genuine concern or served reputation.'
         : null,
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Oikeiosis API error:', err)

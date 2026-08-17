@@ -6,6 +6,13 @@ import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { resolveSageCompass } from '@/lib/practice-sequence'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -123,6 +130,40 @@ function parseCompassContent(body: Record<string, unknown>): ParsedCompass {
 }
 
 /**
+ * The R20a subject for this route — every practitioner-authored field, RAW.
+ *
+ * ⚠ KEEP IN SYNC with parseCompassContent's field list.
+ *
+ * ⚠ `distance` IS INCLUDED, AND THAT IS NOT A VIOLATION OF THE #14 CONSTRAINT.
+ * Read this before "fixing" it.
+ *
+ * The binding mentor constraint on this tool is that the distance "is NOT A
+ * VERDICT — it is a developmental orientation": nothing may score, rank, grade
+ * or classify it as a measure of the practitioner's quality. That is why
+ * `distance` is deliberately absent from classifyExpression's arguments and
+ * from its cache key, pinned at both call sites by the boundary test.
+ *
+ * A distress screen is a categorically different operation. It does not rate
+ * the distance, does not feed the quality gate, does not reach the stored row,
+ * and produces no developmental judgement of any kind — it asks only whether
+ * the person writing is in crisis, and it asks that of EVERY field they wrote.
+ * Excluding `distance` would mean a practitioner who names the gap as something
+ * unbearable writes it into the one field nothing looks at.
+ *
+ * `distance_reading` is excluded instead: it is the controlled far/some_way/
+ * close enum, carrying no prose.
+ */
+function compassDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([
+    b.situation,
+    b.action_considered,
+    b.complete_expression,
+    b.distance,
+  ])
+}
+
+/**
  * Read + shape the JSON request body. A non-JSON payload, or a body that is not a
  * plain object (null / array / primitive), is a client error → the caller returns
  * 400, rather than falling through to a generic 500.
@@ -198,6 +239,26 @@ export async function POST(request: NextRequest) {
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
 
+  // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ────────
+  // RULED IN 2026-08-17. Before parseCompassContent, before classifyExpression's
+  // LLM call, before the insert. Flag-off is byte-identical.
+  let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  if (isR20aGapClosureEnabled()) {
+    const gate = await enforceDistressCheck(
+      detectDistressTwoStage(compassDistressSubject(parsedBody.body))
+    )
+    if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+      return NextResponse.json({
+        distress_detected: true,
+        severity: gate.result.severity,
+        redirect_message: gate.result.redirect_message,
+      })
+    }
+    if (gate.result.severity === 'mild') {
+      mildSupport = buildMildSupportResources('practice')
+    }
+  }
+
   try {
     const parsed = parseCompassContent(parsedBody.body)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
@@ -248,6 +309,7 @@ export async function POST(request: NextRequest) {
       entry: data,
       quality_gate: expressionBlock(quality),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Sage compass API error:', err)
@@ -275,6 +337,26 @@ export async function PATCH(request: NextRequest) {
 
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+
+  // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ─────────────
+  // A revision carries the same free text. Before the id checks and before the
+  // classification call.
+  let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  if (isR20aGapClosureEnabled()) {
+    const gate = await enforceDistressCheck(
+      detectDistressTwoStage(compassDistressSubject(parsedBody.body))
+    )
+    if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+      return NextResponse.json({
+        distress_detected: true,
+        severity: gate.result.severity,
+        redirect_message: gate.result.redirect_message,
+      })
+    }
+    if (gate.result.severity === 'mild') {
+      mildSupport = buildMildSupportResources('practice')
+    }
+  }
 
   const id = typeof parsedBody.body.id === 'string' ? parsedBody.body.id : ''
   if (!id) {
@@ -339,6 +421,7 @@ export async function PATCH(request: NextRequest) {
       entry: data,
       quality_gate: expressionBlock(quality),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Sage compass PATCH error:', err)

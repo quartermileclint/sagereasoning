@@ -6,6 +6,13 @@ import { resolveViewFromAbove } from '@/lib/practice-sequence'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -72,6 +79,32 @@ function parseViewContent(body: Record<string, unknown>): ParsedView {
 }
 
 /**
+ * The R20a subject for this route — every practitioner-authored field, RAW and
+ * untrimmed, in one place so POST and PATCH cannot drift apart.
+ *
+ * ⚠ KEEP THIS IN SYNC WITH parseViewContent's field list. A field added there
+ * and not here is a field a practitioner can write distress into unseen — which
+ * is exactly how the perimeter gap this closure remediates arose in the first
+ * place. The list is deliberately the WHOLE body, not just the two required
+ * fields: someone may put the weight of it into an optional expansion.
+ *
+ * Takes `unknown` because it runs before any validation and must tolerate a
+ * malformed body; composeDistressSubject skips non-strings and never throws.
+ */
+function viewDistressSubject(body: unknown): string {
+  const b = (body ?? {}) as Record<string, unknown>
+  return composeDistressSubject([
+    b.concern,
+    b.recalibrated_reading,
+    b.expansion_one_year,
+    b.expansion_ten_years,
+    b.expansion_whole_life,
+    b.expansion_widest_circle,
+    b.fate_acceptance,
+  ])
+}
+
+/**
  * The tailored quality-gate message — authored deterministically (not by the
  * LLM), keyed off the classification. `calibrates` is true only for a genuinely
  * calibrated reading; the two failure modes each get a distinct, actionable
@@ -125,6 +158,30 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // ── R20a perimeter (AC5; added 2026-08-18, practice-family closure) ──────
+    // RULED IN by the mentor 2026-08-17, and this route is the case they named:
+    // "a route designed to help a practitioner reframe catastrophic loss is the
+    // route where an unscreened acute disclosure is most likely, and it is the
+    // route that currently carries only a static footer. That is the wrong
+    // configuration."
+    //
+    // Runs BEFORE parseViewContent (field validation), before the calibration
+    // LLM call, and before the insert. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(viewDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const parsed = parseViewContent(body)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
@@ -162,6 +219,7 @@ export async function POST(request: NextRequest) {
       entry: data,
       quality_gate: calibrationBlock(quality),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('View from above API error:', err)
@@ -189,6 +247,28 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json()
+
+    // ── R20a perimeter (AC5; added 2026-08-18) — BOTH write paths ───────────
+    // A revision carries the same free text as the original, and is in fact the
+    // likelier place for an acute disclosure: the practitioner is here because
+    // the gate told them their first reading did not calibrate. Screened before
+    // the id check, before parseViewContent, and before the LLM call, matching
+    // /impulse's both-paths precedent.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(viewDistressSubject(body)))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { id } = body
 
     if (!id) {
@@ -232,6 +312,7 @@ export async function PATCH(request: NextRequest) {
       entry: data,
       quality_gate: calibrationBlock(quality),
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('View from above PATCH error:', err)

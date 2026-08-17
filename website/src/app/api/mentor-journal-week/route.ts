@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
@@ -81,6 +88,34 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
+    // ── R20a perimeter (AC5; added 2026-08-18) ───────────────────────────────
+    // Founder-elected into the perimeter 2026-08-18. Both fields are
+    // caller-supplied strings concatenated straight into the LLM input, and
+    // while `recent_activity` is more often system-composed than typed, nothing
+    // enforces that — the route accepts whatever the client sends. Screened
+    // before the fields are read and before the generation call.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(
+          composeDistressSubject([body?.profile_summary, body?.recent_activity])
+        )
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+
     const { profile_summary, recent_activity, week_number } = body
 
     if (!profile_summary || typeof profile_summary !== 'string') {
@@ -117,6 +152,7 @@ export async function POST(request: NextRequest) {
         week_number: week_number ?? 1,
         usage_note: 'Present one question per day. After the practitioner answers, their response can be scored via /api/score or /api/reflect to track progress.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { headers: corsHeaders() }
     )
