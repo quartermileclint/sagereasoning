@@ -22586,3 +22586,148 @@ gap was first recorded), `D-MENTOR-RULING-M4-RETURN-ADOPTED`,
 `D-R2B-SUCCESSOR-M4-RETURNED-M5A-CORRECTED-M5B-SCOPED-PR19-FOLDED`,
 `D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE` (the precedent followed).
 Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-17 — D-R20A-GAP-CLOSURE-ACTIVATED-LIVE-PLUS-TWO-MORE-ROUTES-M4-MEAN-FLOOR-PR19-FOLDED
+
+**Decision:** **ACTIVATED** the six-route R20a gap closure in production (founder-walked flag flip +
+redeploy + a 14-probe both-directions smoke); **found and closed TWO MORE unprotected routes** that
+PR19's fourth pass surfaced; applied the **M-4 mean-floor correction**; corrected **three live false
+public claims**; and **deliberately withheld two things** — M-4's grade-gate retirement (returned to
+the mentor) and the `/limitations` crisis disclosure (returned to the mentor).
+
+**Tier: `code-critical`** (R20a perimeter activation + AC5 + live public copy). **AC7 engaged and
+discharged** — every live op (Vercel flag, redeploy, SQL, browser probes) was founder-performed; the
+AI performed no Vercel/Supabase/git-push operation. **PR19 discharged** (7 dimensions, 8 agents, 0
+errors, ~2.25M subagent tokens).
+
+### 1. The activation — LIVE
+
+`SUBSTRATE_R20A_GAP_CLOSURE_ENABLED=true` in Vercel Production. The six routes
+(`passion-classify`, `passion-log`, `sage-classify`, `sage-prioritise`, `mentor-baseline-response`,
+`mentor/private/baseline-response`) now screen practitioner distress before any validation, cache
+read, LLM call, or DB write.
+
+**Smoke: 14 probes, both directions, all six routes — no sampling.**
+
+- **All six acute probes PASSED**: HTTP 200 with the redirect payload carrying **only** the three
+  redirect keys, in **357–865ms** — sub-second timings confirming stage-1 regex short-circuit with
+  **zero LLM call**.
+- **Zero-write PROVEN, not assumed**: pre/post SQL showed `passion_events` 2 → 3 (the benign probe's
+  row alone; the acute probe wrote nothing) and `mentor_interactions` / `snapshots` /
+  `interaction_count` / `last_interaction` **all unchanged**.
+- **Flag-took-effect proven deterministically**: probes 01 and 04 sent bodies missing a required
+  field. Flag-off those 400 at field validation; flag-on they returned 200 with the redirect. No
+  ambiguous middle result.
+- **Mild fold verified on the passion route** (probe 03: `support_resources.severity='mild'` **plus**
+  the normal payload — served, not blocked).
+- **NOT verified live**: the mild fold on `sage-classify` (probe 08b), blocked by a pre-existing
+  route defect (§5). It is battery-verified only. **Recorded as such, not rounded up.**
+
+### 2. PR19 found TWO MORE unprotected routes — now closed
+
+Both founder-only, both accepting free text, **neither importing `enforceDistressCheck` at all**:
+
+| # | Route | Free text | Found by |
+|---|---|---|---|
+| 7 | `/api/mentor/gap4` | `content` (≤5000 chars) + `divergence_description` | PR19 |
+| 8 | `/api/mentor/private/founder-facts` | POST `note` (unbounded) | PR19 |
+| 8b | …same route, **PUT** | `work_schedule`, `family_situation`, `financial_situation`, `retirement_horizon`, `additional_context[]` | **builder, while wiring PR19's finding** |
+
+The PUT half is the larger surface — a bulk replace of the whole biographical block — and PR19 did
+not name it. **Founder-only is NOT an exemption**, per this codebase's own recorded precedent
+(`/api/mentor/private/reflect` is founder-only and is a perimeter member).
+
+**⚠ THE COUNT HAS NOW MOVED FOUR TIMES: 2 → 4 → 6 → 8.** Eight is **not** claimed final. The
+filesystem-level exhaustiveness backstop remains **the highest-value follow-up** and was not built
+this session.
+
+### 3. M-4 — the mean-floor correction ONLY
+
+`computeDispositionStability` consulted variance but never the mean: 30 identical `reflexive`
+readings gave stddev 0 → `advanced` at confidence 1.0. `ADVANCED_MEAN_FLOOR = 3.0` (founder-set,
+`principled` rank) now gates the `advanced` branch **alone**; a capped reading certifies `established`
+and **says so in its indicators** rather than being silently downgraded.
+
+**⚠ M-4's grade-gate retirement is BUILT, VERIFIED, AND DELIBERATELY NOT COMMITTED.** PR19's
+`claims-vs-code` dimension found — and the AI confirmed directly against the threshold table — that
+excluding the dimension shrinks the shared evaluation pool from 4 to 3, which **silently tightens
+`deliberate_to_principled` from 3-of-4 (75%) to 3-of-3 (100%)**. That rung was never ruled on. The
+AI's own comment claiming "lower rungs are unaffected" was **false**. Compensating it would mean
+retuning a threshold — the category the mentor named as the dishonest option, applied to a rung they
+were not asked about. **Founder elected to put it to the mentor before committing.** The work is
+preserved at `scratchpad/held-for-mentor/grade-gate-retirement.test.ts`; `grade-transition-engine.ts`
+was reverted to HEAD (verified zero diff). **Nothing was ever pushed, so there is no production
+consequence to unwind.**
+
+### 4. Public copy — three corrected, one withheld
+
+Applied under founder-signed wording: `ops-hub:638` ("monitored by Sage Ops / 2-hour acknowledgment"),
+`ops-hub:918` ("queued for review"), and `transparency` support@ — **in both places**. PR19 caught
+that the first pass fixed only one of two occurrences on the same page; the dispute-a-score section
+still promised unqualified investigation.
+
+**`/limitations` NOT applied.** R18 re-derivation found the founder-signed Option A contains a false
+clause: it says a crisis redirect happens "automatically, **every time**". It does not — six practice
+routes (`premeditatio`, `hupexairesis`, `oikeiosis`, `view-from-above`, `morning`, `sage-compass`) sit
+outside the perimeter by recorded precedent, verified by direct grep. Publishing it would place a new
+false claim on the honesty page, repeating the exact error the mentor ruled on for this same page
+(M4, 2026-08-15). **Returned with a PR20-compliant brief** rather than adapted unilaterally.
+
+### 5. Three PRE-EXISTING defects surfaced — none caused by this work
+
+1. **`mentor_profiles` AES-GCM decrypt failure** (`Unsupported state or unable to authenticate data`)
+   — the founder's single profile row cannot be decrypted by the deployed `MENTOR_ENCRYPTION_KEY`.
+   Hits 7 `loadMentorProfile` call sites: two hard-500 (both baseline-response routes),
+   **`practitioner-context` catches and degrades SILENTLY** (the private mentor may reason without
+   the profile context it believes it has), five unverified. **Attribution proven, not inferred:** the
+   diff to both routes is 81 insertions / 0 deletions and the failing frame is a decrypt call the
+   distress block cannot reach. **Recoverability not investigated** — if the prior key is gone, that
+   row's contents are gone. Bounded: one row, the founder's, pre-0h.
+2. **`/api/skill/sage-classify`** returns `"Classification engine returned invalid response"` on the
+   default-categories path — distinct from both the decrypt failure and the credit exhaustion.
+3. **Anthropic credit exhaustion** mid-session, which also left parts of this session's **own Gate-2
+   harness unframed** (four `[discernment] handler error` entries). Credits since topped up.
+
+### 6. PR19 outcome
+
+7 dimensions / 8 agents / 0 errors. **13 distinct findings: 8 CONFIRMED, 4 plausible, 1 likely-false-
+positive.** Two convergences across dimensions that could not see each other (the transparency
+double-claim; the test-coverage gap) — a genuine independence signal. **Every CONFIRMED finding was
+re-verified first-hand against source before action**, per PR19's own discipline. No dimension left
+the tree dirty (`test-adequacy` ran 4 independent mutations and verified byte-identity via `md5`).
+
+**Not fixed, carried:** the `KEEP IN SYNC` banner drift (a canonical mirror exists at
+`/trust-layer/grade-engine/`, is not imported by live code, and now diverges); two LOW ops-hub copy
+items; four plausible-but-unverified findings.
+
+### Verification
+
+`tsc` **0** (caught a real bad import in the new battery — runtime-invisible under tsx) · `npm run
+build` **exit 0**, both new routes registered · `r20a-invocation-guard` **186 → 206/0**, count floors
+bumped 20→22 and 11→13 **in the same edit** per the file's own standing lesson ·
+`disposition-stability-mean-floor` **15/0** · `r20a-gate` 33/0 · both new routes and both new
+batteries **independently mutation-verified**, tree byte-clean after each.
+
+### Rollback
+
+Unset `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` + redeploy (byte-identical flag-off, PR19-proven
+per-route) — note this now covers eight routes, not six. `git revert 2fe6cb7` for the code and copy.
+
+### Carried
+
+The exhaustiveness backstop (**highest value**); M-4's retirement + the `deliberate_to_principled`
+question (**with the mentor**); the `/limitations` wording (**with the mentor**); M-4 obligations 1
+and 4 (agent-facing emissions, the DB column, the dual-defect disclosure); the decrypt incident;
+`sage-classify`'s invalid-response defect; activating the flag for routes 7–8 (**the flag is already
+live, so these two are protected the moment this commit deploys**).
+
+**Rules served:** R20a, AC5, AC7, R18, PR6, PR15, PR17, PR19, PR20, PR23.
+
+**Status:** Adopted. Cross-references: `2fe6cb7`,
+`D-R20A-PERIMETER-GAP-CLOSURE-SIX-ROUTES-BUILT-DARK-PR19-FOLDED`,
+`D-MENTOR-RULING-M4-RETURN-ADOPTED`,
+`operations/trust-layer-2026-07/2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`,
+`operations/trust-layer-2026-07/2026-08-17-public-honesty-batch-signoff-package.md`.
+Weights BLOCKED; the P0 0h hold stands.
