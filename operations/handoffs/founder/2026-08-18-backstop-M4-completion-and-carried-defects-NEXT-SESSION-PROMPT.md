@@ -82,10 +82,18 @@ system-composed than typed).
 
 ## Item 2 — Two mentor questions, if answers have returned
 
-Both briefs are written and were relayed 2026-08-17. **Neither is the AI's to decide.**
+**Neither is the AI's to decide. But only ONE is an actual relay-ready brief, and neither is known to
+have been relayed** — the 2026-08-17 session ended without confirming either was sent. Check with the
+founder before assuming an answer is merely pending.
 
-**(a) The `deliberate_to_principled` collateral tightening.**
-`operations/trust-layer-2026-07/2026-08-17-M4-retirement-HELD/README.md` §2.
+**(a) The `deliberate_to_principled` collateral tightening — ⚠ NO BRIEF EXISTS YET.**
+The question is recorded at
+`operations/trust-layer-2026-07/2026-08-17-M4-retirement-HELD/README.md` §2, but that document was
+written for a *builder* restoring the work, not for the mentor: it assumes familiarity with
+`dimensionsMeetElevated`, the threshold table, and the pool-shrinkage mechanism. **Authoring a
+PR20-compliant brief is the first task of Item 2** — it must name, at mechanism level, that the two
+gate predicates count over `Object.values(levels)`, that the ruling addressed only the top rung, and
+that the sole compensating fix is the move the ruling itself calls dishonest.
 Retiring `disposition_stability` shrinks the shared evaluation pool 4 → 3, which silently tightens a
 rung the mentor never ruled on — from 3-of-4 (75%) to **3-of-3 (100%)**. Compensating it means
 retuning a threshold, the move the ruling names as dishonest. **The built work is preserved** in that
@@ -93,7 +101,7 @@ directory (`engine-change.patch.md` is the ONLY copy — the original was discar
 and is in no git object). Its restore instructions include a **known defect in the held test's §4**
 that must be fixed before the test is trusted.
 
-**(b) The `/limitations` crisis disclosure wording.**
+**(b) The `/limitations` crisis disclosure wording — brief IS written and relay-ready.**
 `operations/trust-layer-2026-07/2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`.
 The founder-signed Option A contains a false clause ("every time"); six practice routes sit outside
 the perimeter. The brief bundles two adjacent questions: ratifying the six original gap-closure
