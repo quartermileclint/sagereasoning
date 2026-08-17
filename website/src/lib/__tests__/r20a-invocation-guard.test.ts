@@ -193,14 +193,18 @@ const HUMAN_FACING_POST_ROUTES = [
   // Founder-only auth is NOT an exemption for the /private twin:
   // /api/mentor/private/reflect is founder-only and is already a member.
   //
-  // ⚠ THE COUNT HAS MOVED TWICE: 2 → 4 (second pass) → 6 (PR19's third,
-  // independent pass). Each pass over a different slice of api/ found more.
-  // DO NOT treat 6 as proven final. There is no filesystem-level exhaustiveness
-  // check in this file (see the named follow-up in the gap-closure decision-log
-  // entry) — this registry is purely additive, so a structurally identical
-  // SEVENTH route would not be caught by anything here.
+  // ⚠ THE COUNT HAS MOVED THREE TIMES: 2 → 4 (second pass) → 6 (PR19's third,
+  // independent pass) → 8 (PR19's FOURTH pass, reviewing the six-route
+  // activation, found two more: gap4 + founder-facts, both founder-only).
+  // Each pass over a different slice of api/ found more. DO NOT treat 8 as
+  // proven final. There is no filesystem-level exhaustiveness check in this
+  // file (see the named follow-up in the gap-closure decision-log entry) —
+  // this registry is purely additive, so a structurally identical NINTH route
+  // would not be caught by anything here.
   'src/app/api/mentor-baseline-response/route.ts',
   'src/app/api/mentor/private/baseline-response/route.ts',
+  'src/app/api/mentor/gap4/route.ts',
+  'src/app/api/mentor/private/founder-facts/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -290,6 +294,22 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
   },
   {
     route: 'src/app/api/mentor/private/baseline-response/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    // PR19-found, session's activation review, gap 7 — founder-only is not an
+    // exemption.
+    route: 'src/app/api/mentor/gap4/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    // PR19-found gap 8 (POST) + builder-found while wiring it (PUT). Two
+    // guarded handlers, ONE flag import — a single entry covers both per this
+    // interface's per-route (not per-handler) shape; the per-route source-grep
+    // below matches once regardless of how many exported functions call it.
+    route: 'src/app/api/mentor/private/founder-facts/route.ts',
     flag: 'isR20aGapClosureEnabled',
     flagSource: 'r20a-gap-closure',
   },
@@ -438,12 +458,16 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // passing. Caught by an independent records-verification pass, not by the
   // battery itself. **Bump BOTH floors in the same edit as any registry
   // addition — the comment above is not advisory.**
-  assert(HUMAN_FACING_POST_ROUTES.length >= 20, `${label} (>=20 route-level)`)
+  //
+  // ⚠ BUMPED AGAIN, same day, same session (20 -> 22, 11 -> 13) — PR19's fourth
+  // pass found gap4 + founder-facts. This time the floors were bumped in the
+  // SAME edit that added the routes, per the standing lesson above.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 22, `${label} (>=22 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
   // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
-  // so a flag-gated entry could be deleted silently. 11 flag-pairs across 10
+  // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12
   // distinct routes (draft-reflect carries two flags, one entry each).
-  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 11, `${label} (>=11 flag-gated route-level flag-pairs)`)
+  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 13, `${label} (>=13 flag-gated route-level flag-pairs)`)
 }
 
 // test('detectDistressTwoStage result is awaited (async safety)')

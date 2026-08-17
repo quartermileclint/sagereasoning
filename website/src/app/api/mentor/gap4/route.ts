@@ -31,6 +31,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAuth, checkRateLimit, RATE_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 // ─── Sunday Prompt Schedule Logic ───────────────────────────────────
 
@@ -113,6 +120,34 @@ export async function POST(request: NextRequest) {
       philodoxia_in_product_decision,
       content,
     } = body
+
+    // ── R20a perimeter (AC5; added 2026-08-17, PR19-found gap 7) ────────────
+    // Founder-only, but founder-only is NOT an exemption (this codebase's own
+    // precedent: /api/mentor/private/reflect is founder-only and IS a member).
+    // `content` is up to 5000 chars of candid reflection on the founder's own
+    // reasoning divergence — exactly the class this perimeter exists for.
+    //
+    // Runs BEFORE the route's own field validation and before any DB write.
+    // Flag-off is byte-identical. See r20a-gap-closure.ts.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([content, divergence_description]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
 
     // ── Validation ────────────────────────────────────────────────────
 
@@ -223,6 +258,7 @@ export async function POST(request: NextRequest) {
         flag_reason: flaggedSuspect
           ? `No divergence reported in month ${month_number} (months 1–3 are auto-flagged when no divergence is reported — it is statistically unlikely this early in practice).`
           : null,
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { status: 201, headers: corsHeaders() }
     )

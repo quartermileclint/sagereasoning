@@ -530,8 +530,49 @@ function computeJudgementQuality(actions: EvaluatedAction[]): DimensionDetail {
  *   emerging:     High variance (stddev > 1.2)
  *   developing:   Moderate variance (stddev 0.8-1.2)
  *   established:  Low variance (stddev 0.4-0.8)
- *   advanced:     Very low variance (stddev < 0.4)
+ *   advanced:     Very low variance (stddev < 0.4) AND mean >= ADVANCED_MEAN_FLOOR
+ *
+ * ── MEAN FLOOR (M-4, mentor ruling 2026-08-17, binding) ────────────────────
+ *
+ * THE DEFECT THIS CLOSES: this function computed `mean` and used it ONLY to
+ * derive variance. Thirty identical readings at ANY level — including thirty
+ * `reflexive` — produced stddev 0 and therefore `advanced` at confidence 1.0.
+ * Consistently poor reasoning certified as an advanced disposition.
+ *
+ * The mentor ruled, verbatim: "before certifying advanced on this dimension,
+ * require that the mean of the readings meets an adequate floor, not merely
+ * that the variance is low… low variance on a poor mean must not certify as
+ * advanced." The specific floor was delegated to the builder; the founder set
+ * it at `principled` (rank 3).
+ *
+ * WHY 3.0 AND WHY ONLY `advanced`: `advanced` is the level the top grade rung
+ * gates on (`min_dimension_level: 'advanced'` + `elevated_dimension_count: 4`
+ * in grade-transition-engine.ts), so the commensurate floor for it is a mean at
+ * `principled`. The floor is applied to the `advanced` branch ALONE, because
+ * that is the scope the ruling names. Extending it to `established` and below
+ * would also make `principled` harder to reach — a grade-ladder change nobody
+ * ruled on.
+ *
+ * WHAT THIS DOES NOT DO: it does NOT restore the dimension to agent-facing
+ * surfaces. The mentor was explicit — "This correction does not restore the
+ * dimension to agent-facing surfaces." It exists so that when the dimension is
+ * eventually restored (once a perturbation-adjusted measure exists), it does
+ * not carry this second defect forward alongside the corrected first one.
+ *
+ * THE OTHER DEFECT IS STILL PRESENT AND IS NOT FIXED HERE: this dimension
+ * cannot distinguish a disposition genuinely tested under varied conditions
+ * from one never tested at all. That is the perturbation defect, and it is why
+ * the dimension is retired rather than merely corrected.
  */
+
+/**
+ * Minimum mean proximity rank required to certify `advanced`.
+ *
+ * 3 = `principled` (PROXIMITY_RANK: reflexive 0, habitual 1, deliberate 2,
+ * principled 3, sage_like 4). Founder-set, 2026-08-17.
+ */
+export const ADVANCED_MEAN_FLOOR = 3.0
+
 function computeDispositionStability(actions: EvaluatedAction[]): DimensionDetail {
   if (actions.length < 5) {
     return makeDimensionDetail('disposition_stability', 'emerging', 0, 'stable', ['Insufficient data for stability assessment'])
@@ -554,9 +595,19 @@ function computeDispositionStability(actions: EvaluatedAction[]): DimensionDetai
   let level: DimensionLevel
   let indicators: string[]
 
-  if (stddev < 0.4) {
+  if (stddev < 0.4 && mean >= ADVANCED_MEAN_FLOOR) {
     level = 'advanced'
     indicators = ['Highly consistent proximity across actions', 'Disposition approaching hexis']
+  } else if (stddev < 0.4) {
+    // Low variance, but the mean does not meet the floor: consistent, yet
+    // consistently below the standard `advanced` asserts. Certify the
+    // consistency honestly at `established` and SAY WHY — a reader must not
+    // have to infer that the level was capped rather than earned.
+    level = 'established'
+    indicators = [
+      'Highly consistent proximity across actions',
+      'Consistency is at a level below the standard required to certify an advanced disposition',
+    ]
   } else if (stddev < 0.8) {
     level = 'established'
     indicators = ['Generally consistent with occasional variation', 'Disposition solidifying']

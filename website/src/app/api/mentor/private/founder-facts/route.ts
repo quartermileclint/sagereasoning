@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { setFounderFacts, appendFounderFactsNote } from '@/lib/context/mentor-context-private'
 import type { FounderFacts } from '@/lib/mentor-profile-summary'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  collectFounderFactsPutText,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 
 // =============================================================================
 // PRIVATE founder-facts — Manage the biographical context block
@@ -36,6 +44,36 @@ export async function PUT(req: NextRequest) {
     const body = await req.json()
     const facts = body.facts as FounderFacts
 
+    // ── R20a perimeter (AC5; added 2026-08-17, builder-found gap 8, PUT half)
+    // FounderFacts carries FOUR free-text fields (work_schedule,
+    // family_situation, financial_situation, retirement_horizon) plus
+    // additional_context: string[] — a bulk REPLACE of the whole biographical
+    // block, larger in surface than the POST note this route's sibling
+    // endpoint screens. Founder-only is NOT an exemption (this codebase's own
+    // precedent: /api/mentor/private/reflect is founder-only and IS a member).
+    //
+    // Runs BEFORE the route's own `facts.age` shape check and before any
+    // write. Flag-off is byte-identical. See r20a-gap-closure.ts.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject(collectFounderFactsPutText(facts)))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
+
     if (!facts || typeof facts.age !== 'number') {
       return NextResponse.json(
         { error: 'Invalid FounderFacts payload — requires at minimum { facts: { age, ... } }' },
@@ -53,7 +91,11 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, message: 'Founder facts set successfully' },
+      {
+        success: true,
+        message: 'Founder facts set successfully',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
+      },
       { headers: corsHeaders() }
     )
   } catch (err) {
@@ -88,6 +130,34 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const note = body.note as string
 
+    // ── R20a perimeter (AC5; added 2026-08-17, PR19-found gap 8, POST half) ─
+    // Unbounded free-text `note` appended to a biographical context block
+    // later fed into mentor LLM prompts. Founder-only is NOT an exemption
+    // (this codebase's own precedent: /api/mentor/private/reflect is
+    // founder-only and IS a member).
+    //
+    // Runs BEFORE the route's own note-emptiness check and before any write.
+    // Flag-off is byte-identical. See r20a-gap-closure.ts.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([note]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
+
     if (!note || typeof note !== 'string' || note.trim().length === 0) {
       return NextResponse.json(
         { error: 'Missing or empty note' },
@@ -105,7 +175,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, message: 'Note appended to founder facts' },
+      {
+        success: true,
+        message: 'Note appended to founder facts',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
+      },
       { headers: corsHeaders() }
     )
   } catch (err) {

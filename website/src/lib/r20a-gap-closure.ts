@@ -23,13 +23,39 @@
  *   6. /api/mentor/private/baseline-  — the founder-only twin of (5), same
  *      response                         shape, same missing check
  *
- * ⚠ THE COUNT MOVED TWICE. A first pass found 2; a second independent pass
- * found 4; PR19's third pass over a DIFFERENT slice of api/ found 6. Routes
- * 5 and 6 were caught because /api/score-scenario accepts the SAME field shape
- * and DOES screen it — the asymmetry between siblings was the tell. **Six is
- * not proven final**: there is no filesystem-level exhaustiveness check in the
- * guard battery, so it is purely additive and a seventh route of this shape
- * would go unnoticed. Closing that structurally is a named follow-up.
+ * ⚠ THE COUNT MOVED THREE TIMES, NOT TWO. A first pass found 2; a second
+ * independent pass found 4; a third pass (PR19, reviewing the six-route build
+ * itself) found 6. A FOURTH pass — PR19 again, this time reviewing the
+ * six-route ACTIVATION — found TWO MORE, confirming the module's own
+ * standing warning that six was never proven final:
+ *
+ *   7. /api/mentor/gap4                — founder-only, up to 5000 chars of
+ *                                        candid `content` + `divergence_
+ *                                        description` about the founder's own
+ *                                        reasoning divergence from the model
+ *   8. /api/mentor/private/founder-facts — founder-only; POST appends an
+ *                                        unbounded `note`; PUT bulk-replaces
+ *                                        the whole FounderFacts block, which
+ *                                        itself carries FOUR free-text fields
+ *                                        (work_schedule, family_situation,
+ *                                        financial_situation,
+ *                                        retirement_horizon) plus
+ *                                        additional_context: string[] — a
+ *                                        LARGER unscreened surface than the
+ *                                        POST note alone, found by the
+ *                                        builder while wiring PR19's finding,
+ *                                        not by PR19 itself
+ *
+ * Both 7 and 8 are founder-only — the exact class the module's own header
+ * already named as NOT exempt (the passion/baseline routes precedent: "the
+ * founder is a practitioner too").
+ *
+ * Routes 5 and 6 were caught because /api/score-scenario accepts the SAME
+ * field shape and DOES screen it — the asymmetry between siblings was the
+ * tell. **Eight is not proven final either**: there is still no
+ * filesystem-level exhaustiveness check in the guard battery, so it is purely
+ * additive and a ninth route of this shape would go unnoticed. Closing that
+ * structurally remains the highest-value named follow-up.
  *
  * A practitioner could write acute distress into any of them and receive no
  * redirect and no crisis resources. This is the same defect class as the
@@ -259,6 +285,37 @@ export function collectBaselineAnswerText(responses: unknown): unknown[] {
     if (r && typeof r === 'object') {
       out.push((r as { answer?: unknown }).answer)
     }
+  }
+  return out
+}
+
+/**
+ * Pull the free-text fields out of a PUT /api/mentor/private/founder-facts
+ * body — a full FounderFacts replacement, `{ facts: { work_schedule,
+ * family_situation, financial_situation, retirement_horizon,
+ * additional_context: string[], ... } }`. `age`, `years_married`, and
+ * `children_ages` are numeric, never prose, and are deliberately excluded.
+ *
+ * Never throws on a malformed body — see composeDistressSubject's contract.
+ * This runs before the route's own `facts.age` shape check.
+ */
+export function collectFounderFactsPutText(facts: unknown): unknown[] {
+  if (!facts || typeof facts !== 'object') return []
+  const f = facts as {
+    work_schedule?: unknown
+    family_situation?: unknown
+    financial_situation?: unknown
+    retirement_horizon?: unknown
+    additional_context?: unknown
+  }
+  const out: unknown[] = [
+    f.work_schedule,
+    f.family_situation,
+    f.financial_situation,
+    f.retirement_horizon,
+  ]
+  if (Array.isArray(f.additional_context)) {
+    out.push(...f.additional_context)
   }
   return out
 }

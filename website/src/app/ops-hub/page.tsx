@@ -635,7 +635,7 @@ export default function OpsHub() {
 
             <div style={styles.footer}>
               <div style={styles.footerDisclaimer}>
-                All alerts are monitored by Sage Ops. Critical alerts require acknowledgment within 2 hours.
+                Alerts are generated automatically and reviewed by the founder when this hub is opened. There is no monitoring rota and no acknowledgment guarantee.
               </div>
             </div>
           </div>
@@ -915,7 +915,7 @@ export default function OpsHub() {
 
             <div style={styles.footer}>
               <div style={styles.footerDisclaimer}>
-                Pipeline processing is automated. Items flagged for review are queued above.
+                Pipeline processing is automated. Items needing attention are listed above; there is no separate review process behind this view.
               </div>
             </div>
           </div>

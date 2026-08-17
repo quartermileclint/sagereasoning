@@ -138,9 +138,10 @@ export default function TransparencyPage() {
             <li>Re-submit your action with additional context that clarifies your situation or intent.</li>
             <li>Scores are tools for reflection, not permanent records &mdash; you are free to
                 disagree with any output.</li>
-            <li>Contact us at{' '}
+            <li>Write to{' '}
               <span className="font-mono text-sage-600">support@sagereasoning.com</span>{' '}
-              if you believe there is a systematic error in scoring that should be investigated.</li>
+              if you believe there is a systematic error in scoring &mdash; as noted above, this
+              address is not monitored continuously and a reply may take time.</li>
           </ol>
           {/* TODO (Phase 3): Add a formal "Dispute a score" button on individual score pages
               that allows users to flag a result for human review. */}
@@ -169,8 +170,10 @@ export default function TransparencyPage() {
             AI is a tool we use &mdash; not an autonomous decision-maker.
           </p>
           <p className="mt-3">
-            If you have concerns about any AI-generated output, you can always contact a human
-            at <span className="font-mono text-sage-600">support@sagereasoning.com</span>.
+            If you have concerns about any AI-generated output, you can write to{' '}
+            <span className="font-mono text-sage-600">support@sagereasoning.com</span>.
+            SageReasoning is built and run by one person, so this address is not monitored
+            continuously and a reply may take time.
           </p>
         </div>
 
