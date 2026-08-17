@@ -22157,3 +22157,190 @@ those surfaces, or any further deployment to them at all?"**
 **Status:** Adopted. Amends `D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`.
 Cross-reference: `operations/handoffs/founder/2026-08-17-R2b-mentor-rulings-successor-NEXT-SESSION-PROMPT.md`
 (amended in place). Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-17 — D-R2B-SUCCESSOR-M4-RETURNED-M5A-CORRECTED-M5B-SCOPED-PR19-FOLDED
+
+**Decision:** Executed the R2b mentor-rulings successor session on the four carried rulings
+(M-2, M-3, M-4, M-5). **M-4 was NOT built and RETURNS to the mentor** with two mechanism facts the
+original ruling was not shown. **M-5(a) discharged internally** (two compliance documents corrected)
+with an R18 sign-off package drafted for the practitioner-facing disclosure gap the grounding found
+adjacent to it. **M-5(b) scoped**, not built. M-2 and M-3 carry, with their column-shape and tier
+questions resolved by founder election so a future session does not re-litigate them. **PR19 run,
+5 findings folded** (2 confirmed-wrong on an incomplete safety sweep, 3 minor wording imprecisions),
+**one self-correction** to the M-4 brief's own framing. **No code, no schema, no flag, nothing
+pushed.**
+
+**Tier: `governance` throughout** (two document corrections + three new scoping/consultation
+documents). **AC7 not engaged.** PR19 discharged. PR20 applied to a post-ruling situation, one step
+later than its literal scope, and the document says so honestly rather than overclaiming.
+
+**Governing records:** the successor prompt
+(`operations/handoffs/founder/2026-08-17-R2b-mentor-rulings-successor-NEXT-SESSION-PROMPT.md`); the
+binding verbatim (`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`).
+
+### Grounding before deciding — and what it overturned
+
+Per the prompt's own instruction not to build on a stated preference order without first
+establishing tractability, a 10-agent read-only grounding workflow (5 investigate + 5 adversarially
+verify) ran before any founder election. **The adversarial pass materially corrected the
+load-bearing claim in all five dimensions**, three of them in ways that changed the founder's actual
+decision:
+
+- **M-4 turned out larger than briefed.** `disposition_stability` is not a reported dimension — it is
+  a **hard gate on Senecan grade upgrade** (`dimensionsMeetFloor`/`dimensionsMeetElevated`,
+  `grade-transition-engine.ts:300-305`, `.every()` over all four dimensions), live via
+  `sage-assent-feed.ts:280→283` on the Sage Reflect completion path, published on the accreditation
+  card. The founder was never shown this. **And the flat "not tractable" claim from the first pass
+  was itself wrong** — `evaluated_at` (server clock) is already mapped onto every element and never
+  read; `surface` is persisted but not selected. Channels exist; none of them distinguishes
+  perturbation, which is the actual defect. A third option — strip the inverted valence, keep an
+  ungraded reading — was never posed in the first pass and matches M-4's stated grievance at lowest
+  cost, but makes `principled → sage_like` structurally unreachable (all four dimensions required at
+  `advanced` for that rung).
+- **M-5(a) turned out smaller.** Zero deployed R18 surfaces make the false escalation claim — verified
+  first-hand, zero hits on `llms.txt`/`agent-card.json`/api-docs for the relevant terms. The false
+  posture lives entirely in two internal compliance documents. But the sweep found two **adjacent**
+  public honesty items outside the ruling's scope: `transparency/page.tsx`'s "Human oversight"
+  section promising a human contact at an unwatched address (CLAUDE.md go-live #11, OPEN), and
+  `ops-hub/page.tsx`'s "2-hour acknowledgment" copy on a page with no auth gating found.
+- **M-3's tier assumption was wrong.** The consult denominator is already exactly right and needs no
+  narrowing. But the same script also **ingests** into `agent_hold_observations`, which has no `path`
+  column — a guard deny persists there as `is_hold=true, loop_event='none'`, contradicting the
+  table's own documented invariant in three places. Whether "never pooled" reaches the durable ledger
+  is the actual scope decision, not a code-elevated/repo-only given.
+- **M-2's coupling is real** but two omissions would have misled: the Q1 flag is UNSET everywhere, so
+  the migration alone does not make M-2 operative; and a second surface, FD-R2, consumes the same
+  conflated state unfixed and can suppress a legitimate progress hold — the unsafe direction.
+- **M-5(b) is more buildable than framed.** `session_id` has no FK or CHECK and forces nothing —
+  `user_id` is the only genuinely schema-forcing constraint, and 30 of 32 branches carry an
+  `auth.users` id in scope (the partition is per-branch, not per-route).
+
+**Founder elections, recorded:** scope = M-4 + M-5(a) + M-5(b) scoping; M-4's disposition = strip the
+inverted valence (later superseded — see below); M-2's column = `q1_determination text` + CHECK
+(matches the four existing enum-guard constraints; a boolean would permanently conflate
+pre-activation rows with genuinely-determined ones, given the flag is unset); M-3's tier = print-split
+only, ledger pooling carried as a named follow-up.
+
+### M-4 execution — the elected build itself was superseded before it started
+
+Reading `grade-transition-engine.ts` and `types/accreditation.ts` first-hand (not from the subagent
+report) confirmed `dimensionsMeetFloor` uses `.every()` over exactly four dimensions
+(`passion_reduction`, `judgement_quality`, `disposition_stability`, `oikeiosis_extension`), and that
+`principled_to_sage_like` requires **all four at `advanced`**. Stripping the certification therefore
+makes that rung structurally unreachable — a live authority-ladder consequence the founder's own
+election had not been quoted a price for. **A live reproduction against `computeWindowSnapshot`
+(30 identical readings, varying only the proximity level) confirmed a second, independent, more
+severe defect not named in the original grounding**: the level computation is **mean-blind** — thirty
+consecutive `reflexive` readings certify `advanced`/"Disposition approaching hexis" at maximum
+confidence. This is not M-4's perturbation defect (thirty identical `sage_like` readings would also
+wrongly certify `advanced`); it is a distinct inversion the ruling was never shown.
+
+**Put back to the founder, and re-elected: M-4 returns to the mentor with both facts named, rather
+than executing on a stated preference the mentor could not have priced.** A mentor brief authored:
+`operations/trust-layer-2026-07/2026-08-17-M4-disposition-stability-mechanism-facts-FOR-RULING.md`.
+**No code was touched.** Spec 4's activation stays blocked.
+
+### M-5(a) — the internal correction, done; the public question, drafted for signature
+
+Two compliance documents corrected in place, quoting the ruling verbatim: `compliance/R20a-vulnerable-
+user-protections.md` (§3's flow steps 3–5 marked `[DESIGNED — NOT BUILT]`; §4's SLA table marked
+not-in-force; the acute-crisis-gap paragraph's reviewer presupposition fixed and its false claim of an
+existing public disclosure — verified against `limitations/page.tsx` and `terms/page.tsx`, both
+zero-hit — corrected) and `compliance/ADR-R20a-01-classifier-pipeline.md` (§1's present-indicative
+false clause annotated, with §5/§6 explicitly excluded as decision/forward-looking records, not
+delivery claims). **Deliberately not corrected:** the migration comment
+(`20260416_r20a_vulnerability_flag.sql:45`) already reads "(Phase F)" and needed nothing.
+
+An R18 sign-off package drafted, unsigned, for the second falsehood the grounding found — the internal
+claim that the acute-crisis gap was publicly disclosed, which it was not:
+`operations/trust-layer-2026-07/2026-08-17-M5a-r18-public-disclosure-signoff-package.md`. Three
+options offered (full disclosure, minimal sentence, decline); the two adjacent honesty items flagged
+for founder direction, unedited.
+
+### M-5(b) — scoped, and the scope's own safety sweep was caught incomplete by PR19
+
+`operations/trust-layer-2026-07/2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md`. Verified
+first-hand against the migration and the live routes: `user_id` is the only schema-forcing NOT NULL/FK
+constraint; `session_id` has no FK or CHECK; the partition of "buildable without a schema change" is
+per-*branch*, not per-route (`/api/reason` and the 13 shared-handler skill routes both carry an
+`auth.users` id in scope before the classifier call); five decisions listed (agent-branch abstention,
+dedup rule, credential-operator identity, gap-precedes-build, and the `flag_written` marking riding
+with R4 rather than the P0 build).
+
+**The scope document's own §6 safety sweep was itself incomplete on its first pass** — it found
+`sage-classify`/`sage-prioritise` (both `api/skill/` handlers with their own `route.ts`, no
+distress check, absent from `HUMAN_FACING_POST_ROUTES`) but PR19's independent, mandatory re-sweep of
+the identical defect class across `api/mentor/` found **two more**: `passion-classify` and
+`passion-log`, verified the same way, and — unlike the six Remaining Principles tools whose exclusion
+from the perimeter is a *recorded design decision* — carrying **no recorded exclusion anywhere**;
+`/passion-log` is on record as a promoted, nav-linked feature. **The gap is four routes, not two.**
+Corrected in the scope document with the miss stated plainly, per the standing discipline that an
+incomplete sweep on a safety perimeter is itself a defect, not a detail to quietly patch over.
+
+### PR19 — 5 dimensions, one self-correction folded into the brief itself
+
+Five parallel dimensions (M-4 facts / M-5a compliance edits / M-5a R18 package / M-5b schema and
+branches / cross-document consistency), each independently re-deriving the cited facts rather than
+trusting the authoring pass.
+
+- **M-4 facts: 0 findings.** Every cited line, threshold, and demonstrated behaviour verified clean,
+  including an independent, code-derived re-confirmation of mean-blindness that did not rely on
+  trusting the document's own demo output.
+- **M-5a compliance edits: 3 imprecisions, folded.** "Omits three NOT NULL columns" overstated the
+  case (`session_id` is present but invalid, not omitted) — corrected to name the distinction
+  precisely; one sentence was grammatically garbled — tightened; the ADR correction presented a
+  section heading and an internal sub-label as one quoted title — separated.
+- **M-5a R18 package: 0 findings**, all seven cited facts (the zero-hit greps, both adjacent items'
+  exact quotes, the CLAUDE.md paraphrase) independently reproduced clean.
+- **M-5b schema and branches: 2 CONFIRMED WRONG** — the two-route perimeter gap above; **7 clean**
+  including the full schema re-derivation and the per-branch auth-availability claims.
+- **Cross-document consistency: 2 imprecisions, folded into the M-4 brief itself.** The PR20
+  invocation overstated its own scope (PR20 governs pre-ruling briefs; this is post-ruling) — the
+  brief's opening now says so plainly rather than claiming to be "PR20's first live test." **The
+  load-bearing one: the brief's own §3 already concludes the perturbation correction is untractable,
+  which satisfies M-4's own conditional ("if not tractable... retire") — the ruling was already
+  resolved to retire on the brief's own terms, and holding it back to ask three questions instead of
+  one was not fully honest about that.** §4 rewritten: names that retire is already licensed by the
+  ruling as stated, narrows the genuinely open question to whether the newly-surfaced grade-gate
+  coupling changes *what* should be retired (not *whether*), and states explicitly that if the
+  mentor's answer to that narrower question is "no, execute as ruled," the brief will not return a
+  third time on the same point.
+
+### Risk classification
+
+`governance` under 0d-ii — two document corrections (compliance records, not public surfaces) and
+three new scoping/consultation documents. Standard risk. **Critical Change Protocol NOT engaged** — no
+code, schema, flag, or public surface changed. AC5/AC7 not engaged. PR19 discharged. PR20 applied
+honestly outside its literal scope, stated as such.
+
+### Rollback path
+
+Every file change is an independent `git revert`; nothing is applied to a live surface, nothing is
+pushed.
+
+### Carried
+
+**M-4** — awaiting mentor ruling on the narrowed question (does the grade-gate coupling change *what*
+gets retired, not *whether*); mean-blindness correction is independently available regardless of that
+answer. **M-5(a)** — the R18 sign-off package awaits founder signature; the two adjacent public
+honesty items (transparency's support@ promise, ops-hub's gating/monitoring copy) await founder
+direction. **M-5(b)** — its own P0 session, per the founder's 2026-08-17 resolution that it does not
+block R4; the four-route perimeter gap (§6) recommended to precede it. **M-2** — needs Q1 Phase-2
+built together (column shape settled: `q1_determination text` + CHECK), plus the FD-R2 design
+question the grounding surfaced (a second consumer of the same conflated state, unfixed). **M-3** —
+print-split only this pass; the durable-ledger pooling into `agent_hold_observations` carried as its
+own founder-walked migration question. `classifier_cost_log`'s absence from every data-rights path
+remains a named R17c item. The `stoa-boundary` #20 ruling and AE-3 scoping remain untouched by this
+session.
+
+**Rules served:** R18, R20a (documents only — no code touched), AC5 (not engaged), AC7 (not engaged),
+PR6 (not engaged), PR15, PR19, PR20, PR23.
+
+**Status:** Adopted. Cross-references:
+`operations/handoffs/founder/2026-08-17-R2b-mentor-rulings-successor-NEXT-SESSION-PROMPT.md`,
+`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`,
+`2026-08-17-M4-disposition-stability-mechanism-facts-FOR-RULING.md`,
+`2026-08-17-M5a-r18-public-disclosure-signoff-package.md`,
+`2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md`,
+`D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`. Weights BLOCKED; the P0 0h
+hold stands.

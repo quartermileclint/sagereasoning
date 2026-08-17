@@ -14,6 +14,28 @@ R20a (draft) specifies an asynchronous queue architecture for detecting practiti
 
 The classifier pipeline is the code path that reads mentor session inputs, produces a risk score, and writes flag rows into the moderation queue. Nothing in this ADR changes the rule in R20a — the asynchronous model, the threshold framing, and the SLA structure are fixed. This ADR is purely about how the detection layer is built.
 
+> **⚠ CORRECTION 2026-08-17, under binding mentor ruling M-5(a)**
+> (`operations/trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`).
+>
+> The sentence above describes the pipeline this ADR *specifies*, in the present indicative. As a
+> statement of what the built system does, **its third clause is false and has always been false.**
+> The classifier does read inputs and does produce a risk score — both live. It **does not write flag
+> rows into the moderation queue.** The three branches that set `flag_written: true`
+> (`website/src/lib/r20a-classifier.ts:150`, `:175`, `:241`) attempt no insert at all, and the sole
+> `vulnerability_flag` write in the codebase (`writeClassifierDownMarker`, `:282`) serves the
+> classifier-**outage** branch and has never successfully written a row for any caller.
+>
+> The ruling's own honest description of the current state: *"the classifier detects distress signals
+> and routes them; the human escalation queue exists in the schema but has no live write path for real
+> detections."* See R20a §3's current-state block for the full account and
+> `2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md` for the ruled P0 build.
+>
+> **Deliberately NOT annotated as false:** §5 ("Founder decisions — adopted") and §6 ("Consequences if
+> defaults are adopted"), whose "**Build artefacts required:**" sub-list is a forward-looking build
+> record, not a delivery claim. Both are decision and forward-looking build records; `[x] D5-a` marks
+> an option *chosen*, not an interface *delivered*. An earlier draft of this correction
+> mischaracterised them, and the mischaracterisation was caught on review.
+
 ## 2. Decision drivers
 
 The founder's position as a non-technical solo builder shapes most drivers:

@@ -54,13 +54,47 @@ The threshold protects both the user and the practice. Flagging ordinary distres
 
 Detection is asynchronous. Mentor responses are served normally and are not blocked by classifier evaluation.
 
+> **⚠ CURRENT STATE — corrected 2026-08-17 under binding mentor ruling M-5(a)**
+> (`operations/trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`).
+>
+> **Steps 1 and 2 below are LIVE. Steps 3, 4 and 5 are DESIGNED AND NOT BUILT.** The flow below is a
+> specification, written in the present indicative as specifications are — but nothing distinguished
+> it from a description of current behaviour, and per the ruling that made it a false claim. The
+> honest description of the current state, in the ruling's own words:
+>
+> *"the classifier detects distress signals and routes them; the human escalation queue exists in the
+> schema but has no live write path for real detections."*
+>
+> Specifically, verified first-hand: the three classifier branches that set `flag_written: true`
+> (`website/src/lib/r20a-classifier.ts:150`, `:175`, `:241`) **attempt no insert at all**. The only
+> write to `vulnerability_flag` anywhere in the codebase is `writeClassifierDownMarker` (`:282`),
+> which serves the classifier-**outage** branch (`flag_written: false`), and which **has never
+> successfully written a row for any caller** — the table requires three NOT NULL columns
+> (`user_id`, `session_id`, `severity`) this insert never satisfies: `user_id` and `severity` are
+> omitted entirely, `session_id` is present but carries an invalid value (`null`, or a non-UUID
+> free-form string on live callers), and the insert additionally sends two columns
+> (`flag_type`, `metadata`) that do not exist on the table. **No `vulnerability_flag` row has ever
+> been written for a real detection.**
+>
+> Consequence for the record: **`classifier_cost_log.flag_written` is a false fact on every row ever
+> written.** Per the ruling this is *"a named integrity failure in the trust-event record"*, to be
+> corrected by marking what those rows actually record — **never** by retroactively writing flags for
+> past sessions, *"which would be fabrication."*
+>
+> What IS live and does protect the practitioner: detection itself, the in-session crisis redirect
+> with verbatim resources across the R20a route-level perimeter, and the persistent footer (§4).
+> Building the genuine-detection write path is ruled a **P0 obligation** and is scoped separately at
+> `operations/trust-layer-2026-07/2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md`.
+
 ### Flow
 
-1. User submits mentor input. Mentor responds normally and immediately.
-2. In parallel, the input and the mentor's response are passed to a classifier (rule-based detectors plus a small-model evaluation) that emits a risk score and category.
-3. Inputs scoring at or above the flag threshold write a row to the `vulnerability_flag` table.
-4. The moderation queue is reviewed at a declared cadence during declared support hours.
-5. The queue reviewer decides: no action / passive nudge / direct outreach / escalation.
+*(Specification. See the current-state block above for what is live: steps 1–2 only.)*
+
+1. User submits mentor input. Mentor responds normally and immediately. **[LIVE]**
+2. In parallel, the input and the mentor's response are passed to a classifier (rule-based detectors plus a small-model evaluation) that emits a risk score and category. **[LIVE]**
+3. Inputs scoring at or above the flag threshold write a row to the `vulnerability_flag` table. **[DESIGNED — NOT BUILT. No such insert exists; see the current-state block.]**
+4. The moderation queue is reviewed at a declared cadence during declared support hours. **[DESIGNED — NOT BUILT. No reviewer role is filled; §8 records it as an open placeholder.]**
+5. The queue reviewer decides: no action / passive nudge / direct outreach / escalation. **[DESIGNED — NOT BUILT.]**
 
 ### Constraints this places on the rest of the system
 
@@ -108,11 +142,19 @@ This closes part of the acute-crisis gap at low operational cost: a user in imme
 | Men's support | MensLine Australia | 1300 78 99 78 / mensline.org.au | 24/7 |
 | International fallback | Befrienders Worldwide | befrienders.org | Varies by region |
 
-These contacts are included verbatim in any outreach template and are visible to the queue reviewer alongside each flagged row.
+These contacts are included verbatim in any outreach template and are visible to the queue reviewer alongside each flagged row. **[The verbatim-inclusion half is LIVE — the same resource list is rendered on the in-session crisis redirect. The reviewer-visibility half is DESIGNED — NOT BUILT; no flagged rows exist and no reviewer role is filled.]**
 
 ### Response SLAs
 
-| Severity | Signal | SLA | Action |
+> **⚠ DESIGNED — NOT OPERATIVE. Corrected 2026-08-17 under binding mentor ruling M-5(a).**
+> These are the SLAs that will govern queue review once the write path and the reviewer role exist.
+> **No SLA below is currently in force**, because no `vulnerability_flag` row is ever written for a
+> real detection (§3 current-state block) and §8 records "Queue reviewer role and name" as an open
+> placeholder. Read the response-time commitments as specification, not as a service the practitioner
+> is receiving today. The protection that IS live and immediate is the in-session crisis redirect
+> and the persistent footer, both of which act within the session rather than after it.
+
+| Severity | Signal | SLA *(designed, not in force)* | Action *(designed, not in force)* |
 |---|---|---|---|
 | 3 | Explicit means, explicit intent, command experience, or loss of orientation | Within 2 hours during declared support hours; routed to external services outside those hours | Reviewer sends resource list with brief, non-moralising message. Severity 3 escalates to the founder during support hours. |
 | 2 | Sustained incapacity-to-reason without explicit means | Within 1 support-hour business day | Reviewer sends a brief offer of resources and an invitation to return when ready. |
@@ -155,7 +197,30 @@ Server-side encryption of `reviewer_notes` and `triggered_rules` uses the same `
 
 ## 6. Known limitations — documented per R19c honest positioning
 
-- **Acute crisis gap — narrowed, not closed.** The asynchronous model does not intervene in real time during an acute crisis. The persistent footer (§4) gives the user a visible self-route at any moment, which narrows the gap but does not close it. A user who does not use the footer and submits content to the mentor will receive a normal philosophical response until the queue reviewer sees the flag. This is an accepted limitation of the current architecture and operating model (solo founder, declared support hours). Disclosed to users via the limitations page (R19c) and the terms of service.
+- **Acute crisis gap — narrowed, not closed.** The asynchronous model does not intervene in real time during an acute crisis. The persistent footer (§4) gives the user a visible self-route at any moment, which narrows the gap but does not close it. This is an accepted limitation of the current architecture and operating model (solo founder, declared support hours).
+
+  > **⚠ TWO CORRECTIONS, 2026-08-17, under binding mentor ruling M-5(a).**
+  >
+  > **(a)** This paragraph previously read *"…will receive a normal philosophical response until the
+  > queue reviewer sees the flag."* That presupposed a reviewer who sees flags. No flag is written for
+  > a real detection and no reviewer role is filled (§3 current-state block; §8). The accurate
+  > statement is: **a user in acute distress receives the in-session crisis redirect with verbatim
+  > resources — which IS live and is immediate — and nothing further happens outside the session.**
+  > There is no post-session follow-up, because there is no queue row and no reviewer.
+  >
+  > **(b)** This paragraph previously claimed the limitation was *"Disclosed to users via the
+  > limitations page (R19c) and the terms of service."* **Verified first-hand 2026-08-17: it is not.**
+  > `website/src/app/limitations/page.tsx` and `website/src/app/terms/page.tsx` contain no mention of
+  > a queue, a reviewer, escalation, flagging, or post-session monitoring (zero grep hits on all six
+  > terms across both files). **The claimed public disclosure does not exist.** This was a false
+  > statement in the compliance record about a public disclosure having been made.
+  >
+  > Whether to *make* that disclosure real — rather than merely deleting the claim that it was made —
+  > is a founder decision under **R18** (founder sign-off on exact wording before any public surface
+  > changes). Candidate wording is drafted for signature at
+  > `operations/trust-layer-2026-07/2026-08-17-M5a-r18-public-disclosure-signoff-package.md`.
+  > **Until that package is signed and applied, this limitation is undisclosed to practitioners**,
+  > and this document should not be read as evidence otherwise.
 - **Classifier false negatives and false positives.** No classifier is complete. Metrics are reviewed quarterly (§7).
 - **Out-of-hours coverage.** Severity 3 signals outside declared support hours rely on the user reaching external services directly through the footer or outreach channel. The product does not send outreach itself outside support hours; it queues outreach for the next support-hour window.
 - **Clinical and legal review pending (rolled into P3).** The detection criteria in §2 are principled on the Stoic framing but have not yet been reviewed by a registered clinician or a lawyer with Australian digital-mental-health experience. Clinical review and legal review are scoped into Priority 3 per project instructions. R20a may be adopted on the founder's reasoning ahead of review; any amendments arising from review will follow the Critical Change Protocol.
