@@ -1,0 +1,174 @@
+/**
+ * grade-gate-retirement.test.ts
+ *
+ * Pins the M-4 retirement of `disposition_stability` from the GRADE GATE
+ * (mentor ruling 2026-08-17, binding).
+ *
+ * WHY THIS FILE EXISTS: when the retirement was implemented, the entire
+ * existing trust-layer battery stayed green — 360+ assertions, zero failures.
+ * That is not reassurance, it is a coverage gap: no test had ever asserted a
+ * `principled → sage_like` promotion, so making the top rung unreachable broke
+ * nothing and proved nothing. Without this file the retirement is unpinned in
+ * BOTH directions — nothing shows it works, and nothing would catch a future
+ * refactor silently restoring it.
+ *
+ * WHAT IS BEING PINNED, and why each matters:
+ *   - the retirement itself (the dimension is excluded from the gate)
+ *   - the INTENDED consequence (the top rung is unreachable)
+ *   - the NON-consequence (lower rungs still work — a missing key would have
+ *     frozen every rung, which is why exclusion is explicit rather than by
+ *     deletion)
+ *   - the RULED PROHIBITION (`elevated_dimension_count` is still 4, NOT
+ *     re-tuned to 3 — the mentor named re-tuning as the dishonest option)
+ *   - the SCOPE BOUND (the shared human `DimensionScores` type still carries
+ *     the dimension; /baseline, /dashboard and /private-mentor are untouched)
+ *
+ * `UPGRADE_THRESHOLDS` is R4 IP and deliberately unexported, so the threshold
+ * pin is a source-grep assertion — the established INV pattern in this codebase
+ * — rather than a reason to widen its visibility.
+ *
+ * Run: npx tsx src/lib/substrate/trust-layer/grade-engine/__tests__/grade-gate-retirement.test.ts
+ */
+
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import {
+  DIMENSIONS_RETIRED_FROM_GATE,
+  gateEvaluatedLevels,
+} from '../grade-transition-engine'
+import type { DimensionScores } from '../../types/accreditation'
+
+let passCount = 0
+let failCount = 0
+const failures: string[] = []
+
+function assert(name: string, condition: boolean, detail?: string): void {
+  if (condition) {
+    passCount++
+    console.log(`  PASS  ${name}`)
+  } else {
+    failCount++
+    failures.push(`${name}${detail ? ` — ${detail}` : ''}`)
+    console.log(`  FAIL  ${name}${detail ? ` — ${detail}` : ''}`)
+  }
+}
+
+const ENGINE_SRC = readFileSync(join(__dirname, '..', 'grade-transition-engine.ts'), 'utf8')
+const ACCRED_TYPES_SRC = readFileSync(
+  join(__dirname, '..', '..', 'types', 'accreditation.ts'),
+  'utf8'
+)
+
+const allAdvanced: DimensionScores = {
+  passion_reduction: 'advanced',
+  judgement_quality: 'advanced',
+  disposition_stability: 'advanced',
+  oikeiosis_extension: 'advanced',
+}
+
+const allEstablished: DimensionScores = {
+  passion_reduction: 'established',
+  judgement_quality: 'established',
+  disposition_stability: 'established',
+  oikeiosis_extension: 'established',
+}
+
+function main(): void {
+  console.log('\n=== §1  The dimension is retired from the gate ===\n')
+
+  assert(
+    '1.1  disposition_stability is listed as retired',
+    DIMENSIONS_RETIRED_FROM_GATE.includes('disposition_stability')
+  )
+  assert(
+    '1.2  gateEvaluatedLevels drops it — 4 dimensions in, 3 evaluated',
+    gateEvaluatedLevels(allAdvanced).length === 3,
+    `got ${gateEvaluatedLevels(allAdvanced).length}`
+  )
+  assert(
+    '1.3  nothing else is retired (the other three all survive)',
+    DIMENSIONS_RETIRED_FROM_GATE.length === 1,
+    `retired=${JSON.stringify(DIMENSIONS_RETIRED_FROM_GATE)}`
+  )
+
+  console.log('\n=== §2  The INTENDED consequence: the top rung is unreachable ===\n')
+
+  // principled_to_sage_like requires elevated_dimension_count 4 at 'advanced'.
+  // Even a PERFECT agent — all four dimensions advanced — can only present 3
+  // to the gate. The rung is unreachable by construction, which is the ruling.
+  const elevatedCount = gateEvaluatedLevels(allAdvanced).filter(l => l === 'advanced').length
+  assert(
+    '2.1  a perfect agent yields at most 3 elevated dimensions, never 4',
+    elevatedCount === 3,
+    `got ${elevatedCount}`
+  )
+  assert(
+    '2.2  therefore count >= 4 is unsatisfiable — sage_like structurally unreachable',
+    !(elevatedCount >= 4)
+  )
+
+  console.log('\n=== §3  The RULED PROHIBITION: the threshold was not re-tuned ===\n')
+
+  // The mentor: re-tuning "would preserve reachability by removing the
+  // condition that made reachability meaningful." If a future session lowers
+  // this to 3 to "fix" the unreachable rung, this assertion must fail loudly.
+  assert(
+    '3.1  principled_to_sage_like still requires elevated_dimension_count: 4',
+    /'principled_to_sage_like':\s*\{[^}]*elevated_dimension_count:\s*4/s.test(ENGINE_SRC)
+  )
+  assert(
+    "3.2  …and still requires min_dimension_level: 'advanced'",
+    /'principled_to_sage_like':\s*\{[^}]*min_dimension_level:\s*'advanced'/s.test(ENGINE_SRC)
+  )
+
+  console.log('\n=== §4  The NON-consequence: lower rungs still work ===\n')
+
+  // deliberate_to_principled needs 3 dimensions at 'established'. With exactly
+  // 3 evaluated, that is satisfiable — it must NOT have been collaterally
+  // broken. A missing-key implementation would have frozen this too.
+  const establishedCount = gateEvaluatedLevels(allEstablished).filter(
+    l => l === 'established' || l === 'advanced'
+  ).length
+  assert(
+    '4.1  three retained dimensions can still satisfy a count-of-3 rung',
+    establishedCount >= 3,
+    `got ${establishedCount}`
+  )
+  assert(
+    '4.2  gateEvaluatedLevels never yields undefined (the freeze-all-grades bug)',
+    gateEvaluatedLevels(allEstablished).every(l => typeof l === 'string' && l.length > 0)
+  )
+
+  console.log('\n=== §5  SCOPE BOUND: human surfaces are untouched ===\n')
+
+  // The ruling retires the dimension from AGENT-facing surfaces. DimensionScores
+  // is shared with the human mentor profile and rendered on /baseline,
+  // /dashboard and /private-mentor. If a future session "tidies up" by deleting
+  // the key from the shared type, it silently strips a human feature nobody
+  // ruled on — and reintroduces the freeze-all-grades bug pinned at 4.2.
+  assert(
+    '5.1  DimensionScores STILL declares disposition_stability',
+    /DimensionScores\s*=\s*\{[^}]*disposition_stability/s.test(ACCRED_TYPES_SRC)
+  )
+
+  console.log('\n=== §6  Spec 4 stays deactivated ===\n')
+
+  // "The related dispersion measure remains deactivated until the dimension is
+  // restored." Retirement is NOT restoration. Pinned as a comment-level
+  // reminder rather than a flag read, since the flag lives in the environment.
+  assert(
+    '6.1  the engine records that retirement does not unblock Spec 4',
+    /retirement is NOT restoration/i.test(ENGINE_SRC)
+  )
+
+  console.log('')
+  console.log(`Total: ${passCount + failCount}  Pass: ${passCount}  Fail: ${failCount}`)
+  if (failCount > 0) {
+    console.log('')
+    console.log('FAILURES:')
+    for (const f of failures) console.log(`  - ${f}`)
+  }
+}
+
+main()
+process.exit(failCount === 0 ? 0 : 1)
