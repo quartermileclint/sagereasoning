@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  collectBaselineAnswerText,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
@@ -111,6 +119,37 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { responses } = body as { responses: BaselineResponse[] }
+
+    // ── R20a perimeter (AC5; added 2026-08-17, gap closure — PR19-found) ────
+    // The founder-only twin of /api/mentor-baseline-response, with the
+    // identical BaselineResponse shape and the identical unbounded free-text
+    // `answer` field passed straight into runSageReason. Same missing check.
+    //
+    // FOUNDER-ONLY AUTH IS NOT AN EXEMPTION, and this codebase already settles
+    // that: /api/mentor/private/reflect is founder-only and IS a registered
+    // perimeter member. The founder is a practitioner too.
+    //
+    // Runs BEFORE the route's own `responses`-shape validation and before the
+    // LLM call. Flag-off is byte-identical. See r20a-gap-closure.ts.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject(collectBaselineAnswerText(responses)))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { headers: corsHeaders() }
+        )
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
 
     // Validate input
     if (!responses || !Array.isArray(responses) || responses.length === 0) {
@@ -237,6 +276,7 @@ export async function POST(request: NextRequest) {
         auto_saved: true,
         usage_note: 'Refinement insights have been auto-saved to the interaction log and a profile snapshot has been taken. Review refinement_notes to see what the answers revealed.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { headers: corsHeaders() }
     )

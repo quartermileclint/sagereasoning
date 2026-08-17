@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import {
   PATTERN_CONSECUTIVE_MISSES,
   resolvePassionLogPattern,
@@ -44,6 +51,32 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { passion_type, intensity, caught_before_assent, false_judgement, description, linked_journal_entry_id } = body
+
+    // ── R20a perimeter (AC5; added 2026-08-17, gap closure) ─────────────────
+    // This route was OUTSIDE the perimeter. `false_judgement` asks the
+    // practitioner for the belief that drove their own fear, anger, grief or
+    // shame, and `description` for the event itself — the purest instance of
+    // the content class the mentor's B3 ruling placed inside the perimeter
+    // (see r20a-gap-closure.ts). Nothing screened either field.
+    //
+    // Runs BEFORE every field validation below and before the store write.
+    // Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([false_judgement, description]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
 
     // Validate required fields
     if (!passion_type || intensity === undefined || caught_before_assent === undefined || !false_judgement?.trim()) {
@@ -142,6 +175,7 @@ export async function POST(request: NextRequest) {
       success: true,
       event: data,
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Passion log API error:', err)

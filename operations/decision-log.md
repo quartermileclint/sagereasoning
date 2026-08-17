@@ -22344,3 +22344,229 @@ PR6 (not engaged), PR15, PR19, PR20, PR23.
 `2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md`,
 `D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`. Weights BLOCKED; the P0 0h
 hold stands.
+
+## 2026-08-17 — D-MENTOR-RULING-M4-RETURN-ADOPTED
+
+**Decision:** The mentor's ruling on the M-4 return is **ADOPTED AS BINDING**. Verbatim recorded at
+`operations/trust-layer-2026-07/2026-08-17-mentor-ruling-M4-return-verbatim.md` (the mentor's own
+header reads 2026-08-16, carried over from the M-1..M-5 set; the relay is 2026-08-17 — recorded as-is
+rather than silently corrected).
+
+**Tier: `governance`** — recording only. No code, schema, or flag changed by this entry.
+
+**The ruling, in four executable obligations:**
+
+1. **Question 1 CONFIRMS the original M-4 ruling as given.** Retire `disposition_stability` from
+   agent-facing surfaces. **Let `principled → sage_like` sit structurally unreachable** for as long as
+   the dimension cannot honestly certify. The mentor addressed the grade-coupling fact directly and
+   rejected the alternative: *"A grade rung that cannot be reached because the required certification
+   cannot be made honestly is not a broken ladder; it is a ladder that accurately reflects what has
+   not yet been demonstrated. The alternative — adjusting the ladder so the top rung remains reachable
+   despite the missing honest measure — would be the dishonesty, because it would preserve
+   reachability by removing the condition that made reachability meaningful."* And: *"Execute
+   retirement on this alone. No further ruling is needed on the first question."* **Do NOT re-tune the
+   `elevated_dimension_count` thresholds** — that is the named dishonest option.
+2. **Question 2: YES — correct the mean-blindness now**, independently of the perturbation problem,
+   because the two defects affect *different populations*: perturbation affects agents never tested;
+   mean-blindness affects agents whose consistent reasoning is consistently poor. *"An agent with
+   consistently poor reasoning who is never perturbed has both defects working in their favour
+   simultaneously."* The correction: require the mean to meet an adequate floor before certifying
+   `advanced`. **Floor value is the builder's call; the binding part is that the mean must be
+   consulted.** Critically — *"This correction does not restore the dimension to agent-facing
+   surfaces"*; it prevents the second defect being carried forward when the dimension is eventually
+   restored.
+3. **Update the published disclosure to name BOTH defects**, accompanying the retirement, not waiting
+   for the perturbation correction. The live disclosure names only the perturbation limit, so *"an
+   agent reading it would not learn that consistently poor reasoning also certifies as advanced."*
+4. **Spec 4 remains deactivated** *"until the dimension is restored."*
+
+**One tension recorded, deliberately NOT acted on and NOT relitigated:** the original M-4 ruling
+blocked Spec 4 on the "carrying both" grounds — an honest ungraded reading beside a defective graded
+one. Once the defective dimension is retired there is arguably no longer a "both," which on the
+original reasoning would unblock Spec 4. This ruling nonetheless keeps it deactivated until
+*restoration*. **The instruction is unambiguous and is what will be followed — Spec 4 stays off.** The
+note exists so a future session does not read retirement as having silently unblocked it, nor mistake
+the tension for an oversight it may resolve on its own authority.
+
+**Process note (honest):** the return itself was vindicated — *"The return is warranted. Both facts
+change the cost of the remedy, and one of them adds a second defect that the original ruling could not
+have named."* But the mentor also confirmed what this session's own PR19 review had already flagged:
+the ruling's own conditional already resolved to retire, so the brief's §4 was rewritten before
+sending to say so plainly rather than re-asking a settled question. The brief committed to executing
+on a "confirm as given" answer without returning a third time. **That commitment now binds.**
+
+**M-4 EXECUTION IS CARRIED — nothing was built under this ruling in this session.** The founder
+directed the four-route (now six-route) R20a perimeter gap ahead of it on the grounds that a live
+safety hole outranks an inflated dimension reading.
+
+**Rollback path:** `git revert` the records commit; the ruling itself stands as record regardless.
+
+**Rules served:** R18 (the disclosure obligation this creates), R13, PR19, PR20 (applied one step
+later than its literal pre-ruling scope, stated as such in the brief).
+
+**Status:** Adopted. Cross-references:
+`2026-08-17-mentor-ruling-M4-return-verbatim.md`,
+`2026-08-17-M4-disposition-stability-mechanism-facts-FOR-RULING.md`,
+`2026-08-17-M4-mentor-consultation-outbound.md`,
+`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` §M-4,
+`D-R2B-SUCCESSOR-M4-RETURNED-M5A-CORRECTED-M5B-SCOPED-PR19-FOLDED`. Weights BLOCKED; P0 0h hold stands.
+
+---
+
+## 2026-08-17 — D-R20A-PERIMETER-GAP-CLOSURE-SIX-ROUTES-BUILT-DARK-PR19-FOLDED
+
+**Decision:** Closed the **R20a perimeter gap** — **SIX** authenticated human-facing routes that
+accepted practitioner free text and ran **no distress check at all**, none of them registered in
+`HUMAN_FACING_POST_ROUTES`, so the invocation-guard battery could not see any of them. Built **DARK**
+behind one new flag, **UNSET everywhere**. PR19 run and fully folded, including **two HIGH defects the
+build itself introduced** and **two additional unprotected routes the review found**.
+
+**Tier: `code-critical`** (R20a perimeter + AC5) — but **nothing activated**: no flag set, no schema,
+no migration, nothing pushed. **AC7 not engaged** (no live op performed). **PR19 discharged.**
+
+### The gap, and how it arose
+
+| # | Route | Practitioner free text | Found by |
+|---|---|---|---|
+| 1 | `/api/mentor/passion-classify` | `description`, `user_diagnosis` | pass 2 |
+| 2 | `/api/mentor/passion-log` | `false_judgement`, `description` | pass 2 |
+| 3 | `/api/skill/sage-classify` | `input`, `context` | pass 1 |
+| 4 | `/api/skill/sage-prioritise` | item descriptions, objective/criteria/stakeholders | pass 1 |
+| 5 | `/api/mentor-baseline-response` | array of `answer` fields, **unbounded — no length validation** | **PR19** |
+| 6 | `/api/mentor/private/baseline-response` | same shape, founder-only twin | **PR19** |
+
+**Root cause of the shape, recorded so it is not read as intentional:** the 13 sibling skill routes
+are built on `createContextTemplateHandler`, which screens at `context-template.ts:112`.
+`sage-classify` and `sage-prioritise` have their **own** `route.ts` and inherited nothing. The passion
+and baseline-response routes never had a shared handler to inherit from.
+
+**The tell that caught routes 5 and 6:** `/api/score-scenario` accepts the **same** field shape (a
+practitioner's free-text answer to a posed question) and **does** call
+`enforceDistressCheck(detectDistressTwoStage(...))`. Its siblings did not. **Asymmetry between
+siblings is the diagnostic** for this defect class.
+
+**⚠ THE COUNT MOVED TWICE — 2 → 4 → 6.** Three passes over three different slices of `api/`. **Six is
+NOT claimed final**, and the honest reason is recorded in both the module header and the registry: the
+guard battery has **no filesystem-level exhaustiveness check**, so it is purely additive and a seventh
+route of this shape would go unnoticed — precisely the failure that let these six persist. **Closing
+that structurally is the highest-value named follow-up from this session.**
+
+### What was built
+
+- **NEW** `website/src/lib/r20a-gap-closure.ts` — one shared module: the flag
+  (`isR20aGapClosureEnabled`), `composeDistressSubject` (per-field cap 5000 + a 20-field total bound,
+  joined by a **non-whitespace** `---` separator so two benign adjacent fields cannot bridge into a
+  false acute across the seam — the `/api/score-conversation` F4 finding), two array collectors
+  (`collectPrioritiseItemText` covering all three `items` shapes the route parses;
+  `collectBaselineAnswerText` taking `answer` only, never the system-generated `question_text`), and
+  `buildMildSupportResources(variant)` in two wordings.
+- **Route-level check on all six**, running **before each route's own field validation** (so distress
+  in an otherwise-invalid body still catches) and **before any cache read or LLM call**.
+  Acute/moderate → immediate redirect, no store write, no LLM call. Mild → non-blocking, with
+  `support_resources` folded onto **every** success path.
+- **Registry:** all six added to `HUMAN_FACING_POST_ROUTES` and `FLAG_GATED_ROUTE_LEVEL_ROUTES`,
+  taking the perimeter to **20 route-level + 2 substrate-gate**.
+
+**ONE flag for all six, deliberately** — `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED`. Every prior addition
+took its own flag; these six share one because they are one remediation of one gap, and **a
+half-closed safety perimeter is worse than a fully-open one, because it invites the belief the gap was
+handled.** Atomic activation removes the failure mode where five flags get set and the sixth is
+forgotten. The standing memory `shared-flag-dark-is-per-flag-not-per-feature` is respected by stating
+explicitly that this flag governs exactly these six routes, rides on no base flag, and gates no other
+feature. Staged activation (e.g. the passion pair first) remains a one-line split per route.
+
+### The AC5 classification — and an honesty correction PR19 forced
+
+Two different grounds, recorded separately rather than flattened:
+
+- **Passion + baseline-response routes** — argued inside on the reasoning the mentor's **B3** ruling
+  applied to `/impulse`: the content *is* the practitioner's own fear, anger, grief and shame, and
+  *"the asymmetry favours inclusion."*
+- **Skill routes** — inside on the ordinary ground that every human-facing free-text evaluation route
+  is inside (the five score routes, `/reflect`, the journal routes).
+
+**PR19 correctly flagged the original framing as over-confident, and it was corrected: B3 is scoped to
+`/impulse` (S7) ALONE.** It says nothing about any of these six. The extension is **the builder's
+argued analogy, not a mentor ruling**, and the module now states that provenance *before* the argument
+so no future reader cites the block as though the mentor had decided it. **Ratifying the membership is
+a mentor question and is NOT foreclosed by this build** — which the dark flag makes safe, since
+nothing is asserted publicly ahead of a ruling.
+
+**The recorded exclusion for the Remaining-Principles family is UNCHANGED** (`/premeditatio`,
+`/hupexairesis`, `/oikeiosis` + `/extension`, `/view-from-above`, `/morning`, `/sage-compass`,
+`/logos` remain outside by family precedent, carrying `SupportFooter`). That standing AC5 question is
+not resolved here and was not quietly widened.
+
+### PR19 — 6 dimensions, and it earned its cost twice
+
+**5 CONFIRMED WRONG, all fixed at the root.** Two were defects **this build introduced**:
+
+1. **(HIGH ×2) The mild-severity crisis resources were silently dropped on the primary success path**
+   of `sage-classify` and `sage-prioritise` — attached on the *cached* return, missing on the
+   fresh-LLM return that most requests take. A practitioner flagged mild would have received crisis
+   resources only on a cache hit. **Root cause worth carrying forward: an `Edit` with
+   `replace_all: true` matched the 6-space-indented cached return, while the primary return is
+   4-space-indented — the tool reported "all occurrences replaced" while hitting one of two.** A
+   `replace_all` across differently-indented call sites is not a safe way to touch every return path.
+2. **(HIGH ×2) Routes 5 and 6** — found by the review's independent third sweep, wired in the fold.
+3. **(MEDIUM) The B3 over-attribution** above.
+
+**Carried, not fixed:** the missing filesystem-level **exhaustiveness check** (MEDIUM — the structural
+backstop); an observation that the guard's regexes verify the flag-call and the distress-call exist
+independently but **not that they are nested in the same conditional**, so a future refactor
+decoupling them would pass; and **two weaker candidate routes deliberately NOT wired** —
+`mentor-journal-week` + its private twin (`recent_activity`, more often a system-composed summary than
+personal disclosure) and `mentor-appendix` (a storage path for content that should be screened
+upstream at route 5, not an independent evaluation surface). Both are founder calls.
+
+**Dimension outcomes:** flag-off byte-identity **0 findings** (proven per-route, plus no import-time
+side effects); ordering/acute-path/composition clean on all routes; registry paths, flag names, and
+the assertion-count delta all independently reproduced; `getCrisisResources()`'s shape traced to
+source rather than assumed from the `/impulse` precedent.
+
+### Verification
+
+`tsc` **0** · `npm run build` **exit 0**, all six routes registered ·
+**r20a-invocation-guard 186/0** (126 at session open; +60 all accounted for by real new coverage) ·
+`r20a-classifier-session-id` 15/0 · flag confirmed **unset in every env file and the process env**.
+
+**Mutation-verified TWICE, both directions:** breaking `enforceDistressCheck` in `passion-log` →
+2 failures → restored 186/0; and again on the PR19-found `mentor/private/baseline-response` →
+2 failures → restored 186/0. **The battery is non-vacuous for both the original and the added routes.**
+
+### Risk classification
+
+`code-critical` class under 0d-ii (R20a perimeter, AC5) — **built dark; Critical Change Protocol not
+discharged because nothing was activated.** AC7 not engaged. PR19 discharged. PR23 honoured (the
+`nextjs-route-export-validation` memory drove running `npm run build`, not just `tsc`, on six
+`route.ts` changes).
+
+### Rollback path
+
+`git revert` the commit; the flag is unset either way, so nothing is live regardless. Post-activation:
+unset `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` + redeploy (byte-identical flag-off).
+
+### ⚠ Do NOT bundle
+
+`website/src/data/environmental-context.json` is modified in the working tree — an **unrelated** stale
+weekly environmental scan, flagged by PR19. It must be committed separately or reverted, or this
+commit's diff will not match its stated scope.
+
+### Carried
+
+**Activation** is its own founder-walked Critical step (AC5 + AC7): set the flag, redeploy, and smoke
+**both directions on every route** — an acute submission redirects with zero write, a benign one saves.
+Plus: the **exhaustiveness-check backstop** (highest value); the two weaker candidate routes; whether
+to put the AC5 membership to the mentor for ratification; and M-4's own execution (retirement +
+mean-floor + dual-defect disclosure), now fully ruled and unstarted.
+
+**Rules served:** R20a, AC5, AC7 (not engaged), KG2 (classifier model unchanged — Haiku), PR6 (not
+engaged), PR15 (reuses the existing two-stage classifier + shared crisis-resource source), PR19, PR23.
+
+**Status:** Adopted. Cross-references:
+`website/src/lib/r20a-gap-closure.ts`,
+`operations/trust-layer-2026-07/2026-08-17-M5b-vulnerability-flag-write-path-SCOPE.md` §6 (where the
+gap was first recorded), `D-MENTOR-RULING-M4-RETURN-ADOPTED`,
+`D-R2B-SUCCESSOR-M4-RETURNED-M5A-CORRECTED-M5B-SCOPED-PR19-FOLDED`,
+`D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE` (the precedent followed).
+Weights BLOCKED; the P0 0h hold stands.

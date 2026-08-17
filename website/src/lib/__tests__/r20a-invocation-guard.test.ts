@@ -138,6 +138,64 @@ const HUMAN_FACING_POST_ROUTES = [
   // gate's LLM call AND before the route's own field validation. Dark behind
   // SUBSTRATE_IMPULSE_R20A_ENABLED; flag-off is byte-identical.
   'src/app/api/mentor/impulse/route.ts',
+  // ── GAP CLOSURE (2026-08-17; AC5 fifteenth through EIGHTEENTH route-level
+  // protocol). Four routes found OUTSIDE this perimeter, each accepting human
+  // practitioner free text behind requireAuth (up to TEXT_LIMITS.medium per
+  // field) with NO distress check of any kind, and each absent from this
+  // registry — so this battery could not see them.
+  //
+  // HOW THE GAP AROSE, recorded so the shape is not read as intentional: the
+  // 13 sibling skill routes are built on createContextTemplateHandler, which
+  // screens at context-template.ts:112. sage-classify and sage-prioritise have
+  // their OWN route.ts and inherited nothing. The passion routes never had a
+  // shared handler to inherit from.
+  //
+  // TWO DIFFERENT GROUNDS FOR MEMBERSHIP — do not flatten them:
+  //   • passion-classify / passion-log are inside on the mentor's B3 ground
+  //     (the same ruling that placed /impulse inside against family
+  //     precedent): their whole subject is the practitioner's own fear, anger,
+  //     grief and shame, and passion-log.false_judgement asks specifically for
+  //     the belief that drove it. Arguably a PURER instance than /impulse.
+  //   • sage-classify / sage-prioritise are inside on the ordinary ground that
+  //     every human-facing free-text evaluation route is inside (the five
+  //     score routes, /reflect, the journal routes). A practitioner in crisis
+  //     does not confine their words to the routes designed to receive them.
+  //
+  // The recorded exclusion for the OTHER Remaining-Principles tools
+  // (/premeditatio, /hupexairesis, /oikeiosis + /extension, /view-from-above,
+  // /morning, /sage-compass, /logos) is UNCHANGED — they remain outside by
+  // family precedent, carrying SupportFooter. That standing AC5 question is
+  // NOT resolved by this closure.
+  //
+  // All four share ONE flag (SUBSTRATE_R20A_GAP_CLOSURE_ENABLED) rather than
+  // one each: they are one remediation of one gap, and a half-closed safety
+  // perimeter is worse than a fully-open one because it invites the belief the
+  // gap was handled. See src/lib/r20a-gap-closure.ts for the full rationale.
+  'src/app/api/mentor/passion-classify/route.ts',
+  'src/app/api/mentor/passion-log/route.ts',
+  'src/app/api/skill/sage-classify/route.ts',
+  'src/app/api/skill/sage-prioritise/route.ts',
+  // ── The SAME gap closure, two MORE routes found by the PR19 review of the
+  // first four (AC5 nineteenth + twentieth route-level protocol). Both accept
+  // an array of practitioner-authored free-text `answer` fields with NO length
+  // validation and concatenate them straight into the runSageReason LLM input.
+  //
+  // The finding that settles it: /api/score-scenario accepts the SAME field
+  // shape (a practitioner's free-text answer to a posed question) and DOES call
+  // enforceDistressCheck(detectDistressTwoStage(...)). These two did not. The
+  // asymmetry between siblings was the tell.
+  //
+  // Founder-only auth is NOT an exemption for the /private twin:
+  // /api/mentor/private/reflect is founder-only and is already a member.
+  //
+  // ⚠ THE COUNT HAS MOVED TWICE: 2 → 4 (second pass) → 6 (PR19's third,
+  // independent pass). Each pass over a different slice of api/ found more.
+  // DO NOT treat 6 as proven final. There is no filesystem-level exhaustiveness
+  // check in this file (see the named follow-up in the gap-closure decision-log
+  // entry) — this registry is purely additive, so a structurally identical
+  // SEVENTH route would not be caught by anything here.
+  'src/app/api/mentor-baseline-response/route.ts',
+  'src/app/api/mentor/private/baseline-response/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -194,6 +252,41 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     route: 'src/app/api/mentor/impulse/route.ts',
     flag: 'isImpulseR20aEnabled',
     flagSource: './r20a',
+  },
+  // ── GAP CLOSURE (2026-08-17): all four share ONE flag, deliberately, so the
+  // perimeter cannot be half-closed by a forgotten flag. Unlike /impulse the
+  // module lives in src/lib/ rather than colocated, because it serves routes in
+  // two different trees (api/mentor/ and api/skill/).
+  {
+    route: 'src/app/api/mentor/passion-classify/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    route: 'src/app/api/mentor/passion-log/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    route: 'src/app/api/skill/sage-classify/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    route: 'src/app/api/skill/sage-prioritise/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    // PR19-found, same gap, same flag.
+    route: 'src/app/api/mentor-baseline-response/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
+  },
+  {
+    route: 'src/app/api/mentor/private/baseline-response/route.ts',
+    flag: 'isR20aGapClosureEnabled',
+    flagSource: 'r20a-gap-closure',
   },
 ]
 

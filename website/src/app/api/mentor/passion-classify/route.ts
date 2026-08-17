@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
@@ -39,6 +46,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { description, user_diagnosis, event_id } = body
 
+    // ── R20a perimeter (AC5; added 2026-08-17, gap closure) ─────────────────
+    // This route was OUTSIDE the perimeter and accepted practitioner free text
+    // about their own fear, anger, grief and shame with no distress check at
+    // all. Inside on the mentor's B3 ground (see r20a-gap-closure.ts).
+    //
+    // Runs BEFORE the route's own field validation, so distress in an
+    // otherwise-invalid body still catches, and BEFORE any cache read or LLM
+    // call. Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([description, user_diagnosis]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('passion')
+      }
+    }
+
     if (!description?.trim() || !user_diagnosis?.trim()) {
       return NextResponse.json(
         { error: 'Required fields: description, user_diagnosis' },
@@ -64,7 +96,7 @@ export async function POST(request: NextRequest) {
       // key is (description, user_diagnosis), which is not user- or
       // event-specific, while the pattern row reads this user's history.
       const suggested = event_id ? await computeSuggestedPractice(userId, event_id, cached.classified_type) : null
-      return NextResponse.json({ ...cached, cached: true, ...(suggested ? { suggested_practice: suggested } : {}) })
+      return NextResponse.json({ ...cached, cached: true, ...(suggested ? { suggested_practice: suggested } : {}), ...(mildSupport ? { support_resources: mildSupport } : {}) })
     }
 
     // Load Stoic passion context for the classifier
@@ -143,6 +175,7 @@ Classify this passion event.`,
       cached: false,
       latency_ms: latencyMs,
       ...(suggested ? { suggested_practice: suggested } : {}),
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
     })
   } catch (err) {
     console.error('Passion classify API error:', err)

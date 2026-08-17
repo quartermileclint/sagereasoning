@@ -9,6 +9,13 @@ import {
   corsHeaders,
   corsPreflightResponse,
 } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
@@ -66,6 +73,33 @@ export async function POST(request: NextRequest) {
       categories?: ClassifyCategory[]
       context?: string
       confidence_threshold?: number
+    }
+
+    // ── R20a perimeter (AC5; added 2026-08-17, gap closure) ─────────────────
+    // This route was OUTSIDE the perimeter with no distress check at all. Its
+    // 13 sibling skill routes get one from createContextTemplateHandler
+    // (context-template.ts:112); this route has its own handler and inherited
+    // nothing. Inside on the ordinary ground that every human-facing free-text
+    // evaluation route is inside — a practitioner in crisis does not confine
+    // their words to the routes designed to receive them.
+    //
+    // Runs BEFORE the route's own validation and before any LLM call.
+    // Flag-off is byte-identical. See r20a-gap-closure.ts.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const gate = await enforceDistressCheck(
+        detectDistressTwoStage(composeDistressSubject([input, context]))
+      )
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('skill')
+      }
     }
 
     if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -130,7 +164,10 @@ export async function POST(request: NextRequest) {
             'If input was flagged urgent or held for review, evaluate with sage-reason for deeper analysis.',
         },
       })
-      return NextResponse.json(envelope, { headers: corsHeaders() })
+      return NextResponse.json(
+        { ...envelope, ...(mildSupport ? { support_resources: mildSupport } : {}) },
+        { headers: corsHeaders() },
+      )
     }
 
     // ── Context layers injection ──────────────────────────────────
@@ -225,7 +262,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(envelope, { headers: corsHeaders() })
+    return NextResponse.json(
+      { ...envelope, ...(mildSupport ? { support_resources: mildSupport } : {}) },
+      { headers: corsHeaders() },
+    )
   } catch (error) {
     console.error('sage-classify API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
