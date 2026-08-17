@@ -22731,3 +22731,86 @@ live, so these two are protected the moment this commit deploys**).
 `operations/trust-layer-2026-07/2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`,
 `operations/trust-layer-2026-07/2026-08-17-public-honesty-batch-signoff-package.md`.
 Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-17 — D-MENTOR-RULINGS-LIMITATIONS-PERIMETER-PRACTICE-FAMILY-AND-M4-BLAST-RADIUS-ADOPTED
+
+**Decision:** Two mentor rulings relayed together are **ADOPTED AS BINDING**. Verbatim at
+`operations/trust-layer-2026-07/2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`
+and `…/2026-08-17-mentor-ruling-M4-blast-radius-verbatim.md`.
+
+**Tier: `governance`** — recording only. No code, schema, or flag changed by this entry.
+**Nothing was built under either ruling in this session.**
+
+### Ruling 1 — `/limitations`, perimeter ratification, practice family
+
+1. **A3 is the resolution, conditionally**: close the coverage gap rather than disclose it. The
+   `/limitations` page carries the ORIGINAL "every time" wording **once the perimeter change is
+   confirmed live**. A1 is the fallback **and must return to the mentor before publishing** — its
+   wording needs an adjustment so it does not frame the static footer as an adequate substitute or
+   imply the gap is a deliberate choice made in the practitioner's interest. **A2 is rejected**:
+   naming routes tells a practitioner in distress exactly where they will not be caught, which
+   *"serves no protective purpose and carries real cost."*
+2. **The six 2026-08-17 gap-closure routes are RATIFIED.** The builder's B3 extension *"was correctly
+   argued and is now a ruling rather than an analogy."* The module header in `r20a-gap-closure.ts`
+   stating the provenance as a builder's analogy is **superseded** and must be updated.
+3. **The six practice routes SHOULD JOIN the perimeter** — `premeditatio`, `hupexairesis`,
+   `oikeiosis`, `view-from-above`, `morning`, `sage-compass`. The family precedent
+   *"reflects the original scoping of B3 to `/impulse` alone, not a considered judgement that the
+   practice family is lower-risk. It is not lower-risk. It is the family where the material is most
+   likely to surface acute distress."* `/view-from-above` is named as the clearest case: *"That is
+   the wrong configuration."* **Critical AC5.**
+4. **The filesystem-level sweep is now a RULED PREREQUISITE for publishing any coverage claim** —
+   it was previously the highest-value follow-up. *"The honest claim is only as strong as the
+   verification behind it."* If it cannot be made exhaustive, the wording must say so without naming
+   routes.
+5. **"Nothing happens afterwards" is the more important half** and must stay prominent. **M-5 (the
+   distress write path) remains P0 and is NOT discharged** by closing the coverage gap.
+
+### Ruling 2 — M-4 blast radius
+
+**Option (c), with a qualification.** Retire `disposition_stability` from agent-facing display **and
+from the `principled → sage_like` gate only**; **retain it unchanged as an input to the three lower
+rungs**; **retune no threshold**.
+
+- **Option (a) rejected** — the 20 newly-allowed promotions at `habitual → deliberate` are *"an
+  unintended consequence that runs in the wrong direction… accepting false promotion at a lower rung
+  as collateral damage is not a defensible reading of that purpose."*
+- **Option (b) rejected** — the builder's preserve-vs-remove distinction *"does not survive
+  scrutiny… the direction of the adjustment does not change what is being done."*
+- **The qualification:** the disclosure must name that the signal **remains a gate input at three
+  rungs**, why, and that it cannot distinguish tested from untested consistency **at any rung**.
+- **Nothing ships until the disclosure is updated to match the scoped retirement** — obligations 1
+  and 4 are now a **gate on** the retirement, not a follow-up to it.
+- **Spec 4 remains deactivated.**
+
+**The mentor endorsed the process, not only the outcome:** *"The hold was correct… exhaustive
+enumeration before confident claim, and an honest note on the internal error that reversed the first
+conclusion. That note is not incidental."*
+
+### ⚠ The held build does NOT implement the ruled option — recorded so it is not restored as-is
+
+`2026-08-17-M4-retirement-HELD/engine-change.patch.md` implements a **global** exclusion:
+`gateEvaluatedLevels()` filters the dimension out of both predicates, and both are called for **every**
+rung. **That is option (a)** — the rejected one. Restoring it unchanged would ship exactly the
+loosening this ruling forbids.
+
+Option (c) needs the exclusion **conditional on the rung**. Verified first-hand that this is
+tractable: `checkUpgrade` resolves `thresholdKey` at `grade-transition-engine.ts:284`, sixteen lines
+before both predicate calls at `:300`/`:301`. The held test must be **rewritten**, not merely fixed
+(its §1.2 asserts the global behaviour), and the three lower rungs' behaviour must be **pinned as
+unchanged** so a later refactor cannot silently reintroduce the loosening.
+
+**Rollback path:** `git revert` the records commit; both rulings stand as record regardless.
+
+**Rules served:** R20a, AC5, R18, R19c, PR20, PR6 (engaged at the builds these rulings authorise).
+
+**Status:** Adopted. Cross-references:
+`2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`,
+`2026-08-17-mentor-ruling-M4-blast-radius-verbatim.md`,
+`2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`,
+`2026-08-17-M4-retirement-grade-gate-side-effects-FOR-RULING.md`,
+`2026-08-17-mentor-ruling-M4-return-verbatim.md` (scoped, not overturned, by ruling 2),
+`D-R20A-GAP-CLOSURE-ACTIVATED-LIVE-PLUS-TWO-MORE-ROUTES-M4-MEAN-FLOOR-PR19-FOLDED`.
+Weights BLOCKED; the P0 0h hold stands.

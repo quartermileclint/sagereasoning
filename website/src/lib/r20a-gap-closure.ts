@@ -73,15 +73,30 @@
  * THE AC5 CLASSIFICATION — two different reasons, one perimeter
  * ===========================================================================
  *
- * ⚠ PROVENANCE, STATED BEFORE THE ARGUMENT (corrected 2026-08-17 after PR19
- * review flagged the original framing as over-confident):
+ * ⚠ PROVENANCE — SUPERSEDED 2026-08-17 (LATER SAME DAY): THIS IS NOW RULED.
  *
- *   **The B3 ruling is scoped to /impulse (S7) ALONE.** It says nothing about
- *   passion-classify, passion-log, or either baseline-response route. The
- *   reasoning below EXTENDS B3 by analogy to routes the mentor has not ruled
- *   on. That extension is the BUILDER'S judgement, not a mentor ruling, and it
- *   is recorded as such so no future reader cites this block as though the
- *   mentor had decided it.
+ *   The mentor RATIFIED these routes' membership, verbatim: the builder's
+ *   extension "was correctly argued and is now a ruling rather than an
+ *   analogy." Recorded at
+ *   operations/trust-layer-2026-07/
+ *     2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md
+ *   (adopted: D-MENTOR-RULINGS-LIMITATIONS-PERIMETER-PRACTICE-FAMILY-AND-M4-
+ *   BLAST-RADIUS-ADOPTED).
+ *
+ *   The SAME ruling also brings the six Remaining-Principles practice routes
+ *   INSIDE the perimeter (premeditatio, hupexairesis, oikeiosis + extension,
+ *   view-from-above, morning, sage-compass) — so the "NOT AFFECTED" note
+ *   further down this header is ALSO superseded and is marked there.
+ *
+ *   The original, now-historical framing is retained below so the arc is
+ *   legible — it was correct when written, and PR19 was right to force it:
+ *
+ *   > **The B3 ruling is scoped to /impulse (S7) ALONE.** It says nothing about
+ *   > passion-classify, passion-log, or either baseline-response route. The
+ *   > reasoning below EXTENDS B3 by analogy to routes the mentor has not ruled
+ *   > on. That extension is the BUILDER'S judgement, not a mentor ruling, and it
+ *   > is recorded as such so no future reader cites this block as though the
+ *   > mentor had decided it.
  *
  *   The extension is a defensible reading — the asymmetry argument B3 makes is
  *   general, and these routes' content class is the one B3 describes — but the
@@ -117,12 +132,31 @@
  * practitioner types, and a practitioner in crisis does not confine their
  * words to the routes designed to receive them.
  *
- * NOT AFFECTED — the recorded exclusion stands: /premeditatio, /hupexairesis,
- * /oikeiosis (+ /oikeiosis/extension), /view-from-above, /morning,
- * /sage-compass, /logos remain OUTSIDE the perimeter by the recorded family
- * precedent, carrying SupportFooter as their crisis exit. This module does not
- * touch them. Whether that family should join is a standing, separate AC5
- * question and is NOT resolved here.
+ * ⚠ SUPERSEDED 2026-08-17 (LATER SAME DAY) — THE PRACTICE FAMILY IS NOW RULED
+ * INSIDE THE PERIMETER, AND IS NOT YET BUILT. The standing AC5 question this
+ * paragraph left open has been answered: /premeditatio, /hupexairesis,
+ * /oikeiosis (+ /oikeiosis/extension), /view-from-above, /morning and
+ * /sage-compass SHOULD JOIN. The mentor, verbatim: the family precedent
+ * "reflects the original scoping of B3 to /impulse alone, not a considered
+ * judgement that the practice family is lower-risk. It is not lower-risk. It is
+ * the family where the material is most likely to surface acute distress."
+ * /view-from-above was named the clearest case — a route for reframing
+ * catastrophic loss carrying only a static footer: "That is the wrong
+ * configuration."
+ *
+ * ⚠ THOSE SIX ROUTES ARE STILL UNPROTECTED AS OF THIS COMMENT. The build is a
+ * Critical AC5 change and is the successor session's Item 1b. /logos is the one
+ * genuine non-member — a static page with no route and no free-text input, so
+ * out of scope rather than exempted.
+ *
+ * The original, now-historical framing is retained so the arc is legible:
+ *
+ *   > NOT AFFECTED — the recorded exclusion stands: /premeditatio, /hupexairesis,
+ *   > /oikeiosis (+ /oikeiosis/extension), /view-from-above, /morning,
+ *   > /sage-compass, /logos remain OUTSIDE the perimeter by the recorded family
+ *   > precedent, carrying SupportFooter as their crisis exit. This module does not
+ *   > touch them. Whether that family should join is a standing, separate AC5
+ *   > question and is NOT resolved here.
  *
  * ===========================================================================
  * WHY ONE FLAG AND NOT SIX

@@ -63,14 +63,42 @@ walk over `src/app/api/`. A new route of the same shape is caught by nothing.
 (a) authenticates a human (`requireAuth`) and (b) accepts free text is **either** a registered
 perimeter member **or** on an explicit, documented exclusion list.
 
+**⚠ RULED 2026-08-17: this sweep is now a PREREQUISITE, not a follow-up.** The mentor:
+*"A filesystem-level sweep that produces a definitive count is a prerequisite for publishing 'every
+time' honestly… The honest claim is only as strong as the verification behind it."* No coverage claim
+may be published in any form until this exists.
+
 The exclusion list must name, with reasons:
-- the **Remaining-Principles family** — `/premeditatio`, `/hupexairesis`, `/oikeiosis` (+
-  `/extension`), `/view-from-above`, `/morning`, `/sage-compass`, `/logos` — outside by recorded
-  family precedent, carrying `SupportFooter`. **This is a standing, unresolved AC5 question, not a
-  settled exemption** (see Item 4).
+- **NOT the Remaining-Principles family — they are now RULED INSIDE the perimeter** (see Item 1b).
+  Only `/logos` stays out, and confirm first-hand why: it is a static page with no route and no
+  free-text input, so it is out of scope rather than exempted.
 - each agent-facing-by-design route.
 
 **Mutation-verify it**: add a fake unprotected route, confirm the battery fails, remove it.
+
+**If the sweep cannot be made exhaustive**, the ruling is explicit about the fallback: the published
+wording must say the check runs on the tools that evaluate what you write and the practice exercises,
+**without claiming completeness** — and **without naming routes**.
+
+---
+
+## Item 1b — Bring the six practice routes inside the perimeter (`code-critical`, AC5)
+
+**RULED 2026-08-17.** `premeditatio`, `hupexairesis`, `oikeiosis` (+ `/extension`),
+`view-from-above`, `morning`, `sage-compass` join the perimeter. The mentor:
+
+> *"The fact that they sat outside by recorded family precedent reflects the original scoping of B3
+> to `/impulse` alone, not a considered judgement that the practice family is lower-risk. It is not
+> lower-risk. It is the family where the material is most likely to surface acute distress."*
+
+`/view-from-above` is named as the clearest case — a route for reframing catastrophic loss, carrying
+only a static footer: *"That is the wrong configuration."*
+
+Follow the established pattern exactly (`r20a-gap-closure.ts`; check before field validation and
+before any LLM/DB call; mild folds onto **every** success path; registry + count floors bumped **in
+the same edit**). **Decide deliberately whether these share the existing flag or take their own** —
+the existing one is already live, so adding routes to it protects them on deploy with no separate
+activation step. That is a safety advantage and a rollback-granularity cost; name the choice.
 
 **Two candidates PR19 named and last session deliberately did NOT wire — founder calls:**
 `mentor-appendix` (persists baseline answers independently of the route whose check gates them —
@@ -80,37 +108,41 @@ system-composed than typed).
 
 ---
 
-## Item 2 — Two mentor questions, if answers have returned
+## Item 2 — BOTH mentor questions are RULED (2026-08-17). Nothing here is open.
 
-**Neither is the AI's to decide. But only ONE is an actual relay-ready brief, and neither is known to
-have been relayed** — the 2026-08-17 session ended without confirming either was sent. Check with the
-founder before assuming an answer is merely pending.
+Verbatim, binding:
+`operations/trust-layer-2026-07/2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`
+and `…/2026-08-17-mentor-ruling-M4-blast-radius-verbatim.md`.
+Adopted under `D-MENTOR-RULINGS-LIMITATIONS-PERIMETER-PRACTICE-FAMILY-AND-M4-BLAST-RADIUS-ADOPTED`.
+**Read both in full before building — verbatim wins over this summary.**
 
-**(a) The grade-gate side effects — brief IS written and relay-ready.**
-`operations/trust-layer-2026-07/2026-08-17-M4-retirement-grade-gate-side-effects-FOR-RULING.md`.
+**(a) `/limitations` → A3: close the gap, do not disclose it.** The page carries the ORIGINAL
+"every time" wording, but **only after** the practice-family perimeter change is confirmed LIVE and
+the filesystem sweep is complete. Both are prerequisites. If A3 cannot be completed first, **A1 is
+the fallback and MUST return to the mentor before publishing** — its wording needs an adjustment so
+it does not frame the static footer as an adequate substitute. **A2 is rejected outright.**
+Keep **"nothing happens afterwards"** prominent — the ruling names it the more important half.
 
-Retiring `disposition_stability` from the gate changes **three rungs the ruling never addressed, in
-BOTH directions**. `dimensionsMeetFloor` uses `.every()`, so dropping a dimension makes the floor
-EASIER everywhere; `dimensionsMeetElevated` counts, so it gets HARDER everywhere. Enumerated over all
-256 combinations (`2026-08-17-M4-retirement-HELD/rung-analysis.mjs`, runnable):
-`habitual_to_deliberate` goes 72 → **80** passing combinations — **20 newly ALLOWED**, i.e. NET MORE
-PERMISSIVE. `deliberate_to_principled` 5 → 4. The top rung 1 → 0, as ruled.
+**(b) M-4 → option (c): retire from display and the TOP RUNG ONLY.** Retain the signal unchanged as
+an input to the three lower rungs. **Retune no threshold** (option (b) rejected: *"the direction of
+the adjustment does not change what is being done"*). The 20 newly-allowed promotions at
+`habitual → deliberate` are why option (a) was rejected — *"an unintended consequence that runs in
+the wrong direction."*
 
-**A loosening is the serious direction**: agents the system previously judged not to qualify now
-promote, *because* a signal was found too defective to trust. The only compensating fix is retuning
-lower-rung thresholds — the move the ruling itself calls dishonest.
+### ⚠ THE HELD BUILD IMPLEMENTS THE REJECTED OPTION — DO NOT RESTORE IT AS-IS
 
-**The built work is preserved** in `2026-08-17-M4-retirement-HELD/` (`engine-change.patch.md` is the
-ONLY copy — the original was discarded by `git checkout` and is in no git object). Its restore
-instructions include a **known defect in the held test's §4** that must be fixed before the test is
-trusted, and the code comment claiming "lower rungs are unaffected" is **false** and flagged inline.
+`2026-08-17-M4-retirement-HELD/engine-change.patch.md` filters the dimension out of **both**
+predicates, and both run for **every** rung. **That is option (a).** Restoring it unchanged ships
+exactly the loosening the ruling forbids.
 
-**(b) The `/limitations` crisis disclosure wording — brief IS written and relay-ready.**
-`operations/trust-layer-2026-07/2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`.
-The founder-signed Option A contains a false clause ("every time"); six practice routes sit outside
-the perimeter. The brief bundles two adjacent questions: ratifying the six original gap-closure
-routes' AC5 membership (argued by analogy from B3, which covers `/impulse` alone), and whether the
-practice family should join.
+Option (c) needs the exclusion **conditional on the rung**. Verified tractable: `checkUpgrade`
+resolves `thresholdKey` at `grade-transition-engine.ts:284`, sixteen lines before both predicate
+calls at `:300`/`:301`. **The held test must be REWRITTEN, not fixed** — its §1.2 asserts the global
+behaviour, and its §4 carries a separate known defect. **Pin the three lower rungs as behaviourally
+UNCHANGED** (use `rung-analysis.mjs`) so a later refactor cannot silently reintroduce the loosening.
+
+**Nothing ships until the disclosure lands.** The ruling makes obligations 1 and 4 a **gate on** the
+retirement, not a follow-up to it.
 
 ---
 
@@ -128,11 +160,18 @@ breaks canonical JSON and every signature test while fixing nothing. Known emiss
 column, mapped both directions), `accreditation-card.ts`, `agent-hand-back-report.ts`.
 **The migration question — drop the column, or leave it dead — is a founder call.**
 
-**(4) Update the published disclosure to name BOTH defects.** The live text names only the
-perturbation limit, so an agent reading it "would not learn that consistently poor reasoning also
-certifies as advanced." Surfaces: `llms.txt`, `agent-card.json`, and `trust-record-payload.ts` —
-whose `does_not_attest` sentence is **pinned object-identical by the S10 battery**.
-**R18: founder sign-off on exact wording before any public surface changes.**
+**(4) Update the published disclosure — now with a RULED, more precise scope.** It must name:
+- **both defects** (the perturbation limit AND the mean-blindness — the live text names only the
+  first, so an agent "would not learn that consistently poor reasoning also certifies as advanced");
+- **that the signal REMAINS a gate input at three rungs**, and why that was a deliberate decision;
+- **that it cannot distinguish tested from untested consistency AT ANY RUNG**;
+- that it has been retired from the top rung and from agent-facing display for that reason.
+
+The ruling: *"The retention at the lower rungs is a deliberate, reasoned decision, and it should be
+stated as such rather than left implicit."* Surfaces: `llms.txt`, `agent-card.json`, and
+`trust-record-payload.ts` — whose `does_not_attest` sentence is **pinned object-identical by the S10
+battery**. **R18: founder sign-off on exact wording before any public surface changes.**
+**This disclosure GATES the retirement — it does not follow it.**
 
 **⚠ SPEC 4 STAYS DEACTIVATED.** "Until the dimension is *restored*" — and it has not even been
 retired. A tension is recorded in the ruling file and is **explicitly not yours to resolve.**
