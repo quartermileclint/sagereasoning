@@ -30,15 +30,18 @@ infer it from a date.**
 - **`18e033a`** — Phase 1, documents only (the two corrected `compliance/` files, the three M-4/M-5
   deliverables, the first decision-log entry). **Pushed mid-session by the founder.** No `website/`
   files, so Vercel correctly did not rebuild.
-- **A second commit** — the whole gap-closure build (shared module, six `route.ts` files, the registry)
-  plus the Phase-2/3 records. Its exact command is in the close's **Revised Founder Verification**
-  block, which supersedes two earlier drafts of the same command.
+- **`224e814`** — Phase 2/3: the whole gap-closure build (shared module, six `route.ts` files, the
+  registry) plus the Phase-2/3 records. 16 files, pre-commit hooks passed. **Pushed; Vercel green
+  (founder-confirmed).** This one DID rebuild, because it carries `website/` files — but every route is
+  byte-identical flag-off, so the deploy changed no behaviour.
 
-**If `git status` still shows the gap-closure files uncommitted, stop and get them committed first** —
-and confirm `website/src/data/environmental-context.json` is NOT staged (an unrelated stale weekly scan;
-PR19-flagged). **Do not assume HEAD** — read it. An earlier draft of the close asserted `17fda7e` after
-the founder had already moved HEAD to `18e033a`; that was caught by checking rather than trusting the
-record, which is the habit this project needs on every session open.
+**So the expected HEAD at open is `224e814`.** **Do not assume it — read it.** An earlier draft of the
+close asserted `17fda7e` after the founder had already moved HEAD to `18e033a`; that was caught only by
+checking rather than trusting the record, which is the habit this project needs at every session open.
+
+**Expected leftover in the working tree:** `website/src/data/environmental-context.json` only — an
+unrelated stale weekly environmental scan, PR19-flagged and deliberately excluded from both commits.
+Do not bundle it into this session's work either.
 
 ---
 
