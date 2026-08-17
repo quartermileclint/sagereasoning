@@ -86,20 +86,24 @@ system-composed than typed).
 have been relayed** — the 2026-08-17 session ended without confirming either was sent. Check with the
 founder before assuming an answer is merely pending.
 
-**(a) The `deliberate_to_principled` collateral tightening — ⚠ NO BRIEF EXISTS YET.**
-The question is recorded at
-`operations/trust-layer-2026-07/2026-08-17-M4-retirement-HELD/README.md` §2, but that document was
-written for a *builder* restoring the work, not for the mentor: it assumes familiarity with
-`dimensionsMeetElevated`, the threshold table, and the pool-shrinkage mechanism. **Authoring a
-PR20-compliant brief is the first task of Item 2** — it must name, at mechanism level, that the two
-gate predicates count over `Object.values(levels)`, that the ruling addressed only the top rung, and
-that the sole compensating fix is the move the ruling itself calls dishonest.
-Retiring `disposition_stability` shrinks the shared evaluation pool 4 → 3, which silently tightens a
-rung the mentor never ruled on — from 3-of-4 (75%) to **3-of-3 (100%)**. Compensating it means
-retuning a threshold, the move the ruling names as dishonest. **The built work is preserved** in that
-directory (`engine-change.patch.md` is the ONLY copy — the original was discarded by `git checkout`
-and is in no git object). Its restore instructions include a **known defect in the held test's §4**
-that must be fixed before the test is trusted.
+**(a) The grade-gate side effects — brief IS written and relay-ready.**
+`operations/trust-layer-2026-07/2026-08-17-M4-retirement-grade-gate-side-effects-FOR-RULING.md`.
+
+Retiring `disposition_stability` from the gate changes **three rungs the ruling never addressed, in
+BOTH directions**. `dimensionsMeetFloor` uses `.every()`, so dropping a dimension makes the floor
+EASIER everywhere; `dimensionsMeetElevated` counts, so it gets HARDER everywhere. Enumerated over all
+256 combinations (`2026-08-17-M4-retirement-HELD/rung-analysis.mjs`, runnable):
+`habitual_to_deliberate` goes 72 → **80** passing combinations — **20 newly ALLOWED**, i.e. NET MORE
+PERMISSIVE. `deliberate_to_principled` 5 → 4. The top rung 1 → 0, as ruled.
+
+**A loosening is the serious direction**: agents the system previously judged not to qualify now
+promote, *because* a signal was found too defective to trust. The only compensating fix is retuning
+lower-rung thresholds — the move the ruling itself calls dishonest.
+
+**The built work is preserved** in `2026-08-17-M4-retirement-HELD/` (`engine-change.patch.md` is the
+ONLY copy — the original was discarded by `git checkout` and is in no git object). Its restore
+instructions include a **known defect in the held test's §4** that must be fixed before the test is
+trusted, and the code comment claiming "lower rungs are unaffected" is **false** and flagged inline.
 
 **(b) The `/limitations` crisis disclosure wording — brief IS written and relay-ready.**
 `operations/trust-layer-2026-07/2026-08-17-limitations-crisis-disclosure-FOR-RULING.md`.

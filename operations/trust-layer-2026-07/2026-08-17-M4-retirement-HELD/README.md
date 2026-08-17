@@ -55,9 +55,36 @@ addressed. Verified directly against the threshold table:
 - **Before:** 3 of 4 dimensions at `advanced` — 75%.
 - **After:** 3 of 3 — **100%**. Every remaining dimension must be `advanced`.
 
-**The mentor ruled on the top rung only.** This is an undisclosed tightening of a *middle* rung.
+**The mentor ruled on the top rung only.** This is an undisclosed change to a *middle* rung.
 The builder's own code comment claiming "lower rungs are unaffected" was **false** and is one of the
 things this hold exists to avoid shipping.
+
+### ⚠ CORRECTED — the effect is BIDIRECTIONAL, and one rung gets MORE PERMISSIVE
+
+The paragraph above was the first analysis and it was **incomplete**. It reasoned from
+`dimensionsMeetElevated` alone and missed `dimensionsMeetFloor` entirely.
+
+`dimensionsMeetFloor` uses `.every()`. **Removing a dimension from an `.every()` can only make it
+easier to satisfy** — the retired dimension no longer has to clear the minimum on ANY rung. So the
+floor check LOOSENS everywhere while the elevated count TIGHTENS everywhere, and which dominates
+differs per rung.
+
+Enumerated over all 256 combinations (`rung-analysis.mjs` in this directory, runnable):
+
+| Rung | Promoting combos | Newly ALLOWED | Newly blocked |
+|---|---|---|---|
+| `reflexive_to_habitual` | 255 → 252 | 0 | 3 |
+| `habitual_to_deliberate` | 72 → **80** | **20** | 12 |
+| `deliberate_to_principled` | 5 → 4 | **2** | 3 |
+| `principled_to_sage_like` | 1 → **0** | 0 | 1 *(intended)* |
+
+**`habitual_to_deliberate` becomes NET MORE PERMISSIVE** — 20 combinations that were blocked now
+promote. Verified by hand: an agent at `developing / established / **emerging** / established` was
+blocked (its `emerging` disposition failed the `developing` floor) and now promotes.
+
+A tightening fails safe. **A loosening promotes agents the system previously judged not to
+qualify — because a signal was found too defective to trust.** That is the substance of the question
+now with the mentor: `../2026-08-17-M4-retirement-grade-gate-side-effects-FOR-RULING.md`.
 
 **Why it was not simply fixed:** compensating it means lowering `deliberate_to_principled`'s
 `elevated_dimension_count` from 3 to 2 to preserve the old ratio. That is *retuning a threshold to
