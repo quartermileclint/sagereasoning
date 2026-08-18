@@ -23046,3 +23046,60 @@ wired routes begin screening; reverting returns them to unscreened.
 `operations/handoffs/founder/2026-08-18-perimeter-completion-CLOSE.md`.
 **`/limitations` remains UNCHANGED** — the sweep is green but the perimeter is BUILT, not confirmed
 LIVE; publication stays gated on live confirmation. Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-18 — D-MENTOR-RULINGS-PERIMETER-CLAIM-BOUNDS-AND-CURIOSITY-SCOPING-ADOPTED
+
+**Decision:** Five mentor rulings ADOPTED AS BINDING. The substituted sweep predicate is accepted;
+**a bare "every time" on `/limitations` now OVER-PROMISES and may not be published**; the
+`taxonomy_question` migration is deferred to the standing-runner design; the `/api/guardrail`
+exclusion is resolved from a deferral to a reasoned judgement (applied this session); and the
+curiosity-trigger sits server-side. Verbatim record:
+`operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md`.
+
+**Tier: `governance` + a small `code-elevated` edit** (one exclusion-entry reason string). No flag,
+schema, credential or deploy change. AC7 not engaged.
+
+**Q2 — the substituted predicate is ACCEPTED as faithful.** The literal instruction (a content-matching
+predicate) was tested and produced a measured regression — three registered members dropped. The
+mentor: *"A predicate that silently stops guarding live members is not more honest than the one it
+replaced; it is less honest, because it produces a green result while covering less ground."*
+**A standing principle is established beyond this session:** *"when a literal instruction produces a
+measured regression against the ruling's stated purpose, the faithful move is to serve the purpose and
+name the deviation, not to execute the instruction and accept the regression silently."*
+
+**Q3 — BLOCKING, and it AMENDS the 2026-08-17 ruling.** That ruling said publish A3's original
+wording; a bare "every time" is now ruled an over-promise. Grounds: the sweep *"has demonstrated it
+can be structurally incomplete while running green"* — the handler.ts blind spot, found by adversarial
+review within 24 hours of the sweep being built. Preferred and floor formulations are ruled verbatim
+and **STAGED, not published**, at `2026-08-18-limitations-crisis-wording-STAGED.md`. Publication stays
+gated on live confirmation. **M-5 remains P0 and is not discharged.**
+
+**Q1 — `taxonomy_question`: intent retained, migration DEFERRED** to the standing-runner design, with
+snake_case spelling fixed. The stub is **code-only** and must not write to the CHECK-constrained
+`cycle_outcome` column. Grounds: the bounded validation run closed 2026-08-16, so the value's stated
+rationale had expired, and the value is not to be added on an expired rationale.
+
+**Q4 — `/api/guardrail` stays outside, on a REASON not a deferral. APPLIED this session.** The human
+path is screened upstream by `/api/compose` and `/api/execute`, both now perimeter members; the
+remaining direct path is agent-credentialed. The 2026-06-19 deferral notation is **retired** — *"it
+should not remain that way behind a published claim."* Battery re-verified **689/0**, `tsc` 0.
+
+**Q5 — curiosity trigger: server-side, beside the taxonomy stub.** Confirmed. **Carried:** placement
+must be revisited explicitly when the standing-runner design opens, and the honest answer may be
+**both** — server-side as the seam confirming novelty, runner-side as the mechanism acting on it.
+
+**Files touched:** `website/src/lib/__tests__/r20a-invocation-guard.test.ts` (Q4 exclusion reason);
+the verbatim record; the staged wording; the FOR-RULING brief; the successor prompt (rulings folded).
+
+**Rollback:** `git revert` this commit. The Q4 edit is a reason-string change to an exclusion entry —
+no behaviour change; reverting restores the deferral wording the mentor asked be retired.
+
+**Rules served:** R20a, AC5, R18, PR15, PR19, PR20, PR23.
+
+**Status:** Adopted. Cross-references:
+`D-R20A-PERIMETER-COMPLETION-SWEEP-GREEN-PR19-FOLDED`,
+`2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md` (**Q3 amends its
+publication instruction**), `2026-08-18-mentor-ruling-unauthenticated-public-surface-verbatim.md`
+(**Q2 accepts a deviation from its predicate instruction**),
+`operations/handoffs/founder/2026-08-18-curiosity-taxonomy-stubs-NEXT-SESSION-PROMPT.md`.
+Weights BLOCKED; the P0 0h hold stands.

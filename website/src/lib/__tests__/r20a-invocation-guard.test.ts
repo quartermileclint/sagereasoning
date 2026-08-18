@@ -920,10 +920,15 @@ const PERIMETER_EXCLUSIONS: readonly PerimeterExclusion[] = [
     route: 'src/app/api/guardrail/route.ts',
     reason:
       AGENT_FACING +
-      '⚠ AND SEPARATELY RECORDED: whether the guardrail should join the human-distress perimeter is ' +
-      'a DEFERRED FOUNDER ELECTION from the 2026-06-19 ADR-009 port, not an oversight. It is named ' +
-      'here so a future reader does not read the omission as one. Reachable by a human only through ' +
-      '/api/compose or /api/execute — both of which are now perimeter members and screen first.',
+      'RULED 2026-08-18 — this entry no longer rests on a deferral. It previously read as a DEFERRED ' +
+      'FOUNDER ELECTION from the 2026-06-19 ADR-009 port; the mentor resolved it, and the deferral ' +
+      'notation is RETIRED per that ruling ("it should not remain that way behind a published ' +
+      'claim"). The reasoned judgement: the human-reachable path into the guardrail runs through ' +
+      '/api/compose and /api/execute, BOTH of which are now perimeter members that screen BEFORE ' +
+      'forwarding — so the human path is covered upstream. The remaining direct path requires an ' +
+      'agent credential, placing it in the standing agent-facing exclusion class above. Recorded at ' +
+      'operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-' +
+      'curiosity-scoping-verbatim.md (Q4).',
   },
 
   // ── Operator / admin surfaces ────────────────────────────────────────────
