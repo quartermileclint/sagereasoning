@@ -7,6 +7,15 @@ import {
   type MentorProfileData,
 } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  collectMentorProfileText,
+  hasScreenableSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import type { MentorProfile } from '../../../../../sage-mentor'
 
@@ -153,6 +162,42 @@ export async function POST(request: NextRequest) {
     // ADR-Ring-2-01 Session 4 (4b): body is canonical MentorProfile shape.
     const { profile } = body as { profile: MentorProfile }
 
+    // ── R20a perimeter (AC5; added 2026-08-18, perimeter completion) ────────
+    // The profile is usually MACHINE-composed (journal ingestion, baseline
+    // processing) — but this route accepts an arbitrary caller-supplied profile
+    // from an authenticated practitioner and persists it verbatim, so the
+    // free-text fields are a genuine write surface for a person's own words
+    // about their own life: `passion_map[].false_judgement` (the belief that
+    // drove a passion), `causal_tendencies[].description` + `.examples`,
+    // `virtue_profile[].evidence`, `journal_references[].summary`,
+    // `proximity_estimate_description`, and the founder_facts prose block.
+    //
+    // Runs before the `display_name` 400 and before the encrypted save.
+    // Flag-off is byte-identical.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const subject = composeDistressSubject(collectMentorProfileText(profile))
+      // PR19 (2026-08-18, CONFIRMED): skip the classifier on an empty subject
+      // — an empty/missing `profile` has no distress to detect, and calling it
+      // anyway pays for a real billed Haiku call before the 400 below fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
+      }
+    }
+
     if (!profile || !profile.display_name) {
       return NextResponse.json(
         { error: 'profile is required (full canonical MentorProfile JSON)' },
@@ -175,6 +220,7 @@ export async function POST(request: NextRequest) {
         profile_version: result.version,
         encrypted: true,
         message: 'Profile saved to Supabase with AES-256-GCM encryption (R17b)',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { headers: corsHeaders() }
     )

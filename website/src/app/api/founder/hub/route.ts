@@ -21,6 +21,14 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  hasScreenableSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
 import { getOpsCostState } from '@/lib/context/ops-cost-state'
 import { getOpsContinuityState } from '@/lib/context/ops-continuity-state'
@@ -336,13 +344,19 @@ TECHNICAL REASONING UPGRADES — April 2026
    that reads route source and asserts both import and call patterns.
    Runtime hope is not a safety design.
 
-6. R20a enforcement perimeter is the 8 human-facing POST routes
-   listed in r20a-invocation-guard.test.ts: score, score-decision,
-   score-document, score-scenario, score-social, reason, reflect,
-   mentor/private/reflect. Adding a ninth route requires: registry
-   entry, both imports, await
-   enforceDistressCheck(detectDistressTwoStage(...)) pattern, and a
-   passing invocation test — before the route is merged.
+6. R20a enforcement perimeter is the route list in
+   r20a-invocation-guard.test.ts — 42 route-level + 2 substrate-gate
+   as of 2026-08-18. Do NOT quote a count from memory: read
+   HUMAN_FACING_POST_ROUTES. This block previously named 8 routes and
+   was stale for months. Adding a route requires: registry entry,
+   both imports, await
+   enforceDistressCheck(detectDistressTwoStage(...)) pattern, the
+   count floors bumped in the SAME edit, and a passing invocation
+   test — before the route is merged. A filesystem sweep at the end
+   of that file is now the backstop: every route.ts under src/app/api
+   with a write verb that reads caller input must be a registered
+   member or an explicitly reasoned exclusion. There is no third
+   state.
 
 7. ReasonDepth imports from depth-constants.ts only. No re-declaring
    or inlining.
@@ -443,14 +457,27 @@ SUPPORT REASONING UPGRADES — April 2026
    conservatism founder-adjudicated accepted-as-designed. Audit
    closed — treat as verified.
 
-3. R20a today ENFORCES on exactly 8 human-facing POST routes:
-   score, score-decision, score-document, score-scenario,
-   score-social, reason, reflect, mentor/private/reflect.
-   Exception ruled at S8a (D-S8A-OPEN-DECISIONS-2026-06-10):
-   /api/score-conversation is INSIDE the perimeter with wiring
-   pending its own Critical session — name it as an acknowledged
-   gap, not an outside surface. Any other surface is outside the
-   perimeter — name this honestly when triage touches it.
+3. R20a ENFORCES on the routes registered in
+   r20a-invocation-guard.test.ts — 42 route-level + 2 substrate-gate
+   as of 2026-08-18. This includes the five score routes, /reason,
+   /reflect, both journal routes, score-conversation, both Stoa
+   routes, /impulse, the passion and skill routes, the baseline and
+   journal-week pairs, the whole Remaining-Principles practice family
+   (premeditatio, hupexairesis, oikeiosis + extension,
+   view-from-above, morning, sage-compass — ruled in 2026-08-17),
+   /evaluate (gated behind auth 2026-08-18 by ruling), compose,
+   execute and this hub route itself.
+
+   ⚠ DO NOT tell a founder or a support case that "any other surface
+   is outside the perimeter". This block said exactly that while
+   naming 8 routes, and it was wrong by 34. If triage turns on
+   whether a specific route screens, READ the registry — do not
+   answer from this block.
+
+   Most members are dark behind SUBSTRATE_R20A_GAP_CLOSURE_ENABLED
+   pending a founder-walked activation; the three ring-proof routes
+   screen unconditionally. Distinguish "registered and dark" from
+   "outside the perimeter" — they are not the same claim.
 
 4. A redirect is a preference for support the tool isn't designed
    to give — not a refusal. Copy and tone carry that stance.
@@ -1192,6 +1219,45 @@ export async function POST(request: NextRequest) {
   try {
     const { agent, message, conversation_id, mode, hub_id } = await request.json()
 
+    // ── R20a perimeter (AC5; added 2026-08-18, perimeter completion) ────────
+    // `message` is free text the founder writes to an agent persona, persisted
+    // to founder_conversation_messages and sent to an LLM. Founder-only auth is
+    // NOT an exemption — /api/mentor/private/reflect, /api/mentor/gap4 and
+    // /api/mentor/private/founder-facts are all founder-only perimeter members,
+    // on the recorded ground that the founder is a practitioner too.
+    //
+    // Runs before the hub_id and message validation, before the conversation
+    // insert, and before any LLM call. Flag-off is byte-identical.
+    //
+    // The field cap is raised to TEXT_LIMITS.long because this route has ONE
+    // free-text field: the 5000 default exists to stop one field starving
+    // later fields, and there are none here, so the default would screen only
+    // the first third of a 15000-char message and drop the rest unseen. See
+    // composeDistressSubject's `fieldCap` docstring.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const subject = composeDistressSubject([message], TEXT_LIMITS.long)
+      // PR19 (2026-08-18, CONFIRMED): skip the classifier on an empty subject
+      // — a missing/empty `message` has no distress to detect, and calling it
+      // anyway pays for a real billed Haiku call before the 400 below fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('skill')
+        }
+      }
+    }
+
     // Validate hub_id — required for hub isolation (privacy boundary)
     const VALID_HUBS = ['founder-hub', 'private-mentor']
     const effectiveHubId = VALID_HUBS.includes(hub_id) ? hub_id : 'founder-hub'
@@ -1302,6 +1368,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         mode: 'ask-org',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
         conversation_id: orgConvId,
         domain_responses: domainResponses.map(dr => ({
           agent: dr.agent,
@@ -1587,6 +1654,7 @@ If the conversation is too casual or brief to yield a meaningful observation, re
 
     return NextResponse.json({
       conversation_id: convId,
+      ...(mildSupport ? { support_resources: mildSupport } : {}),
       primary: {
         agent: primaryResponse.agent,
         content: primaryResponse.content,

@@ -22920,3 +22920,129 @@ because the flag is already live.
 `2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`,
 `operations/handoffs/founder/2026-08-18-perimeter-completion-CONTINUATION-PROMPT.md`.
 Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-18 — D-R20A-PERIMETER-COMPLETION-SWEEP-GREEN-PR19-FOLDED
+
+**Decision:** Completed the R20a perimeter — wired the final **3** routes, registered **20**, bumped
+**all three** count floors in the same edit, and drove the mentor-RULED exhaustiveness sweep to
+**GREEN with zero unclassified in-scope routes**. **PR19 ran and returned 9 findings, 9 CONFIRMED,
+0 refuted** — three were real defects, all fixed and mutation-verified. Discharges the ruled
+prerequisite for any public coverage claim.
+
+**Tier: `code-critical`** (R20a perimeter, AC5). **AC7 NOT engaged** — no Vercel/Supabase/flag/
+credential/deploy operation; the AI performed no live op. **Byte-identity guard verified DORMANT
+first-hand** (`GATE1_FALSE_HOLD_CAPTURE` absent from both the process env and
+`.claude/settings.local.json`) — re-verified, not inferred from a date.
+
+### 1. The perimeter is closed
+
+`mentor-appendix`, `mentor-profile` and `founder/hub` wired; 20 routes registered
+(17 wired here or in the predecessor + the 3 ring-proof routes, which already screened
+**unconditionally** but which the battery asserted nothing about, so a refactor could have deleted
+their checks with the suite green).
+
+Floors, all in ONE edit per the file's own standing lesson: route-level **22 → 42**,
+flag-gated pairs **13 → 30**, substrate-gate unchanged at **2**. The flag-gated floor moves by 17,
+not 20, because the ring-proof trio carries no flag entry.
+
+**Verified counts, re-derived by instrumenting the real file rather than transcribed:**
+124 route.ts files walked · **73 in scope** · 42 route-level + 2 substrate-gate = **44 registered** ·
+**29 exclusions** · 44 + 29 = 73, **zero unclassified**. Battery **689 passed, 0 failed**.
+
+### 2. The continuation prompt's field list was wrong — caught before it shipped
+
+The prompt named three `mentor-profile` fields; **two do not exist on the canonical type**.
+`OikeioisMapEntry` has no `evidence` (it lives on `virtue_profile[]`), and
+`proximity_estimate.description` is the LEGACY shape — canonical is flat
+`proximity_estimate_description` (ADR-Ring-2-01 §12). Wiring as written would have screened
+`undefined` and **certified a route as protected while it screened nothing** — worse than no check.
+It also omitted `passion_map[].false_judgement`, the most distress-bearing field on the type.
+Wired from `sage-mentor/persona.ts` instead.
+
+### 3. A never-measured number in the sweep's own non-vacuity floor
+
+The floor comment recorded "48 in scope" and set the floor at 40 to sit beneath it. Direct
+instrumentation showed the true figure was **69** — the 124 was right, the 48 never was. A floor of
+40 beneath a true 69 tolerated a **42% collapse** of the walk before going loud.
+
+### 4. PR19 — 9 findings, 9 CONFIRMED, 0 refuted, 0 plausible
+
+**HIGH — the sweep was blind to the `route.ts`/`handler.ts` split.** `walkApiRoutes` collected only
+`route.ts` and the predicate read only that file, but this codebase's own standing memory
+(`nextjs-route-export-validation`) documents why logic moves to a sibling `handler.ts`. Six live
+routes use the pattern. For them the write-verb matched while `await request.json()` sat in a file
+the sweep never opened, so `readsCallerInput` was false and the route was **silently out of scope** —
+no registration required, no exclusion reasoning required, battery green. PR19 reproduced it with a
+synthetic unscreened route the sweep never flagged. Fixed at the walk (`readRouteAndHandler`, applied
+to both the scope filter and the superset check). This made **4 routes newly visible**
+(`credential/erase`, `practice/discernment`, `practice/fresh`, `practice/watching`); each was read
+first-hand and given a reasoned exclusion — all UPC/Bearer-only or admin-token surfaces, no human
+session, no practitioner prose.
+
+**MEDIUM — `collectMentorProfileText` omitted three genuine free-text fields**
+(`persisting_passions`, `preferred_indifferents`, `current_prescription.rationale`). The tell was
+that none appeared in the function's own "deliberately excluded" list — an oversight, not a
+judgement. `persisting_passions` is fixtured elsewhere in this repo with phrasing like *"sorrow at
+parting from old role"*. Fixed; runtime-verified that all three are now collected.
+
+**MEDIUM — a billed LLM call on empty input.** `detectDistressTwoStage` has no empty-string
+short-circuit: stage-1 regex finds nothing in `''` and falls through unconditionally to a real Haiku
+call. Because the perimeter check deliberately precedes each route's own validation, a `{}` body paid
+for that call before the 400 fired. Added `hasScreenableSubject`; applied to the 3 routes wired here.
+
+Six further findings were nit/informational (byte-identity confirmations, test-coverage gaps, and an
+unrelated pre-existing diff) — no code defect.
+
+### 5. The mutation that passed, and what it changed
+
+Six mutations were run. **Mutation 4 initially PASSED**: reverting the handler.ts fix dropped
+in-scope 73 → 69, which still cleared the `>= 65` floor, so the battery stayed **green with the fix
+silently undone**. A floor sized for catastrophic collapse is by construction too loose to catch a
+narrow four-route regression.
+
+**This retires the floor as the instrument for that job.** A positive pin was added naming those four
+routes and asserting each is detected in scope; re-mutating now goes **RED on all four**. The floor
+sits at 65 — below 73, and deliberately NOT pinned to any last-measured value, because the
+"true" figure moved twice inside one session.
+
+### 6. Stale prose corrected
+
+The guard file's own header ("20 + 2 = 22") and its floor block disagreed with the assertion beneath
+them. Corrected, with the instruction to **derive the count, never maintain it by hand** — that line
+has now been stale twice. `founder/hub`'s **two embedded persona knowledge blocks** told live triage
+agents the perimeter is "exactly 8 human-facing POST routes" and that "any other surface is outside
+the perimeter" — wrong by 34, and this session made it worse. Both now point at the registry.
+
+### 7. Verification
+
+`tsc` **0** · `npm run build` **0** (all routes registered) · R20a battery **689/0** ·
+boundary suites all green (hupexairesis 697, impulse 260, morning 635, oikeiosis 754,
+passion-log 1041, practice-status 626, premeditatio 712, sage-compass 789, view-from-above 697) ·
+sibling R20a suites 33/33, 57/57, 55/55 · `hasScreenableSubject` and `collectMentorProfileText`
+runtime-verified directly.
+
+### Carried, not fixed
+
+- **The empty-subject billed-call defect exists in the 17 routes wired in the PRIOR session.** Not
+  touched — files this session did not build and has not re-verified. Recorded in-code at
+  `hasScreenableSubject`.
+- **No per-route runtime invocation tests** for `mentor-appendix` / `mentor-profile` / `founder/hub`.
+  The registry check is source-text only, so it cannot catch a check made unreachable by control flow.
+- `mentor-appendix`'s `refinement: {}` ordering bypass (founder elected screen-only; the in-code
+  comment is honest that only the SAFETY half is closed).
+- `/api/guardrail` perimeter membership — deferred founder election, 2026-06-19.
+- M-4 obligations 1 and 4.
+
+**Rollback:** `git revert` this commit. No flag, schema, credential or deploy change was made.
+`SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` was already live before this session, so on push the newly
+wired routes begin screening; reverting returns them to unscreened.
+
+**Rules served:** R20a, AC5, R18, PR6, PR15, PR17, PR19, PR20, PR23.
+
+**Status:** Adopted. Cross-references:
+`D-R20A-EXHAUSTIVENESS-SWEEP-BUILT-PRACTICE-FAMILY-WIRED-EVALUATE-GATED`,
+`2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`,
+`2026-08-18-mentor-ruling-unauthenticated-public-surface-verbatim.md`,
+`operations/handoffs/founder/2026-08-18-perimeter-completion-CLOSE.md`.
+**`/limitations` remains UNCHANGED** — the sweep is green but the perimeter is BUILT, not confirmed
+LIVE; publication stays gated on live confirmation. Weights BLOCKED; the P0 0h hold stands.

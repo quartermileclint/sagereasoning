@@ -255,16 +255,66 @@ export const DISTRESS_SUBJECT_SEPARATOR = '\n\n---\n\n'
  *
  * Composed from the RAW values, deliberately not the trimmed/normalised ones:
  * the check runs over what the practitioner actually sent.
+ *
+ * `fieldCap` OVERRIDE (added 2026-08-18 with the perimeter completion): the
+ * 5000 default exists to stop ONE oversized field pushing LATER fields out of
+ * the classifier window — an input-inducible fail-open. A route with a SINGLE
+ * free-text field has no later fields to protect, so the default would only
+ * truncate screenable text and lose it, which is the UNSAFE direction.
+ *
+ * /api/founder/hub is exactly that case: one `message`, validated to
+ * TEXT_LIMITS.long (15000), so the default would screen the first third of it
+ * and silently ignore the rest. It passes TEXT_LIMITS.long here.
+ *
+ * The parameter is optional and defaults to DISTRESS_SUBJECT_FIELD_CAP, so
+ * every pre-existing caller is byte-identical. The total-subject bound is still
+ * enforced by DISTRESS_SUBJECT_MAX_FIELDS; raising the cap on a MULTI-field
+ * route would re-open the fail-open the default closes, so do not do it.
  */
-export function composeDistressSubject(values: readonly unknown[]): string {
+export function composeDistressSubject(
+  values: readonly unknown[],
+  fieldCap: number = DISTRESS_SUBJECT_FIELD_CAP
+): string {
   const parts: string[] = []
   for (const value of values) {
     if (parts.length >= DISTRESS_SUBJECT_MAX_FIELDS) break
     if (typeof value === 'string' && value.trim().length > 0) {
-      parts.push(value.slice(0, DISTRESS_SUBJECT_FIELD_CAP))
+      parts.push(value.slice(0, fieldCap))
     }
   }
   return parts.join(DISTRESS_SUBJECT_SEPARATOR)
+}
+
+/**
+ * Whether a composed subject is worth submitting to the two-stage classifier.
+ *
+ * PR19 FINDING (2026-08-18, CONFIRMED): `detectDistressTwoStage` has no
+ * empty-string short-circuit of its own — its stage-1 regex simply finds no
+ * indicators in `''` and falls through unconditionally to stage 2, a REAL
+ * billed Anthropic Haiku call (`evaluateBorderlineDistress`). Because the
+ * perimeter check deliberately runs BEFORE each route's own required-field
+ * validation (so distress in an otherwise-invalid body still catches), a
+ * malformed or field-missing request — `{}` to mentor-appendix, mentor-profile
+ * or founder/hub, or any composeDistressSubject([]) result — degenerates to an
+ * empty subject and STILL pays for a billed LLM call before the route's own
+ * 400 fires. This is a real cost-amplification vector bounded only by the
+ * route's own rate limit.
+ *
+ * Skipping the classifier on an empty/whitespace-only subject changes NOTHING
+ * about detection: there is no text to classify, so no genuine distress
+ * signal is ever present in an empty string. Callers should gate their
+ * `detectDistressTwoStage(...)` call on this rather than calling it
+ * unconditionally.
+ *
+ * ⚠ SCOPE: applied to the three routes wired THIS session (mentor-appendix,
+ * mentor-profile, founder/hub). The seventeen routes wired in the PRIOR
+ * gap-closure session share this same defect and are NOT touched here — they
+ * are files this session did not build and has not fully re-verified, so
+ * fixing them is left as a named carried finding rather than an in-session
+ * edit. See the perimeter-completion decision-log entry.
+ */
+export function hasScreenableSubject(subject: string): boolean {
+  return subject.trim().length > 0
 }
 
 /**
@@ -351,6 +401,129 @@ export function collectFounderFactsPutText(facts: unknown): unknown[] {
   if (Array.isArray(f.additional_context)) {
     out.push(...f.additional_context)
   }
+  return out
+}
+
+/**
+ * Pull the practitioner's answers out of a POST /api/mentor-appendix body:
+ * `{ questions, answers: { [question_id]: answer }, refinement, ... }`.
+ *
+ * Collects the VALUES of `answers` only, on the same reasoning as
+ * collectBaselineAnswerText: `questions` is the system-generated question set
+ * the platform posed, and `refinement` is the platform's own prior response
+ * echoed back. Neither is practitioner prose, and folding either in would
+ * dilute the subject with our own wording — and, for `refinement`, would screen
+ * our output rather than their input.
+ *
+ * ⚠ THE ANSWERS ARE UNBOUNDED HERE. The route validates only that `answers` is
+ * a non-empty object; no per-answer length check exists at all. The per-field
+ * cap and DISTRESS_SUBJECT_MAX_FIELDS therefore do real work on this route
+ * rather than merely restating a validator, so neither is overridden.
+ *
+ * Never throws on a malformed body — see composeDistressSubject's contract.
+ * This runs before the route's own `answers`-shape 400.
+ */
+export function collectAppendixAnswerText(answers: unknown): unknown[] {
+  if (!answers || typeof answers !== 'object' || Array.isArray(answers)) return []
+  return Object.values(answers as Record<string, unknown>)
+}
+
+/**
+ * Pull the practitioner-authored free text out of a POST /api/mentor-profile
+ * body: `{ profile }`, a canonical MentorProfile (sage-mentor/persona.ts).
+ *
+ * ⚠ THE FIELD LIST WAS DERIVED FROM THE TYPE FIRST-HAND, NOT FROM THE HANDOFF.
+ * The successor prompt named three fields — `causal_tendencies.description`,
+ * `oikeiosis_map[].evidence`, `proximity_estimate.description` — and two of the
+ * three do not exist on the canonical shape:
+ *
+ *   • `OikeioisMapEntry` has NO `evidence` field. `evidence` lives on
+ *     `VirtueDomainAssessment` (`virtue_profile[]`). Wiring the named path
+ *     would have screened `undefined` and silently covered nothing.
+ *   • `proximity_estimate.description` is the LEGACY (MentorProfileData) shape.
+ *     The canonical type is FLAT — `proximity_estimate_description` — by
+ *     ADR-Ring-2-01 §12 Session 2, and this route documents its POST body as
+ *     canonical.
+ *
+ * It also omitted the single most distress-bearing field on the whole type:
+ * `passion_map[].false_judgement`, the belief that drove a passion. That is the
+ * same field r20a-gap-closure's own header calls "arguably a PURER instance" of
+ * the B3 reasoning than /impulse.
+ *
+ * ⚠ PR19 (2026-08-18) FOUND A SECOND, INDEPENDENT GAP IN THIS FUNCTION ITSELF
+ * (CONFIRMED, adversarially re-verified, not the handoff's error this time —
+ * mine): `persisting_passions: string[]`, `preferred_indifferents: string[]`,
+ * and `current_prescription.rationale: string` (trust-layer/types/progression.ts)
+ * were all left off, and none of them appears in the "DELIBERATELY EXCLUDED"
+ * list below either — the reviewer's exact tell that it was an oversight, not
+ * a judgement call, since every genuinely-excluded field is named and reasoned
+ * about there. `persisting_passions` is fixtured elsewhere in this codebase
+ * with emotionally-loaded phrasing ("fear of failing the deadline", "sorrow at
+ * parting from old role" — mentor-profile-summary.test.ts) and is not a
+ * hypothetical risk. Reproduced directly: a synthetic profile with a
+ * self-harm-adjacent phrase in `persisting_passions` produced a collected array
+ * containing none of it, before this fix. Added below.
+ *
+ * ORDERING IS LOAD-BEARING. DISTRESS_SUBJECT_MAX_FIELDS truncates at 20 values,
+ * so the most distress-bearing fields are collected FIRST and the short
+ * label-like ones last. A profile with many passions must not push its own
+ * false_judgement text out of the subject behind a list of role names.
+ *
+ * DELIBERATELY EXCLUDED as non-prose: `senecan_grade`, `proximity_level`,
+ * `direction_of_travel`, `dimensions`, the `*_references` id arrays,
+ * `current_prescription`'s non-rationale fields (proximity/grade/dimension/
+ * pathway/tool IDs — structured, not prose), and founder_facts' numeric `age`
+ * / `years_married` / `children_ages`.
+ *
+ * Never throws on a malformed body — see composeDistressSubject's contract.
+ * This runs before the route's own `profile.display_name` 400.
+ */
+export function collectMentorProfileText(profile: unknown): unknown[] {
+  if (!profile || typeof profile !== 'object') return []
+  const p = profile as Record<string, unknown>
+  const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
+  const out: unknown[] = []
+
+  // 1. Prose first — the fields a practitioner writes about their own life.
+  for (const e of arr(p.passion_map)) {
+    if (e && typeof e === 'object') out.push((e as Record<string, unknown>).false_judgement)
+  }
+  out.push(...arr(p.persisting_passions))
+  for (const e of arr(p.causal_tendencies)) {
+    if (e && typeof e === 'object') {
+      const c = e as Record<string, unknown>
+      out.push(c.description)
+      out.push(...arr(c.examples))
+    }
+  }
+  for (const e of arr(p.virtue_profile)) {
+    if (e && typeof e === 'object') out.push((e as Record<string, unknown>).evidence)
+  }
+  for (const e of arr(p.journal_references)) {
+    if (e && typeof e === 'object') out.push((e as Record<string, unknown>).summary)
+  }
+  out.push(p.proximity_estimate_description)
+  if (p.current_prescription && typeof p.current_prescription === 'object') {
+    out.push((p.current_prescription as Record<string, unknown>).rationale)
+  }
+  out.push(...arr(p.preferred_indifferents))
+
+  // 2. Biographical free text — reuses the PUT /founder-facts collector so the
+  //    two surfaces cannot drift apart.
+  out.push(...collectFounderFactsPutText(p.founder_facts))
+
+  // 3. Short label-like fields last: real strings, but rarely a disclosure, and
+  //    they must never displace the prose above under the 20-field bound.
+  for (const e of arr(p.oikeiosis_map)) {
+    if (e && typeof e === 'object') {
+      const o = e as Record<string, unknown>
+      out.push(o.person_or_role, o.relationship)
+    }
+  }
+  for (const e of arr(p.value_hierarchy)) {
+    if (e && typeof e === 'object') out.push((e as Record<string, unknown>).item)
+  }
+
   return out
 }
 

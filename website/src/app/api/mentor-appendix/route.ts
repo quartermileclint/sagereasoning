@@ -7,6 +7,15 @@ import {
   corsPreflightResponse,
 } from '@/lib/security'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  isR20aGapClosureEnabled,
+  composeDistressSubject,
+  collectAppendixAnswerText,
+  hasScreenableSubject,
+  buildMildSupportResources,
+} from '@/lib/r20a-gap-closure'
 import {
   saveAppendixRound,
   listAppendixRounds,
@@ -82,6 +91,41 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as AppendixRequestBody
+
+    // ── R20a perimeter (AC5; added 2026-08-18, perimeter completion) ────────
+    // Screens the practitioner's `answers` — their written responses to the
+    // baseline gap questions — BEFORE any validation, encryption or store
+    // write. Flag-off is byte-identical.
+    //
+    // ⚠ CARRIED, NOT FIXED BY THIS CHANGE: this route has an ordering bypass
+    // independent of R20a. A caller posting `refinement: {}` satisfies the only
+    // guard on it, so baseline answers can be persisted here without ever
+    // calling the gating /api/mentor-baseline-response route. Screening closes
+    // the SAFETY hole (distress in those answers is now caught on this path
+    // too); the integrity hole stands and is a founder-elected carry.
+    let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+    if (isR20aGapClosureEnabled()) {
+      const subject = composeDistressSubject(collectAppendixAnswerText(body?.answers))
+      // PR19 (2026-08-18, CONFIRMED): skip the classifier on an empty subject
+      // — an empty/missing `answers` has no distress to detect, and calling it
+      // anyway pays for a real billed Haiku call before the 400 below fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
+      }
+    }
 
     // ── Validate input ────────────────────────────────────────────
     if (!body || typeof body !== 'object') {
@@ -181,6 +225,7 @@ export async function POST(request: NextRequest) {
         appendix_version: saveResult.appendix_version,
         encrypted: true,
         note: 'Round stored as an appendix to the mentor profile. The profile itself was not modified.',
+        ...(mildSupport ? { support_resources: mildSupport } : {}),
       },
       { headers: corsHeaders() }
     )

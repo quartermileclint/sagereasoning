@@ -30,10 +30,15 @@
  * Run: npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC4 (invocation
- * testing); AC5 (perimeter — 20 route-level + 2 substrate-gate = 22 as of
- * 2026-08-12; this line previously read "eight route-level + one substrate-gate
- * = nine", which had been stale for months while the accurate prose block
- * below tracked the real counts — corrected rather than left to drift again).
+ * testing); AC5 (perimeter — 42 route-level + 2 substrate-gate = 44 as of
+ * 2026-08-18, the perimeter completion).
+ *
+ * ⚠ THIS LINE HAS NOW BEEN STALE TWICE. It read "eight + one = nine" for
+ * months, was corrected to "20 + 2 = 22" on 2026-08-12, and that was itself
+ * wrong by two within days. DO NOT MAINTAIN THIS NUMBER BY HAND — derive it
+ * from HUMAN_FACING_POST_ROUTES.length and SUBSTRATE_GATE_ROUTES.length, which
+ * the floor assertions below hold to a minimum. The same instruction is now
+ * recorded in CLAUDE.md against the same figure, for the same reason.
  * Knowledge gaps addressed: KG3, KG7 (build-to-wire gap pattern).
  */
 
@@ -205,6 +210,83 @@ const HUMAN_FACING_POST_ROUTES = [
   'src/app/api/mentor/private/baseline-response/route.ts',
   'src/app/api/mentor/gap4/route.ts',
   'src/app/api/mentor/private/founder-facts/route.ts',
+  // ── PERIMETER COMPLETION (2026-08-18; AC5 twenty-first through FORTY-SECOND
+  // route-level protocol). TWENTY routes, added in ONE edit with all three
+  // floors, closing the sweep out to zero unclassified in-scope routes.
+  //
+  // These are NOT another "gap found by re-reading a slice by hand". They are
+  // the complete remainder produced by the filesystem sweep below — the
+  // mechanism the mentor RULED a prerequisite precisely because five manual
+  // passes and one automated pass had each undercounted. Every one of them
+  // failed the backstop assertion; the list closed only when the backstop went
+  // green. That is the difference between this pass and its four predecessors.
+  //
+  // THREE GROUNDS, and the record should not flatten them:
+  //
+  //   • THE PRACTICE FAMILY (premeditatio, hupexairesis, oikeiosis +
+  //     /extension, view-from-above, morning, sage-compass) — RULED IN
+  //     2026-08-17. This REVERSES the recorded family precedent that every
+  //     comment above still describes as standing, so the older text is
+  //     superseded rather than wrong-when-written. The mentor, verbatim: the
+  //     precedent "reflects the original scoping of B3 to /impulse alone, not a
+  //     considered judgement that the practice family is lower-risk. It is not
+  //     lower-risk. It is the family where the material is most likely to
+  //     surface acute distress." /view-from-above was named the clearest case —
+  //     a route for reframing catastrophic loss carrying only a static footer:
+  //     "That is the wrong configuration."
+  //
+  //     /logos is the one genuine non-member and is NOT an omission: it is a
+  //     static page with no route.ts and no free-text input, so it never enters
+  //     the sweep at all. Confirmed first-hand, not assumed.
+  //
+  //   • /api/evaluate — RULED 2026-08-18, and the FIRST time the B3 asymmetry
+  //     argument resolved toward REMOVING a surface from public availability
+  //     rather than adding it to the perimeter. It was an UNAUTHENTICATED
+  //     free-text Stoic evaluator: proximity rating and improvement path
+  //     returned to anonymous visitors with no screening. It is a member here
+  //     only BECAUSE it was first gated behind requireAuth. Screening it while
+  //     it remained anonymous was forbidden by name — "Do not add distress
+  //     screening to the unauthenticated surface as a standalone fix" — so
+  //     ⚠ DO NOT EVER RE-OPEN THIS ROUTE TO ANONYMOUS ACCESS AND LEAVE IT HERE.
+  //     Membership and the auth gate stand or fall together.
+  //
+  //   • THE REMAINDER — the mentor-examination and orchestration surfaces the
+  //     sweep surfaced: both journal-week routes, both baseline routes,
+  //     mentor-appendix, mentor-profile, compose, execute, founder/hub, and the
+  //     three ring-proof routes. Inside on the ordinary ground that every
+  //     human-facing free-text surface is inside. Founder-only is not an
+  //     exemption (the gap4 / founder-facts / private-reflect precedent).
+  //
+  // TWO OF THESE WERE INVISIBLE TO THE OLD auth-based PREDICATE and surfaced
+  // only when it was rebuilt: /api/execute and /api/compose authenticate via
+  // supabase.auth.getUser() rather than requireAuth. That is the ruling's point
+  // about proxies, demonstrated a second time within the hour of it being made.
+  //
+  // THE THREE RING-PROOF ROUTES SCREEN UNCONDITIONALLY — no feature flag — so
+  // they are deliberately absent from FLAG_GATED_ROUTE_LEVEL_ROUTES below.
+  // They already called the AC5 pattern correctly before this session; they
+  // were simply never registered, so nothing asserted it and a refactor could
+  // have deleted the check with this suite still green.
+  'src/app/api/mentor/premeditatio/route.ts',
+  'src/app/api/mentor/hupexairesis/route.ts',
+  'src/app/api/mentor/oikeiosis/route.ts',
+  'src/app/api/mentor/oikeiosis/extension/route.ts',
+  'src/app/api/mentor/view-from-above/route.ts',
+  'src/app/api/mentor/morning/route.ts',
+  'src/app/api/mentor/sage-compass/route.ts',
+  'src/app/api/evaluate/route.ts',
+  'src/app/api/mentor-journal-week/route.ts',
+  'src/app/api/mentor/private/journal-week/route.ts',
+  'src/app/api/mentor-baseline/route.ts',
+  'src/app/api/mentor/private/baseline/route.ts',
+  'src/app/api/mentor-appendix/route.ts',
+  'src/app/api/mentor-profile/route.ts',
+  'src/app/api/compose/route.ts',
+  'src/app/api/execute/route.ts',
+  'src/app/api/founder/hub/route.ts',
+  'src/app/api/founder/hub/ring-proof/route.ts',
+  'src/app/api/mentor/ring/proof/route.ts',
+  'src/app/api/support/agent/proof/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -313,6 +395,34 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
     flag: 'isR20aGapClosureEnabled',
     flagSource: 'r20a-gap-closure',
   },
+  // ── PERIMETER COMPLETION (2026-08-18): SEVENTEEN of the twenty new members
+  // ride the SAME shared flag, for the same reason it was shared in the first
+  // place — one remediation of one perimeter, and a half-closed perimeter is
+  // worse than an open one because it invites the belief the gap was handled.
+  //
+  // ⚠ THE OTHER THREE (founder/hub/ring-proof, mentor/ring/proof,
+  // support/agent/proof) ARE ABSENT ON PURPOSE, NOT BY OVERSIGHT. They screen
+  // UNCONDITIONALLY — no flag — so they are live-screening today, ahead of the
+  // activation. Adding them here would assert a flag call that does not exist
+  // and go red. DO NOT "fix" their absence by adding entries; the correct
+  // reading is that they are strictly safer than their flag-gated siblings.
+  { route: 'src/app/api/mentor/premeditatio/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/hupexairesis/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/oikeiosis/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/oikeiosis/extension/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/view-from-above/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/morning/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/sage-compass/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/evaluate/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor-journal-week/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/private/journal-week/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor-baseline/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor/private/baseline/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor-appendix/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/mentor-profile/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/compose/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/execute/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  { route: 'src/app/api/founder/hub/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -429,7 +539,24 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 20 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 42 route-level + 2 substrate-gate = 44 routes in the R20a
+  // perimeter overall.
+  //
+  // ⚠ THE PROSE BELOW WAS STALE AND IS CORRECTED HERE. It read "20 route-level
+  // ... = 22 routes overall" while the assertion beneath it already required
+  // >= 22 ROUTE-LEVEL — so the sentence and the code it annotated disagreed by
+  // two. It is fixed rather than extended because a running tally maintained by
+  // hand has now drifted twice; the assertions below are the authority, and
+  // this comment records the ARC, not the count.
+  //
+  // The arc: 8 (18 Apr 2026) + 2 journal (2026-05-31, gap-#4) + score-
+  // conversation (2026-07-07) + 2 Stoa (2026-08-03, ST3 + ST6) + /impulse
+  // (2026-08-12, S7 — the ruled departure from family precedent) = 14; + the
+  // six 2026-08-17 gap-closure routes = 20; + gap4 and founder-facts, found by
+  // PR19's fourth pass = 22; + the TWENTY found by the filesystem sweep on
+  // 2026-08-18 = 42.
+  //
+  // Historical detail retained: (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
   // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
   // the AC5 eleventh-route protocol, flag-gated dark + the Stoa declaration
@@ -442,9 +569,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // SUBSTRATE_IMPULSE_R20A_ENABLED — a RULED DEPARTURE from the
   // Remaining-Principles family precedent, see its entry above)
   // + 2 substrate-gate routes (Calling + Reflect-content added 2026-05-28
-  // under Option A; see SUBSTRATE_GATE_ROUTES)
-  // = 22 routes in the R20a perimeter overall (20 route-level + 2 substrate-gate;
-  // the six 2026-08-17 gap-closure routes took it from 14 to 20).
+  // under Option A; see SUBSTRATE_GATE_ROUTES).
   //
   // The floors are bumped with each addition on purpose: a floor left at the
   // PREVIOUS count stops guarding the newest member (13 >= 13 still passes
@@ -462,12 +587,22 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // ⚠ BUMPED AGAIN, same day, same session (20 -> 22, 11 -> 13) — PR19's fourth
   // pass found gap4 + founder-facts. This time the floors were bumped in the
   // SAME edit that added the routes, per the standing lesson above.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 22, `${label} (>=22 route-level)`)
+  // ⚠ BUMPED 2026-08-18 (22 -> 42, 13 -> 30) — perimeter completion. All three
+  // floors moved in the SAME EDIT that added the twenty routes and the
+  // seventeen flag-pairs, per the standing lesson above. The flag-gated floor
+  // moves by 17 rather than 20 because the three ring-proof routes screen
+  // unconditionally and carry no flag entry — see the note on their absence in
+  // FLAG_GATED_ROUTE_LEVEL_ROUTES.
+  //
+  // The flag-gated floor had ALSO never been bumped alongside a registry
+  // addition before 2026-08-12, which is how it came to be the weakest of the
+  // three. It is now bumped on the same line of reasoning as the other two.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 42, `${label} (>=42 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
   // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
   // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12
   // distinct routes (draft-reflect carries two flags, one entry each).
-  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 13, `${label} (>=13 flag-gated route-level flag-pairs)`)
+  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 30, `${label} (>=30 flag-gated route-level flag-pairs)`)
 }
 
 // test('detectDistressTwoStage result is awaited (async safety)')
@@ -902,6 +1037,47 @@ const PERIMETER_EXCLUSIONS: readonly PerimeterExclusion[] = [
       'is the chain id from params. No practitioner prose is accepted or stored.',
   },
 
+  // ── PERIMETER COMPLETION FOLLOW-UP (2026-08-18, PR19 fold): the route.ts/
+  // handler.ts split-file class. PR19 found the exhaustiveness walk was blind
+  // to this pattern (isInScopeForPerimeter read only route.ts, and the real
+  // request.json() call for these routes lives in the sibling handler.ts) —
+  // CONFIRMED under adversarial verification, fixed at the walk itself (see
+  // readRouteAndHandler above). Fixing the walk made these four NEWLY VISIBLE
+  // to the sweep for the first time; each is read + reasoned here, not
+  // silently passed through.
+  {
+    route: 'src/app/api/credential/erase/route.ts',
+    reason:
+      AGENT_FACING +
+      'CI-14 Step 7 consumer-erasure-by-token (handler.ts): the caller presents THEIR OWN CREDENTIAL ' +
+      '(Authorization: Bearer sr_<token>) or, for the admin-by-id mode, the founder-admin Supabase ' +
+      'JWT. No requireAuth/human-session path exists. Body is `{ confirm: "ERASE" }` or an admin ' +
+      '`{ credential_id }` — no practitioner prose field at all.',
+  },
+  {
+    route: 'src/app/api/practice/discernment/route.ts',
+    reason:
+      AGENT_FACING +
+      'UPC `consult` capability via validatePracticeCredential (handler.ts), Bearer-ONLY (no ' +
+      'X-Api-Key, no cookie/JWT session). The S8 discernment surface — an orchestrator selecting a ' +
+      'sub-agent, not a person disclosing their situation.',
+  },
+  {
+    route: 'src/app/api/practice/fresh/route.ts',
+    reason:
+      AGENT_FACING +
+      'UPC `consult` capability via validatePracticeCredential (handler.ts), Bearer-ONLY. The ' +
+      'IDEA-loop novelty-check surface — candidate proposals from an agent runner, not a ' +
+      'practitioner.',
+  },
+  {
+    route: 'src/app/api/practice/watching/route.ts',
+    reason:
+      AGENT_FACING +
+      'UPC `watching_write` capability via validatePracticeCredential (handler.ts), Bearer-ONLY. A ' +
+      'runner-submitted per-cycle transparency ledger entry, not human free text.',
+  },
+
   // ⚠ /api/compose AND /api/execute WERE DRAFTED AS EXCLUSIONS HERE AND ARE NOT
   // ONE. The reason they moved is recorded because the mistake is instructive.
   //
@@ -1019,20 +1195,92 @@ const registeredRoutes = new Set<string>([
 ])
 const excludedRoutes = new Set<string>(PERIMETER_EXCLUSIONS.map((e) => e.route))
 
+/**
+ * Read a route.ts PLUS its sibling handler.ts, if one exists, concatenated.
+ *
+ * PR19 FINDING (2026-08-18, CONFIRMED, HIGH — this is the same session that
+ * built the sweep, catching a real gap in the sweep itself). The codebase's
+ * own standing memory (`nextjs-route-export-validation`) documents WHY the
+ * split exists: Next.js rejects non-handler exports from route.ts at build,
+ * so any route needing shared/testable/injectable logic moves it to a sibling
+ * `handler.ts` and leaves route.ts as a thin re-export. This is not an edge
+ * case — it is a normal, encouraged pattern here, live today in at least six
+ * routes (practice/fresh, practice/watching, practice/discernment,
+ * credential/erase, founder/watching, trust-record/[agent_id]).
+ *
+ * The original predicate read ONLY route.ts. For a split route, route.ts
+ * genuinely re-exports `POST` (satisfying hasWriteVerb) but the real
+ * `await request.json()` call lives in handler.ts, which the walk never read
+ * — so readsCallerInput was FALSE and the route was silently treated as
+ * out-of-scope. No registry entry required, no exclusion reasoning required,
+ * battery green throughout. PR19 reproduced this directly: a synthetic
+ * route.ts/handler.ts pair with an unscreened `body.feelings` field in
+ * handler.ts was walked (route count went 124 -> 125) but never entered
+ * inScopeRoutes.
+ *
+ * None of the 44 CURRENTLY registered members use this pattern, so nothing
+ * already classified moves. The fix is prospective: closing the exact class
+ * of blind spot the mentor's ruling exists to eliminate, for the next route
+ * built this (normal, encouraged) way.
+ */
+function readRouteAndHandler(routePath: string): string {
+  const routeSrc = fs.readFileSync(path.join(websiteRoot, routePath), 'utf-8')
+  const handlerPath = path.join(websiteRoot, path.dirname(routePath), 'handler.ts')
+  const handlerSrc = fs.existsSync(handlerPath) ? fs.readFileSync(handlerPath, 'utf-8') : ''
+  return routeSrc + '\n' + handlerSrc
+}
+
 const inScopeRoutes = allApiRoutes.filter((r) =>
-  isInScopeForPerimeter(stripCommentsAndStringLiterals(fs.readFileSync(path.join(websiteRoot, r), 'utf-8')))
+  isInScopeForPerimeter(stripCommentsAndStringLiterals(readRouteAndHandler(r)))
 )
+
+// ── POSITIVE PIN for the handler.ts fix — the floor alone does not catch a
+// regression here. ─────────────────────────────────────────────────────────
+//
+// Mutation-tested 2026-08-18: reverting readRouteAndHandler to a plain
+// fs.readFileSync(route.ts) dropped inScopeRoutes from 73 to 69 — STILL above
+// the >=65 non-vacuity floor, so the battery stayed GREEN with the fix
+// silently undone. A floor sized for catastrophic collapse is, by design, too
+// loose to catch a narrow four-route regression. This pin closes that gap
+// directly: it names the four routes the fix exists to catch and asserts each
+// is actually detected as in-scope, independent of any floor.
+{
+  const KNOWN_SPLIT_FILE_IN_SCOPE_ROUTES = [
+    'src/app/api/credential/erase/route.ts',
+    'src/app/api/practice/discernment/route.ts',
+    'src/app/api/practice/fresh/route.ts',
+    'src/app/api/practice/watching/route.ts',
+  ]
+  for (const routePath of KNOWN_SPLIT_FILE_IN_SCOPE_ROUTES) {
+    assert(
+      inScopeRoutes.includes(routePath),
+      `R20a Exhaustiveness Backstop: ${routePath} (route.ts/handler.ts split) is detected in-scope — regression pin for the PR19 handler.ts fix`
+    )
+  }
+}
 
 // ── Non-vacuity floors ─────────────────────────────────────────────────────
 // A sweep that silently walks nothing reports zero violations and looks green.
 // These floors make a broken walk, a moved directory, or an over-narrow
-// predicate fail LOUDLY instead. Counts observed 2026-08-18: 124 route files,
-// 48 in scope. Floors sit below the observed values so ordinary growth does not
-// trip them, but a collapse does.
+// predicate fail LOUDLY instead.
+//
+// ⚠ THIS FLOOR HAS NOW BEEN MEASURED-AND-WRONG TWICE IN ONE SESSION.
+// It first read "Counts observed 2026-08-18: 124 route files, 48 in scope"
+// (floor 40) — the true figure was 69, not 48, confirmed by direct
+// instrumentation. It was corrected to 69/floor-60, and THEN a PR19 finding
+// (the route.ts/handler.ts split-file blind spot — see readRouteAndHandler
+// above) fixed a real hole in the walk itself, which moved the true in-scope
+// count again: 73, with 44 registered + 29 excluded = 73, zero unclassified.
+//
+// The floor is set at 65 — below 73 with headroom for ordinary churn, but
+// still loud on a genuine collapse. It is NOT set at 69 (the prior "true"
+// figure) precisely because that number was itself superseded within the
+// same session — proof that a floor should sit meaningfully below whatever
+// was last measured, not pinned to it.
 {
   const label = 'R20a Exhaustiveness Backstop: the walk is non-vacuous'
   assert(allApiRoutes.length >= 100, `${label} (>=100 route.ts files found; got ${allApiRoutes.length})`)
-  assert(inScopeRoutes.length >= 40, `${label} (>=40 in-scope routes; got ${inScopeRoutes.length})`)
+  assert(inScopeRoutes.length >= 65, `${label} (>=65 in-scope routes; got ${inScopeRoutes.length})`)
 }
 
 // ── The predicate must be a SUPERSET of the existing registry ──────────────
@@ -1041,9 +1289,10 @@ const inScopeRoutes = allApiRoutes.filter((r) =>
 // look-alikes. Verified passing 2026-08-18 with zero misses.
 for (const routePath of HUMAN_FACING_POST_ROUTES) {
   const label = `R20a Exhaustiveness Backstop: registered route ${routePath} matches the in-scope predicate (predicate is not too narrow)`
-  const code = stripCommentsAndStringLiterals(
-    fs.readFileSync(path.join(websiteRoot, routePath), 'utf-8')
-  )
+  // Reads route.ts + a sibling handler.ts, same as inScopeRoutes above — a
+  // future registered route built on the split pattern must not go spuriously
+  // red here just because this check looked only at route.ts.
+  const code = stripCommentsAndStringLiterals(readRouteAndHandler(routePath))
   assert(isInScopeForPerimeter(code) === true, label)
 }
 
