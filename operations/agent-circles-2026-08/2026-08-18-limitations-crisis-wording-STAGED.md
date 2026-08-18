@@ -1,6 +1,10 @@
-# `/limitations` crisis-detection wording — STAGED, NOT PUBLISHED
+# `/limitations` crisis-detection wording — APPLIED 2026-08-19
 
-**Status: STAGED. The page is UNCHANGED and must stay so until the perimeter is confirmed LIVE.**
+**Status: APPLIED.** The perimeter was confirmed LIVE (founder-run smoke, 2026-08-19) and the
+preferred formulation below is now published verbatim in `website/src/app/limitations/page.tsx`'s
+"We are not therapists" section, alongside the M-5 "nothing happens afterwards" disclosure kept
+prominent. See `D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED` in the decision log. This file is
+retained as the record of the ruled wording, not as a pending-action document.
 
 Two independent gates, both from binding rulings:
 1. **2026-08-17** — "Nothing is published until the perimeter change is confirmed live and the

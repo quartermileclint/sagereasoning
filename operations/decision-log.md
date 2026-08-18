@@ -23103,3 +23103,90 @@ publication instruction**), `2026-08-18-mentor-ruling-unauthenticated-public-sur
 (**Q2 accepts a deviation from its predicate instruction**),
 `operations/handoffs/founder/2026-08-18-curiosity-taxonomy-stubs-NEXT-SESSION-PROMPT.md`.
 Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-19 — D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED
+
+**Decision:** The R20a perimeter completion (`fba9b4c`, `6b8434a`) is **confirmed LIVE in production**
+by a founder-run smoke across all three grounds the closure covers, and `/limitations` is now
+**published** with the mentor-ruled coverage bound (2026-08-18 Q3) — not the superseded "every time"
+wording the 2026-08-17 ruling originally instructed.
+
+**Tier:** `code-critical` — a founder-walked live confirmation on the R20a perimeter (AC5) plus a
+public-claim change (R18). **AC7 engaged at the live smoke** (production reads/writes against real
+authenticated routes); the founder ran every live call and the teardown, the AI wrote the commands
+and verified the results.
+
+**Reasoning:** Per `operations/handoffs/founder/2026-08-19-perimeter-live-confirmation-and-limitations-publication-NEXT-SESSION-PROMPT.md`.
+Both binding rulings govern this session and are in tension on one point: the 2026-08-17 ruling said
+"publish A3's original wording" once the perimeter is live; the 2026-08-18 Q3 ruling AMENDS that —
+a bare "every time" over-promises, because the sweep was found structurally incomplete once within
+24 hours of being built. Q3 is later and governs. The published wording carries the Q3 preferred
+formulation verbatim, plus the M-5 "nothing happens afterwards" disclosure kept prominent as its own
+paragraph, per the mentor naming it "the more important half" of the claim.
+
+**The live smoke (founder-run via curl with a real session JWT; AI wrote the commands, verified
+results, performed no live op):**
+
+| Route | Ground | Unauth gate | Acute → redirect, no write | Benign → saves normally |
+|---|---|---|---|---|
+| `/api/evaluate` | auth-gate-holds check | **401** unauthenticated ✓ | `distress_detected:true, severity:"acute"`, full 7-line crisis list; no `katorthoma_proximity` field (never reached the eval) ✓ | full envelope returned (control_filter/passion_diagnosis/oikeiosis) ✓ |
+| `/api/mentor/view-from-above` | practice-family (2026-08-17 ruling) | — | redirect returned; `view_from_above_entries` row count **3→3** (unchanged) ✓ | `success:true`, row count **3→4** ✓ |
+| `/api/mentor-appendix` | mentor-examination, wired 2026-08-18 | — | redirect returned; `mentor_baseline_appendix` round count **0→0** (unchanged) ✓ | `success:true`, round count **0→1** ✓ |
+
+`SUBSTRATE_R20A_GAP_CLOSURE_ENABLED` was confirmed already `true` in Vercel Production before this
+session (grounding fact re-verified per the prompt, not assumed) — the 20 newly-registered routes
+from the predecessor's push began screening on that push; no flag flip occurred this session. The
+no-write side was verified by row/round count, not by the response alone, on both write-bearing
+routes. Both benign artifacts (`view_from_above_entries` id `cb10cc3c-0e4f-417a-855c-7c9816b80b13`,
+`mentor_baseline_appendix` id `3918127a-229d-4150-82a7-060f4ac95dd6`) were created then **torn down
+by the founder** via direct SQL DELETE against both ids, confirmed.
+
+**`/limitations` (R18):** the "We are not therapists" section (its named natural home) gained two
+paragraphs — the Q3 coverage bound, verbatim, with the "found structurally incomplete once" clause
+intact and uncompressed; and a prominent, bolded M-5 disclosure that a caught practitioner receives an
+in-session redirect and **nothing else** — no monitoring, no notification, no follow-up — because the
+write path for genuine distress detections (M-5) is not built and stays P0. The other R18 surfaces
+(`llms.txt`, `agent-card.json`, api-docs) were checked and carry no "every time"/exhaustiveness-style
+coverage claim about the distress check, so none needed the same bound.
+
+**Files touched:**
+- `website/src/app/limitations/page.tsx` — the two paragraphs added to "We are not therapists",
+  with an in-code comment naming the verbatim source and the "do not compress below this" instruction.
+
+**Risk classification:** Critical under 0d-ii (R20a perimeter confirmation, AC5; a public safety-claim
+change, R18). AC7 engaged at the live smoke; discharged. PR6 (Critical Change Protocol) followed —
+what's changing, what could break, rollback, verification, explicit founder approval per named risk —
+via the handoff prompt's own structure. **PR19 not engaged**: the only code change this session is a
+page-copy edit to a static page (no auth/security/R20a-perimeter code, no data-deleting code) — stated
+honestly per the prompt's own instruction, rather than silently skipped.
+
+**Rollback path:** `git revert` this commit reverts the `/limitations` wording only (no schema, flag,
+credential or deploy change accompanies it — the perimeter flag was already live before this session
+and is untouched here). The two smoke artifacts are already torn down; nothing else to roll back.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsc --noEmit                                            # exit 0
+npm run build                                                # exit 0
+npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts       # 689 passed, 0 failed
+```
+Live: visit `https://www.sagereasoning.com/limitations` and confirm the "We are not therapists"
+section carries the coverage-bound paragraph and the bolded "nothing happens afterwards" paragraph.
+
+**Open questions:** carried, not touched this session — the empty-subject billed-call defect in the
+17 prior-session routes; no per-route runtime invocation tests for the 3 routes wired 2026-08-18;
+PR24 retention parity for `agent_hold_observations`; the curiosity/taxonomy stubs (ruled and queued);
+M-4 obligations 1 and 4; the RLS survey remainder.
+
+**Rules served:** R20a, AC5, R18, PR6, PR15, PR17, PR19 (considered, not engaged), PR20, PR23.
+
+**Status:** Adopted. Cross-references:
+`operations/handoffs/founder/2026-08-19-perimeter-live-confirmation-and-limitations-publication-NEXT-SESSION-PROMPT.md`,
+`operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md`
+(Q3, governing), `operations/trust-layer-2026-07/2026-08-17-mentor-ruling-limitations-perimeter-practice-family-verbatim.md`
+(amended by Q3 on the publication instruction only), `operations/agent-circles-2026-08/2026-08-18-limitations-crisis-wording-STAGED.md`
+(the ruled wording, now applied — no longer staged), `D-R20A-PERIMETER-COMPLETION-SWEEP-GREEN-PR19-FOLDED`,
+`D-MENTOR-RULINGS-PERIMETER-CLAIM-BOUNDS-AND-CURIOSITY-SCOPING-ADOPTED`.
+**The R20a perimeter arc that opened 2026-08-17 is now CLOSED end-to-end: ruled, built, swept, PR19-folded,
+confirmed live, and disclosed honestly to practitioners.** Weights BLOCKED; the P0 0h hold stands.

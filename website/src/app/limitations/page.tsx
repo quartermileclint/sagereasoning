@@ -43,6 +43,33 @@ export default function LimitationsPage() {
             mental health professional or crisis service. Our tool cannot and should not
             replace that support.
           </p>
+          {/* Mentor-ruled wording, 2026-08-18 Q3 (AMENDS the 2026-08-17 ruling's
+              instruction to publish A3's original "every time" wording — that
+              instruction was superseded the next day when adversarial review found
+              the exhaustiveness sweep itself structurally incomplete once, within
+              24 hours of being built). Verbatim from
+              operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md
+              — do not compress below this, do not paraphrase looser, and do not
+              drop the "found incomplete once" clause; that clause is the entire
+              substance of the bound. */}
+          <p className="mt-3">
+            The distress check runs on every surface the sweep can see. The sweep is a
+            mechanism: it has been found structurally incomplete once, corrected, and
+            hardened with a regression pin. It is the strongest verification we can
+            honestly offer, not a guarantee of exhaustiveness.
+          </p>
+          {/* The M-5 disclosure — mentor named this "the more important half" of
+              the claim (2026-08-17 ruling) and directed it "remain prominent in
+              whatever wording is eventually published." M-5 (the write path for
+              genuine distress detections) is not built; this says so plainly. */}
+          <p className="mt-3 font-medium">
+            If the check catches something, you receive an in-session redirect to crisis
+            resources &mdash; and that is all that happens. Nothing is monitored
+            afterwards, no one is notified, and there is no follow-up. We have built the
+            detection; we have not yet built what should happen after it. If you are in
+            crisis, please contact a crisis line or emergency services directly
+            &mdash; do not rely on this tool to reach anyone on your behalf.
+          </p>
         </div>
 
         {/* Required factual amendment — mentor's website-page feedback
