@@ -2,12 +2,17 @@
  * idea-loop-types.ts — the IDEA loop's approved gap/candidate shapes + the C2(iii)
  * structural-novelty check (agent-circles C2, 2026-08-08).
  *
- * CONSUMED ONLY BY THE DARK `fresh` ROUTE (updated 2026-08-09 — the earlier
- * "DARK / UNCONSUMED" claim is superseded): `/api/practice/fresh` (dark behind
- * SUBSTRATE_FRESH_ENABLED, UNSET everywhere) wraps assessStructuralNovelty per
- * the RULED endpoint scope. No live engine, harness, or measured path imports
- * this module (pinned in the battery); the generation step remains separately
- * queued and is NOT built here.
+ * CONSUMED BY THE `fresh` ROUTE, WHICH IS LIVE IN PRODUCTION (corrected
+ * 2026-08-19 — this header previously read "the DARK `fresh` ROUTE … dark
+ * behind SUBSTRATE_FRESH_ENABLED, UNSET everywhere", which has been false
+ * since 2026-08-10: SUBSTRATE_FRESH_ENABLED was activated and live-verified in
+ * production at D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10. The code is
+ * still flag-gated — unset ⇒ honest 503 — but the flag is SET in production,
+ * so edits to this module reach a live surface and are owed PR19 care).
+ * `/api/practice/fresh` wraps assessStructuralNovelty per the RULED endpoint
+ * scope. No live engine, harness, or MEASURED path imports this module (pinned
+ * in the battery — /api/reason and the guard channel stay clean); the
+ * generation step remains separately queued and is NOT built here.
  *
  * BINDING SOURCES (verbatim wins):
  *   - `operations/agent-circles-2026-08/2026-08-06-oikeiosis-gap-generated-candidate-type-scope.md`
@@ -218,6 +223,20 @@ export type NoveltyHistoryRow = Pick<
  * curve confidence), not the starved-window case. `basis` is present ONLY on
  * the starved-window outcome; the friction-candidate outcome is surfaced
  * unchanged (ruled: "the existing behaviour ... surfaced unchanged").
+ *
+ * PLACEHOLDER NOTE (added 2026-08-19, curiosity/taxonomy scoping session —
+ * a COMMENT ONLY; this function's behaviour is deliberately unchanged):
+ * the standard applied here — structural novelty against the existing corpus,
+ * i.e. the (circle, virtue-domain-combination) distribution of the window — is
+ * a PLACEHOLDER FOR A RICHER STANDARD. Once the puzzle taxonomy
+ * (PuzzleTaxonomyEntry, below) is populated, novelty can be assessed against
+ * the SHAPES OF INQUIRY already recorded, not only against the structural
+ * signature of past actions. That is a different and better question than the
+ * one this function asks. Nothing schedules it: the taxonomy is a stub with no
+ * population path, and the richer standard is not designed. The note exists so
+ * the current standard is read as provisional-by-design rather than settled.
+ * The already-documented structural-novelty-only limitation above is the same
+ * boundary seen from the other side.
  */
 export function assessStructuralNovelty(
   candidate: Pick<GeneratedCandidate, 'targetCircle' | 'initialClassification'>,
@@ -258,4 +277,205 @@ export function assessStructuralNovelty(
   const confidence =
     Math.round(Math.min(1, Math.abs(count - EVIDENCE_FLOOR) / EVIDENCE_FLOOR) * 100) / 100
   return { novel, confidence }
+}
+
+// ============================================================================
+// Puzzle taxonomy — STUB (curiosity/taxonomy scoping session, 2026-08-19)
+// ============================================================================
+
+/**
+ * PuzzleTaxonomyEntry — the puzzle taxonomy's stub data structure.
+ *
+ * A NAMED, ADDRESSABLE TYPE ONLY. No schema, no route, no population, no
+ * persistence: nothing in this build constructs, writes, reads, or stores one.
+ * The type exists so the taxonomy has a settled shape before anything fills it.
+ *
+ * BINDING SOURCES (verbatim wins over this paraphrase):
+ *   - `operations/handoffs/founder/2026-08-18-curiosity-taxonomy-stubs-NEXT-SESSION-PROMPT.md`
+ *     item 1 — the four members below, scoped exactly and deliberately no wider.
+ *   - `operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`
+ *     — the two design-grounding paragraphs that follow, quoted verbatim.
+ *
+ * ─── WHY SHAPES OF INQUIRY, NOT CONCLUSIONS ─────────────────────────────────
+ * From the RL-passage addendum, verbatim: "storing the chain of reasoning
+ * rather than the answer is what makes tuning meaningful is the computational
+ * grounding for the puzzle taxonomy's design principle. The taxonomy stores
+ * the shapes of inquiry, not conclusions."
+ *
+ * That is WHY this entry carries `questionsOpened` and `taxonomyConnections`
+ * and deliberately carries NO findings, answers, conclusions, or resolution
+ * field. A future session adding one is departing from the design principle,
+ * not extending it — and should say so out loud rather than let the field
+ * arrive quietly.
+ *
+ * ─── THE NON-DUPLICATION BOUNDARY — what the taxonomy is NOT for ────────────
+ * From the same addendum, verbatim: "the taxonomy's value is not duplicated by
+ * what frontier labs are building — because the taxonomy stores examination
+ * chains about the internal world of reasoning, not the external world of
+ * facts."
+ *
+ * This is the load-bearing half, and the cheapest available guard against the
+ * taxonomy drifting into a general knowledge store. An entry that records a
+ * fact about the world — rather than the shape of an examination — is outside
+ * this type's purpose, however useful the fact.
+ *
+ * The addendum licenses no build of its own (its own closing sentence:
+ * "Nothing in this addendum licenses a build, a route, a flag, a credential,
+ * or a schema"). It is recorded here as design grounding for a stub that was
+ * already in scope, adding no field, route, behaviour, or schema.
+ */
+export type PuzzleType = 'pattern' | 'contradiction' | 'discovery' | 'connection'
+
+export interface PuzzleTaxonomyEntry {
+  schema: 'idea-loop-puzzle-taxonomy-entry-v1'
+  /** Which shape of inquiry this puzzle is. The four scoped values, not widened. */
+  puzzleType: PuzzleType
+  /** Where the puzzle came from — an examination record, or outside the loop.
+   *  A discriminated union (the house shape, mirroring
+   *  GeneratedCandidate.initialClassification) so an external-origin puzzle
+   *  structurally cannot be given a false examination-record ref. */
+  origin: { kind: 'examination_record'; ref: string } | { kind: 'external'; description: string }
+  /** The questions this puzzle OPENED — never the answers it closed (the
+   *  shapes-of-inquiry principle above). EMPTY AT STUB: nothing populates it.
+   *  Free text; no vocabulary is fixed here. */
+  questionsOpened: readonly string[]
+  /** References to other taxonomy entries this one connects to. EMPTY AT STUB.
+   *  NO IDENTIFIER SCHEME IS FIXED HERE — deliberately. Inventing one before
+   *  population is designed would settle by default a question that has not
+   *  been asked; the ref format is decided when the taxonomy is populated. */
+  taxonomyConnections: readonly string[]
+}
+
+// ============================================================================
+// Curiosity-loop trigger — STUB. Placement RULED 2026-08-18 (Q5).
+// ============================================================================
+
+/**
+ * The `taxonomy_question` outcome — CODE-ONLY, AND DELIBERATELY NOT WRITABLE.
+ *
+ * RULED 2026-08-18 (Q1), verbatim: "Defer the schema migration until the
+ * standing-runner design opens. At that point the outcome value should be
+ * added with the standing-runner's rationale — not the bounded-run rationale —
+ * and the spelling should follow the established snake_case convention:
+ * `taxonomy_question`, not `taxonomy-question`. The stub in the current build
+ * should be code-only, logging the outcome without writing to the constrained
+ * column, until the migration is ruled and walked."
+ *
+ * WHAT THAT MEANS MECHANICALLY, AND WHY IT MATTERS. `idea_loop_cycles
+ * .cycle_outcome` carries a live NOT NULL CHECK admitting exactly four values
+ * (`winner`, `null_cycle`, `dependency_unavailable`, `terminated_by_timeout`)
+ * on a production table holding real bounded-validation-run rows. This
+ * constant is therefore NOT a member of the watching route's
+ * CYCLE_LEVEL_OUTCOMES and must not become one until the widened CHECK has
+ * landed on TEST and production. Adding it code-first would let the route
+ * accept a value the database rejects — a 500 on write rather than a clean
+ * 400, the exact ordering hazard the `not_selected` precedent migration
+ * (2026-08-10) names in its own ORDER note. `idea-loop-types.test.ts` §7 pins
+ * this containment in both directions, executably.
+ *
+ * THE INTENT THE RULING RETAINS: when the puzzle taxonomy yields a question
+ * and no current bringer exists, that outcome must be distinguishable from a
+ * null cycle. Its home is the standing-runner design, not this build.
+ */
+export const TAXONOMY_QUESTION_OUTCOME = 'taxonomy_question' as const
+
+/** The exact result shape `assessStructuralNovelty` returns. Derived, never
+ *  restated — a hand-copied twin would drift the moment that function changes. */
+export type StructuralNoveltyResult = ReturnType<typeof assessStructuralNovelty>
+
+/**
+ * Is this a GENUINE structural-novelty confirmation, as opposed to an honest
+ * no-basis pass?
+ *
+ * THIS IS A BUILD-TIME JUDGEMENT, NOT A RULING — disclosed as such. Neither the
+ * relay nor the Q5 ruling addresses it, and it is the one real design decision
+ * in the trigger stub, so it is stated rather than buried.
+ *
+ * `assessStructuralNovelty` returns `novel: true` on THREE distinct grounds,
+ * only one of which is evidence of novelty:
+ *   1. genuinely novel — fewer than EVIDENCE_FLOOR matching rows in a
+ *      populated window (confidence > 0);
+ *   2. starved window — fewer than EVIDENCE_FLOOR rows IN TOTAL
+ *      (confidence 0, basis 'insufficient_history');
+ *   3. friction candidate — neither structural axis to assess at all
+ *      (confidence 0, no basis).
+ *
+ * Cases 2 and 3 are the house evidence-floor discipline working exactly as
+ * intended: a true verdict carrying zero claimed confidence, because the check
+ * has no basis. A curiosity trigger that fired on them would be manufacturing
+ * curiosity out of absence of evidence — precisely what
+ * `assessStructuralNovelty`'s own docstring refuses ("the zero confidence says
+ * the check has no basis, rather than manufacturing one"). At population time
+ * that would seed the taxonomy from starved windows and axis-free candidates.
+ * So the trigger fires on case 1 only.
+ *
+ * The `basis === undefined` clause is DEFENCE IN DEPTH, and is redundant today:
+ * the confidence curve makes every genuinely-novel result carry confidence > 0
+ * (count < floor ⇒ |count − floor| / floor ≥ 1/3). It is kept so that a future
+ * change to the confidence curve — which the C2 ruling explicitly leaves open
+ * as a build-time detail — cannot silently make a no-basis pass read as
+ * genuine.
+ */
+export function isGenuineNoveltyConfirmation(result: StructuralNoveltyResult): boolean {
+  return result.novel === true && result.confidence > 0 && result.basis === undefined
+}
+
+/**
+ * curiosity-trigger — the stub seam at the point structural novelty is
+ * confirmed. LOGS THAT IT WAS REACHED, PASSES THROUGH, NOTHING ELSE.
+ *
+ * `curiosity-trigger` is an INTERNAL MECHANISM NAME, not a surface name: it
+ * appears in no route, no response body, no public contract, and no wire
+ * vocabulary. Nothing here is a surface-name-register entry.
+ *
+ * PLACEMENT — RULED 2026-08-18 (Q5), verbatim: "The trigger belongs
+ * server-side, beside the taxonomy stub, for now… Placing the trigger
+ * runner-side would defer it behind the standing-runner opening with no gain —
+ * the trigger's function at stub stage is to log that it was reached and pass
+ * through, which is equally achievable server-side."
+ *
+ * CARRY FORWARD, DO NOT LOSE — the same ruling: "When the standing-runner
+ * design opens, the question of whether the trigger migrates runner-side or
+ * remains server-side should be revisited explicitly. The honest answer at
+ * that point may be that the trigger belongs in both places — server-side as a
+ * seam that confirms novelty, runner-side as the mechanism that acts on the
+ * confirmation."
+ *
+ * ─── WHAT THIS WILL DO, WHEN IT IS BUILT (comment, not behaviour) ───────────
+ * Classify the confirmed novelty by puzzle type (PuzzleType above); consult
+ * the taxonomy for related puzzle shapes; and GENERATE QUESTIONS RATHER THAN
+ * EXPLANATIONS. That last clause is the point of the mechanism, not a stylistic
+ * preference — it is the shapes-of-inquiry principle applied at the moment a
+ * puzzle is recognised.
+ *
+ * ─── WHAT IT DOES NOT DO, AND MUST NOT ──────────────────────────────────────
+ * - It is a PURE PASS-THROUGH: it returns its argument by identity, unexamined
+ *   and unmodified. It cannot change a novelty verdict, a confidence, a basis,
+ *   or any response the caller receives.
+ * - It writes nothing: no DB, no trust event, no `cycle_outcome` (see
+ *   TAXONOMY_QUESTION_OUTCOME above — that column's CHECK would reject it).
+ * - It reads no env and takes no flag. Its only effect is one console line.
+ * - THE Q1 HARD CONSTRAINT (carried): the loop proposes; it never executes.
+ *   Nothing here creates a path from anything to an action-taking tool or
+ *   scheduler, and nothing here may grow one.
+ *
+ * ─── LIVE-SURFACE NOTE (honest, 2026-08-19) ─────────────────────────────────
+ * The one live caller is `/api/practice/fresh`, which is LIVE in production
+ * (SUBSTRATE_FRESH_ENABLED activated 2026-08-10,
+ * D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10) — not dark, as several stale
+ * headers in this module and its consumer had claimed until this session
+ * corrected them. So this log line runs in production. Volume is bounded by
+ * MAX_CANDIDATES (32) log lines per request, and only for genuinely-novel
+ * candidates. Nothing caller-supplied is logged — deliberately: `gapRef` is
+ * runner-authored text and a stub that only needs to say "I was reached" has
+ * no reason to put caller input into the platform log.
+ */
+export function noteCuriosityTrigger(result: StructuralNoveltyResult): StructuralNoveltyResult {
+  if (isGenuineNoveltyConfirmation(result)) {
+    console.log('[curiosity-trigger] reached: structural novelty confirmed (stub — pass-through)', {
+      noveltyConfidence: result.confidence,
+      outcomeWhenPopulated: TAXONOMY_QUESTION_OUTCOME,
+    })
+  }
+  return result
 }

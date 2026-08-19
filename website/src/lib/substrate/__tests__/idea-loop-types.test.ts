@@ -7,11 +7,17 @@
 
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { readdirSync, statSync } from 'fs'
 import {
   createOikeiosisGap,
   assessStructuralNovelty,
+  isGenuineNoveltyConfirmation,
+  noteCuriosityTrigger,
+  TAXONOMY_QUESTION_OUTCOME,
   type GeneratedCandidate,
   type NoveltyHistoryRow,
+  type PuzzleTaxonomyEntry,
+  type PuzzleType,
 } from '../idea-loop-types'
 import { EVIDENCE_FLOOR } from '../trajectory-delta'
 
@@ -160,11 +166,16 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
 }
 
 // ============================================================================
-// §3 Darkness pins — no LIVE/MEASURED path imports this module. AMENDED
-// 2026-08-09: the module is now consumed by exactly ONE route — the DARK
-// /api/practice/fresh handler (SUBSTRATE_FRESH_ENABLED unset ⇒ 503, zero
-// work) — so the pin now asserts (a) the measured/live paths stay clean AND
-// (b) the fresh handler genuinely is the consumer (wiring non-vacuity).
+// §3 MEASUREMENT-NEUTRALITY pins — no LIVE/MEASURED path imports this module.
+// AMENDED 2026-08-09: the module is consumed by exactly ONE route,
+// /api/practice/fresh. CORRECTED 2026-08-19: this block was headed "Darkness
+// pins" and described that route as DARK with "SUBSTRATE_FRESH_ENABLED unset
+// ⇒ 503" — false since 2026-08-10, when the flag was activated and
+// live-verified in production. The route is LIVE; §3.1's real subject was
+// never darkness but MEASUREMENT NEUTRALITY (the /api/reason engine and the
+// guard channel must not import this module), and that is what it still
+// asserts. §3.3 pins flag-GATING — that unset still means off — which is a
+// rollback property, not a claim that the flag is unset.
 // ============================================================================
 {
   const importers: string[] = []
@@ -188,11 +199,11 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
   assert(
     freshHandler.includes("from '@/lib/substrate/idea-loop-types'") &&
       freshHandler.includes('assessStructuralNovelty'),
-    '§3.2 INV: the dark fresh handler is the module\'s consumer (wiring pin, non-vacuous)',
+    '§3.2 INV: the (LIVE, flag-gated) fresh handler is the module\'s consumer (wiring pin, non-vacuous)',
   )
   assert(
     freshHandler.includes("process.env.SUBSTRATE_FRESH_ENABLED === 'true'"),
-    '§3.3 INV: the fresh consumer is flag-gated (dark by default)',
+    '§3.3 INV: the fresh consumer is flag-GATED (unset ⇒ off — the rollback property; the flag IS set in production since 2026-08-10)',
   )
 }
 
@@ -204,6 +215,291 @@ function row(stage: string | null, domains: string[]): NoveltyHistoryRow {
 {
   const outcome: GeneratedCandidate['cycleOutcome'] = 'terminated_by_timeout'
   assert(outcome === 'terminated_by_timeout', '§4.1 cycleOutcome accepts the Q6 seventh value')
+}
+
+// ============================================================================
+// §5 Puzzle taxonomy STUB — shape, and the DESIGN-PRINCIPLE guard
+// (curiosity/taxonomy scoping session, 2026-08-19)
+// ============================================================================
+{
+  const MODULE_SRC = readFileSync(join(__dirname, '../idea-loop-types.ts'), 'utf8')
+  // Comment prose reflows; normalise ` * ` continuations before matching so a
+  // pin fails on DELETION, not on rewrapping.
+  const PROSE = MODULE_SRC.replace(/\n\s*\*\s?/g, ' ').replace(/\s+/g, ' ')
+
+  // 5.1 — the four scoped puzzle types are exactly the four, and constructible.
+  const types: PuzzleType[] = ['pattern', 'contradiction', 'discovery', 'connection']
+  const entries: PuzzleTaxonomyEntry[] = types.map((t) => ({
+    schema: 'idea-loop-puzzle-taxonomy-entry-v1',
+    puzzleType: t,
+    origin: { kind: 'examination_record', ref: 'sess_9f2a:14' },
+    questionsOpened: [],
+    taxonomyConnections: [],
+  }))
+  assert(entries.length === 4, '§5.1 all four scoped puzzle types construct')
+  assert(
+    entries.every((e) => e.schema === 'idea-loop-puzzle-taxonomy-entry-v1'),
+    '§5.2 schema tag (house convention, matches the sibling approved types)',
+  )
+  assert(
+    entries.every((e) => e.questionsOpened.length === 0 && e.taxonomyConnections.length === 0),
+    '§5.3 EMPTY AT STUB — nothing populates either array in this build',
+  )
+
+  // 5.4 — the external-origin branch of the discriminated union.
+  const external: PuzzleTaxonomyEntry = {
+    schema: 'idea-loop-puzzle-taxonomy-entry-v1',
+    puzzleType: 'contradiction',
+    origin: { kind: 'external', description: 'raised in conversation, no examination record' },
+    questionsOpened: [],
+    taxonomyConnections: [],
+  }
+  assert(
+    external.origin.kind === 'external' && !('ref' in external.origin),
+    '§5.4 an external-origin puzzle structurally cannot carry a false examination-record ref',
+  )
+
+  // 5.5 — THE DESIGN-PRINCIPLE GUARD, and the most load-bearing pin in §5.
+  // "The taxonomy stores the shapes of inquiry, not conclusions." A future
+  // session adding a conclusions/answers/findings field is DEPARTING from the
+  // design principle, not extending it — this makes that departure fail loudly
+  // rather than arrive quietly.
+  // ALL declarations, not just the first: TypeScript interface DECLARATION
+  // MERGING means a second `export interface PuzzleTaxonomyEntry { ... }`
+  // anywhere in the module silently adds its members to the same type. A
+  // first-match-only regex would never see it — the evasion PR19 review found.
+  const ifaceBlocks = [
+    ...MODULE_SRC.matchAll(/export interface PuzzleTaxonomyEntry \{([\s\S]*?)\n\}/g),
+  ]
+  assert(ifaceBlocks.length >= 1, '§5.5a at least one PuzzleTaxonomyEntry interface block is findable (non-vacuity floor for 5.5b)')
+  const ifaceBody = ifaceBlocks.map((m) => m[1]).join('\n')
+  assert(
+    ifaceBody.includes('puzzleType') && ifaceBody.includes('questionsOpened'),
+    '§5.5b the parsed block is genuinely the interface body (non-vacuity floor — a regex that silently matched nothing would pass 5.5c trivially)',
+  )
+  // Field-name positions only: strip comment lines so the guard cannot be
+  // tripped by the word "conclusions" appearing in explanatory prose.
+  const declaredFields = ifaceBody
+    .split('\n')
+    .filter((l) => !l.trim().startsWith('*') && !l.trim().startsWith('/*') && !l.trim().startsWith('//'))
+    .join('\n')
+  const FORBIDDEN_FIELD_STEMS = ['conclusion', 'answer', 'finding', 'resolution', 'explanation']
+  const found = FORBIDDEN_FIELD_STEMS.filter((stem) => new RegExp(stem, 'i').test(declaredFields))
+  assert(
+    found.length === 0,
+    `§5.5c NO conclusions/answers field — the taxonomy stores shapes of inquiry, not conclusions (found: ${found.join(', ')})`,
+  )
+
+  // 5.6 — the two verbatim design-grounding quotes survive in the docstring.
+  assert(
+    PROSE.includes('The taxonomy stores the shapes of inquiry, not conclusions.'),
+    '§5.6 the shapes-of-inquiry grounding quote is recorded verbatim in the type docstring',
+  )
+  assert(
+    PROSE.includes(
+      'the taxonomy stores examination chains about the internal world of reasoning, not the external world of facts',
+    ),
+    '§5.7 the NON-DUPLICATION BOUNDARY quote is recorded verbatim (the guard against drifting into a general knowledge store)',
+  )
+
+  // 5.8 — the placeholder note on the novelty assessment (item 1, second half).
+  assert(
+    PROSE.includes('PLACEHOLDER FOR A RICHER STANDARD'),
+    '§5.8 the structural-novelty standard is marked a placeholder for a richer standard once the taxonomy is populated',
+  )
+}
+
+// ============================================================================
+// §6 curiosity-trigger STUB — pass-through identity, and firing ONLY on a
+// genuine confirmation (placement RULED 2026-08-18 Q5)
+// ============================================================================
+{
+  const populated: NoveltyHistoryRow[] = [
+    row('household', ['sophrosyne']),
+    row('household', ['sophrosyne']),
+    row('household', ['sophrosyne']),
+    row('cosmopolis', ['phronesis']),
+  ]
+
+  const genuine = assessStructuralNovelty(
+    { targetCircle: 4, initialClassification: { kind: 'virtue_domain', domains: ['andreia'] } },
+    populated,
+  )
+  const notNovel = assessStructuralNovelty(
+    { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['sophrosyne'] } },
+    populated,
+  )
+  const starved = assessStructuralNovelty(
+    { targetCircle: 2, initialClassification: { kind: 'virtue_domain', domains: ['sophrosyne'] } },
+    [],
+  )
+  const friction = assessStructuralNovelty(
+    { initialClassification: { kind: 'preferred_indifferent' } },
+    populated,
+  )
+
+  // 6.0 — the fixtures are the branches they claim to be (non-vacuity floor:
+  // without this, 6.2's three negatives could all be passing for the wrong
+  // reason — e.g. if `genuine` were silently not novel, everything below would
+  // still "pass").
+  assert(
+    genuine.novel === true && genuine.confidence > 0 && genuine.basis === undefined,
+    '§6.0a the genuine fixture really is a populated-window novel result',
+  )
+  assert(notNovel.novel === false, '§6.0b the not-novel fixture really is not novel')
+  assert(
+    starved.novel === true && starved.confidence === 0 && starved.basis === 'insufficient_history',
+    '§6.0c the starved fixture really is the insufficient_history branch',
+  )
+  assert(
+    friction.novel === true && friction.confidence === 0 && friction.basis === undefined,
+    '§6.0d the friction fixture really is the axis-free branch',
+  )
+
+  // 6.1 — isGenuineNoveltyConfirmation: the disclosed build-time judgement.
+  assert(isGenuineNoveltyConfirmation(genuine) === true, '§6.1a genuine novelty ⇒ a confirmation')
+  assert(isGenuineNoveltyConfirmation(notNovel) === false, '§6.1b not novel ⇒ not a confirmation')
+  assert(
+    isGenuineNoveltyConfirmation(starved) === false,
+    '§6.1c starved window ⇒ NOT a confirmation (an honest no-basis pass, never manufactured curiosity)',
+  )
+  assert(
+    isGenuineNoveltyConfirmation(friction) === false,
+    '§6.1d friction candidate ⇒ NOT a confirmation (no structural axis to be novel against)',
+  )
+
+  // 6.2 — the trigger is a PURE PASS-THROUGH on every branch: same reference,
+  // out as in. This is what makes it impossible for the seam to alter any byte
+  // of /api/practice/fresh's response.
+  for (const [label, r] of [
+    ['genuine', genuine],
+    ['notNovel', notNovel],
+    ['starved', starved],
+    ['friction', friction],
+  ] as const) {
+    assert(
+      noteCuriosityTrigger(r) === r,
+      `§6.2 ${label}: pass-through returns the SAME object reference (cannot alter a verdict)`,
+    )
+  }
+
+  // 6.3 — it logs on a genuine confirmation, and ONLY then. Synchronous
+  // stub/restore in a single sequential block (memory
+  // `async-test-console-stub-race`: only concurrent async blocks clobber).
+  const original = console.log
+  const lines: unknown[][] = []
+  console.log = (...args: unknown[]) => {
+    lines.push(args)
+  }
+  try {
+    noteCuriosityTrigger(genuine)
+    noteCuriosityTrigger(notNovel)
+    noteCuriosityTrigger(starved)
+    noteCuriosityTrigger(friction)
+  } finally {
+    console.log = original
+  }
+  assert(lines.length === 1, `§6.3a exactly ONE log line across the four branches (got ${lines.length})`)
+  const first = String(lines[0]?.[0] ?? '')
+  assert(
+    first.includes('[curiosity-trigger]') && first.includes('reached'),
+    '§6.3b the log says the trigger was reached, under its internal mechanism name',
+  )
+  const payload = (lines[0]?.[1] ?? {}) as Record<string, unknown>
+  assert(
+    payload.outcomeWhenPopulated === TAXONOMY_QUESTION_OUTCOME,
+    '§6.3c the log names the deferred outcome it will eventually emit',
+  )
+  assert(
+    !JSON.stringify(lines[0] ?? []).includes('gapRef'),
+    '§6.3d nothing caller-supplied is logged (no gapRef in the payload)',
+  )
+}
+
+// ============================================================================
+// §7 `taxonomy_question` CONTAINMENT — the Q1 ruling made executable.
+// The migration is DEFERRED, so this value must NOT be writable. Code-first
+// adoption would let a route accept a value the live CHECK rejects — a 500 on
+// write, the ordering hazard the `not_selected` precedent names.
+// ============================================================================
+{
+  assert(
+    TAXONOMY_QUESTION_OUTCOME === 'taxonomy_question',
+    '§7.1 snake_case spelling, per Q1 ("taxonomy_question, not taxonomy-question")',
+  )
+
+  // 7.2 — absent from the watching route's CYCLE_LEVEL_OUTCOMES. Parsed from
+  // source rather than imported: importing that handler pulls in security.ts,
+  // whose keepalive interval would stop this hermetic battery exiting (memory
+  // `tsx-tests-setinterval-keepalive-hang`). The exported-value assertion is
+  // carried in watching-handler.test.ts §4.5, which already imports it.
+  const watchingSrc = readFileSync(
+    join(__dirname, '../../../app/api/practice/watching/handler.ts'),
+    'utf8',
+  )
+  const cycleArr = watchingSrc.match(/export const CYCLE_LEVEL_OUTCOMES = \[([\s\S]*?)\] as const/)
+  assert(cycleArr !== null, '§7.2a CYCLE_LEVEL_OUTCOMES is findable in source (non-vacuity floor)')
+  const cycleValues = (cycleArr ? cycleArr[1] : '').match(/'([a-z_]+)'/g)?.map((q) => q.slice(1, -1)) ?? []
+  assert(
+    cycleValues.length === 4 &&
+      JSON.stringify([...cycleValues].sort()) ===
+        JSON.stringify(['dependency_unavailable', 'null_cycle', 'terminated_by_timeout', 'winner']),
+    `§7.2b the parse really yielded the four known cycle-level values (non-vacuity floor; got ${cycleValues.join(',')})`,
+  )
+  assert(
+    !cycleValues.includes(TAXONOMY_QUESTION_OUTCOME),
+    '§7.2c taxonomy_question is NOT in CYCLE_LEVEL_OUTCOMES — the migration is deferred (RULED Q1)',
+  )
+
+  // 7.3 — absent from the LIVE cycle-level CHECK in the migration.
+  const migration = readFileSync(
+    join(__dirname, '../../../../supabase-idea-loop-watching-migration.sql'),
+    'utf8',
+  )
+  const checkBlock = migration.match(
+    /cycle_outcome TEXT NOT NULL CHECK \(cycle_outcome IN \(\s*'winner'[\s\S]*?\)\)/,
+  )
+  assert(checkBlock !== null, '§7.3a the cycle-level CHECK block is findable in the migration (non-vacuity floor)')
+  const checkValues = (checkBlock ? checkBlock[0] : '').match(/'([a-z_]+)'/g)?.map((q) => q.slice(1, -1)) ?? []
+  assert(
+    checkValues.length === 4,
+    `§7.3b the live cycle-level CHECK still enumerates exactly four values (got ${checkValues.length}: ${checkValues.join(',')})`,
+  )
+  assert(
+    !checkValues.includes(TAXONOMY_QUESTION_OUTCOME),
+    '§7.3c taxonomy_question is NOT in the live CHECK — adding it is a founder-walked migration, not a code change',
+  )
+
+  // 7.4 — no ROUTE anywhere carries the literal: the stub is code-only, and
+  // "code-only" means it does not reach a write path. Walks src/app/api.
+  //
+  // __tests__ directories are EXCLUDED, and the exclusion is a real correction
+  // rather than a convenience: the first form of this pin walked them too and
+  // then failed on its own control run, because the sibling batteries' own
+  // assertion LABELS quote the literal while asserting its absence. The pin's
+  // subject is route source — code that could write the value — not test prose
+  // that names it.
+  const apiRoot = join(__dirname, '../../../app/api')
+  const offenders: string[] = []
+  let filesWalked = 0
+  const walk = (dir: string): void => {
+    for (const name of readdirSync(dir)) {
+      const full = join(dir, name)
+      if (statSync(full).isDirectory()) {
+        if (name !== '__tests__') walk(full)
+        continue
+      }
+      if (!name.endsWith('.ts') && !name.endsWith('.tsx')) continue
+      filesWalked++
+      if (readFileSync(full, 'utf8').includes(TAXONOMY_QUESTION_OUTCOME)) offenders.push(name)
+    }
+  }
+  walk(apiRoot)
+  assert(filesWalked > 50, `§7.4a the API walk genuinely traversed the tree (non-vacuity floor; walked ${filesWalked} files)`)
+  assert(
+    offenders.length === 0,
+    `§7.4b no API route source carries the taxonomy_question literal — the stub writes nothing (found in: ${offenders.join(', ')})`,
+  )
 }
 
 console.log(`\nidea-loop-types battery: ${passed} passed, ${failed} failed`)

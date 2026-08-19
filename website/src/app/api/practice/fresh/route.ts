@@ -1,6 +1,13 @@
 /**
  * /api/practice/fresh — the IDEA loop's novelty-check endpoint (agent-circles,
- * 2026-08-09). DARK behind SUBSTRATE_FRESH_ENABLED (UNSET ⇒ 503).
+ * 2026-08-09). FLAG-GATED behind SUBSTRATE_FRESH_ENABLED (unset ⇒ 503).
+ * CORRECTED 2026-08-19: this line read "DARK behind SUBSTRATE_FRESH_ENABLED",
+ * false since 2026-08-10 — the flag was activated and live-verified in
+ * production at D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10. THIS ROUTE IS
+ * LIVE. (Found by PR19 review: the same session's correction pass fixed the
+ * handler, the types module, and the battery, and missed the route wrapper of
+ * the very route it was correcting — four independent review dimensions
+ * converged on it.)
  *
  * The implementation + its injectable deps live in ./handler (route.ts may
  * export ONLY HTTP handlers — Next route-export validation; memory

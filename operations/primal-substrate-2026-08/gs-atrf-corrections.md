@@ -234,6 +234,87 @@ receiving its output are different moments with different actors.** This section
 distinction produced: a question raised at the founder's level, recorded at the session's level, for a
 third session to inherit.
 
+## (e) CARRY-FORWARD for the session that owns GS-ATRF-1 — a candidate mechanism for the §(c-bis) gap, and a gap in the mechanism itself
+
+**Added 2026-08-19** (`D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19`; record:
+`operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`).
+**Not a correction, not a ruling, and not an answer to §(c-bis)** — a carry-forward the owning session
+should meet at the point of use, following §(d)'s pattern.
+
+**What arrived.** A 2026-08-18 addendum, reasoning from confidence decay over long reasoning traces,
+states: *"A reasoning system that cannot honestly assess its own confidence decay over a long trace
+cannot honestly assess blast radius. The epistemic status framework assessed earlier today —
+specifically the rule that confidence of an explanation must never exceed its evidential basis — is
+the governance mechanism that addresses this. When GS-ATRF-1 is scoped, the epistemic status framework
+should be carried in as a candidate mechanism for honest blast-radius assessment, not just virtue
+domain and oikeiosis circle proxies."*
+
+**Why it belongs beside §(c-bis) specifically.** §(c-bis) establishes that the *loop-level
+blast-radius proxy* has no basis at all for a `friction_detection` candidate, that the ruled
+`high | medium | low` vocabulary cannot express *"this indicator has no basis"*, and that
+`assessStructuralNovelty`'s `{ novel: true, confidence: 0 }` — *"the zero confidence says the check
+has no basis, rather than manufacturing one"* — is the available precedent. **The addendum's rule is
+that same principle, reached independently from a different direction.** §(c-bis) named the gap and
+deliberately proposed no mechanism; this is the first candidate mechanism to arrive for it.
+
+**⚠ THE MECHANISM WAS NOT IN THIS REPOSITORY — relayed and RESOLVED 2026-08-19.** At the time this
+section was first written, a repo-wide search for `epistemic status` returned zero hits; the framework
+existed only inside the 2026-08-18 exploratory session, which has no standalone record here. **The
+founder has since relayed the mentor's own description of it, verbatim:**
+
+> "The epistemic status framework — treating every consequential proposition flowing through the
+> reasoning harness as carrying an epistemic status (observation, inference, assumption, unknown) —
+> was assessed, connected to GS-ATRF-1, and noted as worth carrying as a named open question alongside
+> GS-ATRF-1 through 3. It was not formally added to the ATRF open questions list. That addition needs
+> a ruling before the generation-step build sequence closes. It is not blocking the current sequence
+> but it should not be left as an informal note."
+
+**This both confirms and sharpens the earlier read.** The mentor confirms the connection to GS-ATRF-1
+this section made independently. It also sharpens the shape: the framework is not a single confidence
+bound folded into GS-ATRF-1 as a candidate mechanism — it is a **four-category classification**
+(observation / inference / assumption / unknown) applied to *every consequential proposition* the
+harness carries, and the mentor's own framing is that it is *"worth carrying as a named open
+question alongside GS-ATRF-1 through 3"* — i.e. a candidate **fourth** named open question, not merely
+an input to the first three.
+
+**✅ RULED 2026-08-19 — GS-ATRF-4 formally added, standalone, §(c-bis) carried forward not resolved.**
+A ruling request was put to the mentor the same day
+(`operations/agent-circles-2026-08/2026-08-19-mentor-question-epistemic-status-fourth-question-FOR-RULING.md`)
+and answered in full
+(`operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md` —
+verbatim wins). Three findings, none of which this note anticipated correctly in every particular:
+
+1. **The framework IS formally added, as GS-ATRF-4, standalone — not folded into GS-ATRF-1.** The
+   mentor's own reasoning: *"folding GS-ATRF-4 into GS-ATRF-1 would mean amending a ruled answer, and
+   ruled answers are not amended by the addition of new open questions. They are amended by a ruling
+   that specifically re-opens and revises them."* §(c-bis) is a **named carry-forward to the
+   generation-step scoping session**, examined there alongside GS-ATRF-1 through 4 — **not resolved by
+   this ruling**. The ruled GS-ATRF-4 entry carries its own cross-reference back to §(c-bis) for that
+   purpose.
+2. **APPLIED same session:** `website/src/data/project-context.json` v1.3.0 → v1.4.0 (the ruled
+   question text verbatim, appended after GS-ATRF-3's paragraph; "three questions" → "four questions";
+   `tsc`-clean, JSON-parse-verified) and `website/supabase-project-context-2026-08-19-gsatrf4-update.sql`
+   authored for the founder's walk (same idiom as the 2026-08-09 precedent; **not yet run — a
+   founder-walked live step, the AI performs no Supabase op**).
+3. **The `high | medium | low` vocabulary is UNCHANGED and stays deferred** to the generation-step
+   scoping session, per the mentor's Q(c) — but a **named direction, not a ruling**, is now on record
+   for that session to carry in: the `assessStructuralNovelty` null-plus-flag model (*"not
+   assessable"*) is the stronger candidate over a fourth vocabulary value (*"assessed and found to be
+   in that state"*) — the two are different epistemic claims, and the vocabulary should reflect the
+   difference. **This is explicitly not a ruling on the vocabulary itself.**
+
+**§(c-bis)'s standing instruction is therefore still not fully discharged, but its routing is now
+settled rather than open**: the next session that touches GS-ATRF-1 still owns the gap itself, but no
+longer needs to decide whether a fix belongs there or in a new question — that has been ruled. Both
+GS-ATRF-4's text and its cross-reference note are on the live surface (once the SQL is walked) for
+that session to read directly, rather than through this note.
+
+**Vocabulary note (unchanged by the ruling).** Per **C10** the mechanism at issue throughout this
+section is the **loop-level blast-radius proxy** (reasoning-level, proposal time) and never the
+*permission-layer blast-radius enrichment*.
+
+---
+
 ## What this note does not do
 
 It does not build the migration (parked — see `gs-atrf-2-shape.md` §Watching candidate row and

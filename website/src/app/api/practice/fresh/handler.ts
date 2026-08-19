@@ -6,9 +6,13 @@
  * Implementation lives here; the thin route wrapper is ./route.ts per Next
  * route-export validation (memory `nextjs-route-export-validation`).
  *
- * DARK behind SUBSTRATE_FRESH_ENABLED (UNSET everywhere ⇒ honest 503, zero
- * work, zero DB touch — the discernment/S10 dark-route pattern). Activation is
- * its own founder-walked `code-critical` step; nothing here pre-approves it.
+ * FLAG-GATED behind SUBSTRATE_FRESH_ENABLED (unset ⇒ honest 503, zero work,
+ * zero DB touch — the discernment/S10 dark-route pattern). CORRECTED
+ * 2026-08-19: this header read "DARK … UNSET everywhere", which has been false
+ * since 2026-08-10 — the flag was activated and live-verified in production at
+ * D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10 (the founder-walked
+ * `code-critical` activation step this header anticipated; it has happened).
+ * THIS ROUTE IS LIVE. Edits here reach production and are owed PR19 care.
  *
  * WHAT IT DOES: POST a batch of guardrail-surviving GeneratedCandidate
  * structural axes — [{ gapRef, targetCircle?, initialClassification }] — and
@@ -106,6 +110,7 @@ import {
 } from '@/lib/substrate/agent-assessment-history-store'
 import {
   assessStructuralNovelty,
+  noteCuriosityTrigger,
   type GeneratedCandidate,
   type NoveltyHistoryRow,
   type OikeiosisCircleRank,
@@ -361,8 +366,19 @@ export async function runFreshPost(
   const historyWindow: readonly NoveltyHistoryRow[] = window.value.actions
 
   // 5. Classify each candidate (pure computation; no LLM, no write).
+  //
+  //    THE CURIOSITY-TRIGGER SEAM (stub, 2026-08-19; placement RULED 2026-08-18
+  //    Q5 — "server-side, beside the taxonomy stub"). noteCuriosityTrigger is a
+  //    PURE PASS-THROUGH: it returns its argument by identity and logs one line
+  //    when a GENUINE structural-novelty confirmation is reached (never on the
+  //    zero-confidence starved-window or friction branches — those are honest
+  //    no-basis passes, and firing on them would manufacture curiosity out of
+  //    absence of evidence). It cannot alter `r`, and therefore cannot alter any
+  //    byte of this route's response. Carried from the same ruling: when the
+  //    standing-runner design opens, whether this seam stays here, migrates
+  //    runner-side, or lives in BOTH places must be revisited explicitly.
   const results = candidates.map(({ gapRef, candidate }) => {
-    const r = assessStructuralNovelty(candidate, historyWindow)
+    const r = noteCuriosityTrigger(assessStructuralNovelty(candidate, historyWindow))
     return {
       gapRef,
       passedNoveltyCheck: r.novel,

@@ -1,12 +1,24 @@
 # Next-Session Prompt — Curiosity / puzzle-taxonomy stubs + guide-circle governance record
 
+> **⚠ SPENT — executed 2026-08-19.** All three items built, item 4's migration correctly deferred per
+> the Q1 ruling. Decision: `D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19`.
+> Close: `2026-08-19-curiosity-taxonomy-stubs-CLOSE.md`. **Do not re-run.** One finding is worth
+> carrying if you arrive here from elsewhere: this prompt's F-notes describe `assessStructuralNovelty`
+> as living in a dark module — `/api/practice/fresh` has been LIVE in production since 2026-08-10, and
+> the Q5 ruling was given on that false mechanism fact. The ruling's direction survives; the risk
+> classification did not.
+
 **Paste as the first message of a new session, in the `sagereasoning` repo root.**
 
 **Stream:** founder.
 **Tier: `code-elevated`.** Settled — **item 4's migration is RULED DEFERRED** (2026-08-18 Q1), so no
 live CHECK widening is in scope. If anything would push this to `code-critical`, stop: it is out of
 scope for this session.
-**Predecessor:** `2026-08-18-perimeter-completion-CLOSE.md` (`fba9b4c`, pushed, Vercel green).
+**Predecessor:** `2026-08-19-perimeter-live-confirmation-and-limitations-publication-CLOSE.md`
+(`D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED`, pushed, Vercel green). **Note: this prompt was
+originally authored 2026-08-18, queued behind the perimeter-confirmation session, and has now been
+corrected in place** — the `/limitations` warning below is updated to reflect that the perimeter is
+confirmed live and the page is published, not still gated.
 **Source:** the founder's 2026-08-18 exploratory-session mentor relay, **now ruled**. All five
 questions raised against it were answered — read the verbatim record FIRST:
 `operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md`
@@ -73,6 +85,25 @@ Add a comment at the structural-novelty assessment noting the current standard �
 against the existing corpus — is a **placeholder for a richer standard** once the taxonomy is
 populated. Do not change the assessment's behaviour.
 
+**Design grounding — ADDED 2026-08-19, record it in the type's docstring.** From the RL-passage
+addendum (verbatim record:
+`operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`).
+It supplies the *why* behind the shape already scoped above, and one boundary worth having in writing
+before anything populates the taxonomy:
+
+- **Why shapes of inquiry, not conclusions.** *"storing the chain of reasoning rather than the answer
+  is what makes tuning meaningful is the computational grounding for the puzzle taxonomy's design
+  principle. The taxonomy stores the shapes of inquiry, not conclusions."* This is why the type
+  carries *questions opened* and *taxonomy connections* rather than findings or answers.
+- **The non-duplication boundary — the load-bearing half.** *"the taxonomy's value is not duplicated
+  by what frontier labs are building — because the taxonomy stores examination chains about the
+  internal world of reasoning, not the external world of facts."* Write this down. It tells a future
+  session what the taxonomy is **not** for, and is the cheapest available guard against it drifting
+  into a general knowledge store.
+
+**This changes no field, route, behaviour, or schema** — it is docstring content for a stub already in
+scope. If following it would add any of those, stop: that is scope creep, not grounding.
+
 ### 2. Curiosity-loop trigger — stub mechanism
 A named stub at the point structural novelty is confirmed. **Logs that it was reached, passes
 through, nothing else.** Internal mechanism name (not a surface name) — `curiosity-trigger` is the
@@ -128,6 +159,45 @@ writing to the constrained column, until the migration is ruled and walked."*
   exists, that outcome must be distinguishable from a null cycle. Its home is the standing-runner
   design.
 
+## Record-items carried by the 2026-08-19 addendum — DO NOT ACT ON THESE
+
+The RL-passage addendum (recorded verbatim, see item 1's design grounding) carries three further
+items. **Only its connection 1 is in this session's scope** — the docstring grounding above.
+
+The other three are **record entries for other sessions**. They are named here so this session knows
+they exist and does **not** absorb them:
+
+1. **Positioning (connection 2)** — the dispositional layer (practitioner's hexis, the guide agent's
+   accumulated examination history, the ATRF's task-agnostic harness) is named as SageReasoning's
+   specific contribution to the alignment space, *"when the project's positioning is next reviewed."*
+   **No positioning review is scheduled.** Not this session's.
+2. **GS-ATRF-1 (connection 3)** — an epistemic-status rule offered as a candidate mechanism for the
+   §(c-bis) basis-lessness gap. **Already routed** to
+   `operations/primal-substrate-2026-08/gs-atrf-corrections.md` **§(e)**, where the owning session
+   meets it. **It carries a blocking gap** — the framework has no repo record (see below). Not this
+   session's; this session touches neither GS-ATRF-1 nor the proxy.
+3. **The hexis open question** — whether a reasoning system can be aligned toward dispositional
+   stability rather than output correctness alone. Verified 2026-08-19 to match the second component
+   of `manifest.md`'s **Consciousness and Continuity Obligation** (*"a mechanism by which an agent's
+   disposition deepens over time rather than resetting between cycles"*). Surfaces when that
+   Obligation comes into active scoping. **Not this session's, and not any current session's** — the
+   Obligation is a named direction, not a build item.
+
+**Two founder actions are outstanding and are not this session's to perform or chase:**
+
+- **Relay the epistemic status framework** so it can be recorded. `epistemic status` returns **zero
+  repo hits**; the framework exists only in the 2026-08-18 exploratory session, whose record is also
+  not in the repo. Until relayed, the GS-ATRF-1 session can carry in only the single quoted sentence,
+  not a framework.
+- **Decide whether `manifest.md`'s Consciousness and Continuity Obligation should carry a pointer** to
+  the addendum. Deliberately not done unilaterally — a manifest edit requires a same-session cache
+  update and a `D-CACHE-DRIFT-…` entry, a cost that should be paid deliberately rather than ridden in
+  on a records act.
+
+**If this session finds itself scoping GS-ATRF-1, the loop-level blast-radius proxy, the ATRF, or the
+Consciousness and Continuity Obligation — stop.** All four are out of scope, and three are explicitly
+gated behind the post-validation-run ATRF scoping session marked *"do not open early."*
+
 ## Constraints that bind regardless
 
 - **The Q1 hard constraint: the loop proposes; it never executes.** Nothing here may create a path
@@ -141,19 +211,21 @@ writing to the constrained column, until the migration is ruled and walked."*
 
 ## ⚠ IF ANYTHING IN THIS SESSION TOUCHES `/limitations` — READ THIS FIRST
 
-It should not. But the 2026-08-17 ruling's instruction to *"publish A3's original wording"* is
-**AMENDED** by the 2026-08-18 Q3 ruling: a bare **"every time" now OVER-PROMISES and may not be
-published**. A session acting on the older ruling alone would publish a claim the mentor has since
-ruled dishonest. The ruled replacement wording (preferred + floor formulations, verbatim) is staged at
-`operations/agent-circles-2026-08/2026-08-18-limitations-crisis-wording-STAGED.md`. Publication
-remains gated on the perimeter being confirmed LIVE, which has not happened.
+**UPDATED 2026-08-19 — the situation this warning originally described is resolved.** The perimeter
+was confirmed LIVE (founder-run smoke, 2026-08-19) and `/limitations` is now **published** with the
+Q3-ruled wording (`D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED`) — the coverage bound verbatim,
+plus the M-5 "nothing happens afterwards" disclosure kept prominent. This session's scope (items 1–3,
+the taxonomy/curiosity stubs and the governance record) has no reason to touch that page. If it does,
+stop: that is out of this session's declared scope and needs its own grounding, not an incidental edit
+riding on unrelated work.
 
 ## Carried from the perimeter session (unrelated, still open)
 
-The empty-subject billed-call defect in the **17 routes wired in the predecessor session** (fixed
-only in the 3 wired 2026-08-18; see `hasScreenableSubject`); no per-route runtime invocation tests
-for those 3; `/limitations` still gated on live perimeter confirmation **and now needing the Q3
-bound**; **M-5 ("nothing happens afterwards") remains P0 and is not discharged by any of this.**
+The empty-subject billed-call defect in the **17 routes wired in the predecessor-of-the-predecessor
+session** (fixed only in the 3 wired 2026-08-18; see `hasScreenableSubject`); no per-route runtime
+invocation tests for those 3; PR24 retention parity for `agent_hold_observations`; M-4 obligations 1
+and 4; the RLS survey remainder. **M-5 ("nothing happens afterwards") remains P0 and is not
+discharged by any of this** — publishing the disclosure is not building the write path.
 
 **Already applied 2026-08-18, do not redo:** the `/api/guardrail` exclusion entry was updated from a
 deferral to a reasoned judgement per Q4, and the deferral notation retired. Battery re-verified 689/0.

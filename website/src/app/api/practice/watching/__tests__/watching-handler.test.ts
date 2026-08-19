@@ -26,6 +26,7 @@ import {
   MAX_REF_CHARS,
   type WatchingWriteDeps,
 } from '../handler'
+import { TAXONOMY_QUESTION_OUTCOME } from '@/lib/substrate/idea-loop-types'
 
 let passed = 0
 let failed = 0
@@ -287,6 +288,24 @@ async function run(): Promise<void> {
       CYCLE_LEVEL_OUTCOMES.includes('terminated_by_timeout') &&
         CANDIDATE_LEVEL_OUTCOMES.includes('terminated_by_timeout'),
       '§4.3 QW-C: terminated_by_timeout is the UNIFORM spelling at BOTH levels (not "timeout")',
+    )
+
+    // §4.4/§4.5 — the Q1 containment ruling, asserted on the EXPORTED VALUES
+    // (added 2026-08-19, curiosity/taxonomy scoping session). `taxonomy_question`
+    // is a CODE-ONLY stub constant: its production migration is DEFERRED until
+    // the standing-runner design opens (RULED 2026-08-18 Q1), so neither
+    // validated array may admit it. Admitting it code-first would let this route
+    // accept a value the live CHECK rejects — a 500 on write rather than a clean
+    // 400, the ordering hazard the `not_selected` precedent migration names in
+    // its own ORDER note. The SQL half of this guard lives in
+    // idea-loop-types.test.ts §7.3, which reads the migration itself.
+    assert(
+      !(CYCLE_LEVEL_OUTCOMES as readonly string[]).includes(TAXONOMY_QUESTION_OUTCOME),
+      '§4.4 taxonomy_question is NOT a cycle-level outcome — its migration is deferred (RULED Q1)',
+    )
+    assert(
+      !(CANDIDATE_LEVEL_OUTCOMES as readonly string[]).includes(TAXONOMY_QUESTION_OUTCOME),
+      '§4.5 taxonomy_question is NOT a candidate-level outcome either (the cycle-level CHECK is the ruled home; neither is widened here)',
     )
   }
 

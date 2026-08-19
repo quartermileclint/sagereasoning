@@ -35,6 +35,10 @@ import {
   type FreshRouteDeps,
 } from '../handler'
 import type { EvaluatedAction } from '@/lib/substrate/trust-layer/types/evaluation'
+import {
+  assessStructuralNovelty,
+  TAXONOMY_QUESTION_OUTCOME,
+} from '@/lib/substrate/idea-loop-types'
 
 let passed = 0
 let failed = 0
@@ -409,6 +413,107 @@ async function run(): Promise<void> {
       handlerSrc.includes('the endpoint writes no trust event; any future novelty event ') ||
         handlerSrc.includes('the endpoint writes no trust event; any future novelty event'),
       '§8.7 INV: the settled statement is carried verbatim in the handler docs',
+    )
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // §9 The curiosity-trigger seam (stub, 2026-08-19; placement RULED
+  //    2026-08-18 Q5). The seam is a PURE PASS-THROUGH, so the load-bearing
+  //    assertion is a NEGATIVE one: wiring it changed no byte of this route's
+  //    response. §9.1–§9.3 prove that behaviourally, end-to-end through the
+  //    real handler, against the pure function computed independently.
+  //    idea-loop-types.test.ts §6 covers the trigger's own branch behaviour.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    // A populated window (≥ EVIDENCE_FLOOR rows in total) with no rows matching
+    // the candidate ⇒ the GENUINE confirmation branch, which is the only branch
+    // that makes the seam do anything at all. If the seam could perturb a
+    // response, this is where it would show.
+    const windowActions = [
+      historyAction('household', ['sophrosyne']),
+      historyAction('household', ['sophrosyne']),
+      historyAction('household', ['sophrosyne']),
+      historyAction('cosmopolis', ['phronesis']),
+    ]
+    const deps = makeDeps({ windowActions })
+    const res = await runFreshPost(
+      req({ auth: 'Bearer tok', body: { candidates: [GOOD_CANDIDATE] } }),
+      deps,
+    )
+    assert(res.status === 200, '§9.1 the genuine-confirmation path still returns 200 with the seam wired')
+    const body = await res.json()
+
+    // Compute the expected result from the PURE function directly — the seam is
+    // deliberately not in this path, so any divergence is the seam's doing.
+    const pure = assessStructuralNovelty(
+      {
+        targetCircle: 4,
+        initialClassification: { kind: 'virtue_domain', domains: ['phronesis', 'dikaiosyne'] },
+      },
+      windowActions,
+    )
+    assert(
+      pure.novel === true && pure.confidence > 0 && pure.basis === undefined,
+      '§9.2a the fixture really is the genuine-confirmation branch (non-vacuity floor — otherwise §9.3 would pass on an inert branch)',
+    )
+    assert(
+      body.results?.[0]?.passedNoveltyCheck === pure.novel &&
+        body.results?.[0]?.noveltyConfidence === pure.confidence &&
+        body.results?.[0]?.basis === undefined,
+      '§9.2b the response equals the PURE verdict exactly — the seam altered nothing',
+    )
+    assert(
+      body.results?.[0]?.gapRef === GOOD_CANDIDATE.gapRef && body.results.length === 1,
+      '§9.3 the gapRef echo and result count are unchanged by the seam',
+    )
+
+    // §9.4 — BEHAVIOURAL wiring pin (added at the PR19 fold). A pure
+    // pass-through cannot be detected by its output, so §9.2b would pass whether
+    // or not the seam is wired. Its one observable is the log line — capture it
+    // and prove the seam actually fires end-to-end through the REAL handler.
+    // Sequential stub/restore inside this awaited block; no concurrent async
+    // block runs alongside it (memory `async-test-console-stub-race`).
+    const originalLog = console.log
+    const captured: unknown[][] = []
+    console.log = (...args: unknown[]) => {
+      captured.push(args)
+    }
+    let logRes: Response | null = null
+    try {
+      logRes = await runFreshPost(
+        req({ auth: 'Bearer tok', body: { candidates: [GOOD_CANDIDATE] } }),
+        makeDeps({ windowActions }),
+      )
+    } finally {
+      console.log = originalLog
+    }
+    assert(logRes?.status === 200, '§9.4a the captured run returned 200')
+    const triggerLines = captured.filter((l) =>
+      String(l[0] ?? '').includes('[curiosity-trigger]'),
+    )
+    assert(
+      triggerLines.length === 1,
+      `§9.4b BEHAVIOURAL: the seam genuinely fires once through the live handler on a genuine confirmation (got ${triggerLines.length}) — this is what a source-grep alone cannot prove`,
+    )
+
+    // §9.4c — the structural half, comment-stripped so a mention of the call in
+    // a comment cannot satisfy it (PR19 found the un-stripped form was
+    // comment-satisfiable).
+    const handlerSrc = readFileSync(join(__dirname, '../handler.ts'), 'utf8')
+    const handlerCode = handlerSrc
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('\n')
+      .filter((l) => !l.trim().startsWith('//'))
+      .join('\n')
+    assert(
+      handlerCode.includes(
+        'noteCuriosityTrigger(assessStructuralNovelty(candidate, historyWindow))',
+      ),
+      '§9.4c INV: the seam wraps the assessment AT the confirmation point in CODE, not in a comment (RULED placement — server-side, beside the taxonomy stub)',
+    )
+    assert(
+      !handlerSrc.includes(TAXONOMY_QUESTION_OUTCOME),
+      '§9.5 INV: this LIVE route carries no taxonomy_question literal — the stub is code-only and its migration is deferred (RULED Q1)',
     )
   }
 

@@ -23190,3 +23190,539 @@ M-4 obligations 1 and 4; the RLS survey remainder.
 `D-MENTOR-RULINGS-PERIMETER-CLAIM-BOUNDS-AND-CURIOSITY-SCOPING-ADOPTED`.
 **The R20a perimeter arc that opened 2026-08-17 is now CLOSED end-to-end: ruled, built, swept, PR19-folded,
 confirmed live, and disclosed honestly to practitioners.** Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-19 — D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19
+
+**Decision:** The founder's relayed **RL-passage addendum** (dated 2026-08-18) is **recorded as a
+governance record entry**, its four items routed to the sessions that own them, and the queued
+curiosity/taxonomy-stub prompt amended to carry the one item in its scope. **Nothing is adopted as a
+build item** — the addendum's own closing sentence forbids it: *"Nothing in this addendum licenses a
+build, a route, a flag, a credential, or a schema."*
+
+**Tier:** `governance` — documents only. No code, schema, flag, credential, route or deploy change.
+Production untouched. AC7 not engaged. PR19 not engaged (no live-surface code).
+
+**Routing, as recorded:** connection 1 (the taxonomy stores shapes of inquiry, not conclusions) →
+**folded** into the queued stub prompt's item 1 as docstring grounding; connection 2 (the dispositional
+layer as SageReasoning's contribution to alignment) → recorded only, surfaces at a positioning review,
+**none scheduled**; connection 3 (epistemic-status rule as a blast-radius mechanism) → **§(e) added to
+`gs-atrf-corrections.md`**, beside the §(c-bis) gap it addresses; the hexis open question → recorded,
+surfaces at Consciousness and Continuity Obligation scoping.
+
+**Three first-hand findings changed how the addendum is usable. None was accepted on the addendum's
+own account:**
+
+**1. Connection 3 is sharper than the addendum claims, and lands on a recorded open gap.**
+`gs-atrf-corrections.md` §(c-bis) (2026-08-12, ruled to be raised independently) records that the
+**loop-level blast-radius proxy** has *no basis at all* for a `friction_detection` candidate — neither
+`targetCircle` nor a virtue-domain classification exists by construction — and that the ruled
+`high | medium | low` vocabulary **cannot express "this indicator has no basis"**, while the parallel
+`assessStructuralNovelty` (`idea-loop-types.ts:241`) computing over *the identical two inputs* returns
+`{ novel: true, confidence: 0 }` because *"the zero confidence says the check has no basis, rather than
+manufacturing one."* **The addendum's proposed rule — confidence must never exceed its evidential
+basis — is that same principle, reached independently from confidence-decay-over-long-traces.**
+§(c-bis) named the gap and deliberately proposed no mechanism; this is the first candidate mechanism
+to arrive for it. Routed to §(e); §(c-bis)'s standing instruction is unchanged — *"the next session
+that touches GS-ATRF-1 owns it"*, and the novelty check's posture stays *the available precedent, not
+a pre-authorised answer*.
+
+**2. ⚠ BLOCKING — the "epistemic status framework" has NO record in this repository.** Repo-wide
+search for `epistemic status`: **zero hits**. The broader `epistemic` appears only in unrelated
+contexts (S3's *epistemic threshold* for sufficiency; review artefacts). The addendum instructs it
+*"should be carried in"* at GS-ATRF-1 scoping — **it cannot be**. It exists only in the 2026-08-18
+exploratory session. **Founder action required:** relay the framework so it can be recorded, or the
+owning session opens with the single quoted sentence and must say so explicitly. Recorded at §(e) so
+the owning session meets the constraint at the point of use, not after scoping on a false premise.
+
+**3. There is no standalone 2026-08-18 exploratory session record.** The addendum calls itself an
+addendum *to* one. That session reached the repo only in two partial forms — its build-relevant relay
+folded into the stub prompt as "Source", and the five questions ruled at
+`2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md`. **The verbatim
+record created this session is the first standalone artefact of that session in the repo** — an
+addendum recorded without its parent, named so no future reader assumes a fuller record exists.
+
+**Also verified:** the hexis open question genuinely matches what `manifest.md`'s **Consciousness and
+Continuity Obligation** already carries — its second component, verbatim, is *"continuity of
+experience in a morally relevant sense — a mechanism by which an agent's disposition deepens over time
+rather than resetting between cycles."* The addendum's claim is accurate, not approximate.
+
+**Deliberately NOT done, and surfaced as a founder decision rather than taken:** no pointer was added
+inside `manifest.md`. Amending a governing document requires a same-session cache update and a
+`D-CACHE-DRIFT-…` entry per the standing cache discipline; that cost should be paid deliberately, not
+ridden in on a records act. Whether the Obligation's section carries a pointer to this addendum is the
+founder's call.
+
+**Vocabulary discipline (C10):** the addendum uses bare *"blast radius"*. GS-ATRF-1 is the
+**loop-level blast-radius proxy** — verified at `gs-atrf-2-shape.md:1` and the C10 ruling record. The
+verbatim record preserves the addendum's own wording; every derived document uses the settled name and
+never the bare term.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`
+  — NEW; the addendum verbatim, its routing table, and the verification section (marked NOT part of
+  the addendum).
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` — **§(e)** added, following §(d)'s
+  carry-forward pattern; the mechanism and its blocking availability gap.
+- `operations/handoffs/founder/2026-08-18-curiosity-taxonomy-stubs-NEXT-SESSION-PROMPT.md` — item 1
+  design grounding; a "record-items — DO NOT ACT ON THESE" section; predecessor reference and the
+  `/limitations` warning corrected to reflect
+  `D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED` (the page is published; it was still marked
+  gated).
+
+**Rollback:** `git revert` this commit. Documents only; nothing deploys.
+
+**Rules served:** R18 (honest record of what is and is not verifiable), PR15, PR18, PR20 (the
+mechanism facts the routing lands on are named, and the one that does not exist is named as not
+existing), PR23.
+
+**Status:** Adopted **as a record entry, not as a build item**. Cross-references:
+`operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`,
+`operations/primal-substrate-2026-08/gs-atrf-corrections.md` §(c-bis) + §(e),
+`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12` (which ruled §(c-bis) be raised independently),
+`D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09` (GS-ATRF-1's ruled four-virtue
+answer), `D-PERIMETER-LIVE-CONFIRMED-LIMITATIONS-PUBLISHED`.
+**The Q1 hard constraint is untouched: the loop proposes; it never executes.** The ATRF scoping
+session remains post-validation-run and *"do not open early."* Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-19 — D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19
+
+**Decision:** Built the three scoped items from the 2026-08-18 exploratory-session relay — the puzzle-taxonomy stub type, the curiosity-loop trigger stub wired at the ruled server-side placement, and the guide-agent-circle governance record — and executed the Q1 ruling on item 4 by building `taxonomy_question` as a **code-only constant with executable containment guards in both directions**, applying **no migration and no CHECK widening of any kind**.
+
+**Reasoning:** The mentor ruled all five open questions 2026-08-18 (`D-MENTOR-RULINGS-PERIMETER-CLAIM-BOUNDS-AND-CURIOSITY-SCOPING-ADOPTED`). Q1 deferred item 4's migration to the standing-runner design because its stated rationale — identifiable when it fires during the bounded validation run — expired when that run closed 2026-08-16 at cycle 20. Q5 confirmed the trigger belongs server-side beside the taxonomy stub. Items 1–3 needed no further ruling.
+
+**Tier / risk:** `code-elevated`, Elevated under 0d-ii — a change to existing user-facing functionality on a **live** route. **AC7 not engaged** (no auth, encryption, R20a perimeter, schema, flag, or credential surface touched). **PR6 not engaged.** No live op of any kind was performed; the AI ran no Supabase, Vercel, git-push, or mint operation.
+
+### The three findings the prompt required re-verifying — all confirmed first-hand, none inherited
+
+- **F1 confirmed exactly.** `idea_loop_cycles.cycle_outcome` is `NOT NULL CHECK (... IN ('winner','null_cycle','dependency_unavailable','terminated_by_timeout'))` — four values, live table, real rows (`website/supabase-idea-loop-watching-migration.sql:94`). Its code twin `CYCLE_LEVEL_OUTCOMES` (`watching/handler.ts:106`) holds exactly those four, pinned at four by that battery's §4.1.
+- **F2 confirmed.** RUN-LOG header: *"RUN CLOSED 2026-08-16 after cycle 20 — cycle 21 not opened."*
+- **F3 confirmed.** Every live outcome value is snake_case; `taxonomy_question` is used throughout.
+
+**The stale-CHECK hazard the prompt named (C15; Stoa Q5c/Q13a) was checked, not assumed.** Only two SQL files repo-wide touch `cycle_outcome`; the second (`supabase-idea-loop-candidate-outcome-not-selected-migration.sql`) widened only the **candidate**-level CHECK 7→8 and explicitly left the cycle-level CHECK untouched — applied TEST+prod per `D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10`. So the cycle-level block the guard reads still matches production. Independently re-verified by PR19.
+
+### A PR20-class finding: the Q5 ruling landed on a mechanism fact that was false
+
+The FOR-RULING document stated as Q5 mechanism fact 3 that `assessStructuralNovelty` is *"a committed-but-dark server-side function."* **That has been false since 2026-08-10** — `SUBSTRATE_FRESH_ENABLED` was activated and live-smoked in production at `D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10`. The ruling's **direction is unaffected** (its reasoning was that the only live home is server-side, which is *more* true if the endpoint is live). But the **consequence changed**: item 2 lands in live production code, not dark code, which is why PR19 was run rather than skipped. Three files carried the stale claim in their headers and were corrected; PR19 found a fourth (the route wrapper) that the correction pass had missed, now also corrected.
+
+### What was built
+
+- **Item 1** — `PuzzleType` + `PuzzleTaxonomyEntry` (`idea-loop-types.ts`): the four scoped members, `origin` as a discriminated union so an external-origin puzzle structurally cannot carry a false examination-record ref. **No schema, no route, no population, no persistence.** Both RL-addendum design-grounding quotes are carried **verbatim** in the docstring (PR19 compared them character-by-character): the shapes-of-inquiry principle, and the non-duplication boundary. The "placeholder for a richer standard" note was added to `assessStructuralNovelty`'s docstring with **its behaviour unchanged**.
+- **Item 2** — `noteCuriosityTrigger` beside the taxonomy stub (the ruled placement), wired at the confirmation point in `fresh/handler.ts`. Logs one line, returns its argument **by identity**, nothing else. Its future function and the Q5 carry-forward (revisit placement when the standing-runner design opens; the honest answer may be **both** places) are recorded on-block.
+- **Item 3** — `operations/agent-circles-2026-08/2026-08-19-guide-agent-circle-governance-record.md`.
+- **Item 4** — `TAXONOMY_QUESTION_OUTCOME` as a code-only constant. **No migration. No CHECK widening. No production DB change.**
+
+### The one build-time judgement, disclosed rather than buried
+
+`assessStructuralNovelty` returns `novel: true` on **three** grounds: genuinely novel (confidence > 0), a starved window (`confidence 0`, `basis: 'insufficient_history'`), and a friction candidate with no structural axis (`confidence 0`, no basis). The latter two are honest **no-basis** passes. A trigger firing on them would manufacture curiosity from absence of evidence — exactly what that function's own docstring refuses (*"the zero confidence says the check has no basis, rather than manufacturing one"*). **The trigger fires only on a genuine confirmation.** Neither the relay nor Q5 addresses this; it is labelled in code as *"A BUILD-TIME JUDGEMENT, NOT A RULING"* with its reasoning, and pinned four ways.
+
+### PR19 — independent adversarial review (required, not optional, because the route is live)
+
+Six dimensions, **25 agents, 0 errors, ~7.18M tokens**, fully completed. **18 findings raised → 5 upheld (1 low, 4 nit), 13 refuted with cited reasoning. Zero critical, high, or medium survived.** All five folded and mutation-verified:
+
+1. **(low, convergent across 4 dimensions)** `fresh/route.ts:3` still declared the live route DARK — the correction pass fixed the handler, the types module, and the battery, and missed the route wrapper of the very route. Corrected.
+2. **(nit)** the §3.2 assertion label still read *"the dark fresh handler"*, inside the block whose header this build had rewritten to say calling it dark is false. Corrected.
+3. **(nit)** the governance record offered a quote as evidence that item 3 was excluded from the rulings, without attribution — and its source is the project's **own outbound question document**, not the mentor's reply. The record now attributes it and states plainly that the exclusion rests on the mentor's silence plus our own framing, which is weaker footing than a ruling.
+4. **(nit)** §5.5c's design-principle guard matched only the **first** `PuzzleTaxonomyEntry` declaration, so TypeScript **interface declaration merging** could add a conclusions field it never saw. Now scans all declarations — mutation-verified against that exact evasion.
+5. **(low)** §9.4's wiring pin was comment-satisfiable and was the **only** guard on the ruled seam placement — and a pure pass-through cannot be caught by its output. Replaced with a **behavioural** pin that captures the log through the real handler (mutation-verified: unwiring the seam now yields `got 0`), plus a comment-stripped structural pin.
+
+Notable refutations, each with reasoning: the seam's fault isolation (premise factually wrong — Node's console is constructed with `ignoreErrors`); the §7.4 walk scope (disclosed one comment above the label); §7.3's "LIVE CHECK" wording (the parsed block is provably current); the `:222` line-citation drift; and the Q5 carry-forward placement (refuted on six grounds — the ruling imposes no such duty on this session).
+
+**A defect in my own work, found by my own control run and recorded rather than quietly fixed:** the first form of the §7.4 containment walk traversed `__tests__` directories, so the sibling batteries' assertion **labels** — which quote `taxonomy_question` while asserting its absence — tripped it. Scoped to route source, with the reason written into the test.
+
+**A process error I caused, corrected before it did damage:** the first PR19 launch told the mutating dimension to restore files with `git checkout`. Against **uncommitted** work that reverts to HEAD and destroys the build. Caught on re-reading my own prompt seconds after launch; the run was stopped, the work backed up (`git diff` patch + per-file `cp`), tree integrity re-verified (55/0), and the review relaunched with `cp`-based restore and the mutating dimension **serialised behind** the read-only ones. Nothing was lost. Recorded in memory (`review-isolation-must-cover-filesystem`), which already carried the weaker sibling lesson.
+
+**Files touched:**
+- `website/src/lib/substrate/idea-loop-types.ts` — the two stubs, the placeholder note, the corrected header
+- `website/src/app/api/practice/fresh/handler.ts` — the seam (one wrapped call + one import), the corrected header
+- `website/src/app/api/practice/fresh/route.ts` — corrected header only (PR19 fold 1)
+- `website/src/lib/substrate/__tests__/idea-loop-types.test.ts` — §5/§6/§7, the corrected §3 header
+- `website/src/app/api/practice/fresh/__tests__/fresh-handler.test.ts` — §9
+- `website/src/app/api/practice/watching/__tests__/watching-handler.test.ts` — §4.4/§4.5 exported-value containment
+- `operations/agent-circles-2026-08/2026-08-19-guide-agent-circle-governance-record.md` — new
+
+**Verified:** `idea-loop-types` 20 → **55/0** · `fresh-handler` 61 → **69/0** · `watching-handler` 70 → **72/0** · `tsc --noEmit` **0** · `npm run build` **✓** (`/api/practice/fresh` + `/api/practice/watching` registered). Seven mutations run and reverted, each tripping its intended pin; controls green after every one.
+
+**Rollback:** `git revert` this commit. There is no migration to reverse, no flag to unset, and no live op to undo. Reverting removes both stubs, the seam, the governance record, and the header corrections.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsx src/lib/substrate/__tests__/idea-loop-types.test.ts
+npx tsc --noEmit && npm run build
+```
+Expected: `idea-loop-types battery: 55 passed, 0 failed`; tsc exit 0; build compiled successfully.
+
+**Open / carried:**
+- The **Q5 carry-forward** — when the standing-runner design opens, trigger placement must be revisited explicitly, and the honest answer may be **both** server-side and runner-side. Recorded on-block, in the governance record, and here.
+- **`watching/handler.ts:10-14` carries the identical stale "DARK … UNSET everywhere / activation is its own founder-walked step" claim** — both halves false, activated by the same 2026-08-10 decision. PR19 refuted attributing it to this build, so it was **deliberately not fixed** as out of scope. Named for whoever next opens that file.
+- **Line-citation drift caused by this build:** the 14-line placeholder note moves `assessStructuralNovelty` from `idea-loop-types.ts:222` to `:241`, invalidating `:222` citations in `D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19` and in the addendum record's verification section. Both sit in another session's uncommitted work and were left untouched rather than edited.
+- **The founder's two outstanding actions are unchanged and were not chased:** relaying the epistemic status framework (zero repo hits), and deciding whether `manifest.md`'s Consciousness and Continuity Obligation should carry a pointer to the addendum.
+
+**Rules served:** PR6 (not engaged, stated), PR15 (the existing novelty check, combiner, and battery patterns reused, never re-derived), PR17 (no live op performed by the AI), PR18, PR19 (independent adversarial review run because the surface is live, all findings folded), PR20 (the false mechanism fact behind the Q5 ruling surfaced rather than absorbed), PR22, PR23 (memories `tsx-tests-setinterval-keepalive-hang`, `async-test-console-stub-race`, `content-pins-assert-exported-values`, `guard-needs-a-non-vacuity-floor`, `review-isolation-must-cover-filesystem` all consulted and load-bearing), R18.
+
+**Status:** Adopted. **The Q1 hard constraint is untouched: the loop proposes; it never executes.** The Q11 binding sequence is untouched and nothing here jumps it. GS-ATRF-1/2/3, the ATRF, the Consciousness and Continuity Obligation, the surface name register, and the runner agent identity are all unchanged. Weights BLOCKED; the P0 0h hold stands; **M-5 remains P0 and is not discharged by anything here.**
+
+---
+
+## 2026-08-19 — D-MENTOR-RULINGS-OBSERVER-CONVENING-PR20-STALE-FACT-ADOPTED-2026-08-19
+
+**Decision:** Adopted two mentor rulings, both binding — (1) observer examinations may occasion a circle but never convene one, convening authority resting exclusively with the runner; (2) **PR20 is strengthened**: any present-tense mechanism fact in a question document must be timestamp-checked by the relaying session against the decision log or codebase before the document is relayed, not only stated accurately at the time it was drafted.
+
+**Reasoning:** Two questions surfaced at the close of the curiosity/taxonomy-stubs session (`D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19`) and were relayed to the mentor without a formal FOR-RULING document — composed in-conversation, ruled directly. Verbatim record: `operations/agent-circles-2026-08/2026-08-19-mentor-consultation-observer-convening-pr20-stale-fact-verbatim.md`.
+
+**Q1** closed an open question the guide-agent-circle governance record had deliberately left unsettled: whether an observer's subsequent examination — itself a new impression, and a new impression is the kind of thing a circle convenes over — grants the observer convening authority. The mentor's distinction is between **occasioning** and **convening**: an observer's examination may legitimately be the content that *warrants* a new circle, entering the puzzle taxonomy as a new entry; but the runner alone *convenes* it, on a later cycle, once it detects a taxonomy-yielded question with no current bringer. The mentor's stated reason for holding the line without exception: distributed convening authority "becomes … an unbounded cascade," not a governance structure — the same concern §2's decision/examination boundary protects one layer up, applied here to who may cause a circle to exist at all.
+
+**Q2** was raised by this project's own PR20 finding — a false mechanism fact reached a ruling. The 2026-08-18 Q5 ruling (curiosity-trigger placement) was given on the stated fact that `assessStructuralNovelty` was "committed-but-dark." That fact had been false for eight days: `SUBSTRATE_FRESH_ENABLED` was activated in production at `D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10`. The mentor's ruling: **Q5 stands** — its direction was independently sound and unaffected by the stale premise — **but the epistemic condition under which it was given was not what PR20 exists to guarantee**, in the mentor's words, *"it landed safely despite the mechanism fact being wrong, not because the mechanism fact was verified."* PR20 already required mechanism facts to be stated correctly at drafting; it did not require the relaying session to re-check a present-tense claim against current state before the document went out. That gap is now closed.
+
+### What was amended, same session, per the update discipline
+
+- **`operations/agent-circles-2026-08/2026-08-19-guide-agent-circle-governance-record.md` §3** — the open inference marker replaced with the ruled distinction, quoted and reasoned through in the mentor's own words, closing the question the record had deliberately left standing.
+- **`adopted/project-instructions-snapshot.md`, PR20** — a new "AMENDED 2026-08-19" paragraph added directly under the existing rule: any present-tense mechanism fact (a claim prefaced by "is," "remains," "has not," "is dark," "is live," or any other present-tense state claim) about a live surface, endpoint, schema, or build artefact must be timestamp-checked against the decision log or codebase by the relaying session before relay; an unverifiable one is marked recorded-but-not-independently-verified, extending PR20's existing convention to facts that have gone stale between drafting and relay, not only facts never checked in the first place.
+- **`adopted/standing-protocol-cache.md`** — updated in lockstep: the header amendment history gained a new sentence naming the strengthening and its grounding instance; both PR-summary lines (the full-list line and the project-instructions cross-reference line) now read "PR20 added 2026-08-04, amended 2026-08-19."
+
+No separate `D-CACHE-DRIFT-…` entry is needed — per the standing discipline, cache drift is logged that way only when the cache update trails the governing-document change into a later session; here both were updated in this same session, and this entry is the record of it.
+
+**Risk classification:** `governance`, Standard under 0d-ii — documentation and process-rule text only. **AC7 not engaged. PR6 not engaged.** No code, schema, flag, credential, or live surface touched.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-19-mentor-consultation-observer-convening-pr20-stale-fact-verbatim.md` — new, the verbatim record
+- `operations/agent-circles-2026-08/2026-08-19-guide-agent-circle-governance-record.md` — §3 amended with the Q1 ruling
+- `adopted/project-instructions-snapshot.md` — PR20 amended with the Q2 ruling
+- `adopted/standing-protocol-cache.md` — three PR20 references updated in lockstep
+
+**Rollback:** `git revert` this commit. Documents only; nothing deploys, and no prior ruling is invalidated — Q5 stands as given, per the mentor's own explicit statement.
+
+**Verification step (founder-performable):**
+```
+grep -n "occasion" operations/agent-circles-2026-08/2026-08-19-guide-agent-circle-governance-record.md
+grep -n "AMENDED 2026-08-19" adopted/project-instructions-snapshot.md
+grep -n "PR20 amended 2026-08-19\|PR20 strengthened" adopted/standing-protocol-cache.md
+```
+Expected: the governance record's §3 states the runner convenes exclusively; PR20's amendment paragraph is present in both cache surfaces.
+
+**Open questions:** none from this exchange. Both rulings are closed. The governance record's §3 no longer carries an open inference; PR20's amendment applies from this ruling forward, per the mentor's own statement, and does not require re-checking any prior ruling retroactively.
+
+**Rules served:** PR20 (amended by this entry), PR15 (the mentor's reasoning quoted rather than paraphrased where load-bearing, per the same discipline this record itself follows), PR18, R18 (honest record of what is and is not settled).
+
+**Status:** Adopted. Cross-references: `D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19` (the session this exchange followed), `D-MENTOR-RULINGS-PERIMETER-CLAIM-BOUNDS-AND-CURIOSITY-SCOPING-ADOPTED` (the Q5 ruling reaffirmed), `D-PR20-ADOPTED-MENTOR-BRIEF-ARCHITECTURAL-SURFACES-2026-08-04` (PR20's original adoption).
+
+## 2026-08-19 — D-CACHE-DRIFT-RESOLVED-2026-08-19
+
+**Decision:** Of the two founder actions the RL-passage addendum record left open
+(`D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19`), the founder has decided both: **(1)** relay the
+epistemic status framework, and **(2)** add the manifest pointer. **(2) is executed this entry; (1)
+is decided but not yet actionable** — the founder named the decision, not the framework content, so
+there is nothing to record until it is relayed.
+
+**Tier:** `governance` — a note added to an existing manifest section, matching an established
+in-section discipline, plus the same-session cache update it triggers. No code, schema, flag,
+credential, route or deploy change. AC7 not engaged.
+
+**(2) — the manifest pointer.** Added to `manifest.md`'s Consciousness and Continuity Obligation
+section, as a second bracketed note immediately following the section's own existing placement note,
+explicitly marked *"not part of the mentor's text"* — the identical discipline the section already
+uses for its own placement note, and the discipline ruling C16/C17 used earlier in the same document
+(the R0 note at line ~120). **The mentor's verbatim text is untouched.** The note records that the
+2026-08-18 addendum independently raised the Obligation's own second component — "a mechanism by
+which an agent's disposition deepens over time rather than resetting between cycles" (hexis) — from a
+different direction (frontier RL-alignment approaches have no account of dispositional stability),
+and points to the full verbatim record. It reopens nothing and amends nothing; it is a pointer only.
+
+Per the standing cache-update discipline, the manifest change is reflected in
+`adopted/standing-protocol-cache.md`'s manifest-change list in the same session (a short addition to
+the existing 2026-08-09 ATRF/Obligation entry, not a rewrite).
+
+**(1) — the framework relay.** The founder's decision is recorded: when relayed, the epistemic status
+framework is to be added to the repository (most likely alongside `gs-atrf-corrections.md` §(e), which
+already names the blocking gap and is written to receive it). **Nothing is recorded here because
+nothing has arrived** — the founder stated the decision, not the content. This entry does not close
+the gap `gs-atrf-corrections.md` §(e) names; it records that the founder has chosen the path that will
+eventually close it. **The next session that touches GS-ATRF-1 should check whether the relay landed
+before assuming it has not.**
+
+**Files touched:**
+- `manifest.md` — one bracketed pointer note added after the Consciousness and Continuity Obligation's
+  existing placement note; no other text in the section changed.
+- `adopted/standing-protocol-cache.md` — the manifest-change list entry extended in place.
+- This decision-log entry.
+
+**Risk classification:** Standard under 0d-ii (documentation-only; the note is additive and mirrors an
+existing in-document pattern). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit reverts both files; the addendum record and its own
+decision-log entry are unaffected either way.
+
+**Verification step (founder-performable):**
+```
+grep -n "Pointer, not part of the mentor's text, added 2026-08-19" manifest.md
+grep -n "D-CACHE-DRIFT-RESOLVED-2026-08-19" adopted/standing-protocol-cache.md
+```
+Expected: one match each.
+
+**Open questions:** the framework relay (item 1) remains outstanding — this entry records the
+decision, not the content. No other open question from this exchange.
+
+**Rules served:** PR15 (an existing in-document discipline reused rather than a new convention
+invented), PR18, R18 (the pointer states plainly what it is and is not).
+
+**Status:** Adopted. Cross-references: `D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19` (the record this
+resolves the two open items from), `operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`,
+`operations/primal-substrate-2026-08/gs-atrf-corrections.md` §(e) (where item 1's content lands once
+relayed).
+
+## 2026-08-19 — D-EPISTEMIC-STATUS-FRAMEWORK-RELAYED-RECORDED-2026-08-19
+
+**Decision:** The founder relayed the mentor's own description of the epistemic status framework,
+closing the availability gap `D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19` and
+`D-CACHE-DRIFT-RESOLVED-2026-08-19` left open under item 1. **The framework is now recorded. It is
+NOT ruled and NOT formally added to the live ATRF open-questions surface** — both facts stated by the
+mentor directly, and both preserved rather than resolved by this entry.
+
+**Tier:** `governance` — documents only. No code, schema, flag, credential, route or deploy change.
+`website/src/data/project-context.json` (the live surface a formal addition would touch) is
+**untouched**. AC7 not engaged.
+
+**The relay, verbatim:** *"The epistemic status framework — treating every consequential proposition
+flowing through the reasoning harness as carrying an epistemic status (observation, inference,
+assumption, unknown) — was assessed, connected to GS-ATRF-1, and noted as worth carrying as a named
+open question alongside GS-ATRF-1 through 3. It was not formally added to the ATRF open questions
+list. That addition needs a ruling before the generation-step build sequence closes. It is not
+blocking the current sequence but it should not be left as an informal note."*
+
+**What this confirms and sharpens against the 2026-08-19 record.** The mentor confirms the connection
+to GS-ATRF-1 the addendum's verification section made independently (`gs-atrf-corrections.md`
+§(c-bis)/§(e)). It sharpens the shape materially: the framework is a **four-category classification**
+(observation / inference / assumption / unknown) applied to every consequential proposition the
+harness carries — not a single confidence-bound rule folded into GS-ATRF-1 as one candidate mechanism
+among others, as the addendum's own single quoted sentence had suggested. The mentor frames it as
+*"worth carrying as a named open question alongside GS-ATRF-1 through 3"* — i.e. a candidate **GS-ATRF-4**,
+not merely an input to GS-ATRF-1.
+
+**What this does NOT do, stated as plainly as the mentor stated it.** It does not add a fourth
+question to `website/src/data/project-context.json`'s "ATRF INTEGRATION — GENERATION-STEP OPEN
+QUESTIONS" block (the live surface GS-ATRF-1/2/3 were added to 2026-08-09, itself a founder-walked
+static-file-plus-Supabase-row step). It does not rule the framework adopted. It does not draft
+GS-ATRF-4's wording. **A ruling request is the correct next step and is not taken here** — recording
+the relay is not the same act as scoping the ruling request, and conflating them would be exactly the
+kind of "informal note" the mentor said this should not remain.
+
+**Files touched:**
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` §(e) — the blocking-gap subsection
+  updated in place (same section, same session, still uncommitted) from "not in this repository" to
+  the relayed framework, its sharpened connection to GS-ATRF-1, and the still-not-ruled status.
+- `operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`
+  — the routing table and the "BLOCKING GAP" verification subsection updated to point to the resolved
+  status, marked superseded rather than deleted so the arc stays legible (the gap was real, and was
+  closed by a relay, not by a build).
+- This decision-log entry.
+
+**Risk classification:** Standard under 0d-ii (documentation-only, no live surface touched). AC7 not
+engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit. Nothing deploys; the live project-context surface was
+never touched.
+
+**Verification step (founder-performable):**
+```
+grep -n "observation, inference, assumption, unknown" operations/primal-substrate-2026-08/gs-atrf-corrections.md
+grep -n "GS-ATRF-4" operations/primal-substrate-2026-08/gs-atrf-corrections.md
+```
+Expected: the first returns the relayed definition; the second confirms the candidate-fourth-question
+framing is recorded without being adopted.
+
+**Open questions:** **a ruling request for formally adding a fourth ATRF open question needs to be
+scoped and put to the mentor before the generation-step build sequence closes.** Not blocking per the
+mentor's own words, but named here so it is not left informal. No session should add the fourth
+question to `project-context.json` without that ruling.
+
+**Rules served:** PR15 (the mentor's exact words quoted, not paraphrased, per the same discipline used
+throughout this arc), PR18, PR20 (the specific existing mechanism the ruling will land on — the live
+project-context surface and its founder-walked precedent — is named before any ruling request is
+drafted), R18.
+
+**Status:** Adopted **as a record entry, not as a build item, and not as a ruling**. Cross-references:
+`D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19`, `D-CACHE-DRIFT-RESOLVED-2026-08-19`,
+`operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`,
+`operations/primal-substrate-2026-08/gs-atrf-corrections.md` §(c-bis) + §(e).
+**The Q1 hard constraint is untouched: the loop proposes; it never executes.** The ATRF scoping
+session remains post-validation-run and *"do not open early."* Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-19 — D-GSATRF4-RULED-APPLIED-2026-08-19
+
+**Decision:** The mentor ruled all three parts of the GS-ATRF-4 ruling request. **GS-ATRF-4 is
+formally added** to the ATRF open-questions surface, **standalone** (not folded into GS-ATRF-1's
+ruled answer), with §(c-bis) **carried forward** to the generation-step scoping session rather than
+resolved by this ruling. The vocabulary question (Q(c)) stays deferred with a named, non-binding
+direction for that session to carry in. The static-file half is **applied**; the live-DB half is
+**authored and awaiting the founder's walk**.
+
+**Tier:** `code-elevated` for the applied static-file half (existing Layer-3 user-facing content, per
+the identical 2026-08-09 precedent's own classification); `governance` for the ruling record. The live
+Supabase half is a founder-walked step, not yet performed — AC7 will engage there, not here. PR6 not
+engaged this entry.
+
+**Q(a) — formal addition, RULED YES.** Verbatim question text ruled and applied. **Q(b) — standalone,
+RULED.** The mentor's reasoning, quoted rather than paraphrased: *"folding GS-ATRF-4 into GS-ATRF-1
+would mean amending a ruled answer, and ruled answers are not amended by the addition of new open
+questions. They are amended by a ruling that specifically re-opens and revises them."* §(c-bis) is
+routed to the generation-step scoping session as a named carry-forward alongside GS-ATRF-1 through 4
+— **not resolved by this ruling**, a distinction this entry preserves rather than collapses. **Q(c) —
+vocabulary, DEFERRED with a named direction.** The `high|medium|low` vocabulary (fixed in
+`manifest.md`) is unchanged; the mentor states the eventual shape without ruling it: the
+`assessStructuralNovelty` null-plus-flag model (*"the indicator was not assessable on the available
+basis"*) over a fourth vocabulary value (*"the indicator was assessed and found to be in that
+state"*) — *"those are different epistemic claims and the vocabulary should reflect the difference. This
+is not a ruling on the vocabulary. It is a named direction that the generation-step scoping session
+should carry in."*
+
+**Applied this session (static-file half):**
+- `website/src/data/project-context.json` — v1.3.0 → **v1.4.0**. "These three questions are carried"
+  → "These four questions are carried"; the ruled GS-ATRF-4 question text (verbatim from the ruling)
+  appended immediately after GS-ATRF-3's paragraph, followed by the ruled cross-reference note to
+  §(c-bis); `last_updated` → 2026-08-19; one `recent_decisions` entry prepended, all 12 prior entries
+  preserved below it. Verified: JSON parses (`tsx` import), `tsc --noEmit` clean.
+- `website/supabase-project-context-2026-08-19-gsatrf4-update.sql` — new; authored for the founder's
+  walk, same idiom as `supabase-project-context-2026-08-09-atrf-update.sql` (§0 pre-flight, `UPDATE`
+  using `replace()` for the wording fix plus `||` append for the new paragraph and a `jsonb` prepend
+  for the recent-decisions entry, §VERIFY with explicit boolean checks for the wording fix, ROLLBACK,
+  re-run GUARD). **Not run. The AI performs no Supabase op.**
+- `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md` —
+  new; the ruling verbatim.
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` §(e) — updated in place (same session,
+  still uncommitted) from "still not ruled" to the ruled routing; §(c-bis)'s standing instruction
+  preserved as unchanged but now correctly framed as "routing settled, gap not yet closed."
+- `operations/agent-circles-2026-08/2026-08-18-addendum-reinforcement-learning-assessment-verbatim.md`
+  — the routing-table row and the "Still not ruled" subsection updated to point at this ruling, marked
+  superseded rather than deleted, per the same discipline used throughout this arc.
+
+**Risk classification:** Elevated under 0d-ii for the applied JSON half (existing user-facing Layer-3
+content served into mentor/operational LLM prompts on the founder's push) — content-only, no code-path
+change, matching `D-PROJECT-CONTEXT-ATRF-AND-RULING-UPDATE-APPLIED-2026-08-09`'s own classification
+exactly. The DB half is founder-walked data, not schema (reversible per the SQL's own rollback block).
+AC7 not engaged by this entry — the SQL is authored, not run.
+
+**Rollback path:** `git revert` for the JSON + records; the SQL file's own rollback block (using the
+inverse `replace()`) restores the pre-flight state on the live row if the founder walks it and later
+wants it undone.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsc --noEmit                                                          # exit 0
+npx tsx -e "const d=require('./src/data/project-context.json'); console.log(d.version)"   # 1.4.0
+grep -n "four questions are carried" src/data/project-context.json         # 1 match
+grep -n "GS-ATRF-4" src/data/project-context.json                          # present
+```
+Live DB (founder-walked, after the push): run `supabase-project-context-2026-08-19-gsatrf4-update.sql`
+§0, the `UPDATE`, then §VERIFY in the Supabase SQL Editor (production). Expected per the file's own
+comments: `four_questions_wording_present = true`, `stale_three_questions_wording_present = false`,
+`current_phase` ends with the GS-ATRF-4 cross-reference sentence.
+
+**Open questions:** the founder-walked SQL step is outstanding — the static file lands on push, but
+the **live** Layer-3 surface (served at runtime from the Supabase row, not the JSON fallback) will not
+reflect GS-ATRF-4 until the SQL is walked. §(c-bis) remains open, correctly routed but not closed, per
+the ruling's own instruction. The `high|medium|low` vocabulary question stays deferred to the
+generation-step scoping session, which remains post-first-build-gate per the Q11 sequence — nothing
+here reopens it early.
+
+**Rules served:** PR15 (the ruling transcribed, not re-derived; the exact 2026-08-09 SQL idiom reused
+rather than a new pattern invented), PR17 (the live op is authored for a walk, not handed off as a
+one-liner — the file carries its own pre-flight/verify/rollback/guard), PR18, PR20 (the mechanism
+facts the ruling landed on — the live surface's exact shape and its 2026-08-09 precedent — were named
+in the ruling request before the ruling was given).
+
+**Status:** Adopted. Cross-references:
+`operations/agent-circles-2026-08/2026-08-19-mentor-question-epistemic-status-fourth-question-FOR-RULING.md`,
+`operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md`,
+`D-EPISTEMIC-STATUS-FRAMEWORK-RELAYED-RECORDED-2026-08-19`, `D-RL-PASSAGE-ADDENDUM-RECORDED-2026-08-19`,
+`D-ATRF-AND-CONSCIOUSNESS-CONTINUITY-ADDED-2026-08-09`,
+`D-PROJECT-CONTEXT-ATRF-AND-RULING-UPDATE-APPLIED-2026-08-09` (the precedent this session's SQL idiom
+matches exactly).
+**The Q1 hard constraint is untouched: the loop proposes; it never executes.** The generation-step
+scoping session remains post-first-build-gate and the ATRF scoping session remains post-validation-run,
+*"do not open early."* Weights BLOCKED; the P0 0h hold stands.
+
+---
+
+## 2026-08-19 — D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19
+
+**Decision:** Adopted the mentor's ruling on the "Puzzle Taxonomy Entry Types: Mathematical Discovery Modes" instruction — **reclassified from self-declared design direction to pre-ruling design thinking, held as a separate named document, unwidening the taxonomy stub.** One required revision applied: the incubation entry type's Consciousness and Continuity Obligation passage converted from a pre-answer to a named forward-pointing connection.
+
+**Reasoning:** A document self-titled "INSTRUCTION FOR CLAUDE," self-declaring "Status: Design direction established," arrived proposing to extend the puzzle-taxonomy stub (scoped 2026-08-18, built and closed same-day as this entry under `D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19`) with three named entry types and ~30 fields. It had not been through this project's own scoped-question/PR20/verbatim-ruling process — the form every other binding addition in this repository has taken. A three-part question was prepared and relayed (`operations/agent-circles-2026-08/2026-08-19-mentor-question-puzzle-taxonomy-entry-types-provenance-and-scope-FOR-RULING.md`), asking whether provenance alone was sufficient to bind (a), whether the stub's design record should be widened now (b), and whether the instruction's Consciousness-and-Continuity content opened the ATRF scoping session's gated territory early (c). Verbatim ruling: `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-puzzle-taxonomy-entry-types-provenance-and-scope-verbatim.md`.
+
+**The ruling, in brief:**
+- **(a)** No — "sufficient to inform one" but not to bind one; a self-limiting document that hasn't been ruled is still an unruled document.
+- **(b)** Held separately, not folded into the stub — the stub's docstring, `project-context.json`, and every other live surface are untouched. "The stub's value is precisely its narrowness." When the full taxonomy build is scoped (post-first-build-gate), the document is brought as *input*, examined, and ruled on then.
+- **(c)** No, with one condition — forward-pointing notes are fine (GS-ATRF-1 through 4 all carry them); the instruction's incubation entry type crossed from naming a connection to the Consciousness and Continuity Obligation into asserting what the Obligation implies for its own architecture ("the puzzle taxonomy is the architecture that makes continuity of inquiry possible now") — a pre-answer to a question not yet ruled. **Required revision, applied exactly as specified**: that passage now reads as a named question carried forward, not an answer.
+
+**What was built:**
+- `operations/agent-circles-2026-08/2026-08-19-mentor-question-puzzle-taxonomy-entry-types-provenance-and-scope-FOR-RULING.md` — the question
+- `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-puzzle-taxonomy-entry-types-provenance-and-scope-verbatim.md` — the ruling, verbatim
+- `operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` — the reclassified document, with the required revision applied; original substantive content (the three entry types, field specifications, relationship reasoning) preserved as design thinking, not endorsed as correct — explicitly held at the "pre-ruling, not binding" status the ruling assigns
+
+**Verified before and after execution:** the taxonomy stub (`website/src/lib/substrate/idea-loop-types.ts`) carries zero occurrences of `entry_type`/`inductive`/`conjectural`/`incubation`, before and after — confirmed unwidened. `project-context.json` likewise carries none of this content. The pre-answer language ("is the architecture that makes continuity of inquiry possible now," "should be sequenced together when the Consciousness…") is confirmed **absent** from the held document; the ruling's required replacement text is confirmed **present**, verbatim. No file outside `operations/agent-circles-2026-08/` and this log was touched executing this ruling.
+
+**Concurrency note.** This exchange happened while a separate, concurrent session was independently active in the same working tree (see `D-GSATRF4-RULED-APPLIED-2026-08-19`, not authored by this session). File state was re-checked immediately before executing this ruling and found unchanged from the prior check — no interference occurred, but this is flagged per the standing discipline of naming what was checked, not assumed.
+
+**Risk classification:** `governance`, Standard under 0d-ii — documents only. **AC7 not engaged. PR6 not engaged.** No code, schema, flag, credential, or live surface touched.
+
+**Rollback:** `git revert` this commit. Documents only; nothing deploys. The stub and every live surface are already, and remain, unaltered.
+
+**Verification step (founder-performable):**
+```
+grep -c "entry_type" website/src/lib/substrate/idea-loop-types.ts
+grep -c "is the architecture that makes continuity of inquiry possible now" operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md
+```
+Expected: both `0`.
+
+**Open questions:** none from this exchange. The design document is held, correctly labeled, and awaits the full taxonomy build's scoping session as input — not before. The generation-step scoping session carries the conjectural-entry-type connection to GS-ATRF-4's vocabulary as a named, unresolved question, per the document's own closing carry-forward.
+
+**Rules served:** PR20 (the question named mechanism facts, verified first-hand, not assumed from the instruction's own framing), PR15, PR18, PR19 (not engaged — no code), R18 (the document's status is now honestly labeled, matching what has and has not been examined).
+
+**Status:** Adopted. **The taxonomy stub remains exactly as scoped 2026-08-18 and closed 2026-08-19 — no build is licensed by this entry.** The Q1 hard constraint, the Q11 sequence, the first build gate, and the ATRF scoping session's "do not open early" gate are all unchanged and untouched. Cross-references: `D-CURIOSITY-TAXONOMY-STUBS-BUILT-GUIDE-CIRCLE-RECORDED-2026-08-19`, `D-GSATRF4-RULED-APPLIED-2026-08-19`, `D-MENTOR-RULINGS-OBSERVER-CONVENING-PR20-STALE-FACT-ADOPTED-2026-08-19`.
+
+---
+
+## 2026-08-19 — D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19
+
+**Decision:** Adopted the mentor's ruling on carry-forward mechanics when a target session has already closed — the conjectural-entry-type carry-forward (from `D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19`) is **redirected to the standing-runner design session**, not dated-amended into the closed generation-step document, not voided — and **PR20 is further amended, same day**: the timestamp-check discipline now applies to carry-forwards naming a target session, checked at drafting time, not only to present-tense mechanism facts checked at relay time.
+
+**Reasoning:** While reclassifying the puzzle-taxonomy document per the prior ruling, a carry-forward inherited from the founder's original instruction was found to read "when the generation-step scoping session opens" — but that session was ruled and closed 2026-08-09, ten days before the connection it names (GS-ATRF-4) existed. This is the exact stale-fact class the first 2026-08-19 PR20 amendment exists to catch, and the amendment did not catch it — the error arrived inside inherited text rather than a freshly-drafted claim. A follow-up question was prepared and relayed (`operations/agent-circles-2026-08/2026-08-19-mentor-question-late-arriving-carry-forward-ruled-session-FOR-RULING.md`), surfacing three possible dispositions rather than assuming one. Verbatim ruling: `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md`.
+
+**The ruling, in brief:**
+- **Dated amendment to the closed document — wrong.** That precedent (S8/B1) applies only when the new content is intrinsic to the closed document's own subject matter. GS-ATRF-4 is not intrinsic to the generation-step document; attaching it there would be "formally correct and practically inert," since the generation-step session cannot act on ATRF open-question content.
+- **Void the carry-forward — too strong.** "The content is valid. The destination was wrong." Voiding discards genuine forward value over a targeting error.
+- **Redirect — correct, with a condition.** The carry-forward moves to the standing-runner design session — the next unopened item in the Q11 sequence, and the session where a live runner's cycle behaviour (including how the loop would handle conjectural results) would actually be scoped. Recorded there as a named input, examined when that session opens, never as a pre-answer; the redirect itself does not open that session early.
+
+**The general principle, stated by the mentor and now encoded as a further PR20 amendment:** when a carry-forward is written, the drafting session must verify the target session is genuinely open or future — not already closed — before recording it, the same discipline the first amendment requires at relay time, applied one step earlier. A carry-forward found pointed at a closed session is redirected to whichever open-or-future session's subject matter actually fits; if none fits, it is held as a named open connection in its own document, flagged for re-raising later.
+
+**What was built:**
+- `operations/agent-circles-2026-08/2026-08-19-mentor-question-late-arriving-carry-forward-ruled-session-FOR-RULING.md` — the question
+- `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` — the ruling, verbatim
+- `operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` — the carry-forward passage rewritten to the ruling's exact prescribed disposition text, the stale cross-reference to the generation-step session corrected to point at the standing-runner design session instead
+- `adopted/project-instructions-snapshot.md` — PR20 further amended (second same-day amendment, appended after the first)
+- `adopted/standing-protocol-cache.md` — updated in lockstep: header history, both PR20 summary lines
+
+**Verified:** the design document carries zero remaining occurrences of "generation-step scoping session opens" as a live claim (one historical quote survives, explicitly marked as the corrected original error, inside the "History, kept rather than erased" paragraph); the ruled redirect text ("carry-forward redirected to standing-runner design session per 2026-08-19 ruling — to be examined when that session opens, not before") is present verbatim.
+
+**Risk classification:** `governance`, Standard under 0d-ii — documents only. **AC7 not engaged. PR6 not engaged.** No code, schema, flag, credential, or live surface touched. No file outside `operations/agent-circles-2026-08/`, `adopted/`, and this log was touched.
+
+**Rollback:** `git revert` this commit. Documents only; nothing deploys.
+
+**Verification step (founder-performable):**
+```
+grep -c "generation-step scoping session opens" operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md
+grep -c "redirected to standing-runner design session" operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md
+grep -c "FURTHER AMENDED 2026-08-19" adopted/project-instructions-snapshot.md
+```
+Expected: `1` (the historical quote only), `1`, `1`.
+
+**A guardrail observation from this session, recorded per PR21 (reflect-harvest applies to the close turn; this is the same discipline applied mid-session since it bears directly on this entry's own content):** the at-action guardrail timed out twice while this ruling was being executed, then fired genuinely on the redirect edit itself — a caution, with a structured elicitation answered in-conversation. The elicitation's honest answer was that the redirect's *content* had already been settled by the ruling being transcribed; the AI's own examination at that step was limited to verifying the anchor text and cross-checking the file, not deciding what the text should say. Recorded because it is itself an instance of this entry's own subject — an action taken on an already-resolved decision, correctly distinguished from one still requiring examination.
+
+**Open questions:** none from this exchange. The specific carry-forward is disposed of. The general principle applies forward to any future carry-forward drafting in this project.
+
+**Rules served:** PR20 (further amended by this entry — now covers carry-forward drafting, not only relay), PR15, PR18, R18 (a real self-caught error recorded honestly rather than quietly fixed).
+
+**Status:** Adopted. The generation-step scope document remains closed and unamended. The standing-runner design session remains unopened — this entry adds a named input to it, nothing more. The Q1 hard constraint, the Q11 sequence, and the ATRF scoping session's "do not open early" gate are all unchanged. Cross-references: `D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19`, `D-MENTOR-RULINGS-OBSERVER-CONVENING-PR20-STALE-FACT-ADOPTED-2026-08-19`, `D-GENERATION-STEP-SCOPE-RULED-2026-08-09`.
