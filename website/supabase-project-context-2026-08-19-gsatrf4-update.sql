@@ -25,8 +25,20 @@
 -- question itself stays deferred to the generation-step scoping session).
 --
 -- §0 PRE-FLIGHT (run first; expect current_phase ending with the GS-ATRF-3
--- paragraph -- "The answer must be explicit, not defaulted." -- and 13
--- recent entries if this is the first run, or 14 if this file is re-run):
+-- paragraph -- "The answer must be explicit, not defaulted." -- and 10
+-- recent entries if this is the first run, or 11 if this file is re-run.
+-- CORRECTED 2026-08-19, post-run: this comment originally claimed "13" and
+-- "14" -- wrong, not independently verified before being written. Traced
+-- from the full update chain (seed 3 + 2026-08-09-update +3 +
+-- 2026-08-09b-update +1 + 2026-08-09-atrf-update +3 = 10) and confirmed
+-- against the actual production value at the founder-walked run: n_recent
+-- was 10 pre-run, 11 post-run. The 2026-08-09-atrf-update.sql file this
+-- number was extrapolated from ALSO carries an inaccurate pre-flight count
+-- ("9", corrected there too) -- neither error affected the UPDATE statement
+-- itself, which depends on text content via replace()/LIKE, not on a count.
+-- The founder ran an additional confirming query before Step 2
+-- (LIKE '%These three questions...%') per this session's own discipline of
+-- verifying load-bearing facts directly rather than trusting a comment.):
 --   SELECT right(current_phase, 200) AS phase_tail,
 --          jsonb_array_length(recent_decisions) AS n_recent,
 --          updated_at, updated_by

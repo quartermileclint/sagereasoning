@@ -34,6 +34,18 @@
 -- §0 PRE-FLIGHT (run first; expect current_phase ending with the Runner-
 -- agent-identity line of SETTLED SURFACE NAMES, and 9 recent entries if the
 -- morning's update SQL was walked — or 12 if this file is re-run):
+-- CORRECTED 2026-08-19 (found while walking a later update through
+-- production, D-GSATRF4-EPISTEMIC-STATUS-LIVE-2026-08-19): this count was
+-- never independently verified against production at the time it was
+-- written. Traced from the earlier chain (seed 3 + 2026-08-09-update +3 +
+-- 2026-08-09b-update +1 = 7), the correct pre-flight expectation here was 7,
+-- not 9, and this file's own +3 prepend would then land at 10, not 12 —
+-- which is exactly the value the 2026-08-19 GS-ATRF-4 update found live in
+-- production before it ran (this file's UPDATE statement itself was
+-- unaffected by the miscount; it depends on the runner-agent-identity text
+-- match, not on the count). Left uncorrected in the historical §0/§VERIFY
+-- text below to preserve what was actually written and run at the time;
+-- this note is the correction, not a silent rewrite of the record.
 --   SELECT right(current_phase, 200) AS phase_tail,
 --          jsonb_array_length(recent_decisions) AS n_recent,
 --          updated_at, updated_by

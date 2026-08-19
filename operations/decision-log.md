@@ -23726,3 +23726,63 @@ Expected: `1` (the historical quote only), `1`, `1`.
 **Rules served:** PR20 (further amended by this entry — now covers carry-forward drafting, not only relay), PR15, PR18, R18 (a real self-caught error recorded honestly rather than quietly fixed).
 
 **Status:** Adopted. The generation-step scope document remains closed and unamended. The standing-runner design session remains unopened — this entry adds a named input to it, nothing more. The Q1 hard constraint, the Q11 sequence, and the ATRF scoping session's "do not open early" gate are all unchanged. Cross-references: `D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19`, `D-MENTOR-RULINGS-OBSERVER-CONVENING-PR20-STALE-FACT-ADOPTED-2026-08-19`, `D-GENERATION-STEP-SCOPE-RULED-2026-08-09`.
+
+---
+
+## 2026-08-19 — D-SESSION-OPENING-ORDER-CONFIRMED-2026-08-19
+
+**Decision:** Adopted mentor review of the next-session task list — the open-ended tiered menu is now a **confirmed sequential starting order**, with three named adjustments, folded into the prompt file in place.
+
+**Reasoning:** The founder relayed a mentor instruction reviewing
+`operations/handoffs/founder/2026-08-19-post-taxonomy-stubs-task-menu-NEXT-SESSION-PROMPT.md` — recorded verbatim at `operations/agent-circles-2026-08/2026-08-19-mentor-instruction-session-opening-task-prioritisation-verbatim.md`. **Provenance note, stated explicitly rather than silently applying the earlier standard:** this instruction was NOT routed through the scoped-question/PR20/verbatim-ruling path the puzzle-taxonomy entry-type instruction was ruled to require earlier this session. The distinction, per that ruling's own Q(a) test ("sufficient to bind a future build"): this instruction proposes no build, no schema, no architectural surface, and no widening of any scoped artefact — it reviews and adjusts a session-planning document the AI itself produced, which the founder may redirect the same way any founder direction redirects AI-proposed work. Recorded verbatim anyway, per standing discipline.
+
+**Three adjustments, applied:** (1) the concurrent-session check is reframed as a mechanism fact that gates all further work, not a courtesy check before parallel work; (2) M-4 obligations 1 and 4 must be re-derived from source as the *first* act if that step is reached, not a check performed after work begins; (3) the standing-runner gate question (whether the bounded validation run's §6 report needs its own mentor review, or whether the cycle-20-stop ruling already discharges the gate) must be **routed to the mentor and ruled**, not assumed either way — the redirected conjectural-entry-type carry-forward does not move until that ruling lands.
+
+**What was built:**
+- `operations/agent-circles-2026-08/2026-08-19-mentor-instruction-session-opening-task-prioritisation-verbatim.md` — the instruction, verbatim, with the provenance note
+- `operations/handoffs/founder/2026-08-19-post-taxonomy-stubs-task-menu-NEXT-SESSION-PROMPT.md` — updated in place: title/status banner, Tier-0 gate reframing, the tiered menu replaced with the six-step confirmed sequential order, "what does not move" section, the insight-vs-structure carry-forward folded in verbatim, and the closing note corrected to no longer describe the order as open for the session to reshuffle
+
+**Risk classification:** `governance`, Standard under 0d-ii — documents only. **AC7 not engaged. PR6 not engaged.** No code, schema, flag, credential, or live surface touched.
+
+**Rollback:** `git revert` this commit (once committed). Documents only; nothing deploys.
+
+**Open questions:** none from this exchange — the order is confirmed. The two genuine open items it names (M-4's specifics; the standing-runner gate) remain open, correctly, as the next session's own first acts.
+
+**A pattern worth naming, not yet a ruling:** the at-action guardrail timed out three separate times across this session, on ordinary non-destructive file writes, none in a pattern suggesting anything but transient unavailability. Recorded here per the standing fail-open-with-honest-log discipline; not escalated, since three timeouts on plain writes across a long multi-exchange session is not yet evidence of anything beyond normal transient load.
+
+**Rules served:** PR15 (settled material — the earlier day's puzzle-taxonomy provenance ruling — cited and reused to justify a different disposition, not re-derived), PR18, PR20 (the provenance distinction stated as a fact, not assumed), R18.
+
+**Status:** Adopted. The next session opens against the confirmed order in the updated prompt file, not the original open menu. Cross-references: `D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19` (the Q(a) test this entry applies), `D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19` (the carry-forward whose availability is gated by adjustment 3).
+
+---
+
+## 2026-08-19 — D-GSATRF4-EPISTEMIC-STATUS-LIVE-2026-08-19
+
+**Decision:** Founder-walked live production write applied and verified — the `project_context` table's live row now carries GS-ATRF-4 (mentor-ruled, `2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md`), matching the already-committed static fallback (`project-context.json` v1.4.0). Two documentation errors found and corrected along the way.
+
+**Reasoning:** `website/supabase-project-context-2026-08-19-gsatrf4-update.sql` was authored by a concurrent session but never run against production. Walked founder-live, three stages, each confirmed before proceeding — the standing Critical Change Protocol discipline (PR6/PR17), not a one-line hand-off.
+
+**What was found, and how it was handled — not glossed over:** the file's own §0 pre-flight comment claimed to expect **13** `recent_decisions` entries. The founder's actual Step 1 result showed **10**, with `updated_at` matching the 2026-08-09 ATRF update exactly — meaning nothing had touched the row since. Rather than treat 10-vs-13 as close enough, the full update chain was traced from the original table seed through every prior update file: `3` (seed) `+3` (`2026-08-09-update.sql`) `+1` (`2026-08-09b-update.sql`) `+3` (`2026-08-09-atrf-update.sql`) `= 10` — exactly matching production. **The "13" was a documentation error in the file being run, itself extrapolated from a second, independent documentation error in `2026-08-09-atrf-update.sql`'s own pre-flight comment (which claimed "9," when the correct chain value was 7).** Neither error affected either file's actual `UPDATE` statement — both depend on text-content matches (`replace()`/`LIKE`), not on the count — but before proceeding, one additional confirming query was run (`current_phase LIKE '%These three questions...%'` / `LIKE '%These four questions...%'`) to verify the load-bearing fact directly rather than infer it from an unverified comment. That query returned exactly as expected (`phrase_present: true`, `already_four: false`), and only then was the `UPDATE` run.
+
+**Result, verified against the founder's own Step 3 output, not assumed from "Success. No rows returned":** `four_questions_wording_present: true`, `stale_three_questions_wording_present: false`, `phase_tail` ending on the GS-ATRF-4 cross-reference sentence, `recent_decisions` carrying exactly 11 entries (the new 2026-08-19 entry first, all 10 prior entries intact and in order below it), `active_tensions` unchanged. **Note on "Success. No rows returned":** this Supabase SQL editor message is identical whether an `UPDATE` affects 1 row or 0 (memory `supabase-sql-editor-delete-no-count`, the same principle applied to `UPDATE` rather than `DELETE`) — it was not treated as confirmation; Step 3 was required before this entry was written.
+
+**Both documentation errors corrected in place, history preserved rather than silently rewritten:**
+- `website/supabase-project-context-2026-08-19-gsatrf4-update.sql` — the "13"/"14" pre-flight claim corrected to "10"/"11," with the full trace and the reason the error occurred recorded inline.
+- `website/supabase-project-context-2026-08-09-atrf-update.sql` — a correction note added ("9" should have been "7," this file's own +3 prepend should have landed at 10, not 12 — which is exactly what production showed pre-run today). The original §0/§VERIFY text is left as-written (that is what was actually run at the time); the note documents the correction without erasing the record.
+
+**Risk classification:** `code-critical` under 0d-ii — production data write on a live-read Layer-3 surface. **AC7 engaged and discharged** — every live SQL statement (pre-flight, the confirming LIKE query, the UPDATE, the verify) was run by the founder in the Supabase SQL editor; the AI performed no live Supabase operation, guided each stage, and verified each result against a stated expectation before authorising the next stage. **PR6 + PR17 both engaged** — walked live, three confirm-before-proceed gates, not a one-line hand-off.
+
+**Files touched:**
+- `website/supabase-project-context-2026-08-19-gsatrf4-update.sql` — pre-flight comment corrected (documentation only; the executed `UPDATE` statement itself, already run, is unchanged)
+- `website/supabase-project-context-2026-08-09-atrf-update.sql` — correction note added (documentation only; historical record preserved)
+- **Production `project_context` row** — live-updated by the founder, verified above
+
+**Rollback:** the rollback block is present in `2026-08-19-gsatrf4-update.sql` (lines 67–79 pre-correction) if ever needed; not exercised — Step 3 confirmed a clean apply, so there is nothing to roll back.
+
+**Verification step (founder-performable, already performed above):** the Step 1/Step 3 queries in this entry's own reasoning section reproduce exactly.
+
+**Open questions:** none. The DB half is live; the static-file half landed in the prior commit (`cf2fe3f`). No redeploy is needed — the Layer-3 loader picks the row up on its next cold read per its cache TTL.
+
+**Rules served:** PR6, PR17 (both fully engaged — every live step founder-performed, walked, confirmed before the next), PR20 (a stale documentation fact caught and corrected before it was acted on, not after), PR23 (memory `supabase-sql-editor-delete-no-count` consulted and directly load-bearing — the same discipline extended from DELETE to UPDATE), R18 (both documentation errors named and corrected rather than silently absorbed).
+
+**Status:** Adopted. GS-ATRF-4 is now live end-to-end — the ruling, the static file, and the production row all agree. Cross-references: `D-GSATRF4-RULED-APPLIED-2026-08-19` (the concurrent session's build), `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md` (the ruling this write implements).
