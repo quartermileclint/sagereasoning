@@ -29,6 +29,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { logClassifierRun } from '@/lib/r20a-cost-tracker'
 import type { DistressDetectionResult } from '@/lib/guardrails'
 import { getFastModel, type SafetyCriticalCallParams } from '@/lib/constraints'
+import { handleGenuineDetection } from '@/lib/r20a-vulnerability-write'
 
 // ---------------------------------------------------------------------------
 // Haiku evaluator prompt — minimal, focused
@@ -95,7 +96,8 @@ function getClient(): Anthropic {
  */
 export async function evaluateBorderlineDistress(
   text: string,
-  sessionId?: string
+  sessionId?: string,
+  userId?: string
 ): Promise<DistressDetectionResult> {
   const client = getClient()
 
@@ -139,6 +141,14 @@ export async function evaluateBorderlineDistress(
         `Response preview: ${responseText.slice(0, 200)}`
       )
 
+      // M-5 fix (2026-08-20): flag_written now reflects an ACTUAL write
+      // outcome, not the aspirational `true` this branch used to hardcode —
+      // see r20a-vulnerability-write.ts's header for the full account.
+      const nonJsonFlagWritten = await handleGenuineDetection(
+        { userId, sessionId, severity: 'moderate', triggeredRules: ['llm_content_safety_triggered'] },
+        { stage: 'haiku_nonjson_fallback' }
+      )
+
       // Log the classifier run as an LLM failure
       logClassifierRunSafe({
         session_id: sessionId,
@@ -147,7 +157,7 @@ export async function evaluateBorderlineDistress(
         llm_input_tokens: message.usage?.input_tokens,
         llm_output_tokens: message.usage?.output_tokens,
         severity_result: 2, // moderate — conservative assumption
-        flag_written: true,
+        flag_written: nonJsonFlagWritten,
       })
 
       return {
@@ -164,6 +174,29 @@ export async function evaluateBorderlineDistress(
       ? (parsed.severity as typeof validSeverities[number])
       : 'mild' // Default to mild if unknown severity
 
+    // M-5 fix (2026-08-20): flag_written now reflects an ACTUAL write outcome,
+    // not the aspirational `severity !== 'none'` this used to hardcode as
+    // `true` — see r20a-vulnerability-write.ts's header for the full account.
+    // PR19 fold: only call handleGenuineDetection for a GENUINE detection
+    // (distress_detected AND a non-'none' severity) — checked HERE, before the
+    // write/alert, not after. The original draft called it on severity alone,
+    // so a self-inconsistent Haiku response (distress_detected:false with a
+    // non-'none' severity — schema-valid, not excluded by validation above)
+    // would have written a real row and fired a real alert for a case this
+    // function itself goes on to report as "not detected".
+    const isGenuineDetection = parsed.distress_detected && severity !== 'none'
+    const genuineFlagWritten = isGenuineDetection
+      ? await handleGenuineDetection(
+          {
+            userId,
+            sessionId,
+            severity,
+            triggeredRules: [`haiku_evaluator: ${parsed.reasoning || 'flagged'}`],
+          },
+          { stage: 'haiku' }
+        )
+      : false
+
     // Log the classifier run for cost tracking
     logClassifierRunSafe({
       session_id: sessionId,
@@ -172,10 +205,10 @@ export async function evaluateBorderlineDistress(
       llm_input_tokens: message.usage?.input_tokens,
       llm_output_tokens: message.usage?.output_tokens,
       severity_result: severityToNumber(severity),
-      flag_written: severity !== 'none',
+      flag_written: genuineFlagWritten,
     })
 
-    if (!parsed.distress_detected || severity === 'none') {
+    if (!isGenuineDetection) {
       return { distress_detected: false, severity: 'none', indicators_found: [], redirect_message: null }
     }
 
@@ -226,25 +259,46 @@ import { detectDistress, getCrisisResources } from '@/lib/guardrails'
  */
 export async function detectDistressTwoStage(
   text: string,
-  sessionId?: string
+  sessionId?: string,
+  userId?: string
 ): Promise<DistressDetectionResult> {
   // Stage 1: regex
   const regexResult = detectDistress(text)
 
   if (regexResult.distress_detected) {
+    // M-5 fix (2026-08-20): flag_written now reflects an ACTUAL write
+    // outcome, not the aspirational boolean this used to hardcode — see
+    // r20a-vulnerability-write.ts's header for the full account.
+    // PR19 fold: this used to gate on acute/moderate ONLY, silently excluding
+    // 'mild' — while the parallel Haiku-stage branch (evaluateBorderlineDistress)
+    // includes 'mild'. `detectDistress()` (guardrails.ts) guarantees
+    // `distress_detected === true` iff `severity !== 'none'`, so gating on
+    // `distress_detected` alone (already the enclosing `if`) is sufficient and
+    // symmetric with the Haiku branch — identical-severity detections no
+    // longer behave differently purely by which stage caught them.
+    const regexFlagWritten = await handleGenuineDetection(
+      {
+        userId,
+        sessionId,
+        severity: regexResult.severity,
+        triggeredRules: regexResult.indicators_found,
+      },
+      { stage: 'regex' }
+    )
+
     // Regex caught it — log and return immediately, no LLM needed
     logClassifierRunSafe({
       session_id: sessionId,
       rule_stage_hit: true,
       llm_stage_ran: false,
       severity_result: severityToNumber(regexResult.severity),
-      flag_written: regexResult.severity === 'acute' || regexResult.severity === 'moderate',
+      flag_written: regexFlagWritten,
     })
     return regexResult
   }
 
   // Stage 2: Haiku evaluator for borderline inputs
-  return evaluateBorderlineDistress(text, sessionId)
+  return evaluateBorderlineDistress(text, sessionId, userId)
 }
 
 // ---------------------------------------------------------------------------
@@ -288,59 +342,29 @@ async function writeClassifierDownMarker(
     // Dynamic import to avoid circular dependency with supabase-server
     const { supabaseAdmin } = await import('@/lib/supabase-server')
 
-    // ⚠ FINDING RECORDED 2026-08-17 (R2b item 5) — NOT FIXED HERE, DELIBERATELY.
-    // WIDENED 2026-08-17 (PR19 fold) — an independent review found the ORIGINAL
-    // scope of this note materially understated the gap; both corrections below.
+    // ⚠ FINDING RECORDED 2026-08-17 (R2b item 5); STILL NOT FIXED HERE, DELIBERATELY.
+    // CORRECTED 2026-08-20 (M-5 fix) — this comment previously (and correctly, at
+    // the time) said the THREE genuine-detection branches never wrote to
+    // `vulnerability_flag` at all. That is now FALSE: those three branches call
+    // `handleGenuineDetection()` (r20a-vulnerability-write.ts), which attempts a
+    // schema-correct insert (real `user_id`/`session_id`/`severity`, no `flag_type`
+    // or `metadata` columns — this table has none) whenever a real `auth.users` id
+    // is available, and always fires a real-time alert regardless. The false
+    // `flag_written: true` claim named below is also fixed — `flag_written` now
+    // reflects the actual write outcome on all three of those branches. See
+    // r20a-vulnerability-write.ts's header for the full account; do not re-derive
+    // it from this comment.
     //
-    // THIS INSERT HAS NEVER SUCCEEDED, FOR ANY CALLER, AND NO id-SHAPING CAN REPAIR
-    // IT. It was scoped as a UUID-fragility sibling of the classifier_cost_log
-    // defect; reading the DDL first-hand shows it is worse and different.
-    // `public.vulnerability_flag` (supabase/migrations/20260416_r20a_vulnerability_flag.sql:22-66)
-    // requires THREE NOT NULL columns this insert can never satisfy —
-    //   • user_id  UUID NOT NULL REFERENCES auth.users(id)   — OMITTED entirely,
-    //     no key in the payload at all
-    //   • session_id UUID NOT NULL — IS SENT (`sessionId || null`), just invalid:
-    //     the live callers' ids are free-form strings, so it fails on BOTH the
-    //     null path and the UUID-cast path
-    //   • severity INTEGER NOT NULL  CHECK (severity BETWEEN 1 AND 3)  — OMITTED
-    //     entirely, no key in the payload at all
-    // — and sends TWO columns that DO NOT EXIST on the table at all: `flag_type`
-    // and `metadata`.
-    //
-    // Verified: this is the ONLY write to vulnerability_flag anywhere in the
-    // codebase (repo-wide grep). CONSEQUENCE, recorded because this session is
-    // about to make MORE rows carrying it: `classifier_cost_log.flag_written` is
-    // documented as "true if a vulnerability_flag row was created" and is set true
-    // on acute/moderate — so it is a FALSE FACT on every row ever written, and will
-    // remain so until this is fixed.
-    //
-    // THE GAP IS LARGER THAN "THE ONE INSERT FAILS" — stated precisely so a future
-    // session scoping the fix from this note alone does not rediscover it as a
-    // surprise. `writeClassifierDownMarker` (this function) is called from EXACTLY
-    // ONE call site: the outer catch-all in `evaluateBorderlineDistress`, reached
-    // ONLY when the classifier call itself throws — i.e. a classifier OUTAGE. That
-    // is the same branch that sets `flag_written: false`. The THREE branches that
-    // set `flag_written: true` (a regex hit at moderate/acute; a genuine Haiku
-    // detection at moderate/acute; a non-JSON Haiku response treated as distress)
-    // never call this function, or any insert into `vulnerability_flag`, AT ALL.
-    // So the table — whose own migration comment describes it as the human-review
-    // queue for "mentor sessions where the user's reasoning faculty may be
-    // compromised" — has ZERO write attempts for the actual distress-DETECTED
-    // case. The only write path that exists is for outages, and even that path
-    // always fails. Aligning the columns here (adding real user_id/session_id/
-    // severity) would fix the outage-marker write, but would NOT create any write
-    // path for genuine detections — because none exists to begin with.
-    //
-    // NOT fixed in this session because it cannot be fixed by shaping: the
-    // agent-facing surfaces hold no `auth.users` id to put in user_id, and no
-    // severity in 1-3 truthfully denotes "the classifier was unavailable" — which
-    // is a different thing from a graded distress signal. Making this write
-    // correctly — AND wiring a genuine insert on the flag_written=true branches,
-    // which today do not exist — is a design question about what a distress-flag
-    // review queue should actually look like, and belongs in its own scoped step
-    // (its own founder-walked plumbing: an auth.users id from the calling routes,
-    // a severity mapping from the classifier's own severity levels), not absorbed
-    // here.
+    // THIS insert — the classifier-OUTAGE marker, the one below — remains broken
+    // and is NOT fixed by the above. It is reached only when the Haiku call itself
+    // throws (an outage, not a detection), and the table has no columns named
+    // `flag_type`/`metadata`, requires a UUID `session_id` this call never
+    // validates, and omits `user_id`/`severity` entirely — so this specific insert
+    // still always fails. It cannot be fixed by column-shaping alone: an outage has
+    // no `auth.users` id to attribute it to, and no severity 1-3 truthfully denotes
+    // "the classifier was unavailable" (a different thing from a graded distress
+    // signal). Repairing this is its own scoped step, distinct from the M-5 fix
+    // above (which closes the genuine-detection gap, not the outage-marker gap).
     await supabaseAdmin
       .from('vulnerability_flag')
       .insert({

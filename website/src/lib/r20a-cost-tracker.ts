@@ -182,8 +182,11 @@ export function isClassifierSessionIdShapingEnabled(): boolean {
 }
 
 /** A canonical UUID v4 matcher — an id already in UUID shape is passed through
- *  UNCHANGED, so existing well-formed callers keep their real, joinable id. */
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+ *  UNCHANGED, so existing well-formed callers keep their real, joinable id.
+ *  Exported (2026-08-20, M-5 fix) so r20a-vulnerability-write.ts can reuse the
+ *  same pattern instead of a second, independently-maintained copy — purely
+ *  additive, no behaviour change to this file. */
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
  * Shape a caller-supplied session id into something the UUID column accepts.
