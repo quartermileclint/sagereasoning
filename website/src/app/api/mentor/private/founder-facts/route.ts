@@ -9,6 +9,7 @@ import {
   composeDistressSubject,
   collectFounderFactsPutText,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 
 // =============================================================================
@@ -56,21 +57,26 @@ export async function PUT(req: NextRequest) {
     // write. Flag-off is byte-identical. See r20a-gap-closure.ts.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(composeDistressSubject(collectFounderFactsPutText(facts)))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json(
-          {
-            distress_detected: true,
-            severity: gate.result.severity,
-            redirect_message: gate.result.redirect_message,
-          },
-          { headers: corsHeaders() }
-        )
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('passion')
+      const subject = composeDistressSubject(collectFounderFactsPutText(facts))
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty facts fields have no distress to
+      // detect, and calling it anyway pays for a real billed Haiku call
+      // before the facts.age shape check below fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('passion')
+        }
       }
     }
 
@@ -140,21 +146,26 @@ export async function POST(req: NextRequest) {
     // Flag-off is byte-identical. See r20a-gap-closure.ts.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(composeDistressSubject([note]))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json(
-          {
-            distress_detected: true,
-            severity: gate.result.severity,
-            redirect_message: gate.result.redirect_message,
-          },
-          { headers: corsHeaders() }
-        )
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('passion')
+      const subject = composeDistressSubject([note])
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — a missing/empty `note` has no distress to detect, and
+      // calling it anyway pays for a real billed Haiku call before the
+      // note-emptiness check below fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('passion')
+        }
       }
     }
 

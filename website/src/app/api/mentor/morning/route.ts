@@ -11,6 +11,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -141,16 +142,23 @@ export async function POST(request: NextRequest) {
     // classification, and before the insert. Flag-off is byte-identical.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(morningDistressSubject(body)))
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = morningDistressSubject(body)
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty morning-preparation fields have no
+      // distress to detect, and calling it anyway pays for a real billed
+      // Haiku call before parseMorningContent's own validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 
@@ -220,16 +228,23 @@ export async function PATCH(request: NextRequest) {
     // before parseMorningContent, and before the LLM call.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(morningDistressSubject(body)))
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = morningDistressSubject(body)
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty morning-preparation fields have no
+      // distress to detect, and calling it anyway pays for a real billed
+      // Haiku call before parseMorningContent's own validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 

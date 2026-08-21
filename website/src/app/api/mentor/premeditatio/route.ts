@@ -12,6 +12,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -207,18 +208,23 @@ export async function POST(request: NextRequest) {
     // gate's LLM call, before the insert. Flag-off is byte-identical.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(premeditatioDistressSubject(body))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = premeditatioDistressSubject(body)
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty premeditatio fields have no distress to
+      // detect, and calling it anyway pays for a real billed Haiku call
+      // before parsePremeditatioContent's own validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 
@@ -307,7 +313,10 @@ export async function PATCH(request: NextRequest) {
     // guard, not a new one it introduces.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     const patchSubject = premeditatioDistressSubject(body)
-    if (isR20aGapClosureEnabled() && patchSubject.length > 0) {
+    // Consistency fold (2026-08-22): use the shared hasScreenableSubject
+    // helper rather than a bare length check — trims whitespace-only subjects
+    // too, matching every sibling route's guard.
+    if (isR20aGapClosureEnabled() && hasScreenableSubject(patchSubject)) {
       const gate = await enforceDistressCheck(detectDistressTwoStage(patchSubject))
       if (gate.result.distress_detected && gate.result.severity !== 'mild') {
         return NextResponse.json({

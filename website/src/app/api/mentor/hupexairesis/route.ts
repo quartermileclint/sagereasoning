@@ -12,6 +12,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 
 /**
@@ -111,16 +112,23 @@ export async function POST(request: NextRequest) {
     // gate's LLM call, before the insert. Flag-off is byte-identical.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(reserveDistressSubject(body)))
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = reserveDistressSubject(body)
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty reserve-clause fields have no distress
+      // to detect, and calling it anyway pays for a real billed Haiku call
+      // before parseReserveContent's own validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 
@@ -191,16 +199,23 @@ export async function PATCH(request: NextRequest) {
     // parseReserveContent, before the LLM call.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(reserveDistressSubject(body)))
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = reserveDistressSubject(body)
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty reserve-clause fields have no distress
+      // to detect, and calling it anyway pays for a real billed Haiku call
+      // before parseReserveContent's own validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 

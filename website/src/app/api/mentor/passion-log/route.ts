@@ -7,6 +7,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 import {
   PATTERN_CONSECUTIVE_MISSES,
@@ -63,18 +64,23 @@ export async function POST(request: NextRequest) {
     // Flag-off is byte-identical.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(composeDistressSubject([false_judgement, description]))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('passion')
+      const subject = composeDistressSubject([false_judgement, description])
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — missing/empty fields have no distress to detect, and
+      // calling it anyway pays for a real billed Haiku call before any
+      // downstream validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('passion')
+        }
       }
     }
 

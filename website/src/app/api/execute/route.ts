@@ -10,6 +10,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 
 /**
@@ -113,18 +114,23 @@ export async function POST(request: NextRequest) {
     // making an agent call.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled() && authedUser) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(composeDistressSubject(collectExecuteText(body?.input)))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json({
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        })
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('skill')
+      const subject = composeDistressSubject(collectExecuteText(body?.input))
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — an empty/missing `input` has no distress to detect,
+      // and calling it anyway pays for a real billed Haiku call before any
+      // downstream 400 fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json({
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          })
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('skill')
+        }
       }
     }
 

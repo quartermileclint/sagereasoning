@@ -6,6 +6,7 @@ import {
   isR20aGapClosureEnabled,
   composeDistressSubject,
   buildMildSupportResources,
+  hasScreenableSubject,
 } from '@/lib/r20a-gap-closure'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
@@ -90,21 +91,26 @@ export async function POST(request: NextRequest) {
     // perimeter at the 2026-08-17 gap closure.
     let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
     if (isR20aGapClosureEnabled()) {
-      const gate = await enforceDistressCheck(
-        detectDistressTwoStage(composeDistressSubject([body?.profile_summary]))
-      )
-      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
-        return NextResponse.json(
-          {
-            distress_detected: true,
-            severity: gate.result.severity,
-            redirect_message: gate.result.redirect_message,
-          },
-          { headers: corsHeaders() }
-        )
-      }
-      if (gate.result.severity === 'mild') {
-        mildSupport = buildMildSupportResources('practice')
+      const subject = composeDistressSubject([body?.profile_summary])
+      // PR19 (2026-08-18 fold, extended 2026-08-22): skip the classifier on an
+      // empty subject — a missing/empty `profile_summary` has no distress to
+      // detect, and calling it anyway pays for a real billed Haiku call
+      // before any downstream validation fires.
+      if (hasScreenableSubject(subject)) {
+        const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+        if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+          return NextResponse.json(
+            {
+              distress_detected: true,
+              severity: gate.result.severity,
+              redirect_message: gate.result.redirect_message,
+            },
+            { headers: corsHeaders() }
+          )
+        }
+        if (gate.result.severity === 'mild') {
+          mildSupport = buildMildSupportResources('practice')
+        }
       }
     }
 
