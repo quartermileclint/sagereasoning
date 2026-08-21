@@ -243,7 +243,7 @@ export function buildAccreditationCard(
       label: AUTHORITY_DISPLAY[record.authority_level],
     },
 
-    dimensions: buildDimensionIndicators(record.dimension_levels),
+    dimensions: buildDimensionIndicators(record.dimension_levels, record.typical_proximity),
 
     travel: {
       direction: record.direction_of_travel,
@@ -274,11 +274,30 @@ export function buildAccreditationCard(
 // HELPERS
 // ============================================================================
 
-function buildDimensionIndicators(scores: DimensionScores): DimensionIndicator[] {
+/**
+ * M-4 obligation 1 (mentor ruling M4-return, option (c), ADOPTED 2026-08-17;
+ * built + applied 2026-08-21). `disposition_stability` is omitted from the
+ * displayed card at `principled` and `sage_like` — both proximities, not only
+ * `sage_like`, because at `principled` the agent's ONLY remaining transition
+ * is `principled_to_sage_like`, the top rung this dimension no longer
+ * certifies (grade-transition-engine.ts `dimensionsForThreshold`); showing it
+ * there would misrepresent a value with no bearing on the agent's next
+ * possible advancement. At `reflexive`/`habitual`/`deliberate` it remains
+ * displayed unchanged — it is still a genuine, live gate input at every rung
+ * up to and including `deliberate_to_principled`.
+ */
+export function isTopRungOrBeyond(proximity: KatorthomaProximityLevel): boolean {
+  return proximity === 'principled' || proximity === 'sage_like'
+}
+
+function buildDimensionIndicators(
+  scores: DimensionScores,
+  proximity: KatorthomaProximityLevel
+): DimensionIndicator[] {
   const dimensions: (keyof DimensionScores)[] = [
     'passion_reduction',
     'judgement_quality',
-    'disposition_stability',
+    ...(isTopRungOrBeyond(proximity) ? [] : (['disposition_stability'] as const)),
     'oikeiosis_extension',
   ]
 

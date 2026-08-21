@@ -63,7 +63,16 @@ export const TRUST_RECORD_ENVELOPE = {
     // Named as DISCRIMINATIVE RANGE specifically, not variance or dispersion
     // generically: the doctrinal concept is the Senecan relapse-resistance
     // criterion (Seneca 75.8-9), not statistical variance as such.
-    'Discriminative range — whether the agent\'s proximity readings vary across different types of actions, or whether stability in the record reflects tested relapse-resistance rather than absence of perturbation. The disposition_stability dimension measures consistency of proximity readings; it cannot distinguish a stable disposition that has been tested under varied conditions from one that has not been tested at all.',
+    //
+    // M-4 obligation 4 (mentor ruling M4-return, 2026-08-16/17, ADOPTED
+    // 2026-08-17; retirement built + applied 2026-08-20/21): appended, not
+    // replaced — the sentence above is the perturbation-limit disclosure and
+    // stays word-for-word intact (S2-39/S2-40 pin it). This addition names the
+    // second, now-corrected mean-blindness defect, states the limit applies at
+    // every rung (not only the top), and discloses the top-rung/display
+    // retirement this obligation requires as a GATE on obligation 1's build,
+    // per the ruling's own text: "Nothing ships until the disclosure lands."
+    'Discriminative range — whether the agent\'s proximity readings vary across different types of actions, or whether stability in the record reflects tested relapse-resistance rather than absence of perturbation. The disposition_stability dimension measures consistency of proximity readings; it cannot distinguish a stable disposition that has been tested under varied conditions from one that has not been tested at all. A related defect, corrected 2026-08-17: this dimension previously certified \'advanced\' from low variance alone, without regard to the underlying mean — a consistently poor mean could certify as advanced provided it was consistently poor. A mean floor now gates that certification. The discriminative-range limit above still applies at every rung this dimension informs, not only the top one. For that reason, disposition_stability has been retired from agent-facing display and from certifying the top rung (principled→sage_like) specifically: that transition can never be reached while this dimension cannot make the distinction the top rung\'s evidentiary bar requires. It remains, unchanged, a live gate input at the three lower rungs — a deliberate decision, not an oversight, because the same limit does not disqualify it from informing a lower, less demanding bar.',
   ],
   honest_limit:
     'This record is an attestation composed server-side from consumer-unforgeable trust events under a 90-day retention regime — not a cryptographic proof of the agent’s inner states, and not a certification of safety, ethics, or trustworthiness in any absolute sense (R18a). MEASURE mode: nothing in this record binds any decision; a human’s right to override is absolute regardless of any level shown here (R20c).',

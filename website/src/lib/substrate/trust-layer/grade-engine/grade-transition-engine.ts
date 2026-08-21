@@ -296,10 +296,13 @@ function checkUpgrade(
   const proximityRate = atOrAboveTarget / snapshot.actions_in_window
   if (proximityRate < threshold.proximity_threshold) return null
 
-  // Check dimension levels
-  if (!dimensionsMeetFloor(snapshot.dimension_levels, threshold.min_dimension_level)) return null
+  // Check dimension levels — gateDimensions excludes disposition_stability
+  // ONLY at principled_to_sage_like (M-4 obligation 1, below); every other
+  // rung's predicate call is unaffected, using the full four-dimension pool.
+  const gateDimensions = dimensionsForThreshold(snapshot.dimension_levels, thresholdKey)
+  if (!dimensionsMeetFloor(gateDimensions, threshold.min_dimension_level)) return null
   if (!dimensionsMeetElevated(
-    snapshot.dimension_levels,
+    gateDimensions,
     threshold.elevated_dimension_count,
     threshold.elevated_dimension_level
   )) return null
@@ -463,8 +466,44 @@ const DIMENSION_LEVEL_RANK: Record<DimensionLevel, number> = {
   advanced: 3,
 }
 
-function dimensionsMeetFloor(
+/**
+ * M-4 obligation 1 (mentor ruling M4-return, option (c), ADOPTED 2026-08-17;
+ * built + applied 2026-08-21). Retires disposition_stability from certifying
+ * the TOP RUNG ONLY (`principled_to_sage_like`) — every other threshold key
+ * is returned UNCHANGED, using the full four-dimension pool.
+ *
+ * ⚠ A held, reverted patch (`2026-08-17-M4-retirement-HELD/engine-change.patch.md`)
+ * implemented a GLOBAL exclusion across every rung — the option the mentor
+ * explicitly REJECTED: *"the direction of the adjustment does not change what
+ * is being done."* A global filter here would silently loosen
+ * `dimensionsMeetFloor`'s "every dimension" gate at the three lower rungs too
+ * (disposition_stability was often the rung-blocking floor there — the "20
+ * newly-allowed promotions at habitual → deliberate" the ruling names as the
+ * unintended consequence) and would tighten `dimensionsMeetElevated`'s ratio
+ * at `deliberate_to_principled` from 3-of-4 (75%) to 3-of-3 (100%), a rung the
+ * mentor was never asked about. Do not generalise this exclusion past
+ * `principled_to_sage_like` without a fresh ruling.
+ *
+ * `elevated_dimension_count` for `principled_to_sage_like` is left UNCHANGED
+ * at 4 (retuning it is the ruling's named dishonest option — "Do NOT re-tune
+ * the elevated_dimension_count thresholds"). With disposition_stability
+ * excluded, the pool has only 3 dimensions, so "4 elevated" can never be
+ * satisfied: the top rung becomes structurally unreachable, exactly as ruled
+ * — *"Let principled → sage_like sit structurally unreachable for as long as
+ * the dimension cannot honestly certify."* This is deliberate, not a latent
+ * bug; do not "fix" it by lowering the count.
+ */
+export function dimensionsForThreshold(
   levels: DimensionScores,
+  thresholdKey: string
+): Record<string, DimensionLevel> {
+  if (thresholdKey !== 'principled_to_sage_like') return levels
+  const { disposition_stability: _excludedTopRungOnly, ...rest } = levels
+  return rest
+}
+
+export function dimensionsMeetFloor(
+  levels: Record<string, DimensionLevel>,
   floor: DimensionLevel
 ): boolean {
   const floorRank = DIMENSION_LEVEL_RANK[floor]
@@ -473,8 +512,8 @@ function dimensionsMeetFloor(
   )
 }
 
-function dimensionsMeetElevated(
-  levels: DimensionScores,
+export function dimensionsMeetElevated(
+  levels: Record<string, DimensionLevel>,
   requiredCount: number,
   elevatedLevel: DimensionLevel
 ): boolean {

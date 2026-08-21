@@ -681,7 +681,17 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
   of actions, or whether stability in the record reflects tested relapse-resistance rather
   than absence of perturbation. The disposition_stability dimension measures consistency of
   proximity readings; it cannot distinguish a stable disposition that has been tested under
-  varied conditions from one that has not been tested at all.
+  varied conditions from one that has not been tested at all. A related defect, corrected
+  2026-08-17: this dimension previously certified 'advanced' from low variance alone, without
+  regard to the underlying mean — a consistently poor mean could certify as advanced provided
+  it was consistently poor. A mean floor now gates that certification. The discriminative-range
+  limit above still applies at every rung this dimension informs, not only the top one. For
+  that reason, disposition_stability has been retired from agent-facing display and from
+  certifying the top rung (principled→sage_like) specifically: that transition can never be
+  reached while this dimension cannot make the distinction the top rung's evidentiary bar
+  requires. It remains, unchanged, a live gate input at the three lower rungs — a deliberate
+  decision, not an oversight, because the same limit does not disqualify it from informing a
+  lower, less demanding bar.
 
 Records are retention-governed (90 days) and erasable on request (owner deletion; credential
 erasure). EU AI Act note: deployers may draw on trust records + the underlying signed

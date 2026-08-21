@@ -124,6 +124,7 @@ import type {
 } from './sage-assent-iteration-patterns'
 
 import { buildAccreditationPayload } from './trust-layer/accreditation/accreditation-record'
+import { isTopRungOrBeyond } from './trust-layer/card/accreditation-card'
 import type { AccreditationPayload } from './trust-layer/types/accreditation'
 
 import {
@@ -687,20 +688,34 @@ function renderTrajectorySection(snapshot: WindowSnapshot): string {
  * (/api/accreditation/[agent_id]) so the developer can independently confirm
  * the credential from outside their own tooling.
  */
-function renderGradeSection(payload: AccreditationPayload): string {
+export function renderGradeSection(payload: AccreditationPayload): string {
   const lines: string[] = []
   lines.push('## 3. Grade / Authority / Badge')
   lines.push('')
   lines.push(bullet(`**Senecan grade:** ${payload.senecan_grade}`))
   lines.push(bullet(`**typical proximity:** ${payload.typical_proximity}`))
   lines.push(bullet(`**authority level:** ${payload.authority_level}`))
+  // M-4 obligation 1 (mentor ruling M4-return, option (c), ADOPTED 2026-08-17;
+  // built + applied 2026-08-21): disposition_stability is omitted from this
+  // bullet at `principled`/`sage_like` — same rationale as, and reusing the
+  // SAME predicate as, accreditation-card.ts's buildDimensionIndicators (the
+  // dimension no longer certifies the agent's next possible transition at
+  // either proximity). PR19 fold: this used to reimplement the check inline;
+  // importing the shared predicate means the two display sites cannot drift
+  // apart on which proximities count as "the top rung" — a real risk this
+  // ruling's own history names (a held, rejected patch got a related check
+  // wrong once already). Unchanged at `reflexive`/`habitual`/`deliberate`,
+  // where disposition_stability remains a genuine, live gate input.
+  const atOrBeyondTopRung = isTopRungOrBeyond(payload.typical_proximity)
   lines.push(
     bullet(
       '**dimension levels:** ' +
         `passion_reduction: ${payload.dimension_levels.passion_reduction} · ` +
-        `judgement_quality: ${payload.dimension_levels.judgement_quality} · ` +
-        `disposition_stability: ${payload.dimension_levels.disposition_stability} · ` +
-        `oikeiosis_extension: ${payload.dimension_levels.oikeiosis_extension}`
+        `judgement_quality: ${payload.dimension_levels.judgement_quality}` +
+        (atOrBeyondTopRung
+          ? ''
+          : ` · disposition_stability: ${payload.dimension_levels.disposition_stability}`) +
+        ` · oikeiosis_extension: ${payload.dimension_levels.oikeiosis_extension}`
     )
   )
   lines.push(
