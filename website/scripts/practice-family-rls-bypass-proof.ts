@@ -380,16 +380,59 @@ async function runLegitPathCheck(
   const postText = await post.text()
   check('route POST returns HTTP 200', post.status === 200, `got ${post.status}: ${postText.slice(0, 200)}`)
 
+  // Recover the row's id from the response, if present — some routes (e.g.
+  // journal-feed) encrypt the marker-bearing prose fields at rest, so a
+  // marker-column content search can never find the row; the id is the only
+  // reliable handle in that case. Search one level deep for the first
+  // object value carrying an `id` (response shapes vary: entry/reflection/
+  // event/…), since we don't know the entity key ahead of time per table.
+  let responseId: string | null = null
+  try {
+    const parsed = JSON.parse(postText) as Record<string, unknown>
+    for (const v of Object.values(parsed)) {
+      if (v && typeof v === 'object' && typeof (v as Record<string, unknown>).id === 'string') {
+        responseId = (v as Record<string, unknown>).id as string
+        break
+      }
+    }
+  } catch { /* noop */ }
+
   // The row landed — confirmed via the service key, which sees through RLS.
+  // Primary check is the marker-column content search (works for plaintext
+  // tables); if that finds nothing but the route gave us an id, fall back to
+  // an id-based lookup (the only path that works for at-rest-encrypted
+  // columns, where the marker never lands in a plaintext column at all).
   const sel = await fetch(
     `${U}/rest/v1/${cfg.table}?select=id&${cfg.markerColumn}=like.${encodeURIComponent(`*${marker}*`)}`,
     { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } }
   )
   let rowCount = 0
   try { rowCount = (JSON.parse(await sel.text()) as unknown[]).length } catch { /* noop */ }
-  check('row persisted via the route (service-key read)', rowCount === 1, `saw ${rowCount}`)
 
-  const delCount = await cleanupByMarker(U, SERVICE, cfg, marker)
+  let usedIdFallback = false
+  if (rowCount === 0 && responseId) {
+    const selById = await fetch(
+      `${U}/rest/v1/${cfg.table}?select=id&id=eq.${encodeURIComponent(responseId)}`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } }
+    )
+    try { rowCount = (JSON.parse(await selById.text()) as unknown[]).length } catch { /* noop */ }
+    usedIdFallback = true
+  }
+  check(
+    'row persisted via the route (service-key read)',
+    rowCount === 1,
+    `saw ${rowCount}${usedIdFallback ? ' (via id fallback — marker-column search found nothing, likely an at-rest-encrypted table)' : ''}`
+  )
+
+  const delCount = usedIdFallback && responseId
+    ? await (async () => {
+        const del = await fetch(
+          `${U}/rest/v1/${cfg.table}?id=eq.${encodeURIComponent(responseId)}`,
+          { method: 'DELETE', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, Prefer: 'return=representation' } }
+        )
+        try { return (JSON.parse(await del.text()) as unknown[]).length } catch { return 0 }
+      })()
+    : await cleanupByMarker(U, SERVICE, cfg, marker)
   check('proof row deleted', delCount === rowCount, `deleted ${delCount}`)
 
   console.log(`\n${allPass ? 'ALL PASS' : 'FAILED'} — legitimate route path ${allPass ? 'is unaffected by the RLS lockdown.' : 'has a problem — investigate before proceeding.'}`)
@@ -421,17 +464,27 @@ async function main() {
     process.exit(1)
   }
 
-  if (!legit) {
-    // Safety rail (identical to the impulse harness): the write proof is
-    // TEST-only unless explicitly forced. (TEST project ref: iwdtrvuphogkwmovhnvz.)
+  // Safety rail (identical to the impulse harness): every mode that WRITES a
+  // row — default mode's bypass attempt AND --legit's real route POST — is
+  // TEST-only unless explicitly forced. (TEST project ref: iwdtrvuphogkwmovhnvz.)
+  // PR19 fold, 2026-08-22: this rail previously guarded default mode only
+  // (`if (!legit) {...}`) — --legit was silently exempt. In practice a
+  // production .env file carries no MINT_CLI_ADMIN_EMAIL/PASSWORD, so a
+  // --legit run against it already fails at the `must()` credential check
+  // above before any network call — but that is incidental, not designed,
+  // protection, and the asymmetry with default mode's explicit rail was a
+  // real gap once anyone points --env-file at a file that DOES carry those
+  // vars. Applying the same rail to both modes closes it at the root.
+  {
     const isTest = U.includes('iwdtrvuphogkwmovhnvz')
     const forced = args.includes('--force-nontest')
     if (!isTest && !forced) {
       console.error(
         `\n  REFUSING TO RUN: ${U}\n` +
-        `  This harness WRITES bypass rows and is TEST-only. The URL is not the\n` +
-        `  known TEST project. If this is a deliberate post-migration production\n` +
-        `  check (which must FAIL and write nothing), re-run with --force-nontest.\n`
+        `  This harness WRITES rows (a bypass row in default mode, a real route\n` +
+        `  row in --legit mode) and is TEST-only. The URL is not the known TEST\n` +
+        `  project. If this is a deliberate, exceptional non-TEST run, re-run\n` +
+        `  with --force-nontest.\n`
       )
       process.exit(2)
     }

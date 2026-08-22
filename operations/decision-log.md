@@ -24103,3 +24103,164 @@ redeploy, and smoke were each named and confirmed live), PR24.
 **Status:** Adopted. Cross-references: `5cdf4b9` (the committed cron entry + comment corrections),
 `D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12` (the sibling precedent this activation
 follows), `operations/handoffs/founder/2026-08-22-item3-activation-and-item4-rls-walk-NEXT-SESSION-PROMPT.md`.
+
+## 2026-08-22 — D-CONCURRENT-ARC-C4-PRACTICE-FAMILY-RLS-FIX-LIVE-2026-08-22
+
+**Decision:** The ten-table practice-family RLS lockdown (survey Class A rows 2–11 — `sage_compass_entries`,
+`morning_preparation_entries`, `view_from_above_entries`, `reserve_clause_entries`,
+`circle_extension_entries`, `oikeiosis_reflections`, `premeditatio_entries`, `passion_events`,
+`realtime_journal_entries`, `mentor_baseline_appendix`) is **APPLIED AND LIVE ON PRODUCTION** — a
+founder-walked `code-critical` 0c-ii (AC7 engaged and discharged; PR19 discharged; PR17 throughout —
+the founder ran every live SQL step on both TEST and production and pasted back every result; the AI
+authored the migration and harness in the predecessor session, drove the walk, wrote the SQL blocks,
+ran every read-only/behavioural verification itself, and performed no direct Supabase SQL execution
+of its own — there is no SQL-runner tool available to it, confirmed by grep before asking the founder
+to run anything). **Production is intentionally NOT byte-equivalent — a deliberate standing change.**
+All ten tables now match the proven service-role-only shape (RLS enabled, the per-user owner policies
+dropped, only a "Service role full access to …" policy remaining, anon/authenticated/PUBLIC grants
+revoked, service_role granted). This closes items 1–4 of the survey's recommended backlog order (item
+1, `impulse_entries`, closed 2026-08-16; items 2/3 closed in the immediately preceding session; item 4
+is this entry).
+
+**Two orphaned-session-work findings surfaced and were resolved mid-walk, both disclosed rather than
+silently absorbed.** (1) The harness's `--legit` verification for `realtime_journal_entries` was
+constructed on a false premise inherited from the migration's own header comment — the header claimed
+this table "stores PLAINTEXT impression/assent/action columns," but the live route
+(`/api/mentor/journal-feed`) encrypts those fields at rest into `entry_ciphertext`/`entry_meta` and
+never populates the plaintext columns at all (confirmed by reading `journal-encryption.ts`'s
+documented fallback-only semantics). The marker-column content search the harness used could
+therefore never find the row it had just created — not a regression from the lockdown, but a
+pre-existing harness-authoring defect exposed by finally exercising it. Fixed at the root: the row's
+`id`, recovered from the POST response, now drives a fallback lookup/cleanup when the marker search
+finds nothing, engaged only in that circumstance (verified non-vacuous — the nine already-passing
+tables are unaffected, confirmed by re-reading the diff and by re-running two of them post-fix). One
+orphaned test row this defect left behind on TEST was found and deleted by id before the fix landed.
+(2) `mentor_baseline_appendix` has no `--legit` config by original design (the migration's header
+names it a founder-UI-walk item, since its real write path is a full LLM-generation flow) — but the
+founder-UI route turned out to be blocked by an unrelated, pre-existing bug (`/mentor-baseline/refinements`
+reads the browser's auth token from a hardcoded, production-project-ref localStorage key, so it cannot
+authenticate against a TEST-pointed dev server). Rather than fight that bug or leave the table's legit
+path unverified, the AI drove the real `/api/mentor-appendix` POST route directly with a synthetic-but-valid
+body (the route's own code discloses that `refinement: {}` satisfies its only check on that field, so
+no genuine LLM call was needed to exercise the real write+encrypt+persist path) — proving the same
+thing the other nine `--legit` checks prove, then cleaned up the row. Neither finding blocks or
+weakens the lockdown itself; both are pre-existing, unrelated defects this walk happened to expose.
+
+**PR19 independent adversarial review — completed FIRST-HAND across all four dimensions, per the
+account-session-limit fallback this project has invoked repeatedly.** Four parallel review agents
+(migration-fidelity, consumer-safety, independent live-production re-verification, harness-fix
+correctness) were launched; all four died on the account's session limit (one partial, three with
+zero output) before completing. Per standing precedent, the review was completed directly against
+source and live production rather than treated as done or deferred. **Migration-fidelity — PASS on
+all six checks**: every one of the ten `DROP POLICY` statements matches its table's original
+`CREATE POLICY` name character-for-character (cross-checked against each table's own origin migration
+— `supabase-sage-compass-migration.sql`, `supabase-morning-preparation-migration.sql`,
+`supabase-view-from-above-migration.sql`, `supabase-reserve-clause-migration.sql`,
+`supabase-circle-extension-migration.sql`, `supabase-mentor-gaps-migration.sql` for
+`passion_events`/`premeditatio_entries`/`oikeiosis_reflections`/`realtime_journal_entries`, and
+`supabase-mentor-appendix-migration.sql`); RLS was already enabled pre-migration on every table in its
+own origin file, confirming the migration header's framing; `mentor_baseline_appendix`'s documented
+asymmetry (3 original policies, no UPDATE, no pre-existing service-role policy) verified exactly;
+the disclosed 8-view non-`security_invoker` gap (6 views in `supabase-mentor-gaps-migration.sql` + 2 in
+`supabase/migrations/20260413_logging_refactor_gap4.sql`) confirmed to exist as named, none declaring
+`security_invoker`; the SECURITY DEFINER recount independently reproduced (4 grep hits, 3 distinct
+functions — `revoke_atl_credentials_on_profile_delete` declared twice via `CREATE OR REPLACE` across
+the a10 and phase3 api-keys migrations, plus `increment_structured_observation_count` and
+`update_deliberation_chain_v3` — none writing any of the ten tables). **Consumer-safety — PASS**: zero
+anon-key/client-side consumers re-derived by grep across all ten tables (every writing route confirmed
+on `supabaseAdmin`/`SUPABASE_SERVICE_ROLE_KEY`; the one client-component hit, `src/app/impulse/page.tsx`
+mentioning `passion_events`, is a comment, not a query — no `.from()` call in that file); no
+undisclosed views/RPCs found over the six tables outside the already-disclosed gap (one benign
+`updated_at` trigger function found, not `SECURITY DEFINER`). **Independent live production
+re-verification — PASS, no drift**: fresh unauthenticated anon-key GETs against all ten tables
+returned uniform `401`/`42501` (the genuine RLS permission-denied code, not a different failure mode);
+fresh service-role GETs returned uniform `200` on all ten, confirming the app's own path is
+unaffected. **Harness-fix review — one real finding, fixed at the root during the review itself**:
+`--legit` mode had no TEST-only safety rail at all (unlike default mode, which refuses to run against
+a non-TEST URL without `--force-nontest`) — currently inert only because `.env.local` (production)
+lacks the `MINT_CLI_ADMIN_EMAIL`/`PASSWORD` credentials `--legit` needs, which is incidental rather
+than designed protection. Closed by applying the same `isTest`-or-`--force-nontest` rail to both
+modes; re-verified both modes still behave correctly on TEST post-fix. **Founder dropped the model
+setting before the review and restored it after, per the standing arc constraint.**
+
+**The live walk, in order, every SQL step founder-run, every behavioural/read-only check AI-run:**
+- **TEST §PRE** (all ten, behavioural, before touching anything): direct anon-key INSERT by an
+  authenticated throwaway user → **HTTP 201, "bypass is OPEN"** on all ten tables; anon-session SELECT
+  → 1 row visible on each; cleanup deleted 1 on each.
+- **TEST §PRE, SQL** (founder-run): 5 policy rows on nine tables + 3 on `mentor_baseline_appendix`
+  (matching the documented asymmetry exactly); `relrowsecurity = true` on all ten.
+- **TEST §APPLY** (founder-run, all ten sections): all ten reported success.
+- **TEST §VERIFY V1–V3** (founder-run, SQL): exactly 1 policy row per table (the new/retained
+  service-role policy); RLS still `true` on all ten; zero anon/authenticated grant rows.
+- **TEST §VERIFY V4** (AI-run, behavioural): all ten now **HTTP 403 / 42501 permission denied**
+  (bypass closed), matching the PostgREST hint naming the missing grant.
+- **TEST §VERIFY V5** (AI-run, legitimate path, dev server against TEST): all nine tables with a
+  `--legit` config confirmed unaffected (one required the id-fallback fix above);
+  `mentor_baseline_appendix` confirmed via the direct real-route POST described above.
+- **Production §PRE** (AI-run, read-only, unauthenticated anon-key GET, no session, no write): all ten
+  tables → **HTTP 200 `[]`** — permitted at the privilege layer, empty only because `auth.uid()` is
+  null for anon (the discriminator the production proof rests on, identical in kind to the
+  `impulse_entries`/precedent).
+- **Production §APPLY** (founder-run, all ten sections): all ten reported success.
+- **Production §VERIFY V1–V3** (founder-run, SQL): exactly 1 policy row per table; RLS `true` on all
+  ten; zero anon/authenticated grant rows; row counts read post-apply (3/5/3/2/0/2/3/3/2/1 across the
+  ten tables) — **no pre-migration count was captured on production**, an honest gap disclosed rather
+  than papered over, though none of the ten `§APPLY` statements (`DROP POLICY`/`REVOKE`/`GRANT`/
+  `ALTER TABLE … ENABLE ROW LEVEL SECURITY`) can alter row counts by construction.
+- **Production §VERIFY, behavioural** (AI-run, read-only, twice — once immediately after §APPLY, once
+  again fresh during the PR19 fallback review): all ten tables flipped from `200 []` to **`401 / 42501
+  permission denied`**; service-role GETs confirmed `200` on all ten throughout, proving the app's own
+  path unaffected.
+
+**Files touched:** `website/scripts/practice-family-rls-bypass-proof.ts` (id-fallback fix for
+`realtime_journal_entries`'s `--legit` check; the unified TEST-only safety rail across both modes),
+`operations/decision-log.md` (this entry). The migration file itself
+(`website/supabase-practice-family-rls-lockdown-migration.sql`) was authored in the predecessor
+session and applied verbatim this session — no in-session edits to it.
+
+**Risk classification:** `code-critical` under 0d-ii — a live access-control change to ten production
+tables, several carrying intimate practitioner content (`oikeiosis_reflections`, `passion_events`,
+`view_from_above_entries` named by the survey itself as the most sensitive of the ten). AC7 **engaged
+and discharged** (the six-point Critical Change Protocol disclosure given in conversation before the
+production step; explicit founder approval to proceed). PR19 **discharged** (independent review
+completed first-hand after the account session limit killed all four launched review agents; zero
+findings above LOW severity; the one LOW harness-safety-rail finding fixed at the root in the same
+pass). PR6 not engaged (no distress-classifier code changed).
+
+**Rollback path:** each table's `§INVERSE` block in the migration file (recreates the four original
+`CREATE POLICY` statements verbatim per table, plus the original grants to anon/authenticated) —
+cross-checked this session against each table's own origin migration and confirmed character-identical.
+`mentor_baseline_appendix`'s `§INVERSE` additionally drops the newly-added service-role policy to
+restore its exact pre-migration three-policy, no-service-role-policy state.
+
+**Reflect finding (PR21):** **a migration's own disclosure comment can be wrong about the very thing
+it exists to disclose, and the failure surfaces as a downstream tool's false result, not as an obvious
+contradiction.** The header's plaintext-storage claim for `realtime_journal_entries` was written in the
+predecessor session and inherited unquestioned into this session's harness config; it took actually
+running the harness — not re-reading the comment — to discover the route encrypts those columns and
+the check could never pass. The general lesson, a sharper instance of the same one from the
+`impulse_entries` close: **a claim about a table's current write shape is a claim about live
+application code, not about the table's schema or its own migration's prose — verify it against the
+route that writes the table, not against a sibling comment describing it.**
+
+**Carried:** the rest of the survey backlog — Class A rows 13–18 (two of which, `progress_snapshots_v3`
+and `baseline_assessments` v1, are candidates for a disposal decision rather than a lockdown), Class B
+(`action_evaluations_v3`, `journal_entries`, `reflections` SELECT — each needs a route-change-first
+design, not a migration; `journal_entries` additionally needs a live-state SQL read since it has no
+migration file in the repo at all), row 28 (`environmental_context` — an intent question, not a
+mechanics question), and the disclosed non-`security_invoker` aggregate-view gap over four of these
+ten tables (its own named Critical follow-up, not pre-scoped by this session). Mechanical item 6
+(housekeeping — the stale-DARK-claim line-number re-check, the `idea-loop-types.ts` citation drift, the
+`environmental-context.json` commit-or-discard decision) remains untouched, now carried across six-plus
+sessions.
+
+**Rules served:** R17, AC7, PR6 (considered, not engaged), PR17, PR19, PR21, PR24 (parity check —
+these ten tables carry no `retain_until` column and were not a PR24 target; noted for completeness,
+not a gap).
+
+**Status:** Adopted. Cross-references: `operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md`,
+`D-CONCURRENT-ARC-C4-IMPULSE-RLS-FIX-LIVE-2026-08-16` (the pattern this migration follows exactly),
+`D-C1-AGENT-HOLD-OBSERVATIONS-SWEEP-ACTIVATION-LIVE-2026-08-22` (item 3, the immediately preceding
+close), `operations/handoffs/founder/2026-08-22-item3-activation-and-item4-rls-walk-NEXT-SESSION-PROMPT.md`
+(this session's opening prompt), `operations/handoffs/founder/2026-08-23-post-item4-housekeeping-NEXT-SESSION-PROMPT.md`
+(successor). Weights BLOCKED; the P0 0h hold stands.
