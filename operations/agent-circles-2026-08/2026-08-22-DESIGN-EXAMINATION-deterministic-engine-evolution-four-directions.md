@@ -476,7 +476,15 @@ Directions 1 and 4. They are rival implementations of one underlying finding (th
 generative-process apparatus gap established in §1), and the decision criterion between them is
 whether the existing Layer-2 architecture and output vocabulary can express inquiry-discipline
 measurements or whether the measurement apparatus divides. That criterion is nameable now; applying
-it requires design work no session has done.
+it requires design work no session has done. *(Dated note, 2026-08-22, per the post-1984
+complexity-science rulings Q3 — verbatim wins: the hierarchical modular network finding* **narrows
+this question toward hierarchical** *— parallel and sequential are made less likely, being
+architecturally simpler than what converges in living systems balancing robustness, adaptability, and
+energetic efficiency simultaneously — but the mechanism-level argument that would close it is not yet
+available: which engine sits at the higher level, what the integration mechanism looks like, and
+whether the living-systems analogy carries technical load at the IDEA loop's specific level are all
+unknown. The question remains open; the standing-runner design session carries this as a named input.
+See §4.5.)*
 
 One structural fact bounds any spinoff conversation: **server-side, there is no generation engine to
 spin off from.** Generation is runner-owned by architecture ruling (*"SageReasoning hosts no
@@ -526,6 +534,52 @@ already carries only reasoning-level signals" premise is faithful to the ATRF's 
 `manifest.md`; the ATRF harness itself is unbuilt. The "named paper" grounding the second finding was
 identified by the founder 2026-08-22: **"A digitally controlled silicon quantum processing unit."**)
 
+### 4.5 Post-1984 complexity-science findings (mentor-ruled additions, 2026-08-22)
+
+> **Provenance and status:** recorded on the mentor's five rulings of 2026-08-22
+> (`2026-08-22-mentor-rulings-post-1984-complexity-science-addendum-verbatim.md` — verbatim wins),
+> which examined the post-1984 complexity-science research the founder relayed (Turing patterns,
+> hierarchical/modular/fractal architectures, network motifs, criticality, and the shared generative
+> mechanisms of non-equilibrium order). Ruled destination: **this document** — these are questions
+> about what the engine and its control plane should become, NOT substrate questions (they are
+> distinct from, and do not deepen, the quantum-substrate incubation entry held in the taxonomy
+> design document) and NOT taxonomy material. Each finding is held at its **individually ruled**
+> status — the mentor's Q4 discipline, worth quoting because it refines this document's own
+> governing-constraint application: *"the discipline is not to hold everything at the conjectural
+> end uniformly — that would be epistemic overcorrection... The discipline is to assess each finding
+> honestly and assign the epistemic status it actually warrants."* Per Q5, nothing here changes the
+> current build sequence.
+
+**Finding 1 — local rules producing global coherence (WELL-GROUNDED as a confirmed structural
+correspondence; not yet a named design principle).** The IDEA loop's ruled architecture — no
+server-side generation, heuristics acting locally, the winner selected by a pure function with no
+central orchestration — instantiates the local-interactions-producing-global-coherence motif, and
+the correspondence is *"real and verifiable against the ruled architecture"*: the ruled design
+converged independently on what complexity science found. This is the one P0/P1-relevant finding,
+and its whole P0/P1 content is this naming — it confirms and explains existing rulings, requiring no
+build. It is deliberately NOT elevated to a named design principle: unlike the substrate-agnostic
+control plane (§4.4), it does not yet carry the mechanism-level argument that would make it
+actionable for future design decisions. **The standing-runner design session carries the ruled named
+question:** what does this finding imply for the standing-runner's cycle behaviour, and is there a
+mechanism-level argument that makes the correspondence actionable rather than merely confirmatory?
+
+**Finding 2 — hierarchical modular networks (WELL-GROUNDED as a named structural principle for the
+control plane; deferred).** Sparse, heterogeneous, hierarchically modular topologies — segregation at
+lower levels, integration at higher — are the convergent architecture in living systems under
+simultaneous robustness/adaptability/efficiency constraints; the convergent evidence from network
+science, systems biology, and active matter research is ruled sufficient. Named now; **acting on it
+now is premature** — the control plane's full architecture is a post-first-build-gate design
+question. Its bearing on §4.3 is recorded there (a narrowing toward hierarchical, not a closure) and
+is a named standing-runner input.
+
+**Finding 3 — edge-of-chaos calibration (CONJECTURAL — probably right, structural account partially
+available).** The complexity-science literature (operation near criticality maximising information
+processing, adaptability, and responsiveness while remaining stable) is well-established; the
+application to the IDEA loop's specific architecture — what calibration mechanism the control plane
+would use, what signals it would read, how it would maintain position near the edge — is not
+available. Held per the ruling as a conjectural entry, **deferred to the standing-runner design
+session as a named input.**
+
 ---
 
 ## 5. Cross-reference map (forward-pointing notes, not pre-answers)
@@ -552,6 +606,7 @@ identified by the founder 2026-08-22: **"A digitally controlled silicon quantum 
 | 4 | S6 report §7 (phantasia-level calibration finding) | the measured limit of the evaluative apparatus on the generative input class |
 | 4 | Standing-runner design session (licensed to open; unopened) | already holds the redirected conjectural-entry-type carry-forward; where a live runner's entry-type behaviour would actually be scoped |
 | 4 | Substrate-agnostic control plane (§4.4, mentor-directed 2026-08-21) + the ATRF's task-agnostic design | the principle names the deeper ground of the ATRF's reasoning-signals-only shape; its companion incubation entry (quantum-substrate bifurcation dynamics) is recorded in the taxonomy design document with a phase-gate return condition |
+| 4 | Post-1984 complexity-science findings (§4.5, mentor-ruled 2026-08-22) + the standing-runner design session | three findings at three ruled statuses; the standing-runner session carries three named items from them — the local-rules actionability question, the hierarchical §4.3 narrowing, and edge-of-chaos calibration; ruled distinct from the quantum-substrate incubation entry (control-plane architecture vs execution substrate) |
 
 ---
 
@@ -682,6 +737,12 @@ standing-runner gate and should be reconciled in the routing act itself.
   generation-step scoping session per the ruling — subject to open question 7). This document adds
   nothing to that routing and takes nothing from it.
 
+*(Dated addition, 2026-08-22, per the post-1984 complexity-science rulings — the standing-runner
+design session now carries three further named items from §4.5, in addition to what was already
+routed there: the local-rules actionability question (Q2's ruled named question), the hierarchical
+§4.3 narrowing (Q3), and edge-of-chaos calibration (Q5's deferred conjectural entry). None of these
+gates the session's opening.)*
+
 **Direction 4 (conjectural) — held.** Per the instruction's rule for conjectural directions: held in
 this document until a session is positioned to receive it. The sessions that would be positioned, when
 they open: the **standing-runner design session** (whose scoping of live entry-type behaviour would
@@ -717,6 +778,7 @@ blocked; the P0 0h hold stands; the 0h call remains the founder's.
   by the founder 2026-08-22; verbatim wins over every characterisation of it here)
 - `operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` — the three entry types, pre-ruling, unadvanced (carries the 2026-08-21 mentor-directed incubation entry as a dated addition)
 - `operations/agent-circles-2026-08/2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md` — the §4.4 principle's charter, verbatim
+- `operations/agent-circles-2026-08/2026-08-22-mentor-rulings-post-1984-complexity-science-addendum-verbatim.md` — the §4.5 findings' rulings (and the relayed research text), verbatim
 - `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md` — the ruled provenance vocabulary (verbatim wins)
 - `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` — the redirect principle; the standing-runner destination
 - `operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md` — §2.10 (phantasia/assent, Q1 ≡ Q4.3), §2.13 (open)

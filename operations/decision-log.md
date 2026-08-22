@@ -24430,3 +24430,25 @@ this session), PR19, PR20, PR23.
 `D-CONCURRENT-ARC-C4-PRACTICE-FAMILY-RLS-FIX-LIVE-2026-08-22` (the pattern this build follows and the
 migration this build's own migration is authored to mirror exactly). Weights BLOCKED; the P0 0h hold
 stands.
+
+## 2026-08-22 — D-POST-1984-COMPLEXITY-RULINGS-ADOPTED-EXECUTED-2026-08-22
+
+**Decision:** The mentor's five rulings on the post-1984 complexity-science addendum (dated 2026-08-22, relayed same day) are adopted as binding, recorded verbatim with the relayed research text (`operations/agent-circles-2026-08/2026-08-22-mentor-rulings-post-1984-complexity-science-addendum-verbatim.md` — verbatim wins), and executed documents-only: **(Q1)** destination = the engine-evolution examination document, NOT the puzzle-taxonomy document — the material asks control-plane architecture questions, distinct from the quantum-substrate incubation entry's execution-substrate question; the taxonomy document deliberately untouched. **(Q2)** the IDEA-loop local-rules-producing-global-coherence correspondence recorded as a CONFIRMED STRUCTURAL RESONANCE (verifiable against the ruled architecture) — deliberately NOT a named design principle (the mechanism-level argument that made §4.4's substrate-agnostic principle nameable is absent here); the standing-runner design session carries the ruled named question (actionable or merely confirmatory?). **(Q3)** the hierarchical-modular-network finding recorded as NARROWING the examination's §4.3 parallel/sequential/hierarchical question toward hierarchical without closing it; standing-runner named input. **(Q4)** differentiated statuses per the ruling — findings 1 and 2 WELL-GROUNDED, finding 3 (edge-of-chaos calibration) CONJECTURAL; the ruling's anti-overcorrection discipline ("assess each finding honestly... two are well-grounded, one is conjectural") quoted in §4.5. **(Q5)** one finding P0/P1-relevant as naming only (no build); two deferred; *"Nothing in these rulings changes the current build sequence."*
+
+**Reasoning:** Execution is the recording half of the adoption, per the verbatim-wins discipline. Concurrency: executed in a shared working tree with two live peer sessions mid-work (mechanical items 2/3/4 + the Class-B route change) — target files verified untouched by their commits (`git log 42ee754..HEAD` per-file), both peers messaged and cleared the scoped commit, and this decision-log append explicitly sequenced AFTER sagereasoning-05's `2277ec2` append rather than racing it.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-22-mentor-rulings-post-1984-complexity-science-addendum-verbatim.md` — NEW; the five rulings + the relayed research text + recording notes (incl. the un-relayed "addendum instruction" provenance note)
+- `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — NEW §4.5 (three findings, ruled statuses); §4.3 dated narrowing note; §7 dated standing-runner-inputs addition; §5 map row; cross-reference line
+- `operations/handoffs/founder/2026-08-22-engine-evolution-examination-CLOSE.md` — Addendum 3
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag, credential, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the verbatim file; revert the dated additions in the two amended documents (each self-contained).
+
+**Open questions:** None new beyond the ruled named items (all routed: three standing-runner inputs; nothing gates that session's opening). The un-relayed "addendum instruction" the rulings reference should be captured verbatim if it surfaces; nothing in it can widen these rulings.
+
+**Rules served:** PR18, PR20, PR23; the Q1 hard constraint and the build sequence verified unchanged per Q5.
+
+**Status:** Adopted. Cross-references: D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22, D-SUBSTRATE-AGNOSTIC-CONTROL-PLANE-AND-INCUBATION-ENTRY-RECORDED-2026-08-22, D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22.

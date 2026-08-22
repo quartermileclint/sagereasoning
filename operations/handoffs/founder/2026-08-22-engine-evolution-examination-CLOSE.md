@@ -153,6 +153,28 @@ decision log) are tracked with only this session's dated additions as their diff
 tree's other untracked strays (the three c15 files and the rest) belong to prior sessions and are
 deliberately not staged.
 
+## Addendum 3 — the post-1984 complexity-science rulings adopted and executed (2026-08-22)
+
+After the Addendum-2 commit was pushed and two peer sessions progressed mechanical items 2/3/4
+(commits `5cdf4b9`…`ea53a1e`: R20a runtime tests, the `agent_hold_observations` sweep cron
+activated, the practice-family RLS lockdown live on TEST + production), the founder relayed
+post-1984 complexity-science research findings; five questions were raised and the mentor's five
+rulings returned and executed (`D-POST-1984-COMPLEXITY-RULINGS-ADOPTED-EXECUTED-2026-08-22`;
+verbatim + the relayed research text at
+`2026-08-22-mentor-rulings-post-1984-complexity-science-addendum-verbatim.md`). Executed: **Q1**
+destination = this examination document, NOT the taxonomy document (distinct from the
+quantum-substrate incubation entry — control-plane architecture vs execution substrate; the
+taxonomy document deliberately untouched). **Q2–Q5** recorded as the examination document's new
+**§4.5** — three findings at three individually ruled statuses (local-rules coherence WELL-GROUNDED
+as confirmed structural resonance, not yet a named principle; hierarchical modular networks
+WELL-GROUNDED as a named control-plane structural principle, deferred; edge-of-chaos calibration
+CONJECTURAL, deferred) — plus the §4.3 dated narrowing note (toward hierarchical, not closed) and
+three further named standing-runner-session inputs in §7. Per Q5: nothing changes the current build
+sequence; P0 continues on the named task list. **Concurrency discipline observed:** target files
+verified untouched by the peer commits before editing; both live peer sessions messaged and cleared
+the scoped commit; the decision-log append explicitly sequenced with sagereasoning-05 (who was
+appending their Class-B entry concurrently) rather than racing it.
+
 ## Cross-references
 - `operations/handoffs/founder/2026-08-22-m5-m4-mechanical-item1-CLOSE.md` — predecessor close
 - `operations/handoffs/founder/2026-08-22-mechanical-items-234-and-routing-NEXT-SESSION-PROMPT.md` — the standing successor prompt, unspent
