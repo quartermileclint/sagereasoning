@@ -1,5 +1,22 @@
 # GS-ATRF-2 — shape specification (loop-level blast-radius proxy)
 
+> **✅ DATED UPDATE 2026-08-23 — the shape is RULED-CONFIRMED and two of its open alternatives are
+> now closed** (Q-B1/Q-A4/Q-B2 of the ATRF rulings —
+> `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md`,
+> verbatim wins): **(1)** this specification is confirmed as the migration's scope; **(2)** the
+> circle-recovery choice this document deliberately left open is decided — **the `target_circle`
+> column is ELECTED**, as a design constraint not a preference (auditability of a persisted `high`
+> requires the dikaiosyne dimension's input recoverable from the row); **(3)** the no-basis
+> friction case is expressed as **null-plus-flag** (`manifest.md` untouched), the ruled disclosure
+> flag reading *"loop-level blast-radius assessment not available for this candidate type; agent
+> assessment recorded separately,"* with the null-vs-value two-record comparison semantics defined
+> at Q-A4; **(4)** the basis-copy durability question stays with the build session, as this
+> document proposed; **(5)** per Q-B2 + Q-D1 (pre-generation step elected — no heuristic-CHECK
+> widening), the three columns here ride ONE founder-walked migration window together with the S4
+> watching-table extension. The build remains unlicensed; the migration is founder-walked 0c-ii
+> when it opens. The body below is preserved as drafted; where it says the circle-recovery choice
+> is open, this note governs.
+
 **Purpose:** specify the shape. **Do not build it.** The mentor's 2026-08-11 synthesis authorised
 specifying the GS-ATRF-2 shape now, ahead of the ATRF scoping session, because it can be fully derived
 from ground already ruled — the four-dimension GS-ATRF-1 answer (`gs-atrf-corrections.md` §(a)), the

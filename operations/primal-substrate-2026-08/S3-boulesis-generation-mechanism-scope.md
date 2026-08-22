@@ -270,6 +270,18 @@ honesty bounds are already ruled and public.
 Recommendation: **do not decide it here** — but note that the eighth-heuristic option is a schema
 change and should be costed as one.
 
+> **✅ Q3-d RULED 2026-08-23 (Q-D1 of the ATRF rulings —
+> `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md`,
+> verbatim wins): PRE-GENERATION STEP.** No schema change to the heuristic union; the boulesis
+> mechanism runs before the generation step, producing a **normative-gap signal** the generation
+> step receives as a named input — the gap is the frame within which candidates are generated, not
+> itself a candidate. The M5 separate-fields directive is preserved; the normative-candidate
+> distinction is confirmed (a candidate generated in response to the normative-gap signal may
+> legitimately carry virtue domains — the signal provides the honest basis, C6-compliant, that a
+> friction candidate lacks); the blast-radius proxy's basis for such a candidate is the virtue
+> domain the signal names. The mechanism's detailed design remains future work under this ruled
+> home; §4's design notes below carry forward under it.
+
 ---
 
 ### §5-RULED — the 2026-08-11 rulings

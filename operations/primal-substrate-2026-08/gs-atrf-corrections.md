@@ -120,6 +120,16 @@ independently, so the ATRF scoping session does not have to re-discover it a thi
 
 ## (c-bis) The friction channel has no GS-ATRF-1 basis AT ALL — and no disclosure branch
 
+> **✅ RESOLVED 2026-08-23 (Q-A3 + Q-A4 of the ATRF rulings —
+> `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md`,
+> verbatim wins).** GS-ATRF-4's `unknown` category closes this gap **directly**; GS-ATRF-1's ruled
+> answer needs no amendment. *"Unknown is the honest provenance status for a proposition the agent
+> could not form"* — and `unknown`-in-the-provenance-vocabulary and basis-absent-in-this-context
+> are **the same claim**, not a shared label. The vocabulary expression is **null-plus-flag**
+> (`manifest.md`'s `high|medium|low` untouched), with the ruled disclosure-flag wording and the
+> null-vs-value two-record comparison semantics given at Q-A4. The section below stands as the
+> historical statement of the gap; this note governs its status.
+
 **Added 2026-08-12** (`D-SUFFICIENCY-EXAMINATION-TRIGGER-ROUTED-2026-08-12`; record:
 `operations/agent-circles-2026-08/2026-08-12-mentor-consultation-sufficiency-examination-trigger-verbatim.md`).
 **Ruled to be raised independently, verbatim:** *"raise the GS-ATRF-1 basis-lessness gap now,
@@ -185,6 +195,17 @@ as a recorded covariate of that comparison, not as a fifth dimension.
 ---
 
 ## (d) CARRY-FORWARD for the ATRF scoping session — the completion signal and the justice assessment
+
+> **✅ RESOLVED 2026-08-23 (Q-C3 of the ATRF rulings — same verbatim record as §(c-bis)'s note,
+> verbatim wins).** The ruling was achievable without diagnosing the floor pattern, exactly as
+> constrained: *"Under either reading, the honest posture is the same: the instrument should not
+> attest beyond its measurement basis."* **The refuse-to-attest branch is REQUIRED** — a design
+> constraint named in the completion signal's schema, not left to the build session. The signal can
+> honestly carry the agent's own examination record (what was examined, what assent was given, on
+> what epistemic basis); it **cannot carry a verdict on whether the examination was just in the
+> dikaiosyne sense**. The floor pattern itself remains deliberately undiagnosed; both readings
+> still stand; the three must-NOT-assume bullets below are preserved as the constraint the ruling
+> honoured.
 
 **Added 2026-08-11, after the S8 session closed, on mentor direction. Not a correction of the
 synthesis, and not a re-opening of B1 — a carry-forward the ATRF session must inherit explicitly.**

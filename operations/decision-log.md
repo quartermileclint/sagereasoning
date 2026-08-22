@@ -24452,3 +24452,295 @@ stands.
 **Rules served:** PR18, PR20, PR23; the Q1 hard constraint and the build sequence verified unchanged per Q5.
 
 **Status:** Adopted. Cross-references: D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22, D-SUBSTRATE-AGNOSTIC-CONTROL-PLANE-AND-INCUBATION-ENTRY-RECORDED-2026-08-22, D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22.
+
+## 2026-08-23 — D-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW-AUTHORED-2026-08-23
+
+**Decision:** The ATRF scoping session ran as scoped (`governance`, documents only) and produced its
+one deliverable: `operations/agent-circles-2026-08/2026-08-23-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md`
+— **FOR MENTOR REVIEW, NOT FINAL; no GS-ATRF question is resolved by it; the scope is adopted only
+after the mentor's feedback returns and the founder finalises it.** Every item in the session
+prompt's inherited-inputs register (items 1–12, all sub-clauses) is explicitly dispositioned — in
+scope, out of scope with named destination, or deferred with named condition — with per-item
+readiness assessed differentially per the anti-overcorrection discipline; a 20-question proposed
+mentor question set (Groups A–G) with internal sequencing and gates; boundary dispositions stated as
+proposals (the §2.13 null-cycle owner proposed to the standing-runner design session; the S6
+reordering redirect; the six-items item-6 two-half split).
+
+**Reasoning:** The session's "post-validation-run, do not open early" gate was re-derived discharged
+(`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`; M5's release; concurrent-arc R5 "now
+legitimately open"), and the sequencing election (ATRF scoping opened before the standing-runner
+design session, against the 2026-08-09 five-step order's listing) is recorded as deliberate and
+Q5-compatible (parallel tracks), not drift. Three re-derivation findings shaped the document rather
+than being inherited from the prompt's snapshot: **(1)** the GS-ATRF-4 live-surface caution is
+RESOLVED — the founder-walked production write happened 2026-08-19
+(`D-GSATRF4-EPISTEMIC-STATUS-LIVE-2026-08-19`; static `project-context.json` v1.4.0 re-verified
+first-hand this session); **(2)** the concurrent-arc R5 entry's bundled task "execute the S6
+reordering decision as ruled" rests on a ruling that does not exist (verified against
+`friction-primary-hypothesis.md`, the R1 acceptance, and the priority index) — reported with a
+proposed redirect to the standing-runner track, for the mentor to confirm; **(3)** two line-citation
+drifts corrected rather than inherited (`assessStructuralNovelty` :222→:241; `targetCircle`
+:104→:108-109). **Founder election at open (AskUserQuestion), recorded in the deliverable §4.2:**
+the R5 bundle folds into the scoping document — the two R6 migrations' scoping rides the ATRF
+session's proposed scope; the S6-reordering premise finding is reported, not silently absorbed.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-23-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md` — NEW; the deliverable
+- `operations/handoffs/founder/2026-08-23-ATRF-scoping-session-CLOSE.md` — NEW; session close
+- `operations/handoffs/founder/2026-08-23-ATRF-scoping-session-NEXT-SESSION-PROMPT.md` — one-line SPENT marker added (the file was authored by the predecessor session and deliberately left uncommitted to ride this session's commit, per its author's cross-session handoff)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag,
+credential, migration, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Verification method:** every present-tense mechanism fact in the deliverable carries a `file:line`
+or record citation verified this session (25 code anchors; the register's statuses re-derived from
+primary sources). Then a three-agent independent adversarial review pass per the session prompt's
+requirement (proportionate to the engine-evolution precedent): code-anchored claims 24/25 verified,
+1 minor drift (kathekon-engagement `:266`→`:270`), 0 refuted; record-anchored claims 23/23 verified,
+0 refuted, 2 precision notes; register-completeness/compliance CLEAN on all four dimensions with 2
+LOW findings. **All findings folded before this entry was written** — including the one two
+reviewers found convergently: the deliverable now surfaces the Q2 ruling's own opening line ("Two
+frameworks, two orthogonal axes") rather than silently resolving the source's internal tension in
+the deferred direction.
+
+**Rollback path:** `git rm` the two new files and revert the prompt's marker line + this entry
+(each self-contained; nothing else references the deliverable yet; documents only, nothing deploys).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+head -5 operations/agent-circles-2026-08/2026-08-23-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md
+```
+Expected: the FOR-MENTOR-REVIEW status header ("This scoping is not adopted until the mentor's
+feedback returns…").
+
+**Open questions:** the deliverable's §7 carries six (the discriminating-signature problem; the
+floor-pattern diagnosis; null-vs-two-record comparison semantics; item-5 granularity economics; the
+boulesis mechanism's post-Q3-d home; the S4 extension's column set) — none owned by this session;
+all are the eventual ATRF session's or its mentor's. Next step: the founder relays the deliverable
+to the mentor; the ATRF session's scope is finalised on the feedback's return.
+
+**Reflect finding (PR21):** the session's mid-flight reflect turn surfaced one process note worth
+keeping — the one defect the author caught in its own document post-draft (a section-number typo)
+was exactly the local-coherence-vs-source-accuracy class the independent reviewers exist for, and
+the reviewers then caught five more precision items the author had already read past; the
+re-derivation discipline (three stale premises caught before they entered the document) paid for
+itself a third consecutive session in this stream.
+
+**Rules served:** PR17 (the one founder decision put live at open, not deferred to a hand-off),
+PR18, PR19 (not formally engaged — no live-surface code — but the review-pass discipline applied as
+the prompt required), PR20 (both 2026-08-19 amendments, applied to every mechanism fact and
+carry-forward target), PR21, PR23 (memories consulted: `primary-data-beats-secondary-characterisation`,
+`shared-flag-dark-is-per-flag-not-per-feature`, `method-before-purpose-test-drift`). Weights
+BLOCKED; the Q1 hard constraint untouched; the P0 0h hold stands (founder's 2026-08-22 direction:
+all current tasks before any 0h assessment).
+
+**Status:** Adopted (as a record; the scoping itself is FOR MENTOR REVIEW, not adopted).
+Cross-references: `D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`,
+`D-GSATRF4-RULED-APPLIED-2026-08-19`, `D-GSATRF4-EPISTEMIC-STATUS-LIVE-2026-08-19`,
+`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`, `D-MENTOR-PRIORITISED-SEQUENCE-ADOPTED-2026-08-09`,
+`D-MENTOR-SIX-STOIC-ITEMS-AND-GSATRF-ANSWERS-RECORDED-2026-08-09`,
+`operations/handoffs/founder/2026-08-23-ATRF-scoping-session-NEXT-SESSION-PROMPT.md` (spent).
+
+## 2026-08-23 — D-MENTOR-ATRF-SCOPE-FEEDBACK-ADOPTED-FINALISED-2026-08-23
+
+**Decision:** The mentor's response to the ATRF scoping document (relayed by the founder 2026-08-23,
+`inbox/Mentor ATRF scope response.rtf`) is recorded verbatim
+(`operations/agent-circles-2026-08/2026-08-23-mentor-response-atrf-scoping-verbatim.md` — verbatim
+wins, transcribed programmatically), adopted on the founder's "proceed" direction, and executed
+documents-only: **the scope is confirmed as presented with six named adjustments, all applied** —
+(1) Group A internally resequenced A1→A3→A2→A4, with Q-A2's credence half held until Q-A3 resolves;
+(2) Q-C2 split into Q-C2a (content, for ruling) and Q-C2b (the discriminating signature — named
+successor design work, NOT put for ruling); (3) Q-A1 gains the uniform-across-proposition-types
+requirement; (4) Q-C1 gains the passive-vs-triggering receipt requirement (any receiving write its
+own founder-walked step); (5) Q-A4 must explicitly address the null-vs-value two-record comparison
+semantics (resolve, or name home + condition); (6) the post-task accuracy design must carry a named
+forward pointer to the hegemonikon-drift-and-melete session (per-cycle accuracy readings as variance
+raw material). All three boundary proposals CONFIRMED (Q-G1 §2.13 → standing-runner; Q-G2 the
+S6-reordering redirect — the premise finding endorsed as avoiding *"a false synkatathesis"*; Q-G3
+item 6's split, with the clarification folded as adjustment 6), and every §3 exclusion confirmed.
+**By its own words the response rules no GS-ATRF question and licenses no build** — *"The session's
+rulings follow when the founder finalises the scope and opens the session formally"* — and the
+founder's direction discharged the finalisation half.
+
+**Executed:**
+- The scoping document gains a dated header note + **§10 (Mentor feedback returned; scope
+  FINALISED)** applying all six adjustments, recording the confirmations, and naming the
+  standing-runner design session's three new named inputs (the sufficiency content as §2.13 input;
+  the S6-reordering decision + friction-channel shape constraint; F-Q43 explicit) for that session's
+  opening prompt; §10 relocated after §9 for section order; a dated closer note added. Originals
+  preserved throughout.
+- **The finalised question set is issued:**
+  `operations/agent-circles-2026-08/2026-08-23-ATRF-QUESTIONS-FOR-RULING.md` — sixteen questions in
+  the ruled order, each self-contained (PR20; facts verified this session at HEAD `6dcbe09`), with
+  Q-C2b and the signature problem named as successor work, Q-E2 carried as answered by the feedback,
+  and Group G recorded as confirmed rather than re-put.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-23-mentor-response-atrf-scoping-verbatim.md` — NEW; the response, verbatim + execution notes
+- `operations/agent-circles-2026-08/2026-08-23-ATRF-QUESTIONS-FOR-RULING.md` — NEW; the finalised question set
+- `operations/agent-circles-2026-08/2026-08-23-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md` — dated header note; §10; dated closer note
+- `operations/handoffs/founder/2026-08-23-ATRF-scoping-session-CLOSE.md` — Addendum (this fold + the updated commit block)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag,
+credential, migration, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the two new files; revert the scoping document's three dated additions
+and the close's Addendum (each self-contained; originals preserved in place).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "For ruling" operations/agent-circles-2026-08/2026-08-23-ATRF-QUESTIONS-FOR-RULING.md
+```
+Expected: 16.
+
+**Open questions:** none new. The sixteen questions await the mentor's rulings; the founder relays
+`2026-08-23-ATRF-QUESTIONS-FOR-RULING.md` when they elect. The standing-runner design session's
+opening prompt, when authored, carries its three new named inputs from §10.
+
+**Rules served:** PR18, PR20 (both amendments — same-day verification; the relay re-check duty
+stated on the FOR-RULING document itself), PR23. Weights BLOCKED; the Q1 hard constraint untouched;
+the P0 0h hold stands.
+
+**Status:** Adopted (the feedback and its execution; the sixteen questions themselves remain open
+until the mentor rules). Cross-references:
+`D-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW-AUTHORED-2026-08-23`,
+`operations/agent-circles-2026-08/2026-08-23-mentor-response-atrf-scoping-verbatim.md`,
+`operations/agent-circles-2026-08/2026-08-23-ATRF-QUESTIONS-FOR-RULING.md`.
+
+## 2026-08-23 — D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23
+
+**Decision:** The mentor's rulings on all sixteen ATRF questions (relayed by the founder 2026-08-23,
+labelled "RULING RESPONSE — REQUEST 2") are adopted as binding, recorded verbatim
+(`operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md` —
+verbatim wins), and executed documents-only. **The four GS-ATRF questions are now all resolved or
+fully routed:** **Q-A1** one framework, two orthogonal axes (entry `{provenance, credence}`, uniform
+in form, per-proposition-type honest constraints) — **the Evaluative Engine Epistemic Status Scoping
+Session is UN-GATED**; **Q-A3** GS-ATRF-4's `unknown` closes §(c-bis) directly, no GS-ATRF-1
+amendment (same claim, not a shared label); **Q-A2** provenance assigned/checked at the generation
+step by the runner, disclosed on the proposal shape; **credence assignment is outside the ATRF's
+scope — home: the Evaluative Engine session**; **Q-A4** null-plus-flag, `manifest.md:269` untouched,
+the null-vs-value comparison semantics defined, the disclosure-flag wording given; **Q-B1** the
+GS-ATRF-2 shape confirmed as the migration's scope, **the `target_circle` column ELECTED** (a design
+constraint — auditability of a persisted `high`), basis-copy durability with the build session, C15
+closure binding; **Q-B2** conditional bundling — and since **Q-D1 elected the PRE-GENERATION STEP**
+(no heuristic-CHECK widening; the boulesis mechanism produces a normative-gap signal that orients
+generation; the normative-candidate distinction confirmed), the operative branch is: the three
+blast-radius columns + the S4 watching-table extension ride ONE founder-walked migration window;
+**Q-C1** the return path's named components (agent actor post-execution; direct credentialed POST;
+schema = loop_id + provenance + examination content + refuse-to-attest; a NEW harness endpoint;
+persisted to the watching table immediately on receipt; receipt triggers the write only — that write
+its own founder-walked 0c-ii step at build time); **Q-C2a** the three-question examination content
+under M5's confirmed directives; **Q-C2b's home: the standing-runner design session** (Q4.3
+precedent + F-Q43 explicitly carried — that session's named-input list grows to four); **Q-C3** the
+refuse-to-attest branch REQUIRED as a named schema field (the signal carries the examination record,
+never a justice verdict; the floor pattern stays undiagnosed, honoured under both readings);
+**Q-C4** the signal's provenance statuses ruled; **Q-E1** the generative-process examination is a
+DISTINCT examination category — NOT a fourth ATRF element, `manifest.md` NOT amended; home: the Sage
+Calling engine's diagnostic apparatus; upstream of the ATRF; sequential composition with Q-C2a and
+Q-D1; **Q-F1** the four-virtue pre-task structure with the synkatathesis + premeditatio members, the
+post-task kathekon-vs-katorthoma reading deferring-with-absence-disclosed, the hegemonikon forward
+pointer's exact wording given; **Q-F2** the oikeiosis extension metric per-candidate (on the
+confirmed `target_circle` election; `gap_ref` fallback; C16); **Q-F3** the agent-profile composing
+primitives with evidence floors, provenance statuses, required refuse-to-attest branches, C17 + M-4
+binding, and the reused-vs-paralleled machinery ruled per primitive (composition implementation to
+the build session); **Q-F4** the capacity axis OUTSIDE the profile — held in the examination
+document, status unchanged. **No build, migration, flag, credential, or schema is licensed by any
+ruling** — their own words.
+
+**Executed (documents only):** the verbatim record (NEW); ANSWERED banner on
+`2026-08-23-ATRF-QUESTIONS-FOR-RULING.md`; `gs-atrf-corrections.md` §(c-bis) and §(d) marked
+RESOLVED by dated notes (Q-A3/Q-A4; Q-C3); `gs-atrf-2-shape.md` dated update (`target_circle`
+elected; null-plus-flag + flag wording; one migration window per Q-B2's operative branch);
+`S3-boulesis-generation-mechanism-scope.md` Q3-d marked RULED (pre-generation step);
+`2026-08-23-evaluative-engine-epistemic-status-scoping-NEXT-SESSION-PROMPT.md` gate marked
+DISCHARGED with the two new named inputs (the Q-A2 credence home; the Q-A1 entry-structure model) —
+**that prompt is now pasteable**; the close gains Addendum 2. Originals preserved at every site.
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; production untouched).
+AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the verbatim file; revert the six dated additions (each self-contained).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "RESOLVED 2026-08-23" operations/primal-substrate-2026-08/gs-atrf-corrections.md
+```
+Expected: 2.
+
+**Open questions:** none new. What the rulings hand forward: the ONE bundled migration window (three
+blast-radius columns + `target_circle` + S4 extension — future founder-walked 0c-ii); the NEW
+completion-signal endpoint + its receiving write (future build, own founder-walked step); the
+pre-generation-step boulesis design; the Sage Calling generative-process extension; the
+agent-profile composition build; Q-C2b at the standing-runner design session. Each through its own
+gates — founder election → PR19 → founder-walked 0c-ii where live. The O-C design scope document's
+rulings ("REQUEST 1") are relayed separately and executed on arrival.
+
+**Rules served:** PR18, PR20, PR23. Weights BLOCKED; the Q1 hard constraint untouched (the
+completion signal and pre-generation step are proposal/report surfaces, never execution); the P0 0h
+hold stands.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-ATRF-SCOPE-FEEDBACK-ADOPTED-FINALISED-2026-08-23`,
+`D-ATRF-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW-AUTHORED-2026-08-23`,
+`D-GSATRF4-RULED-APPLIED-2026-08-19`, `D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`.
+
+## 2026-08-23 — D-MENTOR-RULINGS-OC-GATE2-ADOPTED-GATE3-LICENSED-2026-08-23
+
+**Decision:** The mentor's rulings on the O-C per-consumer-rendering Gate-2 scope document (relayed
+by the founder 2026-08-23, labelled "RULING RESPONSE — REQUEST 1") are adopted as binding, recorded
+verbatim (`operations/agent-circles-2026-08/2026-08-23-mentor-rulings-oc-gate2-verbatim.md` —
+verbatim wins), and executed documents-only. All five Gate-2 questions ruled: **Q1** Gate 3's agenda
+order is (c) → (d) → (a)/(b)/(e) — (c) first as *"the condition of possibility for the others"*;
+(a)/(b)/(e) on existing architectural material alone, absence-of-evidence named rather than filled
+by inference. **Q2** yes — L-5's "disclose the posture, don't presume the access" discipline is the
+confirmed dimension-(c) generalisation candidate (its premise strengthened by the L-5 execution the
+relay-time drift note surfaced), with Gate 3's two starting design questions given (the
+examined-not-observed delivery classification; the divergence case). **Q3** B/R-6 and O-C's question
+are genuinely distinct (founder vs practitioner; loop report vs consult rendering; post-run vs
+real-time); the practitioner-audience question IS in scope for Gate 3; inherited constraint — no
+rendering of divergence may presume it can characterise the practitioner's interior state from a
+transport-level signal. **Q4** the nine-candidate classification is NOT re-sequenced — it remains
+R8's gating task; Gate 3 designs dimension (d) from the one verified instance's class, names the
+eight unclassified cases as a known gap, and degrades gracefully under uncertain attribution.
+**Q5** the generalisability caveat is carried; Gate 3 places the ruled single sentence at every
+point where §6 data is cited. **GATE 3 (the O-C design session) IS LICENSED TO OPEN on founder
+election**, under the five rulings as its opening agenda and every §5 constraint inherited verbatim.
+**Not licensed:** any build, flag, or schema change; `SUBSTRATE_LAYER3_ENABLED` stays unset — Gate 3
+produces a design document for its own ruling, nothing more. The mentor's preliminary observation
+also commends the 2026-08-23 relay-time drift note as *"exactly what PR20 requires."*
+
+**Executed (documents only):** the verbatim record (NEW); ANSWERED banner on
+`2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md`; the concurrent-arc
+plan's O-C block updated by dated note (Gate 3 licensed on election; R8 verified unmoved per Q4 — no
+R8 edit needed); the ATRF-session close gains Addendum 3 with the consolidated commit block.
+Originals preserved at every site.
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; production untouched).
+AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the verbatim file; revert the two dated additions and the close addendum
+(each self-contained).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "ANSWERED 2026-08-23" operations/agent-circles-2026-08/2026-08-16-SCOPE-DOCUMENT-oc-per-consumer-rendering-design-FOR-RULING.md
+```
+Expected: 1.
+
+**Open questions:** none new. **Zero mentor ruling requests are now outstanding** — both REQUEST 1
+and REQUEST 2 are ruled, adopted, and executed. Founder-electable next sessions, each fully
+unblocked: the O-C Gate-3 design session (this entry); the Evaluative Engine Epistemic Status
+Scoping Session (its gated prompt discharged at the ATRF rulings); the standing-runner design
+session (four named inputs waiting). None self-starts.
+
+**Rules served:** PR18, PR20 (the relay-time drift note the ruling commends was this discipline
+working), PR23. Weights BLOCKED; the Q1 hard constraint untouched; the P0 0h hold stands.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`,
+`D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`,
+`D-CONCURRENT-ARC-OC-SCOPING-SESSION-GATE2-2026-08-16`,
+`D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`.

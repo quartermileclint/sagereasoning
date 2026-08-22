@@ -216,7 +216,13 @@ is the natural home, founder may re-slot; the verbatim record governs details:**
   generalisability caveat), grounded against the §6 report's real data (delivery-classification
   split, guardrail-rejection data, the B7 cross-endpoint mechanism verified first-hand against
   the run log). **Awaiting mentor ruling — Gate 3 (the design session) does not open until
-  that ruling clears.** **The cross-gate this ruling introduced, restated: R8 (standing-runner
+  that ruling clears.** *(Dated update 2026-08-23: that ruling has cleared —
+  `D-MENTOR-RULINGS-OC-GATE2-ADOPTED-GATE3-LICENSED-2026-08-23`, verbatim at
+  `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-oc-gate2-verbatim.md`. All five
+  questions ruled; **Gate 3 is licensed to open on founder election**, its opening agenda the five
+  rulings in the (c) → (d) → (a)/(b)/(e) order, all §5 constraints inherited verbatim; the
+  nine-candidate classification stays R8's gate per Q4; `SUBSTRATE_LAYER3_ENABLED` stays unset and
+  activation is not licensed — Gate 3 produces a design document for its own ruling, nothing more.)* **The cross-gate this ruling introduced, restated: R8 (standing-runner
   design, below) now waits on THIS Gate 2 having been produced — done — not on Gate 3 or its
   ruling; R8's own prerequisite is therefore now satisfied** (see R8's own entry).
 - **Not adopted / out of reach, recorded so no session self-starts them:** F-c (human mentor

@@ -36,6 +36,19 @@ proposes no code, sets no flag, and answers none of the design questions it name
 
 ---
 
+> **✅ ANSWERED 2026-08-23 — all five questions RULED; Gate 3 licensed conditionally.** Verbatim
+> record, which wins over this document and every summary:
+> `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-oc-gate2-verbatim.md`
+> (`D-MENTOR-RULINGS-OC-GATE2-ADOPTED-GATE3-LICENSED-2026-08-23`). Headlines: Q1 agenda order
+> (c) → (d) → (a)/(b)/(e), with (a)/(b)/(e) on existing architectural material only; Q2 yes — L-5's
+> discipline is the confirmed generalisation candidate; Q3 B/R-6 and O-C are genuinely distinct, the
+> practitioner-audience question IS in scope, with the transport-level honest-limit constraint
+> inherited; Q4 the nine-candidate classification stays R8's gate — Gate 3 designs from the one
+> verified instance's class and degrades gracefully; Q5 the caveat is carried by this document, with
+> the ruled one-sentence form at every point of citation in Gate 3's design document. **Gate 3 opens
+> on founder election** under the five rulings as its agenda; every §5 constraint inherited
+> verbatim; `SUBSTRATE_LAYER3_ENABLED` stays unset — activation is not licensed.
+
 ## 1. The question this document answers
 
 Not "what should an agent-calibrated rendering contain" — that is Gate 3's question, and Gate 3
@@ -318,3 +331,20 @@ the inherited constraints in §5. This document self-starts nothing — no build
 flag.
 
 *End of scope document. Status: FOR RULING.*
+
+---
+
+## Dated relay-time verification note (2026-08-23; PR20 amendment — added by the relaying session, not part of the 2026-08-16 document)
+
+Re-checked before relay, per PR20's timestamp-check-at-relay requirement. **Still true:**
+`SUBSTRATE_LAYER3_ENABLED` has no activation entry in the decision log and the three Layer-3 files
+(`layer3-service.ts`, `layer3-prose.ts`, `/api/substrate/layer3/route.ts`) are untouched since
+drafting (git-verified) — the dormant claim holds; the four relational-context fields remain absent
+from `website/src` (grep clean); the guardrail-rejection data source (`idea_loop_candidates`) is
+schema-unchanged. **Two drifts, both benign, neither changing what Q1–Q5 ask:** (1) §6's "Reflect
+Q1–Q6 wording — unchanged" is stale — `question-bank.ts` was recalibrated at `9bfd69e` (2026-08-17,
+*"R2 Spec 3: reflect Q1-Q6 agent recalibration (D/L-5, Ruling Set D)"*): the L-5 execution track §8
+lists as separately slotted has since RUN, which strengthens Q2's premise (the disclosure discipline
+is now executed on the reflect surface, not merely ruled). (2) §6's B7 row says "running since cycle
+6" — the bounded validation run closed at 20 cycles on 2026-08-16; the row describes the run period,
+now ended. Everything else in the document stands as drafted.
