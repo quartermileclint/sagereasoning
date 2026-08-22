@@ -24050,3 +24050,56 @@ npx tsx --env-file=.env.local src/lib/__tests__/r20a-invocation-guard.test.ts # 
 **Rules served:** PR18, PR20 (the Q1 ruling is itself a PR20-class correction, mentor-named), PR23.
 
 **Status:** Adopted. Cross-references: D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22, D-SUBSTRATE-AGNOSTIC-CONTROL-PLANE-AND-INCUBATION-ENTRY-RECORDED-2026-08-22, D-GSATRF4-RULED-APPLIED-2026-08-19, D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16.
+
+## 2026-08-22 — D-C1-AGENT-HOLD-OBSERVATIONS-SWEEP-ACTIVATION-LIVE-2026-08-22
+
+**Decision:** The `agent_hold_observations` retention sweep — built dark at `fa5b932` (2026-08-17)
+and given its `vercel.json` cron entry this session (`5cdf4b9`, item 3 of the mechanical-items prompt)
+— is now activated in production. `SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED=true` set in Vercel
+Production (founder-walked); redeployed; live smoke confirmed: `{"ok": true, "ran_at":
+"2026-08-22T08:19:37.829Z", "flag_enabled": true, "deleted": {"agent_hold_observations": 0},
+"errors": []}`. This closes the PR24 retention-parity debt for `agent_hold_observations` entirely
+(the table has declared `retain_until` since its 2026-07-12 migration; this is the first live
+enforcement).
+
+**Reasoning:** The founder elected activation this session (over leaving the cron dark for a later
+R4 batch) since the flag is independent of the R4 trust-surface-flag ordering concerns and the
+table is currently empty, so activation deletes nothing today — it only closes the debt going
+forward. Zero-deleted on first fire is the honest, expected result (the table is at most five weeks
+old; nothing is yet past its 90-day `retain_until`).
+
+**Files touched:** None this entry — the flag lives in Vercel env config, not the repo. The code
+(`website/src/lib/agent-hold-observations-store.ts`, `website/src/app/api/cron/agent-hold-observations-
+retention-sweep/{route,handler}.ts`) and the cron entry (`website/vercel.json`) were already
+committed at `5cdf4b9`.
+
+**Risk classification:** Critical under 0d-ii (deployment-configuration change — an env-flag
+activation of a live data-deletion path on production). AC7 engaged and discharged (the founder ran
+the Vercel env-var set, the redeploy, and the smoke; the AI guided and verified the response shape,
+performed no live op). PR6 engaged (this table stores S11 false-hold observation instrument data,
+not a distress/R20a surface — the founder-walked live-op step still applies per PR6's broader
+"deployment-configuration change" scope, not per any R20a-specific rule).
+
+**Rollback path:** Unset `SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED` in Vercel + redeploy — the sweep
+reverts to its byte-identical dark state (`{flag_enabled: false}`, no DB work), test-asserted at
+build time (`agent-hold-observations retention sweep battery`, 26/0). The `vercel.json` cron entry
+may stay in place independently — an unset flag makes every daily invocation a genuine no-op.
+
+**Verification step (founder-performable):**
+```
+curl -s https://www.sagereasoning.com/api/cron/agent-hold-observations-retention-sweep \
+  -H "Authorization: Bearer <CRON_SECRET>" | python3 -m json.tool
+```
+Expected: `flag_enabled: true`, honest `deleted` counts (0 until rows genuinely age past
+`retain_until`).
+
+**Open questions:** None. The sweep's own disclosed operational tension (an active false-hold
+observation window vs the sweep purging server-copy rows past 90 days, with the operator report's
+JSONL buffer able to re-insert a swept row) is named in the code's own header, not a new open item.
+
+**Rules served:** R17c, PR6, PR17 (founder-walked, not a one-line hand-off — the env-var set,
+redeploy, and smoke were each named and confirmed live), PR24.
+
+**Status:** Adopted. Cross-references: `5cdf4b9` (the committed cron entry + comment corrections),
+`D-C1-OBSERVABILITY-RETENTION-SWEEP-ACTIVATION-LIVE-2026-08-12` (the sibling precedent this activation
+follows), `operations/handoffs/founder/2026-08-22-item3-activation-and-item4-rls-walk-NEXT-SESSION-PROMPT.md`.
