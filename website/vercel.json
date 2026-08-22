@@ -20,6 +20,10 @@
     {
       "path": "/api/cron/observability-retention-sweep",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/agent-hold-observations-retention-sweep",
+      "schedule": "0 8 * * *"
     }
   ]
 }

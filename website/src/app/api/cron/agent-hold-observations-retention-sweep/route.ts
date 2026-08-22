@@ -34,9 +34,14 @@
  * The handler logic + its testable dependency seam live in ./handler.ts, because
  * a Next.js route.ts may export ONLY method handlers + route-segment config.
  *
- * NO vercel.json cron entry ships with this build, and the flag is NOT set.
- * Scheduling + activation is a deployment-configuration change and is its own
- * founder-walked step (R4).
+ * UPDATED 2026-08-22 (mechanical item 3, PR19-corrected): a vercel.json cron
+ * entry now ships (0 8 * * *, daily) — the earlier "no cron entry ships"
+ * claim in this comment is now stale and is corrected here rather than left
+ * to mislead. The FLAG remains UNSET, so the cron firing does no DB work
+ * (honest { flag_enabled: false } 200 every day until activated). Flag
+ * activation (SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED=true in Vercel) is
+ * the remaining deployment-configuration step and is its own founder-walked
+ * step (R4).
  *
  * ONE ACTIVATION CONSTRAINT WORTH CARRYING, because it is not obvious: this
  * sweep and an ACTIVE false-hold observation window are in tension by design.

@@ -306,12 +306,20 @@ export function composeDistressSubject(
  * `detectDistressTwoStage(...)` call on this rather than calling it
  * unconditionally.
  *
- * ⚠ SCOPE: applied to the three routes wired THIS session (mentor-appendix,
- * mentor-profile, founder/hub). The seventeen routes wired in the PRIOR
- * gap-closure session share this same defect and are NOT touched here — they
- * are files this session did not build and has not fully re-verified, so
- * fixing them is left as a named carried finding rather than an in-session
- * edit. See the perimeter-completion decision-log entry.
+ * SCOPE (updated 2026-08-22 — the paragraph below was stale): originally
+ * applied only to the three routes wired in the perimeter-completion session
+ * (mentor-appendix, mentor-profile, founder/hub), with the remaining routes
+ * left as a named carried finding. That carried finding is now CLOSED: the
+ * 2026-08-22 mechanical-item-1 pass (commit bbd89d1, PR19-clean) extended the
+ * gate to every remaining consumer route — 29 gated call sites across those
+ * 22 files (32 across all 25 consumer routes total, counting the 3 wired in
+ * the perimeter-completion session; PR19-corrected — an earlier draft of this
+ * paragraph said 25, conflating the call-site count with the consumer-route
+ * count). As of bbd89d1, EVERY route consuming this module gates its
+ * classifier call on hasScreenableSubject; the per-route wiring battery
+ * (src/lib/__tests__/r20a-gap-closure-route-wiring.test.ts) asserts the gate
+ * structurally on all of them, block by block — re-derive the count from that
+ * battery's ROUTE_WIRING table, not from this comment.
  */
 export function hasScreenableSubject(subject: string): boolean {
   return subject.trim().length > 0

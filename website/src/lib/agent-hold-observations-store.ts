@@ -30,8 +30,11 @@
  * DARK: gated by SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED, its OWN flag — never a
  * reuse of SUBSTRATE_TRUST_CORE_SWEEP_ENABLED, which is LIVE in production and would
  * have made this delete rows the moment it deployed (the standing
- * `shared-flag-dark-is-per-flag-not-per-feature` lesson). No flag is set this session
- * and no vercel.json cron entry ships with this build; scheduling is R4.
+ * `shared-flag-dark-is-per-flag-not-per-feature` lesson). The flag remains
+ * unset. A vercel.json cron entry NOW ships (added 2026-08-22, mechanical
+ * item 3) — see ../app/api/cron/agent-hold-observations-retention-sweep/
+ * route.ts's header, PR19-corrected there — but the unset flag makes every
+ * daily invocation a no-op until activation, its own founder-walked step (R4).
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 

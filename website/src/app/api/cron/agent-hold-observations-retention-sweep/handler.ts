@@ -17,8 +17,13 @@
  * corrected in the same commit — that table deliberately has no `retain_until` by
  * binding mentor ruling #24/Q9 ("silent expiry is prohibited").
  *
- * DARK: no flag is set and NO vercel.json cron entry ships with this build.
- * Scheduling and activation are R4, each its own founder-walked step.
+ * DARK: no flag is set (SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED unset ⇒
+ * every daily invocation reports { flag_enabled: false } and does no DB
+ * work). UPDATED 2026-08-22 (PR19-corrected): a vercel.json cron entry now
+ * ships and schedules this route daily — the earlier "no cron entry ships"
+ * claim was stale the moment this session's vercel.json edit landed; see
+ * ./route.ts's header for the fuller correction. Flag activation remains its
+ * own founder-walked step (R4).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import {
