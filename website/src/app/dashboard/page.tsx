@@ -138,17 +138,18 @@ export default function DashboardPage() {
       }
       setUser(user)
 
-      const [evalsRes, baselineRes] = await Promise.all([
-        supabase
-          .from('action_evaluations_v3')
-          .select('id, action, context, relationships, emotional_state, within_prohairesis, outside_prohairesis, is_kathekon, kathekon_quality, katorthoma_proximity, passions_detected, false_judgements, causal_stage_affected, virtue_domains_engaged, ruling_faculty_state, improvement_path, oikeiosis_context, philosophical_reflection, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(20),
+      const [evalsJson, baselineRes] = await Promise.all([
+        // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+        // row 19: this was previously a direct browser query against
+        // action_evaluations_v3 via the anon-key client, relying on the
+        // table's owner SELECT policy. /api/action-evaluations does the
+        // identical query server-side with a server-verified user id.
+        authFetch('/api/action-evaluations?limit=20').then(r => r.json()),
         authFetch('/api/baseline').then(r => r.json()),
       ])
 
-      if (evalsRes.data) setEvaluations(evalsRes.data)
+      const evals: V3ActionEvaluation[] | undefined = evalsJson?.evaluations
+      if (evals) setEvaluations(evals)
       setBaselineStatus(baselineRes)
       setLoading(false)
 
@@ -159,7 +160,7 @@ export default function DashboardPage() {
       // and no evaluations would never have their earned milestones recorded.
       // Fire-and-forget with its own catch: load() has no error boundary, and an
       // unhandled rejection here would strand the page on "Loading your profile".
-      if (!evalsRes.data || evalsRes.data.length === 0) {
+      if (!evals || evals.length === 0) {
         authFetch('/api/milestones', { method: 'POST' }).catch(() => {})
       }
 

@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
-
-// Use client-side supabase with user's auth token for RLS
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Proximity level ranking for comparison
 const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
@@ -63,13 +59,17 @@ export async function GET(request: NextRequest) {
   const startDate = new Date(year, mon - 1, 1).toISOString()
   const endDate = new Date(year, mon, 1).toISOString() // first day of next month
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: request.headers.get('Authorization') || '',
-      },
-    },
-  })
+  // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+  // rows 19–21: this used to be a user-JWT-forwarded anon client, relying on
+  // action_evaluations_v3/reflections/journal_entries's owner SELECT
+  // policies for scoping. `userId` is already server-verified above
+  // (`requireAuth`) and every query below already carries an explicit
+  // `.eq('user_id', userId)`, so the owner policies were never load-bearing
+  // for correctness here — only for permission. Switching to the
+  // service-role client removes that dependency; the query logic and
+  // response shape are unchanged. Closes the last consumer standing between
+  // these three tables and a future RLS lockdown (not this session's job).
+  const supabase = supabaseAdmin
 
   // Fetch action evaluations (V3), reflections, and journal entries for the month in parallel
   const [actionsRes, reflectionsRes, journalRes] = await Promise.all([

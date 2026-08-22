@@ -267,3 +267,14 @@ async function main() {
 }
 
 main().catch((e) => { console.error(e); process.exit(1) })
+
+// Isolates this file's module scope for `tsc --noEmit` (a whole-project
+// check): without this, its top-level `const url`/`anon`/`service`/etc. and
+// helper function names collide with any OTHER plain script in scripts/
+// declaring the same names, since a script with no top-level import/export
+// is treated as global scope. Found 2026-08-23 when a new sibling script
+// (class-b-rls-bypass-proof.ts) collided with this file — practice-family-
+// rls-bypass-proof.ts already carries this same `export {}` fix; this file
+// predated that fix and is corrected to match, closing the gap at the root
+// rather than leaving one of two now-three siblings unprotected.
+export {}

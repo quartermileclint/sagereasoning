@@ -102,16 +102,22 @@ export default function JournalPage() {
         setStorageMode(savedMode)
         await loadProgress(user.id, savedMode)
       } else {
-        // Check if they have any cloud entries (returning user)
-        const { count } = await supabase
-          .from('journal_entries')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
+        // Check if they have any cloud entries (returning user).
+        // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+        // row 20: this was a direct browser count query against
+        // journal_entries via the anon-key client, relying on the owner
+        // SELECT policy. The existing GET /api/journal (no `day` param)
+        // already returns `completed_days` for exactly this purpose — no new
+        // route needed, just routing through the one that already exists.
+        const progressJson = await authFetch('/api/journal').then(r => r.json())
+        const count: number = progressJson?.completed_days ?? 0
 
-        if (count && count > 0) {
+        if (count > 0) {
           setStorageMode('cloud')
           localStorage.setItem(`journal_storage_${user.id}`, 'cloud')
-          await loadProgress(user.id, 'cloud')
+          // Reuse the entries already fetched above rather than calling
+          // loadProgress (which would fetch /api/journal a second time).
+          applyCloudProgress(progressJson?.entries ?? [])
         } else {
           // Check local storage
           const localEntries = getLocalEntries(user.id)
@@ -150,6 +156,15 @@ export default function JournalPage() {
     setCurrentDay(days.length > 0 ? Math.max(...days) + 1 : 1)
   }
 
+  // Shared by both loadProgress and the returning-user check below, so the
+  // latter can reuse its already-fetched entries instead of fetching twice.
+  function applyCloudProgress(entries: Array<{ day_number: number }>) {
+    const days = entries.map(d => d.day_number)
+    setCompletedDays(days)
+    const nextDay = days.length > 0 ? Math.max(...days) + 1 : 1
+    setCurrentDay(Math.min(nextDay, TOTAL_JOURNAL_DAYS))
+  }
+
   // ─── Cloud progress loader ───
   async function loadProgress(userId: string, mode: StorageMode) {
     if (mode === 'local') {
@@ -157,18 +172,13 @@ export default function JournalPage() {
       return
     }
 
-    const { data } = await supabase
-      .from('journal_entries')
-      .select('day_number, created_at')
-      .eq('user_id', userId)
-      .order('day_number', { ascending: true })
-
-    if (data) {
-      const days = data.map(d => d.day_number)
-      setCompletedDays(days)
-      const nextDay = days.length > 0 ? Math.max(...days) + 1 : 1
-      setCurrentDay(Math.min(nextDay, TOTAL_JOURNAL_DAYS))
-    }
+    // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+    // row 20: this was a direct browser query against journal_entries via
+    // the anon-key client, relying on the owner SELECT policy. GET
+    // /api/journal (no `day`) already returns `entries` with `day_number` for
+    // exactly this purpose — no new route needed.
+    const json = await authFetch('/api/journal').then(r => r.json())
+    applyCloudProgress(json?.entries ?? [])
   }
 
   // ─── Storage setup choice ───
@@ -245,12 +255,15 @@ export default function JournalPage() {
       const entry = entries.find(e => e.day === day)
       setPastEntry(entry?.text || null)
     } else {
-      const { data } = await supabase
-        .from('journal_entries')
-        .select('reflection_text')
-        .eq('user_id', user.id)
-        .eq('day_number', day)
-        .single()
+      // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+      // row 20: this was a direct browser query against journal_entries via
+      // the anon-key client, relying on the owner SELECT policy. GET
+      // /api/journal?day=N already returns the full row (including
+      // reflection_text) for exactly this purpose — a 404 (no entry for that
+      // day) is the same "nothing to show" outcome the old `.single()` null
+      // data produced, not an error to surface.
+      const res = await authFetch(`/api/journal?day=${day}`)
+      const data = res.ok ? await res.json() : null
 
       setPastEntry(data?.reflection_text === '__local__' ? '(Stored locally on the device where you wrote it)' : data?.reflection_text || null)
     }

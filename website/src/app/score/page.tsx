@@ -182,33 +182,42 @@ export default function ScoreActionPage() {
 
       // Save result
       if (user && storageMode === 'cloud') {
-        // Column names must match `website/supabase-v3-migration.sql` exactly.
-        // Until 2026-07-26 this wrote `action_description` and `evaluated_by`,
-        // neither of which exists on this table — so EVERY save since 2026-03-21
-        // failed with PGRST204 and the error was discarded (see below).
-        // `schema-drift.test.ts` now pins every key here against the migration.
-        const { error } = await supabase.from('action_evaluations_v3').insert({
-          user_id: user.id,
-          action,
-          context,
-          relationships,
-          emotional_state: emotionalState,
-          katorthoma_proximity: evalResult.virtue_quality.katorthoma_proximity,
-          is_kathekon: evalResult.kathekon_assessment.is_kathekon,
-          kathekon_quality: evalResult.kathekon_assessment.quality,
-          passions_detected: evalResult.passion_diagnosis.passions_detected,
-          false_judgements: evalResult.passion_diagnosis.false_judgements,
-          ruling_faculty_state: evalResult.virtue_quality.ruling_faculty_state,
-          philosophical_reflection: evalResult.philosophical_reflection,
-          improvement_path: evalResult.improvement_path,
-          // Named follow-up from Phase 0 (2026-07-26): oikeiosis_context is
-          // computed by the engine and already rendered above (line ~605),
-          // but was never included in the insert — oikeiosis_community and
-          // oikeiosis_humanity were consequently unearnable regardless of
-          // practice. The column already exists (supabase-v3-migration.sql);
-          // this is additive only.
-          oikeiosis_context: evalResult.oikeiosis_context,
+        // Route-change-first for the RLS-vs-route-enforcement survey's Class B
+        // row 19: this used to insert into action_evaluations_v3 directly from
+        // the browser via the anon-key client, relying on the table's owner
+        // INSERT policy. /api/score/save does the identical insert server-side
+        // (user_id from the verified session, never the request body). Column
+        // names must still match `website/supabase-v3-migration.sql` exactly —
+        // until 2026-07-26 this wrote `action_description` and `evaluated_by`,
+        // neither of which exists on this table, so EVERY save since
+        // 2026-03-21 failed silently. `action-evaluations-v3-schema-drift.test.ts`
+        // now pins every key sent here against the migration (tracking
+        // /api/score/save/route.ts, the write path's new location).
+        const saveRes = await authFetch('/api/score/save', {
+          method: 'POST',
+          body: JSON.stringify({
+            action,
+            context,
+            relationships,
+            emotional_state: emotionalState,
+            katorthoma_proximity: evalResult.virtue_quality.katorthoma_proximity,
+            is_kathekon: evalResult.kathekon_assessment.is_kathekon,
+            kathekon_quality: evalResult.kathekon_assessment.quality,
+            passions_detected: evalResult.passion_diagnosis.passions_detected,
+            false_judgements: evalResult.passion_diagnosis.false_judgements,
+            ruling_faculty_state: evalResult.virtue_quality.ruling_faculty_state,
+            philosophical_reflection: evalResult.philosophical_reflection,
+            improvement_path: evalResult.improvement_path,
+            // Named follow-up from Phase 0 (2026-07-26): oikeiosis_context is
+            // computed by the engine and already rendered above (line ~605),
+            // but was never included in the insert — oikeiosis_community and
+            // oikeiosis_humanity were consequently unearnable regardless of
+            // practice. The column already exists (supabase-v3-migration.sql);
+            // this is additive only.
+            oikeiosis_context: evalResult.oikeiosis_context,
+          }),
         })
+        const error = saveRes.ok ? null : await saveRes.json().catch(() => ({ error: 'unknown' }))
         if (error) {
           // Fail LOUD. This branch did not exist before 2026-07-26: the insert
           // error was discarded and `saved` simply stayed false, so a total

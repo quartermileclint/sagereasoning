@@ -24264,3 +24264,169 @@ not a gap).
 close), `operations/handoffs/founder/2026-08-22-item3-activation-and-item4-rls-walk-NEXT-SESSION-PROMPT.md`
 (this session's opening prompt), `operations/handoffs/founder/2026-08-23-post-item4-housekeeping-NEXT-SESSION-PROMPT.md`
 (successor). Weights BLOCKED; the P0 0h hold stands.
+
+## 2026-08-23 — D-CLASS-B-ROUTE-CHANGE-BUILT-TEST-VERIFIED-2026-08-23
+
+**Decision:** The Class B route-change design work is BUILT, TEST-VERIFIED, and PR19-reviewed —
+`action_evaluations_v3`, `journal_entries`, and `reflections` no longer have ANY client-side
+(browser anon-key) consumer, closing the last dependency the survey named before these three
+tables could be safely RLS-locked-down. This is a `code-standard` repo-only session (no production
+change, no live SQL of any kind, no founder-walked step) — the AI ran this session fully
+autonomously per explicit founder direction (a deliberate ~5-hour unattended run), stopping short
+of the actual RLS `§APPLY` (which is its own `code-critical` founder-walked session, per the item-4
+precedent, and is not pre-approved by this entry).
+
+**What was built:**
+- **NEW `GET /api/action-evaluations`** (`website/src/app/api/action-evaluations/route.ts`) —
+  replaces `src/app/dashboard/page.tsx`'s direct browser SELECT against `action_evaluations_v3`.
+  Server-verified `userId` via `requireAuth`; `supabaseAdmin` (service-role) client; `RATE_LIMITS.analytics`
+  (a read, matching the `/api/milestones`/`/api/mentor/practice-status` precedent, not the measured
+  `scoring` bucket); bounded `limit` param (clamped to 100).
+- **NEW `POST /api/score/save`** (`website/src/app/api/score/save/route.ts`) — replaces
+  `src/app/score/page.tsx`'s direct browser INSERT into `action_evaluations_v3` (the "cloud storage"
+  save path). `user_id` taken ONLY from the verified session, never from the request body (the
+  load-bearing integrity property for this route); `RATE_LIMITS.scoring` (shares `/api/score`'s own
+  cadence — this fires once per cloud-mode evaluation, the same frequency as the evaluation call
+  itself). **Disclosed, not introduced, by this route:** no R20a distress check runs here —
+  `/api/score` (the caller, one step earlier in the same client flow) screens only the `action`
+  field; `context`/`relationships`/`emotional_state` are screened by nothing, in this route or its
+  caller. Verified via `git diff` against the pre-refactor commit that the CLIENT'S OLD direct
+  insert had ZERO distress screening on any field — net exposure is unchanged, arguably improved
+  (this route is at least rate-limited and auth-gated). Named as its own follow-up, not silently
+  absorbed into this refactor (an engine-adjacent route, `/api/score`, is deliberately not touched
+  outside a dedicated session).
+- **MODIFIED `src/app/api/practice-calendar/route.ts`** — switched from a user-JWT-forwarded anon
+  Supabase client to the shared `supabaseAdmin` service-role client. This ONE route is the shared
+  SELECT consumer for all three Class B tables (`action_evaluations_v3`, `reflections`,
+  `journal_entries`); `userId` was already server-verified via `requireAuth` and every query already
+  carried an explicit `.eq('user_id', userId)`, so the owner RLS policies were never load-bearing
+  for CORRECTNESS here — only for the (now-removed) PERMISSION dependency. Query logic and response
+  shape byte-identical (confirmed via the existing `practice-calendar-api-contract.test.ts`, unedited
+  and still green).
+- **MODIFIED `src/app/journal/page.tsx`** — its three direct browser reads against `journal_entries`
+  (returning-user count, day-list progress, past-entry text) now route through the EXISTING
+  `GET /api/journal` (no new route needed — its two response shapes, `{entries, completed_days, ...}`
+  and the single-row `?day=N` shape, already covered everything the page needed). A redundant
+  double-fetch in the returning-user cold-load path was avoided by reusing the already-fetched
+  entries rather than calling the shared `loadProgress` helper a second time.
+- **MODIFIED `src/app/dashboard/page.tsx`** and **`src/app/score/page.tsx`** — point at the two new
+  routes via `authFetch` instead of a direct Supabase client call. Zero remaining `.from(...)` calls
+  against any of the three tables in either file (re-confirmed by an independent PR19 review, not
+  just the builder's own grep).
+- **NEW test files**: `src/app/api/action-evaluations/__tests__/route.test.ts`,
+  `src/app/api/score/save/__tests__/route.test.ts`,
+  `src/app/api/practice-calendar/__tests__/service-role-boundary.test.ts` — source-parsing boundary
+  tests (this project's established convention for routes with no DB connection at test time),
+  asserting service-role usage, `requireAuth` enforcement, user-id integrity (never read from the
+  request body), rate-limit bucket choice, and non-vacuity.
+- **MODIFIED `src/lib/__tests__/action-evaluations-v3-schema-drift.test.ts`** — the write-path marker
+  this test source-parses moved from `src/app/score/page.tsx` to the new
+  `src/app/api/score/save/route.ts` (the `.from(...)`/`.insert({` calls are now on separate lines, not
+  adjacent — the marker-finding logic was adjusted for a bounded-window search rather than assuming
+  adjacency); new WRITE-6/READ-2 checks pin that the two client pages no longer touch the table at
+  all, so a future regression re-adding a direct client query is caught rather than this test having
+  nothing left to say about it.
+- **MODIFIED `src/lib/__tests__/milestone-check-data.test.ts`** — INV-3's ordering-property marker
+  (milestones checked only AFTER the evaluation save, never before) moved from
+  `from('action_evaluations_v3').insert` to `authFetch('/api/score/save'`, tracking the same
+  property at its new location.
+- **AUTHORED, NOT APPLIED**: `website/supabase-class-b-rls-lockdown-migration.sql` (the actual
+  RLS lockdown for all three tables, following the item-4/`impulse_entries` pattern exactly — a
+  future `code-critical` founder-walked session's job) and
+  `website/scripts/class-b-rls-bypass-proof.ts` (its behavioural-proof harness; TEST-verified this
+  session in BOTH default and `--legit` mode for all three tables — see below). `action_evaluations_v3`
+  gains a NEW service-role policy (none existed before, the same asymmetry `mentor_baseline_appendix`
+  had at item 4); `journal_entries` already had one; `reflections` currently has NEITHER a
+  service-role policy NOR (after this migration) its owner SELECT policy — confirmed by re-reading
+  `supabase-open-insert-policies-lockdown-migration.sql`'s own §1/§INVERSE, not assumed — so this
+  migration adds one for consistency with every other locked-down table in this codebase.
+
+**PR19 independent adversarial review — four dimensions, ALL completed fully (no account-limit
+outage this time).** (1) **Consumer-completeness** — COMPLETE for all three tables, zero remaining
+client-side consumer, no undisclosed view/RPC with a different privilege path; one NIT (three stray
+`.fuse_hidden` editor-swap files in `journal`/`score`/`dashboard` carrying pre-refactor code —
+inert, gitignored, but cleaned up during the fold rather than left as false-positive noise for a
+future audit). (2) **Security review of the two new routes** — SOUND, zero findings (auth-bypass,
+user-id integrity, injection/type-confusion, rate-limit bucket choice, error-leak, and the GET
+`limit` bound all checked and clean). (3) **Test-coverage adequacy** — SOUND_WITH_GAPS, two real
+findings, BOTH FIXED AT THE ROOT before this entry: (a) MEDIUM — the two new route tests proved
+`supabaseAdmin` is imported but not that the query is actually chained off it (a mutation swapping
+in a different client while leaving `supabaseAdmin` imported-but-unused would have stayed green) —
+fixed with a positive usage-binding assertion, matching the stronger pattern the practice-calendar
+test already used; (b) MEDIUM-HIGH, the most significant finding — `score/save`'s own schema-guard
+regex was colon-only, silently skipping the THREE shorthand-syntax insert keys
+(`action`, `katorthoma_proximity`, `is_kathekon`) from its own per-key column check, including
+`action`, the exact NOT-NULL column whose omission caused the 2026-07-26 outage this whole test
+class exists to prevent — net protection had survived only because the correctly-written sibling
+`action-evaluations-v3-schema-drift.test.ts` (comma-or-colon) also covers the same file; fixed by
+matching that pattern, with a new non-vacuity pin proving the three shorthand keys are now actually
+captured. (4) **Claims-vs-code / R20a disclosure fidelity** — all 5 points CONFIRMED-ACCURATE,
+including via a direct `git diff` against the pre-refactor commit (not inferred) confirming the
+"client's old insert had zero distress screening" claim, and confirming both new routes' response
+keys (`evaluations`, `completed_days`) genuinely match what the client pages read.
+
+**Live TEST verification (all via a local dev server against the TEST Supabase project;
+`npx tsc --noEmit` and `npm run build` both clean throughout):**
+- `POST /api/score/save` → real insert, confirmed via service-key read, confirmed visible through
+  `GET /api/action-evaluations`, confirmed surfaced correctly on `GET /api/practice-calendar` for the
+  same day (stamp-earning proximity, activity list) — cleaned up after each check.
+- `GET /api/journal` (both the no-param and `?day=N` shapes) round-tripped against a real POST
+  `/api/journal` entry — confirmed the exact field names (`completed_days`, `entries[].day_number`,
+  `reflection_text`) the refactored `journal/page.tsx` now depends on.
+- `GET /api/practice-calendar` confirmed unaffected by the service-role switch (byte-identical
+  response shape, re-verified against the existing field-contract test).
+- The NEW `class-b-rls-bypass-proof.ts` harness itself was run end-to-end against TEST in both
+  default mode (all three tables: the two insert-mode tables show bypass OPEN — expected §PRE state
+  — and `reflections`' select-only mode correctly shows the owner SELECT still PERMITTED, which is
+  NOT a data leak, just the redundant grant this migration will remove) and `--legit` mode (every
+  configured real-route check PASSED for all three tables, including cleanup).
+- **A real, unrelated tsc defect was found and fixed at the root, not worked around:** the new
+  harness script collided with `impulse-rls-bypass-proof.ts` under a whole-project `tsc --noEmit`
+  (`Cannot redeclare block-scoped variable 'url'` etc.) — both files lack the `export {}` idiom
+  `practice-family-rls-bypass-proof.ts` already carries to isolate its module scope from sibling
+  scripts with the same top-level variable names. Confirmed via `git stash`-equivalent isolation
+  that this was a PRE-EXISTING latent gap in `impulse-rls-bypass-proof.ts` (unmasked only because no
+  other non-module script shared its names until this session), not something newly introduced;
+  fixed both files with the same one-line idiom rather than route around it.
+
+**Files touched:** the eleven files named above (five new, six modified — `impulse-rls-bypass-proof.ts`'s
+`export {}` fix counted separately from the Class B build proper, since it fixes a pre-existing,
+unrelated latent defect this session's own new file happened to expose).
+
+**Risk classification:** `code-standard` under 0d-ii — new module/route files not yet wired to any
+live production surface, plus edits to existing user-facing functionality that remove an RLS
+*dependency* without changing any RLS *policy* (the policies themselves are untouched by this
+entry — only the migration authoring them is, and it is explicitly not applied). AC7 not engaged (no
+live production op of any kind — no Supabase SQL, no Vercel flag, no credential mint/revoke; the AI
+performed the entire session, including the PR19 review, without any founder-walked step). PR19
+discharged (four-dimension review, all completed fully, two real findings both fixed at the root).
+PR6 considered, not engaged (no distress-classifier code changed; the one disclosed R20a gap is
+pre-existing and named, not newly created).
+
+**Rollback path:** every code change in this entry is `git revert`-able independently — no schema,
+flag, or credential was touched, and the authored-but-unapplied migration has zero live effect until
+a future session runs it. If reverted, the three tables' RLS-dependency status returns to exactly
+where the survey left it (Class B, `needs-route-change-first`).
+
+**Concurrent-session note (PR23-adjacent — not a rule violation, a live coordination record):**
+this session ran alongside `sagereasoning-28` (the engine-evolution-examination stream, working in
+`operations/agent-circles-2026-08/` + this same decision log) and `sagereasoning-40`. Confirmed via
+direct message exchange before writing this entry that `sagereasoning-28`'s work touches no
+`website/src` file this session touched, and that `decision-log.md` was clean at HEAD (`ea53a1e`)
+immediately before this append — coordinated to avoid a near-simultaneous full-file edit clobbering
+either session's addition.
+
+**Carried:** the actual RLS `§APPLY` for these three tables (its own `code-critical` founder-walked
+session, per the item-4 precedent — walk `supabase-class-b-rls-lockdown-migration.sql` +
+`scripts/class-b-rls-bypass-proof.ts` on TEST then production, exactly as item 4 did for the ten
+practice-family tables); mechanical item 6 (housekeeping, still open); the remaining survey backlog
+(Class A rows 13–18, row 28, the disclosed non-`security_invoker` view gap) — none of it touched or
+advanced by this session.
+
+**Rules served:** R17, PR6 (considered, not engaged), PR17 (not engaged — no founder-walked step
+this session), PR19, PR20, PR23.
+
+**Status:** Adopted. Cross-references: `operations/primal-substrate-2026-08/2026-08-16-rls-route-enforcement-survey.md`,
+`D-CONCURRENT-ARC-C4-PRACTICE-FAMILY-RLS-FIX-LIVE-2026-08-22` (the pattern this build follows and the
+migration this build's own migration is authored to mirror exactly). Weights BLOCKED; the P0 0h hold
+stands.

@@ -472,11 +472,16 @@ assert(
     ),
     'INV-2b: the INV-2 regex genuinely fails on a call with no terminal .catch (non-vacuity)'
   )
-  const insertIdx = scoreSrc.indexOf("from('action_evaluations_v3').insert")
+  // Updated 2026-08-23 (Class B route-change session): the evaluation save
+  // moved from a direct `from('action_evaluations_v3').insert` in this file
+  // to a server route, `POST /api/score/save` — the safety property this pin
+  // checks (milestones are only checked AFTER the evaluation is actually
+  // saved) is unchanged, so the marker now tracks the new save call instead.
+  const insertIdx = scoreSrc.indexOf("authFetch('/api/score/save'")
   const postIdx = scoreSrc.indexOf("authFetch('/api/milestones'")
   assert(
     insertIdx > 0 && postIdx > insertIdx,
-    'INV-3: the POST is placed after the action_evaluations_v3 insert, not before'
+    'INV-3: the POST is placed after the action_evaluations_v3 save, not before'
   )
 
   const dashSrc = read('app/dashboard/page.tsx')
