@@ -116,3 +116,17 @@ session should carry in. Record it as such.
   nothing here reopens it early.
 
 **M-5 is untouched by this and remains P0.**
+
+---
+
+## Dated correction (mentor ruling 2026-08-21, applied 2026-08-22; NOT part of the original ruling)
+
+**The phrase "the generation-step scoping session" in Q(b), Q(c), and the ruled cross-reference note
+above is a stale-mechanism-fact error, corrected by dated ruling**
+(`2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`, Q1 — verbatim wins):
+the generation-step scoping session was ruled 2026-08-09 and is **closed**; the mentor's own words —
+the ruling *"used the phrase 'generation-step scoping session' when it should have said 'ATRF
+scoping session'"*, an error *"of the class the PR20 amendment was designed to catch."* **GS-ATRF-4,
+§(c-bis), and the blast-radius vocabulary question all land at the ATRF scoping session**
+(post-first-build-gate, distinct from the closed generation-step session). The verbatim text above is
+preserved unaltered; this dated correction governs its reading.

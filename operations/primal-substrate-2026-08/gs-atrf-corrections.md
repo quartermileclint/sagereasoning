@@ -288,7 +288,13 @@ verbatim wins). Three findings, none of which this note anticipated correctly in
    mentor's own reasoning: *"folding GS-ATRF-4 into GS-ATRF-1 would mean amending a ruled answer, and
    ruled answers are not amended by the addition of new open questions. They are amended by a ruling
    that specifically re-opens and revises them."* §(c-bis) is a **named carry-forward to the
-   generation-step scoping session**, examined there alongside GS-ATRF-1 through 4 — **not resolved by
+   ~~generation-step scoping session~~ ATRF scoping session** *(dated correction 2026-08-22, per the
+   mentor's 2026-08-21 Q1 ruling —
+   `operations/agent-circles-2026-08/2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`,
+   verbatim wins: the GS-ATRF-4 ruling's "generation-step scoping session" phrase was a
+   stale-mechanism-fact error; that session is closed, ruled 2026-08-09; GS-ATRF-4, §(c-bis), and the
+   blast-radius vocabulary all land at the ATRF scoping session)*, examined there alongside
+   GS-ATRF-1 through 4 — **not resolved by
    this ruling**. The ruled GS-ATRF-4 entry carries its own cross-reference back to §(c-bis) for that
    purpose.
 2. **APPLIED same session:** `website/src/data/project-context.json` v1.3.0 → v1.4.0 (the ruled

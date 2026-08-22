@@ -267,6 +267,58 @@ future session is not itself opening that session early, per the ruling's own co
 
 ---
 
+## Dated amendment — the credence vocabulary's attribution corrected (mentor ruling 2026-08-21, applied 2026-08-22)
+
+> **RULED 2026-08-21** (`2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`,
+> Q2 — verbatim wins), correcting the attribution at the conjectural entry type's "Epistemic status"
+> passage above (which reads *"per the four-state vocabulary named in GS-ATRF-4 ...:
+> true/established, probably true, unknown, probably false"*). The mentor's correction, verbatim:
+>
+> *"the credence vocabulary (established, probably true, unknown, probably false) is a companion
+> framework to GS-ATRF-4's provenance vocabulary, developed in the brainstorm lineage of 2026-08-19
+> through 2026-08-21. It is not contained in GS-ATRF-4's ruled text. Both vocabularies are carried
+> as pre-ruling design thinking pending the ATRF scoping session, where the question of whether
+> they constitute one framework with two axes or two separate frameworks will be examined and
+> ruled."*
+>
+> The ATRF scoping session carries the named input, per the same ruling: are the provenance and
+> credence vocabularies one framework with two orthogonal axes, or two frameworks? If one framework,
+> what is the complete epistemic status entry structure? If two, what governs their relationship?
+> The preserved exploratory text above is not rewritten; this dated amendment governs its reading.
+
+## Incubation entry recorded on mentor instruction (dated addition, 2026-08-21, recorded 2026-08-22)
+
+> **Provenance and status:** added on the mentor's 2026-08-21 instruction
+> (`2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md` — verbatim wins),
+> which directed this entry into this document. It is the first recorded *instance* using the
+> incubation entry-type shape above — a mentor-directed addition under this document's own
+> reclassified status (pre-ruling design thinking; not an alteration of the preserved
+> exploratory-session text above; not an endorsement of the entry type, which remains unexamined;
+> not a schema, route, or persistence — this entry lives in this document only). Nothing about the
+> full-taxonomy build advances because of it.
+
+- **Entry type:** incubation.
+- **Problem statement:** How does the Prigogine dissipative structure framework apply differently to
+  quantum execution substrates than to conventional silicon, and what does that difference imply for
+  the control plane's behaviour at bifurcation points?
+- **Examination history:** Initial examination 2026-08-21. Landauer's principle confirmed that
+  conventional computing is already thermodynamically coupled to its environment. The Prigogine
+  parallel carries genuine technical load for conventional systems. Quantum systems maintain
+  coherence in ways conventional systems cannot — the bifurcation point dynamics will differ. The
+  structural account of how they differ is not yet available and is not needed at P0.
+- **Incubation flag:** true.
+- **Return condition:** when quantum processing units become an operational consideration for the
+  project — not P0, not P1, probably not P2. The return condition is a phase gate, not a calendar
+  date.
+- **Abandoned flag:** false.
+- **Epistemic status:** unknown — the problem is genuinely open and the current examination has
+  reached its limit at the boundary of what is needed for P0.
+
+*(Companion: the same instruction's substrate-agnostic control plane design principle is recorded at
+the 2026-08-22 engine-evolution examination document, §4.4.)*
+
+---
+
 ## Cross-references
 
 - `operations/agent-circles-2026-08/2026-08-19-mentor-question-puzzle-taxonomy-entry-types-provenance-and-scope-FOR-RULING.md` — the question that led to this reclassification
@@ -276,3 +328,5 @@ future session is not itself opening that session early, per the ruling's own co
 - `manifest.md` — the Consciousness and Continuity Obligation, named-not-answered here per the required revision
 - `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — the ATRF scoping session ("do not open early") and the standing-runner design session (the Q11 sequence's next unopened item, and the carry-forward's redirected destination), both named as where this document's content would eventually be examined
 - `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` — the ruling that redirected the carry-forward away from the closed generation-step session
+- `operations/agent-circles-2026-08/2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md` — the instruction directing the 2026-08-21 incubation entry above (verbatim wins)
+- `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — the engine-evolution examination; §4.4 carries the companion design principle

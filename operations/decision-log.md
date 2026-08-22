@@ -23640,9 +23640,13 @@ in the ruling request before the ruling was given).
 `D-ATRF-AND-CONSCIOUSNESS-CONTINUITY-ADDED-2026-08-09`,
 `D-PROJECT-CONTEXT-ATRF-AND-RULING-UPDATE-APPLIED-2026-08-09` (the precedent this session's SQL idiom
 matches exactly).
-**The Q1 hard constraint is untouched: the loop proposes; it never executes.** The generation-step
+**The Q1 hard constraint is untouched: the loop proposes; it never executes.** ~~The generation-step
 scoping session remains post-first-build-gate and the ATRF scoping session remains post-validation-run,
-*"do not open early."* Weights BLOCKED; the P0 0h hold stands.
+*"do not open early."*~~ **[DATED CORRECTION 2026-08-22, per the mentor's 2026-08-21 Q1 ruling
+(`operations/agent-circles-2026-08/2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`,
+verbatim wins) — the struck sentence carried the GS-ATRF-4 ruling's stale-mechanism-fact error forward;
+the mentor's replacement wording: "to be examined at the ATRF scoping session (post-first-build-gate,
+distinct from the closed generation-step scoping session ruled 2026-08-09)."]** Weights BLOCKED; the P0 0h hold stands.
 
 ---
 
@@ -23976,3 +23980,73 @@ npx tsx --env-file=.env.local src/lib/__tests__/r20a-invocation-guard.test.ts # 
 **Rules served:** PR19 (mandatory, three-batch review, zero findings — a genuine clean result, not skipped), PR20 (the "14 remaining routes" carried count was checked against source and found stale before any fix began, corrected to 22, and item 2's scope was similarly re-derived rather than carried forward unchecked), R18 (n/a — no public-surface claim), AC5 (R20a-perimeter code touched, but the change only narrows an existing gate's trigger condition, never widens or weakens the perimeter itself).
 
 **Status:** Adopted (as a record of the build + review; code remains uncommitted at the time this entry was written, pending the founder's commit decision). Cross-references: `operations/handoffs/founder/2026-08-19-post-taxonomy-stubs-task-menu-NEXT-SESSION-PROMPT.md` (this session's confirmed mechanical-items order, item 1), `website/src/lib/r20a-gap-closure.ts` (the shared `hasScreenableSubject` helper + its own doc comment naming the original 3-route/17-route split this entry corrects).
+
+## 2026-08-22 — D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22
+
+**Decision:** The mentor's 2026-08-20 instruction (*"Examination of deterministic engine evolution"*) is executed: the four candidate directions from the 2026-08-20 brainstorm (extension / boundary revision / precision / spinoff) are examined against the engine architecture and the result recorded as a named, pre-ruling design examination — `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — with the instruction itself captured verbatim in-repo (`2026-08-20-mentor-instruction-engine-evolution-examination-verbatim.md`), after an independent compliance review found the charter had no in-repo record.
+
+**Reasoning:** The instruction asked the examination to find where each direction's structural account is genuinely available rather than to confirm the directions. The examination's named findings: **D1 (generative capacity account) PROBABLY RIGHT** — narrowed twice: generative *products* are already ruled into the evaluative frame (§2.10 phantasia/assent, Q1 ≡ Q4.3) and the doctrinal framework already carries the mode (assent discipline; the eupatheiai via S3/M5; the Sage Calling engine's live generative-act diagnostics), so the genuine gap is a diagnostic-apparatus account of the generative *process*. **D2 (graduated rationality) PROBABLY RIGHT** — the principle half is standing doctrine (the Moral Community Boundary, near-verbatim), the mechanism half divides cleanly by layer (capacity-agnostic pipeline / S5-ruled profile-analogue need / already-graduated evidence machinery), and the pre-Stage-1 framing is revised: capacity is a fourth, unencoded axis orthogonal to concern-scope, practice-progress, and evidence-confidence. **D3 (epistemic status) WELL-GROUNDED** as classification-and-disclosure precision — the per-output inventory is produced in the document; three disclosed and two quiet confidence-exceeds-basis sites named; the gating variant explicitly excluded from the finding; plus a genuine records finding: two different four-state vocabularies (ruled provenance vs pre-ruling credence) circulate under the one name "epistemic status framework," with the taxonomy design doc mis-attributing the credence set to the GS-ATRF-4 ruling (adversarially verified — the ruling file contains no occurrence of it). **D4 (spinoff) CONJECTURAL** — held probably-true; only components are the three pre-ruling entry types; the shared-assent-faculty analysis cuts against "genuinely different engine" at the framework level; server-side there is no generation engine to spin off from (generation is runner-owned by ruling), so any spinoff is a second *examination* apparatus. Routing (§7) sends D1/D2 components to the ATRF scoping session, the generation-step §2.13 owner, and the standing-runner design session per their already-ruled/recorded destinations; D3's main body is routed *outside* the Q11 sequence — flagged in-document as a deviation from the instruction's letter requiring ratification; D4 is held in the document per the instruction's conjectural rule. Ten named open questions include the vocabulary discrepancy, the session-identity ambiguity (generation-step-scoping vs ATRF session — two same-day 2026-08-19 rulings point opposite ways), and the item-5/§6-report-acceptance cross-record tension.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — NEW; the examination (pre-ruling, binds nothing)
+- `operations/agent-circles-2026-08/2026-08-20-mentor-instruction-engine-evolution-examination-verbatim.md` — NEW; the charter, verbatim
+- `operations/handoffs/founder/2026-08-22-engine-evolution-examination-CLOSE.md` — NEW; session close
+
+**Verification method:** Five parallel structured readers over the engine + governance corpus (file:line citations; 0 errors), then three independent adversarial passes over the document itself: 44 code-anchored claims (43 verified / 1 nit / 0 refuted), 25 record-anchored claims (24 / 1 / 0), and a compliance/epistemic audit whose material findings (missing GS-ATRF-1/2 + Sage Assent map rows; the D3 routing deviation unflagged; three assertoric passages above their basis; the missing charter record; a dangling cross-reference) were all folded before this entry was written. PR19 not formally engaged (no live-surface code change) but its independent-review discipline applied voluntarily; PR20 discipline applied to every mechanism fact and carry-forward target; PR23 memories consulted (`method-before-purpose-test-drift`, `sage-practice-measurement-instrument-reframe`, `primary-data-beats-secondary-characterisation`).
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag, credential, migration, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the three new files (nothing else references them yet); no production or governance surface changes.
+
+**Open questions:** The document's §6 carries ten, none owned by this session; the sharpest three for near-term routing: (1) the generation-step-scoping vs ATRF-session identity ambiguity (worth one clarifying line to the mentor before either opens); (2) the item-5 framing vs `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16` tension (the queued routing act should reconcile, not inherit either); (3) the two-vocabularies question. The taxonomy doc's mis-attribution is named, deliberately not corrected (preserved exploratory text; whoever next touches that document owns it).
+
+**Rules served:** PR15, PR18, PR20 (incl. both 2026-08-19 amendments), PR23; R0 context via the C15/Moral-Community records; the Q1 hard constraint and the taxonomy-unadvanced constraint both verified untouched.
+
+**Status:** Adopted. Cross-references: `D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19`, `D-GSATRF4-RULED-APPLIED-2026-08-19`, `D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`, `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`, `D-EMPTY-SUBJECT-BILLED-CALL-DEFECT-CLOSED-22-ROUTES-PR19-CLEAN`.
+
+## 2026-08-22 — D-SUBSTRATE-AGNOSTIC-CONTROL-PLANE-AND-INCUBATION-ENTRY-RECORDED-2026-08-22
+
+**Decision:** The mentor's 2026-08-21 instruction (substrate-agnostic control plane) is executed as its two directed record additions, both pre-ruling: the named design principle is recorded as §4.4 of the engine-evolution examination document (mentor-stated status "well-grounded" carried as-is, explicitly distinguished from the examination's own D4 CONJECTURAL finding), and the quantum-substrate/bifurcation incubation entry is recorded as a dated addition to the puzzle-taxonomy design document (the first recorded instance using the incubation entry-type shape — a mentor-directed addition under that document's reclassified status, not an alteration of its preserved text and not an endorsement of the unexamined entry type). The instruction itself is captured verbatim at `operations/agent-circles-2026-08/2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md`.
+
+**Reasoning:** Both additions are exactly what the instruction directs, held at exactly the statuses it states; the verbatim capture follows the discipline this session's own compliance review established for the 2026-08-20 charter. Two recording notes, not part of the instruction: the "harness already carries only reasoning-level signals" premise is faithful to the ATRF's *stated design* in `manifest.md` (the ATRF harness is unbuilt); and the "named paper" grounding the principle's second finding has no in-repo record — the 2026-08-21 examination session (Landauer/Prigogine/the paper) has no standalone record, making the verbatim file its first in-repo artifact (the RL-addendum recording precedent).
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md` — NEW; the instruction, verbatim, plus recording notes
+- `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — §4.4 added (dated, provenance-marked); one §5 map row; cross-references
+- `operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` — the dated incubation-entry section added above its Cross-references; two cross-reference lines
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag, credential, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the verbatim file; revert the two documents' dated additions (each is a self-contained section).
+
+**Open questions:** The identity of "the named paper" (founder-held; noted in the verbatim record). The full-taxonomy build remains unscoped and unadvanced; the control-plane scoped question waits on a build scope that does not exist.
+
+**Rules served:** PR18, PR20 (premises timestamp-checked at recording; one marked faithful-to-design-not-to-mechanism), PR23.
+
+**Status:** Adopted. Cross-references: D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22, D-PUZZLE-TAXONOMY-ENTRY-TYPES-RECLASSIFIED-DESIGN-THINKING-2026-08-19.
+
+## 2026-08-22 — D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22
+
+**Decision:** The mentor's five rulings on the engine-evolution examination session's questions (dated 2026-08-21, relayed 2026-08-22) are adopted as binding, recorded verbatim (`operations/agent-circles-2026-08/2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md` — verbatim wins), and executed in full, documents-only: **(Q1)** the generation-step scoping session and the ATRF scoping session are TWO distinct sessions — the GS-ATRF-4 ruling's "generation-step scoping session" cross-reference was a stale-mechanism-fact error (PR20-amendment class), corrected by dated ruling; GS-ATRF-4, §(c-bis), the blast-radius vocabulary, and Direction 3's GS-ATRF half all land at the ATRF scoping session; dated corrections applied to the D-GSATRF4-RULED-APPLIED-2026-08-19 entry (the mentor's replacement wording), the GS-ATRF-4 ruling record, and `gs-atrf-corrections.md` §(e). **(Q2)** the provenance and credence vocabularies are two frameworks on two orthogonal axes, complementary; the taxonomy design document's mis-attribution corrected by dated amendment using the ruling's own wording; the one-framework-or-two structural question recorded as a named ATRF-session input. **(Q3)** Direction 3's out-of-Q11 routing RATIFIED; the future session named: the **Evaluative Engine Epistemic Status Scoping Session** — founder-elected, primary input the examination's per-output inventory, gated on the ATRF session's Q2 ruling. **(Q4)** the hasty-assent identity HOLDS AS DOCTRINE; the operative passion in conjecture-attachment is **agonia at the synkatathesis stage** (not philodoxia); NO new sub-species needed; the ruled diagnostic entry recorded; Direction 1's narrowing mentor-confirmed, with the Sage Calling generative-act diagnostics named as the future Direction-1 scoped question's primary input. **(Q5)** the standing-runner gate is DISCHARGED — the queued routing act (mechanical-items prompt item 5) updated with the ruling's replacement text; the session may open on founder election; the Q2 dependency binds the epistemic-status session only — parallel tracks. Also this entry's scope: the "named paper" behind the substrate-agnostic control-plane principle identified by the founder as **"A digitally controlled silicon quantum processing unit"** and recorded at both sites.
+
+**Reasoning:** All five rulings answer questions this session itself raised; execution is the recording half of the same act, per the verbatim-wins and dated-correction disciplines. The examination document's open questions 1, 4, 7, and 8 are marked RESOLVED with the rulings quoted; its §7 routing now carries the ratification, the named session, and the corrected destinations.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md` — NEW; the five rulings, verbatim + execution notes
+- `operations/agent-circles-2026-08/2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md` — §1.2/§3.1 ruled-status notes; §6.1/.4/.7/.8 resolutions; §7 re-routing + ratification; §4.4 paper identity
+- `operations/agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` — the Q2 dated attribution amendment (ruling wording verbatim)
+- `operations/agent-circles-2026-08/2026-08-19-mentor-ruling-gsatrf4-epistemic-status-verbatim.md` — dated correction section (Q1)
+- `operations/primal-substrate-2026-08/gs-atrf-corrections.md` — §(e) destination corrected by dated note (Q1)
+- `operations/decision-log.md` — dated correction inside D-GSATRF4-RULED-APPLIED-2026-08-19 (the mentor's replacement wording); this entry
+- `operations/handoffs/founder/2026-08-22-mechanical-items-234-and-routing-NEXT-SESSION-PROMPT.md` — item 5 resolved by dated update (Q5 replacement text)
+- `operations/agent-circles-2026-08/2026-08-21-mentor-instruction-substrate-agnostic-control-plane-verbatim.md` — paper identity added to recording note 2
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; no code, schema, flag, credential, or live op; production untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the new verbatim file; revert the dated additions/corrections in the seven amended files (each is a self-contained dated block; the struck originals are preserved in place).
+
+**Open questions:** None new. Remaining open in the examination document: §6 questions 2, 3, 5, 6, 9, 10 (unchanged); the founder's sequencing direction of 2026-08-22 stands — all current tasks complete before any 0h assessment.
+
+**Rules served:** PR18, PR20 (the Q1 ruling is itself a PR20-class correction, mentor-named), PR23.
+
+**Status:** Adopted. Cross-references: D-ENGINE-EVOLUTION-FOUR-DIRECTIONS-EXAMINED-2026-08-22, D-SUBSTRATE-AGNOSTIC-CONTROL-PLANE-AND-INCUBATION-ENTRY-RECORDED-2026-08-22, D-GSATRF4-RULED-APPLIED-2026-08-19, D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16.

@@ -107,7 +107,23 @@ function writing the same table** — grep `SECURITY DEFINER` across `supabase/m
 **Work these three items in order unless a real dependency surfaces** — if item 3 or item 4 turns out to
 need a decision item 2 doesn't, or vice versa, name the dependency explicitly before reordering.
 
-### Item 5 — route the standing-runner gate question to the mentor
+### Item 5 — ~~route the standing-runner gate question to the mentor~~ **RESOLVED BY RULING 2026-08-22 — now a recording act only**
+
+> **DATED UPDATE 2026-08-22, per the mentor's 2026-08-21 Q5 ruling**
+> (`operations/agent-circles-2026-08/2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`,
+> verbatim wins). The engine-evolution examination session surfaced this item's cross-record tension
+> (the gate question framed as un-ruled, while `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`
+> records the §6 report accepted in full) and put it to the mentor, who ruled: **the gate is
+> discharged** — the §6 report needs no further separate mentor review. The routing act's updated
+> text, per the ruling: *"gate confirmed discharged per D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16
+> and concurrent-arc plan. Standing-runner design session is licensed to open. The redirected
+> conjectural-entry-type carry-forward is waiting as a named input. The session may open when the
+> founder elects to open it."* Named condition: the two-vocabulary question (Q2 of the same rulings)
+> gates the Evaluative Engine Epistemic Status Scoping Session, **not** the standing-runner design
+> session — parallel tracks, not sequential. **Nothing remains of this item beyond confirming the
+> above is recorded (it is — in the rulings verbatim file, the examination document §6.7/§6.8/§7,
+> and `D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`). The original text
+> below is preserved for the record and is spent.**
 
 **Not yet done in any session in this stream.** This is a routing act, not a build item: prepare a
 scoped FOR-RULING question (PR20-disciplined — name the specific mechanism facts the ruling will land
