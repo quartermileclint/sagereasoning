@@ -268,12 +268,12 @@ removed in that same commit, exactly as the ruling required.
 
 ---
 
-## 5b. Named bounds — disclosed here, deliberately NOT published
+## 5b. Named bounds — the oikeiosis-only scope of `ruling_faculty_state`
 
-Added 2026-08-23 at the D4-completion commit. These are true limitations of an engine output that
-are recorded in the repo but carry **no public wording**, because adding a public sentence is an
-R18 change requiring founder signature and nothing licenses one here. Naming them in this map is
-the honest alternative to silence.
+Added 2026-08-23 at the D4-completion commit as a bound recorded in-repo with no public wording.
+**Superseded 2026-08-24: the bound is RULED to owe a public scope note**
+(`2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`, adopted as binding). It is no longer
+a deliberately-unpublished bound; it is a pending R18 publication awaiting founder-signed wording.
 
 - **`ruling_faculty_state`'s deliberation reading is oikeiosis-only.** It is drawn solely from the
   oikeiosis mechanism — a cross-circle tension or a `balanced_neither_decisive` Cicero verdict. It
@@ -289,13 +289,37 @@ the honest alternative to silence.
   **two** engaged circles, four sorted control-filter elements and causal evidence spanning
   phantasia→praxis, already reads that exact string under the PRE-fix code.
 
-  **Carried, for the founder:** whether this bound owes a public one-sentence scope note under
-  EE-C2's own reasoning (*"a choice to serve a field whose basis is known to be imprecise without
-  saying so"*) is an EE-C2-shaped question for the mentor, and any wording is R18-gated. Proposed
-  text, unsigned and unpublished: *"`ruling_faculty_state`'s deliberation reading is drawn solely
-  from the oikeiosis mechanism (a cross-circle tension or a balanced Cicero verdict). A snapshot
-  that deliberates only in the control-filter, value-assessment or causal-stage mechanisms reads as
-  not-deliberating."*
+  **RULED 2026-08-24 — the bound owes a public scope note.** The mentor's reasoning: EE-C2 held that
+  the label should disclose what the field actually measures, not what a consumer might assume, and
+  *"the oikeiosis-only bound is that same gap in a different form."* Crucially the two disclosures
+  are **distinct and both owed** — the retired interim label named *a deficiency in how the
+  oikeiosis mechanism counts* deliberation; this note names *the scope of what the mechanism reads
+  at all*, which is **prior**. *"The proxy disclosure does not substitute for the scope note."*
+
+  **Lifetime:** the note **stays until the mechanism's scope changes** — a separate build decision,
+  not a proxy fix. It is not retired by any future D4-style correction.
+
+  **The mentor declined to rule on wording** (they have not seen a draft) and fixed the required
+  content instead — three clauses, the third explicitly flagged as mattering: the reading is drawn
+  from the oikeiosis mechanism only; a snapshot deliberating in the control-filter,
+  value-assessment or causal-stage mechanisms but not in oikeiosis reads as not-deliberating; and
+  **this is a scope constraint on the field, not a deficiency in the snapshot.** The note must not
+  imply the snapshot is incomplete or that the agent failed to deliberate.
+
+  **The 2026-08-23 draft below FAILS that requirement** and is retained only as the superseded
+  record: it carries the first two clauses and omits the third.
+
+  > *superseded draft, not for publication —* "`ruling_faculty_state`'s deliberation reading is
+  > drawn solely from the oikeiosis mechanism (a cross-circle tension or a balanced Cicero verdict).
+  > A snapshot that deliberates only in the control-filter, value-assessment or causal-stage
+  > mechanisms reads as not-deliberating."
+
+  **Carried to its own session**, R18-gated on founder signature:
+  `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`
+  carries revised candidate wording covering all three clauses, for all **three** surfaces —
+  `llms.txt`, `agent-card.json` and `api-docs/page.tsx`. Note the mentor's positional hint
+  (*"adjacent to the interim proxy disclosure"*) does not locate anything on the third surface:
+  api-docs carried the map but never the interim clause.
 
 ---
 

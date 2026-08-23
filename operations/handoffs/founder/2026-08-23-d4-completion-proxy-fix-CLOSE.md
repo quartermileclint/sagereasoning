@@ -103,13 +103,23 @@ at open — no observation window running, so per the 2026-08-15 M1 ruling it di
 
 ## Open questions
 
-- **Does the oikeiosis-only deliberation bound owe a public scope note?** The field's deliberation
-  reading is drawn *solely* from the oikeiosis mechanism, so a snapshot deliberating in the
-  control-filter, value-assessment or causal-stage mechanisms reads as not-deliberating. This is
-  **pre-existing**, not created here, and is **not** what EE-C2's label disclosed. It is now named in
-  the documentation map's new **§5b** with proposed one-sentence wording left **unsigned and
-  unpublished** — adding public wording is R18-gated on your signature, and whether the bound owes a
-  label under EE-C2's own reasoning is a mentor question this session declined to answer for you.
+- ~~**Does the oikeiosis-only deliberation bound owe a public scope note?**~~ **ANSWERED
+  2026-08-24 — YES, ruled and adopted as binding**
+  (`operations/agent-circles-2026-08/2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`).
+  The mentor held it is the same label-vs-mechanism gap EE-C2 addressed, *"in a different form"*,
+  and — the load-bearing distinction — that the two disclosures are **separate and both owed**: the
+  retired interim label named a deficiency in *how* the oikeiosis mechanism counts deliberation; the
+  scope note names *what it reads at all*, which is prior. *"The proxy disclosure does not
+  substitute for the scope note."* The note **stays until the mechanism's scope changes** — a
+  separate build decision, not a proxy fix.
+
+  The mentor declined to rule on wording and fixed the required **content** instead, in three
+  clauses. **The §5b draft written at this close FAILS it**: it carries the first two and omits the
+  third — *"This is a scope constraint on the field, not a deficiency in the snapshot"* — which the
+  mentor explicitly flagged as the one that matters. Revised candidate wording, for all **three**
+  R18 surfaces, is carried in
+  `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`.
+  Publication remains R18-gated on your signature.
 - `computeProximity`'s `!dikaiosyne` branch deliberately keeps the raw legacy proxy. Now pinned by a
   battery assertion that goes red if a later session "tidies" it.
 

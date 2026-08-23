@@ -25246,3 +25246,79 @@ session open — no observation window running, so per the 2026-08-15 M1 ruling 
 `D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
 `operations/agent-circles-2026-08/2026-08-23-D4-completion-proxy-fix-WORK-ITEM.md`,
 `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md`.
+
+---
+
+## 2026-08-24 — D-MENTOR-RULING-OIKEIOSIS-SCOPE-NOTE-ADOPTED-2026-08-24
+
+**Decision:** Adopted as binding the mentor's ruling that `ruling_faculty_state`'s **oikeiosis-only
+deliberation bound owes a public scope note**, recorded the ruling verbatim, and carried the
+publication to its own R18-gated session. **Documents only — no code, no public surface changed, no
+flag, no schema, nothing live.** The scope note itself is NOT published: R18 requires founder-signed
+wording first, and the mentor deliberately did not rule on wording.
+
+**Reasoning:** The D4-completion close (`D-D4-COMPLETION-…-2026-08-23`) left exactly one open
+question and declined to answer it. This entry records the answer.
+
+### The ruling
+
+**Yes, it owes a note.** EE-C2 held that the label should disclose what the field actually measures
+rather than what a consumer might assume, and *"the oikeiosis-only bound is that same gap in a
+different form."*
+
+**The load-bearing distinction, which this session had not drawn:** the two disclosures are
+**separate and both owed**. The retired interim label named *a deficiency in **how** the oikeiosis
+mechanism counts deliberation*; the scope note names *what the mechanism reads **at all***, which is
+**prior**. Verbatim: *"The proxy disclosure does not substitute for the scope note."* The D4-completion
+close had treated the removal as leaving a bound merely *unlabelled*; the ruling is that it left a
+**distinct disclosure obligation** unmet, and that obligation predates the proxy gap entirely.
+
+**Lifetime:** the note **stays until the mechanism's scope changes** — a separate build decision,
+not a proxy fix. No future D4-style correction retires it.
+
+**Content ruled, wording not.** Three clauses required, the third explicitly flagged (*"That last
+clause matters"*): drawn from the oikeiosis mechanism only; a snapshot deliberating in the
+control-filter, value-assessment or causal-stage mechanisms but not in oikeiosis reads as
+not-deliberating; and **this is a scope constraint on the field, not a deficiency in the snapshot** —
+it must not imply the snapshot is incomplete or that the agent failed to deliberate.
+
+**Consequence for our own draft:** the §5b wording written at the D4-completion close **fails the
+ruling** — it carries the first two clauses and omits the third. Recorded as superseded rather than
+quietly revised; revised candidates for all three surfaces are carried in the successor prompt for
+signature.
+
+### Three of the ruling's own present-tense facts had moved (PR20, recorded not absorbed)
+
+1. *"adjacent to the interim proxy disclosure"* no longer locates anything — that paragraph was
+   removed at `f7619d9`, the very commit the ruling anticipates. The note goes **where it was**. And
+   **the third surface never had one**: `api-docs/page.tsx` carried the map but never the interim
+   clause (verified against `f7619d9~1`), so there it attaches to the existing epistemic-status item.
+2. *"alongside or immediately after the epistemic status map sign-off"* — that sign-off already
+   happened; the map shipped to all three surfaces 2026-08-08. The note is therefore a standalone
+   R18 addition to already-published sections, not a rider on a pending wave.
+3. `ruling_faculty_state: deliberate` is not a value the field emits (it emits one of seven prose
+   strings; `deliberate` is a `katorthoma_proximity` value). Shorthand. **The substance is if
+   anything stronger than the example:** the field's actual strings assert deliberation in words —
+   *"ruling faculty deliberating without distortion"*, *"no deliberation; ruling faculty at rest"* —
+   so the gap the ruling identifies sits in the emitted text, not merely in a field name.
+
+**Files touched:** `2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md` (new, verbatim +
+recording notes); `2026-08-23-evaluative-engine-status-documentation-map.md` §5b (bound → RULED,
+draft marked superseded); `2026-08-23-d4-completion-proxy-fix-CLOSE.md` (open question → answered);
+`2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md` (new); this log.
+
+**Risk classification:** Standard under 0d-ii — documents only. AC7 not engaged. PR6 not engaged.
+R18 engaged as the gate on the *successor* session, not on this one.
+
+**Rollback:** `git revert` this commit. The ruling record itself stands as record regardless.
+
+**Open questions:** none new. The single carried item is the publication, R18-gated on founder
+signature, scoped in the successor prompt.
+
+**Rules served:** R18, PR20, PR23, EE-C2.
+
+**Status:** Adopted. Cross-references:
+`D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`,
+`D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
+`operations/agent-circles-2026-08/2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`,
+`operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`.
