@@ -1,7 +1,12 @@
 # WORK ITEM — the D4-completion proxy fix, and the disclosure it retires
 
-**Status: OPEN. Not scheduled. Not licensed.** This file exists to make a removal condition
-*trackable*, not to schedule the work it gates.
+**Status: CLOSED 2026-08-23** — `D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`.
+The proxy is replaced and every surface this file's completion gate enumerates was cleared in the
+same commit. The closure record is at the end of this file; everything above it is preserved
+verbatim as the condition that was actually discharged, not rewritten to match the outcome.
+
+*(Original status, retained: **OPEN. Not scheduled. Not licensed.** This file existed to make a
+removal condition trackable, not to schedule the work it gated.)*
 
 **Created 2026-08-23** on a founder governance-hygiene note raised while reviewing the EE
 Shape-1 R18 sign-off package. The note, in the founder's own framing: the interim disclosure's
@@ -70,6 +75,49 @@ basis, published on a public surface.
 ## Cross-references
 
 - `2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md` — EE-C2, EE-E3 (binding)
-- `2026-08-23-evaluative-engine-status-documentation-map.md` §4 — the disclosure this gates
+- `2026-08-23-evaluative-engine-status-documentation-map.md` — carried the disclosure this gated, in
+  its §4; that section was removed at closure and §5–§8 renumbered, so there is no §4 to point at now
 - `2026-08-23-evaluative-engine-shape1-r18-signoff-package.md` — the publication half
 - `D-ATRF-EE-PRODUCTION-WAVE-BUILT-PR19-FOLDED-2026-08-23`
+
+---
+
+## CLOSURE RECORD — 2026-08-23
+
+**Decision-log entry:** `D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`.
+**Commit:** the one that carries this file's CLOSED status — its hash is recorded in the session
+close (a commit cannot contain its own hash).
+
+### The completion gate, item by item
+
+| # | Surface | Cleared |
+|---|---|---|
+| — | `layer2-mechanisms.ts` — the proxy itself | ✅ the `computeRulingFacultyState` call site now passes `hasGenuineDeliberation(oik)`; `hasGenuineDeliberation`'s own docstring, which recorded the gap, is rewritten in the same edit |
+| 1 | documentation map §4 (the interim-label entry) | ✅ section removed; §5–§8 renumbered to §4–§7; §5's "named, not built (see §4)" bullet — which became false the moment the fix landed — rewritten as a closure note |
+| 2 | `website/public/llms.txt` — the `Interim disclosure — ruling_faculty_state` paragraph | ✅ removed. It **was** live (the Shape-1 R18 publication had shipped), so the check this file asked for was performed rather than assumed |
+| 3 | `website/public/.well-known/agent-card.json` — the clause in `epistemic-status-map/v1` | ✅ clause removed from the extension description; the extension itself stays; JSON re-parses, extension count unchanged at 24 |
+
+### The flag election (the question the build prompt left open)
+
+**No flag.** `ruling_faculty_state` is consequential under EE-B1 on conditions (b), (c) and (d) —
+served on a public surface, carried into the accreditation record, and named in a disclosure — but
+**not on (a)**: nothing floors or determines a verdict from it. Traced first-hand: `/api/guardrail`'s
+`proceed` comes from `katorthoma_proximity`; `guardrail-sandwich` and `philosophical-mode-service`
+read the field for **prose only**; no trust-event deriver, aggregator, or overlay reads it at all.
+The §4 precedent (`SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED`) gated a change that moved verdicts. This
+one does not.
+
+The decisive consideration is this file's own gate. EE-C2 binds the disclosure's removal to the
+commit that fixes the proxy. A flag separates *the commit that fixes it* from *the moment it is
+fixed*, and the disclosure's truth-condition tracks the second. A flag-gated build would therefore
+either publish "fixed" while dark (a false statement, the precise failure this file exists to
+prevent) or defer removal to activation (contradicting "at the same commit… not left to the build
+session to discover"). A flag would buy near-zero risk reduction — nothing gates on the field — at
+the cost of fighting the ruling. Full reasoning in the decision-log entry.
+
+### What was NOT done, deliberately
+
+- `computeProximity`'s `!dikaiosyne` branch still reads the raw legacy proxy. It is the
+  byte-identical pre-§4 path; narrowing it is an unrelated regression. A battery assertion now
+  **pins** that branch and goes red if a later session "tidies" it.
+- No flag, no schema, no migration, no credential, no live op.

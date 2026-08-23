@@ -1561,12 +1561,36 @@ function computeProximityBase(
   return 'deliberate'
 }
 
-/** D4 fix (flag-on): genuine deliberation = a SUBSTANTIVE oikeiosis note — a
- *  cross-circle tension or a balanced Cicero verdict — NOT the "No circles engaged
- *  in this snapshot" filler that the legacy proxy (deliberation_notes.length>0)
- *  counted, which floated an impulsive no-circle praxis action up from reflexive.
- *  Narrow by design: only the proximity computation reads this; ruling_faculty_state
- *  is untouched this session (the broader proxy re-examination is a named follow-up). */
+/** D4: genuine deliberation = a SUBSTANTIVE oikeiosis note — a cross-circle tension
+ *  or a balanced Cicero verdict — NOT the "No circles engaged in this snapshot"
+ *  filler that the legacy proxy (deliberation_notes.length>0) counted, which floated
+ *  an impulsive no-circle praxis action up from reflexive.
+ *
+ *  D4-COMPLETION (2026-08-23): `ruling_faculty_state` reads this too. D4 landed the
+ *  correction on the proximity reading ONLY and left ruling_faculty_state on the older
+ *  proxy — a gap this docstring itself recorded, and which was disclosed on the R18
+ *  surfaces under EE-C2's interim label. The label is removed in the commit that made
+ *  this paragraph true. ONE predicate, TWO readers, deliberately: a sibling function
+ *  would have to test the same two substantive-note sources over the same data, which
+ *  is exactly the "two independently re-derived restatements that can silently drift"
+ *  hazard `hasNaturalRelationshipFactor` (below) was hoisted to avoid.
+ *
+ *  THE DIVERGENCE FROM THE LEGACY PROXY IS EXACTLY ONE INPUT CLASS. `assessOikeiosis`
+ *  pushes a note iff (i) some circle carries a tension, (ii) some circle's Cicero
+ *  verdict is balanced, or (iii) NO circles were engaged — and (i)∨(ii) is precisely
+ *  this predicate. The argument rests on one lemma worth stating rather than leaving
+ *  implicit: EVERY string pushed into `notes` is non-empty, so "a note was pushed" and
+ *  `deliberation_notes.length > 0` are interchangeable. Two of the three pushes are
+ *  fixed literals; the third joins `computeTension` outputs, which are either null
+ *  (never pushed) or carry the literal prefix "Tension between ". That third branch is
+ *  the one a future edit could plausibly break, so it is pinned by a tension-only
+ *  fixture in the battery. So, over any `oik` this module produces:
+ *      deliberation_notes.length > 0  ≡  hasGenuineDeliberation(oik) ∨ relevant_circles.length === 0
+ *  and the ONLY behaviour change is the zero-circle case, where the filler previously
+ *  read as deliberation. Battery: `__tests__/ruling-faculty-deliberation.test.ts`.
+ *
+ *  NOT read by computeProximity's `!dikaiosyne` branch — that is the byte-identical
+ *  pre-§4 legacy path and deliberately keeps the raw proxy. */
 function hasGenuineDeliberation(oik: Oikeiosis): boolean {
   return oik.relevant_circles.some(
     (c) => c.tension !== null || c.cicero_verdict === 'balanced_neither_decisive'
@@ -2926,11 +2950,41 @@ export function applyMechanisms(
     agentCircles
   )
   const proximity = proximityResult.proximity
+  // D4-COMPLETION (2026-08-23) — the deliberation input is the SUBSTANTIVE-note
+  // predicate, not the legacy presence proxy. Unflagged and unconditional by election.
+  //
+  // FLAG-INDEPENDENT, and NOT because of where this call sits (PR19 fold — the
+  // location argument is a non-sequitur: the `oik` this passes is itself computed
+  // WITH the flag, at assessOikeiosis(..., dikaiosyne) above). The real invariant is
+  // that the `dikaiosyne` argument's ONLY effect inside assessOikeiosis is attaching
+  // `obligation_assessment` to each circle; it leaves tension, cicero_verdict,
+  // relevant_circles.length and deliberation_notes untouched. Both the old proxy and
+  // this predicate therefore read flag-invariant data. ANY future flag threaded through
+  // assessOikeiosis that touches those fields breaks this — pinned by
+  // __tests__/ruling-faculty-deliberation.test.ts §5.
+  //
+  // NO VERDICT MOVES. Traced across every consumer in the repo: no consumer turns this
+  // field into a proceed/block verdict, floor, threshold, rank, trust event, cache key
+  // or gate — the guardrail's `proceed` comes from katorthoma_proximity, and
+  // guardrail-sandwich / philosophical-mode read this field for PROSE only. It IS
+  // inside the Ed25519-signed bytes, so signature-derived identifiers (receipt_id,
+  // artifact_ref, trust-event correlation ids) change with it; harmless because no
+  // production path re-derives a signature to compare against a stored one — the
+  // accreditation provenance gate verifies submitted signatures, it does not recompute.
+  //
+  // What changes is one honest string on the zero-circle case, where the engine used to
+  // report a deliberating ruling faculty on the strength of a note reading "No circles
+  // engaged in this snapshot."
+  //
+  // SCOPE BOUND, pre-existing and NOT closed by this fix: the deliberation reading is
+  // drawn solely from the oikeiosis mechanism. A snapshot that deliberates only in the
+  // control-filter, value-assessment or causal-stage mechanisms still reads as
+  // not-deliberating — see the documentation map's named-bounds section.
   const rulingFacultyState = computeRulingFacultyState(
     pd,
     schema.ambiguity_notes.length,
     schema.urgency_indicators.length,
-    oik.deliberation_notes.length > 0
+    hasGenuineDeliberation(oik)
   )
   // Q2 (2026-08-02) — first-circle positive routing. Keyed off the SAME shared
   // `isDikaiosyneEngaged` predicate Q4's narrowing uses inside computeDikaiosyneFloor,

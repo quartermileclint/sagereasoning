@@ -322,13 +322,6 @@ The Ed25519 signature attests the deterministic computation's reproducibility fr
 extraction; it does not attest the extraction's truth. See `does_not_attest`
 (trust-record-payload.ts:52) and the R18 surface disclosures for the full condition.
 
-Interim disclosure — `ruling_faculty_state`. This field's deliberation input is currently a proxy: it
-counts the presence of deliberation notes rather than testing whether any note is substantive, so a
-filler note is counted as deliberation. The correction that fixed this class was deliberately scoped
-to the proximity reading only; `ruling_faculty_state` was left on the older proxy, and its own
-docstring says so. Named here while the proxy stands; this paragraph is removed at the same commit
-that replaces the proxy.
-
 Three disclosed routes where confidence can exceed basis, none closed by this map. First: an
 ARGUED `obligation_assessment: met` removes the dikaiosyne floor — this is by design; the
 argument is the guard, and the floor's removal is conditional on the argument's presence, not a

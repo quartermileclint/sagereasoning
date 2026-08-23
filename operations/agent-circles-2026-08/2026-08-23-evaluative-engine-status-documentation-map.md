@@ -217,46 +217,7 @@ anything in this map.
 
 ---
 
-## 4. The interim label (EE-C2) — `ruling_faculty_state`, and the condition on its own removal
-
-**Ruled:** *"An interim label is owed… Leaving it unlabelled is not neutral; it is a choice to serve
-a field whose basis is known to be imprecise without saying so."*
-
-**The label:**
-
-> **Interim disclosure — `ruling_faculty_state`.** This field's deliberation input is currently a
-> **proxy**: it counts the presence of deliberation notes rather than testing whether any note is
-> substantive, so a filler note (*"No circles engaged in this snapshot."*) is counted as
-> deliberation. The D4 correction that fixed this class was **deliberately scoped to proximity
-> only** — `hasGenuineDeliberation` requires a substantive note and governs the proximity reading;
-> `ruling_faculty_state` was left on the older proxy, and its own docstring says so. The gap between
-> what the field claims and what it measures is known and documented in code. It is named here while
-> the proxy stands.
-
-**Why it rides this map and not the assessment:** the proxy's limitation is an **architectural fact
-about the field's derivation, not a per-consult finding**. It does not vary by consult; it is always
-true while the proxy stands. A per-assessment additive field would restate a constant fact on every
-response.
-
-**REMOVAL CONDITION — named here, in this entry, not only in the decision log (the ruling's own
-requirement):**
-
-> **This entry is removed at the same commit that lands the D4-completion fix and replaces the
-> proxy.** Not before, and not in a later tidying pass. The build scoping for that follow-up inherits
-> this as a named step.
-
-**Tracked as a work item, not only as a condition in this text:**
-`2026-08-23-D4-completion-proxy-fix-WORK-ITEM.md` carries this removal condition as its completion
-gate and enumerates every surface the removing commit must clear. That file exists because a
-removal condition stated only inside the artifact it governs has no owner — the
-lesson-cited-not-tracked pattern.
-
-The D4-completion fix itself is **not** built by this map, is **not** scheduled by it, and keeps its
-own standing as a code item with its own PR19-reviewed build scoping when elected.
-
----
-
-## 5. What Shape 2 changes on the wire, and what it does not
+## 4. What Shape 2 changes on the wire, and what it does not
 
 **Shape 2 is elected** (EE-B2), with Shape 1 as its unconditional prerequisite and **Shape 3
 deferred**. Shape 2's total wire footprint on the engine is **one string**:
@@ -288,11 +249,10 @@ exists.
 
 ---
 
-## 6. What this map deliberately leaves alone
+## 5. What this map deliberately leaves alone
 
 - **§6.9** (inquiry-discipline outputs on the public trust record) — unowned, uninherited, far
   downstream, no session assigned.
-- **The D4-completion proxy fix** — named, not built (see §4).
 - **The EE-A3 credence-field wire option** — explicitly not elected.
 - **`practitionerContext`'s unlabelled defect** and the larger `projectContext` architectural fix —
   both named elsewhere, both deliberately untouched; the latter is mentor-ruled **not to be built
@@ -300,9 +260,46 @@ exists.
 - **The composition question** — whether the per-surface disclosure regimes should one day converge
   on the same entry vocabulary — held as a named open question, unowned, no session proposed.
 
+**Closed since this map was authored** (kept out of the list above, which carries only genuinely
+still-untouched items): **the D4-completion proxy fix**, BUILT 2026-08-23
+(`D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`) — `ruling_faculty_state`
+now reads the substantive-note predicate, and the interim label this map carried under EE-C2 was
+removed in that same commit, exactly as the ruling required.
+
 ---
 
-## 7. Rollback
+## 5b. Named bounds — disclosed here, deliberately NOT published
+
+Added 2026-08-23 at the D4-completion commit. These are true limitations of an engine output that
+are recorded in the repo but carry **no public wording**, because adding a public sentence is an
+R18 change requiring founder signature and nothing licenses one here. Naming them in this map is
+the honest alternative to silence.
+
+- **`ruling_faculty_state`'s deliberation reading is oikeiosis-only.** It is drawn solely from the
+  oikeiosis mechanism — a cross-circle tension or a `balanced_neither_decisive` Cicero verdict. It
+  reads nothing from the control filter, the value assessment, or the causal-stage evidence, so a
+  snapshot that deliberates entirely in those mechanisms is reported as not-deliberating, and the
+  branch then emits the strongest available negative claim: *"Disengaged — no passions, no
+  deliberation; ruling faculty at rest."*
+
+  **This is pre-existing and was NOT created by the D4-completion fix**, which narrowed the
+  deliberation input without widening where it reads from. Nor was it what EE-C2's interim label
+  disclosed — that label described the presence-vs-substantive proxy, a different gap, now closed.
+  Evidence that it is not an edge case: `website/smoke_a_prod.json`, a real production consult with
+  **two** engaged circles, four sorted control-filter elements and causal evidence spanning
+  phantasia→praxis, already reads that exact string under the PRE-fix code.
+
+  **Carried, for the founder:** whether this bound owes a public one-sentence scope note under
+  EE-C2's own reasoning (*"a choice to serve a field whose basis is known to be imprecise without
+  saying so"*) is an EE-C2-shaped question for the mentor, and any wording is R18-gated. Proposed
+  text, unsigned and unpublished: *"`ruling_faculty_state`'s deliberation reading is drawn solely
+  from the oikeiosis mechanism (a cross-circle tension or a balanced Cicero verdict). A snapshot
+  that deliberates only in the control-filter, value-assessment or causal-stage mechanisms reads as
+  not-deliberating."*
+
+---
+
+## 6. Rollback
 
 `git revert` the records commit. Documents only; nothing deploys from this file. If the companion
 R18 sign-off package has already been applied to the public surfaces, revert that commit
@@ -310,10 +307,13 @@ independently — the two are deliberately separable.
 
 ---
 
-## 8. Cross-references
+## 7. Cross-references
 
 - `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md` — **binding; verbatim wins**
 - `operations/agent-circles-2026-08/2026-08-23-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md` — the scoping document (§2.2 inventory, §10 rulings-returned)
 - `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md` — Q-A1's entry structure, Q-A3's `unknown`
-- `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-shape1-r18-signoff-package.md` — the publication half, awaiting founder signature
+- `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-shape1-r18-signoff-package.md` — the
+  publication half. **Signed and shipped**; its `ruling_faculty_state` interim paragraph and
+  agent-card clause were retired at the D4-completion commit, so the package's proposed text no
+  longer matches the live surfaces and must not be re-derived from (marked in the package itself).
 - `operations/handoffs/founder/2026-08-23-evaluative-engine-epistemic-status-scoping-CLOSE.md` — the predecessor close

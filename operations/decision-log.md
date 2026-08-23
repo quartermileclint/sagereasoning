@@ -25086,3 +25086,163 @@ addition before being updated — the pin is non-vacuous.
 `D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
 `D-CLASS-B-ROUTE-CHANGE-BUILT-TEST-VERIFIED-2026-08-23`,
 `operations/handoffs/founder/2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md`.
+
+---
+
+## 2026-08-23 — D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23
+
+**Decision:** Completed the D4 correction — `ruling_faculty_state`'s deliberation input is now the
+substantive-note predicate `hasGenuineDeliberation`, not the legacy `deliberation_notes.length > 0`
+presence proxy — and removed EE-C2's interim disclosure from all three surfaces in the same change,
+exactly as the ruling required. Built **unflagged**, on a reasoned election recorded below. No
+schema, no flag, no credential, no live operation, nothing pushed.
+
+**Reasoning:** D4 fixed the filler-note class on the proximity reading only and said so in its own
+docstring; EE-C2 ruled an interim label owed while that gap stood, and bound the label's removal to
+the commit that closes it. This is that commit.
+
+### The fix
+
+Two edits in `layer2-mechanisms.ts`: the `computeRulingFacultyState` call site now passes
+`hasGenuineDeliberation(oik)`, and `hasGenuineDeliberation`'s docstring — whose "ruling_faculty_state
+is untouched this session" sentence became false the moment the call site changed — is rewritten in
+the same edit. Nothing else in the module changed.
+
+**Reuse, not a sibling function (PR15)** — the design question the prompt left open. The predicate
+has exactly two substantive-note sources, and both readers ask the same question of the same data, so
+a sibling would be a verbatim restatement: the "two independently re-derived restatements that can
+silently drift" hazard this module's own `hasNaturalRelationshipFactor` was hoisted to avoid. No
+semantic mismatch found.
+
+**The divergence class is provably one class.** `assessOikeiosis` pushes a note iff a tension exists,
+a Cicero verdict is balanced, or NO circles were engaged; the first two are the predicate, so
+`deliberation_notes.length > 0 ≡ hasGenuineDeliberation(oik) ∨ relevant_circles.length === 0`, and
+the only behaviour change is the zero-circle case. `oik` has exactly one construction site. The
+review confirmed this structurally *and* empirically over 20,176 enumerated schemas (40,352
+assessments, both flag states, zero violations), plus adversarial edges.
+
+### The flag election — no flag
+
+`ruling_faculty_state` is consequential under EE-B1 on (b) served publicly, (c) carried into the
+accreditation record, and (d) named in an acted-upon disclosure — **but not on (a)**. Traced
+first-hand and independently re-traced by review across ~30 references: no consumer turns it into a
+proceed/block verdict, floor, threshold, rank, trust event, cache key or gate. `/api/guardrail`'s
+`proceed` comes from `meetsThreshold(katorthoma_proximity, …)`; `guardrail-sandwich` and
+`philosophical-mode-service` read it for **prose only**; the trajectory overlay/delta, window
+aggregator and `derive-trust-events` never reference it; the accreditation provenance gate verifies
+submitted signatures rather than recomputing. The §4 precedent gated a change that moved verdicts;
+this moves none.
+
+The decisive consideration is EE-C2 itself: it binds removal to the commit that fixes the proxy, and
+the disclosure's truth-condition tracks when the fix *takes effect*. A flag separates those moments,
+so a flag-gated build would either publish "fixed" while dark — a false public statement, the exact
+failure the work item exists to prevent — or defer removal, contradicting "at the same commit… not
+left to the build session to discover". Near-zero risk reduction, at the cost of fighting a binding
+ruling. Recorded as an election, not inherited from the prompt.
+
+**Flag-independence verified, and its stated reason corrected.** The field was never gated by the §4
+flag — but *not* for the reason first written. The call-site's location cannot establish it, because
+the `oik` passed is itself computed with the flag. The real invariant is that `dikaiosyne`'s only
+effect inside `assessOikeiosis` is attaching `obligation_assessment`, leaving tension,
+`cicero_verdict`, `relevant_circles.length` and `deliberation_notes` untouched. The comment now
+states that, and warns that a future flag threaded through `assessOikeiosis` could break it.
+
+### Disclosure removal — all three surfaces, same commit
+
+`llms.txt` (the interim paragraph); `agent-card.json` (the clause inside `epistemic-status-map/v1` —
+extension retained, count unchanged at 24, JSON re-parses); documentation map §4 (removed, §5–§8
+renumbered, and §5's now-false "named, not built (see §4)" bullet moved out of the list as a closure
+note). The work item is CLOSED with a per-surface record, its original gate text preserved verbatim.
+The R18 sign-off package is marked **superseded in part**, because it carries the retired wording as
+copy-pasteable "proposed text" and its designed use would have re-published it.
+
+### PR19 — one round, six dimensions, 18 agents, 0 errors, ~5.2M tokens, twelve findings, all folded
+
+Two dimensions CLEAN (equivalence theorem; flag-and-scope). The findings that mattered:
+
+- **MEDIUM — the battery could not detect a 50% mutation of the predicate the fix wires in.**
+  Deleting `c.tension !== null` left it at 101/0, because every "genuine deliberation" fixture also
+  carried a `local_community` circle (h=2/a=2) that independently yields a balanced verdict — so the
+  fixture *named* "cross-circle tension" was never tension-only. This mattered beyond prose: the same
+  predicate governs the live flag-on proximity path. **Folded** with a genuinely tension-only fixture
+  (`household` + `self_preservation`, neither balanced) plus a decay guard asserting no balanced
+  verdict is present, so the coverage cannot silently rot.
+- **MEDIUM — the closure records cited a decision-log entry that did not exist.** I had drafted this
+  entry to a scratchpad and never appended it, while the work item and the map both cited it as the
+  authority for "BUILT". **Folded:** this entry.
+- **LOW — the Overwhelmed guard's off-diagonal was unpinned**; only the 2-passion/2-urgency diagonal
+  existed. **Folded** with 2p+1u and 1p+2u fixtures.
+- **NIT — two of my own "non-vacuity floor" assertions could not fail.** Both counters incremented
+  unconditionally inside the loop whose bound derived from the same array; an empty matrix would have
+  passed `0 === 0`. Exactly the failure mode the standing memory on non-vacuity floors names, written
+  by the session that cites it. **Folded** with literal floors.
+- **LOW — `proximity-dikaiosyne.test.ts`'s flag-off byte-identity header** is now false for this one
+  field, since the fix is unflagged. **Folded** with a dated scope note. CLAUDE.md's §4 rollback line
+  is NOT falsified: it says *scoring* byte-identical, and `katorthoma_proximity` flag-off is
+  genuinely untouched — now pinned.
+- Plus: the C2 claim tightened (the field does enter the signed bytes, so signature-derived
+  identifiers move with it — harmless, since nothing re-derives a signature to compare); the
+  non-emptiness lemma the theorem's argument left implicit now stated; the map's self-contradicting
+  bullet moved; the unrelated `environmental-context.json` modification flagged for a path-scoped
+  commit.
+
+**Every fold mutation-verified.** Five mutations, all now biting where they previously did not:
+tension-disjunct 2 fails (was **0**), balanced-disjunct 6, call-site revert 13, flag-off-branch
+narrowing 3, Overwhelmed-guard weakening 3; restored 0.
+
+### A correction the review forced, recorded rather than quietly dropped
+
+Mid-session I judged that the fix *created* a new false negative — that a circle-free but genuinely
+reasoning snapshot would now read "ruling faculty at rest". **That framing was wrong**, and the
+review refuted it with production evidence I then verified first-hand: `website/smoke_a_prod.json`
+is a real consult with **two** engaged circles, `deliberation_notes: ""`, four sorted control-filter
+elements and causal evidence spanning phantasia→praxis, and it already reads that exact string under
+the **pre-fix** code. The zero-circle class is 2 of 109 captured assessments, both sparse extractions.
+
+The true limitation is different and pre-existing: **the deliberation reading is oikeiosis-only**, so
+a snapshot deliberating in the control-filter, value-assessment or causal-stage mechanisms reads as
+not-deliberating. That is not what EE-C2's label disclosed (it described the presence-vs-substantive
+proxy, now closed), so removing the label removes no disclosure of *this* bound — but it does leave a
+real imprecision unlabelled on a field the Layer-3 prose engine builds narrative from. It is now
+**named in the documentation map's new §5b**, with a proposed one-sentence public scope note left
+**unsigned and unpublished**: adding public wording is R18-gated on founder signature, and whether
+the bound owes a public label under EE-C2's own reasoning is a mentor question this session declined
+to answer for them.
+
+**Files touched:** `layer2-mechanisms.ts` (call site + docstring + comment); new
+`__tests__/ruling-faculty-deliberation.test.ts`; `__tests__/proximity-dikaiosyne.test.ts` (header
+scope note); `website/public/llms.txt`; `website/public/.well-known/agent-card.json`; the
+documentation map; the R18 sign-off package; the work item; this log.
+
+**Risk classification:** **Critical** under 0d-ii — an unconditional change to a MEASURED SURFACE
+(`layer2-mechanisms.ts`, shared by `/api/reason` and `/api/guardrail`) plus a public-contract change.
+AC7 not engaged: no live operation occurred. PR6, PR19, PR20, PR23 engaged.
+
+**Rollback:** `git revert` the commit — one argument, three comments, one new test file, three
+document edits. No flag, no schema, no migration, no credential, nothing to unwind live.
+
+**Verification:** new battery **120/0**, five-way mutation-verified; `proximity-dikaiosyne` 59/0;
+`guardrail-sandwich` 91/91; `layer1-schema-additions` 66/0; `reasoning-integrity` 64/0;
+`tier1-continuation` 42/0; `layer2-signer` 18/0; `layer2-verifier` 18/0; `layer2-canonical-json` 15/0;
+`corroboration-check` 106/0; `orientation-reading` 100/0; `first-circle-routing` 37/0; `ee-c1` 15/0;
+`prose-deferral` 26/0; `reason-loop-closure` 33/0; both injection-defence suites 60/0 and 28/0.
+Downstream consumers: `sage-assent-bridge` 33/0; `agent-assessment-history-store` 120/0;
+`philosophical-mode-service` 43/0; `agent-hand-back-report` 54/0; `score-architecture` 69/0.
+`tsc --noEmit` **0**; `npm run build` **0**.
+
+**Byte-identity guard:** `GATE1_FALSE_HOLD_CAPTURE` confirmed absent from the harness env block at
+session open — no observation window running, so per the 2026-08-15 M1 ruling the guard did not bind.
+
+**Open questions:**
+- Whether the oikeiosis-only deliberation bound (map §5b) owes a public one-sentence scope note under
+  EE-C2's reasoning — a mentor question; proposed wording drafted, unsigned, unpublished.
+- `computeProximity`'s `!dikaiosyne` branch deliberately keeps the raw legacy proxy. Now pinned by a
+  battery assertion that goes red if a later session "tidies" it.
+
+**Rules served:** PR6, PR15, PR19, PR20, PR23, R18, AC7 (not engaged, recorded), EE-B1, EE-C2, EE-E3.
+
+**Status:** Adopted. Cross-references:
+`D-ATRF-EE-PRODUCTION-WAVE-BUILT-PR19-FOLDED-2026-08-23`,
+`D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
+`operations/agent-circles-2026-08/2026-08-23-D4-completion-proxy-fix-WORK-ITEM.md`,
+`operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md`.

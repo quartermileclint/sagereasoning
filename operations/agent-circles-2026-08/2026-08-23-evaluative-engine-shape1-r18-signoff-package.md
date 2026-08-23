@@ -1,5 +1,23 @@
 # R18 sign-off package — Evaluative Engine epistemic-status map (Shape 1 publication)
 
+> **⚠ SUPERSEDED IN PART — 2026-08-23, at the D4-completion commit
+> (`D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`).**
+>
+> This package was signed and its wording **shipped** to the three public surfaces. Two pieces of
+> the text below are **no longer live** and must NOT be re-derived from this file:
+>
+> - the `Interim disclosure — ruling_faculty_state` paragraph in the proposed `llms.txt` text, and
+> - the matching `Interim disclosure: ruling_faculty_state's deliberation input…` clause inside the
+>   proposed `epistemic-status-map/v1` agent-card description.
+>
+> Both were removed from the live surfaces at the D4-completion commit, as EE-C2 required — the
+> proxy they disclosed is fixed, and a disclosure that outlives its limitation is a false statement.
+> Everything else in this package still matches the live surfaces. The package is retained as the
+> record of **what was signed**, not as a description of what is currently published; its own
+> "Status: AWAITING FOUNDER SIGNATURE" header was already stale before this commit and is left as
+> written rather than rewritten after the fact.
+
+
 **Status: AWAITING FOUNDER SIGNATURE. Nothing here has been applied to any public surface.**
 
 > **AMENDED 2026-08-23 on founder review, before signature.** Four items, all applied:

@@ -7,7 +7,12 @@
  *
  * WHAT IT PROVES (the load-bearing assertions of the §4 fix):
  *   1. FLAG-OFF BYTE-IDENTITY — with dikaiosyneWeighting false / unset, the
- *      assessment is byte-identical to pre-§4: NO proximity_floors key, NO
+ *      assessment is byte-identical to pre-§4 (SCOPE NOTE, 2026-08-23: `ruling_faculty_state`
+ *      is EXCLUDED from this claim. The D4-completion fix is unflagged, so that one field
+ *      changes in BOTH flag states on the zero-engaged-circles class. `katorthoma_proximity`
+ *      flag-off is genuinely untouched — which is what CLAUDE.md's §4 rollback line means by
+ *      "scoring byte-identical" — and is pinned by ruling-faculty-deliberation.test.ts §6):
+ *      NO proximity_floors key, NO
  *      obligation_assessment on circles, and an additive Layer-1
  *      obligation_assessment field is IGNORED (a schema with it ≡ a schema without).
  *   2. ENV DEFAULT — a no-option call resolves the flag from
