@@ -357,30 +357,26 @@ Safety-critical functions in scope include: `detectDistress`, the two-stage dist
 
 ### AC5 — R20a Enforcement Perimeter
 
-The R20a vulnerable-user protections apply to exactly the following **thirteen** routes, as enumerated in `r20a-invocation-guard.test.ts` — **eleven route-level** (the `await enforceDistressCheck(detectDistressTwoStage(...))` pattern) plus **two substrate-gate** (the `enforceLayer2R20aGate` pattern, which reuses A7 and internally invokes the same Haiku classifier):
+The R20a vulnerable-user protections apply to **forty-four** routes, as enumerated in `r20a-invocation-guard.test.ts` — **forty-two route-level** (the `await enforceDistressCheck(detectDistressTwoStage(...))` pattern) plus **two substrate-gate** (the `enforceLayer2R20aGate` pattern, which reuses A7 and internally invokes the same Haiku classifier).
 
-**Route-level (11):**
+**This section does not hand-enumerate route-level membership.** It did, twice (first at eight, then at thirteen), and both enumerations went stale — the second silently, for over a month, discovered only by a documents-only examination session that happened to re-derive the count from source rather than restate it. A third hand-transcription in this same document risks the identical failure a third time. The registry is canonical; a session needing the current membership reads `HUMAN_FACING_POST_ROUTES` (route-level, includes both the 29 currently flag-gated members and the 13 that screen unconditionally) and `SUBSTRATE_GATE_ROUTES` (the 2 substrate-gate members) directly.
 
-1. `/api/score`
-2. `/api/score-decision`
-3. `/api/score-document`
-4. `/api/score-scenario`
-5. `/api/score-social`
-6. `/api/reason`
-7. `/api/reflect`
-8. `/api/mentor/private/reflect`
-9. `/api/journal` *(added 2026-05-31, gap-#4 remediation — AC5 ninth-route protocol)*
-10. `/api/mentor/journal-feed` *(added 2026-05-31 — AC5 tenth-route protocol)*
-11. `/api/score-conversation` *(added 2026-07-07 — AC5 eleventh-route protocol; `SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED` Live)*
+**Substrate-gate (2, stable since 2026-05-28 — unchanged by this correction):**
 
-**Substrate-gate (2):**
+1. `/api/calling` *(added under `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` — the first substrate-gate member)*
+2. `/api/practice/reflect` *(added under Option A)*
 
-12. `/api/calling` *(added 2026-05-28 under `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` — the first substrate-gate member)*
-13. `/api/practice/reflect` *(added 2026-05-28 under Option A)*
+**Route-level (42) — a verified snapshot as of this correction, grouped, not individually date-annotated.** Per-route addition provenance (date, commit, flag) was not re-verified route-by-route in this pass; where that provenance is needed, read the registry's own inline comments, which carry it.
+
+*Unconditional (13 — no feature flag; screen on every call):* `/api/journal`, `/api/mentor/journal-feed`, `/api/mentor/private/reflect`, `/api/reason`, `/api/reflect`, `/api/score`, `/api/score-decision`, `/api/score-document`, `/api/score-scenario`, `/api/score-social`, `/api/founder/hub/ring-proof`, `/api/mentor/ring/proof`, `/api/support/agent/proof`.
+
+*Flag-gated (29):* `/api/compose`, `/api/evaluate`, `/api/execute`, `/api/founder/hub`, `/api/mentor-appendix`, `/api/mentor-baseline`, `/api/mentor-baseline-response`, `/api/mentor-journal-week`, `/api/mentor-profile`, `/api/mentor/gap4`, `/api/mentor/hupexairesis`, `/api/mentor/impulse`, `/api/mentor/morning`, `/api/mentor/oikeiosis`, `/api/mentor/oikeiosis/extension`, `/api/mentor/passion-classify`, `/api/mentor/passion-log`, `/api/mentor/premeditatio`, `/api/mentor/private/baseline`, `/api/mentor/private/baseline-response`, `/api/mentor/private/founder-facts`, `/api/mentor/private/journal-week`, `/api/mentor/sage-compass`, `/api/mentor/stoa`, `/api/mentor/stoa/draft-reflect`, `/api/mentor/view-from-above`, `/api/score-conversation`, `/api/skill/sage-classify`, `/api/skill/sage-prioritise`.
 
 Any other surface is outside the perimeter and must be named honestly when triage touches it.
 
-> **Count correction (2026-07-17, RA-1 — `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`).** This section previously read *"exactly the following eight human-facing POST routes, as enumerated in `r20a-invocation-guard.test.ts`"* and listed only routes 1–8 — **contradicting the very test it cites**, whose registries have enumerated 13 since the 2026-07-07 eleventh-route activation (the test asserts `>=11` route-level and `>=2` substrate-gate; it runs 92/0). The governing safety document therefore understated the live perimeter by five routes. The routes themselves were correctly wired and Live throughout — this is a documentation-count correction, not a perimeter change. **Named follow-up (RA-2, which edits that file):** the test's own header docstring is stale in the same way (*"eight route-level + one substrate-gate = nine"*).
+> **Count correction (2026-08-23, reflections-examination session — `D-PROJECT-REFLECTIONS-EXAMINATION-FINDINGS-RECORD-AUTHORED-2026-08-23`, folding a mentor ruling on the finding).** This section previously read *"exactly the following thirteen routes"* (11 route-level + 2 substrate-gate), current since the 2026-07-17 RA-1 correction below. The registry has held 44 (42 + 2) for some time — the true count drifted well past its last recorded correction without detection. **This is the second time this section has understated the live perimeter, discovered the same way both times: not by a scheduled audit, but by a session that happened to check the source rather than restate the document.** `/CLAUDE.md` carried the identical failure at the same moment — it separately restated the count as sixteen (14 + 2), itself already stale by the time it was written, *despite carrying its own explicit instruction to re-derive rather than quote it*. That instruction did not prevent the recurrence; nothing structural required it to be followed. This correction therefore changes the section's *form*, not only its number: see above.
+>
+> **Prior correction (2026-07-17, RA-1 — `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`).** This section previously read *"exactly the following eight human-facing POST routes, as enumerated in `r20a-invocation-guard.test.ts`"* and listed only routes 1–8 — **contradicting the very test it cites**, whose registries have enumerated 13 since the 2026-07-07 eleventh-route activation (the test asserts `>=11` route-level and `>=2` substrate-gate; it runs 92/0). The governing safety document therefore understated the live perimeter by five routes. The routes themselves were correctly wired and Live throughout — this is a documentation-count correction, not a perimeter change. **Named follow-up (RA-2, which edits that file):** the test's own header docstring is stale in the same way (*"eight route-level + one substrate-gate = nine"*) — not re-checked at this correction; worth confirming at the next session that touches that file.
 
 Adding a further route to the perimeter requires, before merge:
 

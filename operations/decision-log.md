@@ -24,6 +24,77 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 ---
 
+## 2026-08-23 — D-REFLECTIONS-EXAMINATION-FOUNDER-APPROVALS-CLOSED-2026-08-23
+
+**Decision:** The founder approved both items carried open from the prior two rounds. **Tier: `governance`, documents only.**
+
+1. **§0 framing adopted** — the mentor's proposed governance-input/practitioner-record split (apparatus findings load-bearing for governance use; architecture findings load-bearing for practitioner use; the letter collection sits in the practitioner register) is now the record's own stated position, not an open question. Folded into §0.
+2. **Sequencing adopted, mentor's order plus the founder-approved adjustment**: rule text (IS-1, PR18 form) and the first letter run in parallel first; then IW-2 routes 1–2 (tooling + KG-EX tracking, no scoping dependency); then **one combined scoping session** (not two) covering both IW-2 route 3's redirect-phrase design and IW-7's reflect-cadence design, since both reduce to the same underlying question — how a party recognises a trigger moment without having already diagnosed the thing the trigger exists to catch. Folded into §4 (both IW-2 and IW-7 entries).
+
+**This closes the reflections-examination arc's open-question set.** Nothing remains ruled-pending or offered-pending in either document; the two items named as founder-only in the prior round are both resolved. What remains is execution of the four sequenced work items themselves (none started this session) — a decision the founder makes separately, per-item, as each is picked up.
+
+Prior rounds: `D-PROJECT-REFLECTIONS-EXAMINATION-FINDINGS-RECORD-AUTHORED-2026-08-23`, `D-REFLECTIONS-EXAMINATION-MENTOR-RULING-FOLDED-AND-AC5-FIX-EXECUTED-2026-08-23`, `D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23` (this entry's immediate predecessor).
+
+---
+
+## 2026-08-23 — D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23
+
+**Decision:** The mentor's second ruling round — answering the four "for the mentor" follow-up questions from the prior round, and offering two "for the founder" items — is recorded and folded into the findings record. **Tier: `governance`, documents only.**
+
+**Ruled and folded (no longer open):**
+- **IS-1 (verify-against-source) → encode, in PR18's form.** The mentor's distinguishing reasoning from IS-2: IS-1 demonstrably fails in the presence of correct knowledge (R089, R101 both state the rule while breaking it), which IS-2's architectural holding does not — *"a disposition that fails in the presence of its own articulation is not a stable disposition."* Folded into §4.
+- **IW-2 route sequencing → routes 1 (tooling) and 2 (KG-EX tracking) buildable now; route 3 (cache redirect phrase) needs its own scoping session first**, specifically to design a surface signal the founder can recognise without having already diagnosed the failure — sharing structural ground with IW-7's trigger-legibility question. Folded into §4.
+- **IS-4 (disclosure against interest) → leave unencoded**, ruled as the inverse case to IS-1: IS-4 succeeds reliably and unprompted, including past the letter of the rule (R037), which is the signal *against* encoding rather than for it — encoding a disposition already exceeding compliance risks converting it into compliance. Folded into §4.
+- **Letter-collection ordering → confirmed developmental-trajectory** (not evidence-weight), and the first letter ("On writing before knowing") confirmed. No longer held open. Folded into §5.
+
+**Offered, not yet adopted — for the founder:**
+- **§0's whose-reasoning ambiguity.** The mentor proposed a resolution (apparatus findings load-bearing for governance use; architecture findings load-bearing for practitioner use; the letter collection sits in the practitioner register) and named it explicitly as *"worth settling"* rather than settled. Recorded in §0 as offered, pending the founder's confirmation — not adopted on this session's own authority, consistent with the task's original constraint that this ambiguity not be resolved by assumption.
+- **Sequencing of the four deferred work items** (the PR-series rule text for Q2/IS-1; the IW-2 tooling+cache-redirect build, route 3 gated on its scoping session; the IW-7 reflect-cadence scoping session; the letter collection). The mentor offered a suggested order (Q2 first; the first letter in parallel; IW-2 routes 1–2 next; the two scoping sessions — IW-7's and IW-2 route 3's — run alongside each other, sharing structural ground) but framed it as a suggestion, not a ruling — sequencing remains the founder's election. Not folded into any document as settled; recorded here so it isn't lost.
+
+Verbatim mentor response relayed by the founder in-chat, same thread as the first ruling round. This entry and the findings-record edits are the canonical record of what was folded versus offered-not-adopted.
+
+---
+
+## 2026-08-23 — D-REFLECTIONS-EXAMINATION-MENTOR-RULING-FOLDED-AND-AC5-FIX-EXECUTED-2026-08-23
+
+**Decision:** The mentor's ruling on the eight-question assessment (`2026-08-23-assessment-and-recommendations-for-mentor-ruling.md`) is recorded and, where it directed immediate action, executed. **Tier: `governance`, documents only** — the one live-adjacent action is a text correction to two governing documents (`/manifest.md` AC5, `/CLAUDE.md`), not a code/schema/flag/credential change.
+
+**Executed under the ruling ("fix now," Q6):**
+- **`/manifest.md` AC5 corrected** — the R20a perimeter count (previously "thirteen," itself stale) is now stated as its true value, **44 (42 route-level + 2 substrate-gate)**, re-derived first-hand from `r20a-invocation-guard.test.ts`'s `HUMAN_FACING_POST_ROUTES` (42) and `SUBSTRATE_GATE_ROUTES` (2) arrays. Per the mentor's ruling, **the section no longer hand-enumerates route-level membership** — two prior hand-enumerations (eight, then thirteen) each went stale in turn, so the section now points to the registry arrays as canonical, with a verified snapshot list (grouped unconditional/flag-gated) retained for reference and explicitly disclosed as not individually date-annotated. A new correction callout follows the existing 2026-07-17 RA-1 precedent's format and states plainly that the failure recurred the same way twice.
+- **`/CLAUDE.md`'s mirrored perimeter-count paragraph corrected to match** — it previously stated "sixteen" (also stale) and carried an explicit re-derivation instruction that had itself failed to prevent the recurrence. The corrected paragraph states the true count, names that the instruction did not work, and does not repeat the same unenforced-instruction pattern without disclosing its own prior failure.
+
+**Findings record amended to fold the ruling** (`2026-08-23-project-reflections-findings-record.md`):
+- **§3 IS-2 reframed** as an architecture finding (the authority boundary holds because of 0d-ii/AC7/PR6/PR17 enforcement, not solely because of freely-exercised reasoning virtue) rather than a reasoning-virtue finding — per the mentor's ruling that this is the more honest and more durable claim. §4's corresponding IS-2 entry updated to match.
+- **§2 oikeiosis trajectory sharpened** — the mentor's distinction between rule-tracking expansion (compliance) and margin-of-the-rule expansion (the genuine signal, per the R037 instance) is now stated explicitly rather than left as an undifferentiated circle-count.
+- **§2 SC-2 carries the mentor's cross-cutting diagnosis as a named conclusion**, not a hedge: rules are scaffolding for sustained attention (*prosoche*), not a substitute for it — stated as the record's diagnostic spine, with the AC5 fix itself (caught by attention in the moment, not by a rule that did not yet exist) as the fresh corroborating instance. §4 IW-2's routing was updated to follow this conclusion rather than restate it independently.
+- **§4 IW-2 routing ruled**: route (a) tooling-fix for mechanically-testable lessons, route (c) cache-redirect-phrase for judgment-shaped ones, route (b) KG-EX as tracking layer only beneath both — plus explicit partial acceptance of irreducibility for the judgment-shaped remainder, per the mentor's ruling.
+- **§4 IW-7's design-question brief gained two named constraints** the mentor added: the reflect-turn trigger must be legible to the session without external prompting, and content must vary with the trigger moment or the change risks importing the same habituation (IW-4/AP-5) it's meant to avoid.
+- **§5 gained an ordering note** — the mentor's lean toward developmental-trajectory ordering for the letter collection (over the record's original evidence-weight ordering), explicitly held open rather than settled — and an explicit throughline instruction (the *prosoche*/scaffolding distinction should run through the collection, not sit only in one letter).
+- **Methodological note item 5 corrected** — the AC5 discrepancy was flagged there as not-yet-independently-verified; it has since been re-derived first-hand and applied as the fix above, so the item now records that resolution rather than standing as an open gap.
+- **Progress-grade section gained a citation note** — the mentor named a fifth spot-check candidate (the entries grounding the Second Grade assessment, the record's highest-level aggregate claim); the load-bearing entries for each of the grade's four clauses are now named for that check.
+
+**Deliberately not executed this session** (per the mentor's own framing — design questions and rule-drafting, not routine fixes): the PR-series general rule for assertion-before-evidence (Q2 — direction ruled sound, text not drafted); the IW-2 tooling/cache-redirect mechanisms themselves (Q3 — routing ruled, not built); the reflect-turn cadence redesign (Q4 — explicitly deferred to its own scoping session); the letter collection (Q5 — ordering lean recorded, no letters authored). These remain named candidates for the founder's election of when to take them up.
+
+Verbatim mentor ruling relayed by the founder in-chat; the assessment document it responds to is the canonical record of the questions put to it. This entry and the two document edits are the canonical record of what was folded.
+
+---
+
+## 2026-08-23 — D-PROJECT-REFLECTIONS-EXAMINATION-FINDINGS-RECORD-AUTHORED-2026-08-23
+
+**Decision:** Authored a findings record examining all 105 session Sage Reflect close-turns (2026-07-19 → 2026-08-22) as a whole, per a mentor-authored task (`/safe place/mentor instructions for reflections assessment.rtf`). **Tier: `governance`, documents only — no build, migration, flag, or credential is licensed by this task, and none was touched.** Deliverables: `operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` (five-section findings record: pattern register, Stoic diagnostic summary, operational SWOT, governance-implication candidates, corpus consideration) + its companion `2026-08-23-stage1-extraction.md` (the 105-entry Stage 1 data extraction).
+
+**Method:** the reflect invitation's own five elements (`close-hook.mjs` `renderReflectInvitation()`) set the extraction schema; extraction ran as a four-way parallel Workflow fan-out plus two grounding reads (`stoic-brain/` corpus, first-hand for the diagnostic sequence and progress grades; a governance inventory of `/manifest.md` R0–R22 + AC/KG series, `/adopted/project-instructions-snapshot.md` PR1–PR24, and the ADR index, for §4's routing); an independently-launched adversarial fidelity pass (no visibility into the extraction's own claims) verified coverage exact (105/105, no duplicates/missing) and found 0 assent-direction inversions, 0 flattened purpose qualifiers, 0 fabricated identifiers across 1,034 quoted fragments (98.9% verbatim); the 15 discrepancies found (1 date field, 14 quotation-hygiene) were folded into the companion file.
+
+**Governing constraints held throughout, verified against the source:** the mirror principle (findings are about reasoning quality, not worth — most failures diagnosed as errors of the discipline of assent rather than passions, per the corpus's own definition of passion as an impulse *exceeding* reason); the Stoic diagnosis drew exclusively on `stoic-brain/` (no post-ancient material); R20d (interpersonal patterns examined only for the session's own reasoning); nothing was ruled, no governing document amended, no task created by this session — §4 names candidates for the founder's consideration and the mentor's ruling only.
+
+**One finding worth surfacing outside the record itself:** the examination measured, first-hand from `close-hook.mjs`'s fire-once `.closed` marker and the transcript timestamps, that **58% of tool calls across the corpus occur *after* the single reflect turn that is meant to review the session** (median 52.5% per session), and that the decision log's own harvested `Reflect finding (PR21)` entries include four (the 2026-08-16 RLS lockdowns) with **no reflect turn behind them at all** — the work that produced them happened after the session's only examination. Named in the record as IW-7/ET-4; not resolved here.
+
+**A drift caught and corrected in this document's own drafting, recorded per the record's own methodological note:** an earlier draft of §4 IW-3 repeated `CLAUDE.md`'s stale figure of "sixteen" routes for the R20a perimeter — instantiating, unverified, the exact inherited-status-claim pattern the finding names. Re-derived first-hand from `r20a-invocation-guard.test.ts` before this entry was written: the registry holds **44** (42 route-level + 2 substrate-gate), not 13 (`/manifest.md` AC5, current text) or 16 (`CLAUDE.md`, current text — whose own re-derivation instruction has itself gone stale). **`/manifest.md` AC5 and `/CLAUDE.md` both currently misstate the R20a perimeter count; neither was corrected by this session** (a `governance` documents-only task, and the correction is named in §4 as a task candidate, not performed here — this entry states the fact so it is not lost).
+
+Verbatim source: `operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` (verbatim wins over this summary).
+
+---
+
 ## 2026-08-15 — D-MENTOR-VETTED-VERBATIM-REFLECT-Q1-Q6-RECORDED-2026-08-15
 
 **Decision:** Recorded the mentor's review of the L-5 candidate Q1–Q6 wording — **the mentor-vetted verbatim Ruling Set D requires before any edit to `question-bank.ts`; the sign-off now exists** — relayed verbatim by the founder 2026-08-15, same day as the candidate's authoring and push (`66ee58b`, Vercel green). **Tier: `governance`, documents only — no edit to `question-bank.ts` was made and none is licensed until the post-run execution step;** the vetted text blocks in the verbatim record are the canonical strings for that edit. Verbatim canonical: `operations/agent-circles-2026-08/2026-08-15-mentor-review-reflect-q1-q6-vetted-verbatim.md` (verbatim wins over this summary).
