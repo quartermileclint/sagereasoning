@@ -272,8 +272,10 @@ removed in that same commit, exactly as the ruling required.
 
 Added 2026-08-23 at the D4-completion commit as a bound recorded in-repo with no public wording.
 **Superseded 2026-08-24: the bound is RULED to owe a public scope note**
-(`2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`, adopted as binding). It is no longer
-a deliberately-unpublished bound; it is a pending R18 publication awaiting founder-signed wording.
+(`2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`, adopted as binding).
+**PUBLISHED 2026-08-24** (`D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`) — the note is live on
+all three R18 surfaces under founder-signed wording. It is no longer a deliberately-unpublished
+bound, and no longer a pending publication.
 
 - **`ruling_faculty_state`'s deliberation reading is oikeiosis-only.** It is drawn solely from the
   oikeiosis mechanism — a cross-circle tension or a `balanced_neither_decisive` Cicero verdict. It
@@ -306,20 +308,34 @@ a deliberately-unpublished bound; it is a pending R18 publication awaiting found
   **this is a scope constraint on the field, not a deficiency in the snapshot.** The note must not
   imply the snapshot is incomplete or that the agent failed to deliberate.
 
-  **The 2026-08-23 draft below FAILS that requirement** and is retained only as the superseded
-  record: it carries the first two clauses and omits the third.
+  **The 2026-08-23 draft FAILED that requirement** — it carried the first two clauses and omitted
+  the third — and was NOT published. The founder signed revised wording on 2026-08-24, choosing the
+  narrower Cicero phrasing over the shorter "a balanced Cicero verdict" (the predicate fires on
+  `balanced_neither_decisive` only, where honourability and advantageousness are graded EQUAL and
+  both below 3 — it does NOT fire on `both_high_aligned`, which the shorter phrase could be read to
+  cover). **The text as signed and published, `llms.txt` form:**
 
-  > *superseded draft, not for publication —* "`ruling_faculty_state`'s deliberation reading is
-  > drawn solely from the oikeiosis mechanism (a cross-circle tension or a balanced Cicero verdict).
-  > A snapshot that deliberates only in the control-filter, value-assessment or causal-stage
-  > mechanisms reads as not-deliberating."
+  > Scope — `ruling_faculty_state`'s deliberation reading. This field's deliberation reading is
+  > drawn from the oikeiosis mechanism only: a cross-circle tension, or a Cicero verdict in which
+  > honourability and advantageousness are graded equal and neither is decisive. It reads nothing
+  > from the control filter, the value assessment, or the causal-stage evidence — so a snapshot that
+  > shows deliberation in those mechanisms but not in the oikeiosis mechanism reads as
+  > not-deliberating. This is a scope constraint on the field, not a deficiency in the snapshot: it
+  > does not mean the reasoning was incomplete, and it is not a finding that the agent failed to
+  > deliberate.
 
-  **Carried to its own session**, R18-gated on founder signature:
-  `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`
-  carries revised candidate wording covering all three clauses, for all **three** surfaces —
-  `llms.txt`, `agent-card.json` and `api-docs/page.tsx`. Note the mentor's positional hint
-  (*"adjacent to the interim proxy disclosure"*) does not locate anything on the third surface:
-  api-docs carried the map but never the interim clause.
+  `agent-card.json` carries the same content as one clause appended to the existing
+  `epistemic-status-map/v1` description (**no new extension — the count stays 24**);
+  `api-docs/page.tsx` carries the compact form on the existing epistemic-status list item, where
+  the ruling's "adjacent to the interim proxy disclosure" hint located nothing because that surface
+  never carried an interim clause. All three carry the mentor's three required clauses.
+
+  **Lifetime, restated because it governs future sessions:** the note stays **until the oikeiosis
+  mechanism's scope changes** — a separate build decision. No future D4-style proxy correction
+  retires it.
+
+  **Published by** `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`
+  (session complete; the prompt is spent).
 
 ---
 

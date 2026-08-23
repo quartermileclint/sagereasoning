@@ -613,6 +613,11 @@ export default function ApiDocsPage() {
             status of <code>{'{ inference, probably-true }'}</code> <strong>must not be read as verified
             true</strong>: the engine cannot detect a clean lie at the field level, and these entries do not imply
             coverage of that residual. See llms.txt &quot;Epistemic status of engine outputs&quot; for the full map.
+            <code>ruling_faculty_state</code>&apos;s deliberation reading is drawn from the oikeiosis
+            mechanism only (a cross-circle tension, or a Cicero verdict in which honourability and
+            advantageousness are graded equal and neither decisive) &mdash; a snapshot deliberating in the
+            control-filter, value-assessment or causal-stage mechanisms but not in oikeiosis reads as
+            not-deliberating. That is a scope constraint on the field, not a deficiency in the snapshot.
           </li>
           <li>
             <strong>Force-clarification &amp; continuation</strong> &mdash; when a situation is too ambiguous

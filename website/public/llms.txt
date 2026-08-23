@@ -322,6 +322,15 @@ The Ed25519 signature attests the deterministic computation's reproducibility fr
 extraction; it does not attest the extraction's truth. See `does_not_attest`
 (trust-record-payload.ts:52) and the R18 surface disclosures for the full condition.
 
+Scope — `ruling_faculty_state`'s deliberation reading. This field's deliberation reading is
+drawn from the oikeiosis mechanism only: a cross-circle tension, or a Cicero verdict in which
+honourability and advantageousness are graded equal and neither is decisive. It reads nothing
+from the control filter, the value assessment, or the causal-stage evidence — so a snapshot that
+shows deliberation in those mechanisms but not in the oikeiosis mechanism reads as
+not-deliberating. This is a scope constraint on the field, not a deficiency in the snapshot: it
+does not mean the reasoning was incomplete, and it is not a finding that the agent failed to
+deliberate.
+
 Three disclosed routes where confidence can exceed basis, none closed by this map. First: an
 ARGUED `obligation_assessment: met` removes the dikaiosyne floor — this is by design; the
 argument is the guard, and the floor's removal is conditional on the argument's presence, not a

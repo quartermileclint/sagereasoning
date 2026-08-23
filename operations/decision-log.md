@@ -25322,3 +25322,66 @@ signature, scoped in the successor prompt.
 `D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
 `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`,
 `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`.
+
+---
+
+## 2026-08-24 — D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24
+
+**Decision:** Published the `ruling_faculty_state` oikeiosis-only **scope note** to all three R18
+surfaces under founder-signed wording, executing `D-MENTOR-RULING-OIKEIOSIS-SCOPE-NOTE-ADOPTED-2026-08-24`.
+**Tier: `governance` with a `code-elevated` rider** (two static public files plus one JSX list item).
+**No code in `website/src/lib/`, no engine change, no flag, no schema, no credential, no live
+operation. AC7 not engaged** — publication happens on the founder's push.
+
+**The R18 gate was honoured in order.** Three candidate texts were put to the founder verbatim
+before any public file was touched. The founder **signed with an amendment**: the narrower Cicero
+phrasing — *"a Cicero verdict in which honourability and advantageousness are graded equal and
+neither is decisive"* — over the shorter *"a balanced Cicero verdict"*. The amendment was raised by
+the AI from source: `hasGenuineDeliberation` (`layer2-mechanisms.ts:1594`) fires on
+`balanced_neither_decisive` **only**, which `ciceroResolve` produces when the two grades are equal
+**and both below 3**; it does not fire on `both_high_aligned`, which the shorter phrase could be
+read to cover. The amended text was re-checked against the mentor's three required clauses and
+loses none of them.
+
+**What was published, and where.** `website/public/llms.txt` — a new paragraph in
+`### Epistemic status of engine outputs`, in the position the retired interim-proxy disclosure held.
+`website/public/.well-known/agent-card.json` — one clause appended to the **existing**
+`epistemic-status-map/v1` description; **no new extension, the count stays 24**.
+`website/src/app/api-docs/page.tsx` — the compact form appended to the existing epistemic-status
+list item, because the ruling's *"adjacent to the interim proxy disclosure"* hint locates nothing on
+that surface: it carried the map but never an interim clause.
+
+**All three carry the mentor's three required clauses**, including the third they flagged as
+mattering: the reading is drawn from the oikeiosis mechanism only; a snapshot deliberating in the
+control-filter, value-assessment or causal-stage mechanisms but not in oikeiosis reads as
+not-deliberating; and **this is a scope constraint on the field, not a deficiency in the snapshot** —
+it does not imply the reasoning was incomplete or that the agent failed to deliberate.
+
+**Lifetime — recorded because it governs future sessions:** the note **stays until the oikeiosis
+mechanism's scope changes**, which is a separate build decision. It is **not** retired by any future
+D4-style proxy correction. This note is a *different and prior* disclosure from EE-C2's retired
+interim proxy label: that label named a deficiency in *how* the mechanism counts deliberation; this
+names *what the mechanism reads at all*. Per the ruling, *"the proxy disclosure does not substitute
+for the scope note."*
+
+**PR20 re-verification against source (not against prior records):** the oikeiosis-only predicate
+(`layer2-mechanisms.ts:1594`); `computeTension` (`:1088`) returning null below two circles and
+emitting `Tension between X and Y`, so "cross-circle" is accurate; the field's emitted strings
+asserting deliberation in words (`:1979`, `:1982`); the extension count at 24.
+
+**Verified:** `npm run build` **0** (`/api-docs` compiled); `npx tsc --noEmit` **0**; agent-card
+extensions **24**, unchanged; `grep -c "oikeiosis mechanism only" llms.txt` → **1**; each inserted
+sentence re-read against the three clauses.
+
+**Records:** `2026-08-23-evaluative-engine-status-documentation-map.md` §5b marked **PUBLISHED**,
+with the superseded 2026-08-23 draft replaced by the text as actually signed and the Cicero
+amendment recorded with its reason.
+
+**Rollback:** `git revert` this commit. Static content plus one JSON description plus one JSX list
+item; nothing deploys from the map or the decision log.
+
+**Status:** Adopted; live on the founder's push. Cross-references:
+`D-MENTOR-RULING-OIKEIOSIS-SCOPE-NOTE-ADOPTED-2026-08-24`,
+`D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`,
+`operations/agent-circles-2026-08/2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`,
+`operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b.
