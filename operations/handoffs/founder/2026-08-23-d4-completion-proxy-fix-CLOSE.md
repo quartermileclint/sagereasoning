@@ -5,7 +5,12 @@ public-contract change). **Governing frame:** `/adopted/standing-protocol-cache.
 **Predecessor:** `2026-08-23-atrf-ee-production-wave-CLOSE.md`. **Opened at HEAD `e462ec4`**
 (== `origin/main`).
 
-**Nothing live was touched. Nothing is pushed. One action remains and it is yours.**
+**Nothing live was touched. One action remains and it is yours: the push.**
+
+**Commit: `f7619d9`** — 10 files, path-scoped; `website/src/data/environmental-context.json` (an
+unrelated weekly-scan refresh) deliberately left out for its own commit. The work item's closure
+record forward-references this hash, since a commit cannot contain its own; this line is that
+record, added in the immediately following commit.
 
 ## What was built
 
