@@ -161,3 +161,89 @@ rather than presented as mandated, two prompt instructions corrected against sou
 review findings folded at the root — with the most costly defects found not in the code but in
 the verification apparatus the founder would have trusted. Nothing live touched; the walk is
 prepared and is the founder's next act.*
+
+---
+
+## Addendum — the founder walk, live-executed in full, same day (2026-08-23)
+
+The consolidated founder walk ran to completion, live, interactively, over this addendum's
+predecessor content — every SQL block pasted and its result checked before the next was issued,
+per PR17. **Nothing deviated from plan except two things, both caught live and both closed
+correctly rather than papered over:**
+
+1. **Step 2's behavioural probe (`§2.VERIFY-BEHAVIOURAL`) was genuinely vacuous on its first
+   attempt** — `idea_loop_candidates` was empty on TEST, so the throwaway-row insert (keyed to
+   `SELECT id FROM idea_loop_cycles LIMIT 1`) silently inserted zero rows because
+   `idea_loop_cycles` was **also** empty, and the two subsequent `UPDATE` probes then matched
+   nothing and reported "Success. No rows returned" — indistinguishable, at a glance, from the
+   two probes genuinely passing. Caught by not accepting "success" at face value and running
+   `SELECT count(*) ... WHERE proposed_action = 's2-probe-row'` — it returned `0`. Fixed by
+   inserting a throwaway `idea_loop_cycles` row first, then the candidate row referencing it,
+   then re-running the probes for real: **both then failed `23514` with the exact expected
+   `DETAIL` line naming the rejected `blast_radius_basis` values.** The same pattern repeated
+   (correctly anticipated this time, no false start) for Step 3's `§VERIFY-V7`. Both throwaway
+   rows were cleaned up and the empty-table counts re-confirmed after.
+2. **The self-service `/api/keys` mint hit the 5-active-key cap** during Step 6's post-deploy
+   confirmation. All five active keys on the founder's account turned out to be standing
+   production credentials (the Gate-1 dogfood harness, the s9-loop trust-measurement identity,
+   and the three org-agent role credentials) — none a safe throwaway, and reusing one for an
+   unrelated smoke call would have polluted its own metering history. Resolved via the
+   admin-gated `/api/admin/api-keys` mint route instead, which is capped by `ADMIN_USER_ID`
+   rather than the self-service owner-count check.
+
+**Live results, both directions, both environments:**
+
+- **A1 (Class B RLS lockdown):** all three tables (`action_evaluations_v3`, `journal_entries`,
+  `reflections`), TEST then production. TEST's `--all` bypass proof showed genuine `OPEN` before
+  and genuine `DENIED (42501)` after on all three; TEST's `--legit --all` (against a live local
+  dev server) showed all four consumer routes still passing. Production repeated the read-only
+  confirmation via direct `curl` against `www.sagereasoning.com` with a real session JWT
+  (`GET /api/action-evaluations`, `GET /api/journal`, `GET /api/practice-calendar` — all `200`),
+  since production intentionally skips the write-bypass probe per the file's own safety rail.
+- **A2 (`idea_loop_candidates` migration):** all three column sections + comments + final
+  confirmation, TEST then production. Production carries **120 real candidate rows** from the
+  bounded validation run; every `§VERIFY` on production confirmed the row count unchanged
+  (`120` before and after) and all six new columns `NULL` on every one of them — the additive/
+  non-invalidating claim proven on real data, not merely asserted.
+- **A3a (`idea_loop_completion_signals` table):** created + verified, TEST then production.
+  Production's `idea_loop_cycles` carries **20 real cycles (15 with a winner)** from the same
+  validation run; `§VERIFY`'s cross-check confirmed both counts identical before and after,
+  proving the new table's FK addition touched nothing on the existing table.
+- **A3b (`api_keys` capability widening):** both `§V` and `§W`, TEST then production. TEST's two
+  behavioural probes are the single most consequential live result in this wave: the positive
+  probe **genuinely failed `23514`** on `api_keys_sage_assent_write_requires_owner_and_agent`
+  (`DETAIL` line confirmed `owner_user_id`/`agent_id` both `null` alongside
+  `{completion_signal_write}`), and the negative probe **genuinely succeeded**, proving the
+  widened invariant fires on the new write-class capability without over-firing on an ordinary
+  consult-only credential. Production's `§W.PRE` zero-violator check (`0` rows) confirmed no real
+  credential would be invalidated, run immediately before `§W.APPLY` as instructed.
+- **Push + deploy:** two commits as planned (EE-C1 wording independently first, then everything
+  else), plus **one corrective third commit** — `operations/decision-log.md` and the
+  `2026-08-23-D4-completion-proxy-fix-WORK-ITEM.md` file were both omitted from the second
+  commit's `git add` list (an AI error, caught by re-checking `git status` after the push
+  commands were given rather than assuming the list was complete) and committed separately
+  before push. Vercel confirmed green.
+- **Post-deploy confirmation (Step 6):** a live `/api/guardrail` call on production confirmed the
+  ruled EE-C1 wording verbatim on **both** the human-readable `reasoning` field and the signed
+  `signed_assessment.assessment.kathekon_assessment.justification` field — the one-string,
+  two-surface claim proven end-to-end on the live deployment, not merely traced in source. Every
+  other field (`is_kathekon`, `kathekon_quality`, `katorthoma_proximity`, `proceed`,
+  `recommendation`) read exactly as expected for a mundane kathekon-free action, confirming the
+  wording change carried zero downstream consequence.
+- **Step 7 (the completion-signal endpoint):** deferred per the walk's own recommendation; the
+  zero-footprint confirmation (`POST` with no auth, flag unset) returned the expected `503`, no
+  footprint left on production.
+
+**R18 publication (the signed sign-off package) applied in full, same session, before the walk:**
+all three surfaces (`llms.txt`, `agent-card.json` — 23→24 extensions, `api-docs/page.tsx`) now
+carry the amended Shape-1 map wording live in the pushed commit, confirmed by the commit-time
+heading-match check (`### Epistemic status of engine outputs` — exact string match, both sides).
+
+**Production state at this addendum's close:** `SUBSTRATE_COMPLETION_SIGNAL_ENABLED` remains
+unset (route dark, confirmed live). No standing credential was minted or left active as a result
+of this walk beyond ordinary account activity. All schema changes are live and verified on both
+TEST and production. HEAD is `c77d193`, pushed, `origin/main` in sync.
+
+*End of addendum. The founder walk closed exactly as scoped — four migrations, one deploy, one
+post-deploy confirmation — with two live discrepancies caught and corrected in the moment rather
+than assumed past.*
