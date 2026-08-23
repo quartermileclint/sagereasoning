@@ -60,6 +60,11 @@ function getAdminClient(): SupabaseClient {
 
 const CYCLES_TABLE = 'idea_loop_cycles'
 const CANDIDATES_TABLE = 'idea_loop_candidates'
+/** ATRF completion signal (GS-ATRF-3, RULED 2026-08-23 Q-C1). A NEW ROW TYPE in
+ *  the watching family — the ruling's own first option — not a column set on the
+ *  candidate row. See the migration header for why: the candidate row's identity
+ *  columns are the RUNNER's, and a completion signal's identity is the AGENT's. */
+const COMPLETION_SIGNALS_TABLE = 'idea_loop_completion_signals'
 
 /**
  * The cycle→candidates embed, DISAMBIGUATED — do not simplify to
@@ -89,14 +94,37 @@ const CANDIDATES_EMBED = `${CANDIDATES_TABLE}!idea_loop_candidates_cycle_id_fkey
 /** Postgres unique_violation — a duplicate (loop_id, cycle_number). */
 const PG_UNIQUE_VIOLATION = '23505'
 
+/** Postgres foreign_key_violation. On the completion-signal insert this means
+ *  exactly one thing: the cycle row resolved a moment ago no longer exists —
+ *  a concurrent /api/credential/erase or retention sweep deleted it between the
+ *  lookup and the insert. That is the SAME state as "no such cycle", so it is
+ *  reported as such rather than as a generic write failure (PR19 finding,
+ *  2026-08-23: the race window is narrow and already fail-honest, but a 503
+ *  tells the agent "try again later" when the truthful answer is "that cycle is
+ *  gone and no retry will help"). */
+const PG_FOREIGN_KEY_VIOLATION = '23503'
+
 /** True when the error means "this table does not exist yet" — the data-rights
  *  paths are Live but the migration is its own founder-walked step, so an
  *  erasure/export/purge BEFORE the table lands must succeed (nothing to touch).
  *  A REAL post-migration failure is NOT matched and surfaces as ok:false. */
 function isMissingTableError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false
-  if (error.code === '42P01' || error.code === 'PGRST205') return true
+  // PR19 hardening (2026-08-23), applying the AE-1 F1 precedent already carried
+  // by agent-assessment-history-store.ts:437 rather than re-deriving it: a
+  // missing COLUMN is NEVER benign. Postgres undefined_column (42703, "column
+  // ... does not exist") and PostgREST's PGRST204 ("Could not find the '...'
+  // column of '...' in the schema cache") both otherwise MATCH the table-ish
+  // regexes below and false-benign — turning a real schema mismatch into a
+  // silent 0-rows-deleted / 0-rows-exported result on an R17c genuine-deletion
+  // path, which is exactly the class the C-1 observability sweep was burned by
+  // (a hardcoded wrong column name that the fake test client could not catch).
+  // A REAL post-migration failure must surface as ok:false so erasure stays
+  // verifiable.
+  if (error.code === '42703' || error.code === 'PGRST204') return false
   const msg = error.message ?? ''
+  if (/column/i.test(msg)) return false
+  if (error.code === '42P01' || error.code === 'PGRST205') return true
   return /does not exist|could not find the table|schema cache/i.test(msg)
 }
 
@@ -138,6 +166,30 @@ export interface WatchingCandidateInsert {
   novelty_basis: string | null
   cycle_outcome: string
   unavailable_dependency: string | null
+
+  // ── ATRF/S4 additive columns (migration:
+  //    supabase-idea-loop-candidates-atrf-blast-radius-and-s4-migration.sql).
+  //
+  //    DELIBERATELY OPTIONAL, not `T | null` like every field above. The
+  //    difference is load-bearing, not stylistic: the required-nullable fields
+  //    above are ALWAYS present as keys in the insert object, so a deploy that
+  //    ran before its migration would send a key for a column that does not
+  //    exist and every write would 400 with PGRST204 (memory
+  //    `build-dark-migrate-later-breaks-writes`). These six are OMITTED
+  //    ENTIRELY when the runner does not supply them, so the insert body is
+  //    byte-identical to a pre-ATRF write and the code is safe in EITHER order
+  //    against the migration. Migration-before-deploy is still walked as
+  //    standing discipline; it is simply no longer a dependency.
+  //
+  //    This is also how the S4 build-success criterion "a candidate write with
+  //    the new column absent behaves byte-identically to today" is satisfied by
+  //    construction rather than by inspection — and it is asserted by a test.
+  blast_radius?: string
+  agent_blast_radius?: string
+  target_circle?: number
+  blast_radius_basis?: Record<string, unknown>
+  traceability_check?: string
+  extraction_evidence?: Record<string, unknown>
 }
 
 export type CycleWriteOutcome =
@@ -326,6 +378,194 @@ export async function getWatchingDataForOwner(
     return { ok: true, value: (data ?? []) as unknown[] }
   } catch (e) {
     return { ok: false, error: `select ${CYCLES_TABLE} threw: ${(e as Error).message}` }
+  }
+}
+
+// ============================================================================
+// ATRF COMPLETION SIGNAL (GS-ATRF-3) — the agent's post-execution report
+//
+// Q-C1: "Receipt triggers a write — the completion signal is persisted
+// immediately on receipt. Receipt does not trigger a flag, a dashboard update,
+// or any downstream action at this stage." Nothing below reads this table for
+// any purpose except data-rights export.
+//
+// NO TRUST EVENT IS EVER WRITTEN FROM HERE — the same §2.9 posture as the
+// sibling record surfaces: "the record surfaces write no trust event; any
+// future event class is a new question for the mentor."
+// ============================================================================
+
+export interface CompletionSignalInsert {
+  loop_id: string
+  cycle_number: number
+  impression_assented_to: string
+  assent_quality: string
+  /** NULL exactly when refuse_to_attest is true — the DB carries a coherence
+   *  CHECK for this, and the route validates it first so the caller gets a named
+   *  400 rather than an opaque 23514. */
+  threshold_reached: string | null
+  refuse_to_attest: boolean
+  refusal_reason: string | null
+  examination_record_provenance: string
+  examination_record_credence: string
+  threshold_provenance: string
+  threshold_credence: string
+  /** Stamped SERVER-SIDE from the presenting completion_signal_write credential
+   *  — never caller-supplied. This is the AGENT's identity and is deliberately
+   *  independent of the cycle row's (the RUNNER's). */
+  agent_id: string | null
+  owner_user_id: string | null
+  credential_ref: string | null
+}
+
+export type CompletionSignalWriteOutcome =
+  | { status: 'written'; signal_id: string; cycle_id: string }
+  | { status: 'duplicate'; cycle_id: string }
+  | { status: 'no_such_cycle' }
+
+/**
+ * Resolve (loop_id, cycle_number) → the cycle row's id, then insert the signal.
+ *
+ * WHY THE LOOKUP: Q-C1 names loop_id as what the signal carries, but loop_id
+ * alone is NOT a cycle identifier in this schema — idea_loop_cycles is unique on
+ * the PAIR. The route requires both and this resolves them.
+ *
+ * WHY no_such_cycle IS AN HONEST OUTCOME AND NOT AN ERROR: the signal's cycle FK
+ * is NOT NULL with ON DELETE CASCADE, which is what gives this table retention
+ * and data rights for free. A signal for a cycle that was never recorded has
+ * nothing to attach to. Reporting that plainly is better than either fabricating
+ * a parent row or silently accumulating orphans — the disclosed cost is that an
+ * agent cannot report on a cycle whose runner-side write never landed.
+ *
+ * IDEMPOTENT on cycle_id via the DB unique index: a retry collides 23505 and
+ * reports { status: 'duplicate' }, writing nothing — the sibling's posture on
+ * this table's own key.
+ */
+export async function insertCompletionSignal(
+  signal: CompletionSignalInsert,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<CompletionSignalWriteOutcome>> {
+  try {
+    const { data: cycleRow, error: lookupErr } = await client
+      .from(CYCLES_TABLE)
+      .select('id')
+      .eq('loop_id', signal.loop_id)
+      .eq('cycle_number', signal.cycle_number)
+      .maybeSingle()
+    if (lookupErr) {
+      return { ok: false, error: `lookup ${CYCLES_TABLE}: ${lookupErr.message}` }
+    }
+    if (!cycleRow) {
+      return { ok: true, value: { status: 'no_such_cycle' } }
+    }
+    const cycleId = (cycleRow as { id: string }).id
+
+    // ECHO-CONSISTENCY IS STRUCTURAL, NOT CHECKED — and must stay that way.
+    // The persisted loop_id/cycle_number are the SAME values used to resolve
+    // cycleId three lines above, so a row whose echo disagrees with its FK'd
+    // cycle is unconstructible on this path. That is why no cross-check exists
+    // and why none is needed. If a future change ever accepts a caller-supplied
+    // cycle_id instead of resolving it here, this guarantee is GONE and an
+    // explicit cross-check becomes mandatory — the echoed columns exist for
+    // auditability, and an auditability column that can silently lie is worse
+    // than no column. (Raised as a NIT by independent review 2026-08-23;
+    // refuted as already-closed, then pinned so it stays closed.)
+    const { data, error } = await client
+      .from(COMPLETION_SIGNALS_TABLE)
+      .insert({ ...signal, cycle_id: cycleId } as unknown as Record<string, unknown>)
+      .select('id')
+      .single()
+    if (error) {
+      const code = (error as { code?: string }).code
+      if (code === PG_UNIQUE_VIOLATION) {
+        return { ok: true, value: { status: 'duplicate', cycle_id: cycleId } }
+      }
+      // The lookup-then-insert is not atomic (Supabase's REST seam offers no
+      // cross-statement transaction here). If the cycle vanished in between, the
+      // FK fails — and the honest report is the one the caller already
+      // understands, not a generic service error.
+      if (code === PG_FOREIGN_KEY_VIOLATION) {
+        return { ok: true, value: { status: 'no_such_cycle' } }
+      }
+      return { ok: false, error: `insert ${COMPLETION_SIGNALS_TABLE}: ${error.message}` }
+    }
+    return {
+      ok: true,
+      value: { status: 'written', signal_id: (data as { id: string }).id, cycle_id: cycleId },
+    }
+  } catch (e) {
+    return { ok: false, error: `insertCompletionSignal threw: ${(e as Error).message}` }
+  }
+}
+
+/**
+ * Genuine deletion (R17c) of an AGENT credential's completion signals.
+ *
+ * THE ONE GAP THE CASCADE DOES NOT COVER, and the reason this function exists:
+ * /api/credential/erase deletes cycles by the CYCLE's credential_ref, which is
+ * the RUNNER's. A completion signal is written under the AGENT's credential. An
+ * agent erasing its own credential would otherwise leave its signals behind,
+ * attached to someone else's cycles. Wired alongside the cycle delete.
+ */
+export function deleteCompletionSignalsForCredential(
+  credentialRef: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<number>> {
+  return deleteSignalsBy('credential_ref', credentialRef, client)
+}
+
+/** Genuine deletion (R17c) of an owner's completion signals. The profiles FK
+ *  already cascades; this is the explicit path for /api/user/delete, which does
+ *  not rely on cascade ordering elsewhere either. */
+export function deleteCompletionSignalsForOwner(
+  ownerUserId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<number>> {
+  return deleteSignalsBy('owner_user_id', ownerUserId, client)
+}
+
+async function deleteSignalsBy(
+  column: string,
+  value: string,
+  client: SupabaseClient,
+): Promise<StoreResult<number>> {
+  try {
+    const { data, error } = await client
+      .from(COMPLETION_SIGNALS_TABLE)
+      .delete()
+      .eq(column, value)
+      .select('id')
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: 0 }
+      }
+      return { ok: false, error: `delete ${COMPLETION_SIGNALS_TABLE} by ${column}: ${error.message}` }
+    }
+    return { ok: true, value: (data as unknown[] | null)?.length ?? 0 }
+  } catch (e) {
+    return { ok: false, error: `delete ${COMPLETION_SIGNALS_TABLE} threw: ${(e as Error).message}` }
+  }
+}
+
+/** Export (R17i) an owner's completion signals. Structural + the agent's own
+ *  examination record; nothing encrypted, nothing derived. */
+export async function getCompletionSignalsForOwner(
+  ownerUserId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<unknown[]>> {
+  try {
+    const { data, error } = await client
+      .from(COMPLETION_SIGNALS_TABLE)
+      .select('*')
+      .eq('owner_user_id', ownerUserId)
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: [] }
+      }
+      return { ok: false, error: `select ${COMPLETION_SIGNALS_TABLE} by owner: ${error.message}` }
+    }
+    return { ok: true, value: (data ?? []) as unknown[] }
+  } catch (e) {
+    return { ok: false, error: `select ${COMPLETION_SIGNALS_TABLE} threw: ${(e as Error).message}` }
   }
 }
 

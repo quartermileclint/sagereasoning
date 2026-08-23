@@ -92,6 +92,46 @@ export type GenerationHeuristic =
   | 'anomaly_detection'
   | 'friction_detection'
 
+/** Q-A4's RULED VERBATIM disclosure for the no-basis case. Reproduced here as a
+ *  frozen constant so no call site retypes it, and so a drift is a test failure
+ *  rather than a silent rewording of a mentor-fixed string. */
+export const BLAST_RADIUS_NO_BASIS_DISCLOSURE =
+  'loop-level blast-radius assessment not available for this candidate type; ' +
+  'agent assessment recorded separately'
+
+/** The four ruled GS-ATRF-1 dimensions, each paired with what it was derived
+ *  from. The four are NOT four alternative candidates for the indicator — they
+ *  are its four constituent readings, each a different cardinal virtue applied
+ *  to the same proposal (the unity-thesis grounding that made the four-virtue
+ *  answer "the most honest answer"). */
+export interface BlastRadiusDimensions {
+  /** dikaiosyne — what is owed to whom. Counts WHICH CIRCLES ARE ENGAGED
+   *  (reach), never how many individuals fall within an engaged circle (C16). */
+  circlesAffected: string
+  /** andreia — what is genuinely fearful and what is not, applied to reversion
+   *  difficulty. */
+  reversibility: string
+  /** phronesis — what is genuinely good, bad, and indifferent. */
+  preferredIndifferents: string
+  /** sophrosyne — how much the action exceeds what reason warrants. */
+  impulseProportionality: string
+}
+
+export type BlastRadiusBasis =
+  | {
+      assessed: true
+      dimensions: BlastRadiusDimensions
+      /** The standing disclosure that the whole indicator is a proxy assessed
+       *  without task details — carried on EVERY reading, regardless of which
+       *  dimensions drove it. */
+      proxyDisclosure: string
+    }
+  | {
+      assessed: false
+      /** Must equal BLAST_RADIUS_NO_BASIS_DISCLOSURE — the mentor's own words. */
+      disclosure: string
+    }
+
 export interface GeneratedCandidate {
   schema: 'idea-loop-generated-candidate-v1'
   /** Links back to the gap this candidate was generated to address. SETTLED
@@ -107,6 +147,43 @@ export interface GeneratedCandidate {
    *  OikeiosisGap.targetCircle for the six virtue-domain-tagged heuristics).
    *  ABSENT for a friction_detection candidate. */
   targetCircle?: OikeiosisCircleRank
+  /** GS-ATRF-2 (RULED, mentor 2026-08-23 Q-B1): the LOOP-LEVEL BLAST-RADIUS
+   *  PROXY — the loop's own indicator, computed at proposal time from this
+   *  candidate's virtue domains + targetCircle, WITHOUT task details. Vocabulary
+   *  fixed by manifest.md's ATRF section (high|medium|low); a build does not
+   *  choose it.
+   *
+   *  NEVER shorten to bare "blast radius": this is the loop-level blast-radius
+   *  PROXY, a different quantity from the permission-layer blast-radius
+   *  ENRICHMENT (item 16) — same name-root, different method, producer, and
+   *  moment. Two names, settled by ruling C10, binding on every document after.
+   *
+   *  ABSENT, not defaulted, when the proxy has no basis. A friction_detection
+   *  candidate carries no targetCircle by construction, so its dikaiosyne
+   *  dimension has nothing to derive from. Manufacturing an indicator anyway —
+   *  defaulting to 'low', or to any value — is the confident-verdict-from-absence
+   *  pattern the `fresh` endpoint's insufficient_history basis exists to prevent.
+   *  Q-A4 ruled the expression: NULL-PLUS-FLAG (the flag rides
+   *  blastRadiusBasis), NOT a fourth vocabulary value — "Null is the honest
+   *  expression of a proposition that was not formed. A fourth vocabulary value
+   *  would claim the proxy ran and produced a result, which is false." */
+  blastRadius?: 'high' | 'medium' | 'low'
+  /** The explicit proxy disclosure, PERSISTED not recomputed on read (C11: "A
+   *  high should remain auditable after the derivation changes"). Two shapes,
+   *  discriminated by `assessed`:
+   *    assessed: true  — the four ruled GS-ATRF-1 dimensions (circles affected /
+   *      reversibility / preferred indifferents at stake / impulse
+   *      proportionality) each paired with what it was derived from, plus the
+   *      standing disclosure that the whole indicator is a proxy assessed
+   *      without task details, carried on every reading regardless of which
+   *      dimensions drove it.
+   *    assessed: false — the Q-A4 RULED VERBATIM flag string. Do not reword it.
+   *
+   *  Not a bare boolean: `isProxy: true` satisfies the letter of "explicit proxy
+   *  disclosure" and loses exactly the traceability the build-success criterion
+   *  asks for — a `high` should be legible after the fact as WHICH dimensions
+   *  drove it, not merely flagged as approximate. */
+  blastRadiusBasis?: BlastRadiusBasis
   /** Six of seven heuristics tag by virtue domain; friction_detection tags by
    *  preferred-indifferent status instead (a discriminated union so a friction
    *  candidate cannot be forced into the virtue-domain shape). */

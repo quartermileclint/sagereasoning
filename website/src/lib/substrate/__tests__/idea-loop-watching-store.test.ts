@@ -21,6 +21,9 @@ import { readFileSync } from 'node:fs'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   insertCycleRecord,
+  insertCompletionSignal,
+  deleteCompletionSignalsForCredential,
+  getCompletionSignalsForOwner,
   deleteWatchingDataForOwner,
   deleteWatchingDataForCredential,
   getWatchingDataForOwner,
@@ -396,6 +399,189 @@ async function run(): Promise<void> {
     assert(
       embedUses.length === 2,
       `§7.3 both readers (dashboard + R17i export) use the shared embed constant (found ${embedUses.length}, expected 2)`,
+    )
+  }
+
+  // ==========================================================================
+  // ATRF completion signal — the lookup/insert race (PR19 finding, 2026-08-23)
+  //
+  // insertCompletionSignal resolves (loop_id, cycle_number) -> cycle_id, then
+  // inserts. Two statements, no transaction between them. If a concurrent
+  // credential-erase or retention sweep deletes the cycle in that gap, the
+  // insert fails the FK. The honest report is no_such_cycle — the state the
+  // caller already has a 409 contract for — not a generic 503 telling the agent
+  // to retry something no retry can fix.
+  // ==========================================================================
+  {
+    const raceClient = {
+      from(table: string) {
+        if (table === 'idea_loop_cycles') {
+          return {
+            select: () => ({
+              eq: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({ data: { id: 'cycle-vanishing' }, error: null }),
+                }),
+              }),
+            }),
+          }
+        }
+        return {
+          insert: () => ({
+            select: () => ({
+              single: async () => ({
+                data: null,
+                error: { code: '23503', message: 'insert or update violates foreign key constraint' },
+              }),
+            }),
+          }),
+        }
+      },
+    } as unknown as SupabaseClient
+
+    const res = await insertCompletionSignal(
+      {
+        loop_id: 'l', cycle_number: 1,
+        impression_assented_to: 'i', assent_quality: 'examined',
+        threshold_reached: 'katorthoma', refuse_to_attest: false, refusal_reason: null,
+        examination_record_provenance: 'inference', examination_record_credence: 'probably-true',
+        threshold_provenance: 'inference', threshold_credence: 'probably-true',
+        agent_id: 'a', owner_user_id: null, credential_ref: 'api_key:c',
+      },
+      raceClient,
+    )
+    assert(res.ok === true, 'RACE-1 an FK violation on the completion-signal insert is NOT reported as a store error')
+    assert(
+      res.ok && res.value.status === 'no_such_cycle',
+      'RACE-2 the vanished-cycle race reports no_such_cycle (the honest 409), not a generic 503 inviting a futile retry',
+    )
+  }
+
+  // ==========================================================================
+  // missing-table-benign hardening (PR19 finding, 2026-08-23)
+  //
+  // A missing COLUMN is never benign. Both 42703 and PGRST204 carry messages
+  // ("column ... does not exist" / "Could not find the '...' column ... in the
+  // schema cache") that MATCH the table-ish regexes, so without the guard they
+  // false-benign into a silent 0-rows result on an R17c genuine-deletion path.
+  // Applying the AE-1 F1 precedent already carried by
+  // agent-assessment-history-store.ts rather than re-deriving it.
+  // ==========================================================================
+  {
+    function clientFailingWith(err: { code?: string; message?: string }) {
+      return {
+        from: () => ({
+          delete: () => ({
+            eq: () => ({ select: async () => ({ data: null, error: err }) }),
+          }),
+          select: () => ({
+            eq: async () => ({ data: null, error: err }),
+          }),
+        }),
+      } as unknown as SupabaseClient
+    }
+
+    // GENUINELY missing table -> benign (0), so the data-rights routes keep
+    // working before the migration lands.
+    const missingTable = await deleteCompletionSignalsForCredential(
+      'api_key:x',
+      clientFailingWith({ code: '42P01', message: 'relation "idea_loop_completion_signals" does not exist' }),
+    )
+    assert(
+      missingTable.ok === true && missingTable.value === 0,
+      'MTB-1 a genuinely missing table stays benign (0 rows) — the pre-migration data-rights posture is preserved',
+    )
+
+    // Missing COLUMN -> NOT benign. Note the message alone would match
+    // /does not exist/, which is precisely the trap.
+    const missingColumn = await deleteCompletionSignalsForCredential(
+      'api_key:x',
+      clientFailingWith({ code: '42703', message: 'column "credential_ref" does not exist' }),
+    )
+    assert(
+      missingColumn.ok === false,
+      'MTB-2 a missing COLUMN (42703) surfaces as ok:false, never a silent 0-rows "erased" — a real schema mismatch on a genuine-deletion path must be visible',
+    )
+
+    const pgrst204 = await deleteCompletionSignalsForCredential(
+      'api_key:x',
+      clientFailingWith({ code: 'PGRST204', message: "Could not find the 'credential_ref' column of 'idea_loop_completion_signals' in the schema cache" }),
+    )
+    assert(
+      pgrst204.ok === false,
+      'MTB-3 PGRST204 surfaces as ok:false too — its message contains "schema cache", the exact substring the benign regex matches on',
+    )
+
+    // Same guarantee on the export path.
+    const exportColumn = await getCompletionSignalsForOwner(
+      'owner-1',
+      clientFailingWith({ code: '42703', message: 'column "owner_user_id" does not exist' }),
+    )
+    assert(
+      exportColumn.ok === false,
+      'MTB-4 the R17i export path applies the same hardening — a column mismatch is not exported as an empty result',
+    )
+  }
+
+  // ==========================================================================
+  // Echo-consistency is STRUCTURAL (independent review 2026-08-23, NIT refuted
+  // as already-closed, then pinned). The loop_id/cycle_number persisted on a
+  // completion signal are the same values used to RESOLVE its cycle_id, so a
+  // row whose echo disagrees with its FK'd cycle cannot be constructed. Pinned
+  // because a refactor to a caller-supplied cycle_id would silently destroy the
+  // guarantee, and an auditability column that can lie is worse than none.
+  // ==========================================================================
+  {
+    const seen: { lookupLoopId?: string; lookupCycleNumber?: number; inserted?: Record<string, unknown> } = {}
+    const echoClient = {
+      from(table: string) {
+        if (table === 'idea_loop_cycles') {
+          return {
+            select: () => ({
+              eq: (_c1: string, v1: string) => {
+                seen.lookupLoopId = v1
+                return {
+                  eq: (_c2: string, v2: number) => {
+                    seen.lookupCycleNumber = v2
+                    return { maybeSingle: async () => ({ data: { id: 'cycle-resolved' }, error: null }) }
+                  },
+                }
+              },
+            }),
+          }
+        }
+        return {
+          insert: (row: Record<string, unknown>) => {
+            seen.inserted = row
+            return { select: () => ({ single: async () => ({ data: { id: 'sig-1' }, error: null }) }) }
+          },
+        }
+      },
+    } as unknown as SupabaseClient
+
+    await insertCompletionSignal(
+      {
+        loop_id: 'loop-echo', cycle_number: 11,
+        impression_assented_to: 'i', assent_quality: 'examined',
+        threshold_reached: 'katorthoma', refuse_to_attest: false, refusal_reason: null,
+        examination_record_provenance: 'inference', examination_record_credence: 'probably-true',
+        threshold_provenance: 'inference', threshold_credence: 'probably-true',
+        agent_id: 'a', owner_user_id: null, credential_ref: 'api_key:c',
+      },
+      echoClient,
+    )
+    assert(
+      seen.lookupLoopId === 'loop-echo' && seen.lookupCycleNumber === 11,
+      'ECHO-1 the cycle lookup keys on the SAME loop_id/cycle_number the caller supplied',
+    )
+    assert(
+      seen.inserted?.loop_id === seen.lookupLoopId &&
+        seen.inserted?.cycle_number === seen.lookupCycleNumber,
+      'ECHO-2 the persisted echo columns are byte-identical to the lookup keys — a row disagreeing with its FK-resolved cycle is unconstructible on this path',
+    )
+    assert(
+      seen.inserted?.cycle_id === 'cycle-resolved',
+      'ECHO-3 cycle_id is the RESOLVED value, never caller-supplied (the property ECHO-2 depends on)',
     )
   }
 

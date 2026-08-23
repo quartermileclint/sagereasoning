@@ -254,6 +254,92 @@ Structural errors (all **HTTP 400**):
 
 In a consult response the signed envelope is the top-level `assessment` object: `assessment.signature` and `assessment.key_id` cover the **nested `assessment.assessment` object exactly** (the deterministic Layer-2 verdict). The canonical form that verifies is the JSON of `assessment.assessment` with **sorted keys at every level, compact separators (no spaces), and raw UTF-8** (`ensure_ascii=false`); an ASCII-escaped canonicalization does **not** verify. During a key rotation, `previous` carries the prior `{ key_id, public_key_pem, issued_at, retires_at }` and `rotation_overlap_until` the overlap deadline — try the current key first, then `previous` within the overlap window.
 
+### Epistemic status of engine outputs
+
+Every engine output carries an epistemic status on two orthogonal axes:
+`provenance` (how did this proposition arrive?) — `observation | inference | assumption | unknown`;
+and `credence` (how likely is it true?) — `established | probably-true | unknown | probably-false`.
+Neither axis reduces to the other: a proposition can be an observation that is probably false (a
+misread instrument), or an assumption that is established (a foundational axiom treated as given).
+
+This section is a MAP, not a wire field. No status entry is added to any payload. It names, in one
+place, what the engine's existing machinery already expresses per-mechanism, so a consumer can join
+the map to the payload. There is deliberately no served `credence` value — the credence axis stays
+expressed in the existing per-mechanism vocabularies (`ambiguity_notes`, `stage_scores`, the
+corroboration report's findings).
+
+Seven output classes:
+
+(a) Verbatim evidence spans — provenance: observation. The engine's ONLY observation-class output.
+    Every classification wraps an observation anchor, so the engine's inference outputs are
+    inference-over-observation, not inference-from-nothing.
+
+(b) Layer-1 classifications (passions, oikeiosis circles, kathekon factors, urgency indicators,
+    orientation observations) — provenance: inference, observation-anchored. The extraction's
+    "do not guess" routing and its `ambiguity_notes` channel are this class's existing expression of
+    the `unknown` value; they are not separate from the status structure.
+
+(c) The two licensed structured judgements (`obligation_assessment`, `examined_before_acting`) —
+    provenance: inference, bounded by explicit prompt licence. The licence boundary is itself the
+    disclosure: these two outputs are inference operating at the edge of what the extraction contract
+    authorises.
+    Conditionality: `obligation_assessment` and `examined_before_acting` are
+    corroboration-checked on this consult only when the action text was supplied, the check flag was
+    on, and dikaiosyne weighting was on (layer2-mechanisms.ts:2808-2818); unchecked otherwise.
+
+(d) Explicit refusal states (`sub_species: null`; `is_kathekon: null`; an argued `indeterminate`;
+    `single_snapshot`; orientation `indeterminate`) — provenance: unknown, expressed. `unknown` means
+    the engine COULD NOT FORM the proposition. All of these are the same claim.
+
+(e) Disclosed conservative defaults (an absent obligation read as reflexive; a stage-less grave act
+    read conservatively; a mixed orientation read as indeterminate; a defaulted causal stage) —
+    `{ provenance: assumption, credence: established }`, with the conservative direction named. The
+    credence is `established`, NOT `probably-true`: these are not guesses, they are principled
+    defaults with a documented direction — established as the conservative reading given the
+    available evidence.
+
+(f) Doctrinal prior constants —
+    `honourability_grade` and `advantageousness_grade` are derived from fixed per-circle
+    doctrinal constants (the Stoic framework's own structure), factor-bumped by the extraction. They
+    are not extracted from the submitted text; they are prior-based assessments,
+    `{ provenance: assumption, credence: established }`.
+
+(g) Layer-2 computed fields (proximity base, kathekon quality, per-domain floors, the aggregate,
+    `proximity_floors.basis`, `stage_scores`) — provenance: inference, inheriting the WEAKEST
+    provenance of the field's inputs. Derivation note: these fields are deterministically derived
+    from the Layer-1 extraction; that determinism is real and is attested, but it is expressed on the
+    SIGNATURE axis, not the provenance axis. Computation is a transformation method, not an
+    epistemic origin — so there is no fifth `computation` provenance value, deliberately.
+
+Two standing constraints on the whole status layer:
+
+A per-field status entry of `{ provenance: inference, credence: probably-true }` must not be
+read as verified true. The engine cannot detect a clean lie at the field level — a well-formed false
+input produces a well-formed output. The A2 structural residual is disclosed at the surface level;
+per-field status entries do not imply A2 coverage and must not be constructed to suggest it.
+
+The Ed25519 signature attests the deterministic computation's reproducibility from the
+extraction; it does not attest the extraction's truth. See `does_not_attest`
+(trust-record-payload.ts:52) and the R18 surface disclosures for the full condition.
+
+Interim disclosure — `ruling_faculty_state`. This field's deliberation input is currently a proxy: it
+counts the presence of deliberation notes rather than testing whether any note is substantive, so a
+filler note is counted as deliberation. The correction that fixed this class was deliberately scoped
+to the proximity reading only; `ruling_faculty_state` was left on the older proxy, and its own
+docstring says so. Named here while the proxy stands; this paragraph is removed at the same commit
+that replaces the proxy.
+
+Three disclosed routes where confidence can exceed basis, none closed by this map. First: an
+ARGUED `obligation_assessment: met` removes the dikaiosyne floor — this is by design; the
+argument is the guard, and the floor's removal is conditional on the argument's presence, not a
+gap in the guard. Second: a lying `examined_before_acting: true` on a rash carried-out act lifts
+the floor — the engine cannot detect a clean lie at the field level (stated above); this is the
+same A2 residual in a specific form. Third: a harm your self-report omits from the text entirely
+has nothing to corroborate against — this is structural, disclosed, not addressed.
+
+This map covers ENGINE outputs only. The trajectory overlay, practice suggestions, orientation
+readings, and the loop fold each sit under their own disclosure regime and are outside it.
+
 ### Guardrail — Stoic Risk Gate for AI Agents (V3)
 
 POST https://www.sagereasoning.com/api/guardrail

@@ -291,17 +291,31 @@ test('flag: "false" → false (strict === "true")', () => {
 
 // ── capabilitiesIncludeWriteClass — must match the 6e §A DB CHECK set, as
 // widened 2026-08-09 by supabase-api-keys-watching-write-capability-migration.sql
-// §W (agent-circles `watching`, QW-B RULED) ─────────────────────────────────
+// §W (agent-circles `watching`, QW-B RULED) and again 2026-08-23 by
+// supabase-api-keys-completion-signal-write-capability-migration.sql §W (ATRF
+// GS-ATRF-3; Q-C1 ruled the ACTOR — the agent, post-execution — and a dedicated
+// capability is what makes that separation enforceable at mint) ─────────────
 // (used by the api-keys UPC mint pre-validation; CI-14 Step 7 + the watching build).
-test('write-class: the set is exactly {accreditation_write, calling, reflect, watching_write}', () => {
+//
+// THIS PIN IS LOAD-BEARING AND IS MEANT TO RED WHEN THE SET CHANGES. It caught
+// the 2026-08-23 addition, which is exactly its job: the DB CHECK arrays are
+// hard-coded, so a code-side widening WITHOUT the paired founder-walked migration
+// re-opens the opaque-500-vs-clear-400 gap. If you are here because this test
+// went red, the question is not "update the number" — it is "has the companion
+// migration's §V AND §W been applied on every environment?"
+test('write-class: the set is exactly {accreditation_write, calling, reflect, watching_write, completion_signal_write}', () => {
   assert(
-    WRITE_CLASS_CAPABILITIES.length === 4 &&
+    WRITE_CLASS_CAPABILITIES.length === 5 &&
       WRITE_CLASS_CAPABILITIES.includes('accreditation_write') &&
       WRITE_CLASS_CAPABILITIES.includes('calling') &&
       WRITE_CLASS_CAPABILITIES.includes('reflect') &&
-      WRITE_CLASS_CAPABILITIES.includes('watching_write'),
-    'write-class set matches the 6e/6e-watching-widened CHECK overlap array',
+      WRITE_CLASS_CAPABILITIES.includes('watching_write') &&
+      WRITE_CLASS_CAPABILITIES.includes('completion_signal_write'),
+    'write-class set matches the 6e / watching-widened / completion-signal-widened CHECK overlap array',
   )
+})
+test('write-class: completion_signal_write alone → true (2026-08-23)', () => {
+  assert(capabilitiesIncludeWriteClass(['completion_signal_write']), 'completion_signal_write')
 })
 test('write-class: watching_write alone → true (2026-08-09)', () => {
   assert(capabilitiesIncludeWriteClass(['watching_write']), 'watching_write')

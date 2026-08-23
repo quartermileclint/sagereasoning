@@ -88,6 +88,7 @@ import {
   type WatchingCycleInsert,
 } from '@/lib/substrate/idea-loop-watching-store'
 import type { StoreResult } from '@/lib/substrate/trust-core/trust-core-store'
+import { BLAST_RADIUS_NO_BASIS_DISCLOSURE } from '@/lib/substrate/idea-loop-types'
 
 // ════════════════════════════════════════════════════════════════════════════
 // Flag (dark-route pattern — shared by BOTH watching routes)
@@ -157,6 +158,49 @@ const VIRTUE_DOMAINS = new Set<string>(['phronesis', 'dikaiosyne', 'andreia', 's
  *  exact sibling string of STRUCTURAL_NOVELTY_LIMITATION's outcome in
  *  fresh/handler.ts; ruled §1 item 7 requires the candidate row to carry it). */
 export const NOVELTY_BASIS_VALUES = ['insufficient_history'] as const
+
+// ════════════════════════════════════════════════════════════════════════════
+// ATRF / S4 vocabularies (RULED — transcribed, not chosen here; the migration's
+// CHECK constraints carry the identical sets, battery-pinned against drift)
+// ════════════════════════════════════════════════════════════════════════════
+
+/** GS-ATRF-1's three values, fixed in manifest.md's ATRF section. A build
+ *  inherits this enum; it does not choose one. Used for BOTH records — the
+ *  loop's own indicator and the agent's own assessment. */
+export const BLAST_RADIUS_VALUES = ['high', 'medium', 'low'] as const
+
+/** The B7 four-valued recording vocabulary (S4 / traceability-criterion.md).
+ *  `not_comparable` behaves like `unlabelled` under B5's frozen discriminator:
+ *  out of scope, NEVER inferred clean. */
+export const TRACEABILITY_CHECK_VALUES = [
+  'clean',
+  'diverged',
+  'not_comparable',
+  'unlabelled',
+] as const
+
+/** The four ruled GS-ATRF-1 dimensions. All four are required when the basis
+ *  reports `assessed: true` — the four are not alternatives, they are the
+ *  indicator's four constituent readings (one per cardinal virtue). */
+export const BLAST_RADIUS_DIMENSION_KEYS = [
+  'circles_affected',
+  'reversibility',
+  'preferred_indifferents',
+  'impulse_proportionality',
+] as const
+
+// Input caps for the S4 evidence payload. Same house rationale as the existing
+// caps above: generous headroom against a real cycle, closing payload abuse
+// without ever touching a legitimate write. A real extraction carries ~3
+// elements per category (the cycle-5 incident's own numbers were 3/3/2).
+export const MAX_EXTRACTION_ELEMENTS_PER_CATEGORY = 32
+export const MAX_EXTRACTION_ELEMENT_CHARS = 1000
+/** Total serialized bound on extraction_evidence — the real abuse vector is
+ *  total payload size, not any single field, and unknown keys are permitted
+ *  (so the shape can grow) but they count toward this. */
+export const MAX_EXTRACTION_EVIDENCE_CHARS = 20000
+export const MAX_DIMENSION_CHARS = 1000
+
 
 // ════════════════════════════════════════════════════════════════════════════
 // Input caps (build-time details under the house input-cap pattern, ruled §2.3;
@@ -333,6 +377,204 @@ function optionalDomainArray(v: unknown, field: string, errors: string[]): strin
   return [...(v as string[])]
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ATRF / S4 field validation
+//
+// COHERENCE IS ENFORCED HERE, not in a DB CHECK — deliberately, and for two
+// reasons stated so a later reader does not "fix" it: (1) the house pattern on
+// this table is that the route 400s on an unrecognised value BEFORE any DB call
+// is made, giving a clear named error instead of an opaque 23514; (2) a
+// cross-column DB CHECK would destroy the independent nullability that makes
+// each of the six columns separately droppable and separately deployable.
+// ════════════════════════════════════════════════════════════════════════════
+
+/** Optional member of a fixed vocabulary. Returns undefined when absent — the
+ *  caller then OMITS the key entirely rather than sending an explicit null. */
+function optionalEnum(
+  v: unknown,
+  field: string,
+  allowed: readonly string[],
+  errors: string[],
+): string | undefined {
+  if (v === undefined || v === null) return undefined
+  if (typeof v !== 'string' || !allowed.includes(v)) {
+    errors.push(`${field} must be one of ${allowed.join(' | ')} when present`)
+    return undefined
+  }
+  return v
+}
+
+/** The IDEA loop's own LOCAL five-rank oikeiosis enumeration
+ *  (OikeiosisCircleRank, idea-loop-types.ts) — 1..5 inclusive, integer.
+ *  C15 closure: this is the enumeration the dikaiosyne dimension counts over.
+ *  It is NOT profiles.ts's free-form OikeiosisCircle and NOT the
+ *  layer1-extractor's string vocabulary. Naming the domain is what C15
+ *  requires; the coexistence of the vocabularies is not reopened here. */
+function optionalCircleRank(v: unknown, field: string, errors: string[]): number | undefined {
+  if (v === undefined || v === null) return undefined
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < 1 || v > 5) {
+    errors.push(`${field} must be an integer 1-5 (the loop's OikeiosisCircleRank) when present`)
+    return undefined
+  }
+  return v
+}
+
+/** Validate the two-shape blast-radius basis, discriminated by `assessed`.
+ *
+ *  The assessed:false disclosure string is RULED VERBATIM (Q-A4) and is
+ *  compared against the frozen constant rather than pattern-matched — a
+ *  reworded flag is a rejected write, not a silently-stored paraphrase of the
+ *  mentor's own words. */
+function optionalBlastRadiusBasis(
+  v: unknown,
+  field: string,
+  errors: string[],
+): Record<string, unknown> | undefined {
+  if (v === undefined || v === null) return undefined
+  if (!isRecord(v)) {
+    errors.push(`${field} must be an object when present`)
+    return undefined
+  }
+  const assessed = v.assessed
+  if (typeof assessed !== 'boolean') {
+    errors.push(`${field}.assessed must be a boolean (the shape discriminant)`)
+    return undefined
+  }
+
+  if (assessed === false) {
+    if (v.disclosure !== BLAST_RADIUS_NO_BASIS_DISCLOSURE) {
+      errors.push(
+        `${field}.disclosure must be the ruled verbatim string when assessed is false ` +
+          `(Q-A4; reword it and the write is refused)`,
+      )
+      return undefined
+    }
+    return { assessed: false, disclosure: BLAST_RADIUS_NO_BASIS_DISCLOSURE }
+  }
+
+  const dims = v.dimensions
+  if (!isRecord(dims)) {
+    errors.push(`${field}.dimensions must be an object when assessed is true`)
+    return undefined
+  }
+  const out: Record<string, string> = {}
+  for (const key of BLAST_RADIUS_DIMENSION_KEYS) {
+    const raw = dims[key]
+    if (typeof raw !== 'string' || !raw.trim()) {
+      errors.push(
+        `${field}.dimensions.${key} must be a non-empty string — all four ruled ` +
+          `GS-ATRF-1 dimensions are required when assessed is true (they are the ` +
+          `indicator's four constituent readings, not four alternatives)`,
+      )
+      return undefined
+    }
+    if (raw.length > MAX_DIMENSION_CHARS) {
+      errors.push(`${field}.dimensions.${key} exceeds ${MAX_DIMENSION_CHARS} chars`)
+      return undefined
+    }
+    out[key] = raw.trim()
+  }
+  const proxyDisclosure = v.proxy_disclosure
+  if (typeof proxyDisclosure !== 'string' || !proxyDisclosure.trim()) {
+    errors.push(
+      `${field}.proxy_disclosure must be a non-empty string — the standing disclosure ` +
+        `that the whole indicator is a proxy assessed without task details rides EVERY ` +
+        `reading, regardless of which dimensions drove it`,
+    )
+    return undefined
+  }
+  if (proxyDisclosure.length > MAX_DIMENSION_CHARS) {
+    errors.push(`${field}.proxy_disclosure exceeds ${MAX_DIMENSION_CHARS} chars`)
+    return undefined
+  }
+  return { assessed: true, dimensions: out, proxy_disclosure: proxyDisclosure.trim() }
+}
+
+/** One endpoint's extraction record inside extraction_evidence. */
+function validateExtractionSide(
+  v: unknown,
+  field: string,
+  errors: string[],
+): boolean {
+  if (!isRecord(v)) {
+    errors.push(`${field} must be an object when present`)
+    return false
+  }
+  for (const cat of ['control_filter_elements', 'oikeiosis_circles_engaged', 'kathekon_factors']) {
+    const arr = v[cat]
+    if (arr === undefined || arr === null) continue
+    if (!Array.isArray(arr)) {
+      errors.push(`${field}.${cat} must be an array of strings when present`)
+      return false
+    }
+    if (arr.length > MAX_EXTRACTION_ELEMENTS_PER_CATEGORY) {
+      errors.push(`${field}.${cat} must carry at most ${MAX_EXTRACTION_ELEMENTS_PER_CATEGORY} elements`)
+      return false
+    }
+    for (const el of arr) {
+      if (typeof el !== 'string') {
+        errors.push(`${field}.${cat} must be an array of strings when present`)
+        return false
+      }
+      if (el.length > MAX_EXTRACTION_ELEMENT_CHARS) {
+        errors.push(`${field}.${cat} has an element exceeding ${MAX_EXTRACTION_ELEMENT_CHARS} chars`)
+        return false
+      }
+    }
+  }
+  if (v.virtue_domains !== undefined && v.virtue_domains !== null) {
+    if (
+      !Array.isArray(v.virtue_domains) ||
+      v.virtue_domains.some((d) => typeof d !== 'string' || !VIRTUE_DOMAINS.has(d))
+    ) {
+      errors.push(`${field}.virtue_domains must be an array of ${[...VIRTUE_DOMAINS].join(' | ')}`)
+      return false
+    }
+  }
+  if (v.proximity !== undefined && v.proximity !== null) {
+    if (typeof v.proximity !== 'string' || !PROXIMITY_VALUES.has(v.proximity)) {
+      errors.push(`${field}.proximity must be one of ${[...PROXIMITY_VALUES].join(' | ')}`)
+      return false
+    }
+  }
+  return true
+}
+
+/** The S4 traceability evidence. Bounded verbatim, not a derived summary:
+ *  the criterion's first property is SOURCE-EXISTENCE ("can a specific span of
+ *  the submitted text be named as this element's source?"), which a count
+ *  cannot answer. Unknown top-level keys are PERMITTED so the shape can grow,
+ *  but they count toward the total serialized bound. */
+function optionalExtractionEvidence(
+  v: unknown,
+  field: string,
+  errors: string[],
+): Record<string, unknown> | undefined {
+  if (v === undefined || v === null) return undefined
+  if (!isRecord(v)) {
+    errors.push(`${field} must be an object when present`)
+    return undefined
+  }
+  const serialized = JSON.stringify(v)
+  if (serialized.length > MAX_EXTRACTION_EVIDENCE_CHARS) {
+    errors.push(`${field} exceeds ${MAX_EXTRACTION_EVIDENCE_CHARS} serialized chars`)
+    return undefined
+  }
+  if (v.winner !== undefined && v.winner !== null && typeof v.winner !== 'boolean') {
+    errors.push(`${field}.winner must be a boolean when present`)
+    return undefined
+  }
+  for (const side of ['guardrail', 'reason']) {
+    if (v[side] === undefined || v[side] === null) continue
+    if (!validateExtractionSide(v[side], `${field}.${side}`, errors)) return undefined
+  }
+  if (v.divergence !== undefined && v.divergence !== null && !isRecord(v.divergence)) {
+    errors.push(`${field}.divergence must be an object when present`)
+    return undefined
+  }
+  return v as Record<string, unknown>
+}
+
 export interface ParsedWatchingBody {
   cycle: Omit<WatchingCycleInsert, 'agent_id' | 'owner_user_id' | 'credential_ref'>
   candidates: WatchingCandidateInsert[]
@@ -477,7 +719,79 @@ export function parseWatchingBody(body: unknown, errors: string[]): ParsedWatchi
     const unavailableDependency = optionalCappedString(
       rc.unavailable_dependency, `candidates[${i}].unavailable_dependency`, MAX_REF_CHARS, errors,
     )
+    // ── ATRF/S4 additive fields (all optional; OMITTED, never explicit-null) ──
+    const blastRadius = optionalEnum(
+      rc.blast_radius, `candidates[${i}].blast_radius`, BLAST_RADIUS_VALUES, errors,
+    )
+    const agentBlastRadius = optionalEnum(
+      rc.agent_blast_radius, `candidates[${i}].agent_blast_radius`, BLAST_RADIUS_VALUES, errors,
+    )
+    const targetCircle = optionalCircleRank(rc.target_circle, `candidates[${i}].target_circle`, errors)
+    const blastRadiusBasis = optionalBlastRadiusBasis(
+      rc.blast_radius_basis, `candidates[${i}].blast_radius_basis`, errors,
+    )
+    const traceabilityCheck = optionalEnum(
+      rc.traceability_check, `candidates[${i}].traceability_check`, TRACEABILITY_CHECK_VALUES, errors,
+    )
+    const extractionEvidence = optionalExtractionEvidence(
+      rc.extraction_evidence, `candidates[${i}].extraction_evidence`, errors,
+    )
     if (errors.length > before) return
+
+    // Q-A4 COHERENCE — the null-plus-flag rule, enforced here because the
+    // migration deliberately carries no cross-column CHECK.
+    //
+    //   value  ⟺ the proxy RAN            ⟺ basis.assessed === true
+    //   absent ⟺ the proxy had NO BASIS   ⟺ basis.assessed === false
+    //
+    // "Null is the honest expression of a proposition that was not formed. A
+    // fourth vocabulary value would claim the proxy ran and produced a result,
+    // which is false." A stored basis that disagrees with the indicator's
+    // presence would make the flag meaningless — which is the whole reason the
+    // flag was elected onto the row in the first place.
+    //
+    // NOTE the asymmetry, and that it is deliberate: a candidate may carry
+    // NEITHER (an older runner that computes no proxy at all — the byte-identical
+    // pre-ATRF write), and that is not an error. The rule binds only when a
+    // basis is actually supplied.
+    if (blastRadiusBasis !== undefined) {
+      const assessed = blastRadiusBasis.assessed === true
+      if (assessed && blastRadius === undefined) {
+        errors.push(
+          `candidates[${i}]: blast_radius_basis.assessed is true but blast_radius is absent — ` +
+            `a basis reporting the proxy ran must accompany the value it produced`,
+        )
+        return
+      }
+      if (!assessed && blastRadius !== undefined) {
+        errors.push(
+          `candidates[${i}]: blast_radius_basis.assessed is false but blast_radius carries ` +
+            `'${blastRadius}' — the no-basis flag claims the proxy was not run (Q-A4 null-plus-flag)`,
+        )
+        return
+      }
+    }
+
+    // PR19 finding (2026-08-23, MEDIUM): Q-B1 elected target_circle as REQUIRED,
+    // not merely preferred, on this exact stated reasoning — "without
+    // target_circle, a persisted high is not auditable because the dikaiosyne
+    // dimension's input is unrecoverable from the row." That reasoning is about
+    // a PARTICULAR ROW, not merely the column's existence: a row that persists
+    // an ASSESSED blast_radius reading with no target_circle recreates the exact
+    // unauditable state the ruling elected the column to close — the free-prose
+    // circles_affected field is not a substitute for the recoverable numeric
+    // rank. Enforced ONLY when the basis reports assessed:true (a friction
+    // candidate's null-plus-flag case has no dikaiosyne-dimension reading to
+    // audit in the first place, so nothing to require here — consistent with
+    // the coherence block above).
+    if (blastRadiusBasis !== undefined && blastRadiusBasis.assessed === true && targetCircle === undefined) {
+      errors.push(
+        `candidates[${i}]: blast_radius_basis reports assessed:true but target_circle is absent — ` +
+          `an assessed blast-radius reading is not auditable without the circle its dikaiosyne ` +
+          `dimension was computed against (Q-B1: target_circle is required, not merely preferred)`,
+      )
+      return
+    }
 
     candidates.push({
       gap_ref: candGapRef,
@@ -494,6 +808,15 @@ export function parseWatchingBody(body: unknown, errors: string[]): ParsedWatchi
       novelty_basis: (noveltyBasis as string | undefined) ?? null,
       cycle_outcome: outcome,
       unavailable_dependency: unavailableDependency,
+      // Spread-when-present: an absent field contributes NO KEY, so the insert
+      // body stays byte-identical to a pre-ATRF write (and therefore works
+      // against a database that has not yet had the migration applied).
+      ...(blastRadius !== undefined ? { blast_radius: blastRadius } : {}),
+      ...(agentBlastRadius !== undefined ? { agent_blast_radius: agentBlastRadius } : {}),
+      ...(targetCircle !== undefined ? { target_circle: targetCircle } : {}),
+      ...(blastRadiusBasis !== undefined ? { blast_radius_basis: blastRadiusBasis } : {}),
+      ...(traceabilityCheck !== undefined ? { traceability_check: traceabilityCheck } : {}),
+      ...(extractionEvidence !== undefined ? { extraction_evidence: extractionEvidence } : {}),
     })
   })
 

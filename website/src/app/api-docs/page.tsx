@@ -593,6 +593,28 @@ export default function ApiDocsPage() {
             yields a profile computed over those facts.
           </li>
           <li>
+            <strong>Epistemic status of engine outputs (a map, not a field)</strong> &mdash; every engine output
+            carries a status on two orthogonal axes: <code>provenance</code>
+            (<code>observation | inference | assumption | unknown</code>) and <code>credence</code>
+            (<code>established | probably-true | unknown | probably-false</code>). <strong>No status entry is
+            added to any payload</strong> and no <code>credence</code> value is served &mdash; the map names what
+            the existing machinery already expresses. In brief: verbatim evidence spans are the engine&apos;s only
+            <em>observation</em>-class output; Layer-1 classifications are <em>inference</em>, observation-anchored;
+            <code>obligation_assessment</code> and <code>examined_before_acting</code> are inference bounded by
+            explicit prompt licence, and are corroboration-checked only when the action text was supplied and both
+            flags were on; explicit refusal states (<code>sub_species: null</code>, <code>is_kathekon: null</code>,
+            an argued <code>indeterminate</code>) are <em>unknown</em> &mdash; the engine could not form the
+            proposition; conservative defaults and the doctrinal prior grades
+            (<code>honourability_grade</code>/<code>advantageousness_grade</code>, derived from fixed per-circle
+            constants and <strong>not</strong> extracted from your text) are
+            <code>{'{ provenance: assumption, credence: established }'}</code>; and Layer-2 computed fields are
+            inference inheriting the <strong>weakest</strong> provenance of their inputs &mdash; the
+            computation&apos;s determinism is attested on the <em>signature</em> axis, not the provenance axis. A
+            status of <code>{'{ inference, probably-true }'}</code> <strong>must not be read as verified
+            true</strong>: the engine cannot detect a clean lie at the field level, and these entries do not imply
+            coverage of that residual. See llms.txt &quot;Epistemic status of engine outputs&quot; for the full map.
+          </li>
+          <li>
             <strong>Force-clarification &amp; continuation</strong> &mdash; when a situation is too ambiguous
             to assess on one axis, <code>/api/reason</code> returns HTTP 200 with
             <code> {'{ clarification_required: true, trigger_code, clarification: { question_text }, continuation_token }'}</code>

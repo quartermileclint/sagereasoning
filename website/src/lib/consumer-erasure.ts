@@ -45,7 +45,10 @@ import {
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
-import { deleteWatchingDataForCredential } from './substrate/idea-loop-watching-store'
+import {
+  deleteWatchingDataForCredential,
+  deleteCompletionSignalsForCredential,
+} from './substrate/idea-loop-watching-store'
 // Stoa ST2 (R17c, 2026-08-03) — genuine deletion of the agent's Stoa entries by
 // owning credential. Missing-table-benign until the migration lands.
 import { deleteStoaDataForCredential } from './stoa/stoa-store'
@@ -207,6 +210,11 @@ export interface ErasureResult {
   /** watching (agent-circles, R17c, ruled §2.7): idea_loop_cycles rows hard-deleted
    *  for this credential (candidate rows cascade via FK). */
   watching_deleted: number
+  /** ATRF completion signals (GS-ATRF-3, R17c): idea_loop_completion_signals rows
+   *  hard-deleted for this credential. Reported separately from watching_deleted
+   *  because the two are keyed on DIFFERENT actors' credentials — the runner's
+   *  and the agent's — and a single number would hide which was covered. */
+  completion_signals_deleted: number
   billing_depersonalised: number
   /** Non-fatal issues (e.g. the best-effort billing de-personalisation) — the
    *  personal data is gone regardless; these are surfaced for the audit record. */
@@ -257,6 +265,19 @@ export async function eraseExternalConsumerCredential(
   //         watching migration lands.
   const watching = await deleteWatchingDataForCredential(credentialRef, client)
   if (!watching.ok) return { ok: false, error: `watching: ${watching.error}` }
+
+  // 1c-iv. ATRF completion signals (GS-ATRF-3, R17c critical).
+  //        THE ONE GAP THE CASCADE DOES NOT COVER, which is why this is its own
+  //        call and not left to the cycle delete above: the cycle delete keys on
+  //        the CYCLE's credential_ref, which is the RUNNER's. A completion
+  //        signal is written under the AGENT's credential. Without this line an
+  //        agent erasing its own credential would leave its own self-reports
+  //        behind, hanging off another party's cycles.
+  //        Missing-table-benign until the completion-signal migration lands.
+  const completionSignals = await deleteCompletionSignalsForCredential(credentialRef, client)
+  if (!completionSignals.ok) {
+    return { ok: false, error: `completion_signals: ${completionSignals.error}` }
+  }
 
   // 1c-ii. Stoa ST2 (R17c critical — a fail is ok:false so erasure stays
   //        verifiable): genuine deletion of this credential's Stoa entries
@@ -353,6 +374,7 @@ export async function eraseExternalConsumerCredential(
       reflect_deleted,
       stoa_deleted: stoa.value,
       watching_deleted: watching.value,
+      completion_signals_deleted: completionSignals.value,
       billing_depersonalised,
       warnings,
     },

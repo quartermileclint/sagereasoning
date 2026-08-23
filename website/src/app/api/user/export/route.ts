@@ -25,7 +25,10 @@ import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-h
 // + state. Missing-table-benign (the migration is its own founder-walked step).
 import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
-import { getWatchingDataForOwner } from '@/lib/substrate/idea-loop-watching-store'
+import {
+  getWatchingDataForOwner,
+  getCompletionSignalsForOwner,
+} from '@/lib/substrate/idea-loop-watching-store'
 // Trust Layer S10 rider (R17i, 2026-07-12) — portability of the operator's agents'
 // reflect sessions (agent_id-keyed; owner→agent_ids resolution mirrors /api/user/delete).
 import { getAgentSessionsForExport } from '@/lib/sage-reflect/session-store'
@@ -194,6 +197,21 @@ export async function GET(request: NextRequest) {
       exportData.idea_loop_cycles = { error: watchingExport.error }
     } else {
       exportData.idea_loop_cycles = watchingExport.value
+    }
+  }
+
+  // 2d-iv. ATRF completion signals (GS-ATRF-3, R17i) — the AGENT's own
+  //        post-execution reports, keyed by owner_user_id. A separate export key
+  //        from idea_loop_cycles deliberately: the two carry DIFFERENT actors'
+  //        identities (the runner's and the agent's), and folding the agent's
+  //        report into the runner's cycle export would obscure that.
+  //        Missing-table-benign until the completion-signal migration lands.
+  {
+    const signalsExport = await getCompletionSignalsForOwner(userId)
+    if (!signalsExport.ok) {
+      exportData.idea_loop_completion_signals = { error: signalsExport.error }
+    } else {
+      exportData.idea_loop_completion_signals = signalsExport.value
     }
   }
 

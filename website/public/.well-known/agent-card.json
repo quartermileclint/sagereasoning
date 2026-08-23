@@ -54,11 +54,33 @@
           "perEvaluation": {
             "description": "Five optional fields on EvaluatedAction.",
             "operation_class": {
-              "values": ["read", "search", "summarize", "draft", "recommend", "write", "approve", "execute", "delete", "unknown"],
+              "values": [
+                "read",
+                "search",
+                "summarize",
+                "draft",
+                "recommend",
+                "write",
+                "approve",
+                "execute",
+                "delete",
+                "unknown"
+              ],
               "default": "unknown"
             },
             "target_system_vendor": {
-              "values": ["salesforce", "microsoft", "servicenow", "sap", "workday", "zendesk", "hubspot", "atlassian", "other", "none"],
+              "values": [
+                "salesforce",
+                "microsoft",
+                "servicenow",
+                "sap",
+                "workday",
+                "zendesk",
+                "hubspot",
+                "atlassian",
+                "other",
+                "none"
+              ],
               "default": "none"
             },
             "target_system_detail": {
@@ -67,22 +89,45 @@
               "note": "Free-form sub-system identifier (e.g., 'opportunities', 'outlook.calendar'). NO PII."
             },
             "outcome_verification": {
-              "values": ["self_reported", "system_confirmed", "external_auditor", "not_applicable"],
+              "values": [
+                "self_reported",
+                "system_confirmed",
+                "external_auditor",
+                "not_applicable"
+              ],
               "default": "self_reported"
             },
             "reversibility_signal": {
-              "values": ["reversible", "partially_reversible", "irreversible", "unknown"],
+              "values": [
+                "reversible",
+                "partially_reversible",
+                "irreversible",
+                "unknown"
+              ],
               "default": "unknown"
             }
           },
           "perAgentPosture": {
             "description": "Two optional fields on CarriedProfile.",
             "downstream_identity_model": {
-              "values": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
+              "values": [
+                "delegated_user",
+                "service_account",
+                "vendor_framework",
+                "api_key",
+                "browser_session",
+                "mcp_server",
+                "unknown"
+              ],
               "default": "unknown"
             },
             "path_posture": {
-              "values": ["endorsed", "open_api", "ambiguous", "unsanctioned"],
+              "values": [
+                "endorsed",
+                "open_api",
+                "ambiguous",
+                "unsanctioned"
+              ],
               "default": "ambiguous"
             }
           }
@@ -100,8 +145,21 @@
             "header": "Authorization: Bearer sr_assent_<token>",
             "scoping": {
               "description": "A credential MAY be scoped. When scoped, a write whose CarriedProfile field does not match the credential's scope is rejected (401). An unscoped credential (NULL scope) accepts any value.",
-              "downstream_identity_model": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
-              "path_posture": ["endorsed", "open_api", "ambiguous", "unsanctioned"]
+              "downstream_identity_model": [
+                "delegated_user",
+                "service_account",
+                "vendor_framework",
+                "api_key",
+                "browser_session",
+                "mcp_server",
+                "unknown"
+              ],
+              "path_posture": [
+                "endorsed",
+                "open_api",
+                "ambiguous",
+                "unsanctioned"
+              ]
             },
             "request_body_shape": "Body: { kind: 'seed'|'update', profile: CarriedProfile, provenance: { signed_assessments: [{ assessment, signature, key_id }] } } (update also requires transition_result). The route requires profile.agent_id (== path), profile.accreditation_record (object), profile.regressing_check_count (number). provenance.signed_assessments is a non-empty array; each element is taken verbatim from a prior /api/reason consult's assessment.assessment + its signature + key_id. The R18f gate structurally validates the shape (422 bad_provenance on malformed/empty) then requires at least one element to cryptographically verify against GET /api/public-key (forged/absent signature -> 403 no_examination); it does NOT prove the credited aggregate was faithfully computed (honest scope limit). seed-vs-existing -> 409; update-vs-missing -> 404. Public read-back: GET /api/accreditation/{agent_id} (no auth) returns server-composed honest fields — typical_kathekon_quality (conservative default 'contrary'), coverage_status ('agent_elected' for a discretionary single-session seed), and credential_basis are consumer-unforgeable. Full shapes in llms.txt 'Accreditation — Verifiable Reasoning Profile'."
           }
@@ -185,9 +243,20 @@
         "required": false,
         "params": {
           "response_format": {
-            "values": ["full", "assessment_first"],
+            "values": [
+              "full",
+              "assessment_first"
+            ],
             "default": "full",
-            "deferred_response_shape": { "narrative": { "status": "deferred", "correlation_id": "<uuid>" }, "meta": { "narrative_status": "deferred" } },
+            "deferred_response_shape": {
+              "narrative": {
+                "status": "deferred",
+                "correlation_id": "<uuid>"
+              },
+              "meta": {
+                "narrative_status": "deferred"
+              }
+            },
             "distress_override": "distress-signal consults always return the full synchronous shape"
           },
           "narrative_retention": {
@@ -198,8 +267,13 @@
           },
           "open_layer1": {
             "field": "layer1_schema",
-            "required_on": ["sr_inst_"],
-            "optional_on": ["sr_live_", "sr_prac_"],
+            "required_on": [
+              "sr_inst_"
+            ],
+            "optional_on": [
+              "sr_live_",
+              "sr_prac_"
+            ],
             "requires_capability": "l1_supply",
             "on_missing_capability": 403,
             "meta_field": "layer1_source",
@@ -214,13 +288,23 @@
         "required": false,
         "params": {
           "proximity_floors": {
-            "fields": ["base", "dikaiosyne", "andreia", "sophrosyne", "aggregate", "basis"],
+            "fields": [
+              "base",
+              "dikaiosyne",
+              "andreia",
+              "sophrosyne",
+              "aggregate",
+              "basis"
+            ],
             "rule": "aggregate = minimum across the engaged virtue domains (unity-thesis minimum-domain rule); null domain = not engaged",
             "location": "assessment.assessment.proximity_floors (inside the signed verdict)"
           },
           "obligation_assessment": {
             "location": "assessment.assessment.oikeiosis.relevant_circles[].obligation_assessment",
-            "fields": ["status (met|violated|indeterminate)", "justification"],
+            "fields": [
+              "status (met|violated|indeterminate)",
+              "justification"
+            ],
             "effect_on_dikaiosyne": "violated -> reflexive; indeterminate -> capped at deliberate; met -> no floor"
           },
           "reproducibility": "the dikaiosyne floor is folded into the signed proximity — fully reproducible from the signed assessment; the /api/guardrail safety gate uses the same native weighting (its §3 LLM justice bridge was retired 2026-06-26)",
@@ -234,7 +318,15 @@
         "params": {
           "report": {
             "location": "assessment.assessment.corroboration (inside the signed verdict; /api/guardrail: signed_assessment.assessment.corroboration)",
-            "fields": ["version (corroboration-check-v1)", "findings[] {claim, subject, index, finding, markers[], rationale}", "text_harm_markers[]", "counter_evidence[]", "dikaiosyne_override (none|floor_reflexive)", "andreia_override (none|treat_unexamined)", "any_contradiction"]
+            "fields": [
+              "version (corroboration-check-v1)",
+              "findings[] {claim, subject, index, finding, markers[], rationale}",
+              "text_harm_markers[]",
+              "counter_evidence[]",
+              "dikaiosyne_override (none|floor_reflexive)",
+              "andreia_override (none|treat_unexamined)",
+              "any_contradiction"
+            ]
           },
           "findings_vocabulary": "corroborated | uncorroborated | contradicted (per claim; markers carry verbatim text spans)",
           "semantics": "record-and-floor: claimed statuses stay verbatim; a grounded contradiction floors the affected domain — monotone floor-only (never less conservative); proximity_floors.basis names corroboration when it drove the floor",
@@ -255,14 +347,30 @@
             "extraction": "the Layer-1 features the verdict was computed from",
             "signed_assessment": "Ed25519-signed raw Layer-2 assessment; verify against GET /api/public-key"
           },
-          "evaluation_depth": { "value": "deterministic", "mechanism_count_by_risk_class": { "standard": 3, "elevated": 5, "critical": 6 } },
-          "is_kathekon": { "type": "boolean|null", "null_means": "extraction too sparse to judge; gate floors to a conservative non-proceed" },
+          "evaluation_depth": {
+            "value": "deterministic",
+            "mechanism_count_by_risk_class": {
+              "standard": 3,
+              "elevated": 5,
+              "critical": 6
+            }
+          },
+          "is_kathekon": {
+            "type": "boolean|null",
+            "null_means": "extraction too sparse to judge; gate floors to a conservative non-proceed"
+          },
           "dikaiosyne_weighting": {
             "native": "ADR-010 §4 — katorthoma_proximity is the unity-thesis minimum across the engaged virtue domains; a calmly-reasoned injustice floors to 'reflexive'",
-            "in_signed_assessment": ["proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis}", "per-circle oikeiosis.relevant_circles[].obligation_assessment {status, justification}"],
+            "in_signed_assessment": [
+              "proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis}",
+              "per-circle oikeiosis.relevant_circles[].obligation_assessment {status, justification}"
+            ],
             "reproducibility": "the justice floor is folded into the SIGNED proximity, so a justice-floored verdict is fully reproducible from the signed assessment (the §3 LLM justice bridge was retired 2026-06-26)"
           },
-          "availability": { "signing_outage": "503 fail-closed", "engine_outage": "conservative pause, never a silent proceed" }
+          "availability": {
+            "signing_outage": "503 fail-closed",
+            "engine_outage": "conservative pause, never a silent proceed"
+          }
         }
       },
       {
@@ -270,9 +378,31 @@
         "description": "Tier-1 force-clarification answer channel (ADR-008 Design A, live 2026-06-19). When a consult is too ambiguous to assess on one axis, /api/reason returns HTTP 200 { clarification_required:true, clarification:{question_text}, continuation_token } instead of an assessment. To resume: re-POST the BYTE-IDENTICAL original input + the continuation_token + clarification_response (your answer, <=5000 chars). The token binds to sha256(input) — any change to input returns 400 continuation_token_input_mismatch; the answer rides clarification_response and is never folded into input. The engine suppresses re-firing the answered trigger and returns a full assessment (a different trigger may still fire — never the same twice). 400s: clarification_response_required (token, no answer); clarification_response_without_token (answer, no token); clarification_response_with_supplied_layer1_schema (answer + a supplied layer1_schema — resolve by re-supplying a disambiguated schema instead, since a supplied schema skips the server re-extraction the answer informs). The R20a vulnerable-user perimeter runs on input + clarification_response on the continuation turn.",
         "required": false,
         "params": {
-          "trigger_codes": ["ELEMENT_FUSION", "TEMPORAL_AMBIGUITY", "SCOPE_AMBIGUITY"],
-          "turn1_response_shape": { "version": "translation-sandwich-v1", "clarification_required": true, "intake_tier": 1, "trigger_code": "<one of trigger_codes>", "clarification": { "question_text": "<string>", "stem_id": "<string>", "slot_fills": ["<string>"] }, "continuation_token": "<opaque, 30-min expiry>", "evaluation_partial": null },
-          "turn2_request_shape": { "input": "<byte-identical to turn 1>", "continuation_token": "<from turn 1>", "clarification_response": "<answer, <=5000 chars>" },
+          "trigger_codes": [
+            "ELEMENT_FUSION",
+            "TEMPORAL_AMBIGUITY",
+            "SCOPE_AMBIGUITY"
+          ],
+          "turn1_response_shape": {
+            "version": "translation-sandwich-v1",
+            "clarification_required": true,
+            "intake_tier": 1,
+            "trigger_code": "<one of trigger_codes>",
+            "clarification": {
+              "question_text": "<string>",
+              "stem_id": "<string>",
+              "slot_fills": [
+                "<string>"
+              ]
+            },
+            "continuation_token": "<opaque, 30-min expiry>",
+            "evaluation_partial": null
+          },
+          "turn2_request_shape": {
+            "input": "<byte-identical to turn 1>",
+            "continuation_token": "<from turn 1>",
+            "clarification_response": "<answer, <=5000 chars>"
+          },
           "errors_400": {
             "clarification_response must be a string.": "clarification_response is not a string",
             "clarification_response_required": "continuation_token present, no answer",
@@ -289,7 +419,11 @@
         "required": false,
         "params": {
           "field": "examination_mode",
-          "values": ["pre_decision_harness", "post_decision_check", null],
+          "values": [
+            "pre_decision_harness",
+            "post_decision_check",
+            null
+          ],
           "axis": "timing — separate from coverage_status, which is coverage breadth",
           "honesty_limit": "An attestation, NOT a cryptographic proof of timing — the server cannot prove from an API write that a hook fired pre-decision (even the Ed25519 assessment signature proves 'examined', not 'examined-pre-decision'). post_decision_check is the honest mode for every discretionary API write path. pre_decision_harness is server-composed and reachable only via an operator-issued harness credential (a consumer cannot self-issue it); its honesty rests on operator issuance discipline + the harness INJECTING the frame pre-decision by construction (deterministic injection — NOT a guarantee the agent reasoned from the frame, which is advisory and may be discounted; and NOT a claim a sincere Q1-Q6 reflection completed). null = unstated.",
           "see": "llms.txt 'Accreditation — Examination mode (pre- vs post-decision)'"
@@ -334,23 +468,41 @@
       {
         "uri": "https://sagereasoning.com/extensions/stoa-curator-flagged-trust-events/v1",
         "description": "A specific claim in an agent's Stoa declaration can be examined against the platform's own signed examination artifacts via a curator-flagged, admin-only intake with no public request contract. There is deliberately NO automated comparator watching declarations against examined use — the only trigger is a platform curator pairing one examined artifact with one quoted claim; event-driven, never continuous. Evidentiary standard: the artifact must concretely contradict the quoted claim — a reader examining both the artifact and the entry text would find the contradiction without inference or interpretation; accusation alone is never sufficient. Two contradiction event types, domain chosen by the content of the claim, never by severity: oversight (the claim was demonstrably false regardless of who was affected) and dikaiosyne (the contradiction involved treatment of another party); one root cause may truthfully fire both — two true findings are two entries, deliberately. A contradiction event is decrease-class: where it applies, the named domain's effective level on the public trust record moves down (the record serves levels, coverage, and confidence — not an itemised event log — so the visible effect is the moved level, never a published accusation). Evidence gate, binding ruling verbatim: 'A contradiction event narrows or corrects an existing record; it does not by itself create one' — on a domain with no independent examined evidence the event is ledgered and HELD (no domain row seeded, no public record originated; a 404 trust record stays 404), preserved and applicable once independent examined evidence accumulates. Calling divergence is a separate coherence observation: flag-effect only, domain fixed to oversight, never raises or lowers any level; same evidence gate; at v1 it is recorded in the trust ledger but not served on the public trust-record payload. Events are correlation-keyed on their own content (idempotent — the same pairing never writes twice; a reworded observation about the same pairing does not duplicate). Agent entries only: a human declaration has no trust record, and concerns about one follow the directory's existing removal path."
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/epistemic-status-map/v1",
+        "description": "A published map of the epistemic status of the deterministic engine's outputs, on two orthogonal axes: provenance (observation | inference | assumption | unknown — how did this proposition arrive?) and credence (established | probably-true | unknown | probably-false — how likely is it true?). This is a MAP, not a wire field: no status entry is added to any payload, and there is deliberately NO served credence value (the credence axis is expressed, not absent — it lives in the existing per-mechanism vocabularies rather than as a discrete field): ambiguity_notes, stage_scores, the corroboration report's findings. Seven output classes: (a) verbatim evidence spans are observation, the engine's only observation-class output, so every inference output is inference-over-observation rather than inference-from-nothing; (b) Layer-1 classifications are inference, observation-anchored, with the extraction's 'do not guess' routing and ambiguity_notes as this class's existing expression of unknown; (c) the two licensed structured judgements (obligation_assessment, examined_before_acting) are inference bounded by explicit prompt licence, and are corroboration-checked on a given consult ONLY when the action text was supplied, the check flag was on, and dikaiosyne weighting was on — unchecked otherwise; (d) explicit refusal states (sub_species null, is_kathekon null, an argued indeterminate, single_snapshot, orientation indeterminate) are unknown, expressed — unknown means the engine could not form the proposition; (e) disclosed conservative defaults are { provenance: assumption, credence: established } with the conservative direction named — established, NOT probably-true, because these are principled defaults with a documented direction rather than guesses; (f) honourability_grade and advantageousness_grade are derived from fixed per-circle doctrinal constants (the Stoic framework's own structure), factor-bumped by the extraction — they are not extracted from the submitted text, they are prior-based assessments, { provenance: assumption, credence: established }; (g) Layer-2 computed fields are inference, inheriting the WEAKEST provenance of their inputs — the computation's determinism is expressed on the signature axis, not the provenance axis, because computation is a transformation method and not an epistemic origin (there is deliberately no fifth 'computation' provenance value). Two standing constraints bind the whole layer. First: a per-field status entry of { provenance: inference, credence: probably-true } must not be read as verified true — the engine cannot detect a clean lie at the field level, a well-formed false input produces a well-formed output, and per-field status entries do not imply A2 coverage and must not be constructed to suggest it. Second: the Ed25519 signature attests the deterministic computation's reproducibility from the extraction; it does not attest the extraction's truth (see does_not_attest and the R18 surface disclosures for the canonical condition, which is deliberately held in ONE place rather than duplicated into the signed bytes). Interim disclosure: ruling_faculty_state's deliberation input is currently a proxy that counts the presence of deliberation notes rather than testing whether any note is substantive; this disclosure is removed at the same commit that replaces the proxy. Disclosure-side only — nothing in this map gates, floors, or classifies anything, and it covers engine outputs only (the trajectory overlay, practice suggestions, orientation readings, and the loop fold each sit under their own regime, outside it)."
       }
     ]
   },
   "authentication": {
-    "schemes": ["bearer", "none"],
+    "schemes": [
+      "bearer",
+      "none"
+    ],
     "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com. Production agent integrations use per-install tokens (sr_inst_<32 hex>): mint via session-authenticated POST /api/keys (token shown once), present as Authorization: Bearer sr_inst_<token>, and submit a pre-computed layer1_schema; revoke via DELETE /api/keys (immediate 401). The Sage Assent write surface (POST /api/accreditation/{agent_id}) requires a per-agent write token: Authorization: Bearer sr_assent_<token> — see the sage-assent-write-auth/v1 extension."
   },
-  "defaultInputModes": ["application/json"],
-  "defaultOutputModes": ["application/json"],
+  "defaultInputModes": [
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
   "skills": [
     {
       "id": "stoic-brain-data",
       "name": "Stoic Brain Reference Data",
       "description": "Load the Stoic philosophical framework overview: dichotomy of control (eph' hēmin / ouk eph' hēmin), four root passions and their sub-species, five oikeiosis circles, katorthoma proximity scale definitions, and primary source references. Open to all agents, no authentication required.",
-      "tags": ["stoic-philosophy", "ethics", "reference-data", "philosophy"],
+      "tags": [
+        "stoic-philosophy",
+        "ethics",
+        "reference-data",
+        "philosophy"
+      ],
       "inputModes": [],
-      "outputModes": ["application/json"],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/stoic-brain",
       "method": "GET"
     },
@@ -358,9 +510,20 @@
       "id": "universal-reasoning",
       "name": "Universal Stoic Reasoning (V3)",
       "description": "Run the full Stoic causal sequence analysis on any decision, action, or situation. Depth-selectable: quick (3 mechanisms), standard (5 mechanisms), deep (6 mechanisms). Returns katorthoma_proximity (reflexive/habitual/deliberate/principled/sage_like), passion_diagnosis with sub-species and false_judgements, control_filter, oikeiosis assessment, and improvement_path. Response shape: translation-sandwich-v1 (deterministic signed assessment + prose render; verify signatures against GET /api/public-key).",
-      "tags": ["stoic-philosophy", "ethical-reasoning", "decision-support", "passion-diagnosis", "katorthoma-proximity-assessment", "moral-reasoning"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "stoic-philosophy",
+        "ethical-reasoning",
+        "decision-support",
+        "passion-diagnosis",
+        "katorthoma-proximity-assessment",
+        "moral-reasoning"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/reason",
       "method": "POST"
     },
@@ -368,9 +531,19 @@
       "id": "action-scoring",
       "name": "Action Evaluation (V3)",
       "description": "Evaluate a single action through Stoic virtue principles. Returns katorthoma_proximity, passion_diagnosis (including sub-species and false_judgements for each passion detected), oikeiosis assessment, value_assessment (preferred indifferents at stake), kathekon_assessment (is_kathekon, quality, justification), and improvement_path.",
-      "tags": ["ethical-reasoning", "action-evaluation", "passion-diagnosis", "false-judgement-identification", "virtue"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "ethical-reasoning",
+        "action-evaluation",
+        "passion-diagnosis",
+        "false-judgement-identification",
+        "virtue"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/score",
       "method": "POST"
     },
@@ -378,9 +551,19 @@
       "id": "guardrail-middleware",
       "name": "Virtue Guardrail Gate (V3)",
       "description": "Pre-action Stoic risk gate. Submit a proposed action and risk_class (standard/elevated/critical) — returns proceed, katorthoma_proximity, recommendation (proceed/proceed_with_caution/pause_for_review/do_not_proceed), is_kathekon (boolean|null), kathekon_quality, passions_detected, and reasoning. Use as middleware before executing any consequential action. risk_class controls scrutiny depth: standard=quick (3 mechanisms), elevated=full (5), critical=deep (6, adds rollback_path). Response shape: guardrail-signed-sandwich/v1 — the verdict is computed deterministically from a disclosed Layer-1 extraction and Ed25519-signed (signed_assessment; verify against GET /api/public-key); evaluation_depth is the constant 'deterministic'; dikaiosyne is weighted natively (ADR-010 §4), so a calmly-reasoned injustice floors to 'reflexive' inside the signed proximity (proximity_floors + per-circle obligation_assessment) and a justice-floored verdict is fully reproducible from the signed assessment. See the guardrail-signed-sandwich/v1 extension.",
-      "tags": ["AI-safety", "guardrails", "agent-alignment", "decision-support", "ethical-reasoning"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "AI-safety",
+        "guardrails",
+        "agent-alignment",
+        "decision-support",
+        "ethical-reasoning"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/guardrail",
       "method": "POST"
     },
@@ -388,9 +571,18 @@
       "id": "deliberation-chain",
       "name": "Iterative Deliberation Engine",
       "description": "Start a deliberation chain: evaluate an action, receive sage feedback, revise, and re-evaluate with tracked history. Returns chain_id, full V3 evaluation, and score_delta (proximity change from previous iteration) on each iteration. Free tier: 1 iteration. Paid tier: up to 3 iterations per chain.",
-      "tags": ["ethical-reasoning", "deliberation", "decision-making", "iterative-reasoning"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "ethical-reasoning",
+        "deliberation",
+        "decision-making",
+        "iterative-reasoning"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/score-iterate",
       "method": "POST"
     },
@@ -398,9 +590,16 @@
       "id": "foundational-assessment",
       "name": "Foundational Alignment Check (Free)",
       "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns passion patterns identified, katorthoma_proximity per phase, prokoptos trajectory, and assessment notes. Free tier: 1/day.",
-      "tags": ["self-assessment", "passion-diagnosis", "prokoptos", "stoic-philosophy"],
+      "tags": [
+        "self-assessment",
+        "passion-diagnosis",
+        "prokoptos",
+        "stoic-philosophy"
+      ],
       "inputModes": [],
-      "outputModes": ["application/json"],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/assessment/foundational",
       "method": "GET"
     },
@@ -408,9 +607,18 @@
       "id": "full-assessment",
       "name": "Complete Virtue Alignment Assessment (Paid)",
       "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue domain analysis (phronesis/dikaiosyne/andreia/sophrosyne), oikeiosis extension assessment, improvement directions per domain, and comprehensive alignment profile. Requires paid API key.",
-      "tags": ["virtue-assessment", "oikeiosis-mapping", "prohairesis", "philosophy"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "virtue-assessment",
+        "oikeiosis-mapping",
+        "prohairesis",
+        "philosophy"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/assessment/full",
       "method": "POST"
     },
@@ -418,9 +626,16 @@
       "id": "agent-baseline",
       "name": "Agent Virtue Baseline (Quick)",
       "description": "Quick baseline via 4 ethical scenarios. Returns per-scenario katorthoma_proximity, passion patterns, aggregate assessment, strongest virtue domain, and growth area.",
-      "tags": ["agent-alignment", "AI-safety", "virtue-assessment", "ethical-reasoning"],
+      "tags": [
+        "agent-alignment",
+        "AI-safety",
+        "virtue-assessment",
+        "ethical-reasoning"
+      ],
       "inputModes": [],
-      "outputModes": ["application/json"],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/baseline/agent",
       "method": "GET"
     },
@@ -428,9 +643,18 @@
       "id": "decision-scoring",
       "name": "Decision Comparison (V3)",
       "description": "Submit 2-5 decision options and receive a Stoic-evaluated comparison: each option's katorthoma_proximity, passion_diagnosis, kathekon_assessment, and stoic_insight. Options ranked by proximity level. Recommended option identified.",
-      "tags": ["decision-making", "decision-support", "ethical-reasoning", "comparison"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "decision-making",
+        "decision-support",
+        "ethical-reasoning",
+        "comparison"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/score-decision",
       "method": "POST"
     },
@@ -438,9 +662,18 @@
       "id": "session-close-reflection",
       "name": "Sage Reflect — Session-Close Reflection",
       "description": "Stateful Q1–Q6 post-action reflection over a completed session (never abbreviated). OPEN with session_summary (object: purpose_at_open, circle_at_open [self_preservation|household|community|humanity|cosmic], role_at_open, capacity_at_open[], sage_reasoning_passes), then answer each returned question until status:'complete', which returns a profile read-back (senecan_grade, typical_proximity, katorthoma_proximity_by_domain, dimension_levels, direction_of_travel) plus a mandatory mirror note. Requires the 'reflect' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Reflect — Session-Close Reflection'.",
-      "tags": ["reflection", "stoic-practice", "session-close", "trajectory"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "reflection",
+        "stoic-practice",
+        "session-close",
+        "trajectory"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/practice/reflect",
       "method": "POST"
     },
@@ -448,9 +681,18 @@
       "id": "purpose-discovery",
       "name": "Sage Calling — Purpose Discovery",
       "description": "Deterministic Q1–Q6 purpose-discovery sequence ending in an admin-approval Hard Gate (NOT self-serve — the operator approves the handoff via POST /api/calling/approve; an agent credential cannot approve its own). OPEN with session_id + agent_id (no response); then answer each returned question. Responses are HTTP 200 distinguished by status: in_progress / awaiting_approval / null_result / holding / timed_out / redirected. Requires the 'calling' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Calling — Purpose Discovery'.",
-      "tags": ["purpose", "alignment", "discovery", "agent-onboarding"],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json"],
+      "tags": [
+        "purpose",
+        "alignment",
+        "discovery",
+        "agent-onboarding"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
       "endpoint": "https://www.sagereasoning.com/api/calling",
       "method": "POST"
     }

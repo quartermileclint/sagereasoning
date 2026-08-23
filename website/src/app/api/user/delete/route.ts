@@ -25,7 +25,10 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 // events + state. Missing-table-benign (the migration is its own founder-walked step).
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
-import { deleteWatchingDataForOwner } from '@/lib/substrate/idea-loop-watching-store'
+import {
+  deleteWatchingDataForOwner,
+  deleteCompletionSignalsForOwner,
+} from '@/lib/substrate/idea-loop-watching-store'
 import { deleteAgentSessions } from '@/lib/sage-reflect/session-store'
 // Stoa ST2 (2026-08-03) — genuine deletion (R17c) of the practitioner's Stoa
 // entries, keyed by owner_user_id (= profiles.id). Wired at birth (the
@@ -168,6 +171,18 @@ export async function DELETE(request: NextRequest) {
     const watchingDelete = await deleteWatchingDataForOwner(userId)
     if (!watchingDelete.ok) {
       deletionErrors.push(`idea_loop_cycles: ${watchingDelete.error}`)
+    }
+  }
+
+  // ATRF completion signals (GS-ATRF-3, R17c) — the AGENT's own post-execution
+  // reports. The profiles FK already cascades and the cycle FK covers the
+  // ordinary case, but this path is explicit for the same reason the watching
+  // delete above is: erasure is verified by query, never inferred from a
+  // cascade. Missing-table-benign until the completion-signal migration lands.
+  {
+    const signalsDelete = await deleteCompletionSignalsForOwner(userId)
+    if (!signalsDelete.ok) {
+      deletionErrors.push(`idea_loop_completion_signals: ${signalsDelete.error}`)
     }
   }
 

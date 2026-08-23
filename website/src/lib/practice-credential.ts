@@ -41,7 +41,15 @@ import { createHash } from 'node:crypto'
  *  'watching_write' ADDED 2026-08-09 (agent-circles `watching` build, QW-B RULED —
  *  a dedicated write-class capability for the IDEA loop's per-cycle record write;
  *  the paired DB vocabulary widening is
- *  supabase-api-keys-watching-write-capability-migration.sql §V). */
+ *  supabase-api-keys-watching-write-capability-migration.sql §V).
+ *  'completion_signal_write' ADDED 2026-08-23 (ATRF GS-ATRF-3 build; Q-C1 RULED
+ *  the ACTOR — "the agent, post-execution … No other actor can supply this
+ *  signal honestly" — and a dedicated capability is what makes that separation
+ *  enforceable at mint rather than merely documented; reusing watching_write
+ *  would let the RUNNER's credential post a signal about the AGENT's own
+ *  examination quality, with nothing on the wire able to tell the two apart.
+ *  Paired DB widening:
+ *  supabase-api-keys-completion-signal-write-capability-migration.sql §V). */
 export const PRACTICE_CAPABILITIES = [
   'consult',
   'l1_supply',
@@ -49,6 +57,7 @@ export const PRACTICE_CAPABILITIES = [
   'calling',
   'reflect',
   'watching_write',
+  'completion_signal_write',
 ] as const
 
 export type PracticeCapability = (typeof PRACTICE_CAPABILITIES)[number]
@@ -69,12 +78,21 @@ export type PracticeCapability = (typeof PRACTICE_CAPABILITIES)[number]
  * migration): adding a value HERE does not extend the DB CHECKs by itself — the DB
  * arrays are hard-coded, so the companion migration's §V (vocabulary) + §W (owner+
  * agent overlap) must be applied founder-walked alongside any widening of this set.
+ *
+ * 'completion_signal_write' ADDED 2026-08-23 (ATRF GS-ATRF-3 build): the ATRF
+ * completion-signal write (`POST /api/practice/completion-signal`) is a durable,
+ * AGENT-ATTRIBUTED record write and carries the same full write-class discipline —
+ * Bearer-only transport at its call-site and the 6e §A owner+agent invariant at
+ * mint. Its own paired migration is
+ * supabase-api-keys-completion-signal-write-capability-migration.sql (§V + §W);
+ * the same both-arrays-hard-coded caveat above applies to it unchanged.
  */
 export const WRITE_CLASS_CAPABILITIES: PracticeCapability[] = [
   'accreditation_write',
   'calling',
   'reflect',
   'watching_write',
+  'completion_signal_write',
 ]
 
 /** Does this capability set include any write-class member ⇒ the row must carry

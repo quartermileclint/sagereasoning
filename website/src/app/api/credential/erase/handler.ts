@@ -257,6 +257,12 @@ export async function runConsumerErasure(
       `stoa_entries (credential-scoped: ${credentialRef}; ${result.value.stoa_deleted} rows)`,
       // watching (agent-circles, ruled §2.7): the IDEA-loop per-cycle records.
       `idea_loop_cycles (credential-scoped: ${credentialRef}; ${result.value.watching_deleted} rows)`,
+      // ATRF completion signals (GS-ATRF-3, 2026-08-23): reported SEPARATELY from
+      // idea_loop_cycles because the two are keyed on DIFFERENT actors'
+      // credentials — the runner's and the agent's. Folding them into one line
+      // would let a ledger reader infer coverage of the agent's own reports from
+      // a number that only ever counted the runner's cycles.
+      `idea_loop_completion_signals (credential-scoped: ${credentialRef}; ${result.value.completion_signals_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
