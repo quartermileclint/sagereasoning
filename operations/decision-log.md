@@ -24908,3 +24908,181 @@ hold stands.
 `D-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-AUTHORED-2026-08-23`,
 `D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`,
 `D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`.
+
+---
+
+## 2026-08-23 — D-ATRF-EE-PRODUCTION-WAVE-BUILT-PR19-FOLDED-2026-08-23
+
+**Decision:** Built all four pieces of the ATRF/EE production wave to their binding rulings —
+the EE Shape-1 documentation map + its R18 sign-off package, the additive
+`idea_loop_candidates` migration (GS-ATRF-2's three ruled columns + the S4 extension), the
+ATRF completion-signal return path (endpoint + new table + a dedicated capability), and the
+EE-C1 in-place wording change — then ran **two independent adversarial review rounds** and
+folded every confirmed finding at the root. **Nothing live was touched:** no SQL run, no flag
+set, no push, no mint. The consolidated founder walk is prepared and is the carried step.
+
+**Reasoning:** Four independently-ruled pieces reached "fully specified, waiting only on a
+build" the same day; the prompt bundled them into one build pass and one founder sitting. Each
+is executed to its ruling verbatim, and where a ruling deliberately left a question to the
+build session, the election is named as an election rather than presented as mandated.
+
+### What was built
+
+**A4 Shape 1 (first, per the ruling's unconditional-prerequisite ordering) —**
+`operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md`:
+the seven output classes with their ruled statuses, every mentor-fixed wording reproduced
+verbatim (EE-C3's entry, EE-D1's conditionality marker and A2-coverage constraint, EE-D2's
+forward pointer, EE-A2's derivation note), and the EE-C2 interim label carrying its own removal
+condition **in the entry itself**, as the ruling required. **A correction to the session
+prompt's framing, recorded because it changed the work:** the prompt called Shape 1 "governance,
+zero live-op cost", but Shape 1's own definition in the scoping document is a map *published on
+the R18 surfaces* — a public-contract change. It therefore rides the standing R18 gate
+(founder-signed wording before any public surface changes), and the publication half is a
+separate sign-off package (`…-shape1-r18-signoff-package.md`, extension count 23→24) that is
+**awaiting signature; nothing public has changed.**
+
+**A2 —** `website/supabase-idea-loop-candidates-atrf-blast-radius-and-s4-migration.sql`, six
+additive nullable columns, header splitting **RULED** (`blast_radius`, `agent_blast_radius`,
+`target_circle` — Q-B1) from **ELECTED BY THIS BUILD SESSION** (`blast_radius_basis`,
+`traceability_check`, `extraction_evidence`). Elections and their reasoning:
+- **`blast_radius_basis`** — Q-B1 left basis-copy durability to the build session. Elected IN
+  for a reason the shape document did not have: **Q-A4's ruled null-plus-flag needs somewhere
+  to put the flag.** A bare NULL `blast_radius` is ambiguous three ways (no basis / runner does
+  not compute it / write dropped it); only a stored disclosure distinguishes them, and C11
+  rules the disclosure persisted rather than computed at read time.
+- **S4's column set** (Q-B2: "specified at build session") — `traceability_check` (the
+  already-ruled four-valued B7 vocabulary) + `extraction_evidence`. **Q4-c decided: bounded
+  verbatim, not derived summary** — the criterion's first property is *source-existence*
+  ("can a specific span be named as this element's source?"), which a count cannot answer;
+  the row already carries `proposed_action` verbatim, so the extraction elements are the
+  missing half. Bounded rather than summarised.
+- **A tension between two source documents, resolved rather than left:** S4 §4 says the
+  evidence column is "for the winner only, at minimum", while `traceability-criterion.md` §2
+  (later, resting on Q4-e) makes guardrail-internal coherence for *filtered* candidates half
+  the criterion's spine. Resolution: the **schema** permits the column on any candidate row;
+  **which** rows are populated is the runner's policy. Restricting it at DDL level would
+  foreclose the evidence stream the later ruling made half the criterion.
+- **C15 closure discharged:** the design states which enumeration the dikaiosyne dimension
+  counts over — the IDEA loop's own local closed `OikeiosisCircleRank` (1–5,
+  `idea-loop-types.ts:41`), **not** `profiles.ts`'s free-form `OikeiosisCircle` and **not** the
+  layer1-extractor string vocabulary. Names the domain; does not reopen the coexistence.
+
+**A3 —** `POST /api/practice/completion-signal` (dark behind
+`SUBSTRATE_COMPLETION_SIGNAL_ENABLED`), the new `idea_loop_completion_signals` table, and a
+**dedicated `completion_signal_write` capability** with its own two-CHECK `api_keys` widening.
+- **The capability is dedicated because the ruling named an ACTOR, not a capability:** Q-C1,
+  *"The agent, post-execution… No other actor can supply this signal honestly."* Reusing
+  `watching_write` — the RUNNER's capability — would let the runner post a signal asserting the
+  quality of the AGENT's examination with nothing on the wire able to tell them apart.
+  Founder-elected at open with the cost stated (a third founder-walked SQL step).
+- **A new table, not columns on the candidate row** (Q-C1's own first option): the candidate
+  row's identity columns are the runner's; a completion signal's identity is the agent's.
+- **No `retain_until`, deliberately** — the FK cascade from `idea_loop_cycles` carries retention
+  and data rights. **PR24 is not engaged** (it binds on a table *declaring* `retain_until`; this
+  declares none — the same reading that corrected the `stoa_entries` case 2026-08-17).
+- **Q-C3's refuse-to-attest branch is a required named field**, enforced at both the DB
+  (NOT NULL + a coherence CHECK) and the route. **There is no justice-verdict column, and a
+  test asserts a supplied one is dropped.**
+- **Q-C4's provenance/credence constraints are enforced, not merely documented** — the
+  examination record must be `inference`; an attested threshold must be `inference` with
+  credence at or above the `probably-true` floor; a refusal must be `unknown`/`unknown`.
+- **A build-session finding, recorded not papered over:** Q-C1 names `loop_id` as what the
+  signal carries, but `loop_id` alone is not a cycle identifier — `idea_loop_cycles` is unique
+  on the *pair*. The endpoint requires `cycle_number` alongside it.
+- Data rights wired across `/api/user/delete`, `/api/user/export`, `/api/credential/erase` and
+  the compliance ledger. **The agent-credential erase is the one gap the cascade does not
+  cover** (the cycle delete keys on the *runner's* credential_ref) and has its own call.
+
+**A4 Shape 2 —** the EE-C1 string at `layer2-mechanisms.ts:1273`, applied verbatim and
+**byte-compared programmatically against the mentor's own record**. **A correction to the
+prompt:** it directed a second edit at `guardrail-sandwich.ts`; that was declined after tracing
+the code — `synthesizeReasoning` *reads* `k.justification` and pushes it through unmodified, so
+one edit reaches both measured surfaces. A second copy would have been exactly the "two
+disclosure channels for one claim" the ruling declined; a `D-3` assertion pins that the claim
+appears **exactly once** on the guardrail surface.
+
+### PR19 — two rounds, seven findings, all folded at the root
+
+**Round 1 (code/contract).** MEDIUM: `target_circle` was not enforced per-row — my own test
+asserted an assessed `blast_radius` with **no** `target_circle` should pass, recreating exactly
+the unauditable state Q-B1 elected the column to prevent (*"without target_circle, a persisted
+high is not auditable"*). I had read that ruling as being about the column's existence; the
+reviewer read it as being about a particular row, and was right. Now enforced when the basis
+reports `assessed: true`; my wrong assertion inverted with a positive control. LOW ×3: the
+lookup/insert race (a vanished cycle surfaced as a generic 503 inviting a futile retry — now
+maps `23503` to the honest `no_such_cycle`); `isMissingTableError` reuse (both `42703` and
+`PGRST204` carry messages matching the benign regex, so a real column mismatch on an R17c
+genuine-deletion path would have returned a silent 0-rows "erased" — fixed by applying the
+AE-1 F1 precedent already in `agent-assessment-history-store.ts`, which also closes it for the
+pre-existing watching paths); and two uncoordinated dimension shapes across an untyped boundary
+`tsc` cannot see (pinned by a test that parses the interface and derives the wire form).
+
+**Round 2 (SQL semantics, run because the founder pastes these into a live production editor
+and round 1 checked value *sets*, not CHECK *semantics*).** **I found one defect myself before
+launching it:** a Postgres CHECK is violated only when its expression evaluates to FALSE — a
+NULL result **passes** — and `jsonb_typeof(basis -> 'assessed') = 'boolean'` yields NULL for
+an object with the key *absent*, which is precisely the input the constraint existed to reject.
+Fixed with `COALESCE`. The review then confirmed that fix correct and found **no sibling**, but
+returned **HIGH**: the `§W` behavioural probe omitted `label`, which is `NOT NULL` — and
+Postgres evaluates NOT NULL *before* any CHECK, so the probe would have failed `23502` and
+proven **nothing** about the most auth-sensitive change in the sitting, while looking like it
+had worked. Plus MEDIUM ×3 (a wrong `EXPECT: 16 columns` — it is 17; two probes that silently
+no-op on an empty TEST table, where a `UPDATE 0` reads as a pass) and LOW ×4 (two dropped
+precedent verification steps, including the *negative* no-over-fire proof, now ported back).
+**Every defect this round was in the verification apparatus — which is where a defect is most
+costly here, because the verification is the founder's only signal that a step worked.**
+One NIT was **refuted**: echo-consistency is closed by construction (the persisted
+`loop_id`/`cycle_number` *are* the lookup keys) — pinned so a refactor cannot quietly break it.
+
+**Every fix mutation-verified** by defeating it and confirming exactly the intended assertions
+red, then restoring. The EE-C1 pin was mutation-verified in **both** directions — reverting the
+code reds 6, rewording the mentor's record reds 5 — and both mentor ruling records were
+confirmed byte-unmodified afterward.
+
+**Files touched:** 3 new migrations; new `api/practice/completion-signal/{route,handler}.ts`;
+3 new batteries; `idea-loop-types.ts`, `idea-loop-watching-store.ts`,
+`practice/watching/handler.ts`, `practice-credential.ts`, `layer2-mechanisms.ts`,
+`consumer-erasure.ts`, `user/delete/route.ts`, `user/export/route.ts`,
+`credential/erase/handler.ts` + 2 existing test files; 3 new operations documents.
+
+**Risk classification:** **Critical** under 0d-ii (live schema, a new credentialed write path,
+an auth-adjacent CHECK widening, and a wire change on two measured surfaces). AC7 engages at
+the founder walk, **not before** — it has not engaged this session. PR6, PR17, PR19, PR20,
+PR23 all engaged.
+
+**Rollback:** nothing to roll back — no live operation occurred. Post-walk paths are tabled in
+the walk document; the EE-C1 wording is recommended as its own commit so the one live-behaviour
+change is revertable independently of the schema and endpoint work.
+
+**Verification:** `tsc` 0; `npm run build` 0 with `ƒ /api/practice/completion-signal`
+registered (the route-export gate `tsc` cannot see). 17 batteries green — new: atrf-s4-fields
+49/0, completion-signal 55/0, ee-c1-wording 15/0; regression: watching 72, watching-store 35,
+erase 40, consumer-erasure 25, practice-credential 47, guardrail-sandwich 91/91,
+proximity-dikaiosyne 59, signer 18, reasoning-integrity 64, layer1-schema 66, logos guard 248,
+fresh 69, founder-watching 20, aah-store 120. The **byte-identity guard was verified DORMANT
+empirically, not assumed** (`GATE1_FALSE_HOLD_CAPTURE` unset; the guard logged and named all
+five measured-set modifications, per the M1 2026-08-15 window-conditional ruling).
+`practice-credential.test.ts`'s write-class pin **correctly went red** on the capability
+addition before being updated — the pin is non-vacuous.
+
+**Open questions:**
+- The R18 publication of the Shape-1 map awaits founder signature; nothing public has changed.
+- Step 7 of the walk (activate + smoke the endpoint) is a **founder election, recommended
+  deferred** — nothing consumes a persisted signal yet, and the runner-side trigger (Q-C2b) is
+  the standing-runner design session's work.
+- **Observed, not acted on (another arc's):** four decision-log entries dated 2026-08-23 sit at
+  lines 27–82 — the *top* of this chronological append-only log, above entries dated eight days
+  earlier. Verified by line number and independently re-confirmed by the peer session that
+  wrote them, which is surfacing it to the founder. Their entries were not touched; relocating
+  entries in an append-only governance artifact is a founder call.
+- **NIT left deliberately unfixed:** `llms.txt:419` uses the phrase "no kathekon factors
+  detected" in prose describing the `instrument_calibration` loop class. It predates this work,
+  describes a different concept, and is not a quotation of the wire string.
+
+**Rules served:** R18, PR6, PR17, PR19, PR20, PR23, PR24, AC5, AC7, KG1, KG7, C11, C15, C16.
+
+**Status:** Adopted. Cross-references:
+`D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`,
+`D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`,
+`D-CLASS-B-ROUTE-CHANGE-BUILT-TEST-VERIFIED-2026-08-23`,
+`operations/handoffs/founder/2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md`.
