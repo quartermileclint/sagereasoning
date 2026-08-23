@@ -1268,9 +1268,35 @@ function assessKathekon(factors: KathekonFactor[]): KathekonAssessment {
   if (hasNaturalRelationship) parts.push('natural relationship engaged')
   if (hasRoleObligation) parts.push('role obligation engaged')
   if (hasJustification) parts.push('justification offered')
+  // EE-C1, RULED VERBATIM 2026-08-23 (mentor; record:
+  // operations/agent-circles-2026-08/2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md).
+  // Previously: 'No kathekon factors detected; action is contrary to appropriate action.'
+  //
+  // WHY IT CHANGED: the old string made a substantive negative claim derived
+  // solely from the ABSENCE of extracted factors, stated assertorically. The
+  // ruled wording carries its own derivation.
+  //
+  // WHY "on that BASIS" and not "on that absence" — the ruling's own one
+  // revision to the proposed direction, and the whole point of the change:
+  // "absence" can read as a claim about the WORLD (no factors exist) rather than
+  // a claim about the EXTRACTION (no factors were found in the text). "On that
+  // basis" is the honest expression: the engine's reading is grounded in what
+  // the extraction produced, not in a claim about what the action contains.
+  //
+  // THIS IS A WORDING CHANGE AND NOTHING ELSE. The classification
+  // (is_kathekon = false) and every downstream consequence are UNCHANGED —
+  // quality, the proximity read, every floor, every recommendation.
+  //
+  // ONE STRING, TWO MEASURED SURFACES. It rides inside the signed assessment
+  // AND surfaces verbatim on the live /api/guardrail verdict's `reasoning` —
+  // synthesizeReasoning (guardrail-sandwich.ts) pushes k.justification through
+  // unmodified, so it needs NO second edit. An additive disclosure note
+  // alongside this string was considered and NOT elected: "two disclosure
+  // channels for the same claim ... is the drift risk". Do not add one.
   const justification =
     parts.length === 0
-      ? 'No kathekon factors detected; action is contrary to appropriate action.'
+      ? 'No kathekon factors were extracted from the submitted text; on that basis, ' +
+        'the engine reads the action as contrary to appropriate action.'
       : `${parts.join('; ')}.`
 
   return { is_kathekon: isKathekon, quality, justification }
