@@ -24744,3 +24744,96 @@ working), PR23. Weights BLOCKED; the Q1 hard constraint untouched; the P0 0h hol
 `D-MENTOR-RULING-OC-SCOPING-LICENSE-RECORDED-2026-08-16`,
 `D-CONCURRENT-ARC-OC-SCOPING-SESSION-GATE2-2026-08-16`,
 `D-MENTOR-RULING-R1-S6-REPORT-ACCEPTED-2026-08-16`.
+
+## 2026-08-23 — D-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-AUTHORED-2026-08-23
+
+**Decision:** The Evaluative Engine Epistemic Status Scoping Session opened (gate verified
+discharged at open — the ATRF Q-A1 ruling, committed at `0fd098c`, whose own text un-gates this
+session) and produced its one deliverable:
+`operations/agent-circles-2026-08/2026-08-23-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md`
+— the Part-B register's eight items all dispositioned; the §3.2 per-output inventory re-derived
+from source into seven proposed output classes (every anchor re-verified at file:line this
+session); a 14-question EE-* set in five gated groups; sequencing; six named unsettled questions;
+boundaries proposed not assumed. Three-reviewer independent adversarial pass run and folded before
+handover (45 code anchors: 43 verified/1 drift/1 wrong; 34 record claims: 32 verified/2 drift/0
+refuted; compliance 7/7 PASS, 3 LOW) — the convergent finding (this session's own first-pass
+"precision" mis-attributing the phantasia-default disclosure to `intake_clarifications`; the true
+channel is `layer2_ambiguity_notes` via `composeLayer2AmbiguityNotes`) corrected openly in the
+document rather than silently. One new load-bearing fact surfaced: quiet site #1's string serves
+verbatim on the live `/api/guardrail` `reasoning` (`synthesizeReasoning`,
+`guardrail-sandwich.ts:195`/`:350`).
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; production
+untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the scoping document; revert the prompt's SPENT marker (each
+self-contained).
+
+**Rules served:** PR18, PR20 (both 2026-08-19 amendments), PR23. Weights BLOCKED; the Q1 hard
+constraint untouched; the P0 0h hold stands.
+
+**Status:** Adopted (as a FOR-MENTOR-REVIEW proposal at authoring; finalised same day — see the
+next entry). Cross-references: `D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`,
+`D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`,
+`D-GSATRF4-RULED-APPLIED-2026-08-19`.
+
+## 2026-08-23 — D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23
+
+**Decision:** The mentor's response to the Evaluative Engine Epistemic Status scoping document
+(relayed by the founder 2026-08-23 with the direction "proceed" — the finalisation election) is
+adopted as binding, recorded verbatim
+(`operations/agent-circles-2026-08/2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md`
+— verbatim wins), and executed documents-only. All EE-questions ruled — headlines: **EE-A1** seven
+output classes confirmed with per-class rulings (class (e) credence `established`, not
+probably-true); **EE-A2** computed fields = inference, weakest-provenance-inherited — the fifth
+"computation" value DECLINED ("a transformation method, not an epistemic origin"), a derivation
+note warranted, never a vocabulary value; **EE-A3** the existing three-grain machinery IS the
+engine's credence expression, deterministic derivation the only honest assignment path, the
+corroboration vocabulary a derivation input not a mapping; **EE-C1** quiet site #1's wording RULED
+in place — "No kathekon factors were extracted from the submitted text; on that basis, the engine
+reads the action as contrary to appropriate action." ("basis" not "absence") — a wire change on
+two measured surfaces, PR19-reviewed `code-critical` at build scoping, NOT licensed by the ruling;
+**EE-C2** interim label owed, rides the Shape-1 documentation map, removed at the same commit the
+D4-completion fix lands (that follow-up inherits the step, named now); **EE-C3**
+documentation-map disclosure, wording ruled; **EE-B1** consequentiality criterion confirmed plus
+condition (d) (named in a disclosure a consumer is expected to act on); **EE-B2 — Shape 2 elected,
+Shape 1 its unconditional prerequisite, Shape 3 deferred; Shape 2 fills provenance gaps only, no
+credence field** (the derivation-circularity worry constrains it); **EE-D1** conditionality marker
+at map level + the A2-coverage standing constraint's wording fixed; **EE-D2** the signature-scope
+condition stays at surface level, the map carries the ruled forward pointer; **EE-E1/E2/E3 + all
+three §4 boundaries** confirmed. The opening observation is held for the record: "the impulse to
+sharpen can overshoot the target."
+
+**Executed (documents only):** the verbatim record (NEW); the scoping document's dated header note
++ new §10 (rulings returned; scope finalised); a dated note on the examination document's §7
+Direction-3 routing block; the session prompt marked SPENT. Originals preserved at every site.
+**Nothing is built** — Shape 1 (the documentation map, carrying the ruled EE-C2/C3/D1/D2 wordings
++ the EE-A2 derivation note) is future founder-elected documents-work; Shape 2's wire changes
+(incl. the EE-C1 rewording at `layer2-mechanisms.ts:1271-1274`) are future PR19-reviewed
+`code-critical` build scoping; Shape 3 is deferred to its own future scoped question.
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only; production
+untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the verbatim file; revert the three dated additions (each
+self-contained).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "on that basis, the engine reads the action" operations/agent-circles-2026-08/2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md
+```
+Expected: 3.
+
+**Open questions:** none new. Carried forward with owners: the Shape-1 documentation map (founder
+election); the Shape-2 build scoping (founder election, PR19); the D4-completion follow-up's
+inherited label-removal step; Shape 3 (deferred, unowned); §7.3 composition question (unowned);
+§6.9 (unowned, far downstream).
+
+**Rules served:** PR18, PR20, PR23. Weights BLOCKED; the Q1 hard constraint untouched; the P0 0h
+hold stands.
+
+**Status:** Adopted. Cross-references:
+`D-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-AUTHORED-2026-08-23`,
+`D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`,
+`D-MENTOR-RULINGS-FIVE-QUESTIONS-EXAMINATION-ADOPTED-EXECUTED-2026-08-22`.

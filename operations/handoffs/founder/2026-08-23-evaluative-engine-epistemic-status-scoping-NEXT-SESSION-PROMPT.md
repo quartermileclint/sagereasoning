@@ -1,5 +1,12 @@
 # Next-Session Prompt — the Evaluative Engine Epistemic Status Scoping Session (scoping only; output = a FOR-MENTOR-REVIEW document)
 
+> **✅ SPENT 2026-08-23** — the session opened with the gate verified discharged, produced the
+> scoping document, ran + folded the three-reviewer adversarial pass, and — same day — the mentor's
+> rulings returned and were adopted on the founder's "proceed"
+> (`operations/agent-circles-2026-08/2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md`;
+> `D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`). Do not
+> re-paste.
+
 > **✅ GATE DISCHARGED 2026-08-23, same day as drafting** — the Q-A1 ruling exists:
 > `operations/agent-circles-2026-08/2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md`
 > (Q-A1: one framework, two orthogonal axes; entry `{provenance, credence}` uniform in form with

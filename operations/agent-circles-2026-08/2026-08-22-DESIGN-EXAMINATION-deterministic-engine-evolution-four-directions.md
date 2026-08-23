@@ -731,7 +731,16 @@ standing-runner gate and should be reconciled in the routing act itself.
   would need to establish: which outputs count as consequential; whether the uniform field is worth
   its cost against the existing three-grain machinery; the disclosure wording for the two quiet
   sites; and it would carry the measured-surface implementation constraint (§3.3) without
-  pre-deciding it.
+  pre-deciding it. *(Dated note, 2026-08-23: this session RAN — gate discharged by the ATRF Q-A1
+  ruling the same day; its scoping document
+  (`2026-08-23-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-SCOPING-DOCUMENT-FOR-MENTOR-REVIEW.md`) was
+  mentor-reviewed and every EE-question RULED
+  (`2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md` — verbatim wins):
+  the seven output classes confirmed; computed fields = inference, weakest-provenance-inherited;
+  the three-grain machinery IS the credence expression; both quiet sites' dispositions ruled
+  (site #1's rewording fixed, in place, future PR19 work; site #2's interim label on the
+  documentation map); Shape 2 elected with Shape 1 prerequisite and Shape 3 deferred. Nothing
+  built; every wire change future founder-walked work.)*
 - *The ATRF-proposition half* (status assignment in the harness; §(c-bis); the vocabulary question) —
   **already ruled onto its own routing** (GS-ATRF-4 standalone; §(c-bis) carried to the
   generation-step scoping session per the ruling — subject to open question 7). This document adds
