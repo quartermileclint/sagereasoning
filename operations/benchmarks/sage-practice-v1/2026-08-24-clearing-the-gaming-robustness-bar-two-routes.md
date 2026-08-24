@@ -1,7 +1,17 @@
 # Clearing the gaming-robustness bar — what the bar's own clearance condition requires
 
 **Authored 2026-08-24** on the founder's instruction *"clear the gaming-robustness bar now."*
-`governance`, documents only. **The bar is NOT cleared by this document, and it cannot be cleared by
+`governance`, documents only. **SUPERSEDED THE SAME DAY** by a 10-agent
+verify-then-adversarially-review workflow that found this document's own reasoning reasoned toward
+"the blocked thing is not really blocked" — the exact shape the mentor's Q2 ruling forecloses — plus
+several corrected facts (the corroboration check's dark-measurement bound, not its production-liveness
+state, is what discharges route (i)'s first conjunct; disclosure state was overstated; `l1_supply` is
+default-preset and mandatory on the plugin path, which is the actual live exposure the bar's Threat-B
+wording does not name; `/api/guardrail` is supply-proof; and a live production gap in
+`emitAccreditationTrustEvents` was found that bears on this question but is not created by it).
+**The corrected, reviewed version is
+`operations/agent-circles-2026-08/2026-08-24-MENTOR-QUESTION-gaming-robustness-bar-route-ii.md`. This
+document is retained as the superseded first draft, not as current analysis.** **The bar is NOT cleared by this document, and it cannot be cleared by
 running anything.** This sets out why, and the two routes the bar itself defines.
 
 ## What is already done — half of route (i)

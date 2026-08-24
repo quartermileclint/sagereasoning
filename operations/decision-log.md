@@ -25936,3 +25936,96 @@ the register — and `1` for the register.
 **Note on which discipline fired.** KG-EX2 lives in `/operations/knowledge-gaps.md`, and the cache's update discipline names the knowledge-gaps register among the surfaces whose change requires a same-session cache update. This entry discharges it for both the KG-EX2 amendment and the table row.
 
 **Status:** Adopted. **Rollback:** `git revert` this session's commit.
+
+---
+
+## 2026-08-24 — D-GAMING-BAR-MENTOR-QUESTION-REWRITTEN-AFTER-ADVERSARIAL-REVIEW-2026-08-24
+
+**Decision:** The gaming-robustness-bar mentor question is **fully rewritten** after a 10-agent
+verify-then-adversarially-review workflow found the first draft
+(`2026-08-24-clearing-the-gaming-robustness-bar-two-routes.md`) **reasoned toward "the blocked thing
+is not really blocked"** — the exact argument shape the mentor's own 2026-08-24 Q2 ruling forecloses.
+**The corrected question is `2026-08-24-MENTOR-QUESTION-gaming-robustness-bar-route-ii.md`. The first
+draft is marked superseded in place, not deleted.** `governance`, documents only.
+
+**The review's headline finding, and why the first draft failed on its own terms.** The digest's
+mechanism-facts section presented nine consecutive verified negative findings (no training loop, no
+live optimisation loop, `fresh` not a training signal, the watching table with no execution pathway,
+`loop_id` never acted upon, the runner external) building toward one conclusion — the gate's premise
+does not obtain here — with the actual refutation (Threat B's premise obtains architecturally through
+the live `l1_supply` capability) buried as a "surprise" at position 16 of 19. **Six first-hand
+re-verifications this session confirmed the review's corrections, not just its critique:**
+
+1. **`emitAccreditationTrustEvents` has NO extraction-provenance gate** (`emission-hooks.ts:74-124`) —
+   confirmed by direct read. Its sibling `emitOrientationReadingTrustEvent` (`:458-465`) has the exact
+   guard, citing *"the gaming ceiling's structural half."* **A live production finding, independent of
+   any ruling here**, recorded as Part 0 of the new question rather than folded into the route
+   analysis.
+2. **`l1_supply` is default-preset for `ecosystem`/`plugin_install` and mandatory on the plugin path**
+   (`practice-credential.ts:216-217`; `route.ts:556-564`) — confirmed. This is the project's actual
+   live exposure, and it is a **supply** channel, not a **co-training** relationship — the bar's own
+   Threat-B definition (§2.2) and route (ii)'s wording (*"not rely on a co-trained extractor"*) name
+   the wrong axis for this project's real hole.
+3. **`/api/guardrail` has zero `layer1_schema` occurrences** in `route.ts` or `guardrail-sandwich.ts`
+   — confirmed. The live ENFORCE surface is structurally supply-proof; the residual reaches the
+   consult/trust-record surfaces only.
+4. **`Layer2Assessment` carries no provenance field; the Ed25519 signature covers only that object**
+   (`layer2-signer.ts:5-6`); `meta.layer1_source` rides outside the signed bytes (`route.ts:2045-2049`)
+   — confirmed. A supplied extraction is cryptographically indistinguishable from a genuine one.
+5. **`TRUST_RECORD_ENVELOPE.attests[1]`** (`trust-record-payload.ts:48`) claims unconditionally that
+   decisions were reasoned *"as narrated and extracted from the submitted text"* — confirmed inaccurate
+   for the `l1_supply` population, where nothing is extracted. `does_not_attest[1]` names only the
+   self-report-omission route, not a supply-provenance route. A `grep` for `layer1|supplied|provenance`
+   in the payload file returns zero hits.
+6. **`website/smoke_a_prod.json` is tracked, committed, and pushed to `origin/main`** at `8aa9fae` —
+   not the "untracked-looking, loose" state the first draft's underlying digest reported. Contains a
+   full production signed assessment; a token grep found no credential material.
+
+**Also corrected:** route (i)'s first conjunct (the corroboration check bounding `G` to the structural
+residual) is now evidenced by the **dark measurement** (`2026-07-08-corroboration-check-build-results.md`
+§2: 22 crossings post-check, the structural set) rather than by production liveness, which two live
+code comments (`parallel-run.ts:810`, `guardrail-sandwich.ts:481-484`) assert is currently off and
+which could not be settled from a repo session either way. The disclosure-state claim is corrected from
+contradictory ("already disclosed" vs "genuinely unbuilt" in different sections of the review) to a
+single verified statement: the Threat-A omission class is published four ways; the Threat-B class this
+question is actually about is published nowhere (zero hits for
+`optimisation|optimization|co-train|adversarial|gaming|red-team` across all three R18 surfaces). A
+genuine, unresolved tension in ADR-012 itself is now named: the third rung's stated validity bar
+("correctness + robustness under optimization," `:46`) is not delivered by route (ii), yet the ADR's
+own blockquote (`:50`) blesses an accepted-disclosed-ceiling as satisfying Arm B's blocking condition.
+
+**GS-CYB-1's textual trap is now stated explicitly** — route (ii) is, in the bar's own §3.3 wording, a
+route by which "Arm B CLEARS," and GS-CYB-1's registered gate reads "until the gaming-robustness bar
+is cleared." A route-(ii) ruling could satisfy that gate by vocabulary coincidence rather than by
+anyone judging a disclosed ceiling adequate for a feedback controller specifically. The new question's
+Part 3 asks this directly rather than letting it pass unflagged, honoring the same discipline the
+mentor applied when ruling GS-CYB-1's constraint must "ride the question explicitly."
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-24-MENTOR-QUESTION-gaming-robustness-bar-route-ii.md` — new; the corrected question, ready for relay
+- `operations/benchmarks/sage-practice-v1/2026-08-24-clearing-the-gaming-robustness-bar-two-routes.md` — marked superseded in place, retained as the first draft, not deleted
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii. Documents only. AC7 not engaged.
+
+**Rollback path:** `git revert` this commit. The superseded-marking is reversible independently of the
+new question.
+
+**Open questions:**
+- **Part 0 (the emission-hooks provenance gap) is a live production finding, unresolved and not put
+  for ruling here.** It needs its own scoping — whether it is closed by mirroring the orientation-path
+  guard, a signing-contract change, or a corrected `attests`/`does_not_attest` pair is unstated.
+- **The route (i)/(ii) question itself remains genuinely open** — this entry rewrites the question,
+  it does not answer it.
+- **The ADR-012 ladder-vs-blockquote tension** is named and not resolved.
+- **PR19 does not engage** — `governance`/documents session — but the two prior drafts (this one and
+  the deliberation-reading brief earlier today) both required a full adversarial pass to reach a
+  question fit to put to the mentor. **A pattern worth naming, not yet a rule change**: same-session,
+  same-day mentor-question drafting appears to benefit materially from independent review before
+  relay, even though the tier does not require it.
+
+**Rules served:** PR19 (voluntarily engaged, though the tier does not require it), PR20, PR18, 0d-ii.
+
+**Status:** Adopted. Cross-references:
+`D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`,
+`2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md`.
