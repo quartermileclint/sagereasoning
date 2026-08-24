@@ -25530,3 +25530,113 @@ lifetime formulation as governing — that was ruled, not drafted.
 **Provenance, recorded because it matters to the arc's own subject:** the misfiling was found by a **concurrent peer session**, not by this arc — and the corrected cause was found only because this session went to check a claim it had already been handed the answer to. Both facts are carried into Letter I as its counterweight against the two catches it reports.
 
 **Status:** Adopted. **Rollback:** `git revert` this session's commit — the note is a blockquote; no entry moved, no ID changed.
+
+---
+
+## 2026-08-24 — D-DELIBERATION-READING-OPEN-QUESTION-ROUTING-BRIEF-AUTHORED-2026-08-24
+
+**Decision:** The mentor brief routing map §5d — the doctrinal open question *"does a ruling faculty
+deliberating in the control-filter, value-assessment, or causal-stage mechanisms but not in the
+oikeiosis mechanism count as deliberating?"* — is **authored and handed to the founder for relay**.
+**Nothing is anchored. The routing is UNRULED.** Per the session prompt's own step 2, a prepared
+brief with nothing anchored is the legitimate outcome when no ruling is available in-session; the
+mentor channel is founder-relayed and no ruling was returned. **Tier: `governance`, Standard.
+Documents only. AC7 not engaged. Weights BLOCKED.**
+
+**The premise finding, verified first-hand at drafting time (PR20), not restated from the prompt.**
+The 2026-08-24 ruling directed the question be carried *"as a scoping question for the generation-step
+or standing-runner design sessions, where the deliberation reading's architecture is already in
+scope."* **That premise does not hold for either named home.** The generation-step scope document is
+**closed** (RULED 2026-08-09) and **does not discuss the deliberation reading** — every `deliberat*`
+hit is adverbial or config-jitter language; zero hits for `ruling_faculty`, `hegemonikon`, or the
+oikeiosis-only bound. The **standing-runner design document does not exist**; it is the next unopened
+Q11 item, gated on the bounded validation run's §6 report.
+
+**Two findings the brief carries beyond the prompt's own framing, both verified at source.**
+**First — the routing may already be determined by a prior binding ruling.**
+`2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` established a
+general principle for exactly this class (a carry-forward pointed at a closed session): not void, not
+a dated amendment to the closed generation-step document, but **redirected to the next unopened Q11
+session as a named input** — and its worked case used the **standing-runner design** as the
+destination. This also **weakens half the premise finding**: the standing-runner document's
+non-existence is not a blocker, since a forward reservation as a named input is the sanctioned
+mechanism, not a fallback. Whether that principle governs a doctrinal question raised *by a ruling*
+rather than drafted by a session is put to the mentor, not decided here.
+**Second — a PR20 asymmetry that cuts against the AI-found third candidate.** The
+oikeiosis-only deliberation predicate has **one definition and two readers, deliberately**
+(`layer2-mechanisms.ts:1569`, in terms) — the second is `computeProximityBase` — so the build target
+both published notes name as their lifetime (*"until the deliberation reading reflects the full ruling
+faculty's deliberative state across all mechanisms"*) is a **`code-critical` change to the live
+deterministic scoring path** (`katorthoma_proximity` floors gate verdicts, feeds `proximity_floors`,
+drives trust events). By contrast the hegemonikon-drift record's ruled outcome is disclosure- and
+read-side (R-2 a `does_not_attest` item; R-3 M-B only, MEASURE-only, never the public record). Routing
+§5d there would place an engine-class build target in a disclosure-class home. **Named, not absorbed.**
+
+**The third candidate, relayed and not chosen.**
+`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` — RULED 2026-08-15 on items 1–4,
+**still OPEN for the uniformity-reads-as-stable family** — with three reasons each verified against
+the record: it is the hegemonikon session by name; Ruling Set B R-1's `computeDispositionStability`
+finding is arguably the same shape of defect (a population stddev certifying `stddev < 0.4` as
+`advanced` / *"Disposition approaching hexis"*, conflating stability-under-perturbation with
+absence-of-perturbation, Seneca *Letters* 75.8–9); and it already uses this note class's machinery
+(R-2/M-A's `does_not_attest` item shipped with the ADR-013 §8 dated amendment,
+`trust-record-payload.ts`, and the S10 pin in one edit). **Two honest counter-considerations are
+carried with it:** the open family is defined and *"ruled together or not at all"*, so a fourth item
+is not free; and the §4 asymmetry above.
+
+**The question of principle deliberately left unanswered:** are the oikeiosis-only deliberation term
+and the zero-variance-certifies-`advanced` finding **one defect class or two?** The brief sharpens it
+rather than resolving it — both are proxies whose label overreaches their input, but the remedies
+differ in kind: §5d is an *under-read* (widen the input set; the unread sources already exist in the
+same snapshot), R-1 an *under-determination* (reading more of what is there cannot fix it; low
+variance is consistent with two causally distinct states, and separating them needs perturbation the
+population may never contain). One is tractable by architecture; the other may not be tractable at all.
+
+**The doctrinal question remains OPEN and UNDESIGNED.** Neither published note (§5b, §5c — both live,
+both untouched this session) is treated as having settled it. No public surface changed, so R18 does
+not engage.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-24-MENTOR-BRIEF-deliberation-reading-open-question-routing.md` — new; the brief for relay
+- `operations/decision-log.md` — this entry, appended at the physical tail per `D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`
+
+**Not touched, deliberately:** map §5d (it is anchored nowhere until the routing is ruled);
+`00-PRIORITY-INDEX.md` (it is the primal-substrate family's register, and no ruling has yet put this
+in that sequence); both published scope notes; `website/smoke_a_prod.json`'s §5c treatment.
+
+**Risk classification:** Standard under 0d-ii. Documents only; no code, flag, schema, credential,
+public surface, or live operation. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this session's commit, or delete the brief — it is referenced only
+from this entry and imported by nothing.
+
+**Verification step (founder-performable):**
+```
+git log --oneline -1
+sed -n '1,12p' operations/agent-circles-2026-08/2026-08-24-MENTOR-BRIEF-deliberation-reading-open-question-routing.md
+grep -c "deliberation reading" operations/agent-circles-2026-08/2026-08-09-generation-step-scope.md
+ls operations/agent-circles-2026-08/*standing-runner* 2>&1
+```
+Expected: the brief's header block; `0` for the generation-step grep; a "No such file" for the
+standing-runner glob — the two halves of the premise finding, reproducible in two commands.
+
+**Open questions:**
+- **The routing itself — UNRULED.** Revisit on the founder's relay of a ruling. Until then §5d is
+  recorded in the map and anchored in no design session, which is the state the ruling's
+  *"do not let the published note stand as the resolution"* asks to end.
+- **Does the 2026-08-19 closed-target principle govern this case?** If yes, no new routing ruling is
+  needed and §5d becomes a named input to the standing-runner design.
+- **One defect class or two?** Named above; not for the AI.
+- **Ten concurrent peer sessions were open at this session's open, and HEAD moved under it
+  mid-session** (`8aa9fae` → `d5669f4`, a peer's reflections-arc commit). Path-scoped commits kept it
+  harmless again, as at the predecessor. The predecessor close already named that a real coordination
+  mechanism is owed if this keeps happening; this is the second consecutive session in which it did.
+
+**Rules served:** PR20, PR18, R18 (not engaged — no public surface), 0d-ii.
+
+**Status:** Adopted (brief authored; routing unruled). Cross-references:
+`D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUBLISHED-2026-08-24`,
+`D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`,
+`D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
+`D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`,
+`operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b/§5c/§5d.
