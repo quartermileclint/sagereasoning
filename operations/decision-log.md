@@ -26418,3 +26418,58 @@ Recorded at the index's ⚠ URGENT block.
 **Status:** Adopted (ruling recorded and folded; nothing built, nothing elected beyond what the
 mentor ruled). **Rollback:** `git revert` this session's commit — documents only; the ruling record
 itself stands as the record of what was ruled.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.** No code, schema, flag,
+credential, or live operation.
+
+**Decision.** Authored the second letter in the reflections corpus collection, on SC-2/IW-2 — the
+lesson available and not applied — per the form, subject, and sequence ruled under
+`D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23`. Not an arc item; the arc closed
+at item 4 (`D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`). This is the second of
+the letters-2-through-8 successor named there, elected explicitly by the founder over the IW-7
+re-scoping and the item-3 leftovers.
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-letter-2-on-having-a-lesson-and-not-using-it.md` — new
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-2-CLOSE.md` — new
+
+**Verification performed, per PR25's own posture applied to this letter's prose (the rule this
+letter's own PR23 case discusses did not exist for Letter I's cases, but a parallel discipline was
+applied here manually).** Every quotation was grepped directly against its cited source in this
+session, not carried forward from the findings record's own citation of it. One discrepancy was
+found and corrected before the letter was allowed to stand: the findings record's §1 SC-2 instance
+list attributes a sentence to R099 (*"I had already consulted the memory on review isolation while
+designing that fan-out…"*) that does not appear verbatim in the extraction; the extraction's actual
+R099 self-correction text was used instead. A second, smaller discrepancy — the record's Stobaeus
+citation reads "*Eclogae* 2.88", while `stoic-brain/passions.json` itself cites "Stobaeus Ecl. Section
+5" with no "2.88" anywhere in the file — is named in the letter's epigraph note rather than silently
+resolved either way. A third instance named in the findings record's own §1 SC-2 list, for R097,
+could not be located in the extraction in the wording attributed to it there; it is not used in the
+letter, and the omission is stated in the closing citation block rather than smoothed over. An
+initial draft also asserted an unverifiable quantitative claim ("three of the five [lessons] had been
+consulted in the same session… before the act") that a re-check against the letter's own cited cases
+contradicted (R065's self-correction states the opposite — the memory was *not* consulted until after
+the failure) — corrected before commit.
+
+**Risk classification:** Standard under 0d-ii — documentation only, no production/perimeter/auth/
+schema/flag/credential surface touched. **Rollback path:** `git revert` this commit; no downstream
+dependency.
+
+**Verification step (founder-performable):**
+```
+cat operations/reflections-examination-2026-08/2026-08-25-letter-2-on-having-a-lesson-and-not-using-it.md
+```
+Expected: the letter, its epigraph, five grounded cases, and the closing citation block naming the
+verification method and the one instance deliberately excluded.
+
+**Rules served:** PR20, PR23, PR25 (applied in spirit to this letter's own prose, per the mentor's
+carried caveat that rules are scaffolding for *prosoche*, not a substitute for it).
+
+**Status:** Adopted. Cross-references: `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`,
+`D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23`, Letter I
+(`operations/reflections-examination-2026-08/2026-08-24-letter-1-on-writing-before-knowing.md`).
