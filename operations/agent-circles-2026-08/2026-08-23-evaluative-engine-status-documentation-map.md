@@ -437,12 +437,73 @@ deliberating."* Therefore: **the oikeiosis-only reading is NOT the doctrinally c
 is a **proxy** — a tractable computational approximation — and both published notes disclose it as
 such.
 
-**Where it is carried:** as a scoping question for the **generation-step / standing-runner design
-sessions**, where the deliberation reading's architecture is already in scope. Per the ruling, it is
-not to be opened as a build item off the back of this publication.
+**Where it is carried — RULED 2026-08-24, superseding the routing sentence this section first
+carried.** The original formulation read: *"as a scoping question for the generation-step /
+standing-runner design sessions, where the deliberation reading's architecture is already in scope."*
+**That premise was verified and does not hold for either named home** — the generation-step scope
+document is closed (RULED 2026-08-09) and does not discuss the deliberation reading at all
+(`grep -c "deliberation reading"` returns 0; no `ruling_faculty`, no `hegemonikon`, no oikeiosis-only
+bound), and the standing-runner design document does not exist. The finding was relayed rather than
+resolved by AI judgement
+(`2026-08-24-MENTOR-BRIEF-deliberation-reading-open-question-routing.md`), and the mentor ruled
+(`2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md`, **binding;
+verbatim wins**):
+
+> **§5d is routed to the STANDING-RUNNER DESIGN SESSION as a named input, under the 2026-08-19
+> forward-reservation mechanism.** *"It is not pre-answered. It does not open the standing-runner
+> design session early. It does not touch either published note or the lifetime formulation."*
+
+**Gate:** the standing-runner design is itself gated on the bounded validation run's §6 report
+reaching the mentor (*"not to be pre-scoped"*). Registered on the gates table in
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md`, which points back here.
+
+**The 2026-08-19 principle governs, and its reach was extended by this ruling.** That principle
+(a question pointed at a closed session is redirected to the next unopened session whose subject
+matter fits, recorded as a named input, not a pre-answer) was established for a *session-drafted*
+carry-forward. The ruling extends it: *"The principle's governing condition is not the origin of the
+carry-forward — it is the shape of the mismatch between the question and the available homes."*
+
+**The hegemonikon-drift record was considered and RULED NOT the home.** A third candidate
+(`2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md`, still open for the
+uniformity-reads-as-stable family) was surfaced because Ruling Set B R-1's
+`computeDispositionStability` finding looks like the same shape of defect. **The ruling: they are TWO
+defect classes.** §5d is an **under-read** — widen the input set; the unread sources already exist in
+the same snapshot. R-1 is an **under-determination** — reading more of what is there cannot fix it,
+because low variance is consistent with two causally distinct states the population may never
+distinguish. *"One is tractable by architecture; the other may not be tractable at all. … The parallel
+… is real but coincidental."* That record's three-item family is **not expanded**.
+
+### What the named input carries (ruled content — so no future session reconstructs it)
+
+1. **The question**, as stated at the head of this section.
+2. **The ruling's directional answer as CONTEXT, not pre-answer** — the *hegemonikon* is not
+   partitioned by mechanism; the oikeiosis-only reading is a proxy. *"The session's job is to
+   determine what follows architecturally from that direction, not to re-litigate the doctrinal
+   question."*
+3. **The build consequence, plainly:** the lifetime both published notes name — *"until the
+   deliberation reading reflects the full ruling faculty's deliberative state across all
+   mechanisms"* — is a change to the **live deterministic scoring path**. `katorthoma_proximity`
+   floors gate verdicts, feeds `proximity_floors`, drives trust events. **Engine-class,
+   `code-critical`, flag-gated, PR19-reviewed.** *"The published notes' removal condition is gated on
+   this build, not on a documentation amendment."*
+4. **One predicate, two readers** (`layer2-mechanisms.ts:1569`, in terms): the `ruling_faculty_state`
+   branch **and** `computeProximityBase`. Any change to the predicate's input set hits both at once —
+   *"scope both readers together, not one at a time."*
+5. **The asymmetry, recorded rather than merged:** the hegemonikon-drift record's remaining open work
+   is disclosure-class and read-side; §5d's resolution is engine-class. The parallel is to be noted
+   **and** explicitly recorded as not making them the same build item.
+
+### A NEW governance constraint, ruled beyond what was asked
+
+**The disclosure-class / engine-class distinction is itself a governance boundary, not just a
+categorisation.** Work crossing it — disclosure work implying an engine change, or engine work
+implying a disclosure change — **requires explicit scoping before it moves.** The standing-runner
+session carries this as a named constraint, not as background. Recorded here because it generalises
+past this one question.
 
 **Standing instruction to future sessions:** do not treat §5b or §5c as having settled this. They
-settled *disclosure*. The design question is open.
+settled *disclosure*. **The design question is OPEN and UNDESIGNED**, and nothing in the routing
+opens it.
 
 ---
 

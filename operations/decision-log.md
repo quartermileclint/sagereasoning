@@ -25640,3 +25640,101 @@ standing-runner glob — the two halves of the premise finding, reproducible in 
 `D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
 `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`,
 `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b/§5c/§5d.
+
+---
+
+## 2026-08-24 — D-DELIBERATION-READING-OPEN-QUESTION-ROUTED-STANDING-RUNNER-2026-08-24
+
+**Decision:** The mentor ruled on the routing brief the same session
+(`D-DELIBERATION-READING-OPEN-QUESTION-ROUTING-BRIEF-AUTHORED-2026-08-24`, whose "routing UNRULED"
+open question this entry **discharges**). **Map §5d — the deliberation-reading doctrinal open
+question — is routed to the STANDING-RUNNER DESIGN SESSION as a named input**, under the 2026-08-19
+forward-reservation mechanism, and is anchored with reciprocal cross-references. **The question
+itself remains OPEN and UNDESIGNED.** Verbatim record (binding; verbatim wins):
+`operations/agent-circles-2026-08/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md`.
+**Tier: `governance`, Standard. Documents only. AC7 not engaged. Licenses no code.**
+
+**What the mentor ruled, beyond the routing itself — three things, none of which the brief asked for
+in that form.**
+
+1. **They are TWO defect classes, not one.** The brief sharpened the question and refused to answer
+   it; the mentor answered it because *"the routing is indeterminate without it"*, and adopted the
+   brief's own §5 analysis: §5d is an **under-read** (widen the input set; the unread sources already
+   exist in the same snapshot), Ruling Set B R-1 an **under-determination** (reading more of what is
+   there cannot fix it). *"One is tractable by architecture; the other may not be tractable at all. …
+   The parallel … is real but coincidental. Coincidental structural similarity is not the same as
+   shared defect class."* **The hegemonikon-drift record is therefore NOT the home**, and its
+   three-item family is **not expanded** — the brief's own counter-consideration was adopted as one
+   of the reasons.
+2. **The 2026-08-19 closed-target principle GOVERNS, and its reach is extended.** The brief asked
+   whether a principle established for a *session-drafted* carry-forward governs a question raised by
+   a *ruling*. It does: *"The principle's governing condition is not the origin of the carry-forward —
+   it is the shape of the mismatch between the question and the available homes."* The
+   standing-runner document's non-existence is confirmed **not** a blocker.
+3. **A NEW named governance constraint, ruled beyond what was asked.** The brief observed that
+   routing an engine-class target into a disclosure-class home would be a category mismatch and left
+   whether that matters to the mentor. Ruled: it matters, **and the distinction is itself a
+   governance boundary, not just a categorisation** — work crossing it (disclosure work implying an
+   engine change, or engine work implying a disclosure change) **requires explicit scoping before it
+   moves.** Recorded at map §5d because it generalises past this one question.
+
+**The named input's ruled content, anchored so no future session reconstructs it:** the question; the
+directional answer as **context not pre-answer** (*"the session's job is to determine what follows
+architecturally from that direction, not to re-litigate the doctrinal question"*); the build
+consequence stated plainly — **engine-class, `code-critical`, flag-gated, PR19-reviewed**, with the
+published notes' removal condition *"gated on this build, not on a documentation amendment"*; the
+one-predicate-two-readers fact (`ruling_faculty_state` **and** `computeProximityBase`) with **both
+readers scoped together, not one at a time**; and the asymmetry recorded rather than merged.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md` — new; the verbatim ruling
+- `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` — §5d's routing sentence **superseded in place** (the original retained as quoted superseded record, matching §5b's own supersession form), the ruling anchored, the five carried items and the new governance constraint recorded
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — the gates table's **Standing-runner design** row gains §5d as a named input, pointing back at map §5d and the verbatim ruling. This is the **reciprocal** half; the map points here, the index points there
+- `operations/decision-log.md` — this entry, appended at the physical tail
+- `operations/handoffs/founder/2026-08-24-deliberation-reading-open-question-routing-CLOSE.md` — rewritten to close the full session rather than the brief-only stopping point
+
+**A precedent gap observed and deliberately NOT fixed:** the 2026-08-19 redirect (the conjectural
+entry type) was anchored **only** in its producing design document and appears nowhere in the gates
+table, so that named input is not discoverable from the register a standing-runner session would read
+at open. This session indexed its own routing rather than repeating the pattern, but **did not touch
+the other document** — someone else's record, and not this session's scope. Named for the founder.
+
+**Not touched, deliberately:** both published scope notes (§5b, §5c — live, unchanged); the lifetime
+formulation; the generation-step scope document (closed — and the ruling explicitly declines the
+dated-amendment shape); the hegemonikon-drift record (ruled not the home; its family unexpanded); no
+public surface, so R18 does not engage.
+
+**Risk classification:** Standard under 0d-ii. Documents only; no code, flag, schema, credential,
+migration, public surface, or live operation. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this session's second commit — the ruling record, the map anchor, and
+the index row revert together, restoring §5d to its unrouted state. The brief and the first commit
+stand independently.
+
+**Verification step (founder-performable):**
+```
+grep -c "00-PRIORITY-INDEX" operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md
+grep -c "§5d" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+grep -n "STANDING-RUNNER DESIGN SESSION as a named input" operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md
+```
+Expected: `1` and `1` — the reciprocity holding in both directions, neither able to drift out of
+sight of the other — and one line showing the routing.
+
+**Open questions:**
+- **The doctrinal question remains OPEN and UNDESIGNED.** Revisit condition: the standing-runner
+  design session, itself gated on the bounded validation run's §6 report reaching the mentor. Nothing
+  in this routing opens it, and §5b/§5c are still not its resolution.
+- **No independent review.** PR19 does not engage a `governance`/documents session, but this
+  session's two substantive contributions (the engine/disclosure asymmetry; the under-read vs
+  under-determination split) were author-checked only — and the mentor adopted both into a binding
+  ruling. Named as a limit, not a defect.
+- **The 2026-08-19 precedent's own un-indexed named input** (above), left for the founder.
+
+**Rules served:** PR20, PR18, 0d-ii. R18 not engaged (no public surface).
+
+**Status:** Adopted. Cross-references:
+`D-DELIBERATION-READING-OPEN-QUESTION-ROUTING-BRIEF-AUTHORED-2026-08-24` (this entry discharges its
+routing open question), `D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUBLISHED-2026-08-24`,
+`D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`,
+`D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
+`D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`.

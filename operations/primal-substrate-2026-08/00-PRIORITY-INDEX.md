@@ -294,7 +294,7 @@ The synthesis parks five items "until after the first build gate." **That gate h
 | --- | --- | --- |
 | **§6 report** | The bounded validation run's own report, reaching the mentor | S6's reordering decision; S4's watching-table extension |
 | **ATRF scoping session** | Post-validation-run, explicitly *"do not open early"* | S3's mechanism design; S5's agent-profile architecture + completion-signal design; S8's GS-ATRF-3 build; **the sufficiency-examination content specification + the boulesis/normative-gap distinction (both added 2026-08-12 — see below)** |
-| **Standing-runner design** | Explicitly gated on the §6 report reaching the mentor; *"not to be pre-scoped"* | Any generation-channel reordering that survives S6 |
+| **Standing-runner design** | Explicitly gated on the §6 report reaching the mentor; *"not to be pre-scoped"* | Any generation-channel reordering that survives S6; **the §5d deliberation-reading doctrinal open question — a NAMED INPUT, routed here 2026-08-24 under the 2026-08-19 forward-reservation mechanism, not pre-answered and not opening this session early** (question + ruled carried content: `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5d; ruling: `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md`) |
 
 Every scope document's §0 names which of these its parked half waits on, by name, rather than
 repeating "the first build gate."
