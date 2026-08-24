@@ -4,6 +4,8 @@
 **Mandate:** run as ONE session, per `D-REFLECTIONS-EXAMINATION-FOUNDER-APPROVALS-CLOSED-2026-08-23` — *"both surfaces reduce to the same underlying question … Solving that once and applying the answer to both surfaces is cheaper than two separate sessions converging on two different answers to one problem."*
 **Status:** a scope and a design proposal. **It rules on nothing.** The reflect-cadence question was explicitly named as needing *"a design proposal and a measured trial, not a direct ruling"*; route (c)'s phrase is the founder's to accept or reject. This document is the input to both.
 
+**[RULED 2026-08-24 — SUPERSEDED WHERE NOTED BELOW.]** The mentor ruled on the §5 architectural question, as put, and explicitly declined to rule on §3.3 (route (c)'s phrase — *"a founder call, not a mentor call"*). **The general answer proposed in §2 is RULED AGAINST for IW-7** (a second exposure-keyed instrument added to a loop already carrying one with a measured erosion problem — IW-4 — relocates and likely accelerates that erosion, because content variation pays for legibility, not credibility, and frequency erodes credibility regardless of content). §4 (the H3 boundary-predicate design) is superseded by this ruling and is retained below as the record of a rejected direction. **Route (c) is unaffected on its own terms** (see the §3 amendment) and stands on a different property than the one the ruling turns on. Verbatim record: `operations/reflections-examination-2026-08/2026-08-24-mentor-ruling-item4-trigger-legibility-verbatim.md`.
+
 ---
 
 ## §1 — The shared question, and why the two surfaces are one
@@ -62,9 +64,17 @@ The founder needs no knowledge of the lesson, the code, or the failure mode — 
 - **It depends on the founder hearing a distinction** between "the rule says X" and "I checked and found Y". That distinction is audible but not automatic, and this proposal has no evidence about how reliably it is heard in practice. **This is the residual legibility risk and it is not designed away.**
 - **It is not content-varied.** A fixed phrase is the mechanism the table already uses, and the founder deploys it at their discretion rather than on a schedule — so the habituation risk falls on the founder's judgment, not on a firing rate. That is a genuine asymmetry with §4 and the reason the two surfaces need different treatments of the same spine.
 
+
+
+### 3.5 [Added 2026-08-24, following the §2/§4 ruling] Why route (c) survives the ruling against §2's general answer
+
+The mentor's argument turns on **frequency eroding credibility regardless of content variation** — an instrument that fires automatically on every action of a class trains ambient discounting no matter how its content varies. Route (c)'s phrase does not have that property: **its firing rate is the founder's discretion, not an automatic trigger on an action class.** There is no loop for a credibility-erosion argument to run in, because there is no rate at which it fires; a founder who never says the phrase never fires it, and one who says it every session is exercising judgment the ruling's argument is not about.
+
+**This is a distinction of kind, not a defence by analogy — recorded so the next reader does not read route (c) as surviving because the ruling missed it.** The mentor was shown §3 and declined to rule on it for exactly this reason: it is not the same architectural question. **Founder-elected 2026-08-24: keep route (c), and record the tension rather than treat the ruling as silently reaching it.** The residual risk named in §3.4 — that the phrase depends on the founder hearing an audible-but-not-automatic distinction — stands unchanged and is not resolved by this note.
+
 ---
 
-## §4 — IW-7: reflect cadence
+## §4 — IW-7: reflect cadence [RULED AGAINST 2026-08-24 — retained as the record of a rejected direction, not as a live design]
 
 ### 4.1 The finding that dissolves constraint (a)
 
@@ -100,6 +110,8 @@ Proposal: **derive the content from the window since the last fire.** At a commi
 
 ### 4.4 The trial, and how it can fail honestly
 
+**[Superseded 2026-08-24.] Do not run this trial as scoped — the design it would trial is ruled against.** Retained to show the trial was specified honestly enough to fail, which is itself part of the record.
+
 A cadence change must be able to distinguish *"it worked"* from *"it fired more."* Proposed observables, in the project's own idiom:
 
 1. **The habituation measure, and it is mechanically computable:** compare the *content* of successive reflect fires within one session. **If fire 2 and fire 3 say substantially the same thing, habituation has arrived** — regardless of what the fires are about. This is a direct measure of constraint (b) and it can fail the design, which is what makes it worth running.
@@ -124,6 +136,18 @@ The findings record observes that **four of the eight harvested findings in the 
 - **The at-action advisory's own false-positive rate (IW-4)** — this proposal deliberately adds a second exposure-keyed instrument to a loop that already carries one that has eroded. The interaction between them is not modelled here.
 
 **The question for the ruling, stated plainly:** is *exposure-keyed trigger plus occasion-varied content* the right general answer to the trigger-legibility problem — and if so, is the content-variation mechanism in §4.3 sufficient to pay for it, or does adding a second exposure-keyed instrument to this loop simply relocate the erosion IW-4 already records?
+
+---
+
+## §6a — [Added 2026-08-24] The ruling's three openings, recorded and not scoped
+
+Per founder election: recorded faithfully as successors; **none scoped in this session.**
+
+1. **A non-exposure-keyed trigger** — a condition other than action-class membership, more specific and less frequent, so §4.3's content-variation mechanism pays for legibility in a context where credibility is not already compromised by frequency.
+2. **A structural intervention rather than an instrument intervention** — if the Gate-2 consult (already on H3, alongside the guard) is not producing the reflect behaviour this scope sought, the question is whether the Gate-2 consult's own design is the right target, not whether a second instrument should sit beside it.
+3. **A close-hook-only intervention** — `close-hook.mjs` and `GATE1_REFLECT_INITIATE_MODE` already exist; the ruling against the mid-session component does not disturb them. If the problem is primarily a close-session one, the question becomes whether the close turn's *content* is legible, not whether a second instrument is needed.
+
+**Also carried forward from the ruling, not resolved here:** the trust-record heterogeneity question (would a mid-session fire count the way a close fire counts) is sharpened, not answered, by the same-day emission-hooks finding that `emitAccreditationTrustEvents` has no extraction-provenance gate while its sibling does — the trust record's attestation accuracy is already a live concern on a different path, independent of this scope.
 
 ---
 

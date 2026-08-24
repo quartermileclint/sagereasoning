@@ -26198,3 +26198,27 @@ Expected: `5616`, `20`, `false`.
 `D-GAMING-BAR-ROUTE-II-RULED-AGAINST-GS-CYB1-CONSTRAINT-AMENDED-2026-08-24`,
 `D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`,
 `website/supabase-project-context-2026-08-19-gsatrf4-update.sql` (the precedent this extends).
+
+---
+
+## 2026-08-24 — D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24
+
+**Decision:** the mentor's ruling on item 4's architectural question is **recorded and folded.** **Ruled AGAINST:** exposure-keyed trigger plus occasion-varied content as the general answer to the trigger-legibility problem — specifically, **against §4's IW-7 design** (a boundary predicate on H3 firing a mid-session reflect turn). **Not ruled on:** §3.3's route (c) phrase, explicitly declined as *"a founder call, not a mentor call."* Verbatim: `operations/reflections-examination-2026-08/2026-08-24-mentor-ruling-item4-trigger-legibility-verbatim.md`. **Tier: `governance`, documents only.** No code, schema, flag, credential, or live operation. AC7 not engaged.
+
+**The reasoning, in the mentor's own structure:**
+1. **IW-4 is a measurement, not a hypothesis.** The at-action advisory's erosion is the current state of a running instrument, not a predicted one. A second exposure-keyed instrument entering the same loop does not start from a clean baseline — it enters a loop already conditioned toward ambient treatment of exposure-keyed prompts, so its own erosion baseline is *lower* than the first instrument's was.
+2. **§4.3's content-variation mechanism pays for legibility, not credibility.** The trigger-legibility problem has two components; frequency erodes credibility regardless of content variation, and content variation slows but does not prevent an agent treating a same-class prompt as a structural feature of the action rather than a signal about it.
+3. **The unmodelled interaction is load-bearing, not a disclosed gap.** The scope's own admission that "the interaction between them is not modelled" mattered for the ruling: H3 already carries the guard and the Gate-2 consult, and a reflect-turn addition there means two exposure-keyed prompts in close temporal proximity on the same action — a combined signal more likely to read as one ambient feature, not two legible ones.
+4. **The trust-record question is not a detail.** Whether a mid-session fire counts the way a close fire counts is unresolved in the scope, and **the same-day emission-hooks finding** (`emitAccreditationTrustEvents` has no extraction-provenance gate while its sibling does; recorded separately by a peer session as a live production finding, first-hand-confirmed) makes this *more* acute — the trust record's attestation accuracy is already a live concern on a different path.
+5. **PR21's harvest-rule velocity argument.** If the write side already outruns the instrument meant to govern it, a second instrument does not close that gap — it adds one the write side will also outrun. The problem named is velocity, not instrument count.
+
+**Three directions the ruling does not foreclose — recorded, none scoped this session, per founder election:**
+1. A **non-exposure-keyed trigger** — a more specific, less frequent condition than action-class membership, where §4.3's mechanism would pay for legibility in a context credibility hasn't already been compromised in.
+2. A **structural intervention rather than an instrument intervention** — if the existing Gate-2 consult on H3 isn't producing the reflect behaviour sought, its own design is the target, not a second instrument beside it.
+3. A **close-hook-only intervention** — `close-hook.mjs` and `GATE1_REFLECT_INITIATE_MODE` already exist and are undisturbed by this ruling; the live question there is content legibility, not instrument count.
+
+**Route (c) — founder-elected: keep, and record the tension rather than treat the ruling as silently reaching it.** The distinction the ruling turns on — automatic frequency eroding credibility — does not apply to a phrase whose firing rate is founder discretion rather than a trigger on an action class; there is no loop for the credibility-erosion argument to run in. This is recorded as a distinction of kind in the scope's new §3.5, **not** as route (c) surviving because the ruling missed it — the mentor was shown §3 and declined to rule on it for exactly this reason.
+
+**Folded into:** the scope document (§4 marked ruled-against and retained as the record of a rejected direction; §3.5 added; §4.4's trial marked do-not-run-as-scoped; §6a records the three openings), and `KG-EX2`'s redirect-phrase pointer (the tension noted in place).
+
+**Status:** Adopted (ruling recorded and folded). **Rollback:** `git revert` this session's commit — removes the verbatim record and the fold; the earlier route (c) adoption and cache row are untouched by this entry.

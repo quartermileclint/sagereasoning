@@ -28,6 +28,38 @@ You can use it from now. It concedes the citation and asks for the one thing a c
 
 ---
 
+## Mentor ruling — RECEIVED and FOLDED, 2026-08-24
+
+**Ruled AGAINST §4's general design** (a boundary predicate on H3 firing a mid-session reflect turn):
+adding a second exposure-keyed instrument to a loop already carrying one with a measured erosion
+problem (IW-4) relocates and likely accelerates that erosion — content variation pays for legibility,
+not credibility, and frequency erodes credibility regardless of content. The unmodelled H3-interaction
+gap this close already flagged as the weakest part was, in the ruling's own words, "load-bearing."
+**Declined to rule on §3.3 (route (c))**, explicitly naming it a founder call.
+
+Verbatim: `operations/reflections-examination-2026-08/2026-08-24-mentor-ruling-item4-trigger-legibility-verbatim.md`.
+Folded into the scope (§4 marked ruled-against and retained as the record of a rejected direction; new
+§3.5; §6a). Decision-log: `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
+
+**Three openings the ruling names, recorded and not scoped, per your election:**
+1. A non-exposure-keyed trigger — more specific, less frequent than action-class membership.
+2. A structural intervention — if the existing Gate-2 consult on H3 isn't producing the reflect
+   behaviour sought, its design is the target, not a second instrument.
+3. A close-hook-only intervention — `close-hook.mjs`/`GATE1_REFLECT_INITIATE_MODE` already exist and
+   are undisturbed; the live question is content legibility, not instrument count.
+
+**One sharpening from a peer session's same-day finding:** `emitAccreditationTrustEvents` has no
+extraction-provenance gate while its sibling `emitOrientationReadingTrustEvent` does — confirmed
+first-hand. The mentor cited this to make the scope's unresolved trust-record question "more acute,
+not less." Independent of this arc; named because the ruling connects it.
+
+**Route (c) — kept, per your election.** It survives on a distinction of kind, not by the ruling
+missing it: its firing rate is your discretion, not an automatic action-class trigger, so the
+credibility-erosion argument has no loop to run in. The mentor was shown §3 and declined to rule on it
+for exactly this reason. Recorded as a tension in the scope's §3.5 and in KG-EX2, not smoothed over.
+
+---
+
 ## What is yours next
 
 **The mentor question, stated plainly in §5 of the scope:** is *exposure-keyed trigger plus occasion-varied content* the right general answer — and if so, does §4.3's content-variation mechanism actually pay for it, or does adding a **second** exposure-keyed instrument to a loop that already carries an eroded one simply relocate the erosion? §5 names the architectural surfaces per PR20: H3 and the guard path it shares, `close-hook.mjs`/`GATE1_REFLECT_INITIATE_MODE`, the trust record's per-session counting, PR21, and IW-4's false-positive rate.
