@@ -25472,3 +25472,61 @@ lifetime formulation as governing — that was ruled, not drafted.
 `D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`,
 `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-katorthoma-proximity-scope-note-and-doctrinal-open-question-verbatim.md`,
 `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b/§5c/§5d.
+
+---
+
+## 2026-08-24 — D-PR25-ADOPTED-VERIFICATION-CLAIM-CARRIES-ITS-CHECK-2026-08-24
+
+**Decision:** **PR25 is adopted** — a verification claim in a code comment carries its check. Encodes the reflections-examination arc's **IS-1** finding on the mentor ruling recorded at `D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23` ("encode it, in PR18's form"). **Tier: `governance`; the amendment itself is Elevated under 0d-ii** per the snapshot's own update discipline. No code, schema, flag, credential, or live operation; AC7 not engaged.
+
+**The rule, in brief.** A verification claim written into a code comment — any assertion that a property has been checked or holds (*verified*, *confirmed*, *proven*, *checked*, *guaranteed*, *cannot happen*, *is safe*) — is resolved **before the commit that ships it** into one of two branches: (1) the comment names the check actually run **and the scope that check actually covered**, or (2) the claim carries an explicit `UNVERIFIED:`/`ASSUMED:` marker naming what would establish it. The named moment is **the commit, not the sentence**; the named source is **the staged diff**, grepped for the claim vocabulary. Convention-only at adoption, per PR22's posture, with a pre-commit grep as the named escalation. **Pilot scope: code comments only** — the general artifact case was considered and deliberately not taken, per PR1's single-endpoint-proof discipline.
+
+**Why this form and not a maxim.** The corpus's evidence is that this discipline is already correctly stated by the sessions that break it — R089 and R101 each articulate the rule in the same reflection that reports the breach — so a maxim adds a sentence to cite, and citing-without-testing is IW-2, the project's other central weakness and PR23's own named failure mode. A moment-and-source rule requires an action to satisfy, not a recitation. **Carried, not dropped:** the ruling's own caveat that rules are scaffolding for sustained attention (*prosoche*) and not a substitute for it (§2 SC-2) is written into PR25's Rationale, so a reader cannot take the rule as closing IS-1 on its own.
+
+**One addition beyond the ruling's literal words, surfaced not slipped in.** Branch 1's *"and the scope that check actually covered"* is a reading of "its completed check," not a quotation. Grounding: R096's author **did** run a real check; the claim outran its scope. A rule satisfied by naming any check would have shipped that comment unchanged. **Founder signed off on the drafted text including this addition** (`AskUserQuestion`, this session), on the sign-off package rather than on a summary of it, per the PR19–PR21 adoption convention.
+
+**Two citation corrections found while verifying the session prompt's own claims (PR20):** (a) **`RULING-Q2-2026-08-23` is not a ruling identifier** — it occurs only as an illustrative example value for the `id` field in `2026-08-23-reflections-corpus-json-schema-design.md`, and in the prompt that presented it as citable; PR25 cites the genuine decision-log entry instead. (b) The R096 quotation *"the assertion I wrote to defend the exclusion is what refuted it"* is in the findings record's §1 (`:104`), **not** in the Stage 1 extraction entry; PR25 quotes only what the extraction verifies.
+
+**Applied:** `adopted/project-instructions-snapshot.md` (PR25 inserted after PR24; cross-reference range updated PR10–PR25). Sign-off package retained at `operations/reflections-examination-2026-08/2026-08-24-pr25-rule-text-signoff-package.md`. **Cache updated in the same session** — see `D-CACHE-DRIFT-RESOLVED-2026-08-24`.
+
+**Carried, founder's:** the Cowork project-instructions panel paste-sync, to be marked by a `D-PI-SYNC-…` entry. Not performed by this session.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit — documents only; nothing deployed, no flag, no schema.
+
+---
+
+## 2026-08-24 — D-CACHE-DRIFT-RESOLVED-2026-08-24
+
+**Decision:** `/adopted/standing-protocol-cache.md` updated in the same session as the PR25 amendment, per the cache's own update discipline. Process-rule range **PR1–PR24 → PR1–PR25**; the Status block gains the dated amendment record; the process-rules cross-reference line gains PR25's full statement (both branches, the commit-as-moment, the staged-diff-as-source, the convention-only posture with its named escalation, and the code-comments-only pilot scope). The `project-instructions-snapshot.md` cross-reference to this cache was updated to match. **Tier: `governance`, Standard.** No code, schema, flag, or live operation.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit.
+
+---
+
+## 2026-08-24 — D-REFLECTIONS-LETTER-1-ON-WRITING-BEFORE-KNOWING-AUTHORED-2026-08-24
+
+**Decision:** The first letter of the reflections collection is authored: **"On writing before knowing"** (AP-2 / IW-1 — the claim that precedes its evidence), at `operations/reflections-examination-2026-08/2026-08-24-letter-1-on-writing-before-knowing.md`. Form (Seneca's letter), subject, ordering (developmental-trajectory), and first-letter selection were all ruled at `D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23`. **Tier: `governance`, Standard.** ~1,500 words. No code, schema, flag, or live operation.
+
+**Location — founder-elected this session:** alongside the arc's other outputs in `operations/reflections-examination-2026-08/`. The two alternatives were put explicitly: a new `operations/reflections-letters/` directory, and `stoic-brain/` proper — the latter surfaced as **not a filing decision** (it would make the letter project doctrine sitting beside the ancient sources the engine reads). Neither taken; the arc-directory election commits to nothing about the collection's eventual status.
+
+**Constraints honoured, each checkable in the text:** the register is fellow-patient, not physician; **it ends without a lesson learned** (it closes on an unresolved discomfort — the corpus grades itself at Seneca's Second Grade, but the indicator fitting this failure, *"awareness of philosophical principles but inconsistent application,"* belongs to the Third, and the letter declines to argue that away); doctrinal content is drawn **only** from `stoic-brain/` (`psychology.json` — the impression–assent–impulse sequence, the comprehensive impression *"bears the mark of truth upon it"* per DL 7.39, hasty assent as *"the root of all error"*; `progress.json` — Seneca, *Epistulae* 75.8–15); no post-ancient material. The ruled opening move is the AC5 route-count error committed inside the findings record that diagnoses it, with the mentor's hinge kept intact: *prosoche* caught it, not a rule, because no rule existed.
+
+**Cases used, all verified at source rather than lifted from the prompt's list:** R093 (the order), R096 (the shipped comment; scope, not merely ordering — the case no ordering rule catches), R089 and R101 (each stating the discipline in the same reflection reporting the breach), R023 (assent against a standard read in the same session), R018 (judgement first, corroboration second). **Eleven quotations — six from reflections, five doctrinal — were each grep-verified against `2026-08-23-stage1-extraction.md` or `stoic-brain/` before the letter was allowed to stand.** That check is PR25 branch 1 applied to prose, on the same day PR25 was adopted for code comments; it is recorded as a fact about this document, not as evidence of a disposition.
+
+**The non-defensiveness constraint, and how it was met rather than asserted.** The letter names two fresh cases from this week — the prompt's two false citations — and then immediately discounts them as evidence, because they were caught only after written instructions to check every citation, and *"nobody in this record failed at the moment they were checking."* Against them it sets the counterweight: **the misfiled decision-log entries were found by a concurrent peer session, not by this arc**, and the inherited explanation for them was itself wrong (see `D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`). A letter that reported only the catches would have destroyed the material it is made of.
+
+**Not done, and named:** the letter has had **no independent review**. PR19's letter does not engage a governance/documents session, but the findings record's own IS-5 and IP-5 conclusions say an author cannot check their own artifact by re-reading it. Letters 2–8 remain unwritten; the collection's ordering is ruled but only its first element exists.
+
+**Status:** Adopted (authored). **Rollback:** `git revert` this session's commit, or delete the file — it is imported by nothing and referenced only from this entry and the close.
+
+---
+
+## 2026-08-24 — D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24
+
+**Decision:** A **placement note** is added at the head of the active-entries region of `operations/decision-log.md`, recording that the 21 entries below the `[Active entries follow.]` marker are not in the file's append order, and that **the convention is append at the physical tail.** **Founder-elected this session** from four options; the election was *leave the entries in place and record the fact*, on the grounds that entry IDs are canonical per the file's own archive policy and rearranging an append-only governance artifact is a question, not a cleanup. **Nothing was relocated.** **Tier: `governance`, Standard.**
+
+**The inherited cause was wrong, and this is the substantive finding.** The reflections arc's next-session prompt attributed its four misplaced entries to an offhand line in one of the arc's own extracted reflections claiming the log ran newest-first. **That cannot be the cause.** Verified first-hand by `git blame` on the block's own heading lines: prepending happened on **2026-07-21** (2 entries dated 2026-07-20), **2026-08-12** (7), **2026-08-15** (6), and **2026-08-23** (4 — this arc). Three of the four prepending events predate the reflections arc entirely. The pattern is older and more general than the explanation reached for; **"relocate the four" would therefore have been a partial fix**, leaving 17 entries in the same position, and that fact was put to the founder before the election rather than after it.
+
+**Provenance, recorded because it matters to the arc's own subject:** the misfiling was found by a **concurrent peer session**, not by this arc — and the corrected cause was found only because this session went to check a claim it had already been handed the answer to. Both facts are carried into Letter I as its counterweight against the two catches it reports.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit — the note is a blockquote; no entry moved, no ID changed.
