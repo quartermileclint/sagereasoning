@@ -25738,3 +25738,47 @@ routing open question), `D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUB
 `D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`,
 `D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
 `D-CONCURRENT-ARC-C2-SCOPE-DOCUMENTS-KATHEKON-AND-DRIFT-MELETE-2026-08-15`.
+
+---
+
+## 2026-08-24 — D-IW2-ROUTE-A-LESSON-TO-CHECK-TRIAGE-AND-FIRST-CHECK-2026-08-24
+
+**Decision:** **IW-2 route (a) is executed** — the 60-memory corpus is triaged into a four-class taxonomy, and the single green-lockable case is built as a structural check and wired into the pre-commit gate. Design at `operations/reflections-examination-2026-08/2026-08-24-iw2-route-a-lesson-to-check-triage.md`. **Tier: `governance` design + one `code-standard` build.** Dev tooling only — no product code path, no route, no schema, no flag, no credential, no live operation. **AC7 not engaged.** Measurement-neutral by construction: no file in the `/api/reason` or `/api/guardrail` import graph is touched.
+
+**Scope election, founder-made this session.** The arc-state note (*"nothing in this arc licenses a build; items 3 and 4 produce designs and scopes"*) and the findings-record ruling (*"routes 1 and 2 are ready to build without further scoping"*) genuinely conflict. Put to the founder rather than resolved silently; the election was **design plus the one green-lockable check** — not design-only, and not all three candidates.
+
+**The finding that reframes the route.** The ruling assumed a clean mechanically-testable/judgment-shaped split with the first side having a clear implementation path. Probing shows the first side is small and splits three further ways. **The criterion, not visible before probing:** *a lesson converts to a structural check cheaply only where the property it names is one the repository currently holds.* Where the repo violates it, conversion is a remediation project with a policy question, not a tooling task.
+
+**The four classes, with probe results:**
+- **Class 1, green-lockable — 1 of 60.** `public-read-surface-honesty-classes`: no non-ASCII in an HTTP header literal (a ByteString **runtime** crash that `tsc` and `next build` both pass green). Probed: **194 files, 57 header literals, clean.** Built.
+- **Class 2, red-on-adoption — 2 of 60.** `rate-limit-bucket-couples-to-measured-surface` (**~50 routes share `RATE_LIMITS.scoring` with `/api/reason` today**) and `supabase-view-default-grants-auto-updatable` (**5 of 7 view-creating files carry no `REVOKE`**). Neither built; each carries a blocking policy question.
+- **Class 3, gate-coverage not a missing assertion — 1 of 60, and it is the ruling's own cited example.** `nextjs-route-export-validation` needs no new check: `next build` already enforces it and the pre-commit hook does not run it. The fix is a gate change whose cost (a full build on every route-touching commit, in a repo with nine concurrent sessions) is a founder decision. **Named, not taken.**
+- **Class 4 — 56 of 60.** ~30 judgment-shaped (route (c)/item 4's territory) and ~26 environment or doctrine facts that are not failure-mode lessons at all.
+
+**Built:** `website/scripts/header-bytestring-check.ts` + a `--staged` step in `.husky/pre-commit`. **Self-tested** (six assertions proving the detector is live) and **mutation-verified against a real file in both directions** — an em-dash injected at `trust-record/[agent_id]/handler.ts:59` was flagged with file, line, header name and offending value; restoration returned it to PASS. `--staged` verified separately on a genuinely staged file, clean and dirty. Two corpus disciplines were applied to the check rather than cited at it: a **non-vacuity floor** (a full-repo run inspecting zero header literals FAILS — a broken detector is not a clean repo, per `guard-needs-a-non-vacuity-floor`), and **PR25 branch 1**, adopted the same day — the script header names its own scope and states plainly that it cannot follow `'X-Foo': SOME_CONST` indirection.
+
+**Scoring bucket — founder-elected: recorded as a finding, no action.** The memory's rationale is that the coupling perturbs the false-hold observation window, and **that window has been stopped since 2026-07-17**. Recorded so a future session restarting a measurement window inherits the fact. **Also observed:** three existing test files already pin this property **per route** (`founder/watching`, `practice/watching`, `practice/fresh`) — three sessions independently reaching for the per-surface row KG-EX1 warns against, none citing it.
+
+**Defect found in the memory corpus, named not fixed:** `never-self-report-at-a-server-boundary.md` carries an **empty `description:` and empty `type:`**, making it effectively invisible to the index-based scan PR23 mandates. Content intact. The memory store is outside this session's scope and a peer session may hold it open.
+
+**Honest measurement of what route (a) closes.** It was routed as the half of IW-2 that closes the mechanically-testable subset. That subset is **roughly 4 of 60, one already enforced elsewhere.** Route (a) is a smaller lever against IW-2 than the routing implied — which strengthens the ruling's own conclusion that route (c) carries the remainder and that some portion is irreducible.
+
+**Not independently reviewed.** PR19 does not engage a governance session and the one code artifact is dev tooling on no product path; named, not waived.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit — deletes the script and restores the two-check pre-commit hook. Nothing deployed; no product behaviour changes either way.
+
+---
+
+## 2026-08-24 — D-KG-EX2-LESSON-CITED-NOT-TESTED-PREPOPULATED-2026-08-24
+
+**Decision:** **IW-2 route (b) is executed** — `KG-EX2 — Lesson-Cited-Not-Tested` is pre-populated as a permanent entry in `operations/knowledge-gaps.md` under PR5 pre-population authority, the same route KG-EX1 took. **Tier: `governance`, Standard.** Documents only.
+
+**Deliberately constrained to the tracking layer.** The ruling states route (b) is *"retained only as the tracking layer beneath both, never as a standalone fix."* The entry says so in its own opening, and carries KG-EX1's warning applied to itself: **if it is ever cited without the current instance being tested against it, it has been used as the failure rather than against it.**
+
+**Root recorded:** a citation is a cheap discharge of an expensive obligation — citing costs one lookup, testing costs a real check, and **no record distinguishes them.** Manifestations verified at source: **R099** (the decisive case — the memory consulted *while designing* the fan-out that broke it: *"I applied the half about racing while missing that the same class contains destruction"*, plus its own naming of the catch as luck: *"a habit that depends on a feeling is not a habit"*); **R016**; and the rule-stated-in-the-same-breath shape from R089, R101, R023. **PR23 is itself an instance** — it states its own failure mode in its own text and has been broken in its presence.
+
+**Founder redirect phrase deliberately NOT supplied.** KG-EX1 carries seven; this entry carries none, on purpose. Route (c) — the cache failure-mode row and its phrase — was ruled to need its own scoping session first, because a phrase requiring the founder to have already diagnosed the failure inherits the blind spot it exists to sidestep. That is **item 4**. Inventing a phrase here would pre-answer a deferred ruling; the entry says so and points forward.
+
+**Promotion basis:** the corpus's trajectory measurement — verification practice improved measurably across five weeks while **lesson-transfer stayed flat**, SC-2 as clear at the end of the record as at the beginning. That flatness, across a period in which the governing corpus grew, is what makes this permanent rather than watch-status. PR8's third-recurrence bar is independently and amply exceeded.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit.

@@ -7,6 +7,10 @@
 #   1. TypeScript compilation (full codebase) — catches unused code, type
 #      errors, and anything noUnusedLocals/noUnusedParameters surfaces.
 #   2. ESLint on safety-critical files only — extra guard on R20a modules.
+#   3. ByteString header check on STAGED API files only — catches non-ASCII in
+#      HTTP header literals, which throws at runtime while checks 1 and 2 (and
+#      next build) all pass green. IW-2 route (a); see the script's own header
+#      for exactly what it covers and what it does not.
 #
 # If either fails, the commit is blocked. Fix the error, re-stage, commit.
 #
@@ -43,6 +47,14 @@ npx eslint \
 if [ $? -ne 0 ]; then
   echo ""
   echo "ESLint found issues in safety-critical files. Fix before committing."
+  exit 1
+fi
+
+echo "Pre-commit: ByteString header check (staged API files)..."
+npx tsx scripts/header-bytestring-check.ts --staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Non-ASCII HTTP header literal found. Fix before committing."
   exit 1
 fi
 
