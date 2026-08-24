@@ -26111,3 +26111,90 @@ Expected: `1`, then `1 0` (amended present, superseded phrasing gone), then `1`.
 **Status:** Adopted. Cross-references:
 `D-GAMING-BAR-MENTOR-QUESTION-REWRITTEN-AFTER-ADVERSARIAL-REVIEW-2026-08-24`,
 `D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`.
+
+---
+
+## 2026-08-24 — D-PROJECT-CONTEXT-LIVE-ROW-UPDATED-ENCODING-INCIDENT-2026-08-24
+
+**Decision:** The carried `project_context` live-row update is **DISCHARGED**. The production row now
+carries the GS-CYB-1/GS-CYB-2 pointer entries, the GS-ATRF-4 stale-pointer correction, and the amended
+two-condition weights-BLOCKED constraint — **byte-identical to `project-context.json` v1.4.1**
+(`length(current_phase)` = **5616**, matching the repo file exactly). **The live `/api/reason` Layer-1
+extraction prompt now carries today's rulings.** **Tier: Elevated under 0d-ii** — a change to text
+injected into every consult; not auth/perimeter/flag/deletion, AC7 not engaged. **Founder-walked
+throughout** (PR17): the founder ran every SQL statement; the AI authored, diagnosed, and verified,
+and performed no Supabase operation.
+
+**The walk, and why the pre-flight was load-bearing rather than ceremonial.** The live row could not be
+read from a repo session, so the authored UPDATE assumed it still matched the 4,159-char 2026-08-19
+baseline. §0 returned **exactly** that — `phase_len` 4159, correct tail, `stale_pointer_present` true,
+`already_applied` false, `n_recent` 11, `updated_at 2026-08-19` (the GS-ATRF-4 update). **No drift.**
+Had it differed, the append would have landed on content the file had never seen.
+
+**AN ENCODING INCIDENT ON FIRST APPLY — found, diagnosed, and corrected in the same walk.** §VERIFY
+returned `phase_len` **5622**, six characters over target, **while every content check passed** (both
+pointers present, amended constraint present, stale pointer gone, SETTLED SURFACE NAMES intact,
+`n_recent` 12). **Root cause:** the three em-dashes in the appended payload were UTF-8 (`E2 80 94`) and
+were decoded as **Mac OS Roman** somewhere between the macOS clipboard and the browser SQL Editor, each
+becoming the 3-character sequence `chr(8218)||chr(196)||chr(238)` (`‚Äî`) — net **+2 per em-dash = +6**.
+The pre-existing **17 baseline em-dashes were unaffected**; only this paste's payload crossed the
+corrupting hop, which the pre-flight's exact 4159 match independently establishes. Corrected with an
+idempotent `replace(current_phase, chr(8218)||chr(196)||chr(238), chr(8212))`; re-verify returned
+`phase_len` **5616**, `proper_em_dashes` **20** (17 + 3 restored), `corruption_remaining` **false**,
+header rendering cleanly, `settled_names_intact` true.
+
+**The first diagnosis was WRONG and that is the part worth recording.** The initial hypothesis was
+Latin-1 (`chr(226)||chr(128)||chr(148)`), and its arithmetic matched the observed +6 *perfectly* — 3
+em-dashes × 2 characters. **A perfectly-matching arithmetic prediction was not sufficient evidence.**
+It was caught only because the diagnostic query tested for that **specific byte sequence** *alongside*
+a count of correctly-stored em-dashes: `mojibake_present = false` **together with**
+`proper_em_dashes = 17-not-20` was immediately informative, where either check alone would have
+misled. **A looser "is it corrupted?" check would have run a no-op `replace()` and reported success on
+a still-corrupt row.** Recorded as the durable lesson: when guessing an encoding, build the query to
+**distinguish hypotheses**, not to confirm one.
+
+**The artifact is hardened, not merely annotated.** The SQL file's payload is rewritten to pure ASCII —
+every em-dash is now `chr(8212)` in the literal, and the `jsonb` entry uses `—` — and was proven to
+reconstruct the identical 1,458-character target text with **zero non-ASCII characters remaining in the
+APPLY statement**. The file is marked **APPLIED — DO NOT RE-RUN**, carries the incident in full, and
+states the rule for the next `project_context` update. **The statement now in the file is deliberately
+NOT byte-identical to what was run** — it is the corrected form producing the same stored text, and the
+file says so.
+
+**Files touched:**
+- `website/supabase-project-context-2026-08-24-gscyb-update.sql` — APPLIED marker, the incident record, the ASCII-hardened payload
+- `~/.claude/.../memory/sql-editor-macroman-corrupts-non-ascii.md` + `MEMORY.md` — the environment fact and the diagnostic discipline
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Elevated under 0d-ii. No code, flag, schema, credential, or public surface.
+The change is to a data row read into a prompt. AC7 not engaged.
+
+**Rollback path:** paste the §0 pre-flight `current_phase` value back verbatim (the safest form; the
+mechanical reverse is in the file's ROLLBACK block, expecting `phase_len` back to 4159), and
+`recent_decisions - 0` to drop the prepended entry.
+
+**Verification step (founder-performable):**
+```
+SELECT length(current_phase) AS phase_len,
+       length(current_phase) - length(replace(current_phase, chr(8212), '')) AS em_dashes,
+       position(chr(8218)||chr(196)||chr(238) in current_phase) > 0 AS corruption_remaining
+FROM project_context;
+```
+Expected: `5616`, `20`, `false`.
+
+**Open questions:**
+- **The one-hour in-process cache** (`CACHE_TTL_MS`, `project-context.ts`) means running serverless
+  instances pick this up on cache expiry or cold start. **No redeploy required**; a redeploy is simply
+  the fastest way to force it. An unchanged prompt inside the first hour is the cache, not a failure.
+- **TEST was not updated** — only production. If TEST's `project_context` is used for any future
+  register-dependent check it will read the older content.
+- **The structural point stands:** this register is injected into every consult, and the
+  mentor-ruled architectural fix (removing `projectContext` from API-key-authenticated `/api/reason`
+  calls) remains deliberately unbuilt. Every register growth rides that unfixed mechanism.
+
+**Rules served:** PR17 (founder-performed steps walked live, not handed off), PR20, PR18, PR23, 0d-ii.
+
+**Status:** Adopted. Cross-references:
+`D-GAMING-BAR-ROUTE-II-RULED-AGAINST-GS-CYB1-CONSTRAINT-AMENDED-2026-08-24`,
+`D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`,
+`website/supabase-project-context-2026-08-19-gsatrf4-update.sql` (the precedent this extends).

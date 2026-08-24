@@ -1,3 +1,36 @@
+-- ============================================================================
+-- STATUS: APPLIED to PRODUCTION 2026-08-24 (founder-walked, SQL Editor).
+-- VERIFIED: phase_len 5616 — byte-identical to project-context.json v1.4.1;
+-- 20 em-dashes; stale pointer gone; SETTLED SURFACE NAMES intact; n_recent 12.
+-- DO NOT RE-RUN. It appends and prepends; a second run duplicates both.
+--
+-- ⚠ INCIDENT ON FIRST APPLY — READ BEFORE AUTHORING THE NEXT project_context SQL.
+-- The first apply landed at phase_len 5622, six characters over target. Cause:
+-- the THREE em-dashes in the appended payload were UTF-8 (E2 80 94) and were
+-- decoded as MAC OS ROMAN somewhere between the macOS clipboard and the browser
+-- SQL Editor, each becoming the 3-character sequence chr(8218)||chr(196)||chr(238)
+-- ('‚Äî'). Net +2 per em-dash = +6. The pre-existing 17 baseline em-dashes were
+-- NOT affected — only this paste's payload passed through the corrupting hop.
+--
+-- Corrected in place, idempotently, with:
+--   UPDATE project_context
+--   SET current_phase = replace(current_phase, chr(8218)||chr(196)||chr(238), chr(8212)),
+--       updated_at = now(), updated_by = 'manual';
+--
+-- A first diagnostic guessed LATIN-1 (chr(226)||chr(128)||chr(148)) and was WRONG.
+-- It was caught only because the diagnostic tested for that SPECIFIC byte sequence
+-- alongside a count of properly-stored em-dashes: mojibake_present=false WITH
+-- proper_em_dashes=17-not-20 was immediately informative. A looser "is it broken?"
+-- check would have run a no-op replace() and reported success on a corrupt row.
+--
+-- THE RULE THIS ESTABLISHES: never put a non-ASCII character in a SQL string
+-- literal bound for a browser SQL Editor. Use chr(8212) for an em-dash and
+-- \uXXXX inside jsonb literals. The payload below has been HARDENED to that form
+-- — it is now pure ASCII on the wire and would survive the same hop unchanged.
+-- (The statement below is therefore NOT byte-identical to what was actually run;
+-- it is the corrected form, and it produces the same stored text.)
+-- ============================================================================
+
 -- Project-context update, 2026-08-24 — mentor-ruled (GS-CYB-1/GS-CYB-2 pointer
 -- entries + the GS-ATRF-4 stale-pointer correction + the amended weights-BLOCKED
 -- constraint).
@@ -74,10 +107,10 @@ SET
     'To be examined at the standing-runner design session.'
   ) || '
 
-GS-CYB-1 — Proximity score as error signal and candidate weighting function. Open question: does the generation step read the proximity score from the watching table as a graded error signal, and if so, how does it use that signal to bias candidate generation toward error-reducing actions? Standing constraint: weights BLOCKED (ADR-012, third rung) — a weighting function optimising against the proximity score places a gameable scorer inside an optimisation loop. AMENDED 2026-08-24 to two INDEPENDENT conditions: (1) the weights-claim bar cleared by a route whose scoping clause addresses supply-provenance, not only co-training; and (2) a separate, independent judgement that the scorer is adequate for use inside a feedback optimisation loop specifically. Clearing (1) does not satisfy (2). Neither is met. Full design specification in the Agent Cybernetic Control Architecture governing document. To be examined at the standing-runner design session.
+GS-CYB-1 ' || chr(8212) || ' Proximity score as error signal and candidate weighting function. Open question: does the generation step read the proximity score from the watching table as a graded error signal, and if so, how does it use that signal to bias candidate generation toward error-reducing actions? Standing constraint: weights BLOCKED (ADR-012, third rung) ' || chr(8212) || ' a weighting function optimising against the proximity score places a gameable scorer inside an optimisation loop. AMENDED 2026-08-24 to two INDEPENDENT conditions: (1) the weights-claim bar cleared by a route whose scoping clause addresses supply-provenance, not only co-training; and (2) a separate, independent judgement that the scorer is adequate for use inside a feedback optimisation loop specifically. Clearing (1) does not satisfy (2). Neither is met. Full design specification in the Agent Cybernetic Control Architecture governing document. To be examined at the standing-runner design session.
 
-GS-CYB-2 — Controlled system model and completion signal return path. Open question: does the completion signal return path constitute a formal model of the controlled system, and if so, what is the update rule by which the post-completion proximity delta modifies the generation step''s candidate weighting function? Sequentially dependent on GS-ATRF-3. Full design specification in the Agent Cybernetic Control Architecture governing document. To be examined at the standing-runner design session.',
-  recent_decisions = '["2026-08-24: GS-CYB-1 and GS-CYB-2 added to the ATRF Integration register as POINTER ENTRIES ONLY (full design specifications live in the Agent Cybernetic Control Architecture governing document) and routed to the STANDING-RUNNER DESIGN SESSION, not the generation-step scoping session, which closed 2026-08-09 — the 2026-08-19 forward-reservation principle, extended 2026-08-24 to questions raised by a ruling. GS-ATRF-4''s identical stale pointer corrected in the same pass. GS-CYB-1 carries the weights-BLOCKED standing constraint, AMENDED the same day to two INDEPENDENT conditions after route (ii) of the gaming-robustness bar was ruled against: clearing the weights-claim bar does not automatically establish that the proximity scorer is adequate for use inside a feedback optimisation loop. Neither condition is met."]'::jsonb || recent_decisions,
+GS-CYB-2 ' || chr(8212) || ' Controlled system model and completion signal return path. Open question: does the completion signal return path constitute a formal model of the controlled system, and if so, what is the update rule by which the post-completion proximity delta modifies the generation step''s candidate weighting function? Sequentially dependent on GS-ATRF-3. Full design specification in the Agent Cybernetic Control Architecture governing document. To be examined at the standing-runner design session.',
+  recent_decisions = '["2026-08-24: GS-CYB-1 and GS-CYB-2 added to the ATRF Integration register as POINTER ENTRIES ONLY (full design specifications live in the Agent Cybernetic Control Architecture governing document) and routed to the STANDING-RUNNER DESIGN SESSION, not the generation-step scoping session, which closed 2026-08-09 \u2014 the 2026-08-19 forward-reservation principle, extended 2026-08-24 to questions raised by a ruling. GS-ATRF-4''s identical stale pointer corrected in the same pass. GS-CYB-1 carries the weights-BLOCKED standing constraint, AMENDED the same day to two INDEPENDENT conditions after route (ii) of the gaming-robustness bar was ruled against: clearing the weights-claim bar does not automatically establish that the proximity scorer is adequate for use inside a feedback optimisation loop. Neither condition is met."]'::jsonb || recent_decisions,
   updated_at = now(),
   updated_by = 'manual';
 
