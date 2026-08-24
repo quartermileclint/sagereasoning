@@ -26300,3 +26300,67 @@ path-scoped; `website/src/data/environmental-context.json` excluded; no peer fil
 
 **Status:** Adopted (scoped; no fix elected). **Rollback:** `git revert` this session's commit —
 documents only.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-SCOPE-PR19-REVIEW-FOLDED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only. **Risk:** Standard. **AC7 not
+engaged.** No code, migration, flag, credential, or public surface. Founder-requested, so PR19 engaged
+despite the documents-only tier.
+
+**Method.** Independent adversarial review per `operations/review-harness/independent-review-workflow-template.md`
+§1 — launched against the two artifacts themselves, never against this session's own conclusions.
+4 dimensions (source-citation accuracy · central-claim soundness · options fairness/completeness ·
+process compliance) → per-finding adversarial refuters told to default REFUTED. **25 agents, 0 errors,
+~6.85M subagent tokens. 21 raised, 7 CONFIRMED, 14 REFUTED.**
+
+**The central claim survived a dimension briefed to break it.** The reviewer reported it could not
+break the M2–M4 chain, and independently surfaced corroboration this session had not found: a *second*
+in-repo comment (`loop-closure-gate.ts:50`, "unique id for this examination (loop id)") asserting the
+same false per-consult uniqueness as `route.ts:1844-1845`. Two independently-authored comments
+asserting a property the code contradicts is strong evidence the finding is real rather than a
+strawman reading.
+
+**CONFIRMED and folded (4 substantive):**
+- **HIGH, folded with a correction to the reviewer's own severity reasoning.** §3.5 called the
+  signature "the only **per-consult**, caller-uninfluenceable identity." Verified first-hand: Ed25519
+  signing here is deterministic, `Layer2Assessment` carries no timestamp/nonce/request-id, and
+  `signLayer2Assessment` adds nothing before signing — so the signature is **per-CONTENT**. Worse than
+  the reviewer stated, `/api/reason` **returns `extraction: layer1Schema`**, so a caller can replay the
+  server's own extraction verbatim. **But the reviewer's security framing does not hold, and I record
+  the disagreement rather than absorbing it:** a collision needs a byte-identical assessment, and
+  identical content means the caller gained nothing; the only reachable misattribution runs the other
+  way and **fails closed**. So option 2′ stays sound; the *word* was wrong, and a build session
+  reasoning from it would pick the ledger's write semantics wrongly. Folded as: the precision, the
+  insert-once-vs-upsert design question (new Q4 branch), and a strictly-sounder server-random-id
+  hybrid variant.
+- **MEDIUM.** Option 1's "cheaper than the inherited framing" conflated **engineering effort** with
+  **stakes**: the three precedent fields are evaluative enrichments, whereas a provenance field *is*
+  the attestation — and fact J is that failure having already happened once, in the analogous
+  `layer1_source` stamp mis-gated on the wrong flag. Both halves now stated.
+- **LOW.** Fact C rendered `loopId = extractLoopId(request) ?? generateLoopId()`, omitting the
+  `isApiKeyAuth` ternary that gates it. Corrected in both documents.
+- **NIT.** Fact F cited `:425`; `PG_UNIQUE_VIOLATION` is at `:427`. Corrected.
+
+Three further CONFIRMED items were **no-defect corroborations** of the central claim (the defeat needs
+no abnormal caller behaviour; no accreditation-write-path constraint catches the reuse; the chain
+re-verified line-by-line), recorded rather than actioned.
+
+**REFUTED but folded anyway as cheap defense-in-depth** (template §3 — honestly labelled refuted, not
+confirmed): the §4.4 blast-radius line and §4.5 table cell now state that route (i)'s incremental cost
+is **~0 on raw-text consults** (which already extract server-side) and falls entirely on the
+schema-supplied subset; and §3.1 now carries the `SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED` qualifier
+with an explicit note that §3 argues the *harder* branch deliberately. The three "missing option"
+findings (write-boundary-scoped extraction; extend the sibling guard; revoke the `l1_supply` preset)
+were each refuted on sound mechanism grounds — chiefly that the write boundary holds no raw action
+text and nothing binds a signed assessment to its input — and are **not** folded.
+
+**A stale self-claim this review created, and fixed.** The question's own Part 3 read "no adversarial
+review was run on this question." Running the review made that false, and the document is bound for the
+mentor — so under PR20's 2026-08-19 strengthening (present-tense facts timestamp-checked at relay) it
+was rewritten to report the review, its counts, what it *changed* versus merely confirmed, and what
+remains unverified.
+
+**Status:** Adopted (review folded; still no fix elected, nothing built). **Rollback:** `git revert`
+this session's commit — documents only.

@@ -33,8 +33,9 @@ is attached **before signing** (`layer2-mechanisms.ts:443`; `parallel-run.ts:898
 `:1084`) and is set from the same `correlationId` the trajectory row is keyed on (`route.ts:1374`
 and `:1851`). Because it is signed, **a caller cannot forge it.**
 
-**M3 — But that key is per-LOOP, not per-consult, and the caller sets it.** On the API-key path
-`correlationId = X-Loop-Id ?? generated` (`route.ts:808-823`); `extractLoopId` validates **UUIDv4
+**M3 — But that key is per-LOOP, not per-consult, and the caller sets it.** On the API-key path only
+(an `isApiKeyAuth` ternary gates it; user-JWT consults always get a fresh server UUID),
+`correlationId = X-Loop-Id ?? generated` (`route.ts:808-810,823`); `extractLoopId` validates **UUIDv4
 format only** — no uniqueness check, no credential binding (`loop-cost-tracker.ts:512-525`). **One loop
 id spanning many consults is the design** — it is the Option-D billing unit.
 `agent_assessment_history.correlation_id` is UNIQUE and a duplicate insert is *"a benign no-op"*
@@ -49,7 +50,7 @@ A check built this way would be the thing *licensing* the corrected public claim
 than the honest gap.**
 
 **M5 — A near variant is sound, and is the lightest structural fix available.** The Ed25519 signature
-is the only per-consult, server-produced, caller-uninfluenceable identity in the system, and **nothing
+is the only server-produced, **caller-uninfluenceable** identity in the system, and **nothing
 persists it today** (the A12 audit row stores only a boolean `layer2_signature_present`). A ledger
 mapping `sha256(signature) → layer1_source`, written at consult time (the signed assessment is already
 in scope at that call site — `parallel-run.ts:1108`, `route.ts:1533,1850`) and read at write time,
@@ -57,6 +58,20 @@ closes the mint-time gap **with no signing-contract change and no wire change.**
 retention (a 90-day window would leave older artifacts unresolvable, interacting directly with the
 already-disclosed **PA-10 stale-artifact replay class**), no history (the ledger starts empty), and
 flag-dependent coverage.
+
+**M5a — one precision, added after adversarial review, and load-bearing for how a ledger is built.**
+The signature is caller-uninfluenceable but it is **per-CONTENT, not per-consult**: Ed25519 signing
+here is deterministic over a `Layer2Assessment` carrying **no timestamp, nonce, or request id**
+(`layer2-signer.ts:183-194` adds nothing before signing), so two consults producing byte-identical
+assessments produce byte-identical signatures — and `/api/reason` returns `extraction: layer1Schema`
+in its own response (`parallel-run.ts:1107`), so a caller can replay the server's own extraction and
+obtain the identical assessment. **This does NOT reproduce M4's defeat:** a collision requires
+identical content, and identical content means the caller gained nothing; making a *different*,
+more favourable assessment read as `'server'` would need an infeasible Ed25519 collision across
+different messages. **But it makes the ledger's write semantics a genuine choice** (put at Q4), and a
+strictly sounder variant removes the property rather than managing it — a fresh **server-random
+per-consult id** in the signed payload, keyed on instead of the signature, which costs what Q1(b)
+costs and is therefore a **hybrid of (a) and (b)** rather than a third option.
 
 **M6 — The public claim is inaccurate on all three R18 surfaces, and has no test pin.**
 `attests[1]` (`trust-record-payload.ts:48`) claims unconditionally that decisions were reasoned *"as
@@ -118,10 +133,16 @@ and is therefore off the table, the genuine fork is:
   negligible per-consult cost, but coverage bounded by retention and starting empty; **or**
 - **(b) provenance inside the signed payload** — cleanest semantics, travels with the artifact, no
   lookup and no retention window, but it changes the signing contract and needs a key/version story.
-  **This is cheaper than previously presented:** `examination`, `proximity_floors` and `corroboration`
-  are three optional fields already added to this exact signed object, each omitted entirely when its
-  flag is off to preserve flag-off byte-identity. The house pattern exists and has been walked three
-  times.
+  **Engineering effort is cheaper than previously presented:** `examination`, `proximity_floors` and
+  `corroboration` are three optional fields already added to this exact signed object, each omitted
+  entirely when its flag is off to preserve flag-off byte-identity. The house pattern exists and has
+  been walked three times. **But the stakes are higher than any of those three precedents, and the two
+  must not be conflated:** each precedent is an evaluative enrichment whose absence only makes an
+  assessment less informative, whereas a provenance field *is* the attestation — mis-set under one of
+  the flag combinations marked unverified above, it silently recreates this exposure beneath a
+  corrected-sounding public claim. **That failure has already happened once** in the structurally
+  analogous `layer1_source` stamp, which was gated on the wrong flag and left a real window of NULL
+  rows.
 
 **Q2 — Is the honesty correction owed NOW, ahead of and independent of any structural fix?** The
 scoping session found that **no structural option repairs already-minted events** — the public record
@@ -144,7 +165,11 @@ the question is whether that argues for building it now or for scoping it separa
 **Q4 — On the absent-row policy, if a ledger is chosen (Q1a).** When an artifact has no ledger entry —
 out of retention, pre-ledger, or written while the consult-side flag was off — should the event
 **mint anyway** (preserves today's behaviour; leaves the gap for uncovered artifacts) or be
-**refused** (honest; would refuse legitimate historical and out-of-window writes)? A secondary point:
+**refused** (honest; would refuse legitimate historical and out-of-window writes)? **And, per M5a, a
+second policy in the same family:** should the ledger be **insert-once** (first write wins —
+conservative, but a genuine `'server'` consult can never correct an earlier `'supplied'` entry) or
+**upsert** (last write wins — which lets a later supplied replay overwrite a genuine entry, and is
+therefore the more dangerous of the two despite sounding safer)? A secondary point:
 the lookup is signature-keyed, so it can cross credentials — a departure from the R17a
 credential-scoping posture used everywhere else, and one that should be ruled rather than assumed.
 
@@ -156,14 +181,27 @@ Not asked: to build anything; to edit `attests[]` / `does_not_attest[]` (a serve
 founder R18 sign-off, deliberately untouched); to re-open route (ii), the GS-CYB-1 amendment, or the
 bar's Arm-B measurement (all settled 2026-08-24); to make any weights-tier claim.
 
-**A note on this document's own limits.** PR19 does not engage for a documents session and **no
-adversarial review was run on this question.** The last two mentor questions each needed a full
-adversarial pass before they were fit to relay, and one of them was found to be reasoning toward a
-conclusion rather than putting a question. **This document has not had that check.** Its central
-technical finding (M2–M4) rests on eight first-hand source reads that are individually cited and
-individually checkable, and the finding *inverts* the option the author would otherwise have
-recommended — but the founder should weigh it accordingly, and a PR19 pass is warranted before any
-build session acts on it.
+**A note on this document's own limits — updated 2026-08-25 after the review ran.** An independent
+adversarial review **has now been run** on this question and on its scope document, at the founder's
+request (PR19 shape: 4 dimensions, 25 agents, 0 errors, per-finding adversarial refuters, launched
+against the artifacts themselves and not against any summary of them). **21 findings raised, 7
+CONFIRMED, 14 REFUTED.** The central technical finding (M2–M4) was attacked directly by a dimension
+briefed to break it and **survived** — the reviewer reported it could not be broken, and independently
+found a *second* in-repo comment (`loop-closure-gate.ts:50`, *"unique id for this examination (loop
+id)"*) asserting the same false per-consult uniqueness as `route.ts:1844-1845`, which is corroboration
+from an angle this document had not looked at.
+
+**What the review changed in this document**, rather than merely confirming: **M5a is new** — the
+signature is per-*content*, not per-consult, which the earlier draft got wrong and which changes how a
+ledger must be built (Q4 now carries the resulting write-semantics choice); **Q1(b) now separates
+engineering effort from stakes**, because the three precedent fields are evaluative enrichments while a
+provenance field *is* the attestation, and the analogous `layer1_source` stamp has already been
+mis-gated once; and **M3's formula was corrected** for an omitted `isApiKeyAuth` guard.
+
+**What remains uncertain.** The review was of these *documents*, not of a build. Production flag states
+and the live `l1_supply` population are still **unverified from a repo session** and are marked so
+throughout. PR19 engages again, and harder, at build time — trust-core, the auth-adjacent write
+boundary, and a public attestation surface, three of its named surfaces at once.
 
 ---
 

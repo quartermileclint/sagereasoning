@@ -85,10 +85,10 @@ used as a starting point, not an authority; **three items came back different** 
 |---|---|---|
 | **A** | **The join key exists and is inside the signed bytes.** `Layer2Assessment.examination?: {ref?, depth_tier?, prior_feedback_ref?}` is attached **before signing** — the field's own docstring says so explicitly, because the M3 write-boundary gate must be able to trust it | `layer2-mechanisms.ts:425-443`; attached at `parallel-run.ts:898-900`, signed at `:1084` |
 | **B** | **`ref` is the `correlationId`** — the same variable the trajectory row's `correlation_id` is set from | `route.ts:1374` (`ref: correlationId`) and `route.ts:1851` (`correlationId`) |
-| **C** | **`correlationId` is the caller-supplied `X-Loop-Id` on the API-key path**, else a server UUID: `const correlationId: string = loopId ?? generateLoopId()`, where `loopId = extractLoopId(request) ?? generateLoopId()` | `route.ts:808-823` |
+| **C** | **`correlationId` is the caller-supplied `X-Loop-Id` on the API-key path**, else a server UUID. Verbatim: `const loopId: string \| null = isApiKeyAuth ? (extractLoopId(request) ?? generateLoopId()) : null`, then `const correlationId: string = loopId ?? generateLoopId()`. **The `isApiKeyAuth` ternary is load-bearing** — on the user-JWT path `loopId` is unconditionally `null`, so `correlationId` is always a fresh server UUID there | `route.ts:808-810,823` |
 | **D** | `extractLoopId` validates **UUIDv4 format only** — no uniqueness check, no credential binding, no per-consult constraint | `loop-cost-tracker.ts:512-525` |
 | **E** | **One loop id spans many consults by design** — that is the Option-D metering unit (`createLoopAccumulator`, `loop_billing_events`, the six `X-Loop-*` headers, `x-loop-internal-calls`) | `route.ts:770-815` |
-| **F** | `agent_assessment_history.correlation_id` is **UNIQUE**; a duplicate insert is *"a benign no-op (inserted: 0)"* | `agent-assessment-history-store.ts:425,460` |
+| **F** | `agent_assessment_history.correlation_id` is **UNIQUE**; a duplicate insert is *"a benign no-op (inserted: 0)"* | `agent-assessment-history-store.ts:427,460` |
 | **G** | ⚠ **A code comment that is false on the API-key path.** `route.ts:1844-1845` reads *"correlation_id is the per-consult unique handle (no signed-assessment dependency on this path)."* It is per-**loop**, not per-consult, whenever `X-Loop-Id` is supplied. **PR25-relevant** (a verification claim in a comment, unchecked) | `route.ts:1844-1845` |
 | **H** | `receipt_id` on the trajectory path is **NOT** derived from the Ed25519 signature. `deriveReceiptId(sig) = 'rcpt_' + sha256(sig)`, but the route passes `signature: correlationId` into the bridge — so the persisted `receipt_id` hashes the **loop id**. Two `receipt_id` namespaces exist and **do not join** | `sage-assent-bridge.ts:160-163,214`; `route.ts:1846` |
 | **I** | **No table persists an Ed25519 signature anywhere.** The A12 audit row stores only `layer2_signature_present` (a boolean). There is no existing signature-keyed surface to join to | `20260603_a12_substrate_audit_events.sql:61`; repo-wide `grep` |
@@ -112,7 +112,7 @@ below should be elected on the assumption that any of them is live.**
 The prompt named this as the question option 2 lives or dies on. **It dies on it, in a more
 instructive way than "no key exists."**
 
-**3.1 The key exists.** `examination.ref` rides inside the signed bytes (fact A) and is set from the
+**3.1 The key exists — conditionally.** `examination.ref` rides inside the signed bytes (fact A) **when `SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED` is on** (fact L; its live state is unverified from a repo session). If that flag is off there is no `ref` at all and option 2 fails trivially for want of any key. **§3.2–3.3 deliberately argue the harder branch** — that option 2 fails *even with* the key present — because that forecloses the "just turn the flag on" shortcut. The conclusion is the same on both branches. `examination.ref` and is set from the
 same `correlationId` the trajectory row is keyed on (fact B). Because it is inside the signature, a
 caller **cannot forge it**: only the server signs, and altering `ref` invalidates the signature. That
 much is genuinely sound, and it is why this had to be checked rather than assumed.
@@ -143,8 +143,25 @@ attacker chooses the extraction and therefore chooses the projection**, so it ca
 server-extracted row it knows exists. It is a "does some server row look like this" test, not a
 provenance test. Named here so a build session does not rediscover it as the easy answer.
 
-**3.5 What survives.** The signature itself is the only per-consult, caller-uninfluenceable identity
-in the system. Nothing persists it today (fact I). That is what option 2′ builds on.
+**3.5 What survives — stated precisely, because the imprecise version misleads a build session.** The
+signature is the only **caller-uninfluenceable** identity in the system, and nothing persists it today
+(fact I). That is what option 2′ builds on. **But it is per-CONTENT, not per-consult** — Ed25519
+signing here is deterministic (`layer2-signer.ts:34`) over the canonical JSON of a `Layer2Assessment`
+carrying **no timestamp, no nonce, and no request id** (verified: the full field list is derived
+content only), and `signLayer2Assessment` adds nothing before signing (`:183-194`). **Two consults
+producing byte-identical assessments produce byte-identical signatures.** Reachable in practice, not
+theoretical: `/api/reason` returns `extraction: layer1Schema` in its own response
+(`parallel-run.ts:1107`), so a caller can replay the server's own extraction back as its supplied
+schema and — Layer 2 being deterministic — obtain the identical assessment.
+
+**Why this does NOT reproduce the §3.3 defeat, and the distinction matters.** A signature collision
+requires a **byte-identical** assessment. Identical content means the caller gained nothing: the
+replayed artifact and the genuine one score the same. To make a *different*, more favourable
+assessment read as `'server'`, a caller would need an Ed25519 collision across different messages —
+infeasible. The only reachable misattribution runs the other way: a `'supplied'` entry landing first,
+a later genuine `'server'` assessment then reading as `'supplied'`. That **fails closed**. **So
+option 2′ remains sound against the threat; what was wrong is the word "per-consult" — and a build
+session reasoning from it would design the ledger's write semantics wrongly.**
 
 ---
 
@@ -171,6 +188,16 @@ signature.
   off precisely to keep flag-off signing bytes byte-identical (facts A, and `layer2-mechanisms.ts:
   446-470`). The house pattern for extending the signed payload exists and has been walked three
   times. **This lowers the cost estimate materially versus the inherited framing.**
+- **The asymmetry that precedent does NOT cover, and it cuts against the cheapness claim:** those three
+  precedent fields are **evaluative enrichments** — if `proximity_floors` is absent or wrong, the
+  assessment is less informative and nothing else changes. **A provenance field IS the attestation**
+  this whole document is about, and would be what a corrected `attests[1]` rests on. A field that is
+  mis-set — under one of the flag combinations §2 explicitly marks **unverified in production** —
+  silently recreates the exact exposure being fixed, now underwritten by a corrected-sounding public
+  claim. **This is not hypothetical: fact J is precisely that failure**, in the structurally analogous
+  `layer1_source` stamp, which was gated on the wrong flag and left a real window of NULL rows.
+  **Engineering effort is genuinely lower than the inherited framing; the stakes of getting it wrong
+  are higher than any of the three precedents.** Both belong in the comparison.
 - **Tier:** `code-critical`.
 
 ### 4.2 Option 2 — server-side join-back on the existing key
@@ -201,6 +228,18 @@ time the server hashes each submitted signature and looks it up.
      today's behaviour and leaves the gap for uncovered artifacts. Fail-closed (refuse to mint) is
      honest but would refuse legitimate historical and out-of-window writes. **This is not a technical
      question — it is the founder's, and it is put to the mentor.**
+- **Design question the collision property forces (§3.5), unaddressed until now:** because one signature
+  can correspond to more than one consult, the ledger's write semantics are a real choice —
+  **insert-once** (first write wins; a later genuine `'server'` consult cannot correct an earlier
+  `'supplied'` entry — biases fail-closed) versus **upsert** (last write wins; the safer-*sounding*
+  option is the more dangerous one here, since it lets a later supplied replay overwrite a genuine
+  `'server'` entry). **Insert-once is the conservative direction and should be the default**, but the
+  choice belongs in the ruling, not in a build session's implementation detail.
+- **A strictly sounder variant, named because it removes the property rather than managing it:** add a
+  fresh **server-random per-consult id** to the signed payload and key the ledger on *that* rather than
+  on the signature. True randomness has no collision-by-replay property at all. It costs what option 1
+  costs (it *is* a signing-payload addition), so it is best read as a **hybrid of 1 and 2′** rather
+  than a fifth option — and it inherits option 1's caveat below.
 - **Secondary design question:** the lookup would be keyed on a signature hash, not on a credential, so
   it can cross credentials. Reading only `layer1_source` for an artifact the caller cryptographically
   proved possession of is defensible, but it is a departure from the R17a credential-scoping posture
@@ -270,8 +309,12 @@ against a caller-supplied schema.
      memory `over-strictness-check-must-be-rank-preserving` warns explicitly. Take-the-stricter is
      safe-but-biased. Take-the-server's makes the supplied schema decorative (→ consequence 1). **The
      policy is the design, and it is unruled.**
-- **Blast radius:** every `/api/reason` path; per-consult cost and latency on all of them; the plugin
-  contract; the disagreement policy as a new engine behaviour. **The largest of the four.**
+- **Blast radius:** every `/api/reason` path; the plugin contract; the disagreement policy as a new
+  engine behaviour. **The largest of the four.** **Incremental cost is NOT uniform across paths and
+  should not be read as such:** a raw-text consult already extracts server-side today (fact J's
+  `'server'` stamp), so route (i) adds **~0** there. The ~10–13s / ~$0.04–0.06 above is the
+  **incremental** cost on the **schema-supplied subset** — which is exactly the subset whose entire
+  purpose is avoiding it, and, on the plugin path, is mandatory.
 - **Tier:** `code-critical`.
 
 ### 4.5 Comparison
@@ -282,7 +325,9 @@ against a caller-supplied schema.
 | **2** join-back | ❌ **not buildable** | ❌ | — | no | none | — |
 | **2′** signature ledger | ✅ within coverage | ❌ | still owed | **no** | negligible | critical |
 | **3** corrected claims | ❌ | ❌ | ✅ | no | none | elevated + R18 gate |
-| **4** route (i) | ✅ by construction | ✅ | still owed¹ | no | **~10–13s + ~$0.04–0.06** | critical |
+| **4** route (i) | ✅ by construction | ✅ | still owed¹ | no | **~10–13s + ~$0.04–0.06 on supplied consults; ~0 on raw-text²** | critical |
+
+² Raw-text consults already pay server-side extraction today, so route (i) is not an incremental cost there — the burden falls entirely on the schema-supplied subset.
 
 ¹ Route (i) makes `attests[1]` true again *going forward*, but the record aggregates historical events
 minted under the gap. **No structural option retroactively repairs already-minted events** — which is
