@@ -284,6 +284,54 @@ halves — never the concurrent ones.
 
 ---
 
+## ⚠ URGENT — UNSCHEDULED — the extraction-provenance asymmetry (registered 2026-08-24 by ruling)
+
+**Ruled 2026-08-24** (`agent-circles-2026-08/2026-08-24-mentor-ruling-gaming-robustness-bar-route-ii-verbatim.md`,
+**binding; verbatim wins**) to be *"named in the project's priority index as an urgent unscheduled
+item"* and treated as **"the first item to scope after today's rulings are recorded, ahead of any
+cybernetics build work."**
+
+**What it is — a live condition, not a future risk.** `emitAccreditationTrustEvents`
+(`website/src/lib/substrate/trust-core/emission-hooks.ts:74-124`) — the function that mints the
+**public trust record's** credential and justice-surface events — gates on `isTrustCoreEnabled()`,
+`provenanceEnforced` (Ed25519 **signature** verification only) and a non-empty `signed_assessments`
+array. **It has no check on extraction provenance.** Its sibling
+`emitOrientationReadingTrustEvent` (`:458-465`) has exactly that guard —
+`if (input.layer1Source !== 'server') return` — with a docstring (`:393-396`) naming the reason as
+*"the gaming ceiling's structural half."* Ruled: *"The project has already ruled this question once,
+in code, and left the older and more consequential surface unguarded."*
+
+**Why it is reachable today with no new ruling:** `l1_supply` is the **default** capability preset for
+`ecosystem` and `plugin_install` credentials (`practice-credential.ts:216-217`) and is **mandatory**
+on the `sr_inst_` plugin path (`route.ts:556-564`).
+
+**Why it cannot be caught downstream:** `Layer2Assessment` carries no provenance field and the Ed25519
+signature covers only that object (`layer2-signer.ts:5-6`); `meta.layer1_source` rides **outside** the
+signed bytes (`route.ts:2045-2049`). A supplied extraction is byte-indistinguishable from a genuine
+one. The accreditation gate's own `no_examination` verdict is a signature test.
+
+**The public attestation is inaccurate for this population right now.**
+`TRUST_RECORD_ENVELOPE.attests[1]` (`trust-record-payload.ts:48`) claims unconditionally that
+decisions were reasoned *"as narrated and extracted from the submitted text"* — on an `l1_supply`
+write nothing is extracted from it. `does_not_attest` names the self-report-omission route only, not a
+supply-provenance route. `grep layer1|supplied|provenance` in that file: **zero hits.**
+
+**The corroboration check does NOT mitigate this** — ruled explicitly: *"It reads the submitted text
+against the claims. It does not read the extraction against its own origin... The two mitigations
+operate on different threat classes."*
+
+**Scope it WITH route (i), not separately** — ruled as a governance observation: the
+independent/ensemble-extractor mitigation and this fix *"are not independent work items — they are the
+same architectural intervention applied to the same channel,"* because a second server-side extraction
+would establish provenance before the trust event is minted. **Scoping them in separate sessions that
+discover the overlap later is the named failure mode.**
+
+**Not ruled:** the fix itself. The options differ in kind and consequence — mirroring the sibling's
+guard, a signing-contract change (Critical — the signed payload would carry provenance), or a
+corrected `attests[]`/`does_not_attest[]` pair. **That is the scoping session's work.**
+
+---
+
 ## The gates, restated correctly
 
 The synthesis parks five items "until after the first build gate." **That gate has already closed** —

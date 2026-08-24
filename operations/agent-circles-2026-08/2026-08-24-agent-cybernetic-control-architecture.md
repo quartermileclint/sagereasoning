@@ -57,16 +57,40 @@ s42005-026-02820-3.
 
 ## 3. GS-CYB-1 — Proximity score as error signal and candidate weighting function
 
-> **STANDING CONSTRAINT — weights BLOCKED (ADR-012, third rung).** *The gaming-robustness bar for the
-> proximity scorer has not been cleared. A candidate weighting function that optimises against the
-> proximity score places a gameable scorer inside an optimisation loop. This is the substance of what
-> the third rung is blocked on, regardless of whether the optimisation operates on model weights or on
-> a weighting function. GS-CYB-1 cannot be examined or built until the gaming-robustness bar is
-> cleared or the question is reframed to operate outside the optimisation loop. This constraint is not
-> a design consideration — it is a governing constraint that precedes examination.*
+> **STANDING CONSTRAINT — weights BLOCKED (ADR-012, third rung). AMENDED 2026-08-24 to a two-condition
+> form** (`2026-08-24-mentor-ruling-gaming-robustness-bar-route-ii-verbatim.md`, **binding; verbatim
+> wins**) — the prior single-condition wording's *"the gaming-robustness bar is cleared"* was ruled
+> **ambiguous**, conflating the weights-claim bar with a separate bar for use inside an optimisation
+> loop:
 >
-> Ruled verbatim 2026-08-24. *"The mechanism is different; the failure mode is the same."* The design
-> proposals below are **held, not invalidated.**
+> *GS-CYB-1 cannot be examined or built until two independent conditions are met: (1) the
+> gaming-robustness bar for the weights claim is cleared by a route whose scoping clause addresses the
+> actual supply-provenance exposure, not only co-training; and (2) a separate, independent judgement
+> establishes that the proximity scorer's gaming-robustness is adequate for use inside a feedback
+> optimisation loop specifically. Condition (1) clearing does not automatically satisfy condition (2).
+> Both conditions must be explicitly ruled before GS-CYB-1 is examined.*
+>
+> **Neither condition is met.** Condition (1): route (ii) — the bar's easiest clearance path — was
+> **RULED AGAINST as currently worded** the same day (`2026-08-24-MENTOR-QUESTION-gaming-robustness-bar-route-ii.md`
+> + its ruling): the scoping clause names co-training, not this project's actual exposure (**supply**,
+> via the live `l1_supply` capability — default-preset for `ecosystem`/`plugin_install`, mandatory on
+> the plugin path). Route (i)'s independent/ensemble-extractor mitigation is ruled the stronger
+> candidate and is to be **scoped before route (ii) is revisited** — and, per the same ruling, in the
+> **same session** as the emission-hooks provenance finding below, since they are *"the same
+> architectural intervention applied to the same channel."* Condition (2) has not been examined at
+> all — it requires its own independent judgement, not inherited from condition (1).
+>
+> **A related, independently urgent finding, named the same day and NOT created by GS-CYB-1:**
+> `emitAccreditationTrustEvents` (`website/src/lib/substrate/trust-core/emission-hooks.ts:74-124`) —
+> the function minting the **public trust record's** credential and justice-surface events — carries
+> **no check on extraction provenance**, while its sibling `emitOrientationReadingTrustEvent`
+> (`:458-465`) has exactly that guard. Ruled: *"Not a disclosure gap. A structural asymmetry in the
+> live production system... The public attestation is inaccurate for the affected population right
+> now."* **Named as an urgent unscheduled item for `00-PRIORITY-INDEX.md` — the founder's next
+> scoping item after today's rulings, ahead of any cybernetics build work.** The corroboration check
+> does **not** mitigate it — *"the two mitigations operate on different threat classes."*
+>
+> The design proposals below are **held, not invalidated.**
 
 **The frame's reading.** The proximity score is the harness's error signal — the measurement of
 deviation between the agent's current reasoning state and the goal state (*katorthoma*). It is

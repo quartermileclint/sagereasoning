@@ -14,11 +14,23 @@ item.** Documents only.
 
 ---
 
+## ⚠ A0. URGENT, RULED, UNSCHEDULED — the extraction-provenance asymmetry
+
+**The single most consequential finding of 2026-08-24**, surfaced by adversarial review of a mentor
+question about something else. `emitAccreditationTrustEvents` mints public trust-record events with
+**no extraction-provenance check**, while its sibling orientation hook has exactly that guard.
+Reachable today (`l1_supply` is default-preset and mandatory on the plugin path); undetectable
+downstream (provenance rides outside the signed bytes); and **the public `attests[1]` clause is
+inaccurate for the affected population right now.** Ruled *"a live condition, not a future risk"* and
+**the first item to scope, ahead of any cybernetics build work** — jointly with route (i), which is
+the same architectural intervention on the same channel. **Not a disclosure gap; a structural
+asymmetry.** Full entry: `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md`.
+
 ## A. Awaiting a mentor ruling — nothing can proceed without it
 
 | # | Question | Where | Blocks |
 |---|---|---|---|
-| A1 | **Cybernetics instruction — 4 questions** (routing to a closed session; the weights-BLOCKED collision in GS-CYB-1; Task 4 growing the live extraction prompt; the ordinal-vs-numeric proximity scale) | `2026-08-24-MENTOR-QUESTIONS-cybernetics-instruction-routing-and-weights.md` | All four tasks of `inbox/Mentor Cybernetics Instructions.rtf`. **Tasks 1–3 look executable once A1's routing half is settled.** |
+| A1 | ✅ **RULED 2026-08-24** (all four). **Cybernetics instruction — 4 questions** (routing to a closed session; the weights-BLOCKED collision in GS-CYB-1; Task 4 growing the live extraction prompt; the ordinal-vs-numeric proximity scale) | `2026-08-24-MENTOR-QUESTIONS-cybernetics-instruction-routing-and-weights.md` | All four tasks of `inbox/Mentor Cybernetics Instructions.rtf`. **Tasks 1–3 look executable once A1's routing half is settled.** |
 | A2 | **Kathekon role-relative evaluation** — should candidate evaluation be role-relative? Gap confirmed **total**: `/api/guardrail` takes no role input | `2026-08-12-SESSION-kathekon-role-relative-evaluation-SCOPING-RECORD.md` | OPEN, awaiting ruling |
 | A3 | **Hegemonikon drift + melete — the uniformity-reads-as-stable family** (3 items, *"ruled together or not at all"*): the guide-reflection recurring-corroborated-patterns reading; the trust-record reading of the same; the conflation itself | `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` (items 1–4 RULED 2026-08-15; this family still OPEN) | OPEN. **Ruled 2026-08-24 NOT to receive §5d** — the family is not expanded |
 | A4 | **Layer 3 per-consumer rendering** — re-open the S7 internal-only decision? Plus the Stage 2 reframing: what does the guide need to know about the practitioner's relational context? | `2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md` | OPEN. `SUBSTRATE_LAYER3_ENABLED` activation **not licensed** |

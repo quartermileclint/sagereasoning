@@ -26029,3 +26029,85 @@ new question.
 **Status:** Adopted. Cross-references:
 `D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`,
 `2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md`.
+
+---
+
+## 2026-08-24 — D-GAMING-BAR-ROUTE-II-RULED-AGAINST-GS-CYB1-CONSTRAINT-AMENDED-2026-08-24
+
+**Decision:** The mentor ruled on the rewritten gaming-robustness-bar question
+(`2026-08-24-mentor-ruling-gaming-robustness-bar-route-ii-verbatim.md`, **binding; verbatim wins**).
+**Route (ii) is RULED AGAINST as currently worded. GS-CYB-1's gate is ruled NOT
+automatically-dischargeable and its registered constraint is AMENDED to a two-condition form,
+applied this session. The emission-hooks finding is confirmed and registered as URGENT.**
+**Tier: `governance`, Standard. Documents + the register mirror. AC7 not engaged. Licenses no code.**
+
+**Q1 — route (ii) ruled against, on three independent grounds.** (a) Its scoping clause *"not rely on
+a co-trained extractor"* **does not describe this project's actual exposure**, which is **supply** via
+`l1_supply`, not co-training — *"not a cleared bar, but a bar whose language does not reach the thing
+it is supposed to bound."* (b) The ADR-012 tension between the third rung's stated validity bar
+(*"correctness + robustness under optimisation"*) and the blockquote blessing an accepted ceiling is
+**not resolvable in route (ii)'s favour without choosing a reading**, and the mentor **declined to
+resolve it by implication**. (c) Route (i)'s independent-extractor option is *"not weaker than route
+(ii) on the substance of the threat... it addresses the actual exposure directly. Route (ii) does
+not."* **Two preconditions before route (ii) may be reconsidered:** reword the scoping clause to name
+supply-provenance; resolve the ADR-012 tension explicitly. **Route (i) is to be scoped first.**
+
+**Q2 — the textual trap is ruled shut.** *"The bar's vocabulary of 'cleared' does not automatically
+discharge GS-CYB-1's gate."* The gate concerns the **optimisation loop**; the weights claim is a
+different question. **The registered constraint is amended verbatim** to require two independent
+conditions, with *"Condition (1) clearing does not automatically satisfy condition (2)."*
+**Applied this session in both places it lives** — the governing document's §3 (full form, with the
+neither-condition-is-met status) and the live-injected register pointer in `project-context.json`
+(compressed form; the superseded single-condition phrasing is gone from both, verified zero
+occurrences). The ruling directed application *"before the standing-runner design session inherits
+it"* — done.
+
+**Part 0 confirmed and registered as URGENT.** *"Not a disclosure gap. It is a structural asymmetry in
+the live production system... The public attestation is inaccurate for the affected population right
+now."* Registered at the head of `00-PRIORITY-INDEX.md` as **urgent, unscheduled, and the first item
+to scope after today's rulings, ahead of any cybernetics build work.** The ruling added a fact the
+question had not made explicit: **the corroboration check does not reduce this exposure at all** —
+*"it reads the submitted text against the claims. It does not read the extraction against its own
+origin. The two mitigations operate on different threat classes."*
+
+**A governance observation adopted, not a ruling:** route (i)'s independent extractor and the
+emission-hooks fix *"are not independent work items — they are the same architectural intervention
+applied to the same channel"* (a server-side extraction establishes provenance before the event is
+minted). **They are to be scoped in the SAME session**; separate sessions discovering the overlap
+later is the named failure mode. Recorded in both the priority-index entry and the amended constraint.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-gaming-robustness-bar-route-ii-verbatim.md` — **new**; the verbatim ruling
+- `operations/agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md` — GS-CYB-1's constraint amended to the two-condition form + the neither-met status + the emission-hooks pointer
+- `website/src/data/project-context.json` — v1.4.0 → **v1.4.1**; the register pointer's constraint corrected to match (**fallback mirror only** — the live `project_context` DB row still carries the superseded single-condition phrasing until a founder-run `UPDATE`)
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — the urgent unscheduled item registered at the head
+- `operations/2026-08-24-OUTSTANDING-OPEN-QUESTIONS-REGISTER.md` — new §A0; A1 marked ruled
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii. Documents + one repo data file on the **fallback** path.
+No code, flag, schema, credential, migration, or public surface. AC7 not engaged.
+
+**Rollback path:** `git revert` this commit. The constraint amendment and the priority-index entry
+revert together; the `project-context.json` correction can be reverted independently.
+
+**Verification step (founder-performable):**
+```
+grep -c "two independent conditions are met" operations/agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md
+python3 -c "import json;c=json.load(open('website/src/data/project-context.json'))['dynamic_defaults']['current_phase'];print(c.count('two INDEPENDENT conditions'), c.count('until the gaming-robustness bar is cleared.'))"
+grep -c "URGENT — UNSCHEDULED" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+```
+Expected: `1`, then `1 0` (amended present, superseded phrasing gone), then `1`.
+
+**Open questions:**
+- **The emission-hooks fix is UNSCOPED and is the next item.** To be scoped jointly with route (i).
+- **The `project_context` DB row is still not updated** — carried from the prior entry, now carrying a
+  second correction. The live extraction prompt has neither the GS-CYB pointers nor this amendment.
+- **The ADR-012 validity-bar/blockquote tension is named and unresolved** — a precondition for any
+  future route (ii) reconsideration.
+- **Route (i) is unscoped**; its cost and latency are unmeasured.
+
+**Rules served:** PR19 (voluntarily engaged — the review that produced this question), PR20, PR18, 0d-ii.
+
+**Status:** Adopted. Cross-references:
+`D-GAMING-BAR-MENTOR-QUESTION-REWRITTEN-AFTER-ADVERSARIAL-REVIEW-2026-08-24`,
+`D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24`.
