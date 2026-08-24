@@ -362,6 +362,37 @@ mandating it on every path **erases the supplied path's entire purpose** — and
 `l1_supply` (mandatory on the plugin path) as a side effect. **Nothing here reaches `/api/guardrail`**,
 which is structurally supply-proof.
 
+**RULED 2026-08-25 — `D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25`. Still UNSCHEDULED as a
+build; the ruling licenses no code.** Verbatim, binding:
+`agent-circles-2026-08/2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md`.
+**The urgent item now resolves into THREE separate work items, in this order:**
+
+1. **The honesty correction — OWED NOW, and it waits on nothing.** Ruled independent of and ahead of
+   any structural fix, because no structural option repairs already-minted events. **Two edits,
+   honest at every instant**; the **first must NOT anticipate the fix** (the mentor supplies its
+   substance verbatim). All three published surfaces; **founder R18 sign-off required**; needs a real
+   content pin, since `attests[1]` has none today. The decisive reason is the pointer that resolves
+   to nothing: *"a reader following that pointer in good faith today receives a false assurance."*
+2. **The signature-keyed provenance ledger — the structural fix, scoped next.** Ruled over the
+   signing-contract change and the hybrid, both of which stay available if its limits prove
+   unacceptable. **Its Q4 policies are ruled and are part of its scoping, not prerequisites:**
+   absent entry ⇒ **refuse the mint**; **insert-once, never upsert**; credential-scoped **subject to
+   F-1**. `code-critical` when built.
+3. **Route (i) — REFRAMED, its own session: *"what is caller-supplied extraction for?"*** with the
+   disagreement policy, the plugin-path consequences, and the Arm-B relationship as named inputs.
+   **This qualifies the 2026-08-24 same-session observation** — the scoping was correctly joint and is
+   now complete; the BUILDS separate, because *"sharing a channel does not mean they should be
+   resolved in the same session if the questions they raise are different in kind."*
+
+**⚠ ONE FOLLOW-UP RULING REQUESTED (F-1), blocking item 2's scoping only.** A literal bare-credential
+scoping of the ledger **would refuse every mint from the project's own standing reference harness** —
+verified: the S9 dogfood runs a consult credential and a separate accreditation-write credential that
+*"lacks `consult`"* — and would equally refuse across the credential rotation that already happened
+once (gen-1 → gen-2, after the 2026-07-17 exposure incident). The mentor's stated purpose (do not
+introduce a cross-credential resolution surface) is preserved by the narrower `owner_agent_pair` unit
+that `longitudinal-identity.ts` already computes. **The principle is not challenged — only the unit.**
+Items 1 and 3 are unaffected and need not wait.
+
 ---
 
 ## The gates, restated correctly

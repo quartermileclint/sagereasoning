@@ -9,9 +9,34 @@ emission-hooks finding *"the first item to scope after today's rulings are recor
 cybernetics build work"* and ruled that it and route (i) *"are not independent work items — they are
 the same architectural intervention applied to the same channel."* They are scoped here together.
 
-**Status of this document:** a scope and a recommendation. **It elects nothing.** The fix choice has
-architectural consequence and the ruling declined to make it; the accompanying mentor question
-(`2026-08-25-MENTOR-QUESTION-extraction-provenance-fix-choice.md`) puts it.
+**Status of this document:** a scope and a recommendation. **It elected nothing.** The fix choice had
+architectural consequence and the 2026-08-24 ruling declined to make it; the accompanying mentor
+question (`2026-08-25-MENTOR-QUESTION-extraction-provenance-fix-choice.md`) put it.
+
+> ## ⚑ RULED 2026-08-25 — all four questions answered; the recommendation confirmed on every one
+>
+> **`2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md` — BINDING; verbatim wins
+> over anything below.** The founder approved this document's §6 recommendation, and the ruling then
+> confirmed it on all four questions. **Nothing here is licensed to build.**
+>
+> | Q | Ruled |
+> | --- | --- |
+> | **Q2** | **The honesty correction is owed NOW**, independent of and ahead of any structural fix. **Two edits, honest at every instant.** The first correction's **wording must NOT anticipate the fix** — the mentor supplies its substance verbatim. All three published surfaces; founder sign-off required; does not wait on Q1. |
+> | **Q1** | **Option (a) — the signature-keyed provenance ledger.** Scoped first. Its limits are *"honest and bounded"* and **not worse than the current state, which has no coverage at all.** (b) and the hybrid stay available if (a)'s limits prove unacceptable. Join-back is *"provenance theatre."* |
+> | **Q3** | **NO — route (i) is NOT decided as a provenance fix.** Its own session: *"what is caller-supplied extraction for?"* **This qualifies the 2026-08-24 same-session observation:** the SCOPING was correctly joint and is now done; the BUILDS separate, because *"sharing a channel does not mean they should be resolved in the same session if the questions they raise are different in kind."* |
+> | **Q4** | Absent ledger entry ⇒ **refuse the mint**. **Insert-once, never upsert** (*"Insert-once is a limit on correction, not a vulnerability. Upsert is a vulnerability."*). Ledger **credential-scoped** — but see **F-1** below. |
+>
+> **⚠ F-1 — one consequence of the credential-scoping bind that the ruling could not see, and that
+> THIS document failed to surface.** §4.2b named cross-credential lookup as a *posture* departure and
+> never stated what a literal credential scoping would do to live configurations. Verified since: the
+> project's **own standing reference harness runs two credentials** — a consult credential producing
+> the signed assessments and a separate accreditation-write credential submitting them (which
+> *"lacks `consult`"*) — so a bare-credential scoping **refuses every mint from the project's own
+> dogfood**, and equally refuses across the credential rotation that has already happened once. A
+> narrower-than-cross-credential unit already exists (`longitudinal-identity.ts`'s `owner_agent_pair`,
+> with a credential-only fallback). **A short follow-up ruling on the scoping UNIT is requested; the
+> principle is not challenged, and nothing else in the ruling is affected.** Full detail: the ruling
+> record's §Finding F-1.
 
 ---
 
@@ -370,6 +395,10 @@ why §5 concludes what it does.
 ## §6 — Recommendation *(permitted; this elects nothing)*
 
 Offered with reasoning, as the prompt allows. **The founder and the mentor decide.**
+
+> **OUTCOME 2026-08-25: the founder approved this recommendation and the mentor's ruling confirmed it
+> on all four questions** — correction first, ledger as the structural fix, route (i) reframed rather
+> than built. Retained below as authored; the ruling record governs.
 
 **Recommended shape: option 3 first and soon, option 2′ as the structural fix, route (i) not now.**
 

@@ -26364,3 +26364,57 @@ remains unverified.
 
 **Status:** Adopted (review folded; still no fix elected, nothing built). **Rollback:** `git revert`
 this session's commit — documents only.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only. **Risk:** Standard. **AC7 not
+engaged.** No code, migration, flag, credential, or public surface. **The ruling licenses no code.**
+
+**What happened.** The founder approved the scoping session's §6 recommendation and relayed the
+mentor's ruling on all four questions. **The ruling confirmed the recommendation on every one.**
+Verbatim canonical record (binding; wins over every paraphrase):
+`operations/agent-circles-2026-08/2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md`.
+
+**Binds.**
+- **Q2 — the honesty correction is owed NOW**, independent of and ahead of any structural fix,
+  because no structural option repairs already-minted events. **Two edits, honest at every instant**;
+  **the first must not anticipate the fix** (substance supplied verbatim). All three published
+  surfaces; founder R18 sign-off; does not wait on Q1. Decisive reason: the pointer that resolves to
+  nothing — *"a reader following that pointer in good faith today receives a false assurance… it
+  actively misdirects rather than merely failing to inform."*
+- **Q1 — option (a), the signature-keyed provenance ledger**, scoped first. Limits *"honest and
+  bounded"* and **not worse than the current state, which has no coverage at all.** (b) and the hybrid
+  remain available if (a)'s limits prove unacceptable. Join-back is *"provenance theatre."*
+- **Q3 — route (i) is NOT decided as a provenance fix**; its own session, *"what is caller-supplied
+  extraction for?"* **This qualifies the 2026-08-24 same-session observation:** the scoping was
+  correctly joint and is done; the builds separate — *"sharing a channel does not mean they should be
+  resolved in the same session if the questions they raise are different in kind."*
+- **Q4 —** absent ledger entry ⇒ **refuse the mint**; **insert-once, never upsert** (*"a limit on
+  correction, not a vulnerability. Upsert is a vulnerability."*); ledger **credential-scoped**
+  (see F-1).
+
+**F-1 — a consequence of the credential-scoping bind that the ruling could not see, and that the
+question document failed to surface.** Recorded as a finding against this session's own work, not as
+a challenge to the ruling. The question named cross-credential lookup as a *posture* departure and
+never stated what a literal credential scoping would do to live configurations. **Verified
+first-hand:** the project's own standing reference harness runs **two** credentials — a consult
+credential producing the signed assessments and a separate accreditation-write credential submitting
+them, which the AE-2 record states plainly *"lacks `consult`"* — so a bare-credential scoping
+**refuses every mint from the project's own dogfood**; and it equally refuses across credential
+rotation, which has already happened once (gen-1 → gen-2, after the 2026-07-17 exposure incident).
+The mentor's stated purpose — do not introduce a cross-credential resolution surface as a side effect
+— is **preserved** by the narrower `owner_agent_pair` unit that `longitudinal-identity.ts` already
+computes (with a credential-only fallback and an existing rotation-truncation disclosure), which is
+strictly narrower than unbounded cross-credential lookup and strictly wider than a bare credential.
+**A short follow-up ruling on the scoping UNIT only is requested. It blocks item 2's scoping; items 1
+and 3 are unaffected.**
+
+**The urgent priority-index item now resolves into three ordered work items** — the honesty
+correction (owed now, waits on nothing), the ledger (blocked only on F-1), and route (i) reframed.
+Recorded at the index's ⚠ URGENT block.
+
+**Status:** Adopted (ruling recorded and folded; nothing built, nothing elected beyond what the
+mentor ruled). **Rollback:** `git revert` this session's commit — documents only; the ruling record
+itself stands as the record of what was ruled.
