@@ -25782,3 +25782,123 @@ routing open question), `D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUB
 **Promotion basis:** the corpus's trajectory measurement — verification practice improved measurably across five weeks while **lesson-transfer stayed flat**, SC-2 as clear at the end of the record as at the beginning. That flatness, across a period in which the governing corpus grew, is what makes this permanent rather than watch-status. PR8's third-recurrence bar is independently and amply exceeded.
 
 **Status:** Adopted. **Rollback:** `git revert` this session's commit.
+
+---
+
+## 2026-08-24 — D-CYBERNETICS-INSTRUCTION-EXECUTED-AND-FOUNDER-ELECTIONS-2026-08-24
+
+**Decision:** The founder declared `inbox/Mentor Cybernetics Instructions.rtf` **BINDING** and relayed
+the mentor's ruling on all four questions
+(`2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md`, **binding; verbatim
+wins**). **All four tasks are EXECUTED as amended**, and the three other founder items (B1, B2, D1/D2)
+plus E's ordering are resolved as recommended. **Tier: `governance`, Standard. Documents + one repo
+data file. AC7 not engaged.**
+
+**Task 1 — the governing document is CREATED, not amended into a closed one.**
+`operations/agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md` (founder-named
+path). The instruction directed its content into *"the generation-step governing document"*; Q1 ruled
+amending that closed document *"the wrong shape"* while ruling a new generation-step session *"not
+warranted"*; Q3 then named *"the governing document"* as the specifications' home — **and no such
+document existed** (verified repo-wide: the only files mentioning "cybernetic" were this session's own
+question brief and register). **Creating it is an implication of the rulings that neither document
+states**, surfaced to the founder and named rather than assumed. It carries the frame, the mapping
+table, the design constraint with its unverified-at-relay marker, both questions at full
+specification, and the changelog.
+
+**Task 4 — amended, and HALF-LANDED, which is the entry's most important fact.** The register carries
+**pointer entries only**, verbatim in the ruled forms: GS-CYB-1's carries the weights-BLOCKED
+constraint, GS-CYB-2's carries the GS-ATRF-3 dependency, both name the standing-runner design session.
+`current_phase` grew **4,159 → 5,347 chars (+28.6%)** — against the ~50% the full specifications would
+have added, which is the proportionality the ruling intended. **But `website/src/data/project-context.json`
+is the FALLBACK, not the live source:** `loadDynamicState` (`website/src/lib/context/project-context.ts:122-124`)
+reads `current_phase` from the **`project_context` Supabase table** and falls back to the JSON only on
+query failure. **So the repo edit updates the mirror; the live extraction prompt is unchanged until a
+founder-run DB `UPDATE` lands the same text.** That step is **NOT taken** — it is a live write to the
+row injected into every `/api/reason` consult, and it is the founder's. **The live payload's current
+content was not read and is unverified from a repo session** — it may already differ from the JSON.
+`project-context-compiled.ts` needs no change (verified: it holds static baselines only; dynamic state
+is layered at runtime).
+
+**The Q1 records correction is applied and BOUNDED.** GS-ATRF-4's stale *"to be examined at the
+generation-step scoping session"* → *"…at the standing-runner design session."* **Exactly one
+occurrence in the register** (asserted before writing). The phrase occurs in **12 other repo
+documents** which the ruling does not scope in; correcting those would rewrite closed records and was
+**deliberately not done**.
+
+**Q4's amendment applied:** `E(n) = P(n) − P(n−1)` is replaced by the sign-of-rank-difference form,
+magnitude recorded, **equal spacing not assumed**, and the spacing question inherited as a **named open
+sub-question within GS-CYB-1**. *"Tractable is not the same as justified."*
+
+**B1 — the named-input register is BUILT** (founder-elected: extend the gates table). New register in
+`00-PRIORITY-INDEX.md` directly under the gates table, with the standing-runner cell rewritten to point
+at it rather than stand alone. **Six rows**, five for the standing-runner design (§5d, GS-CYB-1,
+GS-CYB-2, GS-ATRF-3-as-dependency, and **the 2026-08-19 conjectural entry type — which was unregistered
+until this table existed**) and one for the ATRF session. **The ATRF row is marked a summary, not a
+verified enumeration**, with completing it named as owed before that session opens. **Urgency
+grounded, not asserted:** three inputs landed on the standing-runner design in a single day while that
+session has no document at all.
+
+**B2 — the lightest option, adopted as a CONVENTION and deliberately NOT PR26.** `ListAgents` at open
+plus the path-scoped discipline, written into `adopted/standing-protocol-cache.md`. The reasoning is
+recorded in the cache itself: across the observed sessions concurrency produced **zero** actual
+collisions — path-scoping caught every case — and the one real damage (21 out-of-order log entries) is
+a **convention** failure, not a locking failure. A registry or lease mechanism would be built against a
+failure that has not happened. A pre-commit hook is the named escalation. **The founder may elevate to
+PR26 at any time.**
+
+**D1/D2 — both left BLOCKED; the collision itself is put to the mentor** (founder-elected), not either
+fix: `2026-08-24-MENTOR-QUESTION-byte-identity-guard-collision.md`. The pivot, verified first-hand:
+`GATE1_FALSE_HOLD_CAPTURE` is **unset** in both the founder-loop config and the canonical hooks
+backup, so the window the guard protects has stopped capturing — and **the guard has no defined end
+condition**. Three shapes offered; none chosen. A prior ruling elevated the citation defect *within*
+its gate constraint *"exactly as ruled"*, which reads as a deliberate refusal to route around the
+guard; deciding it has expired would reverse that on AI judgement.
+
+**E — ordering elected, nothing executed.** (1) `api/mentor/private/reflect/route.ts:660`'s
+body-supplied `user_id` — the only live security surface in E, its own `code-critical` session; (2)
+the RLS backlog remainder. A `governance` session is the wrong tier for either.
+
+**Files touched:**
+- `operations/agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md` — **new**; the governing document (Tasks 1–3)
+- `operations/agent-circles-2026-08/2026-08-24-MENTOR-QUESTION-byte-identity-guard-collision.md` — **new**; D1/D2
+- `website/src/data/project-context.json` — v1.3.0 → **v1.4.0**; two pointer entries + the GS-ATRF-4 correction (**the fallback mirror only**)
+- `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — the gates-table cell + the new named-input register (B1)
+- `operations/2026-08-24-OUTSTANDING-OPEN-QUESTIONS-REGISTER.md` — B1/B2/B3 marked resolved; D and E annotated
+- `adopted/standing-protocol-cache.md` — the concurrency convention (B2)
+- `operations/decision-log.md` — this entry, appended at the physical tail
+
+**Risk classification:** Standard under 0d-ii. No code, flag, schema, credential, migration, or public
+surface. The one non-document file (`project-context.json`) is repo data on the **fallback** path;
+the live path is untouched. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit. The `project-context.json` change can be reverted
+independently if only the register footprint is to be undone; the governing document then holds the
+specifications with no pointer to them.
+
+**Verification step (founder-performable):**
+```
+python3 -c "import json;d=json.load(open('website/src/data/project-context.json'));c=d['dynamic_defaults']['current_phase'];print(d['version'],len(c),c.count('GS-CYB-1'),c.count('GS-CYB-2'),c.count('generation-step scoping session'))"
+grep -c "Named inputs held for not-yet-opened sessions" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+```
+Expected: `1.4.0 5347 1 1 0` — version bumped, both pointers present, **zero** stale pointers left in
+the register — and `1` for the register.
+
+**Open questions:**
+- **The `project_context` DB row is NOT updated.** Until a founder-run `UPDATE` lands the same text,
+  the live `/api/reason` extraction prompt does not carry the two pointers. **Named, not deferred
+  silently.**
+- **The Rajpal et al. (2026) citation carries an unverified-at-relay marker.** Per the ruling the
+  constraint *"survives on the broader grounds"* if the paper cannot be verified; the citation is then
+  corrected or removed. **A records-hygiene item before the governing document is finalised.**
+- **The ATRF register row is a summary, not a verified enumeration** — owed before that session opens.
+- **The byte-identity guard collision** — awaiting ruling.
+- **GS-CYB-1 is gated on the gaming-robustness bar**, open since 2026-06-27. Its Arm B (the
+  extraction-controlled adversarial case) has never been run.
+
+**Rules served:** PR20, PR18, PR23, 0d-ii, R18 (not engaged — no public surface).
+
+**Status:** Adopted. Cross-references:
+`2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md`,
+`D-DELIBERATION-READING-OPEN-QUESTION-ROUTED-STANDING-RUNNER-2026-08-24`,
+`D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
+`D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`.

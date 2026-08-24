@@ -17,6 +17,27 @@
 
 If any standing answer below is contested by the day's work or by founder direction, treat the cache as overridable and re-read the underlying governance document.
 
+**6. Concurrency check (added 2026-08-24, founder-elected — convention, NOT a numbered process rule).**
+Run **`ListAgents`** at session open and note the peer count. Then, for the whole session, hold the
+practice that has actually been working rather than a heavier one that has not been needed:
+
+- **Commit path-scoped, always.** Name the paths this session authored. Never `git add -A`, never
+  `git commit -a`.
+- **Run `git status` twice** — once before writing, once immediately before staging. A peer's commit
+  can land mid-session (observed: HEAD moved under a session on 2026-08-24).
+- **Leave other sessions' files alone**, including files this session did not author that appear
+  modified in the working tree.
+- **Append at the physical tail** of shared append-only records (`operations/decision-log.md`), per
+  `D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`.
+
+**Why this is a convention and not PR26.** Across the sessions where concurrency was observed it has
+produced **zero** actual collisions — path-scoping caught every case. The one real damage on record
+(21 out-of-order decision-log entries across four prepending events) is a **convention** failure, not
+a locking failure. A registry or lease mechanism would be built against a failure that has not
+happened. **A pre-commit hook is the named escalation** if the convention slips, following PR22/PR25's
+posture. **The founder may elevate this to PR26 at any time**; until then it binds as practice, not as
+a numbered rule, and needs no cache-drift entry beyond the one recording its addition.
+
 **Mode-specific note (added 2026-05-14):** For Claude Code sessions, `/CLAUDE.md` at repo root is the auto-loaded entry point (Claude Code's special handling). It points at this cache and the other governance surfaces below; it is supplementary, not authoritative. For Cowork mode sessions, the project-instructions panel is the operative surface; the founder paste-syncs it against `/adopted/project-instructions-snapshot.md` between sessions. This cache is the heavy-lifter for both modes.
 
 ---

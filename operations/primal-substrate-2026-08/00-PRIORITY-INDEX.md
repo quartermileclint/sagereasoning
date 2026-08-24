@@ -294,7 +294,37 @@ The synthesis parks five items "until after the first build gate." **That gate h
 | --- | --- | --- |
 | **§6 report** | The bounded validation run's own report, reaching the mentor | S6's reordering decision; S4's watching-table extension |
 | **ATRF scoping session** | Post-validation-run, explicitly *"do not open early"* | S3's mechanism design; S5's agent-profile architecture + completion-signal design; S8's GS-ATRF-3 build; **the sufficiency-examination content specification + the boulesis/normative-gap distinction (both added 2026-08-12 — see below)** |
-| **Standing-runner design** | Explicitly gated on the §6 report reaching the mentor; *"not to be pre-scoped"* | Any generation-channel reordering that survives S6; **the §5d deliberation-reading doctrinal open question — a NAMED INPUT, routed here 2026-08-24 under the 2026-08-19 forward-reservation mechanism, not pre-answered and not opening this session early** (question + ruled carried content: `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5d; ruling: `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md`) |
+| **Standing-runner design** | Explicitly gated on the §6 report reaching the mentor; *"not to be pre-scoped"* | Any generation-channel reordering that survives S6. **NAMED INPUTS — see the register directly below this table; do not rely on this cell alone.** |
+
+
+
+### Named inputs held for not-yet-opened sessions — the register
+
+**Why this exists (founder election, 2026-08-24).** The 2026-08-19 ruling created a real mechanism —
+a question is held as a **named input** to a session that has not yet opened — but named no register
+for it. Holders recorded their inputs in their own producing documents, so a receiving session had no
+single surface to read at open. **Three inputs landed on the standing-runner design in a single day
+(2026-08-24)** while that session has no document at all, which is the reconstruction risk the
+mechanism exists to prevent. This table is the register. **It changes no ruled procedure** — it makes
+the mechanism's outputs findable.
+
+**Rule:** a session recording a named input **also** adds a row here. A row is a pointer, never a
+restatement — the content lives in the holder, and the holder points back.
+
+| Receiving session | Named input | Held in | Routed |
+| --- | --- | --- | --- |
+| **Standing-runner design** | **§5d** — is oikeiosis-only the doctrinally right reading of a deliberating ruling faculty? Resolution is **engine-class, `code-critical`** | `agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5d | `…/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md` |
+| **Standing-runner design** | **GS-CYB-1** — proximity score as error signal + candidate weighting function. **Carries the weights-BLOCKED standing constraint as a gate that PRECEDES examination**; includes the equal-rank-spacing open sub-question | `agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md` §3 | `…/2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md` |
+| **Standing-runner design** | **GS-CYB-2** — controlled system model + completion signal return path | `…/2026-08-24-agent-cybernetic-control-architecture.md` §4 | same ruling |
+| **Standing-runner design** | **GS-ATRF-3 as a named DEPENDENCY** — ruled a prerequisite the standing-runner session inherits, *not* a reason to split GS-CYB-2 to the ATRF session. **GS-ATRF-3 first, GS-CYB-2 second** | the same ruling, Q1 | same ruling |
+| **Standing-runner design** | **The conjectural entry type** ↔ GS-ATRF-4 — the 2026-08-19 worked case. **Was unregistered until this table existed** | `agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` | `…/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` |
+| **ATRF scoping session** | **GS-ATRF-1 / -2 / -3 / -4**, the sufficiency-examination content spec, the boulesis/normative-gap distinction, S3's mechanism design, S5's agent-profile architecture + completion-signal design, S8's GS-ATRF-3 build | `2026-08-09-generation-step-scope.md` (as ruled); `primal-substrate-2026-08/gs-atrf-corrections.md`; this index's §"sufficiency-examination finding" | `2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md`; `2026-08-23-mentor-response-atrf-scoping-verbatim.md` |
+
+> **Honest scope of this register, 2026-08-24.** The standing-runner rows are complete as of today and
+> each was verified at source. **The ATRF row is a summary, not a verified enumeration** — a
+> `grep "named input"` sweep found the phrase across roughly a dozen documents and no session has
+> checked each one's registration status. **Completing the ATRF row is owed before that session
+> opens.**
 
 Every scope document's §0 names which of these its parked half waits on, by name, rather than
 repeating "the first build gate."

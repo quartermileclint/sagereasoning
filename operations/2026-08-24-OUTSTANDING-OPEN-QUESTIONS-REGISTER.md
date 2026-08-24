@@ -23,13 +23,13 @@ item.** Documents only.
 | A3 | **Hegemonikon drift + melete — the uniformity-reads-as-stable family** (3 items, *"ruled together or not at all"*): the guide-reflection recurring-corroborated-patterns reading; the trust-record reading of the same; the conflation itself | `2026-08-12-SESSION-hegemonikon-drift-and-melete-SCOPING-RECORD.md` (items 1–4 RULED 2026-08-15; this family still OPEN) | OPEN. **Ruled 2026-08-24 NOT to receive §5d** — the family is not expanded |
 | A4 | **Layer 3 per-consumer rendering** — re-open the S7 internal-only decision? Plus the Stage 2 reframing: what does the guide need to know about the practitioner's relational context? | `2026-08-12-SESSION-layer3-per-consumer-rendering-SCOPING-RECORD.md` | OPEN. `SUBSTRATE_LAYER3_ENABLED` activation **not licensed** |
 
-## B. Awaiting a founder election — no ruling needed, but AI should not choose
+## B. Awaiting a founder election — **ALL THREE RESOLVED 2026-08-24**
 
 | # | Question | Where |
 |---|---|---|
-| B1 | **The named-input mechanism has no register.** Named inputs are held across ~a dozen documents for at least three unopened sessions, with no surface a receiving session reads at open. Five shapes offered incl. a genuine do-nothing | `2026-08-25-named-input-register-and-concurrency-mechanism-NEXT-SESSION-PROMPT.md` Item 1 |
-| B2 | **The concurrent-session coordination mechanism.** Condition met — concurrency bit two consecutive sessions (ten peers; HEAD moved mid-session). Would become PR26 if adopted | same prompt, Item 2 |
-| B3 | **Is `inbox/Mentor Cybernetics Instructions.rtf` relayed as binding?** By project convention a mentor instruction binds on the founder's relay; it currently sits unadopted in `inbox/` | this session |
+| B1 | ✅ **RESOLVED — register built** (gates-table extension, founder-elected). **The named-input mechanism has no register.** Named inputs are held across ~a dozen documents for at least three unopened sessions, with no surface a receiving session reads at open. Five shapes offered incl. a genuine do-nothing | `2026-08-25-named-input-register-and-concurrency-mechanism-NEXT-SESSION-PROMPT.md` Item 1 |
+| B2 | ✅ **RESOLVED — lightest option adopted as a CONVENTION, not PR26** (`ListAgents` at open + the path-scoped discipline written into the cache). **The concurrent-session coordination mechanism.** Condition met — concurrency bit two consecutive sessions (ten peers; HEAD moved mid-session). Would become PR26 if adopted | same prompt, Item 2 |
+| B3 | ✅ **RESOLVED — BINDING** (founder relay 2026-08-24); mentor ruled all four questions; executed same day. **Is `inbox/Mentor Cybernetics Instructions.rtf` relayed as binding?** By project convention a mentor instruction binds on the founder's relay; it currently sits unadopted in `inbox/` | this session |
 
 ## C. Open by ruling — parked with a named gate, not to be opened early
 
@@ -41,7 +41,12 @@ item.** Documents only.
 | C4 | **S4's watching-table extension** (additive migration, its own founder-walked Critical step) and **S6's reordering decision** | §6 report |
 | C5 | **Melete** — deferred until an agent-side rehearsal surface exists (R-4) | That surface's own session |
 
-## D. Blocked by a standing guard — named, not attempted
+## D. Blocked by a standing guard — **question authored 2026-08-24, awaiting ruling**
+
+**Founder-elected: leave both blocked and put the COLLISION to the mentor, not either fix** —
+`operations/agent-circles-2026-08/2026-08-24-MENTOR-QUESTION-byte-identity-guard-collision.md`. The
+pivot it turns on, verified: `GATE1_FALSE_HOLD_CAPTURE` is **unset**, so the observation window the
+guard protects has stopped capturing, and the guard has **no defined end condition**.
 
 | # | Item | The block |
 |---|---|---|
@@ -49,6 +54,15 @@ item.** Documents only.
 | D2 | **The L4 audit header amendment** (P1's reciprocal half) — exact text recorded in the decision log | `l4-passion-audit.ts` sits inside the guard's measured set. **A collision between two standing instructions, surfaced not routed around** |
 
 ## E. Named-and-unbuilt — POINTER LIST, transcribed from `/CLAUDE.md`, **NOT verified this session**
+
+**FOUNDER-ELECTED ORDERING, 2026-08-24 — first two named, the rest unordered:**
+**(1)** `api/mentor/private/reflect/route.ts:660` — the body-supplied `user_id` on a reflections
+insert. **The only item in E that is a live security surface** rather than design debt, it is the
+application-layer twin of database holes already closed, and it is small. **Its own `code-critical`
+session** (auth/data-integrity ⇒ PR19 engages). **(2)** the RLS backlog remainder, carrying the
+standing warning that a table-level RLS fix is **invisible** to a `SECURITY DEFINER` function writing
+the same table. Neither was executed this session — a `governance` session is the wrong tier for
+both.
 
 Re-derive each from source before acting. `/CLAUDE.md`'s own header warns its statuses drift, and this
 section is exactly the class of claim that drifts.
