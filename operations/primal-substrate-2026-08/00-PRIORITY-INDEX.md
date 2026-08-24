@@ -330,6 +330,38 @@ discover the overlap later is the named failure mode.**
 guard, a signing-contract change (Critical — the signed payload would carry provenance), or a
 corrected `attests[]`/`does_not_attest[]` pair. **That is the scoping session's work.**
 
+**SCOPED 2026-08-25 — `D-EXTRACTION-PROVENANCE-AND-ROUTE-I-SCOPED-2026-08-25`. Documents only; still
+UNSCHEDULED as a build, and no fix elected.** Both items are scoped as ONE architecture per the
+ruling: `agent-circles-2026-08/2026-08-25-extraction-provenance-and-independent-extractor-SCOPE.md`,
+with the fix choice put to the mentor at
+`agent-circles-2026-08/2026-08-25-MENTOR-QUESTION-extraction-provenance-fix-choice.md`.
+
+**The scoping resolved the open technical question at source, and the answer inverts one option.** The
+join key the "server-side join-back" option needed **does exist and is inside the signed bytes**
+(`Layer2Assessment.examination.ref`, set from `correlationId`, attached before signing) — **but it is
+per-LOOP, not per-consult, and the caller sets it.** `correlationId` is the caller-supplied
+`X-Loop-Id` (UUIDv4 format-validated only), one loop id spans many consults by design (the Option-D
+billing unit), and `agent_assessment_history.correlation_id` is UNIQUE with duplicate inserts a silent
+no-op — so only the FIRST consult in a loop writes a row. **A provenance check keyed on that join is
+defeated by reusing one request header, with no forgery and no unusual behaviour.** That option is off
+the table; a signature-keyed variant (`sha256(signature) → layer1_source`) is sound and is the
+lightest structural fix, with disclosed limits (retention, no history, flag-dependent coverage).
+
+**Three findings the registration above did not carry:** (i) `attests[1]` has **NO content pin** — the
+only battery assertion is `S2-37`, strict reference identity, whose own comment says it cannot detect a
+missing item, so an edit to that served public claim passes every battery silently; (ii) the same claim
+is mirrored on **all three** R18 surfaces (`llms.txt:759`, `agent-card.json:446`), not only the served
+payload; (iii) `agent-card.json:474` already tells readers the signature *"does not attest the
+extraction's truth"* and directs them to `does_not_attest` *"for the canonical condition"* — **a
+pointer that resolves to a list with zero provenance content.** The defect is a pointer to nothing, not
+a plain omission.
+
+**Route (i)'s cost is now measured, not speculated:** server-side Layer-1 runs **~10–13s** against a
+supplied-schema consult's **~3.1–4.3s** (TEST-labelled, 2026-06-12, never production-verified), so
+mandating it on every path **erases the supplied path's entire purpose** — and it decides the fate of
+`l1_supply` (mandatory on the plugin path) as a side effect. **Nothing here reaches `/api/guardrail`**,
+which is structurally supply-proof.
+
 ---
 
 ## The gates, restated correctly

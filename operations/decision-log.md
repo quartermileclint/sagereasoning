@@ -26222,3 +26222,81 @@ Expected: `5616`, `20`, `false`.
 **Folded into:** the scope document (§4 marked ruled-against and retained as the record of a rejected direction; §3.5 added; §4.4's trial marked do-not-run-as-scoped; §6a records the three openings), and `KG-EX2`'s redirect-phrase pointer (the tension noted in place).
 
 **Status:** Adopted (ruling recorded and folded). **Rollback:** `git revert` this session's commit — removes the verbatim record and the fold; the earlier route (c) adoption and cache row are untouched by this entry.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-AND-ROUTE-I-SCOPED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — **documents only.** **Risk:** Standard under 0d-ii
+(for the scoping; what it scopes is `code-critical` when built). **AC7 not engaged.** No code,
+migration, flag, credential, public surface, or live operation. Weights BLOCKED. Nothing bears on the
+0h call.
+
+**Context.** Mentor-ordered and mentor-shaped. The binding 2026-08-24 ruling
+(`2026-08-24-mentor-ruling-gaming-robustness-bar-route-ii-verbatim.md`) confirmed the emission-hooks
+finding, named it *"the first item to scope after today's rulings are recorded, ahead of any
+cybernetics build work,"* ruled it and route (i) *"not independent work items — they are the same
+architectural intervention applied to the same channel,"* and **declined to rule the fix**.
+
+**Done.** Both items scoped as ONE architecture:
+`operations/agent-circles-2026-08/2026-08-25-extraction-provenance-and-independent-extractor-SCOPE.md`;
+fix choice put to the mentor at
+`operations/agent-circles-2026-08/2026-08-25-MENTOR-QUESTION-extraction-provenance-fix-choice.md`;
+the priority index's ⚠ URGENT block updated to point at both (still unscheduled as a build).
+
+**The dispositive finding — the joinability question, resolved at source, inverting one option.** The
+prompt named this as the question the "server-side join-back" option lives or dies on. **The join key
+exists and is inside the signed bytes** — `Layer2Assessment.examination.ref` is attached before
+signing and set from the same `correlationId` the trajectory row is keyed on, so a caller cannot forge
+it. **But it is per-LOOP, not per-consult, and the caller sets it:** `correlationId` is the
+caller-supplied `X-Loop-Id` (UUIDv4 format-validated only, no uniqueness or credential binding), one
+loop id spans many consults **by design** (the Option-D billing unit), and
+`agent_assessment_history.correlation_id` is UNIQUE with duplicate inserts a silent no-op — so only
+the first consult in a loop writes a row. **A provenance check on that join is defeated by reusing one
+request header, with no forgery and no unusual behaviour** — and, being a check, it would be the thing
+licensing the corrected public attestation. Worse than the honest gap. **Option 2 is not buildable.**
+A signature-keyed variant (`sha256(signature) → layer1_source`; the signature is the only per-consult,
+caller-uninfluenceable identity, and nothing persists it today) is sound and is the lightest
+structural fix, with four disclosed limits. A content-projection join was considered and **rejected as
+laundering** — an `l1_supply` attacker chooses the extraction and therefore the projection.
+
+**Findings the ruling's registration did not carry.** (i) `attests[1]` has **no content pin** — only
+`S2-37`, strict reference identity, whose own in-test comment says it cannot detect a missing item, so
+an edit to that served public claim passes every battery silently (the `S2-39`/`S2-40` precedent
+exists because this hole was found once before). (ii) The claim is mirrored on **all three** R18
+surfaces, not only the served payload. (iii) `agent-card.json:474` already tells readers the signature
+*"does not attest the extraction's truth"* and points at `does_not_attest` *"for the canonical
+condition"* — **a pointer resolving to a list with zero provenance content**; the defect is a pointer
+to nothing, not a plain omission. (iv) The `layer1_source` stamp is gated on the **delta** flag, not
+the trajectory-write flag, so rows in the 2026-06-14→07-18 window carry NULL. (v) `route.ts:1844-1845`
+carries a comment claiming `correlation_id` is *"the per-consult unique handle"* — **false on the
+API-key path** (PR25-relevant).
+
+**Route (i), costed with basis stated.** Server-side Layer-1 runs **~10–13s** against a
+supplied-schema consult's **~3.1–4.3s** (measured 2026-06-12, **TEST-labelled, never
+production-verified**), so mandating it on every path **erases the supplied path's entire purpose**;
+money cost estimated at ~$0.04–$0.06/extraction (Sonnet $3/$15 per M, `max_tokens: 4000`, prompt
+measured ~4,300 tokens), doubling for an ensemble. Two consequences named per PR20: it makes
+`l1_supply` advisory — deciding its fate, including on the plugin path where the schema is
+**mandatory**, as a side effect — and *"checked against"* requires a **disagreement policy that is
+itself a gaming and over-strictness surface**, unruled. **Bounding fact, favourable:**
+`/api/guardrail` is structurally supply-proof, so nothing here reaches the surface that acts.
+
+**Recommendation (permitted; nothing elected).** Option 3 (corrected claims) first and soon — it is
+owed under every branch, since **no structural option repairs already-minted events**; option 2′
+(signature ledger) as the structural fix; route (i) not now, and better framed as *"what is
+`l1_supply` for?"* than as a provenance fix. Option 1 (signing-contract change) is **cheaper than the
+inherited framing** — three optional fields have already been added to that exact signed object under
+a flag-off byte-identity pattern; **2′ vs 1 is the genuine fork.**
+
+**Honest limits.** PR19 does not engage for a documents session and **no adversarial review was run**;
+this is stated in the question itself, with the note that it engages hard at build (trust-core + the
+auth-adjacent write boundary + a public attestation surface). Production flag states and the live
+`l1_supply` credential count **cannot be verified from a repo session** and are marked unverified
+throughout rather than asserted from the decision record.
+
+**Concurrency.** Two peers live at open; HEAD moved mid-session (`f208919` → `455773d`). Commit
+path-scoped; `website/src/data/environmental-context.json` excluded; no peer file touched.
+
+**Status:** Adopted (scoped; no fix elected). **Rollback:** `git revert` this session's commit —
+documents only.
