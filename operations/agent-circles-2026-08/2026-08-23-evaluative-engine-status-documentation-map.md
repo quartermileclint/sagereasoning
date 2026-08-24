@@ -330,12 +330,119 @@ bound, and no longer a pending publication.
   the ruling's "adjacent to the interim proxy disclosure" hint located nothing because that surface
   never carried an interim clause. All three carry the mentor's three required clauses.
 
-  **Lifetime, restated because it governs future sessions:** the note stays **until the oikeiosis
-  mechanism's scope changes** — a separate build decision. No future D4-style proxy correction
-  retires it.
+  **Lifetime — SUPERSEDED 2026-08-24, and made more demanding.** The prior formulation was *"until
+  the oikeiosis mechanism's scope changes."* The mentor's second ruling of 2026-08-24
+  (`2026-08-24-mentor-ruling-katorthoma-proximity-scope-note-and-doctrinal-open-question-verbatim.md`)
+  restates it: the note's lifetime is **"until the deliberation reading reflects the full ruling
+  faculty's deliberative state across all mechanisms."** That is a build target, not a proxy fix, and
+  it is named rather than left implicit. No D4-style proxy correction retires this note. The prior
+  formulation is retained here as the superseded record, not as the governing one.
 
   **Published by** `operations/handoffs/founder/2026-08-24-oikeiosis-scope-note-r18-publication-NEXT-SESSION-PROMPT.md`
   (session complete; the prompt is spent).
+
+---
+
+## 5c. Named bounds — the oikeiosis-only deliberation TERM in `katorthoma_proximity`
+
+**RULED 2026-08-24 and PUBLISHED the same day**
+(`D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUBLISHED-2026-08-24`), on the founder's relay
+of `2026-08-24-mentor-ruling-katorthoma-proximity-scope-note-and-doctrinal-open-question-verbatim.md`.
+A **separate publication item** from §5b — it does not ride that note.
+
+- **The same predicate has TWO readers, deliberately.** `layer2-mechanisms.ts:1569` says so in
+  terms: *"ONE predicate, TWO readers."* The second reader is `computeProximityBase`, so the
+  oikeiosis-only bound reaches `katorthoma_proximity` as well as `ruling_faculty_state`.
+
+- **The distinction that governs the wording, adopted by the mentor from the AI's framing:** on
+  `ruling_faculty_state` the deliberation reading *is* the field's deliberation content — the whole
+  field turns on it. On `katorthoma_proximity` deliberation is **one term among five**, so the field
+  reads broadly and only its deliberation term is oikeiosis-only. *"That distinction is real. It does
+  not clear the disclosure bar — it changes the wording of what must be disclosed."*
+
+- **Why it is MORE urgent than §5b, not less.** `ruling_faculty_state` is a prose string a consumer
+  reads. `katorthoma_proximity` floors gate verdicts, feeds `proximity_floors`, and drives trust
+  events. *"They are receiving a gating signal that has been shaped by an undisclosed scope
+  constraint."*
+
+- **The conservative direction does not excuse disclosure.** *"A conservative mislabel is still a
+  mislabel."* The error direction bears on urgency only.
+
+- **Branch facts, read first-hand from `computeProximityBase`** (not from any prior record) — the
+  term appears in **three of five** branches:
+
+  | Branch | Deliberation term |
+  |---|---|
+  | `sage_like` | none |
+  | `principled` | none |
+  | `deliberate` (early-stage) | **presence required** |
+  | `habitual` | **absence required** |
+  | `reflexive` | **absence required** |
+
+  In the disclosed direction — deliberation present in other mechanisms, absent in oikeiosis — a
+  false absence routes to the fall-through `deliberate`, to `habitual`, or to `reflexive`: **never
+  more lenient.** The published wording is scoped to that direction deliberately, because a false
+  *presence* (a `computeTension` conflict-marker hit without genuine deliberation) could in principle
+  run the other way, and the note does not claim otherwise.
+
+- **`website/smoke_a_prod.json` is evidence for §5b and NOT for this section.** Its
+  `katorthoma_proximity` is `principled`, reached by the `principled` branch, which carries **no
+  deliberation term** — the term never bit on that snapshot. Recorded explicitly so no later session
+  cites it here. §5b's own citation is verified accurate first-hand: two engaged circles
+  (`self_preservation`, `local_community`), four control-filter elements, causal evidence spanning
+  `phantasia → synkatathesis → horme → praxis`, both circles `tension: null` with no balanced Cicero
+  verdict, and it does emit *"Disengaged — no passions, no deliberation; ruling faculty at rest."*
+  The file is **committed** as of this publication, closing the mentor's records-integrity item.
+
+- **Published wording, `llms.txt` form** (founder-signed 2026-08-24, as written):
+
+  > Scope — `katorthoma_proximity`'s deliberation term. The deliberation term in this field's
+  > computation is drawn from the oikeiosis mechanism only: a cross-circle tension, or a Cicero
+  > verdict in which honourability and advantageousness are graded equal and neither is decisive. A
+  > snapshot that deliberates substantively in the control filter, the value assessment, or the
+  > causal-stage evidence but carries no oikeiosis tension reads as not-deliberating for proximity
+  > purposes. The term appears in three of the base reading's five branches: its presence is required
+  > to reach `deliberate` by the early-stage branch, and its absence is required to reach `habitual`
+  > or `reflexive` — so the constraint bears on the readings that gate toward the strict end.
+  > `sage_like` and `principled` carry no deliberation term at all, and the field's other inputs —
+  > passion count and causal stage, the control filter's within/outside balance, value errors, and
+  > kathekon quality — are unaffected by this constraint. This is a scope constraint on one term of
+  > the computation: it is not a deficiency in the snapshot, not a finding that the agent failed to
+  > deliberate, and not a statement that the field is unreliable. The constraint sits on the base
+  > reading, and in the direction described here — deliberation present in other mechanisms but
+  > absent in oikeiosis — it can only make the reading stricter, never more lenient.
+
+  `agent-card.json` carries the same content as a clause appended to the **existing**
+  `epistemic-status-map/v1` description, immediately after §5b's clause (founder-elected, so a
+  consumer reading one scope note finds the other; **no new extension — the count stays 24**).
+  `api-docs/page.tsx` carries the compact form on the same list item.
+
+- **Lifetime:** identical to §5b's restated lifetime — until the deliberation reading reflects the
+  full ruling faculty's deliberative state across all mechanisms.
+
+---
+
+## 5d. NAMED OPEN QUESTION — is oikeiosis-only the doctrinally right reading of a deliberating ruling faculty?
+
+**OPEN. Ruled 2026-08-24 to be carried deliberately, and explicitly NOT resolved by either published
+scope note.** *"The note discloses the proxy; it does not resolve whether the proxy is the right
+design."*
+
+**The mentor's doctrinal answer, which is not neutral.** The *hegemonikon* is **not partitioned by
+mechanism**. Epictetus describes a unified rational capacity that receives impressions, examines
+them, grants or withholds assent, and generates impulse; the deliberation that matters is the
+deliberation of the whole faculty, not of one mechanism's output. *"A ruling faculty that is
+carefully examining the control-filter question — what is and is not up to me here? — is
+deliberating."* Therefore: **the oikeiosis-only reading is NOT the doctrinally correct reading.** It
+is a **proxy** — a tractable computational approximation — and both published notes disclose it as
+such.
+
+**Where it is carried:** as a scoping question for the **generation-step / standing-runner design
+sessions**, where the deliberation reading's architecture is already in scope. Per the ruling, it is
+not to be opened as a build item off the back of this publication.
+
+**Standing instruction to future sessions:** do not treat §5b or §5c as having settled this. They
+settled *disclosure*. The design question is open.
 
 ---
 

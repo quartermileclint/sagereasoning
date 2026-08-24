@@ -618,6 +618,13 @@ export default function ApiDocsPage() {
             advantageousness are graded equal and neither decisive) &mdash; a snapshot deliberating in the
             control-filter, value-assessment or causal-stage mechanisms but not in oikeiosis reads as
             not-deliberating. That is a scope constraint on the field, not a deficiency in the snapshot.
+            The same constraint applies to <code>katorthoma_proximity</code>: the deliberation term in its
+            computation is drawn from the oikeiosis mechanism only, so a snapshot deliberating in the
+            control-filter, value-assessment or causal-stage mechanisms but not in oikeiosis reads as
+            not-deliberating for proximity purposes &mdash; this bears on the branches gating toward
+            <code>habitual</code> and <code>reflexive</code>; <code>sage_like</code> and
+            <code>principled</code> carry no deliberation term, and the field&apos;s other inputs are
+            unaffected. A scope constraint on one term, not a deficiency in the snapshot.
           </li>
           <li>
             <strong>Force-clarification &amp; continuation</strong> &mdash; when a situation is too ambiguous

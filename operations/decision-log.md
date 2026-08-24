@@ -22,6 +22,12 @@ Adopted 2026-05-04 under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04`.
 
 [Active entries follow.]
 
+> **Placement note — added 2026-08-24 under `D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`; founder-elected (leave-in-place, record the fact).**
+> The **21 entries immediately below this marker are not in the file's append order.** They were *prepended* here — above entries dating back to 2026-05-01 — by four separate arcs, verified by `git blame` on their own headings: **2026-07-21** (2 entries dated 2026-07-20), **2026-08-12** (7), **2026-08-15** (6), and **2026-08-23** (4, the reflections-examination arc). Everything from the 2026-05-02 entry onward is the append-only body, in chronological order, and **the file's true physical tail carries the newest entries.**
+> **The convention is append at the physical tail.** A session adding an entry appends it there, not here.
+> Nothing is lost or unfindable: per this file's own archive policy, **entry IDs are the canonical references and physical location is operational.** The founder elected to leave these 21 in place and record the fact rather than rearrange an append-only governance artifact.
+> **One inherited cause, corrected.** The reflections arc's own next-session prompt attributed its four entries to an offhand line in one of that arc's extracted reflections claiming the log was newest-first. That cannot be the cause: three of the four prepending events predate the arc entirely. The pattern is older and more general than the explanation that was reached for — itself an instance of the class PR25 now encodes.
+
 ---
 
 ## 2026-08-23 — D-REFLECTIONS-EXAMINATION-FOUNDER-APPROVALS-CLOSED-2026-08-23
@@ -25385,3 +25391,84 @@ item; nothing deploys from the map or the decision log.
 `D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`,
 `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-oikeiosis-scope-note-verbatim.md`,
 `operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b.
+
+---
+
+## 2026-08-24 — D-KATORTHOMA-PROXIMITY-DELIBERATION-TERM-SCOPE-NOTE-PUBLISHED-2026-08-24
+
+**Decision:** Adopted as binding a second mentor ruling of 2026-08-24 and executed the part of it
+that was licensed: **published a `katorthoma_proximity` deliberation-term scope note** to the same
+three R18 surfaces under founder-signed wording; **restated the lifetime** of the note published
+hours earlier at `bcd8ed0`; **opened a named doctrinal question**; and **closed the
+`smoke_a_prod.json` records-integrity item** by committing the file. **Tier: `governance` with a
+`code-elevated` rider. No code in `website/src/lib/`, no engine change, no flag, no schema, no
+credential, no live operation. AC7 not engaged** — publication on the founder's push.
+
+**How this arose.** The predecessor session
+(`D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`) closed with two questions raised from source
+rather than from records: whether `katorthoma_proximity` owes the same scope note, and whether
+oikeiosis-only is doctrinally right at all. Both were put to the mentor and both were answered.
+Verbatim: `operations/agent-circles-2026-08/2026-08-24-mentor-ruling-katorthoma-proximity-scope-note-and-doctrinal-open-question-verbatim.md`.
+
+**Ruling 1 — the proximity note is owed, and is MORE urgent than the one already published.** The
+same predicate has two readers by design (`layer2-mechanisms.ts:1569`, *"ONE predicate, TWO
+readers"*), so the oikeiosis-only bound reaches the field that **floors gate verdicts, feeds
+`proximity_floors`, and drives trust events** — not merely a prose string. The mentor adopted the
+AI's framing that deliberation is **one term among five** here, and ruled that the distinction
+*"does not clear the disclosure bar — it changes the wording."* The conservative error direction
+*"bears on urgency but not on whether disclosure is owed. A conservative mislabel is still a
+mislabel."*
+
+**Published, three surfaces, founder-signed as written.** `llms.txt` — new paragraph directly after
+§5b's note. `agent-card.json` — clause appended to the **existing** `epistemic-status-map/v1`
+description immediately after §5b's clause (founder-elected over a 25th extension, so a consumer
+reading one scope note finds the other); **count stays 24**. `api-docs/page.tsx` — compact form on
+the same list item. All four mentor-required content points verified present on each surface, plus
+the guard the mentor asked for: precise enough to bound the constraint, not so broad as to imply the
+field is unreliable.
+
+**Ruling 2 — the lifetime of BOTH notes is restated and made more demanding.** Not *"until the
+oikeiosis mechanism's scope changes"* (the 2026-08-24 formulation, now superseded) but **"until the
+deliberation reading reflects the full ruling faculty's deliberative state across all mechanisms."**
+§5b records both formulations, the prior one as superseded rather than overwritten.
+
+**Ruling 3 — a named open question, NOT resolved by either note.** The mentor's doctrinal answer is
+not neutral: the *hegemonikon* is **not partitioned by mechanism**, so oikeiosis-only is **not the
+doctrinally correct reading** — it is a **proxy**, disclosed as such. Carried as a scoping question
+for the **generation-step / standing-runner design sessions**, where the deliberation reading's
+architecture is already in scope. Recorded at map §5d with a standing instruction that §5b/§5c
+settled *disclosure* only. **Deliberately not opened as a build item off this publication.**
+
+**Ruling 4 — records integrity, closed.** `website/smoke_a_prod.json` was untracked while §5b cited
+it as evidence. Screened first-hand: no `sr_*` tokens, no bearer headers, no key/secret/password
+fields, no emails, no URLs; the single UUID is an `examination.ref` correlation id; the content is
+the founder's own reflective narration. Clean, so **committed** per the mentor's test.
+
+**An error caught before it was made, and recorded so it is not made later.** `smoke_a_prod.json` is
+evidence for §5b and **NOT** for §5c: its `katorthoma_proximity` is `principled`, reached by the
+`principled` branch, which carries **no deliberation term** — the term never bit on that snapshot.
+Citing it under §5c would have been the secondary-characterisation error these notes exist to
+prevent. Recorded explicitly at §5c.
+
+**PR20 verification against source, not records:** `computeProximityBase`'s five branches enumerated
+first-hand — the deliberation term appears in three; presence required for the early-stage
+`deliberate` branch, absence for `habitual` and `reflexive`; `sage_like`/`principled` carry none.
+The published claim that the constraint *"can only make the reading stricter, never more lenient"* is
+deliberately **scoped to the disclosed direction**, because a false *presence* (a `computeTension`
+conflict-marker hit without genuine deliberation) could in principle run the other way — the note
+does not claim otherwise. §5b's evidence description independently re-verified against the payload.
+
+**Verified:** `npm run build` **0**; `npx tsc --noEmit` **0**; agent-card extensions **24**,
+unchanged; both scope notes present in `llms.txt` (2 matches for the shared phrase, 1 for the
+proximity heading); all four required points confirmed per surface by programmatic check.
+
+**Rollback:** `git revert` this commit. Static content, one JSON description, one JSX list item, and
+records; nothing deploys from the map or the decision log. Reverting does not restore the superseded
+lifetime formulation as governing — that was ruled, not drafted.
+
+**Status:** Adopted; live on the founder's push. Cross-references:
+`D-OIKEIOSIS-SCOPE-NOTE-R18-PUBLISHED-2026-08-24`,
+`D-MENTOR-RULING-OIKEIOSIS-SCOPE-NOTE-ADOPTED-2026-08-24`,
+`D-D4-COMPLETION-RULING-FACULTY-DELIBERATION-PROXY-REPLACED-2026-08-23`,
+`operations/agent-circles-2026-08/2026-08-24-mentor-ruling-katorthoma-proximity-scope-note-and-doctrinal-open-question-verbatim.md`,
+`operations/agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5b/§5c/§5d.

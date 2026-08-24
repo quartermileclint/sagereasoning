@@ -331,6 +331,22 @@ not-deliberating. This is a scope constraint on the field, not a deficiency in t
 does not mean the reasoning was incomplete, and it is not a finding that the agent failed to
 deliberate.
 
+Scope — `katorthoma_proximity`'s deliberation term. The deliberation term in this field's
+computation is drawn from the oikeiosis mechanism only: a cross-circle tension, or a Cicero verdict
+in which honourability and advantageousness are graded equal and neither is decisive. A snapshot
+that deliberates substantively in the control filter, the value assessment, or the causal-stage
+evidence but carries no oikeiosis tension reads as not-deliberating for proximity purposes. The
+term appears in three of the base reading's five branches: its presence is required to reach
+`deliberate` by the early-stage branch, and its absence is required to reach `habitual` or
+`reflexive` — so the constraint bears on the readings that gate toward the strict end. `sage_like`
+and `principled` carry no deliberation term at all, and the field's other inputs — passion count
+and causal stage, the control filter's within/outside balance, value errors, and kathekon quality —
+are unaffected by this constraint. This is a scope constraint on one term of the computation: it is
+not a deficiency in the snapshot, not a finding that the agent failed to deliberate, and not a
+statement that the field is unreliable. The constraint sits on the base reading, and in the
+direction described here — deliberation present in other mechanisms but absent in oikeiosis — it
+can only make the reading stricter, never more lenient.
+
 Three disclosed routes where confidence can exceed basis, none closed by this map. First: an
 ARGUED `obligation_assessment: met` removes the dikaiosyne floor — this is by design; the
 argument is the guard, and the floor's removal is conditional on the argument's presence, not a
