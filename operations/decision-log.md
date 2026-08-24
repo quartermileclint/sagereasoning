@@ -25902,3 +25902,37 @@ the register — and `1` for the register.
 `D-DELIBERATION-READING-OPEN-QUESTION-ROUTED-STANDING-RUNNER-2026-08-24`,
 `D-CARRY-FORWARD-REDIRECTED-STANDING-RUNNER-PR20-FURTHER-AMENDED-2026-08-19`,
 `D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`.
+
+---
+
+## 2026-08-24 — D-ITEM4-TRIGGER-LEGIBILITY-SCOPED-AND-REDIRECT-PHRASE-ADOPTED-2026-08-24
+
+**Decision:** **Item 4 — the combined scoping session — is complete.** IW-2 route (c) and IW-7's reflect-cadence question are scoped together as one problem, per `D-REFLECTIONS-EXAMINATION-FOUNDER-APPROVALS-CLOSED-2026-08-23`. Route (c)'s redirect phrase is **adopted and live in the standing cache**; IW-7's cadence design is a **proposal for a measured trial, not a ruling and not a build.** Scope at `operations/reflections-examination-2026-08/2026-08-24-item4-trigger-legibility-combined-scope.md`. **Tier: `governance`.** No code, schema, flag, credential, or live operation. **AC7 not engaged.**
+
+**The shared answer — key on exposure, not on failure.** A trigger keyed on the failure requires the diagnosis, and whoever has the diagnosis does not need the trigger. So detect the **moment of exposure** — a surface event present in *both* the failing and the succeeding case, observable without any diagnosis — and let the trigger's content do the diagnostic work after it fires. **The cost is named rather than hidden:** an exposure-keyed trigger fires when nothing was wrong, which is exactly the property IW-4 records eroding the at-action advisory. **The proposal pays for it with occasion-varied content** — a trigger whose content derives from what happened since it last fired cannot be discounted without being read.
+
+**Route (c) — ADOPTED, founder-elected this session.** Exposure event: the AI cites a lesson, memory, rule, precedent, or "the established pattern" **as a warrant** — a reference offered where a result was asked for. Founder-observable form, in the table's existing voice: *"I asked whether something holds. I was told what a document says."* **Phrase: *"That's the rule — what did the check return?"*** Applied to `/adopted/standing-protocol-cache.md` §"AI failure modes to watch for at session open" as a fifth row, and KG-EX2's placeholder replaced with the live phrase. **Why this over the findings record's own candidate** (*"Have you tested that lesson against this case?"*): that one presumes the founder identified both that a lesson was cited and that testing was the missing step; the adopted phrase requires only noticing the shape of an answer. It concedes the citation and asks for what a citation cannot supply — **an action to satisfy, not a recitation**, the same property that made PR25's form right.
+
+**IW-7 — the finding that dissolves constraint (a).** Constraint (a) demands a trigger the session recognises without external prompting. **The cleanest satisfaction is to stop asking the session to recognise anything.** Mechanism facts verified first-hand this session (PR20, checked at drafting): **H3 is already `PreToolUse` on `Bash|Edit|Write|MultiEdit|NotebookEdit`**, firing on every consequential action; **H3 already carries a once-per-session cached advisory** (the S8 trust-verdict read with per-session state files), so fire-once-per-boundary is an established pattern in that exact hook; `framing-core.mjs` exports a general `markerPath` fire-once helper; and **`GATE1_REFLECT_INITIATE_MODE` already accepts `'context'`**, a soft mode supplying `additionalContext` without forcing a turn. **Consequence: IW-7 needs no new hook and no session judgment — a boundary predicate on H3, firing in the existing soft mode.** Recommended predicates for a trial: a `git commit` in a Bash command, and an Edit/Write under `operations/` — event-shaped, not interval-shaped.
+
+**The trial is specified so it can fail.** Three observables: (1) **the habituation measure, mechanically computable** — compare successive reflect fires' *content* within one session; if fire 2 and fire 3 say substantially the same thing, habituation has arrived and the design has failed constraint (b); (2) the coverage measure, against the findings record's 58%-of-tool-calls baseline (**carried from that record, not independently re-derived**); (3) **a named null result** — if mid-session fires produce nothing the close turn would not have produced, revert. Stating the null in advance is what stops the trial being a demonstration.
+
+**Left open deliberately, not pre-answered.** The PR21 interaction — four of eight harvested findings in the decision log have no reflect turn behind them, so the discipline outruns the instrument — was named by the findings record as the mentor's to say and is **not resolved here**; a cadence change would move the ratio without answering the question. Also unmodelled: this proposal adds a **second** exposure-keyed instrument to a loop that already carries one that has eroded (IW-4), and the interaction between them is not designed.
+
+**Mentor packaging — founder-elected: the scope document is the brief.** §5 already names the affected architectural surfaces per PR20 (H3 and the guard path it shares, `close-hook.mjs`/`GATE1_REFLECT_INITIATE_MODE`, the trust record's per-session counting, PR21, and IW-4's false-positive rate) and states the question plainly. No separate artifact to keep in sync.
+
+**Disclosed, because it is this arc's own subject:** the claim that the false-hold observation window is stopped — the nearest precedent for a measured trial — is taken from `CLAUDE.md` and marked **recorded-but-not-independently-verified**; the flag lives in the founder's local environment and a repo session cannot read it.
+
+**Not independently reviewed.** PR19's letter does not engage a governance session. **§4.3 — the content-variation mechanism — is the weakest part and is flagged as such:** the whole habituation-resistance claim rests on it and it has no evidence behind it yet.
+
+**Status:** Adopted (route (c) phrase live; IW-7 scoped, no build authorised). **Rollback:** `git revert` this session's commit — removes the cache row, restores KG-EX2's placeholder, deletes the scope. Nothing deployed.
+
+---
+
+## 2026-08-24 — D-CACHE-DRIFT-RESOLVED-ITEM4-REDIRECT-PHRASE-2026-08-24
+
+**Decision:** `/adopted/standing-protocol-cache.md` updated in the same session as the KG-EX2 amendment, per the cache's own update discipline. A **fifth row** is added to §"AI failure modes to watch for at session open" — **Lesson cited, not tested (KG-EX2)** — with its founder-observable description and the phrase *"That's the rule — what did the check return?"*. The section's `**Sources:**` line now names KG-EX2 and records the row's exposure-keyed property explicitly, so a future reader does not mistake a fire on a correct citation for a false positive in the ordinary sense. **Tier: `governance`, Standard.**
+
+**Note on which discipline fired.** KG-EX2 lives in `/operations/knowledge-gaps.md`, and the cache's update discipline names the knowledge-gaps register among the surfaces whose change requires a same-session cache update. This entry discharges it for both the KG-EX2 amendment and the table row.
+
+**Status:** Adopted. **Rollback:** `git revert` this session's commit.
