@@ -27371,3 +27371,52 @@ PR25.
 
 **Status:** Adopted. Awaits mentor ruling. Cross-references: `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`,
 `D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-IW7-THREE-OPENINGS-RULED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only, ruling recorded. **Risk:** Standard. **AC7 not engaged.** No code,
+schema, flag, credential, or live operation.
+
+**Decision.** Relayed `D-IW7-THREE-OPENINGS-SCOPED-2026-08-25`'s §4 question to the mentor; the
+ruling is received and folded. Verbatim:
+`operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-iw7-three-openings-verbatim.md`.
+
+**Binds.**
+- **Opening 2 (arm the existing elicitation from the Gate-2 consult's verdict) — HELD.** Not on the
+  frequency grounds the item-4 ruling turned on (named real but secondary); blocked on the flagged
+  design gap this scope surfaced and left open — the consult's output carries no signal-quality
+  indicator distinguishing a genuine adverse verdict from a sparse-extraction default. *"A trigger
+  that cannot distinguish genuine adverse verdicts from instrument silence is not a trigger — it is
+  noise."* Reopen when that basis exists; the frequency question is deferred to that point, ruled
+  with real firing-rate data.
+- **Opening 3 (close-hook content legibility) — RULED FOR, two phases.** Phase one — vary the close
+  turn's content on-condition from a guard-CAUTION signal only, not the consult verdict — is
+  **cleared now**. Phase two (extending to consult verdicts) gated on the same signal-quality
+  resolution as opening 2. Design guidance: interpolate session-specific content into the existing
+  invariant five-question structure, reusing the elicitation's own interpolation pattern.
+- **The coverage-gap question — answered.** Opening 3 alone partially closes it (the legibility
+  problem at the close turn), not the temporal gap between a mid-session event and the close turn,
+  which opening 2 would close once specifiable. Sequencing ruled: opening 3 phase one first, opening
+  2 second.
+- **Opening 1 unaffected** — a measurement task, not a design; the ruling did not need to engage it.
+
+**No build licensed by this ruling.** Opening 3 phase one is now mentor-cleared, but this session's
+own tier remains `governance` — building it is a separate election into a code-tier session, not an
+automatic consequence of a favourable ruling, per this arc's standing discipline.
+
+**Files touched:**
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — folded (banner, §2/§3 disposition notes, new §4a, updated §6)
+- `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-iw7-three-openings-verbatim.md` — new
+- `operations/handoffs/founder/2026-08-25-iw7-three-openings-CLOSE.md` — amended with the ruling fold
+
+**Risk classification:** Standard under 0d-ii — documentation only; the ruling licenses no code.
+**Rollback path:** `git revert` this commit; the verbatim ruling record itself stands as the record of
+what was ruled regardless.
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted (ruling recorded and folded; no build elected). Cross-references:
+`D-IW7-THREE-OPENINGS-SCOPED-2026-08-25`, `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.

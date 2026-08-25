@@ -69,21 +69,57 @@ because this one reuses machinery instead of adding a hook.
 
 ---
 
+## Mentor ruling — RECEIVED and FOLDED, 2026-08-25
+
+**§2 (opening 2) HELD** — not on the frequency grounds the item-4 ruling turned on (named real but
+secondary here), but on the flagged design gap this document itself surfaced and left open: the
+Gate-2 consult's output has no signal-quality indicator distinguishing a genuine adverse verdict from
+a sparse-extraction default, so an unfiltered trigger would be "noise," not a trigger. Reopen when
+that basis exists; the frequency question is deferred to that point, to be ruled with real firing-rate
+data.
+
+**§3 (opening 3) RULED FOR, split into two phases.** Phase one — vary the close turn's content
+on-condition from a guard-CAUTION signal only (not the consult verdict, which carries the same
+signal-quality gap as §2) — is **cleared now**. Phase two (extending to consult verdicts) is gated on
+the same signal-quality resolution as §2. Design guidance: interpolate session-specific content into
+the existing invariant five-question structure, reusing the elicitation's own interpolation pattern,
+rather than replacing the base prompt.
+
+**The coverage-gap question, answered:** opening 3 alone partially closes the gap (the legibility
+problem at the close turn) but not the temporal gap between a mid-session event and the close turn,
+which opening 2 would close once specifiable. Ruled sequencing: opening 3 phase one first, opening 2
+second, when its trigger is specifiable.
+
+Verbatim: `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-iw7-three-openings-verbatim.md`.
+Folded into the scope document (a top banner, per-section disposition notes on §2/§3, a new §4a, an
+updated §6). Decision-log: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`.
+
+**No build in this session.** §3 phase one is now mentor-cleared, but this session's own tier is
+`governance`, no code — building it is its own election into a code-tier session (harness code;
+likely warranting the same PR19 independent-review discipline every prior harness change in this
+project has received), not an automatic consequence of a favourable ruling. Named as the clear next
+candidate in §6, not taken here.
+
+---
+
 ## Records
 
-- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — new
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — new, then folded with the ruling
+- `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-iw7-three-openings-verbatim.md` — new
 - `operations/decision-log.md` — entry appended at the physical tail
 - this close — new
 
 ---
 
-## What comes next — three candidates, none chosen here
+## What comes next — superseded by the ruling; see below
 
-1. Relay the scope document to the mentor (the natural next step for §2 and §3).
-2. Run §1's measurement task first, so any mentor relay carries an actual firing-rate number instead
-   of an inference from reading the guard's allowlist.
-3. Decline all three and record why — a founder call, the same way route (c) in the prior document
-   was.
+The three-candidates framing above was written before the mentor ruled. The ruling has since
+resolved which of it applies: relay has happened, opening 2 is held, opening 3 phase one is cleared.
+What remains open, none chosen here:
+
+1. Elect §3 phase one into its own code-tier session.
+2. Run §1's measurement task (repo-only, unaffected by the ruling, still not run).
+3. Scope the signal-quality gap that both §2 and §3 phase two are now blocked on.
 
 ---
 

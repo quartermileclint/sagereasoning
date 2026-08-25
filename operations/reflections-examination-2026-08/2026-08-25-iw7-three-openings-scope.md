@@ -13,6 +13,17 @@ architecturally consequential, put to the mentor per PR20, and rejected — so t
 through the same discipline rather than skipped, even though what it proposes reuses existing
 machinery instead of adding a new instrument.
 
+**[RULED 2026-08-25.]** §2 (opening 2) is **HELD** — not rejected on the frequency grounds the item-4
+ruling turned on, but blocked on the flagged sparse-extraction-default design gap this document itself
+surfaced and left open: the consult's `is_kathekon` output cannot currently distinguish a genuine
+adverse verdict from instrument silence, and arming a trigger on an unfiltered reading would be "noise,"
+not a trigger. §3 (opening 3) is **RULED FOR, in two phases** — phase one (vary the close turn's
+content on a guard-CAUTION signal only) is cleared now; phase two (extending the condition to consult
+verdicts) is gated on the same signal-quality gap that holds §2. §1 is unaffected (a measurement task,
+not a design). Verbatim:
+`operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-iw7-three-openings-verbatim.md`.
+**This ruling licenses no code in this session** — see the close for why.
+
 ---
 
 ## §0 — Mechanism facts, verified first-hand this session (PR20)
@@ -92,7 +103,17 @@ trigger" — it is "widen this one's gate," which is §2.**
 
 ---
 
-## §2 — Opening 2: a structural intervention on the Gate-2 consult
+## §2 — Opening 2: a structural intervention on the Gate-2 consult [HELD, 2026-08-25]
+
+**Ruled: hold.** Not on the frequency grounds this section itself anticipated as the likely objection
+— the mentor named the frequency concern as real but secondary. **What blocks this opening is the
+flagged design detail below being genuinely unresolved**, not resolvable by qualification alone: the
+Gate-2 consult's output does not currently carry a signal-quality indicator distinguishing a genuine
+adverse `is_kathekon`/proximity reading from a sparse-extraction default. Arming a trigger on an
+unfiltered reading "does not improve on the current state; it adds firing events that carry no
+signal." **Reopen when** the consult's output carries that signal, or the hook gains an independent
+basis for filtering sparse defaults — at which point the frequency question, left open here, gets
+ruled on with actual firing-rate data. Verbatim above.
 
 **This is where opening 1 and opening 2 converge, and the convergence is itself the finding.** The
 ruling's opening 2 asks whether the Gate-2 consult's own design — not a second instrument — is the
@@ -133,7 +154,23 @@ requires naming to the mentor before it ships**, not a reason to skip naming it.
 
 ---
 
-## §3 — Opening 3: a close-hook-only intervention (content legibility)
+## §3 — Opening 3: a close-hook-only intervention (content legibility) [RULED FOR, two phases, 2026-08-25]
+
+**Ruled: the right intervention; does not repeat the item-4 error** (firing frequency is unchanged —
+the close hook fires once per session regardless; only content varies, on-condition). **Amended by
+the ruling into two phases:**
+
+- **Phase one — cleared now.** Vary the close turn's content on-condition **from a guard-CAUTION
+  signal only** (a genuine, narrow-allowlist risk signal, not subject to the sparse-extraction
+  problem). This is what §2 blocks on gets built around, not into.
+- **Phase two — gated on the same signal-quality gap as §2.** Extend the condition to genuine adverse
+  *consult* verdicts once those can be distinguished from sparse-extraction defaults.
+
+**Design guidance from the ruling:** the invariant five-question string stays as the base structure
+(it "carries the philosophical substance"); session-specific content is *interpolated into* it, not a
+replacement — reusing the same interpolation pattern `renderGate2ElicitationBlock` already uses for
+`action.summary`, applied at the close-hook's existing firing point instead of a new one. Verbatim
+above.
 
 **Independently real, and does not depend on §1 or §2.** The close turn's invitation is, per §0,
 completely invariant — the same five questions, worded identically, every session, forever. A
@@ -192,6 +229,16 @@ same erosion the prior ruling named, just on a longer fuse?
 
 ---
 
+## §4a — The coverage-gap question, ruled [added 2026-08-25]
+
+**Does opening 3 alone close the coverage gap without opening 2? Partially, ruled.** Opening 3 closes
+the *legibility* gap at the close turn; it does not close the *temporal* gap between a mid-session
+event (a guard caution at hour one) and the close turn (hour six) — that gap is what opening 2, once
+its trigger is specifiable, would close by arming the elicitation closer to the event. The ruling's
+own sequencing: opening 3 phase one is the right first move; opening 2 is the right second move once
+its condition is specifiable; partial closure now is better than the current state and introduces no
+new erosion.
+
 ## §5 — Limits of this document
 
 - **§1's claim that the guard-CAUTION gate likely fires too rarely to matter is an inference from
@@ -208,13 +255,21 @@ same erosion the prior ruling named, just on a longer fuse?
 
 ---
 
-## §6 — What happens next
+## §6 — What happens next [updated 2026-08-25, post-ruling]
 
-**Nothing, until the founder elects a next step.** Candidates, named and not chosen here:
+**Ruled-for and buildable, once elected into a code-tier session:** §3 phase one (close-hook content
+variation on a guard-CAUTION signal). This document's own tier is `governance`, no code — building it
+is its own election, not automatic from the ruling, per this arc's standing discipline that a
+favourable ruling authorises relay-to-build, not build itself.
 
-1. Relay this document to the mentor per §4 (the natural next step for §2 and §3, which carry
-   architectural consequence).
-2. Run §1's measurement task first (repo-only, no ruling needed) so the mentor consultation in step 1
-   carries an actual firing-rate number instead of an inference from reading the allowlist.
-3. Decline all three and record why, the same way route (c) in the prior document was a founder call
-   the mentor declined to make for the AI.
+**Still open, not chosen here:**
+
+1. Elect §3 phase one into a code-tier session (harness code — `code-elevated` or `code-critical`
+   depending on how the manifest classifies a change to this specific hook path; likely warrants the
+   same PR19 independent-review discipline every prior harness change in this project's history has
+   received before shipping).
+2. Run §1's measurement task (repo-only, no ruling needed, still not run) — its output would sharpen
+   any future §2 reconsideration once the signal-quality gap closes.
+3. Scope the signal-quality gap itself (whether the consult's output can carry a genuine-vs-sparse
+   indicator, or the hook can derive one independently) — a prerequisite for ever reopening §2 or §3
+   phase two, and its own scoping question, not resolved by anything in this document.
