@@ -27025,3 +27025,40 @@ this commit.
 
 **Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-3-AUTHORED-2026-08-25`,
 `D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-5-AUTHORED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.** No code, schema, flag,
+credential, or live operation.
+
+**Decision.** Authored the fifth letter in the reflections corpus collection, on AP-5/IW-4 — the
+erosion of sustained attention under a correctly-discounted but habituated instrument warning —
+continuing the founder's "proceed in order" election. Not an arc item.
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-letter-5-on-a-warning-correctly-ignored-a-hundred-times.md` — new
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-5-CLOSE.md` — new
+
+**Structurally distinct from Letters I–IV.** The findings record's own §4 IW-4 routes this pattern
+away from a session-discipline fix — the false-positive rate is the instrument's property, not the
+reasoner's, and the fix's home is the engine-fidelity thread. The letter holds two claims side by
+side rather than collapsing them: the discipline is real and demonstrated in the corpus (two contrast
+cases show it holding), and no amount of it repairs an instrument that manufactures the condition for
+its own habituation. Explicitly names the throughline connection §5 ruled between this letter and
+Letter II (SC-2) — the same failure under different occasions.
+
+**Verification performed.** All seven quoted fragments (R086, R095, R099, R102, plus the
+`stoic-brain/scoring.json` epigraph) verified clean against source on the first pass. No defect found
+in the findings record's own AP-5 citations while gathering material — unlike the SC-2 and SC-5
+letters, nothing needed correcting at source this time.
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit.
+
+**Rules served:** PR20, PR23, PR25 (applied in spirit to prose).
+
+**Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-4-AUTHORED-2026-08-25`,
+`D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
