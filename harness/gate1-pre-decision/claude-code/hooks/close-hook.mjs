@@ -57,6 +57,7 @@ import { fileURLToPath } from "node:url";
 import { loadConfig, readStdin, maybeDebugDump, honestLog, deriveSibling, markerPath, parseBool } from "./lib/framing-core.mjs";
 import { existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { readProvenance } from "./lib/session-state.mjs";
+import { readGuardCautionSignal, readConsultSignal } from "./lib/close-signal-state.mjs";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
 
@@ -252,15 +253,87 @@ async function writeAccreditation(cfg, sessionId) {
 // what happens to the reflection afterwards — the off-machine egress is disclosed at OPERATOR-install
 // time (the harness README), never asserted to (or hidden from) the agent here.
 // ---------------------------------------------------------------------------
-function renderReflectInvitation() {
-  return (
-    "[SageReasoning — Sage Reflect: review your reasoning this session]\n" +
-    "Before this session closes, take one turn to review your own reasoning from the work just " +
-    "completed: the impressions you formed and how you described them to yourself, where you gave or " +
-    "withheld assent, the actions you chose, what (if anything) you would judge differently, and " +
-    "whether the work served its purpose. This is a review of your own reasoning, within the scope of " +
-    "this task — there is nothing to call and nothing to send."
-  );
+// The invariant five-question string — UNCHANGED verbatim from the pre-IW-7 form. The mentor ruling
+// ("the invariant five-question string stays as the base structure … it carries the philosophical
+// substance") is why this is a named constant rather than inlined: every path below — flag off,
+// flag on with no signal, flag on with a low-confidence-only signal — must return EXACTLY this string,
+// byte-for-byte, and the constant is what makes that a structural guarantee rather than a hope.
+const BASE_REFLECT_INVITATION =
+  "[SageReasoning — Sage Reflect: review your reasoning this session]\n" +
+  "Before this session closes, take one turn to review your own reasoning from the work just " +
+  "completed: the impressions you formed and how you described them to yourself, where you gave or " +
+  "withheld assent, the actions you chose, what (if anything) you would judge differently, and " +
+  "whether the work served its purpose. This is a review of your own reasoning, within the scope of " +
+  "this task — there is nothing to call and nothing to send.";
+
+/**
+ * IW-7 opening 3 (2026-08-25, both phases mentor-ruled-for): the interpolated, session-specific
+ * addition to the close turn — modelled on renderGate2ElicitationBlock's own pattern (a fixed
+ * template with one interpolated fact), applied here to the close-hook's existing firing point
+ * instead of a new one. Returns a string to APPEND to BASE_REFLECT_INVITATION, or null (no
+ * variation — the base string alone is used, unchanged).
+ *
+ * PRECEDENCE (documented, not arbitrary): a guard-CAUTION signal (phase one — the guard's own
+ * narrow, named irreversible-action allowlist; unconditionally a genuine risk signal, never a
+ * sparse-extraction default) takes priority over a consult signal (phase two — narrower in what it
+ * can assert, since the kathekon basis is confidence-graded). If both occurred this session, the
+ * close turn names the guard caution; the consult signal is not additionally surfaced. This keeps
+ * the interpolated content to ONE finding, matching the base prompt's own single-paragraph shape,
+ * and avoids ever compounding two separately-hedged claims into one turn.
+ *
+ * THE CONFIDENCE CONSTRAINT (the second ruling, binding, quoted in the build prompt): a
+ * high-confidence adverse consult verdict earns content that PLAINLY discloses why it is
+ * high-confidence (the extractor engaged substantively elsewhere and specifically found nothing
+ * kathekon-relevant, or — for the proximity basis — a direct adverse reading). A low-confidence
+ * kathekon-contrary read is NEVER named — it falls through to returning null, so the close turn is
+ * byte-identical to a no-signal session. This is the "genuinely different, not silently degraded"
+ * requirement realised structurally: the low-confidence path and the no-signal path are the SAME
+ * code path, not two paths that happen to read alike.
+ */
+function computeCloseContentVariation(cfg, sessionId) {
+  const guardSignal = readGuardCautionSignal(cfg, sessionId);
+  if (guardSignal) {
+    const tool = guardSignal.tool || "an action";
+    return (
+      "\n\nThis session's harness recorded a caution from the at-action guardrail on " +
+      `${tool} — a genuine risk signal on the guard's own irreversible-action allowlist, not a ` +
+      "sparse-extraction default. Did your closing reflection address it, or is this the first time " +
+      "you're examining it?"
+    );
+  }
+
+  const consultSignal = readConsultSignal(cfg, sessionId);
+  if (consultSignal && consultSignal.confidence === "high") {
+    const tool = consultSignal.tool || "the work";
+    if (consultSignal.basis === "proximity") {
+      return (
+        "\n\nThis session's harness recorded a consult verdict of " +
+        `"${consultSignal.proximity}" during ${tool} — a direct adverse reading. Did your closing ` +
+        "reflection address it, or is this the first time you're examining it?"
+      );
+    }
+    if (consultSignal.basis === "kathekon") {
+      return (
+        "\n\nThis session's harness recorded a consult where the kathekon (fitting-action) reading " +
+        `came back contrary during ${tool} — the extractor engaged substantively with the rest of the ` +
+        "text and specifically found nothing kathekon-relevant here, so this is a considered reading, " +
+        "not an uncertain one. Did your closing reflection address it, or is this the first time " +
+        "you're examining it?"
+      );
+    }
+  }
+
+  // No signal, or a low-confidence-only consult signal (the ruling's "generic content or no
+  // variation at all" — this build chose the latter: a low-confidence read must never be dressed
+  // up as a finding, and the surest way to guarantee that is to produce nothing distinguishable
+  // from the no-signal case).
+  return null;
+}
+
+function renderReflectInvitation(cfg, sessionId) {
+  if (!cfg.closeContentVariationEnabled) return BASE_REFLECT_INVITATION; // flag-off byte-identity.
+  const variation = computeCloseContentVariation(cfg, sessionId);
+  return variation ? BASE_REFLECT_INVITATION + variation : BASE_REFLECT_INVITATION;
 }
 
 // The session_summary the harness supplies to OPEN a reflect record. The agent did not state these —
@@ -407,7 +480,7 @@ async function main() {
   const accredStatus = await writeAccreditation(cfg, sessionId);
 
   // 2. Reflect turn (ENFORCE/ADVISE) — a PURE in-conversation invitation; no fetch, no outbound ask.
-  const reflectText = cfg.reflectInitiateMode === "off" ? "" : renderReflectInvitation();
+  const reflectText = cfg.reflectInitiateMode === "off" ? "" : renderReflectInvitation(cfg, sessionId);
 
   // 3. Record the close (fire-once) BEFORE we block, so the stop_hook_active re-fire routes to persist.
   writeCloseMarker(cfg, sessionId, `accred=${accredStatus} mode=${cfg.reflectInitiateMode}`);

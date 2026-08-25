@@ -152,6 +152,21 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
       parsePatternList(process.env.GATE1_SENSITIVE_PATHS) ||
       (Array.isArray(fileCfg.sensitivePaths) ? fileCfg.sensitivePaths : null) ||
       [],
+    // IW-7 opening 3 (2026-08-25, both phases ruled-for): whether the close
+    // hook's reflect invitation varies its content on-condition from the
+    // session's own record (a guard CAUTION — phase one; a confidence-graded
+    // adverse consult verdict — phase two). Read HERE, in the shared core, so
+    // H3 (which records the signals) and H4 (which reads them) derive it the
+    // SAME way — mirroring captureProvenance's own precedent. Default OFF ⇒
+    // H3 records nothing (no new state files) and H4's renderReflectInvitation
+    // returns the exact pre-existing invariant string — byte-identical,
+    // test-asserted. Independent of discernmentEnabled/GATE1_FALSE_HOLD_CAPTURE
+    // — this reads only fields already on the ordinary guard/consult response,
+    // not the discernment route.
+    closeContentVariationEnabled: parseBool(
+      process.env.GATE1_CLOSE_CONTENT_VARIATION_ENABLED,
+      parseBool(fileCfg.closeContentVariationEnabled, false),
+    ),
   };
   cfg.credential = process.env[cfg.credentialEnvVar] || process.env.GATE1_CREDENTIAL || "";
   // H3 guard endpoint (D-A): explicit override, else config, else derive from the reason endpoint

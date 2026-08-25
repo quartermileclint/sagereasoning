@@ -29,9 +29,17 @@ import { createServer } from "node:http";
 // The Layer-2 verdict, shape-independent. Both the signed and unsigned response shapes carry THIS
 // object — the only difference is whether it is nested under a signed envelope. Options let the
 // loop-closure legs vary the redirection + examination markers without touching the default shape.
-function verdict({ redirect = false, ref = "mock-loop-1", depthTier = "standard", priorFeedbackRef } = {}) {
+function verdict({
+  redirect = false,
+  ref = "mock-loop-1",
+  depthTier = "standard",
+  priorFeedbackRef,
+  proximity = "deliberate",
+  kathekonQuality = "marginal",
+  isKathekon = false,
+} = {}) {
   return {
-    katorthoma_proximity: "deliberate",
+    katorthoma_proximity: proximity,
     passion_diagnosis: {
       passions_detected: [{ root_passion: "phobos", sub_species: "agonia" }],
       false_judgements: [{ text: "Missing the traffic window would be a serious loss I must prevent." }],
@@ -47,8 +55,8 @@ function verdict({ redirect = false, ref = "mock-loop-1", depthTier = "standard"
     },
     value_assessment: { indifferents_at_stake: ["reputation", "search traffic"], value_error: null },
     kathekon_assessment: {
-      is_kathekon: false,
-      quality: "marginal",
+      is_kathekon: isKathekon,
+      quality: kathekonQuality,
       justification: "Publishing an unverified account during an unfolding incident risks injustice to those affected.",
     },
     // Redirection carrier: NON-EMPTY ⇒ a redirection was issued (opens a loop). Default empty {}
@@ -61,11 +69,15 @@ function verdict({ redirect = false, ref = "mock-loop-1", depthTier = "standard"
   };
 }
 
-// SIGNED shape (Layer-2 signing ON): verdict nested under the signed envelope.
-export function assessmentFirstBody(opts) {
+// SIGNED shape (Layer-2 signing ON): verdict nested under the signed envelope. `opts.extraction`
+// (IW-7 opening 3 phase two) overrides the top-level `extraction` object — the same field
+// parallel-run.ts sets to `layer1Schema` on the real response, and the ONLY field consult-signal.mjs's
+// computeKathekonConfidence reads. Defaults to the pre-existing fixed shape (byte-identical for every
+// caller that doesn't pass it).
+export function assessmentFirstBody(opts = {}) {
   return {
     version: "translation-sandwich-v1",
-    extraction: { version: "layer1-schema-v1" },
+    extraction: opts.extraction || { version: "layer1-schema-v1" },
     assessment: { assessment: verdict(opts), signature: "mock-sig", key_id: "mock-key" },
     prose: null,
     meta: { narrative_status: "deferred" },
@@ -75,14 +87,36 @@ export function assessmentFirstBody(opts) {
 
 // UNSIGNED shape (Layer-2 signing OFF): the verdict sits directly at `assessment` — no signature/
 // key_id, so NO provenance is extractable (H4 then honestly writes no accreditation).
-export function assessmentFirstBodyRaw(opts) {
+export function assessmentFirstBodyRaw(opts = {}) {
   return {
     version: "translation-sandwich-v1",
-    extraction: { version: "layer1-schema-v1" },
+    extraction: opts.extraction || { version: "layer1-schema-v1" },
     assessment: verdict(opts),
     prose: null,
     meta: { narrative_status: "deferred" },
     narrative: { status: "deferred", correlation_id: "mock-corr-1" },
+  };
+}
+
+// The four Layer1Schema arrays IW-7 opening 3 phase two's confidence proxy cross-checks (mirrors
+// consult-signal.mjs's CONFIDENCE_PROXY_ARRAYS). A helper so battery fixtures don't hand-roll the
+// same four keys.
+export function richExtraction() {
+  return {
+    version: "layer1-schema-v1",
+    passions_present: [{ root_passion: "phobos", sub_species: "agonia", evidence: "mock" }],
+    oikeiosis_circles_engaged: [],
+    value_categories_at_stake: [],
+    causal_stage_evidence: [],
+  };
+}
+export function sparseExtraction() {
+  return {
+    version: "layer1-schema-v1",
+    passions_present: [],
+    oikeiosis_circles_engaged: [],
+    value_categories_at_stake: [],
+    causal_stage_evidence: [],
   };
 }
 
@@ -309,6 +343,23 @@ export function makeServer(getMode, opts = {}) {
         return json(200, assessmentFirstBody({ redirect: false, ref: "mock-loop-close", depthTier: reqDepth, priorFeedbackRef: priorRef }));
       }
       if (reasonMode === "raw") return json(200, assessmentFirstBodyRaw());
+      // IW-7 opening 3 phase two fixtures (2026-08-25): the two disjoint trigger bases + the
+      // confidence grading on the kathekon basis.
+      if (reasonMode === "adverse-proximity") {
+        return json(200, assessmentFirstBody({ proximity: "reflexive", depthTier: reqDepth }));
+      }
+      if (reasonMode === "kathekon-contrary-rich") {
+        return json(
+          200,
+          assessmentFirstBody({ kathekonQuality: "contrary", depthTier: reqDepth, extraction: richExtraction() }),
+        );
+      }
+      if (reasonMode === "kathekon-contrary-sparse") {
+        return json(
+          200,
+          assessmentFirstBody({ kathekonQuality: "contrary", depthTier: reqDepth, extraction: sparseExtraction() }),
+        );
+      }
       return json(200, assessmentFirstBody());
     });
   });

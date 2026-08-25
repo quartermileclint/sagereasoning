@@ -27932,3 +27932,99 @@ session's precedent in this project's history.
 
 **Status:** Adopted. Cross-references: `D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`,
 `D-IW7-THREE-OPENINGS-RULED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-CLOSE-HOOK-CONTENT-VARIATION-BUILT-DARK-REVIEW-FOLDED-2026-08-25
+
+**Stream:** founder. **Category:** `code-elevated` (self-classified at open, per the build prompt's
+own instruction — a new function on existing hooks; no auth/session/encryption/R20a
+perimeter/deployment-config surface touched). **Risk:** Elevated. **AC7 not engaged — no activation,
+no flag flipped, no credential/schema/deployment change.**
+
+**Decision.** Built both mentor-ruled phases of IW-7 opening 3 (close-hook content variation) per
+`operations/handoffs/founder/2026-08-25-close-hook-content-variation-BUILD-NEXT-SESSION-PROMPT.md`,
+built DARK behind a new flag defaulting off, battery-verified, and independently adversarially
+reviewed (PR19) before folding three optional review findings. **Not activated** — that remains a
+separate, later, founder-walked step.
+
+**What was built.** A new shared flag `cfg.closeContentVariationEnabled`
+(`GATE1_CLOSE_CONTENT_VARIATION_ENABLED`, default off, read in `framing-core.mjs`'s `loadConfig` so
+both H3 and H4 derive it identically). Two new pure/fs-backed lib modules:
+`consult-signal.mjs` (pure — `classifyConsultSignal(verdict)` implementing the ruling's two disjoint
+triggers: `katorthoma_proximity` at `reflexive`/`habitual`, unconditionally high-confidence per the
+scope docs' own text; `kathekon_assessment.quality === 'contrary'`, confidence-graded by
+`computeKathekonConfidence(extraction)` — whether the extraction's four OTHER Layer1Schema arrays
+[`passions_present`, `oikeiosis_circles_engaged`, `value_categories_at_stake`,
+`causal_stage_evidence`] are also empty [low] or some populated [high], exactly the scope document's
+§2 proxy) and `close-signal-state.mjs` (fs-backed, mirrors this codebase's own `elicitMarkerPath`
+idiom per the build prompt's recommended pattern — a guard-caution signal, first-wins, and a consult
+signal, strongest-wins/never-downgrades). Wired into `at-action-hook.mjs`: `runGuard`'s CAUTION
+branch records a guard-caution signal; `runConsult`, after a successful fetch, classifies the verdict
+and records a consult signal — both flag-gated, so flag-off writes no new files at all (not merely
+"the recorded content is empty"). `close-hook.mjs`'s `renderReflectInvitation` now takes `(cfg,
+sessionId)`; the exact pre-existing invariant five-question string is a named constant
+(`BASE_REFLECT_INVITATION`) returned unchanged when the flag is off, when no signal was recorded, OR
+when the only recorded signal is a low-confidence kathekon read (the ruling's "generic content or no
+variation at all" — this build chose the latter: a low-confidence read is architecturally
+indistinguishable from a no-signal session, never a hedged version of the high-confidence wording).
+When a signal fires, one interpolated paragraph is appended (never a replacement of the base
+structure, per the first ruling's design guidance) — a guard caution names the tool and the guard's
+own narrow allowlist; a high-confidence proximity or kathekon finding names the dimension and, for
+the kathekon case, plainly discloses WHY it is high-confidence (the extractor engaged substantively
+elsewhere and specifically found nothing kathekon-relevant), satisfying the second ruling's binding
+disclosure constraint verbatim. Precedence when both signal kinds fire in one session: guard caution
+wins (a disclosed, non-mandated design choice — one finding per close turn).
+
+**Battery.** New file `test/close-content-variation.test.mjs`: 70 assertions (pure-function unit
+tests for the classification/confidence/supersession logic and the state-file read/write module,
+plus hook-spawn integration tests via the mock server covering flag-off byte-identity, both phases
+firing/not-firing correctly, the confidence-disclosure constraint's exact wording, precedence, and
+strongest-wins/no-downgrade semantics). `test/mock-reason-server.mjs` extended (backward-compatible —
+every existing caller gets byte-identical fixtures) with three new `/api/reason` modes and an
+`extraction` override. All existing batteries re-run green with no regression: `logic-harness.mjs`
+171/0, `negative-battery.mjs` 250/0 (RELEASE GATE: PASS), `false-hold-capture.test.mjs` 37/0. Combined:
+528 assertions, 0 failures.
+
+**Independent adversarial review (PR19).** A fresh subagent, given no context beyond the governing
+documents and the build's file list, reviewed against ten named risk categories (flag-off byte-
+identity; the confidence-disclosure constraint literally; precedence; strongest-wins/race conditions;
+whether the proximity basis quietly skipped a confidence check the mentor wanted; fail-soft
+discipline; mock-server backward compatibility; battery adequacy; no new firing point; mid-session
+flag-flip degradation). **Verdict: GO_WITH_FIX, no findings required before "done"** — three optional
+LOW items, all folded in this session: (1) a battery case proving a genuinely corrupted state file
+degrades to `null` rather than throwing (the prior battery only tested an unwritable directory, not
+malformed bytes on disk); (2) a battery case pairing a guard caution with a LOW-confidence consult
+signal, confirming the guard content still shows rather than going silent; (3) a disclosure comment
+in `close-signal-state.mjs` naming the unlocked check-then-act read/write as an accepted, bounded
+race (cannot corrupt state or let a low-confidence signal beat an already-recorded high-confidence
+one — both reviewer-confirmed non-issues, disclosed rather than fixed). The reviewer separately
+confirmed the proximity-basis-as-unconditionally-high-confidence design is faithful to both governing
+documents (the signal-quality-gap scope never addresses proximity at all; the three-openings scope
+explicitly analogises it to the guard's own non-ambiguous CAUTION gate), and that `close-hook.mjs`'s
+`main()` genuinely adds no new firing point — only H4's existing once-per-session `Stop` invocation
+now returns different content.
+
+**Files touched:**
+- `harness/gate1-pre-decision/claude-code/hooks/lib/framing-core.mjs` — the new flag
+- `harness/gate1-pre-decision/claude-code/hooks/lib/consult-signal.mjs` — new, pure
+- `harness/gate1-pre-decision/claude-code/hooks/lib/close-signal-state.mjs` — new, fs-backed
+- `harness/gate1-pre-decision/claude-code/hooks/at-action-hook.mjs` — two flag-gated call sites
+- `harness/gate1-pre-decision/claude-code/hooks/close-hook.mjs` — `renderReflectInvitation` rebuilt
+- `harness/gate1-pre-decision/test/mock-reason-server.mjs` — backward-compatible fixture extensions
+- `harness/gate1-pre-decision/test/close-content-variation.test.mjs` — new, 70 assertions
+
+**Risk classification:** Elevated under 0d-ii — a new function on existing hooks, flag-gated, dark on
+push; no auth/session/encryption/R20a-perimeter/schema/credential/deployment surface touched.
+**Rollback path:** `git revert` this commit (the flag stays unset everywhere by default; nothing
+installed reads or writes the new state files until an operator explicitly sets the env var).
+
+**Rules served:** PR15 (reused `elicitMarkerPath`'s established pattern rather than inventing a new
+one), PR19 (independent adversarial review before calling the build done), PR20/PR23 (the mentor
+rulings this build executes).
+
+**Status:** Built, battery-green, review-folded, **NOT activated**. The activation step (setting
+`GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true` in the founder's own dogfood install, or any standing
+operator install) is its own, later, founder-walked step — not scoped or licensed here. Cross-
+references: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`, `D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`,
+`D-CLOSE-HOOK-CONTENT-VARIATION-BUILD-PROMPT-AUTHORED-2026-08-25`.

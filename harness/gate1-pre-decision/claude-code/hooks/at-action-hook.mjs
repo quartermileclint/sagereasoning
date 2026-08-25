@@ -66,6 +66,8 @@ import {
 } from "./lib/session-state.mjs";
 import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord } from "./lib/false-hold-capture.mjs";
 import { composeAction, renderBareInputNote } from "./lib/action-composer.mjs";
+import { classifyConsultSignal, computeKathekonConfidence } from "./lib/consult-signal.mjs";
+import { recordGuardCautionSignal, recordConsultSignal } from "./lib/close-signal-state.mjs";
 import {
   classifyConsult,
   advanceLoopState,
@@ -545,6 +547,13 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
       /* best-effort — a missing marker means no capture, honestly nothing more. */
     }
     writeTrustCalibration(cfg, sessionId, { depthFloorBump: "standard" });
+    // IW-7 opening 3, phase one (2026-08-25): a guard CAUTION on the guard's own
+    // narrow irreversible-action allowlist is a genuine risk signal, not a
+    // sparse-extraction default (the mentor's own distinction between this
+    // branch and a bare consult verdict). Flag-gated; first-wins per session.
+    if (cfg.closeContentVariationEnabled) {
+      recordGuardCautionSignal(cfg, sessionId, { tool: toolName, proximity: r.proximity || null });
+    }
     emitAllowWithContext(
       "[SageReasoning Gate 2 — at-action guardrail: CAUTION]\n" +
         `The guardrail recommends "${r.recommendation}" for this irreversible action (proximity: ${r.proximity || "unknown"}). ` +
@@ -677,6 +686,22 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   // D-D provenance (flag-gated; default off ⇒ no write). Append the SIGNED assessment so H4 can carry
   // it into the accreditation write (R18f). Keyed on the real session_id (H4 reads by session_id).
   if (cfg.captureProvenance && r.signed) appendProvenance(cfg, sessionId, r.signed);
+
+  // IW-7 opening 3, phase two (2026-08-25, mentor-unblocked on a confidence-disclosure constraint):
+  // classify THIS verdict against the two disjoint triggers (proximity reflexive|habitual — high
+  // confidence unconditionally; kathekon_assessment.quality === 'contrary' — graded by whether the
+  // extraction's other arrays are also empty). Flag-gated; strongest-wins per session (never let a
+  // later low-confidence read silently supersede an earlier high-confidence one — consult-signal.mjs).
+  if (cfg.closeContentVariationEnabled) {
+    const signal = classifyConsultSignal(r.verdict);
+    if (signal.fires) {
+      const confidence =
+        signal.basis === "kathekon"
+          ? computeKathekonConfidence(r.body && typeof r.body === "object" ? r.body.extraction : null)
+          : signal.confidence; // 'proximity' basis is already high, unconditionally.
+      recordConsultSignal(cfg, sessionId, { ...signal, confidence, tool: toolName });
+    }
+  }
 
   // D-B: classify this consult + advance the rolling loop state, mirroring the CI-4 closure rule.
   const fallbackRef = `h3-${shortHash(decisionKey)}`;
