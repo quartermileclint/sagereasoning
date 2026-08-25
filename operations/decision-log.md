@@ -26527,3 +26527,55 @@ inherits F-3's three named inputs. Item 3 (route (i) reframed) is unchanged.
 
 **Status:** Adopted (rulings recorded; the superseded bind corrected in place; nothing built).
 **Rollback:** `git revert` this session's commit — documents only.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-HONESTY-CORRECTION-WORDING-DRAFTED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — **documents only; NOTHING APPLIED.** **Risk:**
+Standard. **AC7 not engaged.** No public surface, code file, ADR, or battery was touched — the
+wording awaits founder R18 sign-off, which is the gate.
+
+**What.** The first-edit wording mandated by the 2026-08-25 ruling (Q2, as extended by F-2) is drafted
+as a sign-off package:
+`operations/agent-circles-2026-08/2026-08-25-extraction-provenance-honesty-correction-SIGNOFF-PACKAGE.md`.
+It carries the `attests[1]` qualification, a new `does_not_attest` extraction-origin item, the
+`llms.txt` and `agent-card.json` mirrors, the ADR-013 §8 dated amendment, and four battery pins.
+
+**Two constraints satisfied simultaneously.** Q2 requires the first edit not anticipate the fix; F-2
+requires the coverage-gap behaviour be in the first edit. **No ledger exists and nothing is being
+refused**, so every F-2 clause is **future-tensed** as committed design, beside the forward commitment
+the mentor already specified. A present-tense version would publish behaviour that does not exist —
+the defect class being corrected.
+
+**Ordering carried from precedent, not invented.** ADR-013 §8's 2026-08-15 amendment established that
+public surfaces must not lead the served envelope (*"it would make a public surface claim a
+`does_not_attest` entry the served envelope does not yet carry"*). So: code + ADR + pins in one
+commit; the three R18 surfaces second.
+
+**Pins, because the target has none.** `attests[1]` has **no content pin today** — S2-37 is strict
+reference identity and its own comment says it cannot detect a missing item. The package specifies
+**S2-43/44/45** for the new disclaimer clauses and **S2-46** for the `attests[1]` qualification, with a
+mandatory mutation check (delete each clause, confirm the matching pin fails).
+
+**One election left to the founder (§2b):** whether to include the clause stating a supplied
+extraction is *not distinguishable* from a server-produced one at mint time. Recommended **include** —
+the finding is that the record misdescribes itself, and stopping short of the mechanism repeats the
+pattern — but it sharpens a live exploit path with no fix yet, and the mentor's specified substance
+did not include it. **The founder's call, not the AI's.**
+
+**§7 — a finding for the ledger's scoping, raised here rather than at build.** F-2 names `coverage_gaps`
+as *"the existing machinery."* **Verified at source: that field cannot carry what F-2 requires.** It is
+`VirtueTrustDomain[]` — a bare array of domain names, aggregate-scoped — with no room for the non-mint,
+the reason, or the does-not-mean-they-didn't-practise clause; and a refused mint is an **event-level**
+fact, not a domain-level one. Delivering F-2 will need either a structured shape or a sibling field —
+**either way a change to a served public payload**, with its own sign-off. Recorded as a named input
+to item 2. **It does not affect the wording**, which commits only in the future tense — which is
+precisely why the tense discipline matters.
+
+**One drafting-time correction, disclosed:** the package first stated the agent-card extension count
+must remain 23. Verified at source: it is **24**. Corrected before commit — the class of error the
+package's own §4 check exists to catch.
+
+**Status:** Adopted (wording drafted and awaiting sign-off; nothing applied). **Rollback:**
+`git revert` this commit — documents only.
