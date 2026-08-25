@@ -69,20 +69,47 @@ things were caught and corrected before the letter was allowed to stand:
    to state accurately what the cases show (two consulted-and-misapplied, one un-consulted until too
    late) rather than a round number that did not survive its own check.
 
-**Two discrepancies named rather than resolved.** The findings record cites the Stobaeus passage as
-"*Eclogae* 2.88"; `stoic-brain/passions.json` itself cites "Stobaeus Ecl. Section 5" with no "2.88"
-anywhere in the file. The letter's epigraph note states this rather than picking one. Separately, the
-findings record's §1 SC-2 list names R097 as an instance with a specific quoted phrase ("didn't
-generalise from it fast enough") that could not be located in the extraction's R097 entry in that
-wording; R097 is not used in the letter, and the omission is stated in the closing citation block.
+**Two discrepancies named at close, and a follow-up pass that resolved both — one by fixing the
+source, one by fixing my own overcaution.** Named to the founder after this letter first landed, then
+run to ground in the same session at the founder's request ("do those fixes now"):
+
+1. **The Stobaeus locus.** The findings record cites *"Eclogae* 2.88"; the `key_clarification` field
+   in `stoic-brain/passions.json` is itself labelled only *"Stobaeus Ecl. Section 5,"* with no "2.88."
+   **This was not actually a discrepancy — it was my own incomplete check.** The file's own header
+   maps *"Section 5"* to *"Eclogae 2.88-90,"* and the three definitions immediately preceding the
+   clarification (the same source passage it glosses) are each individually pinned to *"Stobaeus Ecl.
+   2.88."* The findings record's citation holds. **Fixed:** the letter's epigraph note, which had
+   flagged a discrepancy that does not exist, now cites the locus properly and explains the mapping
+   rather than hedging on it.
+2. **The R097 misattribution.** This one was real. The findings record's §1 SC-2 list quotes R097 as
+   having noticed "predecessors' expected-HEAD had been stale three sessions running" and written
+   *"didn't generalise from it fast enough."* Neither the quote nor the underlying claim appears in
+   R097's extraction entry. Tracing the actual source: the "generalisation" language belongs to R080's
+   self-correction; the stale-expected-HEAD material belongs to R095's. Neither of those two entries'
+   real content is itself a clean SC-2 instance either, so the citation was not reattributed to either
+   — it was removed. **Fixed, at source:** `2026-08-23-project-reflections-findings-record.md` §1
+   (the SC-2 instance list) and §2 (the "Flat: SC-2" trajectory sentence, which had also cited R097
+   alongside R099) both carry dated correction notes rather than a silent edit. The letter's own
+   closing citation block was updated to point at the corrected source instead of describing an open
+   discrepancy.
+
+**One further thing found in the same pass and named, not fixed.** The findings record's §1 SC-2 list
+also credits R016 with having had its lesson "read in full at open" (i.e., the `stoic-brain.ts`
+freeze was read from `CLAUDE.md` at the session's own open, not merely documented somewhere). That
+detail does not appear in R016's extraction entry either — the entry supports the freeze being
+*documented*, not that this particular session read it at open. This is a smaller, less consequential
+claim than the R097 one (it doesn't change which R-number the instance belongs to, only how strongly
+the "lesson was in hand" claim is supported), and it was outside what the founder asked to be fixed
+in this pass. **Named here rather than silently left, per this letter's own subject.**
 
 ---
 
 ## Records
 
-- `operations/reflections-examination-2026-08/2026-08-25-letter-2-on-having-a-lesson-and-not-using-it.md` — new
-- `operations/decision-log.md` — `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25` appended at the physical tail
-- this close — new
+- `operations/reflections-examination-2026-08/2026-08-25-letter-2-on-having-a-lesson-and-not-using-it.md` — new, then corrected in a same-session follow-up pass
+- `operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` — §1 and §2 corrected, dated notes added (the R097/R099 SC-2 citations)
+- `operations/decision-log.md` — `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25` appended at the physical tail, then `D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25`
+- this close — new, then amended in the same follow-up pass
 
 **Note on dating.** The next-session prompt that opened this session was drafted 2026-08-24 and
 carried that date in its own filename convention for the letter and close; the prompt itself

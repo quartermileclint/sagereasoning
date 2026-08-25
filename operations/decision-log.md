@@ -26579,3 +26579,63 @@ package's own §4 check exists to catch.
 
 **Status:** Adopted (wording drafted and awaiting sign-off; nothing applied). **Rollback:**
 `git revert` this commit — documents only.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.**
+
+**Decision.** At the founder's request ("do those fixes now in this session"), ran to ground the two
+citation discrepancies named after Letter II landed (`D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25`),
+and corrected what actually needed correcting.
+
+**Finding 1 — not a discrepancy.** The Stobaeus locus ("*Eclogae* 2.88") the findings record cites is
+correct: `stoic-brain/passions.json`'s own header maps "Section 5" to "Eclogae 2.88-90," and the three
+definitions immediately preceding the `key_clarification` field (same source passage) are each
+individually pinned to "Stobaeus Ecl. 2.88." **My own epigraph note in the letter had flagged a
+discrepancy that did not exist** — an incomplete grep at the time of drafting, checking only the one
+field's own label rather than the file's section-to-range mapping. **Fixed:** the letter's epigraph
+note now cites the locus properly instead of hedging on it.
+
+**Finding 2 — a real misattribution, fixed at source.** The findings record's §1 SC-2 instance list
+quotes R097 as having written *"didn't generalise from it fast enough"* about a stale expected-HEAD
+noticed across sessions. Neither the quote nor the claim is in R097's extraction entry. Traced: the
+"generalisation" language belongs to R080's self-correction; the stale-expected-HEAD material belongs
+to R095's. Neither is itself a clean SC-2 instance, so the citation was removed rather than
+reattributed. **Fixed at source, not silently:**
+`operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` §1 (the
+instance list) and §2 (the "Flat: SC-2" trajectory sentence, which also named R097 alongside R099) both
+carry dated correction notes in place, naming what was wrong and why it was removed rather than
+reattributed. The letter's closing citation block was updated to point at the corrected source.
+
+**A third, smaller issue found in the same pass and named, not fixed.** R016's SC-2 citation in the
+same §1 list also credits it with having had the lesson "read in full at open" — not supported by
+R016's extraction entry, which supports the freeze being documented but not that this session read it
+at open. Less consequential than the R097 case (doesn't misattribute the instance to the wrong
+R-number, only overstates how directly the lesson was in hand), and outside what was asked to be fixed
+in this pass. **Named in the letter's close rather than silently left or silently absorbed as a third
+fix.**
+
+**Files touched:**
+- `operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` — §1 and §2, dated correction notes
+- `operations/reflections-examination-2026-08/2026-08-25-letter-2-on-having-a-lesson-and-not-using-it.md` — epigraph note and closing citation block corrected
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-2-CLOSE.md` — amended to record both fixes and the third named-not-fixed item
+
+**Risk classification:** Standard under 0d-ii — documentation-only corrections to already-committed
+governance artifacts; no production/perimeter/auth/schema/flag/credential surface. **Rollback path:**
+`git revert` this commit; the prior commit (`d5c485c`) stands as the record of what was believed before
+this correction pass, per the project's convention of new commits over amended ones.
+
+**Verification step (founder-performable):**
+```
+git show HEAD --stat
+grep -n "Corrected 2026-08-25" operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md
+```
+Expected: two dated correction notes in the findings record (§1 and §2), and a diff touching the
+letter's epigraph and closing citation block plus this close file.
+
+**Rules served:** PR20, PR23, PR25 (again applied in spirit to prose, not only to code comments).
+
+**Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25`.
