@@ -26639,3 +26639,56 @@ letter's epigraph and closing citation block plus this close file.
 **Rules served:** PR20, PR23, PR25 (again applied in spirit to prose, not only to code comments).
 
 **Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-HONESTY-CORRECTION-EDIT-1-APPLIED-2026-08-25
+
+**Stream:** founder. **Category:** `code-elevated` — a change to a **served public claim** on the live
+`GET /api/trust-record/{agent_id}`. **Risk:** Elevated. **AC7 not engaged** (no auth, schema, flag,
+credential, perimeter, or deletion surface). **Founder R18 sign-off obtained on the exact wording
+before any edit**, per the mentor's Q2 requirement and the sign-off package.
+
+**Applied — EDIT 1 ONLY** (`code + ADR + pins`, one commit; the three R18 public surfaces are
+**deliberately NOT touched** and wait until this is live, per the ADR-013 §8 2026-08-15 ordering
+precedent: a public surface must never claim a `does_not_attest` entry the served envelope does not
+yet carry):
+
+1. **`attests[1]` qualified** — the existing sentence preserved **word-for-word** and appended:
+   *"This holds for consults whose extraction the server itself produced; it does not hold where the
+   caller supplied the extraction — see the extraction-origin item in the does-not-attest list."*
+2. **New `does_not_attest` item**, placed immediately after the harms-omitted item (its nearest
+   neighbour — both extraction-trust limits): carries the mentor's three specified sentences, the
+   **founder-elected §2b indistinguishability clause**, and the **F-2 coverage-gap commitment in the
+   FUTURE TENSE**.
+3. **ADR-013 §8 dated amendment**, in the same edit, recording the mechanism ground, the future-tense
+   rationale, the founder's §2b election, the two-edit structure, and the ordering rule.
+4. **Five battery pins, S2-43..S2-47** — the package specified four; **S2-47 was added for the
+   founder's §2b clause**, so an elected disclosure cannot be quietly softened later.
+
+**The future tense is load-bearing, not stylistic.** No provenance ledger exists and no mint is being
+refused, so a present-tense coverage-gap claim would publish behaviour that does not exist — the exact
+defect class this edit corrects. Recorded in-code, in the ADR, and in the package.
+
+**Verified.** S10 battery **138 → 140 assertions, 140 passed / 0 failed** (baseline re-derived from
+HEAD without mutating the tree). **Every one of the five pins mutation-verified**: each clause deleted
+in turn from the served envelope, the matching pin confirmed to FAIL, the file restored from a
+pre-copy each round — because a pin that survives its own deletion is not a pin, and `attests[1]` had
+**no content pin of any kind** before this edit. `tsc --noEmit` exit 0. Sibling `emission-hooks`
+battery 19/0 unchanged. Non-ASCII audit on added lines: served strings use `—`/`’` escapes;
+only comments carry raw non-ASCII, consistent with the file.
+
+**PR19 — honest status.** This file is trust-core **and** a public attestation surface, so PR19
+formally engages. **No independent review has been run on this edit.** Its own rule gates the review
+on the live-op that depends on the artifact — here the founder's push/deploy — not on this commit, so
+the review is a **named carried item before deploy**, not a silent omission. The change is a string
+constant plus mutation-verified pins with no logic, which is why first-hand verification was taken as
+sufficient to commit but **not** as sufficient to publish.
+
+**Carried:** (a) PR19 independent review before push/deploy; (b) **EDIT 2** — the three R18 public
+surfaces (`llms.txt`, `agent-card.json` [count must remain **24**; an edit, not a new extension],
+api-docs), only after edit 1 is live; (c) the second correction, once a structural fix ships.
+
+**Status:** Adopted / Applied (edit 1). **Rollback:** `git revert` this commit — restores the prior
+envelope, the ADR section, and the pins together; nothing else depends on it, and the public surfaces
+were never advanced ahead of it.

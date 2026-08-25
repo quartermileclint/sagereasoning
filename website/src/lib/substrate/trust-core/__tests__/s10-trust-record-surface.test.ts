@@ -275,6 +275,35 @@ async function main(): Promise<void> {
     env.includes('tested relapse-resistance rather than absence of perturbation'),
     'S2-40 envelope: discriminative range names the Senecan relapse-resistance criterion, not generic variance',
   )
+  // ═══ S2-43..S2-47 — the 2026-08-25 extraction-provenance honesty correction
+  // (mentor ruling Q2 + F-2, first edit). S2-37 below is strict reference identity
+  // and CANNOT detect a missing envelope item — these substring pins are what
+  // actually hold the correction in place. attests[1] had NO content pin of any
+  // kind before this edit. Every pin below was mutation-verified at authoring:
+  // deleting its clause makes it fail.
+  assert(
+    env.includes('Extraction origin on caller-supplied consults'),
+    'S2-43 envelope: the extraction-origin does-not-attest item (2026-08-25 ruling Q2)',
+  )
+  assert(
+    env.includes('not verified at the point where trust events are minted'),
+    'S2-44 envelope: extraction-origin names the MINT POINT, not merely the consult',
+  )
+  assert(
+    env.includes('never as silence'),
+    'S2-45 envelope: the F-2 commitment that an unverifiable artifact surfaces as a named coverage gap',
+  )
+  assert(
+    env.includes('This holds for consults whose extraction the server itself produced'),
+    'S2-46 envelope: attests[1] is SCOPED to server-produced extractions (2026-08-25)',
+  )
+  // Founder-elected clause (sign-off package §2b, elected 2026-08-25): stating the
+  // indistinguishability plainly rather than stopping at "not verified". Pinned so a
+  // later edit cannot quietly soften the correction back toward the original defect.
+  assert(
+    env.includes('not distinguishable, at that point, from one the server produced'),
+    'S2-47 envelope: the founder-elected indistinguishability clause (§2b)',
+  )
   eq(payload.envelope, TRUST_RECORD_ENVELOPE, 'S2-37 the payload ships THE envelope object')
   eq(payload.interop.published_externally, false, 'S2-38 interop: nothing published externally')
 
