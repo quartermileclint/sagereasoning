@@ -27180,3 +27180,41 @@ same-session), PR25.
 **Status:** Adopted. Cross-references: `D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25`,
 `D-EXTRACTION-PROVENANCE-AND-ROUTE-I-SCOPED-2026-08-25`,
 `D-L1-SUPPLY-CREDENTIAL-HYGIENE-DISCHARGED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-6-AUTHORED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.** No code, schema, flag,
+credential, or live operation.
+
+**Decision.** Authored the sixth letter in the reflections corpus collection, on AP-1 — assent
+withheld from authority pending first-hand verification, *eulabeia* applied to assent itself —
+continuing the founder's "proceed in order" election. This is the **last of the six letter
+candidates §5 explicitly named**; whether letters beyond it exist is not decided by anything in the
+findings record or any prior close.
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-letter-6-on-refusing-the-authority-you-agree-with.md` — new
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-6-CLOSE.md` — new
+
+**Headlined by R069** (the mentor's own ruled `/welcome` wording, checked and correctly declined),
+with R068 and R066 as supporting, imperfect instances. Names explicitly, at close, the throughline
+with Letter I: this letter is Letter I's discipline (assent-timing) aimed the other direction — one's
+own construction there, someone else's authority here. States the asymmetry honestly rather than
+smoothing it (AP-2 recurs ≥25 times; AP-1 is the corpus's dominant good pattern, never called
+exceptionless).
+
+**Verification performed.** One near-miss caught before commit: a draft re-capitalized a mid-sentence
+quote as a sentence-opener, changing nothing about the words themselves but altering how the source
+text reads. Fixed by restructuring the surrounding prose rather than silently editing the quote.
+Every other quoted fragment and both numeric claims used verified clean on direct check.
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit.
+
+**Rules served:** PR20, PR23, PR25 (applied in spirit to prose).
+
+**Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-5-AUTHORED-2026-08-25`,
+`D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
