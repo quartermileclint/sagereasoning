@@ -26839,3 +26839,41 @@ with the fix's actual coverage once the ledger ships.
 
 **Status:** Adopted (item 1 complete and live; item 2 prompt authored). **Rollback:** `git revert`
 this commit — documents only; the live surfaces are unaffected by it.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-3-AUTHORED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.** No code, schema, flag,
+credential, or live operation.
+
+**Decision.** Authored the third letter in the reflections corpus collection, on IP-3 — the presence
+check where a state check was required — per the founder's explicit election ("proceed in order")
+following Letter II. Not an arc item; the arc closed at item 4
+(`D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`).
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-letter-3-on-the-difference-between-a-document-and-the-world.md` — new
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-3-CLOSE.md` — new
+
+**Verification performed, and one real catch.** Every quotation was grepped directly against its
+cited source in this session. One fabricated quote was caught and fixed before the letter was allowed
+to stand: a draft attributed to R080 a two-part sentence — *"'Does the flag exist in code' and 'is
+the flag on' are different questions"* — presented in quotation marks as verbatim, that does not
+appear anywhere in the extraction. It was my own illustrative gloss on R080's real, verified sentence,
+written fluently in the moment and quote-marked without being checked — the letter's own subject,
+committed while drafting the paragraph about it. Fixed by quoting only R080's actual words and
+stating the general point in the letter's own voice rather than inside quotation marks. This is the
+second consecutive letter session in which the mandatory verification pass caught exactly one
+fabricated-or-misattributed quote; the close explicitly declines to characterise two instances as a
+trend.
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit; no downstream dependency.
+
+**Rules served:** PR20, PR23, PR25 (applied in spirit to prose).
+
+**Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25`,
+`D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25`,
+`D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
