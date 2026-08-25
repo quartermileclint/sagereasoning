@@ -11,6 +11,16 @@ credential, or public surface was touched. **AC7 not engaged. This document lice
 > `2026-08-26-MENTOR-QUESTION-provenance-ledger-identity-and-policy.md`. Read this scope alongside it —
 > the corrections here are what changed the mentor package from three questions to four.
 
+> **⚠ ROUND 2, 2026-08-26.** The mentor ruled on all four questions. **Q2 is fully decided and
+> implemented below (§5, §4.1, §11).** **Q3 is decided in shape, with the departure now properly cased
+> rather than asserted (§6) — a genuine choice offered, not presupposed.** **Q4 is half-implemented**
+> (§9's C2 now resubmission-reachable per the ruling) **and half carried forward as an explicitly open
+> design question** (the 404/stub-record fork, §6.5 — the mentor's own framing, not yet answered).
+> **Q1 was returned by the mentor, unruled — it declined to rule on inferred options and asked for the
+> actual three, restated below.** See
+> `2026-08-26-mentor-ruling-provenance-ledger-q1-q4-verbatim.md` and
+> `2026-08-26-MENTOR-QUESTION-round2-provenance-ledger-q1-options.md`.
+
 **What it scopes is `code-critical` when built** — two new tables, a trust-core write path, the
 accreditation write boundary's mint decision, and a change to a served public payload.
 
@@ -72,7 +82,8 @@ to be computable at all.** So the ledger is not a partial substitute for PA-10's
 | Write semantics | **Insert-once, never upsert** | §4.3 |
 | Scoping unit | **Owner+agent pair with a credential-only fallback**, via the existing `resolveLongitudinalIdentity`; **no second identity notion** | §3 — honoured exactly, and §3 is the finding |
 | Phasing | **Record-only → accumulate → switch refusal on**; threshold **defined before ship** | §9 |
-| Refusal visibility | **Every refused mint is a named coverage gap, never silence, "using the existing machinery" — F-2: "The existing `coverage_gaps` field is the right surface"**; no signature or artifact detail | **§6 — DEPARTED FROM, flagged.** The first draft of this row dropped the `coverage_gaps` clause, which is the clause §6 departs from. Restored |
+| Refusal visibility | **Every refused mint is a named coverage gap, never silence, "using the existing machinery" — F-2: "The existing `coverage_gaps` field is the right surface"**; no signature or artifact detail | **§6 — DEPARTED FROM, flagged, and cased per the round-2 ruling.** The first draft of this row dropped the `coverage_gaps` clause, which is the clause §6 departs from. Restored. Ruling on Q3 (2026-08-26): bring the departure back labelled, and make the case that `coverage_gaps` is inadequate rather than merely inconvenient — done in §6.2/6.3 |
+| **Supplied-entry disposition (Q2, RULED 2026-08-26)** | **A ledger entry reading `supplied` REFUSES the mint** — a second refusal branch distinct from missing-entry, with its own reason surfaced separately on the record. Server entry permits. The plugin path (mandatory-supplied) is named as its own open sub-question, not blocking non-plugin shipping | §5 — implemented; §11 — named |
 
 ---
 
@@ -231,7 +242,7 @@ precedent. RLS service-role-only.
 | column | notes |
 |---|---|
 | `agent_id`, `owner_user_id`, `credential_ref` | the write's identity |
-| `reason` | a small closed vocabulary: `no_ledger_entry \| out_of_window \| identity_mismatch` |
+| `reason` | four values, per the Q2 ruling: `no_ledger_entry \| out_of_window \| identity_mismatch \| caller_supplied_extraction` — the last is a DISTINCT fact from the first three (§5) |
 | `occurred_at`, `retain_until` | as above |
 | `correlation_id` | idempotency, derived like `accr:<digest>`; **internal only, never served** |
 
@@ -300,16 +311,50 @@ insert-once is conservative here, not merely simpler.
 
 ## §5 — The lookup and the refusal
 
-At `emitAccreditationTrustEvents`, after the existing gates and before deriving events:
+**RULED, and it changes this section's design from what the first draft carried. Mentor ruling on Q2,
+2026-08-26:** *"the ledger's enforcement logic has two branches, not one — missing entry refuses,
+supplied entry refuses. Server entry permits."* The first draft's §5 only ever named `no_ledger_entry`,
+`out_of_window`, and `identity_mismatch` as refusal reasons — a supplied-and-resolved entry was never
+covered, which is exactly the gap two independent reviews and the mentor all converged on
+(the companion mentor-question document's Q2). **Corrected below; this design point is no longer open.**
+
+At `emitAccreditationTrustEvents`, after the existing gates and before deriving events, **per submitted
+signed assessment:**
 
 1. Resolve the write-side identity via `resolveLongitudinalIdentity({credentialRef, ownerUserId, agentId})`
    — the module unchanged, no second notion.
-2. For each submitted signed assessment, `sha256(signature)` → ledger lookup.
-3. An entry resolves **only if** its recorded identity matches the write-side identity (§3.4) **and**
-   it is within the window.
-4. **Record-only phase:** log the outcome, mint as today. **Enforce phase:** any unresolved artifact
-   ⇒ no mint for that write, plus one `agent_provenance_gaps` row.
+2. `sha256(signature)` → ledger lookup.
+3. **Three outcomes, not two:**
+   - **No entry, or an entry outside the window, or an entry whose recorded identity does not match
+     the write-side identity (§3.4)** → refuse, reason `no_ledger_entry` / `out_of_window` /
+     `identity_mismatch`. *"The instrument could not verify origin."*
+   - **An entry that resolves and reads `layer1_source = 'supplied'`** → refuse, reason
+     `caller_supplied_extraction` — **a distinct reason from the missing-entry class, per the ruling's
+     own instruction: "one says the instrument had no data. The other says the instrument had data and
+     the data disqualified the mint. They are different facts and should be named differently."**
+   - **An entry that resolves and reads `layer1_source = 'server'`** → permit.
+4. **Record-only phase:** log every outcome, mint as today regardless of outcome (§9). **Enforce
+   phase:** any refused artifact ⇒ no mint for that write, plus one `agent_provenance_gaps` row per
+   §6's revised reason vocabulary.
 5. The write still returns 200 (fact 2a).
+
+**The closed reason vocabulary is now four values, not three:** `no_ledger_entry | out_of_window |
+identity_mismatch | caller_supplied_extraction`. §4.1's table 2 schema and §6's served field must both
+carry this.
+
+**The plugin path — RULED as a named open question, not settled here, not blocking non-plugin
+shipping.** Supplied extraction is MANDATORY on the plugin path (`route.ts:564`; fact from §2). Under
+this design, **every plugin accreditation write would refuse at mint time**, because its ledger entry
+always reads `supplied`. The mentor's own words: *"That is not a misconfiguration. It is the honest
+consequence of the capability's design... That question may require a separate ruling before the ledger
+ships on the plugin path. It does not block the ledger shipping on the non-plugin paths."* **Carried
+here as a named, unscheduled sub-question, not decided:** what is the plugin path's accreditation story
+if every mint is permanently refused? Candidates for a future session, none elected: (i) the plugin path
+is accepted as accreditation-incapable by design, disclosed as such; (ii) the plugin capability preset
+is narrowed to exclude `accreditation_write` explicitly (it already carries none — confirm this is
+already the case, not merely coincidental, before treating it as settled); (iii) a route-(i)-style
+change to the plugin path's extraction obligations, which would re-open the question route (i) already
+owns and must not be pre-empted here.
 
 **Fail-honest, not fail-open.** A ledger read that *errors* is not a missing entry. It must be logged
 and must not be silently treated as either resolution or refusal — the `isMissingTableError`
@@ -318,70 +363,185 @@ named hazard, and the ledger's read is exactly its shape.
 
 ---
 
-## §6 — The coverage-gap surface (Step 2, answered)
+## §6 — The coverage-gap surface: a departure from F-2, the case for it, and the 404 carried forward
 
-**Decision: a sibling field modelled on C2c `orientation_readings`, not an extension of `coverage_gaps`.**
+> **RULED — Q3. The mentor's disposition of this section's first draft: correctly self-identified as a
+> departure that had been mislabelled "answered," and returned with an instruction — "bring the
+> alternative field back with the departure labelled explicitly. State what `coverage_gaps` cannot do
+> that the alternative field can, or what the alternative field does that `coverage_gaps` cannot... If
+> `coverage_gaps` can carry the refused-mint signal without modification, use it."** This section is
+> rewritten to do that work rather than assert a decision.
 
-`coverage_gaps` stays as it is. It is domain-level, it lives inside the aggregate block, and it means
-*"this domain's evidence was A2-zeroed."* A provenance refusal is event-level and means *"an artifact's
-origin could not be verified."* Overloading one field with two unrelated semantics would make both
-harder to read, and F-2's own reasoning — that the reader must be able to tell refusal from absence —
-argues for a distinct surface, not a shared one.
+### 6.1 This is a departure from F-2's exact wording, stated as one
 
-**Shape, following the precedent one-for-one:**
+F-2, verbatim, twice: *"A refused mint must surface on the public record as a named coverage gap using
+the existing machinery, not as silence... The existing `coverage_gaps` field is the right surface."*
+
+**The recommendation below does not use that field.** It is a departure from a binding ruling's stated
+mechanism, made because the mechanism cannot carry the ruling's own stated minimum content — not because
+a different mechanism is more convenient. The case for that follows; the founder and mentor decide
+whether it is sufficient.
+
+### 6.2 Can `coverage_gaps` carry the signal without modification? No — and this is the first, weaker
+branch of the case, disposed of first because it is the branch the ruling names as decisive if available
+
+`coverage_gaps: VirtueTrustDomain[]` (`trust-record-payload.ts:131`) is literally an array of virtue-
+domain name strings — `'dikaiosyne'`, `'sophrosyne'`, and so on — with no companion structure at all.
+
+**Unmodified reuse is possible in exactly one degraded form, and it is worse than useless.** For a
+`caller_supplied_extraction` refusal, the refused artifact's own extraction is IN HAND (that is what
+made it resolvable as `supplied` rather than `missing` — §5's second branch), so its
+`virtue_domains_engaged` could be pushed into `coverage_gaps` unmodified, today, with zero schema
+change. **This is not recommended, and stating why is the strongest single argument in this section:**
+it would make a **provenance refusal indistinguishable from an A2-zeroed domain** — the exact confusion
+F-2 exists to prevent, restated in the ruling's own words: *"Honest refusal and absence look identical
+to the reader the public record is written for. That is a fidelity failure, not a cosmetic one."*
+Unmodified reuse doesn't merely fail to carry F-2's minimum content (no reason, no timestamp, no
+clause) — it actively **launders** a provenance refusal into a domain-coverage signal the reader has no
+way to distinguish from the pre-existing A2 semantic. **Unmodified reuse is available and is rejected on
+the merits, not skipped.**
+
+For a `no_ledger_entry` / `out_of_window` / `identity_mismatch` refusal there is no even-degraded form:
+these have no resolved extraction to draw a domain name from, so unmodified `coverage_gaps` cannot
+represent them at all — an empty entry, or an entry with no available content, which is functionally
+silence.
+
+**Verdict on the first branch: `coverage_gaps` cannot carry the signal without modification, and its one
+available unmodified form should be rejected even where technically possible.**
+
+### 6.3 Could `coverage_gaps` carry the signal WITH modification — widening its element type? This is
+the real fork, and the first draft never considered it
+
+The mentor's instruction implies more than literal reuse: *"if `coverage_gaps` can carry the… signal…
+use it"* leaves modification on the table. A serious case requires weighing this, not dismissing it.
+
+**The modification would be:** widen `coverage_gaps`'s element type from a bare `VirtueTrustDomain`
+string to a discriminated union — e.g. `{kind:'domain_evidence', domain} | {kind:'provenance_refused',
+reason, occurred_at, not_attestable_clause}` — keeping the field's name, its place inside the aggregate
+block, and its stated commitment ("sparse evidence… named, never papered over") while widening what an
+element can say.
+
+**Arguments for it:** it is literally the field F-2 named; it avoids new parallel plumbing (a second
+served array, a second cap, a second count); and it makes the *concept* — "this record names its own
+gaps" — visibly singular rather than split across two fields a reader must learn are related.
+
+**Arguments against it, and this is the actual case for the sibling field:**
+
+1. **It is a breaking change to a documented, currently plain-shaped public field, and this project has
+   a standing, repeatedly-applied answer for exactly this situation: never retrofit, always add.** Every
+   prior addition of a new kind of signal to this same payload — the C2c `orientation_readings` list,
+   the AE-1 `meta.trajectory.delta` block, the AE-2 `loop_fold` annotation — shipped as a **new optional
+   field**, never as a widened type on an existing one, even in cases where an adjacent overload was
+   arguably available. That is not incidental convenience; it is the pattern this codebase uses
+   precisely because a currently-simple field's shape is itself a contract external readers hold, and
+   `coverage_gaps: VirtueTrustDomain[]` is published on all three R18 surfaces as exactly that shape
+   today. Widening it silently changes what an existing integration parsing `coverage_gaps[0]` as a
+   bare string receives.
+2. **The two kinds of gap are not the same kind of fact, and folding them into one field's element type
+   would make every reader re-derive that distinction from a discriminant tag instead of from field
+   identity.** A2-zeroed-domain coverage is a property of the AGGREGATE's evidence composition across
+   the agent's history. A provenance refusal is a property of ONE ACCREDITATION WRITE at one moment. The
+   aggregate block's own confidence-weighting language (`CONFIDENCE_BASIS`) is written in terms of
+   folded, weighted evidence — a provenance-refusal entry inside it would sit awkwardly beside a field
+   whose neighbours are all continuous, weighted quantities.
+3. **This is genuinely NOT the "coverage_gaps is inadequate, not merely inconvenient" case falsely — it
+   is that case, honestly:** §6.2 already showed unmodified reuse actively launders the signal into the
+   wrong meaning. A widened type avoids the laundering but pays for it by breaking a public field's
+   documented shape, which is the exact class of harm (an undisclosed change to a served public
+   contract) this entire arc exists to correct. **The sibling field pays neither cost**: additive,
+   backward-compatible, and it does not launder — which is why it is recommended, not because it is more
+   convenient to build.
+
+**Recommendation, offered as a case rather than a decision:** a new field, following the C2c
+`orientation_readings` pattern exactly (§6.4), is the sound resolution of the departure — because
+unmodified reuse launders the signal (§6.2) and modified reuse breaks a documented public contract in
+the same way this arc exists to fix (§6.3). **If the mentor judges the breaking-change cost acceptable
+given F-2's mechanism preference, `coverage_gaps` should be widened instead** — the choice is now made
+on stated, comparable grounds rather than asserted.
+
+### 6.4 The recommended shape, if a sibling field is elected
 
 ```
 record: {
   …,
   provenance_gaps?: TrustRecordProvenanceGapEntry[]   // capped, newest first, absent flag-off
-  total_provenance_gaps_count?: number                 // "showing N of M" — the §6(b) honesty rule
+  total_provenance_gaps_count?: number                 // "showing N of M" — the honesty rule
 }
 
 TrustRecordProvenanceGapEntry {
-  reason_text: string             // template per reason code
+  reason: 'no_ledger_entry' | 'out_of_window' | 'identity_mismatch' | 'caller_supplied_extraction'
+  reason_text: string             // template per reason code — DISTINCT text for caller_supplied_extraction
+                                   // per the Q2 ruling ("the instrument had data and the data
+                                   // disqualified the mint" vs "the instrument had no data")
   not_attestable_clause: string   // the did-not-stop-practising clause, INLINE
   occurred_at: string
 }
 ```
 
 **Three details of the precedent a build must copy rather than approximate** — an independent review
-found this document's first draft diverging from the pattern it claims to follow, which would have
-produced a near-miss rather than a match:
+found this document's first draft diverging from the pattern it claims to follow:
 
-1. **The field is `not_attestable_clause`**, not `not_attested_clause`. A build following an
-   approximate name would diverge from the precedent in the one place the precedent is load-bearing.
-2. **The cap is 50 and it is enforced at the STORE READ, not the serialiser** —
-   `ORIENTATION_READINGS_ROW_CAP` (`trust-core-store.ts:628`), via `.limit(CAP + 1)` as a truncation
-   probe then `.slice(0, CAP)`. Enforce the new cap the same way, for the same reason.
+1. **The field is `not_attestable_clause`**, not `not_attested_clause` — corrected throughout this
+   document.
+2. **The cap is 50, enforced at the STORE READ, not the serialiser** — `ORIENTATION_READINGS_ROW_CAP`
+   (`trust-core-store.ts:628`), via `.limit(CAP + 1)` as a truncation probe then `.slice(0, CAP)`.
+   Enforce the new cap the same way.
 3. **The total count is OMITTED, never fabricated, when the count read fails** (`trust-core-store.ts:713`;
-   payload `:191-197`). `total_provenance_gaps_count` must carry the same honest-omission branch. A
-   fabricated or defaulted total on an honesty surface is the defect in miniature.
+   payload `:191-197`). `total_provenance_gaps_count` must carry the same honest-omission branch.
 
 **Why inline and not once at the top:** the C2c ruling's structural reason applies unchanged — *"the
-entry is the unit that will be read in isolation."* An entry that travels without its clause is an
-entry that reads as an accusation.
+entry is the unit that will be read in isolation."*
 
-**F-2's minimum content, mapped:** the non-mint (the entry's existence and its `reason_text`); the
-reason (missing vs out-of-window, from the closed vocabulary); and the did-not-practise clause
-(`not_attested_clause`, verbatim, inline). **F-2's hard exclusion** is satisfied at the schema level
-(§4.1) — the serialiser has no signature to leak.
+**F-2's minimum content, mapped, now against the four-value vocabulary (§5):** the non-mint (the
+entry's existence and its `reason` field — no longer delegated to an unpinned string alone); the reason,
+now genuinely distinguishing "no data" from "data that disqualified the mint" as the ruling requires;
+and the did-not-practise clause, inline. **F-2's hard exclusion:** no signature-derived value is ever
+serialised — enforced by the serialiser's field list (§4.1's earlier correction), not by an absence in
+the schema.
 
-**A confirmed defect independent review found and this document had not: F-2's "never silence" fails
-in exactly the case it exists for.** `GET /api/trust-record/{agent_id}` 404s when no domain carries
-evidence (`handler.ts:222`, the ENV-1 evidence gate — a deliberate, previously-correct design decision
-that a bare row's existence must not imply examined evidence). `provenance_gaps` lives inside the
-`record` object that gate only composes on a 200. **An agent whose mints are ALL refused — precisely the
-population §9's C1 targets — never accumulates evidence, its record 404s, and its gap entries render
-nowhere.** The reader gets silence for the agent most affected, and the live claim promises the gap will
-appear *"on this record."* This is not resolved here — it needs its own decision (relax ENV-1 for
-provenance-gap-only agents, its own R18 treatment of a public 404 contract; or accept and disclose the
-boundary) — and is carried to the mentor as part of Q3's framing.
+### 6.5 The 404 — RULED as the more serious finding, carried forward, NOT settled here
 
-**Cost and blast radius, stated as Step 2 requires it be:** this is a **change to a served public
-payload**. It carries its own founder R18 sign-off, its own ADR-013 §8 dated amendment, and its own
-battery pins **in one edit** — the S2-39/S2-40 and S2-43..S2-46 precedent, which exists because
-`attests[1]` was found to have no content pin at all. New pins start at **S2-48**. The `does_not_attest`
-list also gains its second edit at enforcement (§10), and that edit belongs in the same change.
+**Mentor, verbatim, on Q4:** *"the public trust record 404ing for an agent with no evidence at all means
+that the agent the fix exists to make visible... has no public record at all... That is the silent
+carve-out I rejected, arriving through a different path."*
+
+`GET /api/trust-record/{agent_id}` 404s when no domain carries evidence (`handler.ts:222`, the ENV-1
+gate — a deliberate, previously-correct decision that a bare row's existence must not imply examined
+evidence). Whichever field carries `provenance_gaps` — sibling or widened `coverage_gaps` — it lives
+inside the `record` object that gate only composes on a 200. **An agent whose mints are ALL refused
+never accumulates evidence, its record 404s, and its gaps render nowhere.**
+
+**The mentor's own framing of the open question, carried here verbatim rather than paraphrased, because
+paraphrase is exactly the risk that produced Q3's departure:** *"does the public trust record need a
+stub record — a record that exists because an agent attempted accreditation, regardless of whether any
+event minted — or does the coverage gap need to surface through a different mechanism for the
+zero-evidence population?"*
+
+**Not resolved in this document.** Two shapes are named, neither elected, both requiring their own R18
+treatment of a public 404 contract:
+
+- **A stub record** — `GET` would serve a 200 with an empty/near-empty `record` block plus
+  `provenance_gaps` whenever provenance-gap entries exist, even with zero evidence in every virtue
+  domain. This relaxes ENV-1's gate specifically for the provenance-gap population, and needs its own
+  statement of what else such a stub honestly discloses (the aggregate would read `level: null`,
+  `basis: 'no evaluated cardinal-domain evidence'` — already the payload's own null-aggregate shape,
+  §trust-record-payload.ts `:394-398` — so the stub is closer to "compose the existing null-aggregate
+  branch whenever gaps exist" than to a wholly new response shape).
+- **A different mechanism for the zero-evidence population** — e.g. a distinct, narrower endpoint or a
+  documented statement that a fully-refused agent's coverage gaps are, by design, not publicly visible
+  until at least one evaluated domain exists, with that limit disclosed on the live attestation
+  alongside the rest of §10's wording.
+
+**Named as the next open item for either a return-with-more-detail relay or its own scoping increment.**
+
+### 6.6 Cost and blast radius, stated as Step 2 requires it be
+
+This is a **change to a served public payload**, whichever shape is elected. It carries its own founder
+R18 sign-off, its own ADR-013 §8 dated amendment, and its own battery pins **in one edit** — the
+S2-39/S2-40 and S2-43..S2-46 precedent, which exists because `attests[1]` was found to have no content
+pin at all. New pins start at **S2-48**. The `does_not_attest` list also gains its second edit at
+enforcement (§10), and that edit belongs in a separate, later slice from this one — see §10's slice
+correction.
 
 **One consequence worth naming:** the refusal record's own 90-day retention means coverage-gap entries
 age out of the public record on the same clock as the events they stand in for. That is consistent
@@ -506,9 +666,22 @@ a population-wide condition and needs its own query** — group `api_keys` by `a
 agent with a write in the trailing 90 days. §12.1 answers the harness case specifically; C1's own
 evaluation query is not yet written and is owed before switch-on, not before this scoping closes.
 
-**C2 — Coverage.** Every agent with an accreditation write in the trailing 30 days has **100%** of that
-write's submitted artifacts resolving in the ledger, observed across at least **two consecutive weeks**
-of record-only operation.
+**C2 — Coverage, RE-DEFINED per the Q4 ruling to be reachable.** Mentor, verbatim: *"the threshold
+definition must be reachable by every population the ledger is designed to cover, including legitimate
+resubmission... An artifact that predates the ledger, or that was submitted while the consult-side
+write flag was off, is not a supplied artifact — it is an artifact the ledger cannot speak to. The
+missing-entry refusal applies, and the coverage gap surfaces. That is honest."*
+
+**C2, corrected:** every agent with an accreditation write in the trailing 30 days has **100% of that
+write's ledger-eligible submitted artifacts** resolving in the ledger, observed across at least **two
+consecutive weeks** of record-only operation — where an artifact is **ledger-eligible** only if it was
+consulted at or after the point the ledger's consult-side write began recording for its identity.
+**Artifacts consulted before that point are honestly `no_ledger_entry` forever, are named as such, and
+are EXCLUDED from C2's completeness denominator** — they cannot be resolved by any amount of waiting
+(§8's PA-10 discussion), so counting them against completeness would reproduce exactly the unreachable
+threshold the ruling warns against. This does not weaken C2's honesty: a pre-ledger artifact still
+refuses at enforcement and still surfaces its gap; it simply does not block the SWITCH from clearing on
+its account.
 
 *Why 100% and not a percentage.* Addendum 2 offered *"what coverage percentage, or what population of
 active credentials with confirmed ledger entries."* A percentage is the wrong instrument here: the
@@ -535,14 +708,21 @@ termination problem below.
 **C4 — The surface is live.** §6's `provenance_gaps` field is deployed, pinned, and R18-signed **before**
 the first refusal can fire. F-2 is not satisfied by a refusal that has nowhere to surface.
 
-**A termination problem an independent review found, and it is real: as stated, C1/C2 may never clear.**
+**A termination problem — RULED as a required constraint on this scoping (Q4), not merely a finding.**
+The mentor confirmed both halves are genuine and must be carried; the resubmission-reachability half is
+addressed directly above by C2's re-definition. **The open-population half (ii) below is NOT resolved
+by that re-definition and remains genuinely open** — it is a different mechanism (identity coherence
+across a growing population, not artifact age).
 
-Two concrete scenarios. **(i) The immortal chain** — an agent whose accreditation chain carries one
-pre-ledger signed assessment and resubmits the accumulated chain on each write never reaches 100%
-resolution under C2, permanently: the artifact is real and legitimate, insert-once means no backfill,
-and absence is indistinguishable from missing. **(ii) The open-population problem, which is the more
-serious of the two** — C1's identity-coherence rule (§3.4) is a universal over *every* agent with a
-write in the trailing 90 days, evaluated on an **open, growing** population. Every future onboarding
+Two concrete scenarios. **(i) The immortal chain — RESOLVED by C2's redefinition above.** An agent
+whose accreditation chain carries one pre-ledger signed assessment and resubmits the accumulated chain
+on each write no longer blocks the threshold: that artifact is `no_ledger_entry`-eligible by
+construction (it predates the ledger for its identity) and is excluded from C2's denominator, per the
+Q4 ruling's own distinction between "the ledger cannot speak to this" (honest, non-blocking) and "the
+ledger spoke and the artifact disqualified" (§5's `caller_supplied_extraction`). **(ii) The
+open-population problem — NOT resolved by the redefinition, and remains the serious one** — C1's
+identity-coherence rule (§3.4) is a universal over *every* agent with a write in the trailing 90 days,
+evaluated on an **open, growing** population. Every future onboarding
 re-tests it. §3.3 shows the fix is cheap for the founder's own harness (mint an owner-bound consult
 credential) but costly for an **external consumer** — the population the owner-less `external_consumer`
 shape exists for in the first place — because binding an owner removes that credential from the
@@ -562,9 +742,10 @@ default one by omission.
    C1–C4 have not cleared, the non-clearance is escalated as its own decision rather than left to
    persist as the status quo.
 
-**This is put to the mentor** (the companion mentor-question document) rather than settled here, because
-it is a genuine design fork with a founder-facing cost on one side (data rights) and a governance cost
-on the other (an unbounded phase).
+**This was put to the mentor and the mentor confirmed the constraint must be carried — it did not yet
+elect between the two closing mechanisms.** Still open for the next round: freeze the cohort, or a named
+exception register / hard review date, or some combination. Genuine design fork, founder-facing cost on
+one side (data rights, per §3.3), governance cost on the other (an unbounded phase).
 
 **Ordering note:** C3 (≥90 days) dominates C2's two weeks, so the binding path is C1 → C4 → C3, with C2
 observed along the way. **C1 is the only one that requires action rather than waiting**, which is why
@@ -731,28 +912,29 @@ and the public-claim edit independently `git revert`-able.
 
 ---
 
-## §14 — Recommendation *(permitted; this elects nothing)*
+## §14 — Recommendation *(permitted; this elects nothing)* — updated after the mentor's Q2/Q3/Q4 ruling
 
-**Option (a) is still buildable within its ruled limits, and this scoping did not find a limit that
-makes it unacceptable — but two items in this recommendation's first draft are now known to be wrong or
-blocked, and are corrected here rather than left standing.**
+**Option (a) is still buildable within its ruled limits.** Option (b) and the hybrid stay unneeded.
+**(a) does not fail.**
 
-**Option (b) and the hybrid stay where the ruling left them — available, unneeded.** Said plainly as the
-prompt requires: **(a) does not fail.**
+**What is now RULED and no longer a recommendation:** the two-branch refusal design (§5) — missing
+refuses, supplied refuses with a distinct reason, server permits, the plugin path named as its own open
+sub-question; C2's resubmission-reachable redefinition (§9); and that the `coverage_gaps` departure must
+be labelled and cased, not asserted (§6 now does this and offers the mentor a genuine choice between a
+sibling field and a widened `coverage_gaps`, rather than presupposing the sibling field).
 
-The recommended shape, corrected: two tables; the ledger's own flag; provenance computed
-unconditionally; the identity module used **unchanged** — but **not** with the credential configuration
-"moved to satisfy it" as first stated: §1.4 of the companion mentor question found all three available
-exits blocked (merging credentials trades away a documented security posture; relaxing the ledger's
-match reopens the guard F-1 protects; accepting permanent refusal for split-pair agents may make the
-switch-on threshold unmeetable). **This is now Q1, unresolved, and the recommendation does not
-presuppose an answer.** A C2c-shaped `provenance_gaps` surface rather than `coverage_gaps` — **stated
-here as a departure from binding text, put to the mentor as Q3, not as a settled design call.** A
-90-day window, on the corrected §7 basis (the retention-family alignment is convenience, not coverage;
-the session-scoped write pattern is the real argument). Sweep folded into the existing trajectory cron.
-The recency-tier work sequenced after the ledger rather than displaced by it — unchanged, this held up.
-**The live attestation should be AMENDED, not left as written** — §10's reversal, carried through here
-rather than contradicted.
+**What is still open, awaiting the mentor's answer to the round-2 Q1 question:** whether the identity
+conflict resolves by merging the harness's two credentials (option A), by deferring the harness's own
+accreditation specifically (the narrower reading of option C), or by a general permanent-refusal policy
+toward every split-pair agent (option C as first scoped) — with option B already closed by the standing
+owner+agent-pair instruction. The recommendation does not presuppose an answer.
+
+**Also still open:** the 90-day window (unchanged, §7's corrected basis holds); sweep folded into the
+existing trajectory cron (unchanged); the recency-tier work sequenced after the ledger (unchanged); the
+live attestation amended to name enforcement rather than existence as its trigger (§10, unchanged since
+the reversal); the 404/stub-record question (§6.5, carried forward per the ruling, not yet answered);
+and §9's open-population half of the switch-on threshold (cohort-freeze vs. exception register — the
+ruling confirmed the constraint but did not elect a mechanism).
 
 ---
 

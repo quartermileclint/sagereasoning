@@ -27420,3 +27420,81 @@ what was ruled regardless.
 
 **Status:** Adopted (ruling recorded and folded; no build elected). Cross-references:
 `D-IW7-THREE-OPENINGS-SCOPED-2026-08-25`, `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Recorded and folded the mentor's binding ruling on the four provenance-ledger questions
+raised at `D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26`. Three of four are decided; Q1 was
+returned unruled, with an explicit instruction not to infer options, and a round-2 question restates the
+scoping's actual three exits rather than the mentor's provisional guess at them.
+
+**Q2 — RULED and fully implemented in the scope document.** The ledger's enforcement logic has two
+refusal branches, not one: `missing` refuses; **`supplied` refuses too**, with a coverage-gap reason
+distinct from the missing-entry class (*"the instrument had data and the data disqualified the mint"*
+vs *"the instrument had no data"*); server permits. This was the gap two independent reviews and the
+mentor's own reading converged on before it was ever raised — the ledger's first design, absent this
+branch, would have recorded provenance and gated nothing on it, reproducing the exact carve-out the
+prior ruling rejected. Folded into §5 (the lookup logic, now three-way), §4.1 (the four-value reason
+vocabulary on table 2), and §11 (the plugin path — mandatory-supplied by construction — named as its
+own explicit, unscheduled sub-question that does not block the ledger shipping elsewhere).
+
+**Q3 — RULED, and the scope document now does the work the mentor asked for rather than the work it
+first submitted.** The `coverage_gaps` departure is correctly labelled as a departure, and a real case
+is made rather than asserted: unmodified reuse of `coverage_gaps` is shown to be available in one
+degraded form — folding a refused artifact's engaged virtue domains into the array — and rejected on the
+merits, because it would launder a provenance refusal into an A2-zeroed-domain signal, reproducing the
+exact confusion F-2 exists to prevent. Modifying `coverage_gaps`'s element type into a discriminated
+union is weighed as a genuine alternative, not dismissed, and rejected because it breaks a documented
+public field's shape against every established precedent this exact payload has followed for adding a
+new signal (`orientation_readings`, `meta.trajectory.delta`, `loop_fold` — all shipped as new optional
+fields, none as a retrofit). The sibling-field recommendation stands, now on stated and comparable
+grounds; the mentor retains the option to rule for widening `coverage_gaps` instead if the breaking-
+change cost is judged acceptable.
+
+**Q4 — RULED on both findings; one implemented, one carried forward exactly as the mentor framed it.**
+The unmeetable-threshold half is addressed directly: §9's coverage condition (C2) is redefined so an
+artifact the ledger cannot speak to — one that predates the ledger's own consult-side recording for its
+identity — is honestly `no_ledger_entry` forever and is **excluded from the completeness denominator**,
+rather than blocking the switch-on threshold from ever clearing. This resolves the "immortal chain"
+scenario the prior session's review found. **The 404 finding — ruled the more serious of the two — is
+NOT resolved and is carried forward using the mentor's own words rather than a paraphrase**: does the
+public trust record need a stub record for an agent that attempted accreditation with zero minted
+events, or does the coverage gap need a different surfacing mechanism for the zero-evidence population?
+Neither shape is elected; both are named with their respective costs (relaxing the ENV-1 evidence gate
+vs. a separate mechanism), and the question is left open for a return or its own scoping increment.
+
+**Q1 — returned by the mentor unruled, and returned again here with the actual options.** The mentor
+declined to rule on inferred choices: *"If the options are different from what I have named, the
+question should return with the three options stated explicitly. I will not rule on a set of options I
+am inferring rather than reading."* The mentor's provisional guess and the scoping's actual three exits
+differ in two material respects, both stated in the round-2 document rather than assumed away: option A
+(merge the harness's two credentials into one) was scoped but not in the guess, and the guess's option
+(c) — defer the harness's own accreditation specifically — is narrower than the scoping's option C
+(accept permanent refusal for every split-pair agent as a general policy), a difference with real
+consequences for §9's switch-on threshold depending on how many other split-pair agents exist (unknown,
+unmeasurable from a repo session). **One thing IS already ruled regardless of which reading is
+correct**: F-1's owner+agent-pair scoping stands; no path abandoning it for a bare credential or an
+unbounded cross-credential lookup is available — closing option B outright.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-q1-q4-verbatim.md` — new, the binding ruling
+- `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round2-provenance-ledger-q1-options.md` — new, Q1 returned with actual options
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — corrected in place: §1 (Q2 ruling row), §5 (two-branch refusal design), §4.1 (four-value reason vocabulary), §6 (rewritten — the Q3 case, the 404 carried forward per the ruling's own framing), §9 (C2 redefined for resubmission-reachability), §11 (plugin path named), §14 (recommendation updated to reflect ruled vs. still-open items), header notice
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-mentor-ruling-round1-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15 (the resubmission-reachability fix reuses the existing PA-10/§8 disclosure rather
+than inventing new machinery), PR19, PR20 (every mechanism claim in the Q3 case re-derived from source,
+not asserted), PR25.
+
+**Status:** Adopted. Awaits the mentor's ruling on Q1 (round 2) and the still-open 404/stub-record and
+cohort-mechanism questions. Cross-references: `D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26`,
+`D-PROVENANCE-LEDGER-SCOPED-2026-08-26`.
