@@ -26786,3 +26786,56 @@ route (i) reframed, which should not open before the `l1_supply` population quer
 **Status:** Adopted / Applied (edit 2). **Rollback:** `git revert` this commit — restores all three
 public surfaces together; the served envelope (edit 1) is untouched by it and would correctly remain
 ahead of the docs, never behind.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-CORRECTION-LIVE-AND-LEDGER-PROMPT-AUTHORED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only. **Risk:** Standard. **AC7 not
+engaged.** No code, schema, flag, credential, or public-surface change this entry.
+
+**EDIT 2 IS LIVE — verified by observation, not by report.** The founder pushed and reported Vercel
+green; production was then queried directly on all three surfaces: `llms.txt` carries the
+extraction-origin bullet; `agent-card.json` carries both the scoped attests clause and the
+extraction-origin item and **still reports 24 extensions** (an edit, never a new extension, as
+required); `/api-docs` renders both clauses. **The extraction-provenance honesty correction is now
+complete end-to-end at its first edit** — the served envelope (edit 1, independently confirmed live
+before edit 2 was written) and all three published surfaces state the same honest limit, and **every
+coverage-gap reference on every surface is future-tensed**, so nothing anywhere claims behaviour that
+does not exist.
+
+**This closes item 1 of the three the 2026-08-25 ruling produced.**
+
+**Item 2's scoping prompt authored:**
+`operations/handoffs/founder/2026-08-26-provenance-ledger-SCOPING-NEXT-SESSION-PROMPT.md`.
+It carries, so the scoping session inherits rather than rediscovers: the four **already-ruled**
+policies (option (a); refuse-on-missing; insert-once; **owner+agent-pair scoping via the existing
+`resolveLongitudinalIdentity`**, the F-1 correction) marked explicitly as not-to-be-re-litigated;
+F-3's three named inputs (the **PA-10 coupling** as a named dependency, the window length to be
+resolved **from data not principle**, and F-2's effect on the cost calculus); the inherited mechanism
+facts with a PR20 instruction to re-verify rather than trust them; PR24's retention-parity obligation;
+and the PR19 warning that three named surfaces engage at once.
+
+**Its Step 2 is the finding most likely to shape the work, promoted to the top for that reason:**
+F-2 names `coverage_gaps` as *"the existing machinery,"* but that field is a bare
+`VirtueTrustDomain[]`, aggregate-scoped, domain-names-only (re-confirmed at HEAD,
+`trust-record-payload.ts:131`) — it cannot carry the reason or the did-not-stop-practising clause, and
+a refused mint is an **event-level** fact. Delivering F-2 therefore needs a structured shape or a
+sibling field: **another served-payload change, with its own sign-off, ADR treatment and pins.** The
+public commitment is already live and future-tensed, so **the fix cannot ship without satisfying it.**
+
+**Step 5 names three founder-run prerequisites** the AI cannot settle from a repo session — the four
+flag states, the `l1_supply` population count, and the actual distribution of historical accreditation
+writes (without which F-3's window question is unanswerable). **The prompt instructs the session to
+raise these at open rather than proceed around them.**
+
+**One instruction deliberately included:** if scoping shows option (a) genuinely fails its limits, the
+session must **say so and stop**, not silently re-open options (b) or the hybrid — which the ruling
+left available only on that condition.
+
+**Carried:** item 2 (the ledger, per the new prompt); item 3 (route (i) reframed — **not to open
+before the `l1_supply` query is run**); and the SECOND correction, replacing the forward commitment
+with the fix's actual coverage once the ledger ships.
+
+**Status:** Adopted (item 1 complete and live; item 2 prompt authored). **Rollback:** `git revert`
+this commit — documents only; the live surfaces are unaffected by it.
