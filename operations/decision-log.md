@@ -27218,3 +27218,52 @@ this commit.
 
 **Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-5-AUTHORED-2026-08-25`,
 `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
+
+---
+
+## 2026-08-25 — D-IW7-THREE-OPENINGS-SCOPED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — scope + design proposal, no build. **Risk:** Standard. **AC7 not engaged.** No code,
+schema, flag, credential, or live operation. No harness file edited.
+
+**Decision.** Scoped all three openings the mentor's item-4 ruling recorded and left unscoped, per the
+founder's explicit request. Not the "IW-7 trial" itself — that trial is marked superseded/do-not-run
+in its own source document, since it would trial the design the ruling rejected; this scopes the
+three alternatives the ruling left standing instead.
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — new
+- `operations/handoffs/founder/2026-08-25-iw7-three-openings-CLOSE.md` — new
+
+**Headline finding, from reading `at-action-hook.mjs` + `close-hook.mjs` directly.** Opening 1 (a
+non-exposure-keyed trigger) substantially already exists: a three-sub-question elicitation is already
+wired to H3's guard-CAUTION verdict (a narrow, non-exposure-keyed condition — the guard only runs on
+an irreversible-action allowlist), already carries occasion-varied content. What's open is only
+whether that gate fires often enough to matter — probably not, since the guard's allowlist is narrow.
+Opening 2 converges with opening 1: the same elicitation machinery could be armed from the Gate-2
+consult's own verdict instead (which fires on every distinct decision, not only the guard's subset),
+adding no new hook but genuinely widening the firing rate — the exact property the prior ruling
+turned on, so this is scoped and named to the mentor (§4), not built. Opening 3 (close-hook content
+legibility) is independently real: the close-turn's invitation is a fully invariant string, verified
+by direct read; proposed to derive part of its content from the session's own record, on-condition.
+
+**A design mistake caught and fixed while drafting.** An early draft of opening 2 proposed arming the
+widened elicitation on a bare `is_kathekon === false` verdict. This session's own opening frame
+carried exactly that reading on a documents-only session with nothing adverse in it — cross-checked
+against `CLAUDE.md`'s own SD-1 finding (a documented sparse-extraction default on a sibling surface,
+the guardrail), confirming the bare signal would very likely have fired on ordinary sessions,
+reproducing Letter V's own subject (habituated false-positive erosion) in a new location. Fixed by
+naming the distinction as an open design question rather than a plausible-sounding gate.
+
+**No build authorised.** Openings 2 and 3 carry the same architectural-consequence class the prior
+ruling engaged; named to a future mentor consultation per PR20 rather than built, even though both
+reuse existing machinery instead of adding a new instrument.
+
+**Risk classification:** Standard under 0d-ii — documentation/scope only. **Rollback path:**
+`git revert` this commit.
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted. Cross-references: `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`,
+`D-REFLECTIONS-LETTER-6-AUTHORED-2026-08-25`.
