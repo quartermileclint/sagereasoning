@@ -27267,3 +27267,107 @@ reuse existing machinery instead of adding a new instrument.
 
 **Status:** Adopted. Cross-references: `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`,
 `D-REFLECTIONS-LETTER-6-AUTHORED-2026-08-25`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.** Founder-elected escalation of `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`.
+
+**Decision.** The founder elected to escalate the provenance-ledger scope to the mentor, against that
+scope's own §15 conclusion that no question was owed. Two independent-review passes were run before
+raising anything, per the standing discipline that a founder-directed escalation still gets checked
+before it reaches the mentor. **Both passes found real defects — including in the scope's own §15
+self-assessment, which was wrong on the question it existed to answer.** Corrected in place rather than
+silently rewritten; the scope document now carries a post-escalation notice at its head. New question
+document: `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-provenance-ledger-identity-and-policy.md`.
+
+**Four questions, not the three first anticipated.**
+
+**Q1 (identity conflict) — CONFIRMED by independent review, and worse than the scope's first draft
+recommendation acknowledged.** F-1 corrected the ledger's scoping unit to the owner+agent pair, citing
+`longitudinal-identity.ts`. Verified: that module reaches `owner_agent_pair` only when owner and agent
+are both non-null, and the s9-loop consult credential is owner-less **by force, not choice** —
+`api_keys_upc_owner_agent_active_uniq` permits at most one active credential per `(owner_user_id,
+agent_id)` across all purposes, so a split consult/write pair can only both be active if the consult
+side is owner-less. This has already collided on production (`23505`, recorded 2026-08-15) and was
+resolved in exactly this direction. **The scope's first-draft recommended fix — mint a fresh
+owner+agent-bound consult credential — is itself blocked by the same index**, a fact the first draft
+missed and the review caught: doing so while the write credential is also owner+agent bound would
+recreate the collision. All three available exits (merge to one credential; relax the ledger's match;
+accept permanent refusal) trade away something ruled or documented elsewhere. **Unresolved in scoping**,
+carried to the mentor as Q1.
+
+**Q2 (the ledger's central policy is unruled) — a genuine gap this scoping session did not identify at
+all, and it was found only by independent review.** Q4 ruled the missing-entry case. It never ruled the
+case where the entry **exists and reads `supplied`** — the population the entire urgent item concerns.
+The sibling function this document's own §2 cites as precedent (`emitOrientationReadingTrustEvent`)
+already answers this for its own surface (`if (input.layer1Source !== 'server') return`) and the first
+draft quoted it without noticing it resolved the open question. Left unaddressed, the ledger records
+provenance and gates nothing on it — reproducing the exact "corrected-sounding claim with a silent
+carve-out" the ruling rejected, for a live, currently-mandatory population (the plugin path, where
+supplied extraction is required and no accreditation-write capability exists to self-correct it).
+
+**Q3 (the coverage-gap surface) — a departure from binding text this session made and did not label as
+one, caught by independent review against the verbatim.** F-2 ruled, twice: "the existing `coverage_gaps`
+field is the right surface." The scope recommended a sibling field instead, on a sound technical
+argument (the field is a bare domain-name array with no room for a reason or clause), but presented the
+departure as an "answered question" rather than a departure — and the ruled-items table summarising F-2
+had silently dropped the very clause being departed from. Both corrected in place.
+
+**Q4 (threshold termination + a public-record 404 hole) — surfaced only on a SECOND independent-review
+pass, run specifically to check the design arguments the first pass had accepted.** The switch-on
+threshold's 100%-resolution condition is a universal over an open, growing population with no stated
+escape hatch — a legitimately-resubmitted pre-ledger artifact can make an agent permanently unable to
+clear it, which risks converting the ruled-out "accept and disclose" posture into the silent default.
+Separately: `GET /api/trust-record/{agent_id}` 404s when no domain carries evidence (a correct,
+previously-ruled design decision) — but the proposed gap-surface field lives inside the payload that
+gate only composes on a 200, so an agent whose mints are all refused (precisely C1's target population)
+never surfaces its gaps anywhere. Both real; neither settled here.
+
+**Corrections folded into the scope document itself, found by the same reviews, not held for the
+mentor.** The window-alignment argument in §7.2 was factually wrong (`agent_trust_state` is a
+materialised fold that persists independently of any retention window — the migration says so in its
+own comment — so the claimed "coverage equals consequence" alignment does not hold; the session-scoped
+write-pattern argument in §7.3 is the real basis and now leads). The "refusal record cannot be a trust
+event" argument equivocated between two different senses of "verifiable artifact"; the real reasons
+(two CHECK-constraint widenings instead of one; a named live-incident class on that exact constraint;
+re-auditing the public envelope's first claim) were sitting unused in the same document and now carry
+the argument. The live attestation's wording was first judged "confirmed, no amendment" on a grammatical
+reading that does not hold and that contradicts two verbatim passages in the very addendum being
+discharged (`"the structural fix is partially in place"`; `"now accurately says the structural fix is in
+place"`) — corrected to recommend an amendment naming enforcement, not existence, as the trigger, in the
+same slice as the served-field change. R17 data-rights coverage for both new tables was absent from the
+first draft and is now stated as a precondition, not a rider — sharpened by the fact that
+`agent_provenance_gaps` is served publicly, so an owner deletion that left it standing would keep
+publishing a fact about an erased subject. Several smaller gaps (table 2's undeclared idempotency
+constraint; per-write multi-reason handling; the plugin path never named in the "does not cover" list;
+AE-2's `loop_fold` reading the same submitted chain with no equivalent guard; §12.1's query being scoped
+to one credential when §9's C1 needs a population-wide one) are named in place, none built.
+
+**Method, stated because it is itself a finding.** Three independent reviewers were run in parallel
+against different slices of the same document (mechanism/identity; mechanism-facts table; design-
+judgement quality; ruling-fidelity and completeness) with explicit instructions to refute rather than
+confirm. Every claim any reviewer disputed was re-verified first-hand at source before being accepted —
+none was folded on a reviewer's say-so alone. **The design-judgement reviewer overturned two of this
+session's own prior conclusions using mentor text the first draft had not engaged**, and that reversal
+is recorded in the document rather than absorbed silently. The scope's own §15 ("no question is owed")
+was itself treated as a claim requiring the same adversarial pass the rest of the document received —
+it had not been, in the first draft, and it failed the pass twice.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-provenance-ledger-identity-and-policy.md` — new
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — corrected in place (post-escalation notice + eight sections revised)
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-mentor-escalation-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15, PR19 (the two independent-review passes, run and folded before anything went to
+the mentor), PR20 (every disputed claim re-verified at source, not accepted on a reviewer's word), PR23,
+PR25.
+
+**Status:** Adopted. Awaits mentor ruling. Cross-references: `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`,
+`D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25`.
