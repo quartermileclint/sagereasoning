@@ -93,6 +93,7 @@ tier stays `governance` — building it is its own election into a code-tier ses
 
 ## Commit
 
-Committed. **Not yet pushed** — the founder pushes.
+Committed and **pushed — founder-confirmed, Vercel green.** (Documents-only session; "Vercel green" is
+expected, not evidence of anything this session changed at runtime.)
 `website/src/data/environmental-context.json` remains a pre-existing, unrelated modification and is
 excluded from this session's commit.

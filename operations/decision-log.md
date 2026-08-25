@@ -27895,3 +27895,40 @@ own tier remains `governance`; building is a separate election into a code-tier 
 
 **Status:** Adopted (ruling recorded and folded; no build elected). Cross-references:
 `D-SIGNAL-QUALITY-GAP-SCOPED-2026-08-25`, `D-IW7-THREE-OPENINGS-RULED-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-CLOSE-HOOK-CONTENT-VARIATION-BUILD-PROMPT-AUTHORED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only (a next-session prompt authored;
+no code in this session). **Risk:** Standard. **AC7 not engaged.**
+
+**Decision.** Authored the next-session build prompt for §3 (both phases, now fully mentor-cleared):
+`operations/handoffs/founder/2026-08-25-close-hook-content-variation-BUILD-NEXT-SESSION-PROMPT.md`.
+Also corrected the signal-quality-gap close file's push status (founder-confirmed pushed, Vercel
+green) — a documents-only session, so this is expected rather than evidence of a runtime change.
+
+**What the prompt scopes.** A `code-elevated`-tier build (self-classify at open) implementing both
+ruled phases of close-hook content variation: phase one on a guard-CAUTION signal from this session
+(the first ruling); phase two on the confidence-graded consult-verdict proxy from
+`D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`, carrying the binding disclosure constraint (a low-confidence
+read must read differently from a high-confidence one, in plain language, not silently degraded).
+Names an open design question the build session must resolve and document — how `close-hook.mjs`
+learns what `at-action-hook.mjs` observed earlier in the same session (two established codebase
+patterns pointed at, a recommendation offered, not mandated). Instructs the build session to
+re-verify every mechanism fact and field name against source at build time rather than inherit this
+prompt's (same-day, but still second-hand by then) citations — and to build dark, battery-verify,
+route through independent adversarial review, and NOT activate, matching every prior harness
+session's precedent in this project's history.
+
+**Files touched:**
+- `operations/handoffs/founder/2026-08-25-close-hook-content-variation-BUILD-NEXT-SESSION-PROMPT.md` — new
+- `operations/handoffs/founder/2026-08-25-signal-quality-gap-CLOSE.md` — push status corrected
+
+**Risk classification:** Standard under 0d-ii — this session wrote documents only. **Rollback path:**
+`git revert` this commit.
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted. Cross-references: `D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`,
+`D-IW7-THREE-OPENINGS-RULED-2026-08-25`.
