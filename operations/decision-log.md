@@ -26981,3 +26981,47 @@ without the capability, so stripping it deadlocks the path by construction.
 **Status:** Adopted / Discharged (item 2a complete). **Rollback:** re-activate either credential via
 the same admin surface (`is_active=true`) — though neither has a live use, and the throwaway should
 stay revoked regardless.
+
+---
+
+## 2026-08-25 — D-REFLECTIONS-LETTER-4-AUTHORED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only. **Risk:** Standard. **AC7 not engaged.** No code, schema, flag,
+credential, or live operation.
+
+**Decision.** Authored the fourth letter in the reflections corpus collection, on SC-5 — verification
+that passes for a reason other than the property it names — continuing the founder's "proceed in
+order" election. Not an arc item; the arc closed at item 4.
+
+**Files:**
+- `operations/reflections-examination-2026-08/2026-08-25-letter-4-on-tests-that-pass-for-the-wrong-reason.md` — new
+- `operations/handoffs/founder/2026-08-25-reflections-arc-letter-4-CLOSE.md` — new
+- `operations/reflections-examination-2026-08/2026-08-23-project-reflections-findings-record.md` — §1 SC-5 corrected
+
+**Departure from the prior two letters, by design and honestly stated.** SC-5 is the one pattern the
+findings record measures as genuinely improving (mutation testing catching roughly four times as
+often in the later half of the record as the earlier). The letter reports this rather than forcing an
+artificial unresolved ending, but stops at the specific gap that remains: the practice is not yet a
+rule, so nothing makes running it the default.
+
+**Verification performed.** All four case quotations (R021, R036, R043, R097) verified clean against
+the extraction on the first pass — no fabrication in this letter's own drafting, unlike the two
+before it. A separate defect was found in the findings record itself while checking SC-5's full
+instance list: its §1 paragraph quoted R093 with a sentence not present in R093's extraction entry.
+R093 was not usable for the letter regardless (already the record's primary SC-1 case, used in Letter
+I), so this did not change the letter's material — it is fixed at source with a dated correction note
+rather than left standing, replacing the citation with two verified instances (R036, R097) drawn from
+SC-5's own list.
+
+**Running count, named rather than trended:** across four letter sessions, three citation defects
+found in the findings record's own pattern lists, two fabricated quotes caught in letter drafts
+(letters II and III), zero in this one.
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit.
+
+**Rules served:** PR20, PR23, PR25 (applied in spirit to prose).
+
+**Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-3-AUTHORED-2026-08-25`,
+`D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25`.
