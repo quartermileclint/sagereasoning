@@ -27851,3 +27851,47 @@ edited. **Rollback path:** `git revert` this commit.
 
 **Status:** Adopted. Cross-references: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`,
 `D-IW7-OPENING1-MEASUREMENT-RUN-2026-08-25`.
+
+---
+
+## 2026-08-25 — D-SIGNAL-QUALITY-GAP-RULED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — documents only, ruling recorded. **Risk:** Standard. **AC7 not engaged.** No code,
+schema, flag, credential, or live operation.
+
+**Decision.** Relayed `D-SIGNAL-QUALITY-GAP-SCOPED-2026-08-25`'s §4 question to the mentor; the ruling
+is received and folded. Verbatim:
+`operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md`.
+
+**Binds.**
+- **The heuristic confirmed, precisely characterised.** The kathekon-plus-other-arrays cross-check is
+  real, derivable now with no server change — but *"a confidence proxy, not a discriminant."*
+- **Opening 2 stays HELD**, reconfirmed on sharper grounds than the original ruling: not primarily the
+  residual false-negative risk, but that a confidence proxy at opening 2's firing rate is *"a
+  rate-limiter on false positives that still passes false positives through"* — the condition the
+  original ruling actually required (a genuine second-pass check on the kathekon dimension, or a new
+  wire field) is not satisfied by a proxy built from adjacent dimensions.
+- **Opening 3 phase two is UNBLOCKED.** Because it uses the identical proxy at a fixed,
+  once-per-session frequency to vary content rather than gate a firing — a materially different use of
+  the same signal, ruled acceptable there. **Constraint:** the content variation must carry the
+  confidence level explicitly and disclose, plainly, when a high-confidence reading drives the content
+  — never presented as a certainty.
+
+**No build licensed by this ruling.** §3 (now both phases) is fully mentor-cleared, but this session's
+own tier remains `governance`; building is a separate election into a code-tier session.
+
+**Files touched:**
+- `operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md` — folded
+- `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md` — new
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — §§2/3/6 updated (opening 3 phase two's status changed)
+- `operations/handoffs/founder/2026-08-25-signal-quality-gap-CLOSE.md` — amended
+- `operations/handoffs/founder/2026-08-25-iw7-three-openings-CLOSE.md` — addendum pointing to this ruling
+
+**Risk classification:** Standard under 0d-ii — documentation only; the ruling licenses no code.
+**Rollback path:** `git revert` this commit; the verbatim ruling record stands regardless.
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted (ruling recorded and folded; no build elected). Cross-references:
+`D-SIGNAL-QUALITY-GAP-SCOPED-2026-08-25`, `D-IW7-THREE-OPENINGS-RULED-2026-08-25`.

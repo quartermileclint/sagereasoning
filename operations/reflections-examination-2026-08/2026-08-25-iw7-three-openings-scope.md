@@ -111,7 +111,17 @@ trigger" — it is "widen this one's gate," which is §2.**
 
 ---
 
-## §2 — Opening 2: a structural intervention on the Gate-2 consult [HELD, 2026-08-25]
+## §2 — Opening 2: a structural intervention on the Gate-2 consult [HELD, 2026-08-25; RECONFIRMED HELD 2026-08-25]
+
+**[Follow-up ruling, 2026-08-25.]** The signal-quality gap was scoped
+(`operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md`) and a derivable,
+zero-server-change confidence proxy was found (cross-referencing the kathekon-empty reading against
+whether the extraction's *other* arrays are also empty). **The mentor confirmed the proxy is real but
+ruled it insufficient for opening 2 specifically**, because a confidence proxy at opening 2's firing
+rate is *"a rate-limiter on false positives that still passes false positives through"* — the
+condition this document's §4 named (a genuine second-pass check on the kathekon dimension, or a new
+wire field) is not satisfied by a proxy built from adjacent dimensions. **Opening 2 remains HELD.**
+Verbatim: `2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md`.
 
 **Ruled: hold.** Not on the frequency grounds this section itself anticipated as the likely objection
 — the mentor named the frequency concern as real but secondary. **What blocks this opening is the
@@ -162,7 +172,18 @@ requires naming to the mentor before it ships**, not a reason to skip naming it.
 
 ---
 
-## §3 — Opening 3: a close-hook-only intervention (content legibility) [RULED FOR, two phases, 2026-08-25]
+## §3 — Opening 3: a close-hook-only intervention (content legibility) [RULED FOR, two phases, 2026-08-25; PHASE TWO UNBLOCKED 2026-08-25]
+
+**[Follow-up ruling, 2026-08-25.] Phase two is now UNBLOCKED, on a condition.** The same confidence
+proxy §2's fold above describes was ruled **acceptable for phase two specifically**, because phase two
+uses it to vary *content* at an already-fixed, once-per-session firing point rather than to *gate a
+new firing* — a materially different use of the identical signal at a materially lower frequency.
+**Constraint:** the content variation must carry the confidence level explicitly — a high-confidence
+adverse verdict (contrary kathekon reading + rich extraction elsewhere) earns session-specific content
+naming the kathekon dimension, *disclosed plainly as such*; a low-confidence one (contrary + extraction
+empty everywhere) earns generic content or none. The disclosure must let the practitioner tell *"the
+instrument found something worth reflecting on"* apart from *"the instrument thinks it found something
+but cannot be certain."* Verbatim: `2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md`.
 
 **Ruled: the right intervention; does not repeat the item-4 error** (firing frequency is unchanged —
 the close hook fires once per session regardless; only content varies, on-condition). **Amended by
@@ -171,8 +192,9 @@ the ruling into two phases:**
 - **Phase one — cleared now.** Vary the close turn's content on-condition **from a guard-CAUTION
   signal only** (a genuine, narrow-allowlist risk signal, not subject to the sparse-extraction
   problem). This is what §2 blocks on gets built around, not into.
-- **Phase two — gated on the same signal-quality gap as §2.** Extend the condition to genuine adverse
-  *consult* verdicts once those can be distinguished from sparse-extraction defaults.
+- **Phase two — now unblocked, per the follow-up ruling above**, on the confidence-disclosure
+  constraint. Extends the condition to consult verdicts using the kathekon-plus-other-arrays
+  confidence proxy, never presented as certain.
 
 **Design guidance from the ruling:** the invariant five-question string stays as the base structure
 (it "carries the philosophical substance"); session-specific content is *interpolated into* it, not a
@@ -263,25 +285,30 @@ new erosion.
 
 ---
 
-## §6 — What happens next [updated 2026-08-25, post-ruling]
+## §6 — What happens next [updated 2026-08-25, post-second-ruling]
 
-**Ruled-for and buildable, once elected into a code-tier session:** §3 phase one (close-hook content
-variation on a guard-CAUTION signal). This document's own tier is `governance`, no code — building it
-is its own election, not automatic from the ruling, per this arc's standing discipline that a
-favourable ruling authorises relay-to-build, not build itself.
+**Ruled-for and buildable, once elected into a code-tier session: §3 in full (both phases).** Phase
+one (guard-CAUTION content variation) was cleared at the first ruling; phase two (consult-verdict
+content variation, confidence-disclosed) was unblocked at the follow-up ruling on the signal-quality
+gap. **Opening 2 remains HELD** — the follow-up ruling reconfirmed it, on different, sharper grounds
+(a confidence proxy is the wrong kind of signal for a gating use at that firing rate, not merely an
+imperfect one). This document's own tier is `governance`, no code — building §3 is its own election
+into a code-tier session, not automatic from either ruling.
 
-**§1's measurement task is done** (see the fold above and the full report). It confirmed and
-sharpened the inference it was checking, and surfaced an unanticipated infrastructure finding (the
-discernment route's 503 rate) outside this arc's own scope to act on.
+**Both named prerequisites are now discharged:**
+- §1's measurement task — done (see the fold above and the full report); confirmed and sharpened the
+  original inference, and surfaced an infrastructure finding (the discernment route's 503 rate)
+  outside this arc's scope, flagged as a separate background task.
+- The signal-quality gap — scoped and ruled (see the folds in §2/§3 above); resolved differently for
+  each opening rather than uniformly.
 
 **Still open, not chosen here:**
 
-1. Elect §3 phase one into a code-tier session (harness code — `code-elevated` or `code-critical`
-   depending on how the manifest classifies a change to this specific hook path; likely warrants the
-   same PR19 independent-review discipline every prior harness change in this project's history has
-   received before shipping).
-2. Scope the signal-quality gap itself (whether the consult's output can carry a genuine-vs-sparse
-   indicator, or the hook can derive one independently) — a prerequisite for ever reopening §2 or §3
-   phase two, and its own scoping question, not resolved by anything in this document.
+1. Elect §3 (both phases) into a code-tier session — harness code (`at-action-hook.mjs` reuse pattern
+   for the guard signal already scoped; `close-hook.mjs` for the firing point; the confidence-proxy
+   logic from the signal-quality scope for phase two) — likely warranting the same PR19
+   independent-review discipline every prior harness change in this project's history has received.
+2. A genuine second-pass kathekon-dimension check or a new wire field, if opening 2 is ever to be
+   reopened — named but not scoped by anything in this arc.
 3. Diagnose the discernment route's growing 503 rate — a SageReasoning project-stream concern, named
    here but out of a reflections-arc session's scope to act on.

@@ -127,11 +127,15 @@ doubling (18 → 45 outages). That is an infrastructure fact about a live servic
 the trigger design, and it is named rather than diagnosed: diagnosing or fixing it is a SageReasoning
 project-stream concern, outside this documents-only reflections session's scope.
 
-## What comes next
+## What comes next — superseded by later same-day sessions
 
-1. Elect §3 phase one into its own code-tier session.
-2. Scope the signal-quality gap that both §2 and §3 phase two are blocked on.
-3. Diagnose the discernment route's growing 503 rate (project stream, not this arc).
+Items 2 and 3 above were both actioned the same day: the discernment 503 rate is flagged as a
+background task; the signal-quality gap was scoped and ruled
+(`operations/handoffs/founder/2026-08-25-signal-quality-gap-CLOSE.md`), unblocking opening 3 phase
+two while reconfirming opening 2's hold. This document's own §2/§3/§6 carry the resulting fold. The
+live next step is:
+
+1. Elect §3 (both phases, now both ruled-for) into its own code-tier session.
 
 ---
 

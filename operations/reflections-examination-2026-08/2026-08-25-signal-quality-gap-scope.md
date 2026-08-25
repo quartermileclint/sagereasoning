@@ -12,6 +12,17 @@ basis for filtering sparse-extraction defaults."*
 — it is derivable, partially, from data the consult's output already carries — and names precisely
 where the remaining honest gap is, rather than closing the question outright.
 
+**[RULED 2026-08-25.]** The heuristic is confirmed as real and correctly characterised (*"a confidence
+proxy, not a discriminant"*). **Opening 2 stays HELD** — not primarily on the residual false-negative
+risk, but because a proxy at opening 2's firing rate is *"a rate-limiter on false positives that still
+passes false positives through,"* which the condition named in the prior ruling (a genuine second-pass
+check on the kathekon dimension, or a new wire field) requires and this proxy does not supply.
+**Opening 3 phase two is UNBLOCKED**, because it uses the same proxy at a fixed, once-per-session
+frequency to vary content rather than to gate a firing — with a design constraint: the content
+variation must carry the confidence level explicitly and disclose, plainly, when a high-confidence
+reading is what's driving the content. Verbatim:
+`operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md`.
+
 ---
 
 ## §0 — Mechanism facts, verified first-hand this session (PR20)
@@ -98,30 +109,33 @@ in hand.
 
 ---
 
-## §3 — What this unblocks, and what it does not
+## §3 — What this unblocked, ruled [updated 2026-08-25]
 
-**This does not, by itself, clear opening 2 or opening 3 phase two.** It answers the mentor's
-conditional ("is this derivable from the consult's output?") with: partially — a confidence-graded
-proxy is derivable; a certain genuine-vs-sparse distinction is not, and per §2's own honest limit,
-may not be derivable from this consult's output at all without a genuine second look at the specific
-text (which is a different kind of check than a trigger condition should be doing).
+**Opening 2 — stays HELD.** The mentor's reasoning turns on what opening 2 *does* with the proxy, not
+only on the proxy's own residual error rate: at opening 2's firing rate (every distinct adverse-verdict
+decision), a confidence proxy is *"a rate-limiter on false positives that still passes false positives
+through."* The condition the prior ruling actually named — a genuine second-pass check on the kathekon
+dimension itself, or a new structured wire field — is not satisfied by a proxy derived from *adjacent*
+dimensions. **Held pending one of those two, not this document.**
 
-**What it does provide:** the actual mechanism-level answer PR20 requires before any further ruling —
-this document, not a restatement of the open question, is what should go back to the mentor next, if
-opening 2 or opening 3 phase two are to be reconsidered. The prior scope's honest disclosure ("may not
-be derivable") is now sharpened into "a graded proxy is derivable; a certain answer is not," which is
-a materially different, more actionable claim to rule on.
+**Opening 3 phase two — UNBLOCKED, with a design constraint.** Because opening 3 fires once per session
+regardless of what the proxy returns, the proxy's role there is to vary *content*, not to *gate a
+firing* — a materially different use of the identical signal. Ruled acceptable at that frequency,
+**on the condition that the content variation carries the confidence level explicitly**: a
+high-confidence adverse verdict (contrary + rich extraction elsewhere) gets session-specific content
+naming the kathekon dimension, disclosed plainly as such; a low-confidence one (contrary + extraction
+empty elsewhere too) gets generic content or none. The disclosure must tell the practitioner the
+difference between *"the instrument found something worth reflecting on"* and *"the instrument thinks
+it found something but cannot be certain."*
 
 ---
 
-## §4 — What this scope is asking for (PR20)
+## §4 — What this scope asked for, and the answer received (PR20)
 
-**For the mentor, when the founder elects to relay this:** is a confidence-graded richness proxy
-(§2) — never a certainty, disclosed as a heuristic — an acceptable basis for arming opening 2 or
-opening 3 phase two, given that a rich-elsewhere-but-kathekon-missed case remains structurally
-possible and undetectable by this method? Or does the residual false-negative risk mean the trigger
-should stay held until a stronger basis exists (e.g., a genuine second-pass check specifically on the
-kathekon dimension, which is a heavier design than this document scopes)?
+**Original question:** is a confidence-graded richness proxy an acceptable basis for arming opening 2
+or opening 3 phase two? **Answer: differently for each**, per §3 — opening 2 no (the proxy is the
+wrong kind of signal for a gating use at that frequency); opening 3 phase two yes, conditioned on
+disclosing the confidence level in the content itself rather than absorbing it silently.
 
 ---
 

@@ -52,19 +52,42 @@ residual false-negative risk means holding until a stronger check exists.
 
 ## Records
 
-- `operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md` — new
+- `operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md` — new, then folded with the ruling
+- `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md` — new
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — §§2/3/6 updated to reflect opening 3 phase two's new status
 - `operations/decision-log.md` — entry appended at the physical tail
-- this close — new
+- this close — new, then amended with the ruling fold
+
+---
+
+## Mentor ruling — RECEIVED and FOLDED, 2026-08-25
+
+**Opening 2 stays HELD**, reconfirmed on sharper grounds than the original ruling: the proxy is real,
+but at opening 2's firing rate it is *"a rate-limiter on false positives that still passes false
+positives through"* — the wrong shape of signal for a gating use, not merely an imperfect one. The
+condition the original ruling actually named (a genuine second-pass check on the kathekon dimension,
+or a new wire field) is not satisfied by a proxy built from adjacent dimensions.
+
+**Opening 3 phase two is UNBLOCKED**, because it uses the identical proxy at a fixed, once-per-session
+frequency to vary *content* rather than to *gate a firing* — ruled acceptable there specifically,
+on the constraint that the content variation carry the confidence level explicitly and disclose,
+plainly, when a high-confidence reading is what's driving the content (never presented as a certainty).
+
+Verbatim: `operations/reflections-examination-2026-08/2026-08-25-mentor-ruling-signal-quality-gap-verbatim.md`.
+Folded into both scope documents (this session's own `2026-08-25-signal-quality-gap-scope.md` §§0/3/4,
+and the master `2026-08-25-iw7-three-openings-scope.md` §§2/3/6, since the ruling changes opening 3
+phase two's standing status there). Decision-log: `D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`.
+
+**No build in this session.** §3 (both phases now) is fully mentor-cleared, but this session's own
+tier stays `governance` — building it is its own election into a code-tier session.
 
 ---
 
 ## What comes next — not chosen here
 
-1. Relay §4's question to the mentor.
-2. Decline and hold openings 2 and 3-phase-two indefinitely — a founder call.
-3. Scope the heavier alternative (a genuine second extraction pass specifically on the kathekon
-   dimension, or a new structured wire field) instead of the client-side proxy — named but not
-   scoped in this document.
+1. Elect §3 (both phases, now both ruled-for) into a code-tier session.
+2. A genuine second-pass kathekon-dimension check or a new wire field, if opening 2 is ever to be
+   reopened — a heavier, unscoped alternative.
 
 ---
 
