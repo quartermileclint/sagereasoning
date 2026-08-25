@@ -26733,3 +26733,56 @@ completeness though it changes nothing.
 push/deploy, and Edit 2 (the three public surfaces) once Edit 1 is live.
 
 **Status:** Adopted (review complete, clean). **Rollback:** N/A — no code changed this entry.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-HONESTY-CORRECTION-EDIT-2-APPLIED-2026-08-25
+
+**Stream:** founder. **Category:** `code-elevated` — R18 public-surface change. **Risk:** Elevated.
+**AC7 not engaged.** No auth, schema, flag, credential, perimeter, or deletion surface. Applied under
+the founder's R18 sign-off on the correction's wording (2026-08-25 package), the §2b clause elected.
+
+**The ordering gate was verified LIVE, not assumed.** Edit 1 (`9f2f7b9`) was reported pushed and
+Vercel-green; before publishing any documentation of it, production was queried directly —
+`GET https://www.sagereasoning.com/api/trust-record/sagereasoning:s9-loop@v1` — and **all five clauses
+confirmed served**: the `attests[1]` qualification, the extraction-origin item, the mint-point clause,
+the founder-elected indistinguishability clause, and the future-tensed `never as silence` commitment.
+Only then were the public surfaces edited. This is the ADR-013 §8 ordering precedent discharged by
+observation rather than by report — the surfaces now describe an envelope that demonstrably carries
+the claim.
+
+**Applied to all three R18 surfaces:**
+1. **`llms.txt`** — the attests bullet scoped (*"for consults whose extraction the server produced;
+   NOT where the caller supplied it"*) and a new does-not-attest bullet placed immediately after the
+   harms-omitted bullet (its nearest neighbour; both extraction-trust limits), carrying the mint-point
+   clause, the §2b indistinguishability clause, and the future-tensed coverage-gap commitment.
+2. **`agent-card.json`** — the `trust-record/v1` description's attests clause scoped and the
+   does-NOT-attest enumeration extended at the same position. **JSON re-validated; extension count
+   remains 24** — an edit to an existing description, never a new extension, as the package required.
+3. **`api-docs/page.tsx`** — the envelope paragraph's attests and does-not clauses both extended in
+   that surface's compressed register.
+
+**One disclosure about scope of sign-off.** The package drafted literal wording for `llms.txt` (§3)
+and `agent-card.json` (§4) only; **api-docs was named in Edit 2's scope but its exact phrasing was
+never drafted or signed.** Verified at source that api-docs genuinely carries both halves of the claim
+(`page.tsx:828-830`), so omitting it would have left one of three surfaces stating the uncorrected
+claim. The wording applied there is **the AI's, matching the surface's own compressed style and the
+signed substance** — it is a summary surface that explicitly defers to llms.txt for the full contract.
+**Flagged for the founder to adjust or re-sign if the phrasing is not wanted as written.**
+
+**Verified.** `npm run build` exit 0, "Compiled successfully", `/api-docs` registered (a `page.tsx`
+change is gated by `next build`, not `tsc` alone — the standing lesson). `tsc --noEmit` exit 0. S10
+battery **140 passed / 0 failed**, unchanged. `agent-card.json` parses; 24 extensions.
+
+**The correction is now complete end-to-end at its first edit:** the served envelope and all three
+published surfaces state the same honest limit, and none of them claims behaviour that does not exist
+— every coverage-gap reference is future-tensed.
+
+**Carried, unchanged:** the SECOND correction, when a structural fix ships, replacing the forward
+commitment with the fix's actual coverage; the ledger's scoping (F-1 resolved to the owner+agent pair;
+F-3's three named inputs; the §7 finding that `coverage_gaps` cannot carry what F-2 requires); and
+route (i) reframed, which should not open before the `l1_supply` population query is run.
+
+**Status:** Adopted / Applied (edit 2). **Rollback:** `git revert` this commit — restores all three
+public surfaces together; the served envelope (edit 1) is untouched by it and would correctly remain
+ahead of the docs, never behind.

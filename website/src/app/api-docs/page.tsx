@@ -827,8 +827,11 @@ export default function ApiDocsPage() {
           read; the justice latch surfaced; reflect history modulate-only &mdash; it cannot raise any level).
           Every response carries the honest-claims envelope &mdash; what the record attests (signed
           examination artifacts exist for the examination-derived events; how decisions were reasoned as
-          narrated and extracted; decay/coverage honestly marked) and what it does not (factual
-          correctness; harms omitted from the submitted text; freshness beyond the artifact record; future
+          narrated and extracted, <em>for consults whose extraction the server produced &mdash; not where
+          the caller supplied it</em>; decay/coverage honestly marked) and what it does not (factual
+          correctness; harms omitted from the submitted text; <em>extraction origin on caller-supplied
+          consults &mdash; that origin is not verified at the point trust events are minted, and this list
+          will be updated when a structural fix is in place</em>; freshness beyond the artifact record; future
           behaviour; training-signal fitness; discriminative range &mdash; stability may reflect absence of
           perturbation, not tested relapse-resistance). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined

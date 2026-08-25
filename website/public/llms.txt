@@ -758,7 +758,8 @@ WHAT A TRUST RECORD ATTESTS:
   aggregates (the no-event-without-a-verified-artifact rule);
 - HOW the aggregated decisions were reasoned, as narrated and extracted from the submitted
   text (examination before acting; justice structure over the circles named in the text;
-  passion diagnosis; proximity with per-domain floors);
+  passion diagnosis; proximity with per-domain floors) — for consults whose extraction the
+  server produced; NOT where the caller supplied it (see the extraction-origin limit below);
 - the decay and coverage state of each domain, honestly marked — sparse evidence is named,
   never papered over;
 - the confidence basis of the aggregate (weakest-domain ceiling; corroboration floored at
@@ -770,6 +771,13 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
 - harms omitted from the submitted text — the disclosed extraction-trust ceiling: a cleanly-
   narrated self-report that omits a real harm scores high; an uncatchable delegation-level
   justice failure produces a developmental flag, not a detected violation;
+- extraction origin on caller-supplied consults — where the caller supplied the extraction
+  rather than the server producing it, that origin is NOT verified at the point trust events
+  are minted, and a supplied extraction is not distinguishable, at that point, from one the
+  server produced; this list will be updated when a structural fix is in place, and that fix
+  will surface any artifact whose origin it cannot verify as a named coverage gap, never as
+  silence — an absent event will say why it is absent, and that it does not mean the agent
+  did not practise;
 - freshness beyond the artifact record — a genuinely-earned signed assessment re-submitted in
   later writes can sustain a domain at (never above) its once-demonstrated proximity (the
   disclosed stale-artifact replay class);
