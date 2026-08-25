@@ -24,19 +24,21 @@ question (`2026-08-25-MENTOR-QUESTION-extraction-provenance-fix-choice.md`) put 
 > | **Q2** | **The honesty correction is owed NOW**, independent of and ahead of any structural fix. **Two edits, honest at every instant.** The first correction's **wording must NOT anticipate the fix** — the mentor supplies its substance verbatim. All three published surfaces; founder sign-off required; does not wait on Q1. |
 > | **Q1** | **Option (a) — the signature-keyed provenance ledger.** Scoped first. Its limits are *"honest and bounded"* and **not worse than the current state, which has no coverage at all.** (b) and the hybrid stay available if (a)'s limits prove unacceptable. Join-back is *"provenance theatre."* |
 > | **Q3** | **NO — route (i) is NOT decided as a provenance fix.** Its own session: *"what is caller-supplied extraction for?"* **This qualifies the 2026-08-24 same-session observation:** the SCOPING was correctly joint and is now done; the BUILDS separate, because *"sharing a channel does not mean they should be resolved in the same session if the questions they raise are different in kind."* |
-> | **Q4** | Absent ledger entry ⇒ **refuse the mint**. **Insert-once, never upsert** (*"Insert-once is a limit on correction, not a vulnerability. Upsert is a vulnerability."*). Ledger **credential-scoped** — but see **F-1** below. |
+> | **Q4** | Absent ledger entry ⇒ **refuse the mint** — and (F-2, same day) **that refusal must surface as a NAMED COVERAGE GAP, never silence**. **Insert-once, never upsert** (*"Insert-once is a limit on correction, not a vulnerability. Upsert is a vulnerability."*). Ledger scoped to the **owner+agent pair with a credential-only fallback** — the bare-credential form was **corrected** on F-1 the same day. |
 >
-> **⚠ F-1 — one consequence of the credential-scoping bind that the ruling could not see, and that
-> THIS document failed to surface.** §4.2b named cross-credential lookup as a *posture* departure and
+> **⚠ F-1 — RAISED, RELAYED, AND RULED THE SAME DAY. The bare-credential bind is CORRECTED.** This
+> document failed to surface it: §4.2b named cross-credential lookup as a *posture* departure and
 > never stated what a literal credential scoping would do to live configurations. Verified since: the
 > project's **own standing reference harness runs two credentials** — a consult credential producing
 > the signed assessments and a separate accreditation-write credential submitting them (which
-> *"lacks `consult`"*) — so a bare-credential scoping **refuses every mint from the project's own
-> dogfood**, and equally refuses across the credential rotation that has already happened once. A
-> narrower-than-cross-credential unit already exists (`longitudinal-identity.ts`'s `owner_agent_pair`,
-> with a credential-only fallback). **A short follow-up ruling on the scoping UNIT is requested; the
-> principle is not challenged, and nothing else in the ruling is affected.** Full detail: the ruling
-> record's §Finding F-1.
+> *"lacks `consult`"*) — so a bare-credential scoping **would have refused every mint from the
+> project's own dogfood**, and would have truncated the record at the credential rotation that has
+> already happened once. **Ruled: the ledger is scoped to the `owner_agent_pair` identity with a
+> credential-only fallback** — *"strictly narrower than unbounded cross-credential lookup and strictly
+> wider than bare credential"* — and **no new disclosure is required**, the existing
+> rotation-truncation disclosure covering the fallback. **Two further rulings arrived with it (F-2:
+> refused mints must surface as named coverage gaps; F-3: worked in scoping).** Full detail: the
+> ruling record's ADDENDUM.
 
 ---
 

@@ -384,14 +384,27 @@ build; the ruling licenses no code.** Verbatim, binding:
    now complete; the BUILDS separate, because *"sharing a channel does not mean they should be
    resolved in the same session if the questions they raise are different in kind."*
 
-**⚠ ONE FOLLOW-UP RULING REQUESTED (F-1), blocking item 2's scoping only.** A literal bare-credential
-scoping of the ledger **would refuse every mint from the project's own standing reference harness** —
-verified: the S9 dogfood runs a consult credential and a separate accreditation-write credential that
-*"lacks `consult`"* — and would equally refuse across the credential rotation that already happened
-once (gen-1 → gen-2, after the 2026-07-17 exposure incident). The mentor's stated purpose (do not
-introduce a cross-credential resolution surface) is preserved by the narrower `owner_agent_pair` unit
-that `longitudinal-identity.ts` already computes. **The principle is not challenged — only the unit.**
-Items 1 and 3 are unaffected and need not wait.
+**F-1 WAS RAISED, RELAYED, AND RULED THE SAME DAY — item 2 is NO LONGER BLOCKED.** A literal
+bare-credential scoping would have refused every mint from the project's own standing reference
+harness (a consult credential plus a separate accreditation-write credential that *"lacks `consult`"*)
+and would have truncated the record at the rotation that already happened once. **Ruled: the ledger is
+scoped to the `owner_agent_pair` identity with a credential-only fallback**; no new disclosure needed.
+
+**TWO FURTHER RULINGS ARRIVED WITH IT AND CHANGE THE ITEMS ABOVE:**
+- **F-2 extends item 1's scope.** A refused mint **must surface as a NAMED COVERAGE GAP** on the
+  existing `coverage_gaps` surface, never as silence — *"Honest refusal and absence look identical to
+  the reader the public record is written for."* It must carry the non-mint, the reason (missing or
+  out-of-window ledger entry), and **that this does not mean the agent did not practise**; it must
+  **NOT** carry the signature or artifact detail *"that would expose the provenance mechanism to
+  gaming."* **This belongs in the FIRST edit, not the second** — subject to the tense constraint at
+  the ruling record's §F-2-DRAFT (no ledger exists yet, so it must be written as committed design in
+  the future tense, never as live behaviour).
+- **F-3 is worked in item 2's scoping, not ruled.** Three things must travel into that document,
+  named and not pre-answered: the refuse-on-missing ↔ **PA-10 coupling** as a named dependency
+  (does the ledger's incidental narrowing change the standing of the scheduled recency-tier closure?);
+  the window-length tension resolved **from data**, not first principles; and **F-2's effect on the
+  cost calculus** — with every refusal publicly visible, window length is *"also a decision about how
+  frequently the public record will carry coverage gap entries."*
 
 ---
 

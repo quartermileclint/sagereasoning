@@ -26473,3 +26473,57 @@ carried caveat that rules are scaffolding for *prosoche*, not a substitute for i
 **Status:** Adopted. Cross-references: `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`,
 `D-REFLECTIONS-EXAMINATION-SECOND-RULING-ROUND-FOLDED-2026-08-23`, Letter I
 (`operations/reflections-examination-2026-08/2026-08-24-letter-1-on-writing-before-knowing.md`).
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-F1-F2-F3-RULED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only. **Risk:** Standard. **AC7 not
+engaged.** No code, migration, flag, credential, or public surface. **Licenses no code.**
+
+**What happened.** The three follow-up questions raised on folding
+`D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25` were relayed and ruled the same day. Verbatim
+canonical: the **ADDENDUM** to
+`operations/agent-circles-2026-08/2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md`.
+
+**F-1 — A BIND WAS CORRECTED, NOT MERELY CLARIFIED.** *"The bare-credential ruling is corrected."*
+The ledger is scoped to the **owner+agent pair with a credential-only fallback.** The mentor accepted
+the finding as *"precise and… not visible at ruling time"* and added the rotation point: bare-credential
+scoping *"would have truncated the trust record at that point."* **No new disclosure required** — the
+existing rotation-truncation disclosure covers the fallback. **The earlier record was corrected in
+place** rather than left standing with a superseded bind: the headline table row, the warning banner,
+and the F-1 finding block all now carry the amendment, because a binding record that still asserts a
+corrected bind is the exact drift PR20 exists to prevent.
+
+**F-2 — RULED, and it EXTENDS the honesty correction's scope.** A refused mint **must surface as a
+named coverage gap** on the existing `coverage_gaps` surface, never as silence — *"Honest refusal and
+absence look identical to the reader the public record is written for. That is a fidelity failure, not
+a cosmetic one."* Minimum content: the non-mint, the reason (missing/out-of-window ledger entry), and
+**that it does not indicate the agent did not practise.** Hard exclusion: no signature or artifact
+detail *"that would expose the provenance mechanism to gaming."* Accepted cost, named by the mentor:
+the refusal becomes *"not silent governance"* and carries a higher operational cost than silence —
+*"That cost is the right cost."* **This belongs in the FIRST edit, not the second.**
+
+**§F-2-DRAFT — a drafting constraint recorded against F-2, not a challenge to it.** F-2 directs the
+coverage-gap behaviour into the first edit; Q2 directs that the first edit *"must not anticipate the
+fix."* Both are satisfiable, but only with deliberate tense: **no ledger exists, so nothing is being
+refused today**, and a present-tense claim that refused mints surface as coverage gaps would publish
+behaviour that does not exist — the precise defect class this arc is correcting. The resolution is
+drafting, not governance: the first edit already carries one mentor-specified forward commitment, and
+the coverage-gap sentence sits beside it in the **same future tense**, as committed design. Recorded
+so the drafting session cannot discharge F-2 by publishing a false present-tense claim.
+
+**F-3 — NOT ruled; worked in the ledger's scoping**, escalated only if unresolvable. Three items must
+travel into that document named and not pre-answered: the refuse-on-missing ↔ **PA-10 coupling** as a
+named dependency (does the ledger's incidental narrowing change the standing of the scheduled
+recency-tier closure?); the window-length tension resolved **from data** — *"the actual distribution
+of historical writes and the actual PA-10 exposure window"* — not first principles; and **F-2's effect
+on the cost calculus**, since with every refusal publicly visible the window length is *"also a
+decision about how frequently the public record will carry coverage gap entries."*
+
+**Net effect on the three work items.** Item 1 (honesty correction) **gains F-2's requirement** and
+still waits on nothing but founder R18 sign-off. Item 2 (the ledger) is **no longer blocked** and
+inherits F-3's three named inputs. Item 3 (route (i) reframed) is unchanged.
+
+**Status:** Adopted (rulings recorded; the superseded bind corrected in place; nothing built).
+**Rollback:** `git revert` this session's commit — documents only.

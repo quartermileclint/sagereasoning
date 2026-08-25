@@ -34,16 +34,18 @@ then confirmed on all four questions.
 4. **Q4 — RULED, three policies, all part of option (a)'s scoping and not prerequisites to choosing
    it:** (i) **an artifact with no ledger entry ⇒ REFUSE the mint** (minting anyway is *"a
    corrected-sounding claim with a silent carve-out"*); (ii) **insert-once, never upsert** (*"Insert-once
-   is a limit on correction, not a vulnerability. Upsert is a vulnerability."*); (iii) **the ledger is
-   CREDENTIAL-SCOPED** — a cross-credential lookup *"should not be introduced as a side effect of the
-   fix"*; a signature appearing under a different credential ⇒ **refuse the mint on that basis**.
+   is a limit on correction, not a vulnerability. Upsert is a vulnerability."*); (iii) **~~the ledger is
+   CREDENTIAL-SCOPED~~ — AMENDED SAME DAY, see the addendum: the ledger is scoped to the OWNER+AGENT
+   PAIR with a credential-only fallback.** The original bare-credential form was *"corrected"* on F-1;
+   the principle it rested on (do not introduce an unbounded cross-credential lookup) is preserved.
 
 **Licenses no code.** No build, route, flag, credential, or schema. Every step remains its own
 founder-walked 0c-ii.
 
-> **⚠ ONE CONSEQUENCE OF BIND 4(iii) THE RULING COULD NOT SEE, found on folding — see
-> `§Finding F-1` at the foot of this file. It does not overturn the ruling's principle; it questions
-> the scoping UNIT (bare credential vs the owner+agent pair). A short follow-up ruling is requested.**
+> **⚠ BIND 4(iii) WAS AMENDED THE SAME DAY. F-1 was raised on folding, relayed, and RULED: the
+> bare-credential form is *"corrected"* to the OWNER+AGENT PAIR with a credential-only fallback.
+> Two further rulings arrived with it (F-2, F-3). See the ADDENDUM below the first END VERBATIM —
+> it is part of the binding record, not commentary.**
 
 ---
 
@@ -125,6 +127,10 @@ The ruling: the ledger should be credential-scoped. A signature produced under o
 
 ## Finding F-1 — a consequence of bind 4(iii) the ruling could not see (raised 2026-08-25, on folding)
 
+> **RULED 2026-08-25 — the bare-credential bind is CORRECTED to the owner+agent pair with a
+> credential-only fallback. See the ADDENDUM. This section is retained as the record of how the
+> finding was raised and what it rested on; the ruling supersedes its "Requested" line.**
+
 **Not a challenge to the ruling's principle, which is sound.** Recorded because PR20 exists to make
 downstream consequences visible before they are discovered by a build, and because **the scoping
 question failed to surface this** — it named the cross-credential point as a *privacy/posture*
@@ -159,10 +165,10 @@ lets the *same owner's same declared agent* resolve its own, across a legitimate
 and across a rotation. It is strictly narrower than an unbounded cross-credential lookup and strictly
 wider than a bare credential.
 
-**Requested:** a short follow-up ruling on the scoping unit only — bare credential (as ruled, which
-refuses the project's own harness), or the owner+agent pair with a credential-only fallback (which
-preserves the ruling's stated purpose). **Everything else in the ruling is unaffected**, and this
-does not block the Q2 honesty correction, which the mentor ruled is owed now and independent of Q1.
+**Requested (and RULED the same day — see the ADDENDUM):** a short follow-up ruling on the scoping
+unit only — bare credential (as ruled, which refuses the project's own harness), or the owner+agent
+pair with a credential-only fallback (which preserves the ruling's stated purpose). **Everything else
+in the ruling is unaffected**, and this did not block the Q2 honesty correction.
 
 ---
 
@@ -174,3 +180,118 @@ does not block the Q2 honesty correction, which the mentor ruled is owed now and
   "scope them in the same session" observation is qualified by Q3 here (scoping joint, builds separate)
 - `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` — the ⚠ URGENT registration
 - `website/src/lib/substrate/longitudinal-identity.ts` — the owner+agent identity unit F-1 names
+
+---
+
+# ADDENDUM — F-1 / F-2 / F-3 ruled (verbatim), same day
+
+**Relayed by the founder 2026-08-25**, answering the three follow-up questions raised on folding the
+ruling above. **ADOPTED AS BINDING. Verbatim wins.** Part of the binding record, not commentary.
+
+**Binds (headline; the verbatim below governs):**
+
+1. **F-1 — THE Q4(iii) BIND IS CORRECTED.** *"The bare-credential ruling is corrected."* The ledger is
+   scoped to the **owner+agent pair, with a credential-only fallback.** The mentor accepted the
+   finding as *"precise and… not visible at ruling time"* and named the rotation incident as
+   compounding it: bare-credential scoping *"would have truncated the trust record at that point."*
+   **No new disclosure is required** — the existing rotation-truncation disclosure already covers the
+   fallback's honest limit. **Nothing else in Q4 is affected.**
+2. **F-2 — RULED: a refused mint MUST surface as a NAMED COVERAGE GAP**, on the existing
+   `coverage_gaps` surface, never as silence. *"Honest refusal and absence look identical to the
+   reader the public record is written for. That is a fidelity failure, not a cosmetic one."*
+   **Minimum content:** that no trust event was minted for the cycle; that the reason is a missing or
+   out-of-window provenance-ledger entry; and **that this does not indicate the agent did not
+   practise** — only that the instrument could not verify the extraction's origin. **Hard exclusion:**
+   the entry must **NOT** carry the signature or any artifact detail *"that would expose the
+   provenance mechanism to gaming."* Named consequence, accepted: the refusal becomes *"not silent
+   governance — it is a disclosed limit that appears on the public record every time it fires,"* at a
+   higher operational cost than silence — *"That cost is the right cost."*
+   **⚠ This changes the FIRST edit's scope: the coverage-gap behaviour belongs in edit one, *"not
+   deferred to the second."*** (See the drafting constraint recorded at §F-2-DRAFT below — it is not
+   a challenge to this bind.)
+3. **F-3 — NOT ruled; worked in option (a)'s scoping.** *"Escalate only if the tension proves
+   unresolvable in scoping."* **Three things must travel into that scoping document, named and not
+   pre-answered:** (i) the refuse-on-missing ↔ PA-10 coupling, *"named explicitly… not discovered
+   mid-build,"* carried as a **named dependency** — whether the ledger's incidental narrowing of
+   PA-10 changes the standing of the scheduled recency-tier closure work; (ii) the window-length
+   tension resolves **from data** — *"the actual distribution of historical writes and the actual
+   PA-10 exposure window"* — *"not from general principles,"* using data *"the scoping session has
+   access to and this ruling does not"*; (iii) **F-2 changes the cost calculus** — with every refused
+   mint publicly visible, window length *"is also a decision about how frequently the public record
+   will carry coverage gap entries,"* and that framing must be carried explicitly.
+
+**Licenses no code.**
+
+---
+
+## VERBATIM (addendum)
+
+### F-1 — The credential-scoping unit
+
+The bare-credential ruling is corrected. The owner+agent pair with a credential-only fallback is the right scoping unit.
+
+The finding that defeats the bare-credential ruling is precise and was not visible at ruling time: the project's own standing reference harness runs two credentials by design — a consult credential that produces the signed assessments and a separate accreditation-write credential that submits them. A bare-credential scoping refuses every mint from the project's own dogfood. That is not a misconfiguration to be corrected — it is the documented intended configuration.
+
+The credential-rotation incident compounds this: rotation has already happened once after a credential-exposure incident, and bare-credential scoping would have truncated the trust record at that point.
+
+The owner+agent pair with a credential-only fallback is strictly narrower than unbounded cross-credential lookup and strictly wider than bare credential. It permits exactly what the intended configuration requires — the same owner's same declared agent resolving its own signatures across a legitimate consult/write split and across rotation — and nothing more.
+
+The existing disclosure that rotation truncates a credential-scoped window already covers the fallback's honest limit. No new disclosure is required by this correction.
+
+The ruling is amended: the ledger is scoped to the owner+agent pair identity, with a credential-only fallback consistent with the existing disclosure. Nothing else in the Q4 ruling is affected.
+
+---
+
+### F-2 — Refused mint as named coverage gap
+
+This is correctly routed to the mentor and the instinct behind it is sound. Here is the ruling.
+
+A refused mint must surface on the public record as a named coverage gap using the existing machinery, not as silence.
+
+The reasoning is the one the question already contains, and it is correct: the trust record's envelope commits that sparse evidence and unevaluated domains are named, never papered over. A refused mint produces silence. Silence is indistinguishable, from outside, from an agent that stopped practising. In a project whose whole reframe is that the value is the measurement, an instrument that declines to record without saying so is not being honest — it is being absent. Honest refusal and absence look identical to the reader the public record is written for. That is a fidelity failure, not a cosmetic one.
+
+The existing coverage_gaps field is the right surface. The named gap should carry, at minimum: that a trust event was not minted for this cycle, that the reason is a missing or out-of-window provenance ledger entry, and that this does not indicate the agent did not practise — it indicates the instrument could not verify the extraction's origin for this artifact.
+
+The gap entry should not carry the signature or any artifact detail that would expose the provenance mechanism to gaming. It carries the fact of the refusal and its honest reason, nothing more.
+
+One implication worth naming explicitly: this means the ledger's refusal is not silent governance — it is a disclosed limit that appears on the public record every time it fires. That is a higher honesty standard than the current state, where the gap is present but unnamed. It is also a higher operational cost than silence, because every refused mint produces a visible record entry. That cost is the right cost. The project's commitment to naming gaps rather than papering over them is not optional when the instrument itself is the thing with the gap.
+
+The correction to the honesty text — the first edit, which the founder will sign off on — should note that refused mints surface as named coverage gaps, not as absence. That wording belongs in the first edit, not deferred to the second.
+
+---
+
+### F-3 — Retention window, refuse-on-missing, and the PA-10 coupling
+
+This is close enough to option (a)'s scoping that it should be worked there. The tension is real but it is a scoping-level design choice, not a governance question that requires a ruling before scoping can proceed. Escalate only if the tension proves unresolvable in scoping — the question correctly identifies that threshold.
+
+Two observations that should travel into the scoping session rather than be resolved here:
+
+The coupling between refuse-on-missing and PA-10's closure path is real and should be named explicitly in the scoping document, not discovered mid-build. The scoping session should carry the question of whether the ledger's incidental narrowing of PA-10 changes the standing of the scheduled recency-tier closure work — not as a pre-answer, but as a named dependency. If the ledger delivers part of what PA-10's closure was designed to deliver, the case for that scheduled work changes, and the scoping session is the right place to assess how much it changes.
+
+The window-length tension — longer window means more coverage but longer replay exposure; shorter window means tighter replay exposure but more legitimate historical writes refused — does not resolve to a single correct answer from first principles. It resolves from the project's own priority ordering: replay exposure (PA-10) is a disclosed threat with a scheduled closure path. Legitimate historical write refusals are a new cost introduced by the fix. The scoping session should assess which cost is larger given the actual distribution of historical writes and the actual PA-10 exposure window, not from general principles. That assessment requires data the scoping session has access to and this ruling does not.
+
+One thing that should not wait for scoping: the F-2 ruling above changes the cost calculus for refused mints. If every refused mint surfaces as a named coverage gap on the public record, the operational cost of a short retention window is visible to practitioners in a way that a silent refusal would not be. That visibility is honest, but it means the window-length decision is not purely a technical tradeoff — it is also a decision about how frequently the public record will carry coverage gap entries. The scoping session should carry that framing explicitly.
+
+## END VERBATIM (addendum)
+
+---
+
+## §F-2-DRAFT — a drafting constraint on the first edit (recorded 2026-08-25, not a challenge)
+
+**F-2 directs the coverage-gap behaviour into the FIRST edit. Q2 directs that the first edit's
+wording *"must not anticipate the fix."* Both are satisfiable, but only with deliberate tense.**
+
+**The mechanism fact:** no ledger exists today, so **no mint is being refused today.** A first edit
+saying, in present tense, that refused mints surface as named coverage gaps would publish a claim
+about behaviour that **does not exist** — which is precisely the defect class this entire arc is
+correcting.
+
+**The resolution, and it is a drafting matter rather than a governance one:** the first edit already
+carries one mentor-specified forward commitment (*"The disclaimer list will be updated when a
+structural fix is in place"*). The coverage-gap sentence sits beside it in the **same future tense**,
+as a statement of the fix's committed design — not as a description of live behaviour. So:
+*"…that fix will surface any artifact whose origin cannot be verified as a named coverage gap, not as
+silence"* — honest on the day it is published, and honest again when the fix ships.
+
+**Recorded so the drafting session cannot discharge F-2 by publishing a present-tense claim about a
+mechanism that does not yet exist.** Founder R18 sign-off governs the final wording either way.
