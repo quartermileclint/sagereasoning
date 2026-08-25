@@ -131,6 +131,10 @@ prompt named at its own close.
 
 ## Commit
 
-Committed, **not pushed** — the founder pushes. `website/src/data/environmental-context.json` is a
-pre-existing weekly-scan modification from before this session and is excluded from this session's
-commit, per the predecessor's own note.
+Both commits (`d5c485c`, the letter; `fcbd676`, the citation-correction follow-up) are **pushed —
+founder-confirmed, Vercel green.** `website/src/data/environmental-context.json` was a pre-existing
+weekly-scan modification from before this session and was excluded from both commits, per the
+predecessor's own note; it remains modified-but-uncommitted in the working tree, untouched by this
+session. Since this arc's work is documents-only, "Vercel green" is expected rather than a claim
+about anything this session changed at runtime — no code, schema, flag, or public-surface file was
+touched.
