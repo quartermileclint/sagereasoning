@@ -422,6 +422,42 @@ nor the commitment; and *"the plugin path cannot be stripped,"* so the capabilit
 wording covers the phased distinction (the second edit fires at ENFORCEMENT, not at first ship) or
 amend it. **Item 2a — credential hygiene — DISCHARGED 2026-08-25** (`D-L1-SUPPLY-CREDENTIAL-HYGIENE-DISCHARGED-2026-08-25`): both `l1_supply`-carrying credentials revoked on production, founder-walked; the capability-resolving query returns **`active_with_l1_supply = 0`** (founder-verified — the AI has no independent means to confirm it). **Live exposure is now zero active credentials.** No public claim is affected — `l1_supply` remains a documented capability and the preset still grants it on new mints. **Item 2b (removing it from the `ecosystem` preset) is CARRIED and re-tiered to `code-critical`** — `presetForPurpose` feeds read-time auth resolution, not just mint — and is no longer urgent, since it would now affect zero active credentials. `plugin_install` keeps it permanently (stripping it deadlocks that route by construction). **The ledger stays owed: source-narrowing defers, it does not substitute.**
 
+**ITEM 2 SCOPED 2026-08-26 — `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`. Documents only; still UNSCHEDULED
+as a build.** `agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`. **Option (a) does not
+fail** — no limit was found that makes it unacceptable, so (b) and the hybrid stay available and
+unneeded. Both hard requirements are discharged: the **switch-on threshold** is four concrete checkable
+conditions (identity coherence; 100% artifact resolution over the trailing 30 days observed for two
+weeks; a ≥90-day drain of pre-ledger artifacts; the gap surface live and R18-signed before any refusal
+can fire), and the **Q4 wording is CONFIRMED with no amendment** — the live clause binds the update to a
+fix *characterised by* the coverage-gap behaviour, so read whole it already fires edit two at
+ENFORCEMENT rather than at first ship.
+
+**⚠ ONE FINDING CHANGES F-1's PRACTICAL EFFECT AND NEEDS ONE FOUNDER QUERY.**
+`resolveLongitudinalIdentity` reaches `owner_agent_pair` **only when owner AND agent are both
+non-null**, and the s9-loop **consult** credential is **owner-less by design** — the module's own
+docstring names it as the example — while the accreditation-write credential is owner+agent bound. The
+two identities never match, so **every mint from the project's own reference harness would still be
+refused**: F-1's stated purpose is preserved by the ruling and defeated by the configuration. F-1's
+principle and unit are untouched and correct. **Resolved in scoping without relaxing the cross-tenant
+guard and without a second identity notion** — the credential configuration moves to satisfy the module,
+recommended as a fresh owner+agent-bound consult credential rather than mutating the existing one
+(`/api/credential/erase` scope-guards external-consumer erasure on `owner_user_id IS NULL`), and
+generalised into switch-on condition C1. **Verification owed:** that credential's live owner field
+(scope §12.1) — a record claim, not a verification, and the finding's liveness turns on it.
+
+**Two further scoping results worth not re-deriving:** the **F-2 coverage-gap surface is answered** —
+a sibling field modelled one-for-one on the C2c `orientation_readings` pattern (capped, newest-first,
+each entry carrying its honest clause inline, served with a total count), **not** an extension of
+`coverage_gaps`, which is domain-level and A2-semantic and cannot carry a reason; and the **PA-10
+coupling runs opposite to the de-scheduling reading** — A5's recency tier has never been wired because
+no artifact-age signal exists anywhere (the signed envelope has no timestamp; AE-2 took ADR-014 §6's
+refuse branch for this reason), so a ledger storing `recorded_at` **enables** that scheduled closure
+rather than substituting for it. **Window: 90 days, on a data basis** — PA-10's exposure is currently
+unbounded so any finite window strictly improves it; 90 is where all three sibling tables already sit,
+aligning coverage with consequence exactly; and the only production write pattern on record is
+session-scoped by construction (`close-hook.mjs` writes at `Stop` from a session-id-keyed provenance
+file), so submitted artifacts are hours old. **No mentor question is raised, and scope §15 argues why.**
+
 ---
 
 ## The gates, restated correctly

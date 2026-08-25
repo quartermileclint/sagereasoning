@@ -27062,3 +27062,121 @@ this commit.
 
 **Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-4-AUTHORED-2026-08-25`,
 `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SCOPED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Scoped the signature-keyed provenance ledger — the structural fix ruled as option (a) on
+2026-08-25 — as a buildable `code-critical` change:
+`operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`. All four Q4 policies were
+already ruled and are honoured, not re-litigated. **Option (a) does not fail**: this scoping found no
+limit that makes it unacceptable, so option (b) and the hybrid stay where the ruling left them.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — new
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-SCOPING-CLOSE.md` — new
+
+**Three findings the ruling could not see, in descending order of consequence.**
+
+**1 — F-1's correction does not by itself achieve F-1's stated purpose, and one founder query decides
+how much that matters.** F-1 corrected the scoping unit to the owner+agent pair *"with a credential-only
+fallback"*, citing `longitudinal-identity.ts` as computing the right unit. It does. But
+`resolveLongitudinalIdentity` reaches `owner_agent_pair` only when owner **and** agent are both
+non-null, and the s9-loop **consult** credential is owner-less by design — that module's own docstring
+names it as the example. So consult-side resolves to `credential`, write-side to `owner_agent_pair`,
+they never match, and **every mint from the project's own reference harness is still refused** — the
+precise outcome F-1 was raised to prevent. F-1's principle and unit are both untouched and correct;
+what it did not check is that the configuration it cited fails the module's own precondition on one of
+its two credentials. **Resolved without a design compromise** (scope §3): the module is used unchanged,
+the cross-tenant guard is untouched, and the credential configuration moves to satisfy it — recommended
+as a fresh owner+agent-bound consult credential rather than mutating the existing one's `owner_user_id`,
+because `/api/credential/erase` scope-guards external-consumer erasure on `owner_user_id IS NULL` and
+mutation would silently remove that credential from the erasure path. It generalises into the switch-on
+condition C1. **Turns on one unverified fact** — the credential's live owner field — which a repo
+session cannot settle; the query is in scope §12.1.
+
+**2 — The F-2 coverage-gap surface is answered, and the answer is not to touch `coverage_gaps`.** The
+prompt's Step-2 finding is confirmed at HEAD: `coverage_gaps` is a bare `VirtueTrustDomain[]` inside the
+aggregate block, filled from A2-zeroed domains, and cannot carry a reason or the did-not-practise clause
+— and a refused mint is event-level, not domain-level. But an exact precedent sits on the same payload:
+the C2c `orientation_readings` list — optional, capped, newest-first, **each entry carrying its honest
+clause inline** (ruled that way because *"the entry is the unit that will be read in isolation"*),
+served with a `total_..._count` so a reader sees "showing N of M". F-2's minimum content maps onto it
+one-for-one, and F-2's hard exclusion is satisfied at the **schema** level rather than the serialiser,
+so a future serving change cannot leak artifact detail.
+
+**3 — The PA-10 coupling runs opposite to the reading that would de-schedule the recency work.** A5's
+recency tier has never been wired because **no artifact-age signal exists anywhere** — the signed
+envelope carries no timestamp, which is why AE-2 took ADR-014 §6's refuse branch and disclosed that
+replayed evidence is not age-detectable. A ledger storing `recorded_at` per signature **supplies that
+missing input for the first time.** So the ledger both narrows PA-10 incidentally (exposure from
+unbounded to the window) and **enables** its scheduled closure. Recommendation: sequence the recency
+work after the ledger, do not displace it, and record `recorded_at` deliberately for it.
+
+**The two hard requirements, both discharged.** The **switch-on threshold** is defined as four concrete
+checkable conditions (identity coherence; 100% resolution over the trailing 30 days observed for two
+weeks; a ≥90-day drain of pre-ledger artifacts; the gap surface live and R18-signed before any refusal
+can fire) — with 100% argued rather than assumed, since at ~10 agents any percentage below it is one
+agent and would ship enforcement into a known silent refusal. The **Q4 wording** is **confirmed, no
+amendment recommended**: the live clause binds the update to a fix *characterised by* the coverage-gap
+behaviour, so read whole it already fires edit two at enforcement rather than at first ship — a
+consequence of §F-2-DRAFT's tense constraint putting both halves in one sentence. The residual
+whole-sentence-parse dependency is stated rather than hidden, and amending would be a third edit to a
+served claim to sharpen a distinction the sentence already carries.
+
+**The window carries a data basis, not a principled guess.** 90 days, on three grounds: PA-10's current
+exposure is **unbounded**, so every finite window is a strict improvement and the tradeoff is only
+between candidates; 90 is where `agent_trust_events`, `agent_trust_state`, and `agent_assessment_history`
+all already sit, so at exactly 90 every artifact that can still affect a live trust record has a live
+ledger entry; and the only production write pattern on record is **session-scoped by construction**
+(`close-hook.mjs` writes at `Stop` from a session-id-keyed provenance file), so submitted artifacts are
+hours old. F-3(iii)'s framing is carried explicitly: at 90 days the expected steady-state frequency of
+out-of-window gap entries is approximately zero, and a 30-day window would buy marginal PA-10
+improvement by making the public record carry gap entries for legitimate writes.
+
+**Design points a build session must not rediscover.** The refusal record is **not** a trust event —
+`agent_trust_events.artifact_ref` is `NOT NULL` under the stated invariant *"no trust event without a
+verifiable artifact"*, and a refusal is by definition the case where none exists; putting it there would
+mean fabricating a ref or widening the invariant that `TRUST_RECORD_ENVELOPE.attests[0]` publicly rests
+on. The `agent_hold_observations` precedent is the right one. **"Refuse the mint" is not "refuse the
+write"** — the emission hook sits after the writer and never throws to it, so the write still returns
+200. The ledger needs **its own flag**, never `isTrajectoryWriteEnabled()`, and must compute provenance
+**unconditionally** from `preExtractedLayer1Schema`, never inside `isTrajectoryDeltaEnabled()`, or it
+inherits the existing stamp's blind window. A ledger read that **errors** is not a missing entry — the
+`isMissingTableError` false-benign class has bitten this codebase twice and the ledger read is its shape.
+
+**No mentor question is raised, and that is considered rather than default.** The candidate the prompt
+anticipated (the gap surface) is answered and needed nothing the ruling failed to anticipate. The
+stronger candidate — finding 1 — is not owed: F-1's principle and unit are untouched, the resolution
+relaxes no ruled constraint and invents no second identity notion, and it lands exactly where addendum 2
+assigned such things, as a named condition on the switch-on threshold. Escalating would ask the mentor
+to re-rule something not in tension: the tension is between the ruling and a credential's configuration,
+and configurations move. The founder may escalate if they read that prerequisite as heavier than this
+document treats it.
+
+**Verification performed.** Every mechanism claim re-verified first-hand at HEAD (PR20), not inherited:
+the `coverage_gaps` shape and its `combiner.ts` source; `resolveLongitudinalIdentity`'s branch condition
+and its docstring; `emitAccreditationTrustEvents`' gating, its post-writer call site and `.catch`;
+the consult-side write site's available inputs; `sandwichResult.output.assessment` as the signed
+wrapper; the `layer1Source`/delta-flag coupling; `artifact_ref NOT NULL` and its column comment; the
+21-value `TrustEventType` and 5-value `ArtifactKind`; the uniform 90-day retention across all three
+tables; the 6 crons and the two-table sweep precedent; `close-hook.mjs`'s session-scoped provenance
+read; and S2-47 as the highest existing pin. **Two facts are explicitly marked not verifiable from a
+repo session** and carried as founder prerequisites rather than asserted: the s9-loop consult
+credential's owner field, and the age distribution of submitted artifacts.
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15 (the C2c, `agent_hold_observations`, and two-table-sweep precedents reused rather
+than re-derived), PR19 (budgeted and named in the scope), PR20, PR24 (purge and sweep named as
+same-session), PR25.
+
+**Status:** Adopted. Cross-references: `D-EXTRACTION-PROVENANCE-FIX-CHOICE-RULED-2026-08-25`,
+`D-EXTRACTION-PROVENANCE-AND-ROUTE-I-SCOPED-2026-08-25`,
+`D-L1-SUPPLY-CREDENTIAL-HYGIENE-DISCHARGED-2026-08-25`.
