@@ -111,15 +111,27 @@ candidate in §6, not taken here.
 
 ---
 
-## What comes next — superseded by the ruling; see below
+## §1's measurement task — run
 
-The three-candidates framing above was written before the mentor ruled. The ruling has since
-resolved which of it applies: relay has happened, opening 2 is held, opening 3 phase one is cleared.
-What remains open, none chosen here:
+At the founder's election ("1 measurement task"). Report:
+`operations/reflections-examination-2026-08/2026-08-25-iw7-opening1-measurement.md`, folded into the
+scope document. Run against the live `~/.sage-gate1/gate1.log` (28,406 lines, 2026-07-12–2026-08-25,
+exhaustive — every line accounted for, not a sample), the founder's own dogfood harness log, the same
+session store the 100-reflection corpus was drawn from.
+
+**Result: the scope document's inference was correct and stronger than stated.** Completed
+elicitations reach **12.9%** of the guard cautions that arm them, **2.1%** of total decision volume.
+**An unanticipated second finding:** the completion rate is declining across the window — 29.2% in
+July, 7.0% in August — driven almost entirely by the discernment route's own HTTP 503 rate more than
+doubling (18 → 45 outages). That is an infrastructure fact about a live service, not a property of
+the trigger design, and it is named rather than diagnosed: diagnosing or fixing it is a SageReasoning
+project-stream concern, outside this documents-only reflections session's scope.
+
+## What comes next
 
 1. Elect §3 phase one into its own code-tier session.
-2. Run §1's measurement task (repo-only, unaffected by the ruling, still not run).
-3. Scope the signal-quality gap that both §2 and §3 phase two are now blocked on.
+2. Scope the signal-quality gap that both §2 and §3 phase two are blocked on.
+3. Diagnose the discernment route's growing 503 rate (project stream, not this arc).
 
 ---
 

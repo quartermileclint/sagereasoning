@@ -98,6 +98,14 @@ log (`ELICIT` lines already written to `honestLog`) and count firings against to
 actions over a representative window. No code change is required to answer it — the counting can run
 against the harness's own existing logs.
 
+**[Measured 2026-08-25.]** Run against the live `~/.sage-gate1/gate1.log` (28,406 lines,
+2026-07-12–2026-08-25, exhaustive accounting). The inference above was correct and sharper than
+stated: completed elicitations reach only **12.9%** of the guard cautions that arm them and **2.1%**
+of total decision volume. A second, unanticipated finding: the completion rate is *declining* across
+the window (29.2% in July → 7.0% in August), driven almost entirely by the discernment route's own
+503 rate more than doubling — an infrastructure fact, not a trigger-design one. Full report:
+`operations/reflections-examination-2026-08/2026-08-25-iw7-opening1-measurement.md`.
+
 **If that count shows the existing gate is too narrow, the honest next question is not "add a new
 trigger" — it is "widen this one's gate," which is §2.**
 
@@ -262,14 +270,18 @@ variation on a guard-CAUTION signal). This document's own tier is `governance`, 
 is its own election, not automatic from the ruling, per this arc's standing discipline that a
 favourable ruling authorises relay-to-build, not build itself.
 
+**§1's measurement task is done** (see the fold above and the full report). It confirmed and
+sharpened the inference it was checking, and surfaced an unanticipated infrastructure finding (the
+discernment route's 503 rate) outside this arc's own scope to act on.
+
 **Still open, not chosen here:**
 
 1. Elect §3 phase one into a code-tier session (harness code — `code-elevated` or `code-critical`
    depending on how the manifest classifies a change to this specific hook path; likely warrants the
    same PR19 independent-review discipline every prior harness change in this project's history has
    received before shipping).
-2. Run §1's measurement task (repo-only, no ruling needed, still not run) — its output would sharpen
-   any future §2 reconsideration once the signal-quality gap closes.
-3. Scope the signal-quality gap itself (whether the consult's output can carry a genuine-vs-sparse
+2. Scope the signal-quality gap itself (whether the consult's output can carry a genuine-vs-sparse
    indicator, or the hook can derive one independently) — a prerequisite for ever reopening §2 or §3
    phase two, and its own scoping question, not resolved by anything in this document.
+3. Diagnose the discernment route's growing 503 rate — a SageReasoning project-stream concern, named
+   here but out of a reflections-arc session's scope to act on.

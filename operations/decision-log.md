@@ -27498,3 +27498,118 @@ not asserted), PR25.
 **Status:** Adopted. Awaits the mentor's ruling on Q1 (round 2) and the still-open 404/stub-record and
 cohort-mechanism questions. Cross-references: `D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26`,
 `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`.
+
+---
+
+## 2026-08-25 — D-IW7-OPENING1-MEASUREMENT-RUN-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — measurement only, no code, no ruling needed. **Risk:** Standard. **AC7 not engaged.**
+
+**Decision.** Ran §1's measurement task (`D-IW7-THREE-OPENINGS-SCOPED-2026-08-25`), at the founder's
+election. Report: `operations/reflections-examination-2026-08/2026-08-25-iw7-opening1-measurement.md`.
+
+**Method.** Counted every line of `~/.sage-gate1/gate1.log` (28,406 lines, 2026-07-12–2026-08-25, the
+founder's own dogfood harness log — the same session store the 100-reflection corpus was drawn from).
+Exhaustive accounting: every event type counted, sum matches total lines.
+
+**Result — the scope document's inference confirmed and sharpened.** Completed elicitations reach
+**83/641 = 12.9%** of the guard cautions that arm them, and **83/3,996 = 2.1%** of total decision
+volume (consult attempts). Even counting failed/skipped attempts, not just completions, the ceiling
+is 22.9% of arming events. This settles §1: the existing elicitation, as built, does not reach enough
+of a session's decision volume to move the coverage figure meaningfully.
+
+**An unanticipated second finding, named plainly rather than left out because it wasn't asked for.**
+The completion rate is *declining* across the same window: 29.2% in July (50/171) → 7.0% in August
+(33/470). Nearly all of the collapse traces to one cause — every one of the 63 `ELICIT-OUTAGE` events
+in the whole log carries the identical reason `http 503 — service error` from the discernment route,
+and outage count alone grew 18 → 45 across the two months. **This is an infrastructure fact about a
+live service's reliability, not a property of the trigger design** — named here, explicitly not
+diagnosed or fixed, since that is a SageReasoning project-stream concern outside this documents-only
+arc's scope.
+
+**Files touched:**
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-opening1-measurement.md` — new
+- `operations/reflections-examination-2026-08/2026-08-25-iw7-three-openings-scope.md` — §1 and §6 updated with the result
+- `operations/handoffs/founder/2026-08-25-iw7-three-openings-CLOSE.md` — amended
+
+**Risk classification:** Standard under 0d-ii — read-only measurement against a local log file; no
+code, schema, flag, credential, or live operation. **Rollback path:** `git revert` this commit; no
+downstream dependency (the log file itself is untouched, read-only).
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted. Cross-references: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`,
+`D-IW7-THREE-OPENINGS-SCOPED-2026-08-25`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-Q1-RULED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Folded the mentor's ruling on Q1 round 2 (`2026-08-26-mentor-ruling-provenance-ledger-
+q1-round2-verbatim.md`) into the scope document. All four originally-raised questions are now ruled or
+carried forward on an explicit basis; none remains silently unaddressed.
+
+**Q1 — RULED. Defer the harness's own accreditation by name; not a general policy.** The mentor ruled
+the narrower move over both scoped generalisations: option A (merge the harness's two credentials into
+one) is available in principle — it does not violate the standing owner+agent-pair scoping — but is a
+security-posture trade the mentor explicitly declined to rule and explicitly recommended against, citing
+the documented least-privilege split, the harness's own code refusing to write under a merged
+configuration, and the project's prior credential-exposure incident: *"available to the founder as a
+decision. It is not available as a ruling from me."* Option C's general-policy reading (permanent
+refusal for every present and future split-pair agent) is rejected as broader than the problem requires;
+the ruled resolution is a **named, single-agent deferral** of the harness's accreditation specifically,
+leaving the general population question open until measured.
+
+**A genuine internal contradiction, found and corrected while folding this ruling — the scope document's
+own §3.2 had never been updated after §1.4 superseded it.** The original §3 table called "mint a fresh
+owner+agent-bound consult credential for the harness" the *"available path… recommended"* — but §1.4,
+written later in the same prior session after independent review, had already shown that exact path
+blocked by the identical uniqueness-index collision the identity conflict itself depends on. The
+contradiction survived two rounds of mentor consultation without being caught, because §3 was never
+revisited once §1.4 superseded its conclusion. **Corrected in place**, with the stale table kept as a
+visible record of where the error was rather than silently deleted.
+
+**§9's switch-on threshold is restructured, not merely amended.** The mentor's ruling changes the
+*sequence*, not just the value: *"C1's population-wide threshold is defined after the split-pair
+population is measured, not before... The harness is excluded from C1's denominator by name until its
+configuration changes."* A new step (§9's S0) precedes the four conditions — a population-wide SQL query
+(added at §12.0, now load-bearing for C1's own definition, not merely confirmatory) — and the
+cohort-freeze / exception-register machinery the prior draft carried as open alternatives is **retired
+as unneeded** under the ruled narrower reading, since a single named exclusion replaces a general
+freeze mechanism. The mentor's own assessment: *"cleaner… and more honest: the threshold reflects the
+population the ledger actually covers, not a population that includes a permanently excluded agent
+whose exclusion is papered over by a freeze mechanism."*
+
+**A dependency the ruling's own wording surfaces and does not resolve, named rather than absorbed.** The
+mentor states the harness deferral is proportionate because *"the coverage gap surfaces per F-2 — the
+refusal is named, not silent."* That is not yet true under the CURRENT unresolved state of the prior
+ruling's own Q4 second finding (the 404 problem, `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`):
+an agent whose every mint is refused gets a 404, not a coverage-gap entry — the record that would carry
+the gap does not exist. So today, deferring the harness's accreditation would make its refusal genuinely
+invisible, not honestly-refused-and-visible, until §6.5's 404/stub-record question is answered. **Named
+explicitly in §3.3 and flagged in §14 as the strongest remaining candidate for a further mentor round**
+— not resolved here, and not silently assumed away by treating the mentor's proportionality claim as
+already satisfied.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-q1-round2-verbatim.md` — new, the binding ruling
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — corrected in place: §1 (ruled-table row), §3 (rewritten — the stale table retained as record, the ruled resolution stated, the 404 dependency flagged), §9 (restructured — S0 precedes C1, harness excluded by name, freeze machinery retired), §12 (S0's population-wide query added as §12.0), §14 (recommendation narrowed to what remains open), header notice, plus two duplicate section headings introduced by the prior session's edits found and removed
+- `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round2-provenance-ledger-q1-options.md` — marked answered
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-q1-ruled-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15 (§9's population-wide query reuses the existing `api_keys`/`agent_trust_events`
+join pattern rather than inventing new machinery), PR19, PR20 (the §3.2 contradiction found and
+corrected rather than left standing across two mentor rounds), PR25.
+
+**Status:** Adopted. All four originally-raised questions are now ruled (Q1, Q2, Q3's mechanism choice
+still open between two named options) or carried forward as an explicit, named open question (the 404/
+stub-record fork, §6.5). Cross-references: `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`,
+`D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26`.
