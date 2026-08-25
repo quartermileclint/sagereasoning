@@ -27760,3 +27760,53 @@ attestation wording (§10, a founder R18 sign-off item, likely not a further men
 already-reviewed build-shape items in §13. Cross-references: `D-PROVENANCE-LEDGER-Q3-AND-404-CASED-2026-08-26`,
 `D-PROVENANCE-LEDGER-Q1-RULED-2026-08-26`, `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`,
 `D-PROVENANCE-LEDGER-SCOPED-2026-08-26`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-R18-SIGNOFF-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Recorded the founder's R18 sign-off on the two items the mentor's ruling had delegated to
+this scoping session to resolve on its own: the exact wording of the attestation amendment (§10) and
+the build sequencing (§13). This closes the scoping document entirely — every question the arc raised
+is ruled, and both remaining founder-facing decisions are signed.
+
+**§10 — exact wording locked, minimal-diff from the live sentence.** The founder signed a precise,
+final replacement rather than the illustrative "e.g." placeholder the prior draft carried — this
+project's own discipline (the `attests[1]`-had-no-content-pin defect this arc is itself correcting)
+treats served-claim wording precision as load-bearing, so the sign-off is recorded on an exact sentence,
+not a direction. Only the trigger clause changes — `"is in place"` → `"begins enforcing which events are
+minted"` — leaving every other clause, including the parts battery pins will need to hold, untouched
+verbatim. Assigned to slice 3, riding alongside `provenance_gaps`, the ADR-013 §8 amendment, and pins
+from S2-48.
+
+**§13 — build sequencing signed, and a real staleness caught and fixed while recording it.** Slice 4 of
+the prior draft still described the superseded first-attempt fix — minting the harness a new bound
+consult credential — which §3.2's own retained record shows was blocked by the identical uniqueness
+index the identity conflict depends on, two rounds before this session. Under the ruled resolution
+(defer the harness's accreditation by name, confirmed by §12.0 as the only agent needing it), **no
+credential action is needed at all**: the harness's writes refuse automatically under the two-branch
+design already scoped in slices 1–3, and C1 already excludes it by name. Slice 4 is retired and its
+correct disposition — "no action needed" — recorded in place, rather than left standing with a stale
+description a build session might otherwise have executed literally.
+
+**Explicit about what sign-off on sequencing does NOT license.** Recorded plainly in §13/§14: this is
+approval of the order, not a start signal. Every slice remains its own founder-walked 0c-ii, to be
+opened individually.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — §10 (exact wording locked), §13 (slice 4 corrected, sequencing sign-off recorded), §14 (final closure), header notice; one duplicate section heading (the same recurring edit-tool artifact caught in every prior round) found and removed
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-r18-signoff-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15 (§10's wording reuses the minimal-diff discipline the S2-39/S2-40 precedent set),
+PR20 (slice 4's staleness caught and fixed rather than carried forward into a build).
+
+**Status:** Adopted. The scoping document is fully closed — every question ruled, both founder sign-offs
+recorded. Nothing built; each slice awaits its own founder-walked open. Cross-references:
+`D-PROVENANCE-LEDGER-SCOPING-ARC-CLOSED-2026-08-26`, `D-PROVENANCE-LEDGER-Q3-AND-404-CASED-2026-08-26`.

@@ -48,6 +48,13 @@ credential, or public surface was touched. **AC7 not engaged. This document lice
 > sign-off item (§10) and the already-reviewed build-shape items in §13/§14 — no further mentor
 > question is owed.**
 
+> **⚠ FOUNDER R18 SIGN-OFF GIVEN, 2026-08-26. The exact attestation wording (§10) and the build
+> sequencing (§13) are both signed.** §10's minimal-diff wording is locked verbatim, and §13's slice 4
+> — inherited from a first-draft fix superseded two rounds ago — is corrected in place to "no action
+> needed" rather than left standing with a stale description. **Everything this document set out to
+> scope is now decided. Nothing is built. Every slice in §13 remains its own founder-walked 0c-ii,
+> opened individually.**
+
 **What it scopes is `code-critical` when built** — two new tables, a trust-core write path, the
 accreditation write boundary's mint decision, and a change to a served public payload.
 
@@ -854,7 +861,7 @@ election if the founder prefers coverage over the least-privilege posture).
 
 ---
 
-## §10 — The live attestation's wording (Step 2c / addendum 2 Q4)
+## §10 — The live attestation's wording — RULED SOUND (round 5), then FOUNDER-SIGNED (2026-08-26)
 
 > **REVERSED BY INDEPENDENT REVIEW. This section first concluded "confirmed, no amendment." That was
 > wrong, and it was wrong in the specific way this whole arc exists to correct — it reached a
@@ -907,12 +914,25 @@ edit is not available"* comes from Q1, where it referred to an edit that **retra
 *"one that moves backward rather than forward."* A clarifying amendment moves forward. The first draft
 imported the prohibition without its qualifier.
 
-**Recommended amendment (founder R18 sign-off governs the final wording; this decides nothing):**
-replace *"This disclaimer list will be updated when a structural fix is in place"* with wording that
-names **enforcement** rather than existence as the trigger — e.g. *"…will be updated when that
-verification begins to gate which events are minted."* Carried in slice 3 alongside the
-`provenance_gaps` field, its ADR-013 §8 amendment and its pins, it costs one sign-off already being
-sought rather than a standalone edit.
+**FOUNDER R18 SIGN-OFF GIVEN, 2026-08-26.** Exact wording, minimal-diff from the live sentence — only
+the trigger clause changes, `"that fix will surface…"` and everything after is untouched verbatim so
+the existing content pins keep applying to the unchanged clause:
+
+> Live (`trust-record-payload.ts:60`, `does_not_attest[1]`): *"This disclaimer list will be updated
+> when a structural fix **is in place**; that fix will surface any artifact whose origin it cannot
+> verify as a named coverage gap on this record, never as silence — an absent event will say why it is
+> absent, and that it does not mean the agent did not practise."*
+>
+> **Signed replacement:** *"This disclaimer list will be updated when a structural fix **begins
+> enforcing which events are minted**; that fix will surface any artifact whose origin it cannot verify
+> as a named coverage gap on this record, never as silence — an absent event will say why it is absent,
+> and that it does not mean the agent did not practise."*
+
+**Exactly this text, no other variant, ships at slice 3** — alongside the `provenance_gaps` field, its
+ADR-013 §8 dated amendment, and pins from S2-48. `attests[1]` and this specific clause both need a
+content pin at that same edit (fact 8b, §2 — `attests[1]` currently has none; the S2-39/S2-40 precedent
+is the pattern). **No further mentor question or founder sign-off is owed on this wording** unless the
+built PR19 review surfaces a reason to revisit it.
 
 **Slice ambiguity, fixed:** §6 and §13 read differently on which slice carries edit two. **Edit two —
 the disclaimer's substantive update to describe the fix's actual coverage — fires at ENFORCEMENT
@@ -1069,15 +1089,17 @@ and expect the load-bearing dimensions to be: identity-matching correctness (§3
 fail-open on the ledger read (§5), the F-2 hard exclusion holding at the schema and the serialiser, and
 flag-off byte-identity on the served payload.
 
-**Suggested slicing, each its own founder-walked 0c-ii:**
+**FOUNDER SIGN-OFF ON SEQUENCING GIVEN, 2026-08-26.** This is the order to build in — **not**
+authorization to open slice 1 now. Each row remains its own founder-walked 0c-ii; nothing here
+self-starts.
 
 | Slice | Content | Tier |
 |---|---|---|
 | 1 | Both migrations, TEST → production, inert | `code-critical` (schema) |
 | 2 | The consult-side write + its flag, record-only; PR24 sweep wiring in the same session | `code-critical` |
-| 3 | The `provenance_gaps` served field + R18 sign-off + ADR-013 §8 amendment + pins from S2-48, in one edit | `code-critical` |
-| 4 | The identity-coherence credential step (§3.3), founder-walked | credential |
-| 5 | Switch-on, gated on §9's C1–C4, with edit two of the public claim in the same step | `code-critical` |
+| 3 | The `provenance_gaps` served field + the §10 attestation amendment (exact wording locked, above) + ADR-013 §8 amendment + pins from S2-48, in one edit; the ENV-1 gate relaxation (§6.5) rides in the same edit — it touches the same served payload | `code-critical` |
+| 4 | **RETIRED — no credential action needed.** The original slice 4 ("mint the harness a new bound consult credential") was §3's superseded first-draft fix, blocked by the same uniqueness index the identity conflict itself depends on (§3.2). The RULED resolution — defer the harness's accreditation by name — requires no credential step at all: under the two-branch design already built in slices 1–3, the harness's writes refuse automatically, and C1 already excludes it by name (§9, confirmed empty population beyond it, §12.0). Option A (merge the harness's credentials) remains available as a distinct, separately-documented founder election if ever taken — not part of this build's sequence. |
+| 5 | Switch-on, gated on §9's C1–C4 (C1 already discharged, §12.0), with edit two of the public claim in the same step | `code-critical` |
 
 **Inherited lessons that must not be rediscovered:** re-derive any CHECK constraint's *current*
 definition via `pg_get_constraintdef` rather than trusting a migration file's comments (the Stoa
@@ -1090,32 +1112,30 @@ and the public-claim edit independently `git revert`-able.
 
 ---
 
-## §14 — Recommendation *(permitted; this elects nothing)* — the scoping arc is closed
+## §14 — Recommendation *(permitted; this elects nothing)* — the scoping arc is fully closed
 
 **Option (a) is buildable within its ruled limits. (a) does not fail.** Option (b) and the hybrid stay
 unneeded, per the original ruling.
 
-**Every question raised in this arc is now RULED, including the ones the mentor sent back for more
-precision or more work:** the two-branch refusal design (§5); C2's resubmission-reachable redefinition
-(§9); the identity conflict — defer the harness by name, not a general policy (§3, §9); the
-`provenance_gaps` sibling field, not widened `coverage_gaps` (§6); the 404 fix — relax the ENV-1 gate,
-tied to the ledger's own flag (§6.5); and the dependency between the last two, closed explicitly (§3.3).
+**Every question raised in this arc is RULED, and both remaining founder-facing items are now
+SIGNED:** the two-branch refusal design (§5); C2's resubmission-reachable redefinition (§9); the
+identity conflict — defer the harness by name (§3, §9, confirmed empty population beyond it — §12.0);
+`provenance_gaps` (§6); the ENV-1 gate relaxation for the 404 (§6.5); the dependency between the last
+two, closed explicitly (§3.3); **the attestation amendment's exact wording — founder-signed, 2026-08-26
+(§10)**; **the build sequencing — founder-signed, 2026-08-26 (§13), with the superseded slice-4
+credential fix retired and replaced with the correct "no action needed" disposition.**
 
-**Empirically confirmed, not merely reasoned, as of 2026-08-26:** §9's C1 population is empty beyond the
+**Empirically confirmed on live data, not merely reasoned:** §9's C1 population is empty beyond the
 named harness exclusion (§12.0); the identity-conflict finding is live on the active credential pair,
-not a record claim (§12.1); the general write-lag pattern underlying §7's 90-day window holds for four
-of five sampled agents, with the fifth being the harness itself, whose own outlier lag corroborates the
-identity finding rather than contradicting the window basis (§12.2).
+not a record claim (§12.1); the write-lag pattern underlying §7's 90-day window holds for four of five
+sampled agents, with the fifth — the harness — corroborating rather than contradicting it (§12.2).
 
-**What remains, and none of it blocks a build slice from being scoped in detail:**
+**Nothing outstanding gates opening a build slice.** The 90-day window, PR24 sweep wiring, and the
+recency-tier sequencing held up under two rounds of review and are unchanged.
 
-1. **The live attestation amendment** (§10) — a founder R18 sign-off item, likely not a further mentor
-   round (the original ruling delegated "confirm or amend" to this scoping session).
-2. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — held up under two rounds
-   of review, unchanged.
-
-**Nothing here is built.** Every schema, flag, credential, and public-surface step in §13's slicing
-remains its own founder-walked 0c-ii.
+**Nothing here is built.** §13's sign-off is on the ORDER, not a start signal — every schema, flag,
+credential, and public-surface step in that sequence remains its own founder-walked 0c-ii, opened
+individually when the founder elects to.
 
 ---
 
