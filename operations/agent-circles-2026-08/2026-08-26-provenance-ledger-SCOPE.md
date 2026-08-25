@@ -30,6 +30,12 @@ credential, or public surface was touched. **AC7 not engaged. This document lice
 > remaining candidate for a further mentor round. See
 > `2026-08-26-mentor-ruling-provenance-ledger-q1-round2-verbatim.md`.
 
+> **⚠ ROUND 4, 2026-08-26.** Both remaining cases are now made and sent, not merely named. §6.5's
+> "free reuse" claim was checked against source and found wrong — the composer's null-aggregate branch
+> is dead code on its sole live call path, not proven reuse — and the case for relaxing the 404 gate is
+> now argued on ENV-1's own stated principle rather than asserted. See
+> `2026-08-26-MENTOR-QUESTION-round4-provenance-ledger-q3-and-404.md`.
+
 **What it scopes is `code-critical` when built** — two new tables, a trust-core write path, the
 accreditation write boundary's mint decision, and a change to a served public payload.
 
@@ -539,40 +545,84 @@ and the did-not-practise clause, inline. **F-2's hard exclusion:** no signature-
 serialised — enforced by the serialiser's field list (§4.1's earlier correction), not by an absence in
 the schema.
 
-### 6.5 The 404 — RULED as the more serious finding, carried forward, NOT settled here
+### 6.5 The 404 — a case is now made, not just two names on a list
 
-**Mentor, verbatim, on Q4:** *"the public trust record 404ing for an agent with no evidence at all means
-that the agent the fix exists to make visible... has no public record at all... That is the silent
-carve-out I rejected, arriving through a different path."*
+**Mentor, verbatim, on Q4:** *"the public trust record 404ing for an agent with no evidence at all
+means that the agent the fix exists to make visible... has no public record at all... That is the
+silent carve-out I rejected, arriving through a different path."* And the fork the mentor put back:
+*"does the public trust record need a stub record... or does the coverage gap need to surface through a
+different mechanism for the zero-evidence population?"*
 
-`GET /api/trust-record/{agent_id}` 404s when no domain carries evidence (`handler.ts:222`, the ENV-1
-gate — a deliberate, previously-correct decision that a bare row's existence must not imply examined
-evidence). Whichever field carries `provenance_gaps` — sibling or widened `coverage_gaps` — it lives
-inside the `record` object that gate only composes on a 200. **An agent whose mints are ALL refused
-never accumulates evidence, its record 404s, and its gaps render nowhere.**
+**The first draft of this section named both shapes and picked neither. It also asserted, without
+checking, that a stub record would be nearly free — "closer to compose the existing null-aggregate
+branch... than a wholly new response shape." Verified at source, that claim is wrong, and the actual
+mechanism facts change the case.**
 
-**The mentor's own framing of the open question, carried here verbatim rather than paraphrased, because
-paraphrase is exactly the risk that produced Q3's departure:** *"does the public trust record need a
-stub record — a record that exists because an agent attempted accreditation, regardless of whether any
-event minted — or does the coverage gap need to surface through a different mechanism for the
-zero-evidence population?"*
+**6.5.1 What is actually true, verified against `composeTrustRecordPayload` and its call graph.**
+`GET /api/trust-record/{agent_id}` has exactly ONE caller of the composer
+(`handler.ts:269`), and it is called only after the ENV-1 gate (`handler.ts:222`,
+`verdict.profile.domains.some(d => d.hasEvidence)`) has already passed. Inside the composer, the
+`aggregate ? {…} : {level: null, …}` branch's FALSE arm is reachable only when `verdict.aggregate` is
+`null` — but `readTrustVerdict` (`harness-integration.ts:503-582`) only ever returns a null `aggregate`
+on an early failure path (store error, disabled flag), never alongside a non-null `profile`. **On the
+sole live call path, the composer's own "no evidence" branch is dead code, not a proven, exercised
+shape.** Reaching it for the first time — which any stub-record build would do — is new surface, not
+reuse, and needs its own test coverage.
 
-**Not resolved in this document.** Two shapes are named, neither elected, both requiring their own R18
-treatment of a public 404 contract:
+**6.5.2 What a zero-evidence agent's profile actually looks like, also verified.** `readTrustProfile`
+(`trust-core-store.ts:524-550`) reads `agent_trust_state` rows for the agent and passes whatever it
+finds — possibly nothing — into `computeTrustProfile`. An agent with zero rows still gets a **non-null**
+profile: `computeTrustProfile` synthesizes a `domains` array from the profile-prior defaults, each
+entry honestly `hasEvidence: false`, and sets `sparse: evaluated.length === 0`
+(`trust-aggregate.ts:110`) — which for such an agent correctly reads `true`. **The 404 gate is not
+"does a profile exist" — it is the single condition `domains.some(hasEvidence)`.** This narrows what a
+stub-record build actually is: not composing a new near-empty shape, but **relaxing one boolean
+condition** and, for the first time, exercising an existing-but-dormant branch honestly.
 
-- **A stub record** — `GET` would serve a 200 with an empty/near-empty `record` block plus
-  `provenance_gaps` whenever provenance-gap entries exist, even with zero evidence in every virtue
-  domain. This relaxes ENV-1's gate specifically for the provenance-gap population, and needs its own
-  statement of what else such a stub honestly discloses (the aggregate would read `level: null`,
-  `basis: 'no evaluated cardinal-domain evidence'` — already the payload's own null-aggregate shape,
-  §trust-record-payload.ts `:394-398` — so the stub is closer to "compose the existing null-aggregate
-  branch whenever gaps exist" than to a wholly new response shape).
-- **A different mechanism for the zero-evidence population** — e.g. a distinct, narrower endpoint or a
-  documented statement that a fully-refused agent's coverage gaps are, by design, not publicly visible
-  until at least one evaluated domain exists, with that limit disclosed on the live attestation
-  alongside the rest of §10's wording.
+**6.5.3 The case for the stub record, on grounds sharper than "F-2 wants it visible."** The ENV-1 fold's
+own stated purpose, quoted in its own comment, was never "must have virtue-domain evidence" as an end
+in itself — it was **"gating the 404 on bare row existence would have served [a declaration-class]
+agent a 200, falsifying the published contract... A 200 now genuinely implies... examined evidence."**
+The thing ENV-1 rejects is a *bare row* — evidence of nothing, dressed as evidence of something. **A
+provenance-gap entry is not that.** It is proof the ledger genuinely examined an artifact's origin and
+reached a determinate verdict (refuse, and why) — a different KIND of examination than virtue-domain
+evaluation, but not a lesser one, and not the bare-row case ENV-1 was built to exclude. **Extending the
+gate to `domains.some(hasEvidence) || provenance_gaps.length > 0` is a faithful extension of ENV-1's
+actual principle — genuine examination, not bare existence — not a violation of it.**
 
-**Named as the next open item for either a return-with-more-detail relay or its own scoping increment.**
+**6.5.4 The case against the separate-endpoint alternative, worked through rather than left as a name.**
+A dedicated sibling endpoint (e.g. `GET /api/trust-record/{agent_id}/provenance-gaps`) would leave the
+main record's existing, already-published ENV-1 contract untouched — a real advantage, smaller PR19
+surface on the already-shipped endpoint. **But it fails on its own unless the main endpoint's 404 body
+points to it.** A client that follows the documented flow, hits a 404, and stops would never discover
+the sibling surface — reproducing, in a new place, the exact "pointer resolves to nothing" defect class
+this whole arc opened by correcting (fact N, the `agent-card.json` pointer to an empty
+`does_not_attest`). Making the 404 honest then requires modifying the 404 response body to carry a
+pointer — its own change to a documented response shape, with its own R18 consideration. **Once made
+honest, the separate-endpoint approach costs a NEW endpoint plus a modified 404 body; the stub-record
+approach costs one relaxed gate condition on an endpoint already being changed this session.** The
+former is not simpler once honesty is priced in; it is two smaller changes instead of one, with the
+same total surface.
+
+**6.5.5 A genuine cost of the stub record, named rather than omitted because the case favours it.**
+Today, EVERY 200 from this endpoint implies at least one domain has evidence — an assumption no live
+consumer has ever had to violate, because the dead branch has never fired. Any future integration built
+against today's live behaviour (200 ⇒ some evidence exists) would need to additionally check
+`aggregate.level !== null` before treating the record as evaluative. This is disclosable and bounded
+(the payload already, honestly, says `sparse: true` and `aggregate.basis: 'no evaluated cardinal-domain
+evidence'`), but it is a real change to an implicit contract, not a free extension.
+
+**6.5.6 Recommendation.** The stub-record approach — relax `verdict.profile.domains.some(hasEvidence)`
+to also admit `provenance_gaps.length > 0` — on the grounds that it is a faithful extension of ENV-1's
+own stated principle rather than a violation of it (6.5.3), it is the smaller total change once the
+separate-endpoint alternative is made honest (6.5.4), and its costs are disclosable and already
+partially covered by the payload's existing honesty fields (6.5.5). **The relaxation should be tied to
+the same flag gating the ledger** (`SUBSTRATE_PROVENANCE_LEDGER_ENABLED`), so that flag-off leaves this
+endpoint byte-identical — `provenance_gaps` is never populated flag-off, so the additional OR-condition
+is never true, and the change is inert until the ledger itself ships. **Offered as a case, per the same
+discipline Q3 required — not a decision.**
+
+### 6.6 Cost and blast radius, stated as Step 2 requires it be
 
 ### 6.6 Cost and blast radius, stated as Step 2 requires it be
 
@@ -965,31 +1015,27 @@ and the public-claim edit independently `git revert`-able.
 
 ---
 
-## §14 — Recommendation *(permitted; this elects nothing)* — updated after both mentor rounds
+## §14 — Recommendation *(permitted; this elects nothing)* — updated after round 4
 
 **Option (a) is still buildable within its ruled limits.** Option (b) and the hybrid stay unneeded.
 **(a) does not fail.**
 
-**Now fully RULED, no longer recommendations:** the two-branch refusal design (§5); C2's
-resubmission-reachable redefinition (§9); the `coverage_gaps` departure labelled and cased (§6, choice
-still open between sibling field and widened field); and **the identity conflict (§3, §9)** — defer the
-harness's own accreditation by name, not a general policy; option A (merge credentials) available in
-principle as an unrecommended founder election; §9's C1 now defined only after the split-pair population
-is measured (§12.0), with cohort-freeze machinery retired as unneeded under the ruled narrower reading.
+**Fully RULED:** the two-branch refusal design (§5); C2's resubmission-reachable redefinition (§9); the
+identity conflict (§3, §9) — defer the harness by name, not a general policy; §9's C1 defined only after
+the split-pair population is measured (§12.0).
 
-**Still open, and now down to a small, well-bounded set:**
+**Cased and sent, awaiting a ruling (round 4):** Q3's mechanism choice — sibling field recommended over
+widening `coverage_gaps` (§6.1–6.4); the 404 question — relaxing the ENV-1 gate for the provenance-gap
+population recommended over a separate endpoint (§6.5, with a prior draft's "free reuse" claim corrected
+in the process — the composer's null-aggregate branch is dead code today, not proven reuse).
 
-1. **Q3's mechanism choice** — sibling field vs. widened `coverage_gaps` (§6.3).
-2. **§6.5/§10 — the 404/stub-record question**, ruled the more serious Q4 finding and explicitly not
-   settled. **Sharper now than at round 1:** §3.3 shows the harness deferral's own honesty depends on
-   this being resolved — until it is, deferring the harness makes its refusal invisible, not
-   honestly-visible, which is the exact failure this whole arc exists to prevent. **This is the
-   strongest remaining candidate for a third mentor round, not a build-time detail.**
-3. **§12.0's population measurement** — a founder SQL query, now load-bearing for C1's own definition,
-   not merely confirmatory.
-4. **The live attestation amendment** (§10, wording that names enforcement rather than existence as the
-   trigger) — unchanged, still owed.
-5. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — unchanged, all held up
+**Still open, smaller now:**
+
+1. **§12.0's population measurement** — a founder SQL query, load-bearing for C1's own definition.
+2. **The live attestation amendment** (§10) — unchanged, still owed, likely a founder R18 sign-off item
+   rather than a further mentor round (the original ruling delegated "confirm or amend" to this scoping
+   session).
+3. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — unchanged, all held up
    under review.
 
 ---

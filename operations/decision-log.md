@@ -27613,3 +27613,78 @@ corrected rather than left standing across two mentor rounds), PR25.
 still open between two named options) or carried forward as an explicit, named open question (the 404/
 stub-record fork, §6.5). Cross-references: `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`,
 `D-PROVENANCE-LEDGER-MENTOR-QUESTION-RAISED-2026-08-26`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-Q3-AND-404-CASED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Did the work the founder flagged as owed but not yet done: Q3's case (made in the prior
+session, folded into the document, but never actually sent to the mentor) and a genuine argued case for
+the 404 question (which the prior round only named two shapes for, without a recommendation). Both are
+now relayed in one round —
+`operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round4-provenance-ledger-q3-and-404.md`.
+
+**Q3's case relayed.** Summarised, not reargued here (full case already recorded at
+`D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`): unmodified reuse of `coverage_gaps` is
+rejected because its one available degraded form (folding a refused artifact's engaged domains into the
+array) would launder a provenance refusal into an unrelated existing signal; widening the field's
+element type is rejected because it breaks a documented public field's shape against every established
+precedent this exact payload has for adding a new kind of signal, and because the two kinds of gap sit
+at different grains (aggregate-composition property vs. single-write-moment property).
+
+**The 404 case required real verification before it could be made honestly, and a prior claim in this
+document turned out to be wrong.** The scope had asserted a stub record would be nearly free, "closer
+to compose the existing null-aggregate branch… than a wholly new response shape." Traced against
+source: `composeTrustRecordPayload` has exactly one live caller (`handler.ts:269`), invoked only after
+the 404 gate already passed; its own null-aggregate branch is reachable only when `readTrustVerdict`
+returns a null aggregate alongside a non-null profile, which never happens on the live success path.
+**That branch is dead code today, not proven reuse — reaching it for the first time is new surface,
+needing new test coverage.** Corrected in place rather than let stand.
+
+**What the trace also established, and it reshapes the case rather than merely correcting an error.**
+The 404 gate is not "does a profile exist" — a zero-evidence agent still gets a real, honestly
+`sparse: true` profile with every domain present at `hasEvidence: false` (`computeTrustProfile`,
+`trust-aggregate.ts:110`). The gate is exactly one boolean condition
+(`domains.some(hasEvidence)`). This narrows what relaxing it actually is: not composing a new
+near-empty shape, but widening one condition to also admit `provenance_gaps.length > 0`.
+
+**The case for that relaxation, made on ENV-1's own stated principle rather than on F-2's visibility
+requirement alone.** The ENV-1 fold's own source comment names its purpose precisely: rejecting a *bare
+row* (a declaration-class event seeding state with no real evidence) from falsifying a "200 implies
+examined evidence" claim. A provenance-gap entry is not a bare row — it is proof the ledger genuinely
+examined an artifact's origin and reached a determinate refusal verdict. Extending the gate to admit it
+is argued as a faithful extension of ENV-1's actual principle, not a violation of it.
+
+**Weighed explicitly against the separate-endpoint alternative the mentor also named.** A dedicated
+sibling endpoint leaves the main record's contract untouched, but only stays honest if the existing 404
+body is modified to point to it — otherwise it reproduces, in a new location, the exact
+"pointer-resolves-to-nothing" defect class this whole arc opened by correcting. Priced at that full
+honest cost, the separate-endpoint approach is a new endpoint plus a modified 404 body — not smaller in
+total than one relaxed condition on the endpoint already being changed this session. **The disclosed
+cost of the recommended approach is stated rather than omitted**: every 200 today implicitly means some
+evidence exists, and a future integration checking only HTTP status rather than `aggregate.level` could
+misread a zero-evidence stub — bounded by the payload's existing honesty fields, but real.
+
+**Recommendation sent, tied to the ledger's own flag** so the relaxation is inert (and byte-identical)
+until the ledger ships — flag-off means `provenance_gaps` is never populated, so the widened condition
+is never true.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round4-provenance-ledger-q3-and-404.md` — new
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — §6.5 rewritten with the corrected trace and the argued case; §14, header notice updated; two duplicate section headings introduced by the edit process found and removed
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-q3-404-cased-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15 (the ENV-1 relaxation is argued as an extension of the existing gate's own
+principle, not a new mechanism), PR19, PR20 (the "free reuse" claim traced to source and corrected
+rather than repeated a third time across two prior drafts).
+
+**Status:** Adopted. Awaits the mentor's ruling on Q3's mechanism choice and the 404/stub-record
+question. Cross-references: `D-PROVENANCE-LEDGER-Q1-RULED-2026-08-26`,
+`D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`.
