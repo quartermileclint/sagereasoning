@@ -26692,3 +26692,44 @@ api-docs), only after edit 1 is live; (c) the second correction, once a structur
 **Status:** Adopted / Applied (edit 1). **Rollback:** `git revert` this commit — restores the prior
 envelope, the ADR section, and the pins together; nothing else depends on it, and the public surfaces
 were never advanced ahead of it.
+
+---
+
+## 2026-08-25 — D-EXTRACTION-PROVENANCE-EDIT1-PR19-REVIEW-CLEAN-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — the PR19 review itself is documents-only. No code
+changed. AC7 not engaged.
+
+**What.** The founder-requested PR19 independent adversarial review of `9f2f7b9` (the extraction-
+provenance envelope edit) ran: 3 dimensions (mandate fidelity vs the binding ruling + sign-off
+package · pin adequacy and uniqueness · blast radius across other consumers and the public surfaces)
+with per-finding adversarial verification. **0 findings raised across all three dimensions.**
+
+**A harness anomaly, disclosed rather than accepted silently.** The Workflow's own diagnostics flagged
+`agents_empty_result: 3` — all three review agents — with only 35 total tool calls across three
+dimensions each briefed to read 6+ files. Per the standing project lesson that a guard which stops
+guarding still prints zero failures, **this was not treated as a clean pass on the harness's report
+alone.** The journal (`journal.jsonl`) was read directly: all three agents returned a **structurally
+valid** `{"findings": []}` — not `null`, not an error — so the flag reflects the harness's generic
+short-output heuristic, not a dead or skipped agent. **Independently re-verified first-hand** on the
+three sharpest checks each dimension was assigned: (1) the three public surfaces (`llms.txt`,
+`agent-card.json`) contain **zero** occurrences of any new sentence fragment — confirmed by direct
+grep, not by trusting the commit message; (2) `git show 9f2f7b9 --stat` confirms exactly the four
+files claimed, nothing else; (3) a third consumer of `TRUST_RECORD_ENVELOPE` exists
+(`orientation-reading.ts`) that the drafting session had not enumerated — verified it is a **comment
+reference only**, not an import, so it carries no risk; (4) every one of the five pin substrings
+(S2-43..S2-47) occurs **exactly once** in the served envelope, ruling out both a duplicate-match false
+pass and a pin matching the wrong sentence; (5) no present-tense coverage-gap claim exists anywhere
+in the file outside the one deliberately future-tensed sentence.
+
+**Conclusion: the review is treated as CONFIRMED CLEAN**, on the combination of (a) a genuine,
+schema-valid zero-findings result from three independent dimensions, not a crashed or empty run, and
+(b) first-hand re-verification of the highest-risk checks rather than deference to either the
+Workflow's summary or its anomalous diagnostic field. The one new fact this review surfaced beyond the
+drafting session's own record — the `orientation-reading.ts` comment reference — is recorded here for
+completeness though it changes nothing.
+
+**PR19 is now discharged for this commit.** The only remaining carried item is the founder's own
+push/deploy, and Edit 2 (the three public surfaces) once Edit 1 is live.
+
+**Status:** Adopted (review complete, clean). **Rollback:** N/A — no code changed this entry.
