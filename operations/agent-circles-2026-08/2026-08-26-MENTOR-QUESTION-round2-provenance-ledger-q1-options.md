@@ -1,5 +1,11 @@
 # Mentor question, round 2 — Q1 only: the three actual options, stated as scoped
 
+> **⚠ ANSWERED 2026-08-26.** Ruled: defer the harness's own accreditation by name (the narrower move,
+> not the general policy); option A (merge credentials) available in principle, explicitly not
+> recommended, left to the founder. Full ruling:
+> `2026-08-26-mentor-ruling-provenance-ledger-q1-round2-verbatim.md`. Folded into
+> `2026-08-26-provenance-ledger-SCOPE.md` §3, §9, §12, §14.
+
 **Raised 2026-08-26**, returning `2026-08-26-MENTOR-QUESTION-provenance-ledger-identity-and-policy.md`
 §1 per the mentor's own instruction: *"If the options are different from what I have named, the
 question should return with the three options stated explicitly. I will not rule on a set of options I

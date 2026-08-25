@@ -21,6 +21,15 @@ credential, or public surface was touched. **AC7 not engaged. This document lice
 > `2026-08-26-mentor-ruling-provenance-ledger-q1-q4-verbatim.md` and
 > `2026-08-26-MENTOR-QUESTION-round2-provenance-ledger-q1-options.md`.
 
+> **⚠ ROUND 3, 2026-08-26. Q1 is now RULED.** Defer the harness's own accreditation by name, not a
+> general policy (§3.3); option A (merge the two credentials) is available in principle as an
+> unrecommended founder election; §9's C1 is defined only after the split-pair population beyond the
+> harness is measured (§12.0), and the cohort-freeze machinery is retired as unneeded. **One dependency
+> the ruling's own wording surfaced and did not resolve: the harness deferral is only honestly visible
+> once §6.5's still-open 404 question is answered** — named explicitly in §3.3 as the strongest
+> remaining candidate for a further mentor round. See
+> `2026-08-26-mentor-ruling-provenance-ledger-q1-round2-verbatim.md`.
+
 **What it scopes is `code-critical` when built** — two new tables, a trust-core write path, the
 accreditation write boundary's mint decision, and a change to a served public payload.
 
@@ -84,6 +93,7 @@ to be computable at all.** So the ledger is not a partial substitute for PA-10's
 | Phasing | **Record-only → accumulate → switch refusal on**; threshold **defined before ship** | §9 |
 | Refusal visibility | **Every refused mint is a named coverage gap, never silence, "using the existing machinery" — F-2: "The existing `coverage_gaps` field is the right surface"**; no signature or artifact detail | **§6 — DEPARTED FROM, flagged, and cased per the round-2 ruling.** The first draft of this row dropped the `coverage_gaps` clause, which is the clause §6 departs from. Restored. Ruling on Q3 (2026-08-26): bring the departure back labelled, and make the case that `coverage_gaps` is inadequate rather than merely inconvenient — done in §6.2/6.3 |
 | **Supplied-entry disposition (Q2, RULED 2026-08-26)** | **A ledger entry reading `supplied` REFUSES the mint** — a second refusal branch distinct from missing-entry, with its own reason surfaced separately on the record. Server entry permits. The plugin path (mandatory-supplied) is named as its own open sub-question, not blocking non-plugin shipping | §5 — implemented; §11 — named |
+| **The identity conflict (Q1, RULED round 2, 2026-08-26)** | **Defer the harness's own accreditation, by name, as a single-agent decision. NOT a general policy toward every split-pair agent.** Option A (merge the harness's two credentials) is available IN PRINCIPLE as a founder security trade, explicitly NOT ruled and NOT recommended. Option B remains closed | §3 — implemented; §9 — restructured |
 
 ---
 
@@ -139,40 +149,70 @@ unit. What it did not check is that the specific configuration it cited as the r
 correction **fails the module's own precondition on one of its two credentials**. That is a
 second-order consequence of exactly the kind PR20 exists to surface before a build discovers it.
 
-### 3.2 The three ways out, and why only one is available
+### 3.2 The three ways out — SUPERSEDED. This table's own "available path" (C, below) was later shown
+blocked by the same index, and the real resolution came from the mentor across two rounds. Kept as the
+honest record of how the reasoning moved, not as the current design.
 
-| | Path | Verdict |
+| | Path (as first drafted) | Verdict at the time |
 |---|---|---|
-| A | Relax the guard: let a `credential`-kind consult entry be resolved by an `owner_agent_pair` lookup sharing the agent_id | **Rejected.** This *is* the `(null, agent_id)` join the cross-tenant guard forbids, and it reintroduces precisely the cross-credential surface the ruling's stated reason is about. It would also be a second identity notion, which the ruling forbids by name |
-| B | Widen the ledger's matching to "identity matches **or** credential_ref matches" | **Does not help.** The two credential refs differ. It buys nothing and adds a rule |
-| C | Make the harness's consult credential owner+agent bound, so both sides resolve to the pair — and make that a **switch-on precondition**, not a design change | **The available path.** The module is used unchanged; no new identity notion; the guard is untouched; the configuration moves to satisfy it |
+| A | Relax the guard: let a `credential`-kind consult entry be resolved by an `owner_agent_pair` lookup sharing the agent_id | Rejected then, rejected now — this is the `(null, agent_id)` join the cross-tenant guard forbids, and the mentor's round-1 ruling closed it outright: no path abandoning owner+agent-pair scoping for a bare-credential or unbounded lookup is available |
+| B | Widen the ledger's matching to "identity matches **or** credential_ref matches" | Correctly rejected — the two credential refs differ; buys nothing |
+| C | Mint a fresh owner+agent-bound consult credential for the harness, retiring the current one | **Called "the available path… recommended" here — WRONG, and the error survived into this document until §1.4 caught it.** `api_keys_upc_owner_agent_active_uniq` permits at most one active credential per `(owner_user_id, agent_id)` **across all purposes**; the write-class credential is already owner+agent bound on that exact pair. Minting a second owner+agent-bound credential for the same pair collides on the identical index the identity conflict itself depends on (fact confirmed on production record, §1.4). **This path is blocked, not available.** |
 
-### 3.3 Path C's own blast radius — named, because it is not free
+**What actually happened next, stated plainly because the document owes it to itself:** §1.4 (written
+later in this same session, after independent review) found C blocked and re-scoped the real fork as
+A′ (merge the harness's two credentials into one) / B′ (relax the match, already closed) / C′ (accept
+permanent refusal — either generally, or narrowed to the harness by name). **The mentor ruled on that
+later fork, not on this one.** Table 3.2 above is retained only so a reader can see where the first
+error was and that it was caught in-session before reaching the mentor, not silently dropped.
 
-Two forms, and they are not equivalent:
+### 3.3 The RULED resolution (two mentor rounds, 2026-08-26)
 
-- **Mutating the existing credential's `owner_user_id`** — **do not do this without weighing it.**
-  `POST /api/credential/erase` scope-guards external-consumer erasure on `owner_user_id IS NULL`.
-  Binding an owner takes that credential **out of the consumer-erasure path** and changes what
-  `owner_kind` denotes for it. That is an auth-and-data-rights-adjacent state change, not a config tweak.
-- **Minting a fresh owner+agent-bound consult credential for the harness and retiring the current one**
-  — **recommended.** No existing credential's owner semantics are mutated; it is an ordinary
-  founder-walked mint + revoke, which this project has done repeatedly; and it is the same shape as
-  the gen-1 → gen-2 rotation already on record.
+**Defer the harness's own accreditation, by name, as a single-agent decision. Not a general policy
+toward every split-pair agent.** Mentor, round 2, verbatim: *"The ruling: defer the harness's
+accreditation specifically, by name, as a single-agent decision. Do not adopt option C's general
+policy."*
 
-Either way it is a **founder-walked credential step and a named precondition on §9's switch-on**, not
-part of the build.
+**Option A′ (merge the harness's two credentials into one) is available IN PRINCIPLE — the identity
+requirement is satisfied cleanly, and it does not violate the owner+agent-pair scoping — but it is a
+security-posture trade the mentor explicitly declined to rule and explicitly recommended against:**
+*"The least-privilege split is not a preference. It is a documented response to a real incident and a
+HIGH adversarial finding... Option A is available to the founder as a decision. It is not available as
+a ruling from me."* **Not elected here.** If the founder takes it, the security trade must be
+documented explicitly alongside the provenance rationale — its own record, not a side effect of this one.
 
-### 3.4 The general form, which is what actually belongs in the switch-on condition
+**Consequence, named by the mentor rather than discovered later:** deferring the harness's
+accreditation means **the harness's own practice is not visible on the public trust record under
+enforcement.** The mentor judges this proportionate — *"the harness is not a practitioner whose
+progress is being obscured; it is the project's own reference integration whose configuration creates
+the identity conflict"* — on the stated premise that *"the coverage gap surfaces per F-2 — the refusal
+is named, not silent."*
 
-The harness is one instance of a general rule the ledger creates:
+**⚠ That premise is not yet true, and this document is the place to say so rather than let it pass.**
+Under the CURRENT unresolved state of Q4's second finding (§6.5), an agent whose every mint is refused
+gets a **404**, not a coverage-gap entry — the record that would carry the gap does not exist. The
+mentor's own round-1 ruling named this the more serious of Q4's two findings and left it explicitly
+open. **So today, deferring the harness's accreditation would make its refusal genuinely INVISIBLE, not
+merely honestly-refused-and-visible** — the exact silent-carve-out shape the whole arc exists to
+prevent, arriving through the interaction of two separately-ruled, separately-correct decisions.
+**Named as a dependency, not resolved here: the harness deferral's own honesty claim is contingent on
+§6.5's 404/stub-record question being answered before or alongside enforcement switching on.** This is
+carried forward rather than silently assumed away.
+
+### 3.4 The general form, which now applies only after measurement — RULED, sequencing changed
+
+The general rule the identity finding produces still holds descriptively:
 
 > **For any agent, every credential that produces assessments must resolve to the same longitudinal
 > identity as the credential that submits them — or its assessments will be refused.**
 
-That is a checkable condition over the live credential population, it is exactly the kind of concrete
-condition addendum 2 demanded be *"defined before the ledger ships, not discovered operationally"*, and
-it falls out of the identity finding rather than being invented for the threshold. §9 uses it.
+**What changed is what this rule is FOR.** The first draft made it a switch-on condition (§9's original
+C1) evaluated over every agent, with a cohort-freeze or exception-register mechanism to keep the
+threshold reachable. **The mentor's round-2 ruling replaces that:** *"C1's population-wide threshold is
+defined AFTER the split-pair population is measured, not before... The harness is excluded from C1's
+denominator by name until its configuration changes."* **The measurement — how many agents beyond the
+harness use a split consult/write pair — is now a hard founder prerequisite that must run BEFORE §9's
+C1 is defined, not merely before this scoping closes.** §9 is restructured accordingly.
 
 ---
 
@@ -648,23 +688,44 @@ discovered mid-build, which is what F-3 asked for.
 
 ---
 
-## §9 — The record-only → enforce switch-on threshold (hard requirement)
+## §9 — The record-only → enforce switch-on threshold (hard requirement) — RESTRUCTURED per the
+mentor's round-2 ruling
 
 Addendum 2 requires this be *"defined before the ledger ships, not discovered operationally."* It is
 stated here as a concrete checkable condition. **It decides nothing — the switch-on remains a
 founder-walked 0c-ii step, and this is the condition that step checks.**
 
-**Enforcement may be switched on when all four hold:**
+> **⚠ This section is materially different from its first two drafts. The first draft's C1 was a
+> population-wide universal that a review found could never clear (§3's stale table shows why). The
+> second draft added cohort-freeze / exception-register machinery to work around that. The mentor's
+> round-2 ruling removes the need for that machinery entirely, by changing the SEQUENCE: measure the
+> population, THEN define C1 against it, with the harness excluded by name in the meantime.** Verbatim:
+> *"C1's population-wide threshold is defined after the split-pair population is measured, not before...
+> This is cleaner than the cohort-freeze machinery §9 currently requires under option C's general
+> policy. It is also more honest: the threshold reflects the population the ledger actually covers, not
+> a population that includes a permanently excluded agent whose exclusion is papered over by a freeze
+> mechanism."*
 
-**C1 — Identity coherence.** For every agent with an accreditation write in the trailing 90 days, every
-credential that produces its assessments resolves to the **same** longitudinal identity as the
-credential that submits them (§3.4). **This is the condition the identity finding produces, and the
-s9-loop harness fails it today** (§3.1). Checkable by SQL over `api_keys` alone — it needs no ledger
-data. **One correction: §12.1's query is scoped to `agent_id = 'sagereasoning:s9-loop@v1'` alone; C1 is
-a population-wide condition and needs its own query** — group `api_keys` by `agent_id`, compare
-`(owner_user_id, agent_id)` resolution across consult-capable vs write-class capabilities for every
-agent with a write in the trailing 90 days. §12.1 answers the harness case specifically; C1's own
-evaluation query is not yet written and is owed before switch-on, not before this scoping closes.
+**A new, sequence-ordering step precedes the four conditions below, and it is now the load-bearing one:**
+
+**S0 — Measure the split-pair population, before C1 is defined.** A population-wide query, not the
+harness-scoped one §12.1 already answers: group `api_keys` by `agent_id`, and for every agent with an
+accreditation write in the trailing 90 days, compare the longitudinal identity resolved on its
+consult-capable credential(s) against its write-class credential. **This is a hard founder prerequisite
+that gates C1's own definition, not merely this scoping's close.** If the population beyond the harness
+is zero, C1 collapses to a single named exclusion and nothing else is needed. If it is non-zero, C1's
+threshold is set against that measured population — with real data, per the ruling, rather than
+generalising from the one known case.
+
+**Enforcement may be switched on when S0 has run and all four hold:**
+
+**C1 — Identity coherence, defined AFTER S0, over the population S0 measures, EXCLUDING the harness by
+name.** For every agent **other than `sagereasoning:s9-loop@v1`** with an accreditation write in the
+trailing 90 days, every credential that produces its assessments resolves to the **same** longitudinal
+identity as the credential that submits them (§3.4's general rule, now correctly scoped to the measured
+population rather than assumed universal). **The harness's own accreditation is deferred by name**
+(§3.3, RULED) — it is not counted toward C1, and it does not block enforcement from switching on for
+every other agent.
 
 **C2 — Coverage, RE-DEFINED per the Q4 ruling to be reachable.** Mentor, verbatim: *"the threshold
 definition must be reachable by every population the ledger is designed to cover, including legitimate
@@ -677,79 +738,40 @@ write's ledger-eligible submitted artifacts** resolving in the ledger, observed 
 consecutive weeks** of record-only operation — where an artifact is **ledger-eligible** only if it was
 consulted at or after the point the ledger's consult-side write began recording for its identity.
 **Artifacts consulted before that point are honestly `no_ledger_entry` forever, are named as such, and
-are EXCLUDED from C2's completeness denominator** — they cannot be resolved by any amount of waiting
-(§8's PA-10 discussion), so counting them against completeness would reproduce exactly the unreachable
-threshold the ruling warns against. This does not weaken C2's honesty: a pre-ledger artifact still
-refuses at enforcement and still surfaces its gap; it simply does not block the SWITCH from clearing on
-its account.
+are EXCLUDED from C2's completeness denominator.** This does not weaken C2's honesty: a pre-ledger
+artifact still refuses at enforcement and still surfaces its gap (subject to §6.5's still-open 404
+question); it simply does not block the SWITCH from clearing on its account.
 
-*Why 100% and not a percentage.* Addendum 2 offered *"what coverage percentage, or what population of
-active credentials with confirmed ledger entries."* A percentage is the wrong instrument here: the
-population is roughly ten agents, so any percentage below 100 is one agent, and a threshold that
-tolerates one agent's artifacts failing is a threshold that tolerates shipping enforcement into a known
-silent refusal. The population is small enough to require completeness, and completeness is what makes
-the refusals that follow **honest** refusals rather than blanket ones — which is exactly the standard
-addendum 2 set (*"honest refusals rather than blanket refusals of legitimate server-extracted
-artifacts"*).
+*Why 100% and not a percentage.* At a small, now-measured population (S0), any percentage below 100 is
+one agent, and a threshold that tolerates one agent's artifacts failing is a threshold that tolerates
+shipping enforcement into a known silent refusal. Completeness is what makes the refusals that follow
+**honest** refusals rather than blanket ones.
 
-**C3 — Corrected by independent review; the original justification was invalid.** It read *"at least
-90 days of record-only operation, so that no legitimate artifact predates the ledger's own existence."*
-**That inference does not hold.** Ninety days of ledger *operation* entails that no newly-created
-artifact predates the ledger. It entails nothing about *submitted* artifacts — a client keeps its own
-signed chain and may legitimately resubmit an artifact of any age, which is exactly PA-10 (§8),
-disclosed on this very payload. §8 says artifacts do not drain by aging; the original C3 assumed they
-do. Both cannot be right, and §8 is the one this document stands behind.
+**C3 — A minimum 90-day soak period**, ensuring the ledger has observed ordinary traffic before
+enforcement is considered. **Not a drain guarantee** — a legitimately-resubmitted pre-ledger artifact
+never drains by aging (§8's PA-10 discussion); C2's redefinition, not C3, is what keeps such artifacts
+from blocking the switch.
 
-**C3 as corrected: a minimum 90-day SOAK period, not a drain guarantee.** It ensures the ledger has had
-time to observe ordinary traffic before enforcement is considered — a good reason on its own — but it
-does **not** by itself make C2 reachable, because C2's population is not bounded by ledger age. See the
-termination problem below.
+**C4 — The surface is live.** §6's `provenance_gaps` field (or the widened `coverage_gaps`, per the
+mentor's still-open Q3 election) is deployed, pinned, and R18-signed **before** the first refusal can
+fire. F-2 is not satisfied by a refusal that has nowhere to surface — **and per §3.3's carried-forward
+dependency, C4 should be read as also requiring §6.5's 404/stub-record question to be resolved BEFORE
+enforcement switches on for any agent whose refusals could produce a zero-evidence record — the harness
+being the first, named example.** This is a strengthening of C4 this document did not carry until the
+round-2 ruling's own consequence (§3.3) surfaced it; not yet put to the mentor as its own question.
 
-**C4 — The surface is live.** §6's `provenance_gaps` field is deployed, pinned, and R18-signed **before**
-the first refusal can fire. F-2 is not satisfied by a refusal that has nowhere to surface.
+**The cohort-freeze / exception-register machinery the prior draft carried is RETIRED.** It was designed
+to keep C1 reachable under a general-policy reading of the identity conflict that the mentor did not
+adopt. Under the ruled narrower reading (§3.3), C1 is defined once, after S0, over a population that
+already excludes the one known blocker by name — no freeze mechanism is needed unless S0 finds other
+split-pair agents whose configuration cannot be resolved before C1 is set, which would be its own,
+smaller, future question.
 
-**A termination problem — RULED as a required constraint on this scoping (Q4), not merely a finding.**
-The mentor confirmed both halves are genuine and must be carried; the resubmission-reachability half is
-addressed directly above by C2's re-definition. **The open-population half (ii) below is NOT resolved
-by that re-definition and remains genuinely open** — it is a different mechanism (identity coherence
-across a growing population, not artifact age).
-
-Two concrete scenarios. **(i) The immortal chain — RESOLVED by C2's redefinition above.** An agent
-whose accreditation chain carries one pre-ledger signed assessment and resubmits the accumulated chain
-on each write no longer blocks the threshold: that artifact is `no_ledger_entry`-eligible by
-construction (it predates the ledger for its identity) and is excluded from C2's denominator, per the
-Q4 ruling's own distinction between "the ledger cannot speak to this" (honest, non-blocking) and "the
-ledger spoke and the artifact disqualified" (§5's `caller_supplied_extraction`). **(ii) The
-open-population problem — NOT resolved by the redefinition, and remains the serious one** — C1's
-identity-coherence rule (§3.4) is a universal over *every* agent with a write in the trailing 90 days,
-evaluated on an **open, growing** population. Every future onboarding
-re-tests it. §3.3 shows the fix is cheap for the founder's own harness (mint an owner-bound consult
-credential) but costly for an **external consumer** — the population the owner-less `external_consumer`
-shape exists for in the first place — because binding an owner removes that credential from the
-`POST /api/credential/erase` path (§3.3). §3.4 generalises the rule to every agent; nothing bounds the
-population it is evaluated against. A threshold that gets *harder* to satisfy as the system grows is
-the wrong shape for a phase addendum 2 requires to terminate — "accept and disclose" is ruled
-unavailable, and a threshold that can silently never clear converts that ruled-out posture into the
-default one by omission.
-
-**Two changes close this, and a build session should adopt at least one:**
-
-1. **Freeze the cohort.** Evaluate C1/C2 once, over the agents active at threshold-evaluation time. New
-   agents onboard *into* enforcement rather than blocking it — growth stops being a veto.
-2. **A named exception register, or a hard review date.** Either an agent may be excluded from C2 by a
-   recorded founder decision naming the agent, the unresolvable artifact class, and the reason — making
-   the exclusion itself a disclosed limit rather than an invisible stall — or a fixed date by which, if
-   C1–C4 have not cleared, the non-clearance is escalated as its own decision rather than left to
-   persist as the status quo.
-
-**This was put to the mentor and the mentor confirmed the constraint must be carried — it did not yet
-elect between the two closing mechanisms.** Still open for the next round: freeze the cohort, or a named
-exception register / hard review date, or some combination. Genuine design fork, founder-facing cost on
-one side (data rights, per §3.3), governance cost on the other (an unbounded phase).
-
-**Ordering note:** C3 (≥90 days) dominates C2's two weeks, so the binding path is C1 → C4 → C3, with C2
-observed along the way. **C1 is the only one that requires action rather than waiting**, which is why
-§3.3's credential step should be scheduled early rather than at the switch-on.
+**Ordering, restated:** S0 → C1's definition → (C1, C2 observed, C3 soak, C4 live, incl. the §6.5
+dependency) → switch-on. **S0 is now the step that requires action first**, ahead of §3.3's harness
+credential question (which the round-2 ruling makes moot for the harness specifically — the deferral,
+not a credential change, is the ruled resolution — though §3.3's Option A remains open as a founder
+election if the founder prefers coverage over the least-privilege posture).
 
 ---
 
@@ -846,6 +868,37 @@ Stated plainly, because the corrected public claim will rest on it.
 
 ## §12 — Founder prerequisites
 
+**12.0 — NOW THE HARD PREREQUISITE, per the round-2 ruling (§9's S0). Gates §9's C1 definition, not
+just this scoping's close.** The population-wide split-pair query:
+
+```sql
+-- Every agent with an accreditation write in the trailing 90 days, and for each: does its
+-- consult-capable credential resolve to the same (owner_user_id, agent_id) pair as its
+-- write-class credential? Population beyond the harness decides whether C1 needs any
+-- machinery beyond the harness's own named exclusion.
+select
+  k_write.agent_id,
+  k_write.owner_user_id       as write_owner,
+  k_consult.owner_user_id     as consult_owner,
+  (k_write.owner_user_id is not distinct from k_consult.owner_user_id) as identity_coheres
+from api_keys k_write
+join api_keys k_consult
+  on k_consult.agent_id = k_write.agent_id
+  and k_consult.is_active
+  and 'consult' = any(coalesce(k_consult.capabilities, array['consult']))
+where k_write.is_active
+  and ('accreditation_write' = any(coalesce(k_write.capabilities, array['accreditation_write'])))
+  and k_write.agent_id in (
+    select agent_id from agent_trust_events
+    where event_type = 'credential-completed' and occurred_at > now() - interval '90 days'
+  )
+order by identity_coheres, k_write.agent_id;
+```
+
+If this returns only `sagereasoning:s9-loop@v1` with `identity_coheres = false`, C1 is defined as the
+single named exclusion §3.3/§9 already specify and nothing further is owed. If it returns others, C1's
+population-wide threshold is set against them specifically, per the ruling.
+
 **12.1 — Required, and it gates §3.** The s9-loop **consult** credential's `owner_user_id` and
 `owner_kind`. The repo asserts owner-less in two places including the identity module's own docstring,
 but that is a record claim, not a verification, and §3's whole finding turns on it.
@@ -912,29 +965,32 @@ and the public-claim edit independently `git revert`-able.
 
 ---
 
-## §14 — Recommendation *(permitted; this elects nothing)* — updated after the mentor's Q2/Q3/Q4 ruling
+## §14 — Recommendation *(permitted; this elects nothing)* — updated after both mentor rounds
 
 **Option (a) is still buildable within its ruled limits.** Option (b) and the hybrid stay unneeded.
 **(a) does not fail.**
 
-**What is now RULED and no longer a recommendation:** the two-branch refusal design (§5) — missing
-refuses, supplied refuses with a distinct reason, server permits, the plugin path named as its own open
-sub-question; C2's resubmission-reachable redefinition (§9); and that the `coverage_gaps` departure must
-be labelled and cased, not asserted (§6 now does this and offers the mentor a genuine choice between a
-sibling field and a widened `coverage_gaps`, rather than presupposing the sibling field).
+**Now fully RULED, no longer recommendations:** the two-branch refusal design (§5); C2's
+resubmission-reachable redefinition (§9); the `coverage_gaps` departure labelled and cased (§6, choice
+still open between sibling field and widened field); and **the identity conflict (§3, §9)** — defer the
+harness's own accreditation by name, not a general policy; option A (merge credentials) available in
+principle as an unrecommended founder election; §9's C1 now defined only after the split-pair population
+is measured (§12.0), with cohort-freeze machinery retired as unneeded under the ruled narrower reading.
 
-**What is still open, awaiting the mentor's answer to the round-2 Q1 question:** whether the identity
-conflict resolves by merging the harness's two credentials (option A), by deferring the harness's own
-accreditation specifically (the narrower reading of option C), or by a general permanent-refusal policy
-toward every split-pair agent (option C as first scoped) — with option B already closed by the standing
-owner+agent-pair instruction. The recommendation does not presuppose an answer.
+**Still open, and now down to a small, well-bounded set:**
 
-**Also still open:** the 90-day window (unchanged, §7's corrected basis holds); sweep folded into the
-existing trajectory cron (unchanged); the recency-tier work sequenced after the ledger (unchanged); the
-live attestation amended to name enforcement rather than existence as its trigger (§10, unchanged since
-the reversal); the 404/stub-record question (§6.5, carried forward per the ruling, not yet answered);
-and §9's open-population half of the switch-on threshold (cohort-freeze vs. exception register — the
-ruling confirmed the constraint but did not elect a mechanism).
+1. **Q3's mechanism choice** — sibling field vs. widened `coverage_gaps` (§6.3).
+2. **§6.5/§10 — the 404/stub-record question**, ruled the more serious Q4 finding and explicitly not
+   settled. **Sharper now than at round 1:** §3.3 shows the harness deferral's own honesty depends on
+   this being resolved — until it is, deferring the harness makes its refusal invisible, not
+   honestly-visible, which is the exact failure this whole arc exists to prevent. **This is the
+   strongest remaining candidate for a third mentor round, not a build-time detail.**
+3. **§12.0's population measurement** — a founder SQL query, now load-bearing for C1's own definition,
+   not merely confirmatory.
+4. **The live attestation amendment** (§10, wording that names enforcement rather than existence as the
+   trigger) — unchanged, still owed.
+5. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — unchanged, all held up
+   under review.
 
 ---
 
