@@ -27810,3 +27810,44 @@ PR20 (slice 4's staleness caught and fixed rather than carried forward into a bu
 **Status:** Adopted. The scoping document is fully closed — every question ruled, both founder sign-offs
 recorded. Nothing built; each slice awaits its own founder-walked open. Cross-references:
 `D-PROVENANCE-LEDGER-SCOPING-ARC-CLOSED-2026-08-26`, `D-PROVENANCE-LEDGER-Q3-AND-404-CASED-2026-08-26`.
+
+---
+
+## 2026-08-25 — D-SIGNAL-QUALITY-GAP-SCOPED-2026-08-25
+
+**Stream:** founder. **Arc:** reflections (not a SageReasoning project arc). **Category:**
+`governance` — scope + design proposal, no build. **Risk:** Standard. **AC7 not engaged.** No code,
+schema, flag, credential, or live operation.
+
+**Decision.** Scoped the signal-quality gap the mentor's IW-7-openings ruling named as blocking
+opening 2 and opening 3 phase two, per the founder's explicit election.
+`operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md`.
+
+**Headline finding, from reading `layer2-mechanisms.ts`, `layer1-extractor.ts`, and `parallel-run.ts`
+directly.** The sparse-extraction default (`quality: 'contrary'`) is a fully deterministic function
+of one count, already fully readable on the wire — that is not the gap. The actual gap: this signal
+cannot distinguish "genuinely nothing kathekon-relevant here" from "the extractor missed something
+real," and no further signal on the kathekon dimension itself resolves that.
+
+**A derivable, disclosed-as-heuristic cross-check proposed, zero server change.** The full
+`Layer1Schema` object's *other* arrays (passions, oikeiosis circles, value categories, causal-stage
+evidence) are already on the wire, unused for this purpose — whether they're also empty (low
+confidence in the null) or populated (higher confidence) is a graded proxy, explicitly not a
+certainty: a rich extraction elsewhere does not prove the kathekon dimension specifically was
+examined correctly.
+
+**Does not clear opening 2 or opening 3 phase two.** Sharpens the mentor's own disclosed uncertainty
+into a specific answer (a graded proxy is derivable; a certainty is not) and puts a new, more
+actionable question to a future mentor consultation rather than resolving the block itself.
+
+**Files touched:**
+- `operations/reflections-examination-2026-08/2026-08-25-signal-quality-gap-scope.md` — new
+- `operations/handoffs/founder/2026-08-25-signal-quality-gap-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation/scope only; four files read, none
+edited. **Rollback path:** `git revert` this commit.
+
+**Rules served:** PR20, PR23.
+
+**Status:** Adopted. Cross-references: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`,
+`D-IW7-OPENING1-MEASUREMENT-RUN-2026-08-25`.
