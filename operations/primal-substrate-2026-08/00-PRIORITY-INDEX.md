@@ -406,6 +406,22 @@ scoped to the `owner_agent_pair` identity with a credential-only fallback**; no 
   cost calculus** — with every refusal publicly visible, window length is *"also a decision about how
   frequently the public record will carry coverage gap entries."*
 
+**RULED AGAIN 2026-08-25 (addendum 2), against measured data — urgency REDUCED, standing UNCHANGED.**
+The F-3 prerequisites were run: **2 active `l1_supply` credentials, both dead test artifacts** (one
+dormant since April, one a self-labelled throwaway still active 2 days after its smoke), **zero
+supplied extractions across 3,200 recorded consults**, 9 active UPC credentials carrying none, 0 active
+plugin credentials. **Ruled: the ledger remains first, but PHASED** — ship record-only, accumulate,
+then switch refusal on; *"it does not reintroduce the silent carve-out."* **The switch-on threshold
+must be defined BEFORE the ledger ships, "not discovered operationally."** **"Accept and disclose" is
+NOT available** — it would require retracting the live commitment, *"a third edit… that moves backward
+rather than forward."* **Source-narrowing (revoke the two + drop `l1_supply` from the `ecosystem`
+preset) is a legitimate CONCURRENT move and should happen, but defers rather than substitutes** — it
+addresses neither Arm-B, nor the emission-hooks asymmetry, nor the 454 unmarked historical consults,
+nor the commitment; and *"the plugin path cannot be stripped,"* so the capability always exists there.
+**Item 1's live attestation stands as written, with no date**, but the scoping session must confirm its
+wording covers the phased distinction (the second edit fires at ENFORCEMENT, not at first ship) or
+amend it. **A new concurrent item 2a — credential hygiene — is founder-walked and ready now.**
+
 ---
 
 ## The gates, restated correctly

@@ -295,3 +295,107 @@ silence"* — honest on the day it is published, and honest again when the fix s
 
 **Recorded so the drafting session cannot discharge F-2 by publishing a present-tense claim about a
 mechanism that does not yet exist.** Founder R18 sign-off governs the final wording either way.
+
+---
+
+# ADDENDUM 2 — the ledger's urgency, phasing, and source-narrowing, ruled against measured data
+
+**Relayed by the founder 2026-08-25**, answering the four questions raised after the F-3 data
+prerequisites were run. **ADOPTED AS BINDING. Verbatim wins.** Part of the binding record.
+
+**Binds (headline; the verbatim below governs):**
+
+1. **Q3 — THE PHASED APPROACH IS LEGITIMATE.** Ship the ledger **record-only**, accumulate, then
+   switch refusal on. *"It does not reintroduce the silent carve-out."* The distinction ruled: the
+   rejected carve-out was *"minting events the fix cannot verify while the public claim implies the
+   gap is closed"*; during accumulation **no event is minted with a false provenance claim and no gap
+   is papered over.** **F-2 stands unchanged** — refused mints still surface as named coverage gaps;
+   the phasing defers *when* refusals begin. **A HARD REQUIREMENT ON THE SCOPING:** the switch-on
+   threshold *"should be defined before the ledger ships, not discovered operationally"*, carried as a
+   **named decision point** — *"what coverage percentage, or what population of active credentials
+   with confirmed ledger entries, triggers the switch from record-only to enforce?"* Finding 6's cost
+   is *"the right cost of refuse-on-missing applied immediately. It is not the right cost of a phased
+   approach."*
+2. **Q1 — URGENCY REDUCED, STANDING UNCHANGED.** *"The ledger remains the right structural fix… the
+   ledger remains first, phased per Q3."* The exposure is *"structurally present even when
+   operationally dormant."* **"Accept and disclose" is RULED NOT AVAILABLE** — it would require
+   retracting the live commitment, *"a third edit to a served public claim — one that moves backward
+   rather than forward."*
+3. **Q2 — SOURCE-NARROWING DEFERS, DOES NOT SUBSTITUTE.** *"Source-narrowing should happen"* — the
+   right credential-hygiene response to the still-active throwaway — **as a legitimate CONCURRENT
+   move**. But it addresses **neither** Arm-B, **nor** the emission-hooks asymmetry, **nor** the 454
+   unmarked historical consults, **nor** the commitment the honesty correction made. Decisive:
+   *"the plugin path cannot be stripped — meaning the capability will always exist on that path, and
+   the ledger is the only mechanism that verifies provenance at mint time regardless of which path
+   produced the artifact."*
+4. **Q4 — THE ATTESTATION STANDS AS WRITTEN.** No date, deliberately: *"a date would be a promise
+   about a build timeline, which this project does not make in public attestations."* **But a named
+   task lands on the scoping session:** confirm the commitment's wording covers the phased
+   distinction — **the second edit fires when ENFORCEMENT BEGINS, not when the ledger first ships** —
+   *"or amend it if it does not."*
+
+**Licenses no code.**
+
+---
+
+## VERBATIM (addendum 2)
+
+### Q3 — Does finding 6 change the refuse-on-missing ruling, or only its sequencing?
+
+The phased approach — ship the ledger record-only, let coverage accumulate, switch refusal on once the ledger can resolve ordinary traffic — is a legitimate reading of the ruling. It does not reintroduce the silent carve-out.
+
+Here is the distinction that matters. The silent carve-out I rejected was minting events the fix cannot verify while the public claim implies the gap is closed. The phased approach does not do that. During the accumulation phase, the ledger is recording provenance without yet gating mints. The public claim — which now accurately says the structural fix is in place but coverage is bounded — remains accurate at every instant. No event is minted with a false provenance claim. No gap is papered over. The ledger is building the coverage it will eventually enforce.
+
+The switch-on moment is the governance decision: when the ledger can resolve enough ordinary traffic that refuse-on-missing produces honest refusals rather than blanket refusals of legitimate server-extracted artifacts. That threshold should be defined before the ledger ships, not discovered operationally. The scoping session should carry it as a named decision point: what coverage percentage, or what population of active credentials with confirmed ledger entries, triggers the switch from record-only to enforce?
+
+Finding 6's concrete consequence — roughly ten legitimate agents, all server-extracted, publicly marked with coverage gaps as the first visible effect of the fix — is the right cost of refuse-on-missing applied immediately. It is not the right cost of a phased approach. The phased approach's first visible effect is the ledger accumulating entries silently, with no public record impact until the switch-on. That is honest and proportionate to the actual exposure.
+
+The F-2 ruling stands: refused mints surface as named coverage gaps. The phased approach simply defers the moment when refusals begin, which defers the moment when coverage gaps appear. That deferral is legitimate because the ledger is doing real work during the accumulation phase — building the coverage that makes honest refusal possible.
+
+---
+
+### Q1 — Does the data change option (a)'s standing or its urgency?
+
+The data changes the urgency significantly. It does not change the standing.
+
+The ledger remains the right structural fix. The honesty correction is live and accurate. The public attestation now commits that a structural fix will come. That commitment is owed regardless of the exposure's current size. Two abandoned test credentials and zero traffic in the recorded history is the current measurement — it is not a guarantee about the system's future, and the question correctly names this limit. The capability sits in the ecosystem preset and will recreate itself on the next credential mint unless the preset is changed. The plugin path cannot be stripped without deadlocking. The exposure is structurally present even when operationally dormant.
+
+But urgency is a real category and the data speaks to it honestly. The three courses the question names resolve as follows:
+
+**Build the ledger as ruled, phased as Q3 now permits.** This remains the right path. The phased approach removes the disproportionate first-cost problem finding 6 identified. The ledger's scoping proceeds, the accumulation phase runs, the switch-on threshold is defined and met before enforcement begins.
+
+**Close at source first, treat the ledger as unhurried architecture.** This is a legitimate first move — Q2 below — but it does not substitute for the ledger. It narrows the live exposure while the ledger is being scoped and built. These are not mutually exclusive.
+
+**Accept and disclose, on the ground that the honesty correction is already live.** This is not available. The honesty correction's own text commits to a structural fix. Accepting and disclosing without building the fix would require retracting that commitment, which would be a third edit to a served public claim — one that moves backward rather than forward. That is not the right shape.
+
+**The ruling on Q1:** the ledger remains first, phased per Q3. Source-narrowing (Q2) is a legitimate concurrent first move, not a substitute. The ledger's urgency is reduced by the data but not eliminated by it.
+
+---
+
+### Q2 — Does closing at source substitute for the ledger, or merely defer it?
+
+It defers it. The ledger stays owed.
+
+The adversarial review's refutation — revoke the capability as a product-policy decision dressed as a security fix — is weaker at two dead credentials and zero uses, as the question correctly notes. But the refutation's weakness does not make source-narrowing a substitute. It makes it a legitimate concurrent move.
+
+Source-narrowing does two things: it removes l1_supply from the ecosystem preset, closing the capability for future ecosystem credentials; and it revokes the two dormant test credentials, closing the current live exposure. Both are appropriate credential hygiene.
+
+Neither addresses the Arm-B threat. Neither repairs the emission-hooks asymmetry. Neither makes the public attestation accurate for the historical 454 unmarked consults. Neither fulfils the commitment the honesty correction made.
+
+The ledger is owed because the honesty correction committed to it, because the emission-hooks asymmetry remains structural regardless of how many credentials currently exercise it, and because the plugin path cannot be stripped — meaning the capability will always exist on that path, and the ledger is the only mechanism that verifies provenance at mint time regardless of which path produced the artifact.
+
+Source-narrowing should happen. It is the right credential hygiene response to finding 1's throwaway credential still being active two days after its smoke. It reduces the live exposure while the ledger is scoped and built. It does not change what the ledger is for.
+
+---
+
+### Q4 — Does the second correction's timing move?
+
+No. The attestation stands as written.
+
+The forward commitment — "will be updated when a structural fix is in place" — is accurate under every branch now ruled. The fix is the ledger, phased. Source-narrowing is concurrent credential hygiene, not the structural fix the commitment refers to. The ledger's phased approach does not change the commitment's meaning: the second edit fires when the ledger is built and the switch-on threshold is met, not when the accumulation phase begins.
+
+The commitment has no date attached, and that is correct. A date would be a promise about a build timeline, which this project does not make in public attestations. "When a structural fix is in place" is accurate and honest. It ages in public without a date because the date is not known and should not be fabricated.
+
+One thing worth naming: the commitment's wording should be re-examined at the scoping session to confirm it accurately describes the phased approach. If the ledger ships in accumulation-only mode first, the structural fix is partially in place — the ledger exists and is recording, but enforcement has not begun. The second edit should fire when enforcement begins, not when the ledger first ships. The scoping session should confirm that the commitment's wording covers this distinction, or amend it if it does not.
+
+## END VERBATIM (addendum 2)

@@ -34,6 +34,7 @@ provenance ledger is the right structural fix to scope first"* — and placed it
 | **Missing entry** | **Refuse the mint.** *"A ledger that mints on missing entries… is a corrected-sounding claim with a silent carve-out."* |
 | **Write semantics** | **Insert-once, never upsert.** *"Insert-once is a limit on correction, not a vulnerability. Upsert is a vulnerability."* |
 | **Scoping unit** | **Owner+agent pair, with a credential-only fallback** — the bare-credential form was **corrected** (F-1). Use `website/src/lib/substrate/longitudinal-identity.ts`'s existing `resolveLongitudinalIdentity`; **do not invent a second identity notion.** No new disclosure is required — the existing rotation-truncation disclosure covers the fallback. |
+| **Phasing** | **Ship RECORD-ONLY, accumulate, then switch refusal on** (addendum 2, Q3) — ruled legitimate and *"does not reintroduce the silent carve-out"*, because during accumulation no event is minted with a false provenance claim. **The switch-on threshold MUST be defined BEFORE the ledger ships, "not discovered operationally"** — carry it as a named decision point: *what coverage percentage, or what population of active credentials with confirmed ledger entries, triggers enforce?* **A hard requirement on this session, not a nicety.** |
 | **Refusal visibility** | **Every refused mint surfaces as a NAMED COVERAGE GAP, never silence** (F-2). Minimum content: the non-mint; the reason (missing/out-of-window entry); **that it does not mean the agent did not practise.** **Hard exclusion:** no signature or artifact detail *"that would expose the provenance mechanism to gaming."* |
 
 ## Step 2 — THE FINDING THAT WILL SHAPE THIS MOST (find it early or waste the session)
@@ -52,6 +53,37 @@ sign-off, its own ADR-013 §8 treatment, and its own battery pins. **Scope this 
 of the work, not an implementation detail.** The public honesty commitment is already live and
 future-tensed (*"that fix will surface… as a named coverage gap, never as silence"*), so **the fix
 cannot ship without satisfying it.**
+
+## Step 2b — THE MEASURED DATA (run 2026-08-25; it changed the urgency, not the standing)
+
+**Do not re-derive these; do re-check them if the session is much later.**
+- **Active `l1_supply` credentials: 2** — both dead test artifacts (*"P0 Hold Point Testing"*, dormant
+  since 2026-04-11; *"EE-C1 deploy smoke (throwaway)"*, ~2 minutes of use on 2026-08-23), **both being
+  revoked as concurrent credential hygiene.** The 9 active UPC credentials carry **none**; there are
+  **0** active plugin credentials.
+- **3,200 recorded consults; ZERO supplied extractions.** 2,746 stamped `server`; **454 predate the
+  stamp and are genuinely unknown** — not inferred clean. **No ledger repairs those**, and the
+  attestation stays inaccurate for them; the mentor named this explicitly.
+- **12 accreditation agents**, 10 written in 90 days. All four relevant flags **confirmed live in
+  production** (founder-verified 2026-08-25).
+
+**Ruled on this data (addendum 2):** urgency **reduced**, standing **unchanged** — *"the exposure is
+structurally present even when operationally dormant."* **"Accept and disclose" is NOT AVAILABLE**: it
+would require retracting the live commitment, *"a third edit… that moves backward rather than
+forward."* **Source-narrowing defers, it does not substitute** — it addresses neither Arm-B, nor the
+emission-hooks asymmetry, nor the 454 unmarked, nor the commitment; and *"the plugin path cannot be
+stripped,"* so the capability always exists there and **the ledger is the only mechanism that verifies
+provenance at mint time regardless of which path produced the artifact.**
+
+## Step 2c — A NAMED TASK ON THE LIVE PUBLIC CLAIM (addendum 2, Q4)
+
+The served attestation commits: *"will be updated when a structural fix is in place."* **It stands as
+written and gets no date** — *"a date would be a promise about a build timeline, which this project
+does not make in public attestations."* **But this session must confirm the wording covers the phased
+distinction:** under phasing the fix is *partially* in place once the ledger ships and records, while
+enforcement has not begun. **The second edit fires when ENFORCEMENT BEGINS, not when the ledger first
+ships.** Confirm the wording carries that, **or amend it** — and an amendment is a served public claim
+needing founder R18 sign-off, an ADR-013 §8 dated amendment, and its own pins, in one edit.
 
 ## Step 3 — F-3's three named inputs (ruled INTO this session, not pre-answered)
 
@@ -102,7 +134,10 @@ cannot ship without satisfying it.**
    the schema; the write path and its gating; the read/lookup at the accreditation boundary keyed on
    the owner+agent pair; the refusal path; **the coverage-gap surface decision (Step 2) with its cost
    and blast radius**; the retention window **with its data basis stated**; PR24 wiring; the PA-10
-   dependency; and an honest statement of what the fix does **not** cover.
+   dependency; and an honest statement of what the fix does **not** cover — **including the 454
+   unmarked historical consults, which no ledger repairs.**
+   **Plus, mandatory:** the **record-only → enforce switch-on threshold** as a concrete, checkable
+   condition (Step 2b); and the **Q4 wording confirmation or amendment** (Step 2c).
 2. **A mentor question only if one is genuinely owed** — the fix choice and all four policies are
    already ruled. **Do not manufacture one.** The likely candidate is the coverage-gap surface shape,
    if it turns out to need a served-payload change the ruling did not anticipate.

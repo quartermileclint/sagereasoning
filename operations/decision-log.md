@@ -26877,3 +26877,54 @@ this commit; no downstream dependency.
 **Status:** Adopted. Cross-references: `D-REFLECTIONS-LETTER-2-AUTHORED-2026-08-25`,
 `D-REFLECTIONS-LETTER-2-CITATIONS-CORRECTED-2026-08-25`,
 `D-ITEM4-MENTOR-RULING-EXPOSURE-KEYED-TRIGGER-REJECTED-2026-08-24`.
+
+---
+
+## 2026-08-25 — D-PROVENANCE-LEDGER-URGENCY-PHASING-RULED-2026-08-25
+
+**Stream:** founder. **Category:** `governance` — documents only. **Risk:** Standard. **AC7 not
+engaged.** No code, schema, flag, credential, or public surface. **Licenses no code.**
+
+**What happened.** The founder ran F-3's three data prerequisites, the results materially changed the
+picture, and rather than scope the ledger as if they had not, four questions were relayed and ruled.
+Verbatim canonical: **ADDENDUM 2** to
+`operations/agent-circles-2026-08/2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md`.
+
+**The data.** Active `l1_supply` credentials: **2**, both dead test artifacts — *"P0 Hold Point
+Testing"* (dormant since 2026-04-11) and *"EE-C1 deploy smoke (throwaway)"* (~2 minutes of use on
+2026-08-23, **still active two days later** — an independent credential-hygiene miss). The 9 active
+UPC credentials carry none; **0** active plugin credentials. **3,200 recorded consults, ZERO supplied
+extractions** (2,746 stamped `server`; **454 predate the stamp and are genuinely unknown, not inferred
+clean**). 12 accreditation agents, 10 written in 90 days. All four relevant flags confirmed live.
+
+**Binds.**
+- **Q3 — the PHASED approach is legitimate:** record-only → accumulate → switch on. *"It does not
+  reintroduce the silent carve-out"*, because during accumulation *"no event is minted with a false
+  provenance claim."* **F-2 stands**; phasing defers only *when* refusals begin. **Hard requirement:
+  the switch-on threshold must be defined BEFORE the ledger ships, "not discovered operationally."**
+- **Q1 — urgency reduced, standing unchanged.** The ledger remains first, phased. The exposure is
+  *"structurally present even when operationally dormant."* **"Accept and disclose" is NOT available**
+  — retracting the live commitment would be *"a third edit… that moves backward rather than forward."*
+- **Q2 — source-narrowing defers, does not substitute.** It *"should happen"* as concurrent hygiene,
+  but addresses neither Arm-B, the emission-hooks asymmetry, the 454 unmarked, nor the commitment.
+  Decisive: *"the plugin path cannot be stripped… the ledger is the only mechanism that verifies
+  provenance at mint time regardless of which path produced the artifact."*
+- **Q4 — the attestation stands as written, deliberately dateless** (*"a date would be a promise about
+  a build timeline, which this project does not make in public attestations"*). **New named task:** the
+  scoping session must confirm the wording covers the phased distinction — **the second edit fires at
+  ENFORCEMENT, not at first ship** — or amend it.
+
+**Folded.** The ledger scoping prompt gained a **Phasing** row in its ruled table, a new **Step 2b**
+(the measured data + what was ruled on it, marked do-not-re-derive), a new **Step 2c** (the Q4 wording
+task), and two **mandatory** additions to its deliverables (the switch-on threshold as a concrete
+checkable condition; the Q4 confirmation-or-amendment). Its "what the fix does not cover" requirement
+now explicitly names the **454 unmarked historical consults, which no ledger repairs.** The priority
+index carries the re-ruling and registers a new concurrent **item 2a — credential hygiene**.
+
+**A process note worth keeping.** The AI flagged before the queries ran that a near-zero result would
+materially change the case, and on receiving it **stopped rather than scoping to plan** — the
+method-before-purpose failure mode this project tracks. The mentor's own F-3 ruling had anticipated
+exactly this, naming data *"the scoping session has access to and this ruling does not."*
+
+**Status:** Adopted (ruling recorded and folded). **Rollback:** `git revert` this commit — documents
+only.
