@@ -420,7 +420,7 @@ addresses neither Arm-B, nor the emission-hooks asymmetry, nor the 454 unmarked 
 nor the commitment; and *"the plugin path cannot be stripped,"* so the capability always exists there.
 **Item 1's live attestation stands as written, with no date**, but the scoping session must confirm its
 wording covers the phased distinction (the second edit fires at ENFORCEMENT, not at first ship) or
-amend it. **A new concurrent item 2a — credential hygiene — is founder-walked and ready now.**
+amend it. **Item 2a — credential hygiene — DISCHARGED 2026-08-25** (`D-L1-SUPPLY-CREDENTIAL-HYGIENE-DISCHARGED-2026-08-25`): both `l1_supply`-carrying credentials revoked on production, founder-walked; the capability-resolving query returns **`active_with_l1_supply = 0`** (founder-verified — the AI has no independent means to confirm it). **Live exposure is now zero active credentials.** No public claim is affected — `l1_supply` remains a documented capability and the preset still grants it on new mints. **Item 2b (removing it from the `ecosystem` preset) is CARRIED and re-tiered to `code-critical`** — `presetForPurpose` feeds read-time auth resolution, not just mint — and is no longer urgent, since it would now affect zero active credentials. `plugin_install` keeps it permanently (stripping it deadlocks that route by construction). **The ledger stays owed: source-narrowing defers, it does not substitute.**
 
 ---
 

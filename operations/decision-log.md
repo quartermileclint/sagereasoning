@@ -26928,3 +26928,56 @@ exactly this, naming data *"the scoping session has access to and this ruling do
 
 **Status:** Adopted (ruling recorded and folded). **Rollback:** `git revert` this commit — documents
 only.
+
+---
+
+## 2026-08-25 — D-L1-SUPPLY-CREDENTIAL-HYGIENE-DISCHARGED-2026-08-25
+
+**Stream:** founder. **Category:** `code-critical` by surface (credential revocation on the live auth
+path) — **founder-walked end to end; the AI performed no live operation**, only authored the commands
+and this record. **AC7 engaged and discharged.** No code, schema, flag, or public-surface change.
+
+**Done.** Both active `l1_supply`-carrying credentials revoked on production
+(`PATCH is_active=false` via the admin CLI, class-guarded `revoke api`):
+- `6e0951e2-a50a-46f3-8efb-3e204ccd8cce` — *"P0 Hold Point Testing"*, last used **2026-04-11**,
+  dormant ~4.5 months.
+- `9da45407-e059-4c10-924c-544bba3d4d7e` — *"EE-C1 deploy smoke (throwaway)"*, created and last used
+  **2026-08-23**, ~2 minutes of use, **still active two days after its own smoke** — a teardown miss
+  against this project's standing practice of revoking smoke credentials at teardown.
+
+**Verified (founder-run).** The capability-resolving query — which resolves `capabilities` the way the
+code does, explicit array first with the purpose-preset fallback — returns
+**`active_with_l1_supply = 0`**.
+
+**Honest limit on that verification.** The AI has **no independent means to confirm it**: it never
+held either token and has no database access from a repo session. This rests on the founder's query
+result, and is recorded as founder-verified rather than as an AI observation.
+
+**State change.** The live `l1_supply` exposure is now **zero active credentials** — down from two,
+neither of which had ever been used (0 supplied extractions across 3,200 recorded consults). This
+discharges the concurrent source-narrowing move the 2026-08-25 addendum-2 ruling said *"should
+happen"*, and closes the credential-hygiene half of it.
+
+**No public claim is affected, checked rather than assumed.** `llms.txt` describes `l1_supply` as a
+*capability and feature* (lines 28, 166, 170) — all still accurate: the route works, the purpose
+preset still grants it on any new `ecosystem`/`plugin_install` mint, and the documented
+403-without-the-capability behaviour is unchanged. **Only the credential population changed, not the
+contract**, so no R18 edit follows from this.
+
+**What this does NOT do, per the ruling.** It *"defers rather than substitutes."* It addresses neither
+the Arm-B threat, nor the emission-hooks asymmetry, nor the 454 unmarked historical consults, nor the
+commitment the live honesty correction made. **The ledger stays owed.**
+
+**Carried — item 2b, and a tier correction the AI is recording against itself.** Removing `l1_supply`
+from the **`ecosystem` preset** was first described by the AI as *"mint-time, `code-elevated` at
+most."* **That was wrong and is corrected here:** `presetForPurpose` feeds
+`effectiveCapabilities = COALESCE(capabilities, preset_for(purpose))` on the **read-time auth path**,
+so changing it changes what every NULL-capabilities row can do on its next request — **`code-critical`
+(AC7 + PR6), with PR19.** It is also no longer urgent: after this revocation it would affect **zero**
+active credentials. It gets its own founder-walked session. **`plugin_install` keeps the capability
+permanently** — verified: that route 400s without a supplied schema and 403s if one is supplied
+without the capability, so stripping it deadlocks the path by construction.
+
+**Status:** Adopted / Discharged (item 2a complete). **Rollback:** re-activate either credential via
+the same admin surface (`is_active=true`) — though neither has a live use, and the throwaway should
+stay revoked regardless.
