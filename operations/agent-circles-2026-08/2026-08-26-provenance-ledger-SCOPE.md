@@ -36,6 +36,18 @@ credential, or public surface was touched. **AC7 not engaged. This document lice
 > now argued on ENV-1's own stated principle rather than asserted. See
 > `2026-08-26-MENTOR-QUESTION-round4-provenance-ledger-q3-and-404.md`.
 
+> **⚠ ROUND 5, 2026-08-26 — THE SCOPING ARC IS CLOSED.** Both remaining questions RULED, no
+> corrections needed this round. `provenance_gaps` licensed for Q3; the ENV-1 gate relaxes for the 404,
+> tied to the ledger's flag; §3.3's dependency between the two explicitly closed by the mentor's own
+> words. **The founder then ran all three §12 prerequisite queries**: §12.0 found ZERO agents beyond
+> the harness in identity conflict (§9's C1 collapses to the single named exclusion, nothing further
+> needed); §12.1 confirmed the identity-conflict finding on live credential data, not record claim;
+> §12.2 confirmed the 90-day window's write-lag basis for four of five agents, with the harness's own
+> outlier lag corroborating rather than contradicting the finding. See
+> `2026-08-26-mentor-ruling-provenance-ledger-q3-and-404-verbatim.md`. **What remains is a founder R18
+> sign-off item (§10) and the already-reviewed build-shape items in §13/§14 — no further mentor
+> question is owed.**
+
 **What it scopes is `code-critical` when built** — two new tables, a trust-core write path, the
 accreditation write boundary's mint decision, and a change to a served public payload.
 
@@ -97,9 +109,10 @@ to be computable at all.** So the ledger is not a partial substitute for PA-10's
 | Write semantics | **Insert-once, never upsert** | §4.3 |
 | Scoping unit | **Owner+agent pair with a credential-only fallback**, via the existing `resolveLongitudinalIdentity`; **no second identity notion** | §3 — honoured exactly, and §3 is the finding |
 | Phasing | **Record-only → accumulate → switch refusal on**; threshold **defined before ship** | §9 |
-| Refusal visibility | **Every refused mint is a named coverage gap, never silence, "using the existing machinery" — F-2: "The existing `coverage_gaps` field is the right surface"**; no signature or artifact detail | **§6 — DEPARTED FROM, flagged, and cased per the round-2 ruling.** The first draft of this row dropped the `coverage_gaps` clause, which is the clause §6 departs from. Restored. Ruling on Q3 (2026-08-26): bring the departure back labelled, and make the case that `coverage_gaps` is inadequate rather than merely inconvenient — done in §6.2/6.3 |
+| Refusal visibility | **Every refused mint is a named coverage gap, never silence.** Ruled (2026-08-26, final): **the sibling field `provenance_gaps` is licensed** — the departure from F-2's literal `coverage_gaps` wording is affirmed as correct, because degraded reuse *"is not a reuse of `coverage_gaps` — it is a corruption of it"* and widening it would fold *"structurally different facts"* into one field | **§6 — RULED. Use `provenance_gaps` + `total_provenance_gaps_count`.** |
 | **Supplied-entry disposition (Q2, RULED 2026-08-26)** | **A ledger entry reading `supplied` REFUSES the mint** — a second refusal branch distinct from missing-entry, with its own reason surfaced separately on the record. Server entry permits. The plugin path (mandatory-supplied) is named as its own open sub-question, not blocking non-plugin shipping | §5 — implemented; §11 — named |
 | **The identity conflict (Q1, RULED round 2, 2026-08-26)** | **Defer the harness's own accreditation, by name, as a single-agent decision. NOT a general policy toward every split-pair agent.** Option A (merge the harness's two credentials) is available IN PRINCIPLE as a founder security trade, explicitly NOT ruled and NOT recommended. Option B remains closed | §3 — implemented; §9 — restructured |
+| **The public-record 404 (Q4's second half, RULED 2026-08-26)** | **Relax the ENV-1 gate**: `domains.some(hasEvidence) \|\| provenance_gaps.length > 0`, tied to the ledger's own flag (byte-identical flag-off). RULED a *"faithful extension of ENV-1's actual principle, not a violation of it"* — a provenance-gap entry is not the bare row ENV-1 was built to exclude. The separate-endpoint alternative was weighed and not taken, priced at its full honest cost | §6.5 — RULED. **Closes §3.3's dependency**: the harness-deferral's honesty claim *"holds"* now that a refused mint genuinely surfaces even with zero prior evidence |
 
 ---
 
@@ -134,7 +147,12 @@ age distribution of submitted assessments. Both are §12 founder prerequisites.
 
 ## §3 — The identity finding, and its resolution
 
-### 3.1 The mismatch, stated precisely
+### 3.1 The mismatch, stated precisely — CONFIRMED ON LIVE DATA 2026-08-26, not merely on record
+
+**§12.1's query, run by the founder, closes what was previously a record claim.** The live, active
+credential pair reads exactly as this table always asserted — consult `33bef3d4…` is
+`owner_less: true`; accred `1ffe14f6…` is `owner_less: false`. The finding below was never hypothetical;
+it is now also empirically checked.
 
 The ledger writes at consult time under the identity of the **consult** credential and reads at write
 time under the identity of the **accreditation-write** credential. Under the ruled unit:
@@ -194,16 +212,15 @@ progress is being obscured; it is the project's own reference integration whose 
 the identity conflict"* — on the stated premise that *"the coverage gap surfaces per F-2 — the refusal
 is named, not silent."*
 
-**⚠ That premise is not yet true, and this document is the place to say so rather than let it pass.**
-Under the CURRENT unresolved state of Q4's second finding (§6.5), an agent whose every mint is refused
-gets a **404**, not a coverage-gap entry — the record that would carry the gap does not exist. The
-mentor's own round-1 ruling named this the more serious of Q4's two findings and left it explicitly
-open. **So today, deferring the harness's accreditation would make its refusal genuinely INVISIBLE, not
-merely honestly-refused-and-visible** — the exact silent-carve-out shape the whole arc exists to
-prevent, arriving through the interaction of two separately-ruled, separately-correct decisions.
-**Named as a dependency, not resolved here: the harness deferral's own honesty claim is contingent on
-§6.5's 404/stub-record question being answered before or alongside enforcement switching on.** This is
-carried forward rather than silently assumed away.
+**⚠ CLOSED, 2026-08-26.** This premise was flagged here as unmet at the time this section was
+written — the 404 question (§6.5) was still open, so deferring the harness would have made its refusal
+genuinely invisible rather than honestly visible. **§6.5 is now ruled**: the ENV-1 gate relaxes to admit
+`provenance_gaps`, and the mentor's own closing words on this exact dependency: *"With the gate relaxed
+and the `provenance_gaps` field populated on refusal, the refused mint surfaces on the public record for
+an agent with no prior virtue evidence. The claim holds."* **The dependency this section named is
+discharged, not merely noted as resolved elsewhere** — recorded here as the place the gap was caught,
+so the sequence (name the dependency → resolve it → close it explicitly, not silently) is itself on the
+record.
 
 ### 3.4 The general form, which now applies only after measurement — RULED, sequencing changed
 
@@ -409,7 +426,7 @@ named hazard, and the ledger's read is exactly its shape.
 
 ---
 
-## §6 — The coverage-gap surface: a departure from F-2, the case for it, and the 404 carried forward
+## §6 — The coverage-gap surface: RULED. `provenance_gaps`, and the 404 gate relaxed
 
 > **RULED — Q3. The mentor's disposition of this section's first draft: correctly self-identified as a
 > departure that had been mislabelled "answered," and returned with an instruction — "bring the
@@ -418,7 +435,13 @@ named hazard, and the ledger's read is exactly its shape.
 > `coverage_gaps` can carry the refused-mint signal without modification, use it."** This section is
 > rewritten to do that work rather than assert a decision.
 
-### 6.1 This is a departure from F-2's exact wording, stated as one
+### 6.1 This is a departure from F-2's exact wording — RULED CORRECT
+
+> **RULED 2026-08-26.** *"The case satisfies the instruction. The sibling field is licensed."* Both
+> the degraded-reuse rejection and the widening rejection are affirmed, the latter's second reason
+> (different kinds of fact at different grains) named as *"the deeper reason the first reason is
+> right."* **Field name confirmed: `provenance_gaps` + `total_provenance_gaps_count`.** §6.2–6.4 kept
+> below as the case the ruling accepted, not as an open question.
 
 F-2, verbatim, twice: *"A refused mint must surface on the public record as a named coverage gap using
 the existing machinery, not as silence... The existing `coverage_gaps` field is the right surface."*
@@ -505,7 +528,7 @@ the same way this arc exists to fix (§6.3). **If the mentor judges the breaking
 given F-2's mechanism preference, `coverage_gaps` should be widened instead** — the choice is now made
 on stated, comparable grounds rather than asserted.
 
-### 6.4 The recommended shape, if a sibling field is elected
+### 6.4 The shape, per the ruling
 
 ```
 record: {
@@ -545,7 +568,16 @@ and the did-not-practise clause, inline. **F-2's hard exclusion:** no signature-
 serialised — enforced by the serialiser's field list (§4.1's earlier correction), not by an absence in
 the schema.
 
-### 6.5 The 404 — a case is now made, not just two names on a list
+### 6.5 The 404 — RULED. The gate relaxes.
+
+> **RULED 2026-08-26.** *"The case lands the ruling on the stub-record shape via gate relaxation. The
+> separate-mechanism reading is not preferred."* Both corrections (the "free reuse" error named before
+> arguing; the actual gate condition traced rather than assumed) affirmed as *"load-bearing and
+> correctly made before the argument."* **Exact condition ruled: `domains.some(hasEvidence) ||
+> provenance_gaps.length > 0`, tied to the ledger's own flag.** The ENV-1 reading is affirmed sound: a
+> provenance-gap entry *"is not a bare row… different facts"* from what the gate was built to exclude.
+> **§3.3's dependency is closed**: *"the refused mint surfaces on the public record for an agent with
+> no prior virtue evidence. The claim holds."* §6.5.1–6.5.6 kept below as the case the ruling accepted.
 
 **Mentor, verbatim, on Q4:** *"the public trust record 404ing for an agent with no evidence at all
 means that the agent the fix exists to make visible... has no public record at all... That is the
@@ -612,7 +644,7 @@ against today's live behaviour (200 ⇒ some evidence exists) would need to addi
 (the payload already, honestly, says `sparse: true` and `aggregate.basis: 'no evaluated cardinal-domain
 evidence'`), but it is a real change to an implicit contract, not a free extension.
 
-**6.5.6 Recommendation.** The stub-record approach — relax `verdict.profile.domains.some(hasEvidence)`
+**6.5.6 RULED.** The stub-record approach — relax `verdict.profile.domains.some(hasEvidence)`
 to also admit `provenance_gaps.length > 0` — on the grounds that it is a faithful extension of ENV-1's
 own stated principle rather than a violation of it (6.5.3), it is the smaller total change once the
 separate-endpoint alternative is made honest (6.5.4), and its costs are disclosable and already
@@ -620,9 +652,7 @@ partially covered by the payload's existing honesty fields (6.5.5). **The relaxa
 the same flag gating the ledger** (`SUBSTRATE_PROVENANCE_LEDGER_ENABLED`), so that flag-off leaves this
 endpoint byte-identical — `provenance_gaps` is never populated flag-off, so the additional OR-condition
 is never true, and the change is inert until the ledger itself ships. **Offered as a case, per the same
-discipline Q3 required — not a decision.**
-
-### 6.6 Cost and blast radius, stated as Step 2 requires it be
+discipline Q3 required — RULED, see the update above 6.1.**
 
 ### 6.6 Cost and blast radius, stated as Step 2 requires it be
 
@@ -758,24 +788,23 @@ founder-walked 0c-ii step, and this is the condition that step checks.**
 
 **A new, sequence-ordering step precedes the four conditions below, and it is now the load-bearing one:**
 
-**S0 — Measure the split-pair population, before C1 is defined.** A population-wide query, not the
-harness-scoped one §12.1 already answers: group `api_keys` by `agent_id`, and for every agent with an
-accreditation write in the trailing 90 days, compare the longitudinal identity resolved on its
-consult-capable credential(s) against its write-class credential. **This is a hard founder prerequisite
-that gates C1's own definition, not merely this scoping's close.** If the population beyond the harness
-is zero, C1 collapses to a single named exclusion and nothing else is needed. If it is non-zero, C1's
-threshold is set against that measured population — with real data, per the ruling, rather than
-generalising from the one known case.
+**S0 — Measure the split-pair population, before C1 is defined. RUN 2026-08-26 — discharged.** The
+population-wide query (§12.0) returned exactly one row: `sagereasoning:s9-loop@v1`,
+`identity_coheres: false`. **No agent beyond the harness is in identity conflict.** Per this section's
+own stated branch, that outcome collapses C1 to a single named exclusion — nothing further is needed.
 
-**Enforcement may be switched on when S0 has run and all four hold:**
+**Enforcement may be switched on when all four hold — C1 below is now a closed, empirically-confirmed
+condition, not an open population question:**
 
-**C1 — Identity coherence, defined AFTER S0, over the population S0 measures, EXCLUDING the harness by
-name.** For every agent **other than `sagereasoning:s9-loop@v1`** with an accreditation write in the
+**C1 — Identity coherence, EXCLUDING the harness by name. DISCHARGED, empty population confirmed
+(§12.0).** For every agent **other than `sagereasoning:s9-loop@v1`** with an accreditation write in the
 trailing 90 days, every credential that produces its assessments resolves to the **same** longitudinal
-identity as the credential that submits them (§3.4's general rule, now correctly scoped to the measured
-population rather than assumed universal). **The harness's own accreditation is deferred by name**
-(§3.3, RULED) — it is not counted toward C1, and it does not block enforcement from switching on for
-every other agent.
+identity as the credential that submits them (§3.4's general rule). **Measured 2026-08-26: this
+population is empty — every other agent already coheres.** The harness's own accreditation is deferred
+by name (§3.3, RULED) — it is not counted toward C1, and it does not block enforcement from switching on
+for every other agent. **C1 is satisfied as of the measurement date**; a re-check at switch-on time is
+still prudent (new agents could onboard between now and then), but the condition itself requires no
+further construction.
 
 **C2 — Coverage, RE-DEFINED per the Q4 ruling to be reachable.** Mentor, verbatim: *"the threshold
 definition must be reachable by every population the ledger is designed to cover, including legitimate
@@ -978,6 +1007,52 @@ order by write_lag desc;
 
 A lag in hours confirms §7.3. A lag in months would move the window question into §11's territory.
 
+---
+
+**All three queries RUN by the founder, 2026-08-26. Results below, folded into §3, §7, §9.**
+
+**§12.0 result — POPULATION MEASURED, ONE ROW:**
+
+| agent_id | write_owner | consult_owner | identity_coheres |
+|---|---|---|---|
+| `sagereasoning:s9-loop@v1` | `babdde33-…` | `null` | **false** |
+
+**No agent beyond the harness is in identity conflict.** §9's S0 prerequisite is discharged: C1 is
+exactly the single named exclusion (`sagereasoning:s9-loop@v1`) and needs no further machinery — the
+"if it is one, nothing further is owed" branch of §9's own conditional. Folded into §9.
+
+**§12.1 result — the harness credential state CONFIRMED on live data, not record claim:**
+
+| id | label | owner_kind | owner_less | agent_id | capabilities | is_active |
+|---|---|---|---|---|---|---|
+| `09e83b4d…` | s9-loop consult (gen-1) | external_consumer | true | s9-loop | consult | **false** |
+| `e715520b…` | s9-loop accred (gen-1) | operator | false | s9-loop | accreditation_write, reflect | **false** |
+| `1ffe14f6…` | s9-loop accred (gen-2, re-mint) | operator | false | s9-loop | accreditation_write, reflect | **true** |
+| `33bef3d4…` | s9-loop consult (gen-2, re-mint) | external_consumer | **true** | s9-loop | consult | **true** |
+
+**The live, active pair confirms §3's finding exactly**: the active consult credential
+(`33bef3d4…`) is genuinely owner-less; the active accred credential (`1ffe14f6…`) is owner+agent bound.
+§3.1's mismatch table was correct on live data, not merely on record. Folded into §3.
+
+**§12.2 result — write-lag, general population confirms §7.3; the harness is the disclosed exception:**
+
+| agent_id | latest_write | latest_consult | write_lag |
+|---|---|---|---|
+| `correlationid-verify@v1` | 2026-07-29 00:59:34.83 | 2026-07-29 00:59:34.06 | 0.77s |
+| `p2-leg-b@v1` | 2026-07-20 18:36:14.09 | 2026-07-20 18:38:27.90 | −2m14s |
+| `a3-smoke@v1` | 2026-07-28 11:32:08.47 | 2026-07-28 11:37:43.44 | −5m35s |
+| `sagebench:rerun-ops@v1` | 2026-07-25 23:34:58.15 | 2026-07-25 23:59:06.24 | −24m8s |
+| `sagereasoning:s9-loop@v1` | 2026-07-11 05:45:29.67 | 2026-08-25 09:39:27.43 | **−45d 3h54m** |
+
+**Four of five agents confirm §7.3 exactly** — sub-hour write lag, the session-scoped pattern the 90-day
+window was reasoned from. **The fifth, `s9-loop`, is the harness itself, and its outlier lag is
+CONSISTENT WITH the identity finding, not evidence against §7's window basis**: its latest accreditation
+write predates the query by 45 days while its consults have continued — exactly what a credential stuck
+behind an unresolvable identity mismatch looks like (no successful write landing since), and exactly the
+population §3.3's deferral now names and excludes. **Folded into §7 as a confirming data point, not a
+counter-example** — the general population's sub-hour pattern stands; the one outlier is the one agent
+already carved out by name.
+
 **12.3 — Already discharged 2026-08-25, re-checked here, not re-run.** All four flags founder-verified
 live; `active_with_l1_supply = 0`; 3,200 consults / 0 supplied / 454 unmarked; 12 agents, 10 in 90 days.
 
@@ -1015,28 +1090,32 @@ and the public-claim edit independently `git revert`-able.
 
 ---
 
-## §14 — Recommendation *(permitted; this elects nothing)* — updated after round 4
+## §14 — Recommendation *(permitted; this elects nothing)* — the scoping arc is closed
 
-**Option (a) is still buildable within its ruled limits.** Option (b) and the hybrid stay unneeded.
-**(a) does not fail.**
+**Option (a) is buildable within its ruled limits. (a) does not fail.** Option (b) and the hybrid stay
+unneeded, per the original ruling.
 
-**Fully RULED:** the two-branch refusal design (§5); C2's resubmission-reachable redefinition (§9); the
-identity conflict (§3, §9) — defer the harness by name, not a general policy; §9's C1 defined only after
-the split-pair population is measured (§12.0).
+**Every question raised in this arc is now RULED, including the ones the mentor sent back for more
+precision or more work:** the two-branch refusal design (§5); C2's resubmission-reachable redefinition
+(§9); the identity conflict — defer the harness by name, not a general policy (§3, §9); the
+`provenance_gaps` sibling field, not widened `coverage_gaps` (§6); the 404 fix — relax the ENV-1 gate,
+tied to the ledger's own flag (§6.5); and the dependency between the last two, closed explicitly (§3.3).
 
-**Cased and sent, awaiting a ruling (round 4):** Q3's mechanism choice — sibling field recommended over
-widening `coverage_gaps` (§6.1–6.4); the 404 question — relaxing the ENV-1 gate for the provenance-gap
-population recommended over a separate endpoint (§6.5, with a prior draft's "free reuse" claim corrected
-in the process — the composer's null-aggregate branch is dead code today, not proven reuse).
+**Empirically confirmed, not merely reasoned, as of 2026-08-26:** §9's C1 population is empty beyond the
+named harness exclusion (§12.0); the identity-conflict finding is live on the active credential pair,
+not a record claim (§12.1); the general write-lag pattern underlying §7's 90-day window holds for four
+of five sampled agents, with the fifth being the harness itself, whose own outlier lag corroborates the
+identity finding rather than contradicting the window basis (§12.2).
 
-**Still open, smaller now:**
+**What remains, and none of it blocks a build slice from being scoped in detail:**
 
-1. **§12.0's population measurement** — a founder SQL query, load-bearing for C1's own definition.
-2. **The live attestation amendment** (§10) — unchanged, still owed, likely a founder R18 sign-off item
-   rather than a further mentor round (the original ruling delegated "confirm or amend" to this scoping
-   session).
-3. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — unchanged, all held up
-   under review.
+1. **The live attestation amendment** (§10) — a founder R18 sign-off item, likely not a further mentor
+   round (the original ruling delegated "confirm or amend" to this scoping session).
+2. **The 90-day window, PR24 sweep wiring, and the recency-tier sequencing** — held up under two rounds
+   of review, unchanged.
+
+**Nothing here is built.** Every schema, flag, credential, and public-surface step in §13's slicing
+remains its own founder-walked 0c-ii.
 
 ---
 

@@ -27688,3 +27688,75 @@ rather than repeated a third time across two prior drafts).
 **Status:** Adopted. Awaits the mentor's ruling on Q3's mechanism choice and the 404/stub-record
 question. Cross-references: `D-PROVENANCE-LEDGER-Q1-RULED-2026-08-26`,
 `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SCOPING-ARC-CLOSED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Recorded the mentor's ruling on Q3 (sibling field) and the 404 question (gate relaxation),
+folded both into the scope document, and folded in the founder's live results from all three §12
+prerequisite queries. **Every question raised across this arc — Q1, Q2, Q3, and the two Q4 findings — is
+now ruled, and the two remaining unverified facts the arc had carried since its first close are now
+confirmed on live data.** This closes the scoping phase; nothing further is owed to the mentor from this
+arc.
+
+**Q3 — RULED. Use `provenance_gaps`.** *"The case satisfies the instruction. The sibling field is
+licensed."* Both grounds accepted: degraded reuse of `coverage_gaps` *"is not a reuse… it is a
+corruption of it"*; widening its type is rejected on both stated reasons, with the second — that
+A2-zeroed-domain coverage and a provenance refusal are different kinds of fact at different grains —
+named *"the deeper reason the first reason is right."*
+
+**The 404 — RULED. Relax the gate.** *"The case lands the ruling on the stub-record shape via gate
+relaxation."* The exact condition ruled: `domains.some(hasEvidence) || provenance_gaps.length > 0`, tied
+to the ledger's own flag. Both corrections in the prior round's case — naming the earlier wrong
+"free-reuse" claim before arguing, and tracing the gate's actual condition rather than assuming it —
+were affirmed as *"load-bearing and correctly made before the argument."* The ENV-1 reading was
+affirmed sound: a provenance-gap entry *"is not a bare row… different facts"* from what the gate exists
+to exclude.
+
+**§3.3's dependency, named two rounds ago and left open, is now explicitly closed by the mentor's own
+words, not silently assumed resolved by proximity.** *"With the gate relaxed and the `provenance_gaps`
+field populated on refusal, the refused mint surfaces on the public record for an agent with no prior
+virtue evidence. The claim holds."* The scope document's §3.3 records this as a closure event, not a
+rewrite — the section that named the gap now names its discharge.
+
+**The founder then ran all three §12 prerequisite queries, and the results close out the arc's two
+remaining unverified facts.**
+
+- **§12.0 — the population-wide split-pair query. ONE ROW: `sagereasoning:s9-loop@v1`,
+  `identity_coheres: false`.** No agent beyond the harness is in identity conflict. §9's C1, restructured
+  in the prior round to be defined only after this measurement, collapses to the single named exclusion
+  the ruling already specified — the "if the population is one, nothing further is owed" branch this
+  document itself had written in advance, now the actual outcome.
+- **§12.1 — the harness credential's owner state, previously a repo-record claim only. CONFIRMED live**:
+  the active consult credential (`33bef3d4…`) is genuinely `owner_less: true`; the active accreditation
+  credential (`1ffe14f6…`) is `owner_less: false`. §3.1's mismatch table, which had rested on a claim
+  the document itself flagged as unverifiable from a repo session, is now confirmed on the actual
+  production row.
+- **§12.2 — the write-lag proxy underlying §7's 90-day window. Four of five sampled agents show sub-hour
+  lag**, confirming the session-scoped write pattern the window recommendation was reasoned from. **The
+  fifth is the harness itself**, showing a 45-day lag — read here as corroborating the identity finding
+  rather than undermining the window basis: a credential stuck behind an unresolvable identity mismatch
+  is exactly what a 45-day gap between a last successful write and continuing consults looks like, and
+  it is the one agent already named and excluded by the Q1 ruling.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-q3-and-404-verbatim.md` — new, the binding ruling
+- `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` — corrected in place: §1 (final ruled-table rows), §3.1/§3.3 (live-data confirmation; the dependency closed), §6/§6.1/§6.4/§6.5 (headings finalised to RULED, case sections kept as the record the ruling accepted), §9 (S0/C1 discharged), §12 (all three query results recorded), §14 (the arc's closing recommendation), header notice; one duplicate section heading found and removed (the same class of edit-tool artifact caught and fixed in every prior round this arc)
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-arc-closed-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR15, PR19, PR20 (both the "free reuse" correction from the prior round and this
+round's live-data confirmations rest on source/data checked directly, not carried forward as assertion).
+
+**Status:** Adopted. The scoping arc is closed. What remains before a build slice opens: the live
+attestation wording (§10, a founder R18 sign-off item, likely not a further mentor question) and the
+already-reviewed build-shape items in §13. Cross-references: `D-PROVENANCE-LEDGER-Q3-AND-404-CASED-2026-08-26`,
+`D-PROVENANCE-LEDGER-Q1-RULED-2026-08-26`, `D-PROVENANCE-LEDGER-Q2Q3Q4-RULED-Q1-RETURNED-2026-08-26`,
+`D-PROVENANCE-LEDGER-SCOPED-2026-08-26`.
