@@ -28780,3 +28780,57 @@ code, schema, flag, or test change resulted — the build stands as committed at
 
 Cross-references: `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-
 sweep-CLOSE.md` (independent-review addendum appended in the same edit as this entry).
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE2-ACTIVATION-LIVE-2026-08-26
+
+**Stream:** founder. **Tier:** `code-critical` (env-flag activation of a write path against a production
+table, plus a live cron). **AC7: ENGAGED AND DISCHARGED** — the founder set the flag in Vercel, redeployed,
+minted the smoke-test credential via the browser console (own admin JWT against `/api/admin/api-keys`),
+ran the live consult, read back the database, checked the sweep, and revoked the throwaway credential. The
+AI drafted every command and confirmed each result against expectation; it performed no live Vercel/
+Supabase/mint/revoke operation itself.
+
+**Decision.** Activated `SUBSTRATE_PROVENANCE_LEDGER_ENABLED=true` in Vercel across all environments
+(Production included) and redeployed. **Production is now intentionally NOT byte-equivalent — a
+deliberate, standing change**: `/api/reason` now writes one `agent_provenance_ledger` row per
+credential-bearing, successfully-signed consult, and the `emitAccreditationTrustEvents` classification
+loop runs record-only on every accreditation write.
+
+**Live-verified, in order:**
+1. A throwaway `sr_live_` credential (`provenance-ledger-slice2-smoke`, id `1727d770-8bff-4b0f-beff-
+   797c9e84bede`) was minted via the browser console (admin JWT from the founder's own logged-in session,
+   `POST /api/admin/api-keys`) — no CLI, no shell-exported credentials.
+2. A live consult against `https://www.sagereasoning.com/api/reason` with that credential returned `200`
+   with a genuinely signed assessment (`signature`/`key_id: substrate-layer2-2026Q2` present — signing is
+   on in production) and no Tier-1 trigger.
+3. The database read back exactly one new `agent_provenance_ledger` row, matching the credential's shape
+   field-for-field: `identity_kind: credential`, `owner_user_id: null`, `agent_id: null`, `credential_ref:
+   api_key:1727d770-…`, `layer1_source: server`. Confirms the write path, the identity resolution, and the
+   unconditional `layer1_source` computation all behave exactly as designed on a real production request.
+4. The sweep (`GET /api/cron/trajectory-retention-sweep`) reported `flag_enabled: {trajectory: true,
+   provenance_ledger: true}`, `deleted: {trajectory: 0, provenance_ledger: 0, provenance_gaps: 0}`, zero
+   errors — confirming the two new purges are live and correctly no-op (nothing has aged past 90 days yet).
+5. The throwaway credential was revoked (`PATCH /api/admin/api-keys`, `is_active:false`) via the same
+   console session.
+
+**Process note, named for future sessions:** the founder's first attempt queried the wrong Supabase
+project (TEST) after only setting the Vercel flag, expecting a row from a consult that was never made.
+This project's TEST Supabase project has no live Vercel deployment pointing at it — TEST is reachable
+only via a local `npm run dev` + `.env.development.local`, never via a Vercel URL. Since the flag was set
+in Vercel across all environments (including Production), the practical path was to verify directly
+against Production rather than stand up a separate local-TEST leg — recorded as a deliberate, disclosed
+deviation from the "TEST-first" convention in the slice-2 close, not a silent skip.
+
+**No schema change** (slice 1 already applied both migrations to TEST and production). **Rollback:**
+unset `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` + redeploy (byte-identical flag-off, battery-asserted).
+
+**Status:** Slice 2 is now BUILT + independently reviewed + ACTIVATED + LIVE-VERIFIED. The founder-run
+observation window (SCOPE §9's C2 threshold — two consecutive weeks of 100% ledger-eligible-artifact
+resolution) starts now. Slice 3 (the served `provenance_gaps` field) and slice 5 (ENFORCE switch-on) both
+remain their own founder-walked sessions, gated on that observation window.
+
+Cross-references: `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-
+sweep-CLOSE.md`, `D-PROVENANCE-LEDGER-SLICE2-CONSULT-WRITE-CLASSIFICATION-SWEEP-BUILT-2026-08-26`,
+`D-PROVENANCE-LEDGER-SLICE2-INDEPENDENT-REVIEW-CLEAN-2026-08-26`.
