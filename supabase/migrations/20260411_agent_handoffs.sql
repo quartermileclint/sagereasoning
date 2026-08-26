@@ -126,6 +126,34 @@ GROUP BY category, target_agent
 ORDER BY target_agent, item_count DESC;
 
 -- ═══════════════════════════════════════════════════════════════════════
+-- 5b. Grants — REVOKE-FIRST (reflections-arc item-3 leftover #2,
+-- remediated 2026-08-26; memory `supabase-view-default-grants-
+-- auto-updatable`). The base table has RLS ENABLED but declares NO
+-- policies (default-deny for any non-owner role querying the table
+-- directly) — but a view with no `security_invoker` executes
+-- against the base table AS ITS OWNER, which bypasses RLS
+-- entirely. Supabase's default privileges would otherwise grant
+-- the full privilege set on both views to anon/authenticated/
+-- service_role, silently defeating the table's own RLS posture
+-- through the view. No caller in website/src queries either view
+-- today (internal ops tooling, queried directly); grant SELECT to
+-- service_role only.
+-- ═══════════════════════════════════════════════════════════════════════
+
+REVOKE ALL ON public.agent_handoffs_open FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON public.agent_handoffs_30d_categories FROM anon, authenticated, service_role, PUBLIC;
+
+GRANT SELECT ON public.agent_handoffs_open TO service_role;
+GRANT SELECT ON public.agent_handoffs_30d_categories TO service_role;
+
+-- §VERIFY (run after applying): every row below must show exactly
+-- one grantee (service_role) and exactly one privilege (SELECT).
+-- Any other row = FAIL (a default grant survived).
+-- SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants
+-- WHERE table_schema = 'public' AND table_name IN
+--   ('agent_handoffs_open', 'agent_handoffs_30d_categories') ORDER BY table_name, grantee;
+
+-- ═══════════════════════════════════════════════════════════════════════
 -- 6. Verify
 -- ═══════════════════════════════════════════════════════════════════════
 

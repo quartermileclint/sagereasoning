@@ -3,7 +3,7 @@
 # ============================================================================
 # SageReasoning Pre-Commit Hook
 #
-# Two checks, in order:
+# Four checks, in order:
 #   1. TypeScript compilation (full codebase) — catches unused code, type
 #      errors, and anything noUnusedLocals/noUnusedParameters surfaces.
 #   2. ESLint on safety-critical files only — extra guard on R20a modules.
@@ -11,6 +11,19 @@
 #      HTTP header literals, which throws at runtime while checks 1 and 2 (and
 #      next build) all pass green. IW-2 route (a); see the script's own header
 #      for exactly what it covers and what it does not.
+#   4. Route-export check on STAGED route.ts files only — catches a non-handler
+#      export (a helper, a constant, an injectable test seam) that fails
+#      `next build` at Vercel while tsc and the tsx test suite both stay green.
+#      Reflections-arc item-3 leftover, taken up 2026-08-26; see the script's
+#      own header for exactly what it covers and what it does not.
+#   5. View-grants check on STAGED .sql files only — catches a CREATE VIEW
+#      with no matching REVOKE ALL in the same file, which leaves Supabase's
+#      default ALL-privilege grant (SELECT + write) standing on a new public
+#      view. Reflections-arc item-3 leftover, taken up 2026-08-26; see the
+#      script's own header for exactly what it covers and what it does not
+#      (including the one currently-known, deliberately-unresolved exception:
+#      vulnerability_flag_owner_view — held pending its own founder decision,
+#      NOT allow-listed, so staging that file will correctly still flag it).
 #
 # If either fails, the commit is blocked. Fix the error, re-stage, commit.
 #
@@ -55,6 +68,22 @@ npx tsx scripts/header-bytestring-check.ts --staged
 if [ $? -ne 0 ]; then
   echo ""
   echo "Non-ASCII HTTP header literal found. Fix before committing."
+  exit 1
+fi
+
+echo "Pre-commit: route-export check (staged route.ts files)..."
+npx tsx scripts/route-export-check.ts --staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Invalid route.ts export found. Fix before committing."
+  exit 1
+fi
+
+echo "Pre-commit: view-grants check (staged .sql files)..."
+npx tsx scripts/view-grants-check.ts --staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "A CREATE VIEW with no matching REVOKE ALL was found. Fix before committing."
   exit 1
 fi
 

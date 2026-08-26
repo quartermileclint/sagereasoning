@@ -231,6 +231,27 @@ LEFT JOIN public.api_key_usage u
   AND u.year = EXTRACT(YEAR FROM NOW())::INTEGER
   AND u.month = EXTRACT(MONTH FROM NOW())::INTEGER;
 
+-- ------------------------------------------------------------
+-- Grants — REVOKE-FIRST (reflections-arc item-3 leftover #2,
+-- remediated 2026-08-26; memory `supabase-view-default-grants-
+-- auto-updatable`). This is a JOIN view, so it is not
+-- auto-updatable (no write path opens through it), but Supabase's
+-- default privileges still grant SELECT on a new public view to
+-- anon/authenticated/service_role invisibly to a migration that
+-- states no grant at all — which would expose every API
+-- consumer's owner_email + usage pattern to an unauthenticated
+-- PostgREST client. Matches the file's own stated design below
+-- ("admin-only at the RLS level... all access via service role").
+-- ------------------------------------------------------------
+REVOKE ALL ON public.api_key_usage_current FROM anon, authenticated, service_role, PUBLIC;
+GRANT SELECT ON public.api_key_usage_current TO service_role;
+
+-- §VERIFY (run after applying): the row below must show exactly
+-- one grantee (service_role) and exactly one privilege (SELECT).
+-- Any other row = FAIL (a default grant survived).
+-- SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants
+-- WHERE table_schema = 'public' AND table_name = 'api_key_usage_current';
+
 -- ============================================================
 -- 5. ROW LEVEL SECURITY
 -- api_keys and api_key_usage are admin-only at the RLS level.

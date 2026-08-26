@@ -283,3 +283,42 @@ SELECT
 FROM oikeiosis_reflections
 GROUP BY user_id, year, quarter, stage
 ORDER BY user_id, year, quarter;
+
+-- ------------------------------------------------------------
+-- Grants — REVOKE-FIRST (reflections-arc item-3 leftover #2,
+-- remediated 2026-08-26; memory `supabase-view-default-grants-
+-- auto-updatable`). Supabase's default privileges grant ALL on a
+-- newly created public view to anon/authenticated/service_role,
+-- invisibly to a migration that only states a SELECT grant. All
+-- six views above are GROUP BY aggregates (not auto-updatable —
+-- no write path opens through them), but the default SELECT grant
+-- alone would let an unauthenticated PostgREST client read every
+-- user's per-user journal-lag/passion/premeditatio/oikeiosis
+-- aggregates. Every consumer of these views
+-- (website/src/app/api/mentor/{journal-feed,passion-log,
+-- premeditatio,oikeiosis}/route.ts) reads via the service-role
+-- client only — grant SELECT to service_role alone.
+-- ------------------------------------------------------------
+REVOKE ALL ON realtime_journal_lag_stats FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON passion_weekly_catch_rate FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON passion_classification_accuracy FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON passion_intensity_trends FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON premeditatio_engagement FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON oikeiosis_stage_progression FROM anon, authenticated, service_role, PUBLIC;
+
+GRANT SELECT ON realtime_journal_lag_stats TO service_role;
+GRANT SELECT ON passion_weekly_catch_rate TO service_role;
+GRANT SELECT ON passion_classification_accuracy TO service_role;
+GRANT SELECT ON passion_intensity_trends TO service_role;
+GRANT SELECT ON premeditatio_engagement TO service_role;
+GRANT SELECT ON oikeiosis_stage_progression TO service_role;
+
+-- §VERIFY (run after applying): every row below must show exactly
+-- one grantee (service_role) and exactly one privilege (SELECT).
+-- Any other row = FAIL (a default grant survived).
+-- SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants
+-- WHERE table_schema = 'public' AND table_name IN (
+--   'realtime_journal_lag_stats', 'passion_weekly_catch_rate',
+--   'passion_classification_accuracy', 'passion_intensity_trends',
+--   'premeditatio_engagement', 'oikeiosis_stage_progression'
+-- ) ORDER BY table_name, grantee;

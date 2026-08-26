@@ -360,3 +360,27 @@ SELECT
 
 FROM gap4_entries g
 GROUP BY g.user_id;
+
+-- ------------------------------------------------------------
+-- Grants — REVOKE-FIRST (reflections-arc item-3 leftover #2,
+-- remediated 2026-08-26; memory `supabase-view-default-grants-
+-- auto-updatable`). Both views above are GROUP BY aggregates (not
+-- auto-updatable), but Supabase's default privileges still grant
+-- SELECT (and the full write set) on a new public view to
+-- anon/authenticated/service_role by default, invisibly to a
+-- migration that never states a grant at all. The sole consumer
+-- (website/src/app/api/mentor/gap4/route.ts) reads via the
+-- service-role client — grant SELECT to service_role alone.
+-- ------------------------------------------------------------
+REVOKE ALL ON gap4_month3_review FROM anon, authenticated, service_role, PUBLIC;
+REVOKE ALL ON gap4_month6_review FROM anon, authenticated, service_role, PUBLIC;
+
+GRANT SELECT ON gap4_month3_review TO service_role;
+GRANT SELECT ON gap4_month6_review TO service_role;
+
+-- §VERIFY (run after applying): every row below must show exactly
+-- one grantee (service_role) and exactly one privilege (SELECT).
+-- Any other row = FAIL (a default grant survived).
+-- SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants
+-- WHERE table_schema = 'public' AND table_name IN ('gap4_month3_review', 'gap4_month6_review')
+-- ORDER BY table_name, grantee;
