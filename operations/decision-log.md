@@ -28028,3 +28028,37 @@ rulings this build executes).
 operator install) is its own, later, founder-walked step — not scoped or licensed here. Cross-
 references: `D-IW7-THREE-OPENINGS-RULED-2026-08-25`, `D-SIGNAL-QUALITY-GAP-RULED-2026-08-25`,
 `D-CLOSE-HOOK-CONTENT-VARIATION-BUILD-PROMPT-AUTHORED-2026-08-25`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE1-PROMPT-AUTHORED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, migration, flag, credential, public surface, or live operation. Production
+byte-equivalent. **Licenses no build.**
+
+**Decision.** Authored the next-session prompt for slice 1 of the ruled build sequence — the two
+provenance-ledger migrations, TEST → production, inert:
+`operations/handoffs/founder/2026-08-26-provenance-ledger-slice1-migrations-NEXT-SESSION-PROMPT.md`.
+
+**One thing worth surfacing rather than leaving implicit in the prompt alone.** While drafting it,
+checked whether two items the scope document itself flagged as unresolved — the missing uniqueness
+constraint on `agent_provenance_gaps` (labelled "idempotency" with nothing enforcing it) and the
+undecided precedence when one accreditation write produces multiple distinct refusal reasons at once —
+had ever actually been sent to the mentor across the arc's five prior rounds. **They had not.** Both are
+schema-level questions that the migration session cannot avoid deciding, so the prompt surfaces them as
+its first substantive step (Step 2), with a recommended default for each stated explicitly rather than
+left to be silently defaulted mid-build, and an instruction to escalate rather than decide unilaterally
+if either proves more consequential than it looks on the page.
+
+**Files:**
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-slice1-migrations-NEXT-SESSION-PROMPT.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR20 (the two unresolved gaps found by checking, not assumed absent because no prior
+session had flagged them), PR15 (the prompt's schema section is drawn directly from the ruled SCOPE
+document rather than re-derived).
+
+**Status:** Adopted. Cross-references: `D-PROVENANCE-LEDGER-R18-SIGNOFF-2026-08-26`.
