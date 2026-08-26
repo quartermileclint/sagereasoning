@@ -40,6 +40,12 @@ import {
 import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
 import { isAgentCirclesEnabled } from '@/lib/translation-sandwich/reasoning-integrity'
 import type { OrientationObservation } from '@/lib/translation-sandwich/layer1-extractor'
+import { resolveLongitudinalIdentity } from '../longitudinal-identity'
+import {
+  isProvenanceLedgerEnabled,
+  lookupProvenanceLedgerEntry,
+} from './provenance-ledger-store'
+import { classifyProvenanceArtifact } from './provenance-classification'
 
 /** Extract the provenance.signed_assessments array from a parsed write body,
  *  defensively (returns [] on any shape mismatch). */
@@ -108,6 +114,57 @@ export async function emitAccreditationTrustEvents(
       .digest('hex')
       .slice(0, 32)
     const correlationId = `accr:${sigDigest}`
+
+    // Provenance-ledger classification (round-6 ruling, Q5, 2026-08-26):
+    // RECORD-ONLY at every accreditation write, gated on the ledger's own
+    // flag so a flag-off deployment does ZERO extra I/O (byte-identical to
+    // pre-slice-2). Classifies, logs, returns — NEVER refuses the mint,
+    // NEVER writes agent_provenance_gaps in this slice (both are ENFORCE-
+    // phase behaviours slice 5 adds, reusing this exact classifyProvenance
+    // Artifact call — see provenance-classification.ts's header). The
+    // founder-run readiness check (SCOPE §9's C2) tallies these logged
+    // outcomes; nothing here binds the write's outcome, which is why this
+    // runs entirely independently of, and after, the correlationId derived
+    // above — a classification failure must never perturb event derivation.
+    if (isProvenanceLedgerEnabled()) {
+      const writeSideIdentity = resolveLongitudinalIdentity({
+        credentialRef,
+        ownerUserId: owner_user_id,
+        agentId: input.agentId,
+      })
+      for (const sa of signedAssessments) {
+        try {
+          const signature = sa.signature
+          // Not ledger-eligible (this file's own eligibility contract, per
+          // provenance-classification.ts's header): no non-empty signature,
+          // no signature_hash to look up — skip, do not fabricate a lookup.
+          if (typeof signature !== 'string' || signature.length === 0) continue
+          const lookup = await lookupProvenanceLedgerEntry(signature)
+          if (!lookup.ok) {
+            // Fail-honest (SCOPE §5): an I/O error is logged distinctly and
+            // NEVER coerced into a classification outcome for this artifact.
+            console.error(
+              '[trust-core][provenance-ledger] lookup failed (record-only; no classification this artifact):',
+              lookup.error,
+            )
+            continue
+          }
+          const outcome = classifyProvenanceArtifact({
+            writeSideIdentity,
+            lookup: lookup.value,
+            now,
+          })
+          console.info(
+            `[trust-core][provenance-ledger] classify agent=${input.agentId} outcome=${outcome}`,
+          )
+        } catch (classifyErr) {
+          console.error(
+            '[trust-core][provenance-ledger] classification error:',
+            (classifyErr as Error).message,
+          )
+        }
+      }
+    }
 
     const events = deriveCredentialAndJusticeEvents({
       agentId: input.agentId,

@@ -84,7 +84,7 @@ function makeDeps(over: Partial<EraseDeps>): Spy {
       calls.erase++
       // collaboration_deleted non-zero (PA-8 pin, 2026-07-11) so the response +
       // compliance-log assertions discriminate a dropped count from a zero.
-      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 3, reflect_deleted: 0, stoa_deleted: 0, watching_deleted: 0, completion_signals_deleted: 4, billing_depersonalised: 1, warnings: [] } }
+      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 3, reflect_deleted: 0, stoa_deleted: 0, watching_deleted: 0, completion_signals_deleted: 4, provenance_deleted: 5, billing_depersonalised: 1, warnings: [] } }
     },
     logCompliance: async (entry: unknown) => {
       calls.log++
@@ -207,6 +207,7 @@ async function main(): Promise<void> {
     assert(body.collaboration_rows_deleted === 3, 'PA-8: erased body reports the collaboration_records count')
     const logged = JSON.stringify(calls.logEntries[0] ?? {})
     assert(logged.includes('collaboration_records') && logged.includes('3 rows'), 'PA-8: compliance tables_cleared names collaboration_records with its count')
+    assert(logged.includes('agent_provenance_ledger') && logged.includes('5 rows'), 'provenance-ledger slice 1: compliance tables_cleared names agent_provenance_ledger + agent_provenance_gaps with its count')
     assert(body.credential === 'anonymised_and_revoked', 'erased body states the husk was anonymised+revoked')
     assert(Array.isArray(body.retained_by_law) && body.retained_by_law.length >= 1, 'erased body lists retained-by-law children (honest)')
     assert(calls.erase === 1 && calls.log === 1, 'erasable → erase once + compliance logged once')

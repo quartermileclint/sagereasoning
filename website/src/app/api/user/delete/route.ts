@@ -25,6 +25,7 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 // events + state. Missing-table-benign (the migration is its own founder-walked step).
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+import { deleteProvenanceDataForOwner } from '@/lib/substrate/trust-core/provenance-ledger-store'
 import {
   deleteWatchingDataForOwner,
   deleteCompletionSignalsForOwner,
@@ -163,6 +164,18 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Provenance-ledger slice 1 (R17c) — genuine deletion of the operator's
+  // signature-keyed ledger entries + coverage-gap records, keyed by
+  // owner_user_id. Always-on, missing-table-benign until the two migrations
+  // land (both tables are empty/inert this slice; the tables ship with R17
+  // coverage in the same session per the ruled SCOPE §4.4 precedent).
+  {
+    const provenanceDelete = await deleteProvenanceDataForOwner(userId)
+    if (!provenanceDelete.ok) {
+      deletionErrors.push(`agent_provenance_ledger + agent_provenance_gaps: ${provenanceDelete.error}`)
+    }
+  }
+
   // watching (agent-circles, R17c, ruled §2.7) — genuine deletion of the
   // operator's IDEA-loop cycle records (candidates cascade via FK), keyed by
   // owner_user_id. Always-on, missing-table-benign until the watching migration
@@ -263,7 +276,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'idea_loop_cycles', 'sage_reflect_sessions', 'stoa_entries'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'idea_loop_cycles', 'sage_reflect_sessions', 'stoa_entries', 'agent_provenance_ledger', 'agent_provenance_gaps'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

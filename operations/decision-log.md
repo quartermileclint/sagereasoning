@@ -28204,6 +28204,61 @@ founder-walked apply step is carried in the close document above. Weights BLOCKE
 Cross-references: `D-PROVENANCE-LEDGER-SLICE1-PROMPT-AUTHORED-2026-08-26`,
 `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
 
+**⚠ SUPERSEDED same day — see `D-PROVENANCE-LEDGER-SLICE1-MIGRATIONS-APPLIED-2026-08-26` below. Both
+migrations are now applied and verified clean on TEST and production.**
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE1-MIGRATIONS-APPLIED-2026-08-26
+
+**Stream:** founder. **Tier:** `code-critical` (schema). **Risk:** Critical under 0d-ii. **AC7: ENGAGED
+AND DISCHARGED** — the founder ran every migration statement (`§PRE`/`§APPLY`/`§VERIFY`, both files) on
+TEST and then production, in the SQL Editor, and returned every result for confirmation. The AI
+performed no live DB operation; it drafted the paste-ready SQL and checked every returned result against
+the migration files' stated expectations.
+
+**Decision.** Applied both slice-1 migrations
+(`website/supabase-agent-provenance-ledger-migration.sql`,
+`website/supabase-agent-provenance-gaps-migration.sql`) to TEST, then production, in that order, each
+table's `§PRE` → `§APPLY` → `§VERIFY` walked in full. **Every result matched expectation on both
+environments, and production is byte-for-byte identical to TEST**: same 10/9-column order, types, and
+nullability on the two tables; the same six index names per table; the same CHECK constraint
+definitions (`agent_provenance_ledger`'s three, `agent_provenance_gaps`'s one); the FK to `profiles`
+with `ON DELETE CASCADE` on both; RLS enabled with no permissive policy on both; both tables genuinely
+empty (`count = 0`) on both environments.
+
+**The two checks the build session flagged as load-bearing were both confirmed live, not just in the
+file:** `agent_provenance_ledger`'s `apl_identity_kind_consistency` CHECK definition, read back from
+`pg_get_constraintdef`, is the tightened form from the same-day adversarial-review fold
+(`identity_kind = 'credential' AND owner_user_id IS NULL`, not the looser pre-fix version); and
+`agent_provenance_gaps`'s `V9` query (searching live column names for `%signature%`) returned zero rows
+on both TEST and production — F-2's hard exclusion is now a checked fact of the live schema, not merely
+a migration comment.
+
+**Files:**
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-slice1-migrations-CLOSE.md` — updated with
+  the founder-run verify results and closed out.
+
+**Verified:** all `§VERIFY` queries, both tables, both environments — see the close document for the
+full result set as returned.
+
+**Risk classification:** Critical under 0d-ii — new schema now live on production; both tables remain
+genuinely inert (no flag, no route reads or writes them for real content; `SUBSTRATE_PROVENANCE_LEDGER_
+ENABLED` does not exist in the codebase). **Rollback path:** `DROP TABLE IF EXISTS public.agent_
+provenance_gaps;` then `DROP TABLE IF EXISTS public.agent_provenance_ledger;` on either environment,
+independently — still fully available since both tables hold zero rows.
+
+**Rules served:** PR6/PR17 (every live DB operation founder-performed, none simulated); PR19 (both
+load-bearing checks from the same-day adversarial review re-confirmed against the live schema, not
+assumed from the file).
+
+**Status:** Applied and verified clean, TEST and production. **Slice 1 is closed.** Slice 2
+(`operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` §13, row 2 — the
+consult-side write + `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` + the PR24 sweep wiring) is ready to open as
+its own founder-walked session. Weights BLOCKED (unaffected). Cross-references:
+`D-PROVENANCE-LEDGER-SLICE1-MIGRATIONS-BUILT-REVIEW-FOLDED-2026-08-26`,
+`operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
+
 ## 2026-08-26 — D-CLOSE-HOOK-LIVE-OBSERVATION-PARTIAL-2026-08-26
 
 **Tier:** `code-elevated` (observation-only — touches no production surface, no schema, no
@@ -28313,3 +28368,385 @@ session (repeated consult-outages, then one ordinary non-qualifying `deliberate`
 verdict). Work continues.
 
 Cross-references: same as the entry immediately above.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE2-PROMPT-AUTHORED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, flag, credential, or public surface touched. Production byte-equivalent.
+**Licenses no build.**
+
+**Decision.** Authored the next-session prompt for slice 2 of the ruled provenance-ledger build
+sequence — the consult-side write to `agent_provenance_ledger`, its own flag
+(`SUBSTRATE_PROVENANCE_LEDGER_ENABLED`), and the PR24 retention-sweep extension covering both new
+tables: `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-sweep-
+NEXT-SESSION-PROMPT.md`.
+
+**Two things surfaced while drafting, both flagged explicitly in the prompt rather than resolved
+unilaterally:**
+
+1. **A genuine slice-boundary ambiguity SCOPE does not cleanly settle.** §13's table describes slice 2
+   as "the consult-side write + its flag, record-only" — read narrowly, only the write into
+   `agent_provenance_ledger`. But §5 ("The lookup and the refusal") describes classification logic at
+   a DIFFERENT location (`emitAccreditationTrustEvents`) with its own stated record-only behaviour
+   ("log every outcome, mint as today regardless"), and §9's C2 readiness threshold is unmeasurable
+   without something running that classification during the record-only window. The prompt lays out
+   both readings, recommends building the classification logic now (record-only, never refusing, never
+   writing `agent_provenance_gaps` — that stays an enforce-phase behaviour), and explicitly authorizes
+   the next session to escalate rather than guess if it proves more consequential once the actual code
+   is in view.
+2. **A live flag-scoping hazard, caught by checking rather than assuming.** `SUBSTRATE_TRAJECTORY_
+   SWEEP_ENABLED` is already `true` in production. The SCOPE-recommended sweep shape (extend the
+   existing `trajectory-retention-sweep` cron rather than add a new one) means the two new purges
+   could silently inherit that flag's already-"on" state if gated carelessly — the exact "shared flag
+   makes dark per-flag, not per-feature" class this project's own memory records from the Stoa
+   Q5c/Q13a session. Currently low-blast-radius (the tables are empty until slice 2's write path
+   ships), but flagged prominently in the prompt as the thing most likely to be gotten wrong by
+   default, with an explicit instruction to gate each new purge on its own flag rather than the
+   cron's pre-existing one.
+
+**Files:**
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-sweep-
+  NEXT-SESSION-PROMPT.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only; nothing reaches a live surface.
+**Rollback path:** `git revert` this commit.
+
+**Rules served:** PR20 (the slice-boundary ambiguity and the flag-scoping hazard both found by reading
+the actual code and the actual production-state record, not assumed); PR15 (the prompt's write-path and
+sweep-extension guidance are drawn directly from the exact precedent code — `agent-assessment-history-
+store.ts`, the observability two-table sweep handler — with confirmed-current line numbers, not
+re-derived from memory).
+
+**Status:** Adopted. Cross-references: `D-PROVENANCE-LEDGER-SLICE1-MIGRATIONS-APPLIED-2026-08-26`,
+`operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-ROUND6-MENTOR-QUESTION-AUTHORED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, flag, credential, or public surface touched. Production byte-equivalent.
+**Licenses no build.**
+
+**Decision.** At the founder's request, wrote the two findings from the slice-2 prompt-authoring pass
+up as a formal mentor-question document, so a ruling can be obtained before the slice-2 build session
+opens: `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round6-provenance-ledger-slice2-
+scope-and-sweep-flag.md`. Explicitly framed as round 6 — opened AFTER the arc's own round-5 closure —
+so it is legible as new implementation questions found while prepping the next build slice, not a
+reopening of anything already ruled.
+
+**Q5** asks whether slice 2's ruled scope ("the consult-side write + its flag, record-only") includes
+building §5's classification logic (the lookup-and-refuse check at the accreditation write boundary,
+run record-only — never refusing, never writing `agent_provenance_gaps`) or whether that logic is
+deliberately deferred to a later slice, with §9's C2 readiness threshold measured in the interim by an
+independent script instead. **Q6** asks whether the two new retention purges should gate on their own
+flag rather than the already-live `SUBSTRATE_TRAJECTORY_SWEEP_ENABLED` when riding inside the same
+cron/handler — citing this project's own Stoa ST3/ST4 precedent (memory `shared-flag-dark-is-per-flag-
+not-per-feature`) as the exact failure class to avoid, while noting the practical severity here is low
+(the new tables are empty until slice 2's write path deploys).
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-MENTOR-QUESTION-round6-provenance-ledger-slice2-
+  scope-and-sweep-flag.md` — new
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit.
+
+**Rules served:** PR20 (both questions traced to source rather than answered from recollection); PR15
+(reuses the exact `orientation_readings`/round-4-style mentor-question document shape this arc's own
+prior rounds established, rather than inventing a new format).
+
+**Status:** Sent to the founder to relay; awaiting the mentor's ruling. The slice-2 build prompt
+(`operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-sweep-
+NEXT-SESSION-PROMPT.md`) already names both questions inline (Step 2 for Q5, Step 4 for Q6) with a
+recommended default for each — the ruling, once returned, should be folded into that prompt (or into
+Step 0 of whichever session opens it) before slice 2's build begins. Cross-references:
+`D-PROVENANCE-LEDGER-SLICE2-PROMPT-AUTHORED-2026-08-26`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-ROUND6-RULING-ADOPTED-FOLDED-2026-08-26
+
+**Stream:** founder. **Tier:** `governance` — documents only. **Risk:** Standard under 0d-ii. **AC7 not
+engaged.** No code, schema, flag, credential, or public surface touched. Production byte-equivalent.
+**Licenses no build.**
+
+**Decision.** The mentor ruled on both round-6 questions the same day they were raised. Recorded the
+verbatim ruling
+(`operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-round6-q5-q6-
+verbatim.md`) and folded both rulings into the slice-2 build prompt in place, so the session that opens
+it next finds settled build instruction rather than an open design question.
+
+**Q5 ruled Reading A**: slice 2 builds §5's classification logic (a PURE function — identity +
+ledger-lookup-result in, outcome out, its ledger-eligibility predicate stated explicitly in the
+function's own contract rather than left for callers to infer) alongside the consult-side write,
+running record-only at every accreditation write. The mentor's reasoning: §9's C2 threshold cannot be
+observed without this logic running live during the two-week record-only window, and a standalone
+measurement script (Reading B) would create a second implementation needing to stay in sync with the
+first — the right shape for a one-time retrospective audit (the S11 precedent it was compared against),
+not an ongoing observation. Slice 5 reuses the identical function in its enforcing branch — a pure
+function makes that a wire-in, not a rewrite.
+
+**Q6 ruled `SUBSTRATE_PROVENANCE_LEDGER_ENABLED`**: the two new retention purges gate on the ledger's
+own flag, not the already-live `SUBSTRATE_TRAJECTORY_SWEEP_ENABLED` and not a third dedicated flag. The
+mentor explicitly rejected the "it's harmless because the tables are empty" argument this document's
+own Q6 had offered as a possible out — ruling that the practical inertness is a coincidence of current
+state, not a property of the design, and that the Stoa ST3/ST4 precedent's durable harm was the
+record-vs-reality contradiction persisting across sessions, not the nine days of inert activity itself.
+
+**Files:**
+- `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-round6-q5-q6-
+  verbatim.md` — new
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-sweep-
+  NEXT-SESSION-PROMPT.md` — updated: Step 2 rewritten from an open question to Q5's ruled build
+  instruction (incl. the new eligibility-predicate contract requirement, not present in the original
+  SCOPE text); Step 4 rewritten from an open question to Q6's ruled flag shape; Step 1's ruled-items
+  table gained two rows; Steps 5/6, Constraints, and the closing "what done looks like" section updated
+  to match throughout.
+
+**Risk classification:** Standard under 0d-ii — documentation only. **Rollback path:** `git revert`
+this commit.
+
+**Rules served:** PR20 (both rulings folded in full, including the one binding implementation detail —
+the eligibility-predicate contract requirement — that the original SCOPE document did not carry); PR15
+(the prompt is now internally consistent end-to-end rather than carrying stale "open question" framing
+alongside settled answers).
+
+**Status:** Adopted. Slice 2's build prompt is ready to paste into a new session with no outstanding
+mentor questions. Cross-references: `D-PROVENANCE-LEDGER-ROUND6-MENTOR-QUESTION-AUTHORED-2026-08-26`,
+`D-PROVENANCE-LEDGER-SLICE2-PROMPT-AUTHORED-2026-08-26`.
+
+## 2026-08-26 — D-REFLECTIONS-ITEM3-LEFTOVERS-TWO-CHECKS-BUILT-ONE-FINDING-HELD-2026-08-26
+
+**Tier:** `code-standard` for the two checks; the fifth view's remediation is explicitly NOT done
+this session — held pending founder direction (see below). Arc: reflections (not a SageReasoning
+project arc), continuing the item-3 leftovers named at that item's own close
+(`operations/handoffs/founder/2026-08-24-reflections-arc-item-3-CLOSE.md`) plus the empty-frontmatter
+memory fix from the same close. **AC7 not engaged.** No production surface, schema flip, credential,
+or migration was applied to any live environment this session — the one migration-shaped file
+authored here is repo-only and explicitly carried to the founder to run.
+
+**Founder elections (AskUserQuestion, this session):** empty-frontmatter fix — done directly, no
+election needed (mechanical). Route-export check — cheap AST/regex approximation, over a full
+`npm run build` gate or leaving it to Vercel. View-grants check — remediate the existing gap first,
+then add the check, over scoping to changed-files-only, downgrading to a warning, or doing nothing.
+
+**Task 1 — the empty-frontmatter memory fix.** `never-self-report-at-a-server-boundary.md`'s
+frontmatter (`name: ""`, no `description`, no `metadata.type`) was invisible to the PR23 index scan.
+Fixed to match the sibling schema (`discriminated-union-enforces-safety-primitive.md` used as the
+template): `name: never-self-report-at-a-server-boundary`, a one-line `description`, `metadata.type:
+feedback`. This file lives outside the git repo (the personal cross-session memory store under
+`~/.claude/projects/.../memory/`) — nothing to commit for this task.
+
+**Task 2 — `route-export-check.ts`.** New script (`website/scripts/route-export-check.ts`), mirroring
+`header-bytestring-check.ts`'s established shape (a documented-scope regex scan, self-test, `--staged`
+mode). Checks that a `route.ts` under `src/app/api` exports only HTTP-method handlers + the documented
+route-segment-config properties + `generateStaticParams`; a bare or named `export default` is always
+flagged regardless of whether the declared name happens to coincide with an allowed handler name (a
+real gap caught and fixed during the self-test's own first run — `export default function GET() {}`
+would otherwise have silently passed because "GET" is an allowed name, even though a *default* export
+named GET is not a recognised route handler). 11/11 self-test assertions pass; a full-repo run scans
+127 route.ts files / 295 exports clean (non-vacuous); a live `--staged` smoke against a disclosed,
+deliberately-constructed throwaway fixture (`src/app/api/__scratch-route-export-check-test__/`,
+created, staged, confirmed caught, then unstaged and deleted) proved the git-plumbing path, not just
+the pure-function self-test. Wired into `.husky/pre-commit` as check 4 of 5, staged-`route.ts`-only
+(exits 0 with "nothing to check" when no route.ts is staged, matching the existing check's contract).
+`tsc --noEmit` and `npm run build` both clean after wiring.
+
+**Task 3 — `view-grants-check.ts` + the remediation it required first.** Per the founder's election,
+the underlying gap was fixed before the check was built. Recount at this session's own hand (not
+trusted from item 3's "5 of 7" figure): 7 files in the repo contain a `CREATE (OR REPLACE) VIEW`
+statement; `website/supabase-location-migration.sql`'s view block was found already NEUTRALISED to a
+comment (superseded 2026-08-03 by the community-map-degrade migration — genuinely dead, not a live
+gap) and is excluded from the count; of the remaining 6, one
+(`website/supabase-community-map-degrade-migration.sql`) already carries the correct
+REVOKE-ALL-then-GRANT-SELECT pattern (the 2026-08-03 ST1 TEST-walk finding this whole memory
+originates from). **5 genuinely lacked it**, reconciling with item 3's own count:
+`website/supabase-mentor-gaps-migration.sql` (6 views), `supabase/migrations/20260413_logging_refactor_gap4.sql`
+(2 views), `supabase/migrations/20260411_agent_handoffs.sql` (2 views),
+`api/api-keys-schema.sql` (1 view), and `supabase/migrations/20260416_r20a_vulnerability_flag.sql`
+(1 view, `vulnerability_flag_owner_view`).
+
+**Four of the five were remediated this session** (their source files edited in place with a
+`REVOKE ALL ... FROM anon, authenticated, service_role, PUBLIC;` then `GRANT SELECT ... TO
+service_role;` block, matching the community-map-degrade precedent) — verified by direct grep of
+every consuming route (`journal-feed`, `passion-log`, `premeditatio`, `oikeiosis`, `gap4`,
+`admin/api-keys` all read via `supabaseAdmin`/`SUPABASE_SERVICE_ROLE_KEY` server-side, never
+anon/authenticated; `agent_handoffs`'s two views have no website/src consumer at all — internal ops
+tooling, restricted to service_role as the conservative default). Since these 4 files' underlying
+features are already Live in production (`/premeditatio`, `/oikeiosis`, journal-feed, passion-log all
+confirmed Live per CLAUDE.md; `api_key_usage_current` and `agent_handoffs` are foundational
+infrastructure), editing the historical migration text alone does not retroactively fix the
+already-applied live grants — a NEW consolidated file,
+`website/supabase-view-grants-remediation-migration.sql` (§PRE/§APPLY/§VERIFY/§INVERSE, matching this
+repo's standard shape), was authored to apply the identical fix against TEST then production. **This
+file is authored, not run** — it is a founder-walked step (PR6/PR17), carried, not executed this
+session.
+
+**The fifth — `vulnerability_flag_owner_view` — is DELIBERATELY NOT remediated, and is a materially
+different, more serious finding than the other four**, surfaced here rather than folded silently into
+the batch fix or silently deferred without a record. Unlike the other four (internal analytics/ops
+views, service_role-only by design, confirmed via every real consumer), this view was explicitly
+designed for `authenticated`-owner SELECT access (its own migration comment: *"Owner reads go through
+the view (SELECT inherited from table RLS)... Users query this view, not the table directly"*) — so
+the correct grant here is NOT service_role-only, it needs `authenticated` too. More importantly: the
+view carries no `security_invoker` option (checked directly — absent from the file), which on current
+Postgres/Supabase semantics means the view executes against its base table AS THE VIEW'S OWNER, not
+the querying role; the base table's RLS is only `ENABLE`d, not `FORCE`d (also checked directly), so its
+owner is exempt from RLS by default. If the view's owner is the same role that created the base table
+(the ordinary case for a same-migration `CREATE TABLE` + `CREATE VIEW`), **the migration's own claim
+that RLS governs access through the view may be false** — every row could be visible to any role
+granted SELECT on the view, not just the owning user's own row. Combined with the very default-grants
+bug this whole task addresses (before any fix, `anon`+`authenticated` already have full default
+privileges on this view), this is a plausible full-table read exposure on a table storing R20a
+vulnerable-user protection flags (users flagged for potential crisis/self-harm reasoning signals) —
+confirmed to exist in production (`vulnerability_flag`, 0 rows as of the last count per
+`operations/decision-log.md:10998`), so currently latent rather than actively leaking real data, but a
+structural hole that would begin leaking the moment a real row is written. **This session could not
+verify the actual live behaviour** (no direct database query access), so this is raised as a finding
+requiring the founder's explicit direction — whether to verify live first (e.g. a throwaway two-user
+RLS-bypass-through-view probe, mirroring the `impulse-rls-bypass-proof.ts` precedent from the C4 RLS
+lockdown work), treat it as a Critical 0d-ii item in its own right given the safety-data class, or
+some other disposition — rather than fixed, guessed at, or silently left as the one open item without
+a clear next step. **Recorded here rather than assumed benign because the table it concerns is
+precisely the one this repository's own R20a discipline exists to protect.**
+
+**`view-grants-check.ts`** (`website/scripts/view-grants-check.ts`) was then built: for every
+`CREATE (OR REPLACE) VIEW <name>` in a `.sql` file, the SAME file must also carry a `REVOKE ALL ON
+<name>` statement (case/prefix-insensitive on both). A one-time cross-file allow-list
+(`CROSS_FILE_REMEDIATIONS`, currently one entry — the remediation file named above) is named
+explicitly rather than the check being loosened to tolerate any cross-file REVOKE generally. **The
+check's own first full-repo run caught two real false positives in its own logic before this was
+committed** — its regex initially matched `CREATE OR REPLACE VIEW` occurring inside `--` line
+comments (`supabase-community-map-degrade-migration.sql`'s own explanatory comment, and
+`supabase-location-migration.sql`'s neutralisation note), fixed at the root by stripping `--` line
+comments before matching, with a dedicated self-test fixture added for exactly this class (a comment
+merely mentioning the phrase must yield zero views, not a fabricated violation). 9/9 self-test
+assertions pass; the corrected full-repo run reports exactly one violation —
+`vulnerability_flag_owner_view` — confirming both that the check works and that the held finding
+above is real, not a first-pass artifact. Wired into `.husky/pre-commit` as check 5 of 5,
+staged-`.sql`-only; the held file is deliberately NOT allow-listed, so staging it in a future,
+unrelated commit will correctly still surface the flag rather than silently pass.
+
+**Files:**
+- `website/scripts/route-export-check.ts` — new
+- `website/scripts/view-grants-check.ts` — new
+- `website/supabase-view-grants-remediation-migration.sql` — new (authored, not yet run — founder-walked)
+- `website/supabase-mentor-gaps-migration.sql` — modified (grants block added)
+- `supabase/migrations/20260413_logging_refactor_gap4.sql` — modified (grants block added)
+- `supabase/migrations/20260411_agent_handoffs.sql` — modified (grants block added)
+- `api/api-keys-schema.sql` — modified (grants block added)
+- `.husky/pre-commit` — two new checks added (4 and 5 of 5)
+- `operations/decision-log.md` — this entry, at the physical tail (re-checked before writing; a
+  concurrent provenance-ledger session had appended further entries since this session's own earlier
+  entries)
+
+**Deliberately NOT touched:** `supabase/migrations/20260416_r20a_vulnerability_flag.sql` (the held
+finding, above — no edit made); `website/supabase-location-migration.sql` (confirmed already dead,
+correctly excluded from remediation and from the check's own view count).
+
+**Verified:** `tsc --noEmit` clean; `npm run build` exit 0, all routes registered (unaffected by
+`.sql`/script-only changes, run anyway per the very lesson task 2 encodes); all three pre-commit
+checks' self-tests green (header-bytestring-check unchanged/re-confirmed, route-export-check 11/11,
+view-grants-check 9/9); a live `--staged` smoke for each new check against real staged files (the 4
+remediated files pass cleanly at 11/11 views; a disclosed synthetic route.ts violation was caught then
+cleaned up).
+
+**Rules served:** PR15 (both scripts reuse `header-bytestring-check.ts`'s exact shape — walk/self-test/
+`--staged`/non-vacuity-floor — rather than inventing a new pattern); PR20 (the fifth file's genuine
+severity difference from the other four is named and escalated, not batch-processed for convenience);
+the project's standing build discipline (a live defect found in passing — the view-grants-check's own
+false positives — was fixed at the root before being reported as done, not silently worked around).
+
+**Risk classification:** Standard/Elevated for the two checks (dev-tooling, no product code path
+touched); the four remediated migration FILES are Elevated (idempotent grant statements, additive,
+reversible via the authored §INVERSE block) but their LIVE effect is unapplied pending the founder
+running the consolidated remediation file — **Critical** would attach to that live step itself
+(PR6/PR17), not to this session's authoring of it. The fifth file's eventual fix, whatever form the
+founder elects, should be scoped and risk-classified in its own right when that direction is given.
+
+**Status:** Tasks 1 and 2 (memory fix, route-export check) fully complete. Task 3 is complete for the
+check itself and for 4 of 5 remediations (authored, live-apply carried to the founder); the 5th
+(`vulnerability_flag_owner_view`) is an open, escalated finding awaiting founder direction — not yet
+scoped as its own next-session item pending that direction.
+Cross-references: `operations/handoffs/founder/2026-08-24-reflections-arc-item-3-CLOSE.md`,
+memory `nextjs-route-export-validation`, memory `supabase-view-default-grants-auto-updatable`, memory
+`never-self-report-at-a-server-boundary`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE2-CONSULT-WRITE-CLASSIFICATION-SWEEP-BUILT-2026-08-26
+
+**Stream:** founder. **Tier:** `code-critical`. **Risk:** Critical (new write path against a production
+table + a live cron extension). **AC7: NOT YET ENGAGED** — this session drafted, wired, tested, and
+adversarially reviewed the build; it performed no live Vercel/Supabase operation. The carried
+founder-walked step is the flag-flip (`SUBSTRATE_PROVENANCE_LEDGER_ENABLED=true`) + redeploy + live smoke.
+
+**Decision.** Built slice 2 of the signature-keyed extraction-provenance ledger (ruled option (a)) per
+the slice-2 build prompt and the round-6 mentor ruling (Q5/Q6, both folded in verbatim, neither
+re-derived): (1) the consult-side write at `/api/reason`, own flag, own gating condition, hoisted shared
+identity-resolution locals so the ledger flag and the trajectory-write flag never duplicate a
+credential-context read; (2) the §5 classification pure function
+(`website/src/lib/substrate/trust-core/provenance-classification.ts`, new) wired record-only at
+`emitAccreditationTrustEvents` — classifies every submitted signed artifact's provenance
+(permit/no_ledger_entry/out_of_window/identity_mismatch/caller_supplied_extraction), logs the outcome,
+never refuses the mint, never writes `agent_provenance_gaps` in this slice; (3) the PR24 sweep extension
+on the existing `/api/cron/trajectory-retention-sweep` handler — two new purges
+(`purgeExpiredProvenanceLedger`/`purgeExpiredProvenanceGaps`) each gating INTERNALLY on
+`SUBSTRATE_PROVENANCE_LEDGER_ENABLED` (round-6 Q6 — never the already-live
+`SUBSTRATE_TRAJECTORY_SWEEP_ENABLED`), called unconditionally by the handler so the ledger's sweep tracks
+only its own flag's state in every combination.
+
+**Round-6 ruling's binding implementation note, honoured:** the classification function's own contract
+states explicitly what counts as a ledger-eligible artifact (a non-empty signature the caller already
+confirmed, plus a ledger lookup that succeeded at the I/O layer) — an artifact predating the ledger's
+consult-side write beginning for its identity is NOT a separate case; it classifies identically to any
+other genuine lookup miss (`no_ledger_entry`), permanently, which is the correct honest reading SCOPE
+§9's C2 already names.
+
+**Adversarial review (first-hand, this session — not an independent separate-context run, named
+honestly):** the five load-bearing dimensions the prompt names were each checked against the actual code
+(flag-off byte-identity, the signature field's correctness against `layer2-signer.ts`'s real shape,
+insert-once dedup, the sweep's genuine flag independence in both directions, and record-only holding —
+never touching `agent_provenance_gaps` or the event-derivation control flow). One design defect was
+caught and fixed in-session before it reached a test: the write function was first going to take a
+pre-resolved `LongitudinalIdentity`, which cannot carry the raw declared `agent_id` on the credential
+(owner-less) branch — fixed by taking the raw identity inputs directly, matching the migration's own
+stated column shape (`agent_id` "MAY also be set on the credential branch").
+
+**Verified:** `provenance-classification.test.ts` 14/0 (new); `provenance-write-lookup-purge.test.ts`
+33/0 (new); `trajectory-retention-sweep/__tests__/route.test.ts` 43/0 (rewritten for the new response
+shape and the three-purge independence property); `provenance-ledger-store.test.ts` 18/0 (slice-1
+regression, unaffected); `emission-hooks.test.ts` 19/0 (regression, unaffected); `agent-assessment-
+history-store.test.ts` 120/0 (regression); `tsc --noEmit` clean; `npm run build` exit 0, all routes
+registered incl. `/api/reason` and the sweep cron (Next.js route-export validation passed — memory
+`nextjs-route-export-validation`).
+
+**Concurrency note:** `ListAgents` at open showed 13 peer sessions/agents. Commit is path-scoped to the
+provenance-ledger feature's files only; `website/src/data/environmental-context.json`,
+`.husky/pre-commit`, `supabase/migrations/20260413_logging_refactor_gap4.sql`, `api/api-keys-schema.sql`,
+`supabase/migrations/20260411_agent_handoffs.sql`, and `website/supabase-mentor-gaps-migration.sql` were
+left untouched as concurrent peer-session work. This session's commit ALSO carries slice 1's own
+previously-uncommitted files (both migrations, `provenance-ledger-store.ts`'s slice-1 R17 functions +
+test, and the R17 wiring edits to `/api/user/delete`/`/api/user/export`/`/api/credential/erase`/
+`consumer-erasure.ts`), found still untracked at this session's open despite the slice-1 close document
+describing slice 1 as CLOSED — the same feature's earlier ruled slice, not concurrent work, included
+rather than left stranded uncommitted a second time.
+
+**No schema change this session** (slice 1 already applied both migrations to TEST and production).
+
+**Rollback:** unset `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` + redeploy (byte-identical flag-off,
+test-asserted for every new code path); `git revert` the commit for a full removal (no schema to
+reverse — slice 1's migrations are additive and independent of this slice's flag).
+
+**Status:** Built, tested, first-hand-reviewed; NOT activated. Slice 3 (the served `provenance_gaps`
+field + the §10 attestation amendment) and slice 5 (ENFORCE switch-on, reusing `classifyProvenanceArtifact`
+unchanged) are both ready to open as their own founder-walked sessions once this slice's flag has
+accumulated the record-only observation window SCOPE §9's C2 threshold requires.
+
+Cross-references: `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-
+sweep-NEXT-SESSION-PROMPT.md`, `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-
+write-and-sweep-CLOSE.md`, `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-
+round6-q5-q6-verbatim.md`, `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.

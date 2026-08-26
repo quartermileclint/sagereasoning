@@ -45,6 +45,7 @@ import {
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
+import { deleteProvenanceDataForCredential } from './substrate/trust-core/provenance-ledger-store'
 import {
   deleteWatchingDataForCredential,
   deleteCompletionSignalsForCredential,
@@ -210,6 +211,12 @@ export interface ErasureResult {
   /** watching (agent-circles, R17c, ruled §2.7): idea_loop_cycles rows hard-deleted
    *  for this credential (candidate rows cascade via FK). */
   watching_deleted: number
+  /** Provenance-ledger slice 1 (R17c): agent_provenance_ledger +
+   *  agent_provenance_gaps rows hard-deleted for this credential. Both tables
+   *  are empty/inert this slice; the field exists so erasure coverage ships
+   *  with the schema, per the same precedent trust_deleted/collaboration_
+   *  deleted followed. */
+  provenance_deleted: number
   /** ATRF completion signals (GS-ATRF-3, R17c): idea_loop_completion_signals rows
    *  hard-deleted for this credential. Reported separately from watching_deleted
    *  because the two are keyed on DIFFERENT actors' credentials — the runner's
@@ -257,6 +264,14 @@ export async function eraseExternalConsumerCredential(
   //     Missing-table-benign until the migration lands.
   const collab = await deleteCollaborationDataForCredential(credentialRef, client)
   if (!collab.ok) return { ok: false, error: `collaboration: ${collab.error}` }
+
+  // 1c-v. Provenance-ledger slice 1 (R17c critical — a fail is ok:false so
+  //       erasure stays verifiable): genuine deletion of this credential's
+  //       signature-keyed ledger entries + coverage-gap records. Both tables
+  //       are empty/inert this slice; missing-table-benign until their
+  //       migrations land.
+  const provenanceLedger = await deleteProvenanceDataForCredential(credentialRef, client)
+  if (!provenanceLedger.ok) return { ok: false, error: `provenance: ${provenanceLedger.error}` }
 
   // 1c-iii. watching (agent-circles, R17c critical — ruled §2.7: erase coverage
   //         rides this build regardless of the runner credential's eventual
@@ -374,6 +389,7 @@ export async function eraseExternalConsumerCredential(
       reflect_deleted,
       stoa_deleted: stoa.value,
       watching_deleted: watching.value,
+      provenance_deleted: provenanceLedger.value.ledger + provenanceLedger.value.gaps,
       completion_signals_deleted: completionSignals.value,
       billing_depersonalised,
       warnings,

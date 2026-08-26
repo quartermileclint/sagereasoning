@@ -263,6 +263,8 @@ export async function runConsumerErasure(
       // would let a ledger reader infer coverage of the agent's own reports from
       // a number that only ever counted the runner's cycles.
       `idea_loop_completion_signals (credential-scoped: ${credentialRef}; ${result.value.completion_signals_deleted} rows)`,
+      // Provenance-ledger slice 1: agent_provenance_ledger + agent_provenance_gaps.
+      `agent_provenance_ledger + agent_provenance_gaps (credential-scoped: ${credentialRef}; ${result.value.provenance_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })

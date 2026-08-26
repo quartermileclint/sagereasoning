@@ -25,6 +25,7 @@ import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-h
 // + state. Missing-table-benign (the migration is its own founder-walked step).
 import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+import { getProvenanceDataForOwner } from '@/lib/substrate/trust-core/provenance-ledger-store'
 import {
   getWatchingDataForOwner,
   getCompletionSignalsForOwner,
@@ -185,6 +186,21 @@ export async function GET(request: NextRequest) {
       exportData.collaboration_records = { error: collabExport.error }
     } else {
       exportData.collaboration_records = collabExport.value
+    }
+  }
+
+  // 2e. Provenance-ledger slice 1 (R17i) — the operator's signature-keyed
+  //     ledger entries + coverage-gap records, keyed by owner_user_id.
+  //     Structural facts (no signature, no artifact detail — F-2's hard
+  //     exclusion). Missing-table benign until the two migrations land.
+  {
+    const provenanceExport = await getProvenanceDataForOwner(userId)
+    if (!provenanceExport.ok) {
+      exportData.agent_provenance_ledger = { error: provenanceExport.error }
+      exportData.agent_provenance_gaps = { error: provenanceExport.error }
+    } else {
+      exportData.agent_provenance_ledger = provenanceExport.value.ledger
+      exportData.agent_provenance_gaps = provenanceExport.value.gaps
     }
   }
 

@@ -201,6 +201,14 @@ import { emitOrientationReadingTrustEvent } from '@/lib/substrate/trust-core/emi
 import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
 import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
+// Provenance-ledger slice 2 (2026-08-26): the consult-side write. Flag-gated
+// by SUBSTRATE_PROVENANCE_LEDGER_ENABLED; UNSET → no write, no extra
+// credential-context read beyond what the trajectory write already needs
+// (byte-identical).
+import {
+  isProvenanceLedgerEnabled,
+  persistProvenanceLedgerEntry,
+} from '@/lib/substrate/trust-core/provenance-ledger-store'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -1789,31 +1797,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Mechanism-correction M6 (CI-5 schema + write half, 2026-06-14): persist the
-    // per-consult agent trajectory keyed to the consulting credential. WRITE-ONLY
-    // — the engine does NOT read this back (determinism untouched); M7 wires the
-    // windowed read. Awaited (KG1 rule 2 — no fire-and-forget; Vercel terminates
-    // after the response). Fail-honest: a write failure is logged and the response
-    // proceeds unchanged (the guarantee never rides on a write that didn't land —
-    // the M1 election). Entirely skipped (incl. the credential-context lookup) when
-    // SUBSTRATE_TRAJECTORY_WRITE_ENABLED is unset → byte-identical, zero new reads.
-    // Only a real examination writes a row (assessment produced; no Tier-1
-    // short-circuit, no error); user-JWT consults carry no agent identity → no row.
-    if (
-      isTrajectoryWriteEnabled() &&
-      sandwichResult.error === null &&
-      sandwichResult.tier1_trigger === null &&
-      sandwichResult.layer2_assessment !== null
-    ) {
-      let credentialRef: string | null = null
-      let ownerUserId: string | null = null
-      let declaredAgentId: string | null = null
-
+    // Shared identity-resolution locals, reused by BOTH the M6 trajectory
+    // write below AND the provenance-ledger write (slice 2, 2026-08-26) that
+    // follows it. Hoisted out of the M6 `if` (where they used to live scoped
+    // to that block alone) so turning on SUBSTRATE_PROVENANCE_LEDGER_ENABLED
+    // alone — without the trajectory flag — does not duplicate the
+    // resolveCredentialContext PK read the trajectory write already performs
+    // when ITS flag is on, and vice versa (the sharedCredCtx reuse discipline
+    // extended one level further). Computed only when at least one of the two
+    // write flags needs it — the DB read is flag-gated exactly as before.
+    let credentialRef: string | null = null
+    let ownerUserId: string | null = null
+    let declaredAgentId: string | null = null
+    if (isTrajectoryWriteEnabled() || isProvenanceLedgerEnabled()) {
       if (apiKey && apiKey.valid) {
         credentialRef = `api_key:${apiKey.api_key_id}`
         // The sr_live_ credential's operator + declared agent identity live on its
         // api_keys row (validateApiKey does not surface them). One gated, indexed
-        // PK read — only when the flag is on, so flag-off adds no DB read.
+        // PK read — only when a write flag is on, so flag-off adds no DB read.
         // AE-1 (KG1): when the delta block already resolved this consult's
         // context, reuse it — never two PK reads for one consult.
         const credCtx =
@@ -1829,7 +1830,29 @@ export async function POST(request: NextRequest) {
         credentialRef = `install:${installAuth.install_id}`
         ownerUserId = installAuth.owner_user_id
       }
+    }
+    // The consult time, shared by the M6 trajectory write and the
+    // provenance-ledger write below, so both rows agree on the moment
+    // (provenance-ledger slice 2, Step 3's instruction).
+    const provenanceRecordedAt = new Date()
 
+    // Mechanism-correction M6 (CI-5 schema + write half, 2026-06-14): persist the
+    // per-consult agent trajectory keyed to the consulting credential. WRITE-ONLY
+    // — the engine does NOT read this back (determinism untouched); M7 wires the
+    // windowed read. Awaited (KG1 rule 2 — no fire-and-forget; Vercel terminates
+    // after the response). Fail-honest: a write failure is logged and the response
+    // proceeds unchanged (the guarantee never rides on a write that didn't land —
+    // the M1 election). Entirely skipped when SUBSTRATE_TRAJECTORY_WRITE_ENABLED
+    // is unset → byte-identical (the shared credential-context lookup above is
+    // ALSO skipped unless the provenance-ledger flag needs it instead).
+    // Only a real examination writes a row (assessment produced; no Tier-1
+    // short-circuit, no error); user-JWT consults carry no agent identity → no row.
+    if (
+      isTrajectoryWriteEnabled() &&
+      sandwichResult.error === null &&
+      sandwichResult.tier1_trigger === null &&
+      sandwichResult.layer2_assessment !== null
+    ) {
       if (credentialRef !== null) {
         const evaluatedAction = mapLayer2AssessmentToEvaluatedAction(
           sandwichResult.layer2_assessment,
@@ -1882,6 +1905,55 @@ export async function POST(request: NextRequest) {
           console.warn(
             '[/api/reason] trajectory history write failed (response unaffected):',
             trajectoryWrite.error,
+          )
+        }
+      }
+    }
+
+    // Provenance-ledger slice 2 (2026-08-26, SCOPE §4.2/Step 3): persist the
+    // signature-keyed extraction-provenance fact for this consult. OWN flag
+    // (SUBSTRATE_PROVENANCE_LEDGER_ENABLED), OWN gating condition — NOT folded
+    // into the M6 `if` above. Two conditions the M6 block does not have:
+    //   - a signed assessment must actually be present (gate on a signature
+    //     being present — with signing off there is nothing to hash; this is
+    //     self-consistent, not a gap, since the R18f gate cannot set
+    //     provenanceEnforced without signing either, so no accreditation mint
+    //     would happen regardless — SCOPE §4.2).
+    //   - layer1_source is computed UNCONDITIONALLY from
+    //     preExtractedLayer1Schema !== undefined — NEVER gated behind
+    //     isTrajectoryDeltaEnabled() (the trajectory-delta blind window this
+    //     ledger must not inherit — SCOPE §2 fact 6).
+    // Awaited (KG1); fail-honest (a write failure is logged, never affects the
+    // response — mirrors the M6 write's posture exactly).
+    if (
+      isProvenanceLedgerEnabled() &&
+      sandwichResult.error === null &&
+      sandwichResult.tier1_trigger === null &&
+      sandwichResult.layer2_assessment !== null &&
+      credentialRef !== null
+    ) {
+      const signedOutput = sandwichResult.output as Record<string, unknown> | null
+      const assessmentField = signedOutput?.assessment as { signature?: unknown } | undefined
+      const signature =
+        assessmentField && typeof assessmentField.signature === 'string'
+          ? assessmentField.signature
+          : null
+      // No signature (SUBSTRATE_LAYER2_SIGNING_ENABLED off) → nothing to hash
+      // → skip silently. Not an error; the ledger's whole premise is a
+      // signature-keyed lookup.
+      if (signature !== null && signature.length > 0) {
+        const ledgerWrite = await persistProvenanceLedgerEntry({
+          signature,
+          credentialRef,
+          ownerUserId,
+          agentId: declaredAgentId,
+          layer1Source: preExtractedLayer1Schema !== undefined ? 'supplied' : 'server',
+          recordedAt: provenanceRecordedAt,
+        })
+        if (!ledgerWrite.ok) {
+          console.warn(
+            '[/api/reason] provenance-ledger write failed (response unaffected):',
+            ledgerWrite.error,
           )
         }
       }
