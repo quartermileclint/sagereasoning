@@ -28089,26 +28089,27 @@ correct, and confirmed `framing-core.mjs`'s `parseBool` reads the string `"true"
 sibling flags in that same block already do (`GATE1_TELOS_LINE_ENABLED`, etc.) — no restart needed,
 since hooks are spawned fresh per invocation.
 
-**Live observation, same session (session id `34f6a775-835d-45f9-a73c-459302e5e17e`, the harness's own
-identifier for this Claude Code session):**
-- A genuine `GUARD-CAUTION` fired for this session (`rec=pause_for_review`, `tool=Bash`,
-  `proximity=deliberate`) at 2026-08-26T00:32:35.941Z, confirmed in `gate1.log` and in a freshly-
-  written `34f6a775….guardcaution.json` (2ms after the log line) — this was NOT contrived; it arose
-  from ordinary tool activity during re-verification, moments after the flag flip. **Honesty note for
-  the record:** this session id's state directory also carries ~20 minutes of unrelated `.decision`
-  files (Edit/Write consults on `credential/erase`, `user/delete`, `user/export`,
-  `consumer-erasure.ts`, and a provenance-ledger migration/store) that this conversation did not
-  perform — strong evidence that the harness's session id is shared across concurrent Claude Code
-  windows/tabs in this environment, not scoped to one ccd conversation. The guard-caution is
-  genuinely recorded against the live session the Stop hook will read from; it should not be read as
-  proof that a specific tool call *in this transcript* triggered it.
-- The session's `.closed` fire-once marker did not exist before this turn, so the close hook has not
-  yet fired for this session. The consult-signal path was NOT independently confirmed live before this
-  turn's Stop event (no `consultsignal.json` was present) — the high/low-confidence kathekon-verdict
-  path is **not yet observed live**, only the guard-caution path.
-- What remains to be recorded (necessarily after this turn ends, since the Stop hook fires post-turn
-  and, in `block` mode, forces the next turn to carry its `reason` text): whether the close turn's
-  content names the guard caution, with the base five-question string still fully present as a prefix.
+**Live observation, corrected after an in-session self-catch.** A `GUARD-CAUTION` was initially found
+in `gate1.log` under session id `34f6a775-835d-45f9-a73c-459302e5e17e` and a draft of this entry
+treated it as this session's own observation, flagged with an honesty caveat about possible session-id
+sharing. That caveat proved correct: when this turn's own `Stop` event fired, `gate1.log` recorded
+`CLOSE session=b05f12eb-815d-4c0e-a76d-af3705ed16fe` — this session's actual harness id (matching this
+session's own scratchpad path) — a different id from `34f6a775-…` entirely. `34f6a775-…` is a
+genuinely separate, concurrent Claude Code session (most likely one of the peer `sagereasoning-*`
+windows `ListAgents` showed active at open); its guard-caution is real but is not this session's
+observation.
+- **Confirmed live, for this session (`b05f12eb-…`):** no guard-caution or consult-signal file existed
+  for this session id before the `Stop` event, and the rendered close-turn content (the forced next
+  turn's `reason` text) was exactly the base five-question `BASE_REFLECT_INVITATION` string, verbatim
+  — the flag-on/no-signal byte-identical path, live-confirmed.
+- **Not confirmed live this session:** the guard-caution appended-paragraph path (seen firing
+  correctly for a concurrent peer session, but that peer session had not closed as of this writing)
+  and the consult-verdict confidence-graded path (no qualifying signal occurred for this session
+  either). Both remain battery-confirmed (70/0, PR19-reviewed) only.
+- **Standing lesson:** the harness's session id is not scoped to one `ccd` conversation in this
+  environment; verifying live harness behaviour requires checking the actual `CLOSE session=…` (or
+  equivalent) line against the session's own known id, not assuming the first id seen in the log is
+  its own. Full account in the close.
 
 **Rollback path:** remove `GATE1_CLOSE_CONTENT_VARIATION_ENABLED` from `.claude/settings.local.json`'s
 `env` block (or set it to `"false"`) — byte-identical to pre-activation, test-asserted. No server-side,
