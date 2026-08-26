@@ -28124,3 +28124,192 @@ attribution of the guard-caution to a specific tool call).
 variation observed to have a qualifying signal recorded; the rendered close-turn content and the
 consult-verdict path are recorded in the session close, completed after this turn's Stop event is
 observable. Cross-references: `D-CLOSE-HOOK-CONTENT-VARIATION-BUILT-DARK-REVIEW-FOLDED-2026-08-25`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE1-MIGRATIONS-BUILT-REVIEW-FOLDED-2026-08-26
+
+**Stream:** founder. **Tier:** `code-critical` — new schema. **Risk:** Critical under 0d-ii. **AC7:**
+engages at the TEST/production apply step, **not yet engaged this session** — the AI drafted and
+adversarially reviewed the migrations and the R17 wiring but performed no live DB operation. Production
+byte-equivalent (both new tables do not exist on any environment yet; no flag, no route, no write path
+reads or writes them).
+
+**Decision.** Built slice 1 of the ruled provenance-ledger sequence (`operations/agent-circles-2026-08/
+2026-08-26-provenance-ledger-SCOPE.md` §13): two new migration files
+(`website/supabase-agent-provenance-ledger-migration.sql`,
+`website/supabase-agent-provenance-gaps-migration.sql`), following the `agent_hold_observations`/
+`agent_trust_events` precedent shape. Resolved the two schema-level gaps the five prior scoping
+rounds never actually put to the mentor (named in the slice-1 prompt's Step 2): `agent_provenance_gaps.
+correlation_id` is now `UNIQUE` (Gap 1 — the harness's honest-409-on-reuse pattern makes retries the
+normal case, not an edge case, so without this a retry would duplicate a refusal fact on the public
+record), and the multi-reason precedence when one write produces several refusal reasons at once is
+now stated in the migration comment as `caller_supplied_extraction` > `identity_mismatch` >
+`out_of_window` > `no_ledger_entry` (Gap 2 — a recommendation the session was explicitly licensed to
+change if a review judged otherwise; none did).
+
+**A third judgement call this session made and recorded, not silently defaulted:** whether R17
+data-rights coverage (delete/export/erase) for the two new tables ships in this slice or waits for
+slice 2. Elected to wire it now — new store module
+`website/src/lib/substrate/trust-core/provenance-ledger-store.ts` (mirrors `trust-core-store.ts`/
+`collaboration-store.ts` exactly: missing-table-benign, fail-honest, no ledger read/write logic — that
+stays slice 2's), wired into `/api/user/delete`, `/api/user/export`, and `/api/credential/erase`. This
+follows SCOPE §4.4's "not a rider; a precondition" language and every prior schema slice's own
+precedent (S1/S5/Stoa all wired R17 the same session as their schema) — but the slice-1 prompt's
+"Constraints that bind" also says "no route change," and this session did touch three existing routes.
+Recorded as a judgement call with reasoning, not asserted as the only possible reading; the close names
+exactly how to revert the R17-wiring commit independently of the two migrations if the founder judges
+otherwise.
+
+**Adversarial review (one independent-agent pass, this session): GO-WITH-FIXES, all folded before
+close.** One MEDIUM (the ledger's `apl_identity_kind_consistency` CHECK was looser than its own header
+comment claimed — tightened so the credential branch requires `owner_user_id IS NULL`, exactly
+matching what `resolveLongitudinalIdentity()` can produce); two LOW (both migrations' `§VERIFY V2`
+comments miscounted their own column lists — corrected; the gaps table's correlation-id reasoning now
+explicitly distinguishes its shape from `agent_trust_events`' three-column composite
+`uq_ate_correlation` rather than implying it mirrors that shape); one NIT (F-2's hard exclusion — no
+signature-derived column on `agent_provenance_gaps` — had no standing regression test; added a
+text-based drift pin reading the migration's own `CREATE TABLE` block, mutation-verified to catch an
+injected `signature_hash` column).
+
+**Files:**
+- `website/supabase-agent-provenance-ledger-migration.sql` — new
+- `website/supabase-agent-provenance-gaps-migration.sql` — new
+- `website/src/lib/substrate/trust-core/provenance-ledger-store.ts` — new
+- `website/src/lib/substrate/trust-core/__tests__/provenance-ledger-store.test.ts` — new (18/0)
+- `website/src/app/api/user/delete/route.ts` — modified
+- `website/src/app/api/user/export/route.ts` — modified
+- `website/src/app/api/credential/erase/handler.ts` — modified
+- `website/src/app/api/credential/erase/__tests__/handler.test.ts` — modified (41/0)
+- `website/src/lib/consumer-erasure.ts` — modified (`consumer-erasure.test.ts` 25/0, unchanged assertions)
+- `operations/handoffs/founder/2026-08-26-provenance-ledger-slice1-migrations-CLOSE.md` — new (the
+  founder-walked apply-step instructions)
+
+**Verified:** `tsc --noEmit -p .` clean; `npm run build` exit 0, all routes registered; the three
+touched/new test files all green as listed above.
+
+**Risk classification:** Critical under 0d-ii — NEW schema; both migrations idempotent and additive
+(`CREATE TABLE IF NOT EXISTS`), no existing table altered, reversible via each file's own commented
+rollback block. **Rollback path:** `DROP TABLE IF EXISTS public.agent_provenance_gaps;` then
+`DROP TABLE IF EXISTS public.agent_provenance_ledger;` on either environment, independently; `git
+revert` the R17-wiring files independently of the two migration files if desired.
+
+**Rules served:** PR6/PR17 (every live DB step named founder-only, none simulated); PR19 (one
+independent adversarial pass run and folded, not skipped for being schema-only); PR20 (both
+SCOPE-flagged gaps resolved with stated reasoning); PR15 (every store/route pattern reused verbatim
+from the S1/S5 precedent, nothing re-invented).
+
+**Status:** Built, battery-green, review-folded. **NOT yet applied to TEST or production** — the
+founder-walked apply step is carried in the close document above. Weights BLOCKED (unaffected).
+Cross-references: `D-PROVENANCE-LEDGER-SLICE1-PROMPT-AUTHORED-2026-08-26`,
+`operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
+
+## 2026-08-26 — D-CLOSE-HOOK-LIVE-OBSERVATION-PARTIAL-2026-08-26
+
+**Tier:** `code-elevated` (observation-only — touches no production surface, no schema, no
+credential; the flag was already live from the prior session).
+
+**Context:** continuing `operations/handoffs/founder/2026-08-26-close-hook-live-observation-completion-NEXT-SESSION-PROMPT.md`
+— completing the live-observation record for IW-7 opening 3 (close-hook content variation), which
+the two prior sessions left with one of three cases confirmed (flag-on/no-signal) and two open (the
+guard-caution appended-paragraph path; the confidence-graded consult-verdict path).
+
+**Method correction applied from the start (per the predecessor prompt's own postmortem):** this
+session's true harness id was established by cross-checking the scratchpad path
+(`24528626-ffbe-4d13-a683-6a1342f1b130`) against a `FRAMED session=...` line already in
+`gate1.log`, rather than trusting the first session id encountered in the shared log. This
+correctly separated this session's own activity from a different, concurrent session's
+`CONSULT-OUTAGE session=b05f12eb-...` line appearing interleaved in the same log — exactly the
+misattribution class the predecessor session hit and this prompt's method section was written to
+prevent.
+
+**Case 1 (guard-caution appended paragraph) — SIGNAL CONFIRMED LIVE; close-turn rendering not yet
+observed this turn.** A diagnostic `grep` command run during step 1 (surveying the guard's
+irreversible-pattern allowlist for awareness) contained the literal search strings `rm -rf` and
+`force`, which tripped `DEFAULT_IRREVERSIBLE_PATTERNS` against the command's own text — a genuine,
+organic guard-caution, not contrived (the underlying action was a harmless `grep`; the pattern
+matched the search text, not any actual destructive operation). Confirmed under this session's own
+correctly-attributed id: `GUARD-CAUTION session=24528626-ffbe-4d13-a683-6a1342f1b130 tool=Bash
+rec=pause_for_review`, with a persisted signal file
+`24528626-ffbe-4d13-a683-6a1342f1b130.guardcaution.json` =
+`{"tool":"Bash","proximity":"deliberate","at":"2026-08-26T01:00:36.950Z"}`. The three-sub-question
+elicitation fired in-conversation and was answered genuinely (prior preference: none; stake: mild
+efficiency only; resolution: examined before proceeding). **What remains unconfirmed as of this
+entry:** whether this session's own close-turn content, at its next `Stop`, actually appends a
+paragraph naming this caution with the base five-question string intact as an unmodified prefix —
+that requires ending a turn and reading the forced next-turn content, which had not yet happened at
+the point this entry was written.
+
+**Case 2 (confidence-graded consult-verdict path) — NOT YET FIRED.** Two at-action consults during
+this session's ordinary editing work (drafting a scratch close-notes file) drew `CONSULT-OUTAGE`
+(28s timeouts, fail-open-honest, no verdict to classify) before a third succeeded with
+`proximity=deliberate`, `kathekon quality=moderate` — neither of the two disjoint trigger conditions
+(`reflexive`/`habitual` proximity, or `kathekon_quality === 'contrary'`) was met, so no
+`consultsignal.json` was written and no signal fired (confirmed absent from the state directory).
+This is the expected, correct non-firing behaviour for an ordinary verdict, not a defect. The
+repeated consult-outages are noted but not chased — they may relate to the separately-flagged,
+out-of-scope discernment-route 503 rate diagnosis; diagnosing that is explicitly not this session's
+job.
+
+**Disposition:** neither open case is fully confirmed as of this entry (case 1's signal is confirmed,
+its close-turn rendering is not yet observed within this same turn; case 2 has not fired). Work
+continues this session to observe the close-turn content directly. If genuine occurrence does not
+arise for case 2 by session end, the close will name that honestly and raise, as a question rather
+than a unilateral decision, whether the founder wants a disclosed, deliberately-constructed test case
+next.
+
+**Rules served:** PR15 (the method correction reuses the predecessor's own diagnosed fix rather than
+re-deriving it); PR19 is not applicable (no code changed this session); PR6/PR17 not applicable (no
+production/credential/schema action taken).
+
+**Status:** in progress — see the session close for the final disposition of both cases.
+Cross-references: `operations/handoffs/founder/2026-08-26-close-hook-content-variation-ACTIVATION-CLOSE.md`,
+`operations/handoffs/founder/2026-08-26-close-hook-live-observation-completion-NEXT-SESSION-PROMPT.md`.
+
+## 2026-08-26 — D-CLOSE-HOOK-LIVE-OBSERVATION-CASE1-CONFIRMED-2026-08-26
+
+**Tier:** `code-elevated` (observation-only, continuing the entry immediately above).
+
+**Case 1 (guard-caution appended paragraph) — CONFIRMED LIVE, fully, this session.** Ending the turn
+that recorded the guard-caution (see the entry above) triggered a genuine `Stop` event; the harness
+forced a next-turn reflect invitation whose content was read back verbatim. Cross-checked against
+`gate1.log`: `CLOSE session=24528626-ffbe-4d13-a683-6a1342f1b130 accred=already-exists(2)
+mode=block persistEnabled=true` — the same session id as the `FRAMED`/`GUARD-CAUTION` lines earlier
+in this entry, correctly attributed (not the misattribution class the predecessor session hit).
+
+The rendered content, character-for-character:
+
+> [SageReasoning — Sage Reflect: review your reasoning this session]
+> Before this session closes, take one turn to review your own reasoning from the work just
+> completed: the impressions you formed and how you described them to yourself, where you gave or
+> withheld assent, the actions you chose, what (if anything) you would judge differently, and
+> whether the work served its purpose. This is a review of your own reasoning, within the scope of
+> this task — there is nothing to call and nothing to send.
+>
+> This session's harness recorded a caution from the at-action guardrail on Bash — a genuine risk
+> signal on the guard's own irreversible-action allowlist, not a sparse-extraction default. Did your
+> closing reflection address it, or is this the first time you're examining it?
+
+Diffed against `harness/gate1-pre-decision/claude-code/hooks/close-hook.mjs`'s
+`BASE_REFLECT_INVITATION` constant (lines 261-267): the first paragraph is byte-exact, unmodified,
+present in full — confirming interpolation (append), not replacement, exactly as the mechanism
+claims. The second paragraph is the guard-caution variation, and its wording matches the
+mechanism's own precedence rule (guard-caution named specifically as "a genuine risk signal … not a
+sparse-extraction default" — the phrase distinguishing it from the phase-two kathekon-confidence
+wording, confirming the correct branch fired, not a confusion between the two signal types).
+
+The underlying elicitation (answered genuinely, in-conversation, at the time the guard fired) and
+this closing reflection (answered genuinely, in this turn) are recorded as: no prior preference for
+the triggering action; a mild efficiency-only stake; the resolution genuinely preceded the decision
+to proceed (the search text contained the trigger phrases as literal strings, not an actual
+destructive operation — correctly distinguished at the time and re-confirmed on reflection).
+
+**Case 1 is now closed as fully live-confirmed** — the flag-on/no-signal path (prior session) and
+the guard-caution appended-paragraph path (this session) are both genuinely observed. Only the
+confidence-graded consult-verdict path (case 2) remains open.
+
+**Case 2 status unchanged from the entry above** — not yet fired on a qualifying verdict this
+session (repeated consult-outages, then one ordinary non-qualifying `deliberate`/`moderate`
+verdict). Work continues.
+
+Cross-references: same as the entry immediately above.
