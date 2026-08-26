@@ -28062,3 +28062,64 @@ session had flagged them), PR15 (the prompt's schema section is drawn directly f
 document rather than re-derived).
 
 **Status:** Adopted. Cross-references: `D-PROVENANCE-LEDGER-R18-SIGNOFF-2026-08-26`.
+
+---
+
+## 2026-08-26 — D-CLOSE-HOOK-CONTENT-VARIATION-ACTIVATED-2026-08-26
+
+**Stream:** founder. **Arc:** the IW-7-openings thread (a reflections-arc successor, not a
+SageReasoning project arc) — this session's *work* touches the founder's own live local dogfood
+harness install, which is a SageReasoning project concern. **Tier:** `code-critical`, founder-walked.
+**Risk:** Critical under 0d-ii (a flag flip in the founder's own standing dogfood install, observed
+live). **AC7 engaged and discharged** — the founder confirmed the flip via AskUserQuestion before any
+edit; the AI made the edit with the founder present and confirming, then verified.
+
+**Decision.** Executed
+`operations/handoffs/founder/2026-08-26-close-hook-content-variation-ACTIVATION-NEXT-SESSION-PROMPT.md`.
+
+**Re-verification (before touching any config):** `git show --stat 274c7de` confirmed the commit
+matches the close's file list exactly. All four batteries re-run fresh, no drift: `close-content-
+variation.test.mjs` 70/0, `logic-harness.mjs` 171/0, `negative-battery.mjs` 250/0 (RELEASE GATE PASS),
+`false-hold-capture.test.mjs` 37/0 — 528/0 combined, matching the build close.
+
+**Activation.** The founder confirmed (AskUserQuestion, "Yes, edit it now") setting
+`GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true` in `.claude/settings.local.json`'s `env` block. The AI
+made the edit with the founder present, verified the resulting JSON parses and the key/value are
+correct, and confirmed `framing-core.mjs`'s `parseBool` reads the string `"true"` the same way the
+sibling flags in that same block already do (`GATE1_TELOS_LINE_ENABLED`, etc.) — no restart needed,
+since hooks are spawned fresh per invocation.
+
+**Live observation, same session (session id `34f6a775-835d-45f9-a73c-459302e5e17e`, the harness's own
+identifier for this Claude Code session):**
+- A genuine `GUARD-CAUTION` fired for this session (`rec=pause_for_review`, `tool=Bash`,
+  `proximity=deliberate`) at 2026-08-26T00:32:35.941Z, confirmed in `gate1.log` and in a freshly-
+  written `34f6a775….guardcaution.json` (2ms after the log line) — this was NOT contrived; it arose
+  from ordinary tool activity during re-verification, moments after the flag flip. **Honesty note for
+  the record:** this session id's state directory also carries ~20 minutes of unrelated `.decision`
+  files (Edit/Write consults on `credential/erase`, `user/delete`, `user/export`,
+  `consumer-erasure.ts`, and a provenance-ledger migration/store) that this conversation did not
+  perform — strong evidence that the harness's session id is shared across concurrent Claude Code
+  windows/tabs in this environment, not scoped to one ccd conversation. The guard-caution is
+  genuinely recorded against the live session the Stop hook will read from; it should not be read as
+  proof that a specific tool call *in this transcript* triggered it.
+- The session's `.closed` fire-once marker did not exist before this turn, so the close hook has not
+  yet fired for this session. The consult-signal path was NOT independently confirmed live before this
+  turn's Stop event (no `consultsignal.json` was present) — the high/low-confidence kathekon-verdict
+  path is **not yet observed live**, only the guard-caution path.
+- What remains to be recorded (necessarily after this turn ends, since the Stop hook fires post-turn
+  and, in `block` mode, forces the next turn to carry its `reason` text): whether the close turn's
+  content names the guard caution, with the base five-question string still fully present as a prefix.
+
+**Rollback path:** remove `GATE1_CLOSE_CONTENT_VARIATION_ENABLED` from `.claude/settings.local.json`'s
+`env` block (or set it to `"false"`) — byte-identical to pre-activation, test-asserted. No server-side,
+schema, or credential change to reverse.
+
+**Rules served:** PR6/PR17 (founder-walked activation of a founder-owned local surface), PR19 (the
+prior session's independent review is the review of record; this session re-verified rather than
+re-reviewing), PR20 (recorded the session-id-sharing observation honestly rather than overclaiming
+attribution of the guard-caution to a specific tool call).
+
+**Status:** Activated. The flag is live in the founder's dogfood install. Guard-caution content
+variation observed to have a qualifying signal recorded; the rendered close-turn content and the
+consult-verdict path are recorded in the session close, completed after this turn's Stop event is
+observable. Cross-references: `D-CLOSE-HOOK-CONTENT-VARIATION-BUILT-DARK-REVIEW-FOLDED-2026-08-25`.
