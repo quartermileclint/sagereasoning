@@ -111,11 +111,28 @@ inputs directly (mirroring `LongitudinalIdentityInput`) rather than a pre-resolv
 and writing `agent_id` from the raw input unconditionally — verified by test #2 in `provenance-write-
 lookup-purge.test.ts` (the harness's own owner-less shape persists `agent_id` correctly).
 
-**No independent (separate-context) adversarial review was run this session** — the prompt names this as
+**No independent (separate-context) adversarial review was run at first close** — the prompt names this as
 the arc's standing practice but the account's tooling for spawning an independent review workflow was not
-invoked here; this is a first-hand review only, performed by the same session that wrote the code. Named
-honestly rather than silently omitted. A founder-elected independent re-review before or shortly after
-activation would follow this arc's own PR19 precedent.
+invoked at that point; that was a first-hand review only, performed by the same session that wrote the
+code. Named honestly rather than silently omitted at the time.
+
+## Independent adversarial review — ADDENDUM, run same day at the founder's explicit request
+
+Four independent (fresh-context, separate-subagent) review passes were then run, one per load-bearing
+dimension, each instructed not to trust this close document's or the commit message's claims and to
+verify directly against the code and the actual DB constraint/schema files:
+
+| Dimension | Verdict |
+|---|---|
+| Identity-matching correctness (`writeSideIdentityMatches`, the harness's deferred shape, the DB CHECK) | **Clean.** Confirmed by direct trace: `write.kind !== 'owner_agent_pair'` has no fallthrough to `true`; a `credential`-kind ledger entry can never match a pair-kind write identity regardless of `agent_id`; no `(ownerUserId, agentId)` input combination can violate `apl_identity_kind_consistency`. |
+| Fail-honest vs. fail-open on the ledger read | **Clean.** `lookupProvenanceLedgerEntry` deliberately does NOT apply the missing-table-benign discipline used by the R17 delete/select helpers (verified this is the ONE call site in the file that excludes it, and that a dedicated negative test exercises exactly a `42P01` through this path asserting `ok:false`, not `found:false`); an I/O failure and a successful classification log with disjoint message prefixes (no readiness-check grep could conflate them); `23505` handling is an exact code match, not a pattern. |
+| Flag-off byte-identity + record-only holding | **Clean.** With both flags unset, zero DB reads occur (the hoisted identity block's `||` gate traced directly); the ledger-write block's flag check short-circuits before any side effect; the classification loop never introduces an early return, a variable collision, or a mutation of `signedAssessments` that could perturb the unconditional `deriveCredentialAndJusticeEvents`/`emitTrustEvents` sequence immediately following it; no INSERT path into `agent_provenance_gaps` is reachable from this slice (grep-confirmed across the whole diff); `/api/reason`'s response shape is untouched flag-off. |
+| Sweep-flag independence + F-2's hard exclusion | **Clean.** Both new purge functions check `isProvenanceLedgerEnabled()` as their literal first statement, before any DB call; the handler calls them unconditionally, outside the trajectory-flag branch; `route.test.ts` proves independence in both flag-combination directions using call-count spies (not just deleted-count assertions, which could not distinguish "called but internally inert" from "not called"). `agent_provenance_gaps` has no signature-shaped column (the migration's own `V9` self-check enforces this live); the TypeScript types shaping a future writer (`ProvenanceLedgerLookupHit`'s deliberate omission of `signature_hash`, `ProvenanceClassificationOutcome`'s closed string-literal union) make smuggling a signature into that table structurally awkward for a future slice, not merely discouraged by comment. |
+
+**Zero confirmed findings across all four dimensions.** No fold was needed. This satisfies the prompt's
+Step 6 item 5 in full — the review is now independent, not first-hand-only, and every one of the five
+load-bearing checks the prompt named was covered (identity-matching, fail-honest-vs-fail-open, the F-2
+hard exclusion, flag-off byte-identity, and the sweep's genuine flag independence).
 
 ## Tests (all `npx tsx`, no Jest, per this session family's convention)
 

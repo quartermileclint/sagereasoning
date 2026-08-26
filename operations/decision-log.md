@@ -28750,3 +28750,33 @@ Cross-references: `operations/handoffs/founder/2026-08-26-provenance-ledger-slic
 sweep-NEXT-SESSION-PROMPT.md`, `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-
 write-and-sweep-CLOSE.md`, `operations/agent-circles-2026-08/2026-08-26-mentor-ruling-provenance-ledger-
 round6-q5-q6-verbatim.md`, `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
+
+---
+
+## 2026-08-26 — D-PROVENANCE-LEDGER-SLICE2-INDEPENDENT-REVIEW-CLEAN-2026-08-26
+
+**Stream:** founder. **Tier:** `code-critical` (review-only; no code/schema/flag change this entry).
+
+**Decision.** At the founder's explicit request, ran a genuinely independent adversarial review of
+D-PROVENANCE-LEDGER-SLICE2-CONSULT-WRITE-CLASSIFICATION-SWEEP-BUILT-2026-08-26 (above) — four
+fresh-context subagents, one per load-bearing dimension the slice-2 build prompt named, each instructed
+not to trust the build session's own claims and to verify directly against the code, the DB constraint
+definitions, and the migration files.
+
+**Result: zero confirmed findings across all four dimensions** — identity-matching correctness
+(`writeSideIdentityMatches` traced directly; no fallthrough path to a spurious match; no `(ownerUserId,
+agentId)` input can violate `apl_identity_kind_consistency`); fail-honest vs. fail-open on the ledger read
+(`lookupProvenanceLedgerEntry` deliberately excludes the missing-table-benign discipline used elsewhere in
+this codebase, confirmed by a dedicated negative test; no exception path fabricates an outcome); flag-off
+byte-identity + record-only holding (zero DB work with both flags unset; the classification loop never
+perturbs the pre-existing event-derivation/emit sequence; no reachable write path to `agent_provenance_
+gaps` in this slice); sweep-flag independence + F-2's hard exclusion (both new purges gate on their own
+flag as the literal first statement; the handler calls them unconditionally; `agent_provenance_gaps` has
+no signature-shaped column, live-verified by the migration's own `V9` self-check, and the TypeScript
+types make smuggling a signature into it structurally awkward for a future slice).
+
+This closes the gap the slice-2 close document disclosed at first close (a first-hand-only review). No
+code, schema, flag, or test change resulted — the build stands as committed at `935fae6`.
+
+Cross-references: `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-
+sweep-CLOSE.md` (independent-review addendum appended in the same edit as this entry).
