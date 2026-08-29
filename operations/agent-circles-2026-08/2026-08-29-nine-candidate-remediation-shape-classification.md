@@ -210,8 +210,36 @@ The run generated the same proposals repeatedly across cycles. That accident sup
 | **c6 ×3** apply the honest-claims / MEASURE-only discipline to the public trust record | **c4** "Apply the honest-claims discipline… to the public trust record's not-attestable clause…" | **`sage_like`** |
 | same | **c15** transfer the honest-claims discipline to the public trust record's rendering | **`sage_like`** |
 
-**Every one of the nine rejections except cycle 14 has at least one materially similar candidate in
-the same run that passed** — several at `principled`, three at `sage_like`, one as a cycle winner.
+### The two tiers, verified 2026-08-29 (corrected — see §10)
+
+The pairings are **not all of equal strength**, and an earlier draft of this section flattened them
+into one count. They separate cleanly:
+
+**Tier A — the same act on the same surface** (a genuine near-duplicate). **3 of 9 rejections.**
+
+| Rejected | Tier-A twin | Verdict |
+|---|---|---|
+| **c11** publish the SDK | **c13** (near-verbatim), **c15** | `deliberate`, `deliberate` |
+| **c9** owner field on founder-walked Critical steps | **c4** — same act, same artifact, *same cited incident* | `principled` |
+| **c15** name the quota cause instead of a bare 401 | **c5**, **c7** — same act, same surface, near-identical wording | `principled`, `principled` |
+
+**Tier B — the same defect class and remedy shape, on a different surface or by a different
+mechanism.** **6 of 9 rejections.** Suggestive, not decisive: a different mechanism could
+legitimately draw a different reading.
+
+| Rejected | Tier-B twin | Verdict |
+|---|---|---|
+| **c6** thin-extraction flag on the trust record | **c17** `context_transfer` — *"rather than a fold that reads identically whether it rests on thin or substantial evidence"* vs c6's *"instead of letting a thin verdict render identically to a rich one"* | `sage_like` |
+| **c6** extraction-confidence note | **c4** `context_transfer` — honest-claims discipline on the trust record's not-attestable clause | `sage_like` |
+| **c6** MEASURE-only clarity on the trust record | **c15** `context_transfer` — honest-claims discipline on the record's rendering | `sage_like` |
+| **c14** machine-readable capability matrix | **c10** — the *same six capability values enumerated verbatim*, same goal (a developer verifies capability boundaries machine-readably before integrating), different surface (new endpoint vs `llms.txt`/`agent-card.json`) | `deliberate` |
+| **c16** quota-state headers | **c17** `friction_detection` — same goal (see exhaustion coming), different mechanism; c17 explicitly considers and supersedes the header approach | `principled`, **cycle winner** |
+| **c20** fresh's starved-window pass → indeterminate | **c17** `context_transfer` — both name `EVIDENCE_FLOOR`, both say a thin-evidence result renders identically to a well-evidenced one; different surface and remedy | `sage_like` |
+
+**All nine rejections have at least a Tier-B twin; three have a Tier-A twin.** The divergence
+argument rests on **Tier A**. Tier B corroborates it and independently reinforces §4: for *every*
+rejected candidate, the run produced a same-class proposal that passed, most of them at
+`principled` or `sage_like`.
 
 ### The c11 ↔ c13 pair, verbatim and complete
 
@@ -361,6 +389,11 @@ that premise is now weaker than when it was set.
 This finding has design consequences (it materially changes what the standing-runner design session
 inherits), so **PR19 engages**. It has **not** been discharged.
 
+**Partially discharged since:** the close-turn reflection caught a real overstatement in this
+record's own §3 and the founder directed it verified; the correction is §10. That is a genuine
+finding against the artifact, but it came from the *same* session and does not substitute for
+independent review.
+
 **What was done instead, and disclosed as such:** a first-hand adversarial pass by the same session
 that produced the classification. It attacked the load-bearing claim — §3's divergent-twin argument
 — on the most plausible way it could be an artifact: that the "near-identical" texts were only
@@ -388,6 +421,46 @@ text to `/api/guardrail` today, several times, would measure the instability dir
 run because it consumes credential quota and writes production billing rows — outside a
 `governance` session's licence and not authorised by this prompt. **Recommended as the standing-
 runner design session's own first evidence step**, where it would properly belong.
+
+---
+
+## 10. Correction, 2026-08-29 — the twin count, found by the session's own closing reflection
+
+**This record's first committed version overstated one number, and the error was found by the
+close-turn reflection, not by review.** It is recorded here rather than silently amended.
+
+**What it said:** *"Every one of the nine rejections except cycle 14 has at least one materially
+similar candidate in the same run that passed"* — eight of nine.
+
+**What was actually verified at the time:** seven. The §3 table evidenced pairs for c11, c9, c15,
+c16 and the c6 trio. **c20's twin was asserted without being checked, and c14 was asserted to have
+none without being checked.** The count was carried one step past the evidence — the same
+`primary-data-beats-secondary-characterisation` class this project has hit before, and the same
+error the c11/c13 full-length check had just successfully avoided a few paragraphs earlier.
+
+**What the verification found — the claim was wrong in *both* directions:**
+
+- **c20 does have a twin**, but a weaker one than the pairs around it: c17 `context_transfer`
+  (`sage_like`). Both name `EVIDENCE_FLOOR`; both say a below-floor result currently renders
+  identically to a well-evidenced one; both propose making the thin case distinguishable. But the
+  surface differs (fresh's novelty verdict vs the trust record's fold) and so does the remedy
+  (return `indeterminate` vs render a note). A systematic search of all 120 for
+  `insufficient_history` / `EVIDENCE_FLOOR` / `practice/fresh` / `passedNoveltyCheck` / "starved"
+  returned exactly two rows: c20 itself and c17. The two candidates initially considered — c11 and
+  c18 `combinatorial_generation` — share only the Tier-1 *source concept*, not the proposal, and
+  were rejected as twins on inspection of their full text.
+- **c14 does have a twin**, contrary to the original claim: c10 `analogous_transfer`
+  (`deliberate`), enumerating the *same six capability values verbatim* toward the same goal, on a
+  different surface.
+
+**Net effect:** the flat "eight of nine" is replaced by the verified two-tier split in §3 —
+**3 Tier A, 6 Tier B, 0 with no twin.** Coverage rises to all nine; the strength claim becomes
+narrower and more defensible, because the divergence argument now rests explicitly on the three
+Tier-A pairs rather than on an undifferentiated eight.
+
+**No conclusion in §0, §4, §5 or §6 changes.** The base-rate finding never depended on the twin
+count, and the strongest single piece of evidence — the c11 ↔ c13 near-verbatim pair — was
+verified at full stored length before the first commit and is untouched.
 
 ---
 
