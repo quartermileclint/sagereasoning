@@ -1,4 +1,17 @@
-# F2 briefing-correction addendum — dated 2026-08-29 — FOR MENTOR RULING BEFORE THE REVIEW RUNS
+# F2 briefing-correction addendum — dated 2026-08-29 — **RULED APPROVED; THE REVIEW MAY PROCEED**
+
+> **Status update, 2026-08-29 (same day):** ruled approved in full — all nine corrections
+> "accurate, properly sourced, and scoped correctly"
+> (`2026-08-29-mentor-ruling-f2-addendum-approved-verbatim.md`; verbatim wins). Three precision
+> rulings bind the review on top of this addendum: **A4** — the single-backward-edge design
+> constraint stands on its merits regardless of the citation's unverified posture (only the
+> paper's empirical claim is off-limits as a finding basis). **A6 — SHARPENED:** Probe 2's
+> question is now *what of the gate's available resolution — the graded `katorthoma_proximity`
+> and the three-way recommendation — does the loop's ELECTION LOGIC actually consume?* — i.e.
+> whether the loop treats the gate as binary in practice; resolution loss between the gate and
+> the election step is the finding class. **A9** — the two data absences are confirmed structural
+> findings, named in **Probe 1** (oikeiosis-circle) and **Probe 2** (completion-signal), never
+> framed as deferrals, and carried forward as standing-runner design observations.
 
 **What this is.** The Q3 ruling (2026-08-29, `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md`)
 elected option (a): the adversarial-review instruction's text stays untouched
