@@ -23,21 +23,36 @@ remediation-shaped candidates — is NOT supported by the record.** It is not re
 *mechanism* (the mentor's cycle-20 diagnosis stands, unreversed), but it fails as an explanation
 of *which* candidates were rejected.
 
-Two findings, the second stronger than the first:
+**This headline was corrected 2026-08-29 by independent PR19 review — see §11.** The first
+committed version of this document claimed the base rate of remediation-shape across the full 120
+was "essentially the entire population," making the 8/9 rejection rate "indistinguishable from
+chance." **That claim was overstated.** An independent reviewer classified a fresh sample of the
+111 non-rejected candidates against this document's own criterion and found a base rate near
+**63%**, not near-universal. This session then verified, in full and without sampling, that the
+entire 20-candidate `fifth_circle_weighting` heuristic bucket (published SDK proposals, pure reach,
+no described defect) is uniformly NOT remediation-shaped — a hard floor consistent with the
+reviewer's independent estimate. Under a corrected base rate of 60–65%, observing 8 of 9 rejected
+candidates land remediation-shaped has an estimated probability of roughly **0.07–0.12 under pure
+chance** — a real, mild departure worth naming, but nowhere near strong enough on its own, at n=9,
+to carry the "systematic depression is ruled out" conclusion the first version rested on it.
 
-1. **8 of 9 rejected candidates are remediation-shaped — and so is essentially the entire
-   population of 120.** The IDEA loop's generative frame *is* remediation: nearly every candidate
-   it produced describes a shortcoming of SageReasoning's own disclosure, honesty, or friction
-   posture in order to propose fixing it. Against a near-universal base rate, 8/9 is
-   indistinguishable from chance. A systematic filter against remediation-shape would have to
-   depress far more than 9 of 120 (7.5%).
-2. **At least three of the nine rejections have near-verbatim or materially identical twins
-   elsewhere in the same run that scored `deliberate`, `principled`, or `sage_like`.** This is a
-   within-run repeated-measures control the run produced by accident, and it is more informative
-   than the rate comparison. It points at **low-frequency verdict instability on near-identical
-   inputs**, not at a shape-selective filter.
+**The finding that survives, and now carries the primary evidential weight, is §3's within-run
+divergence control — independently confirmed strong by review, and unaffected by this
+correction:**
 
-**The single most diagnostic case is the one rejection that is NOT remediation-shaped.**
+1. **At least three of the nine rejections have near-verbatim or materially identical twins
+   elsewhere in the same run that scored `deliberate`, `principled`, or `sage_like`** — the
+   sharpest, c11 ↔ c13, differing only in a parenthetical cycle list (independently fuzzy-matched
+   at 0.944 similarity against a next-best score under 0.25 for every other candidate pair in the
+   set, per review). This within-run repeated-measures control points at **low-frequency verdict
+   instability on near-identical inputs**, not at a shape-selective filter, and does not depend on
+   any base-rate assumption.
+2. **The base rate, corrected, is a weaker corroborating signal, not a decisive one.** It no longer
+   rules out systematic depression by itself; it lowers confidence in it, modestly.
+
+**The single most diagnostic case remains the one rejection that is NOT remediation-shaped** —
+the standing-SDK-publish proposal (c11), which recurred nineteen times elsewhere in the run and
+scored `deliberate`/`principled` every other time it was generated.
 
 ---
 
@@ -54,7 +69,17 @@ Two findings, the second stronger than the first:
 - **h1 / cycle 20 was not re-derived.** It is folded in as the one already-diagnosed instance,
   citing the §6 report's own finding, per the prompt's instruction.
 
-### PR20 — a schema correction found before any query ran
+### A schema defect caught before any query ran
+
+**(Not itself a PR20 invocation — corrected 2026-08-29, see §11.4. PR20 governs mentor-brief
+architectural facts being timestamp-checked before a ruling; a self-authored SQL query's own
+column name is a different, narrower discipline — verify the schema before trusting a query,
+which this session did on its own initiative, not because a numbered rule required it. The
+underlying practice is the same spirit PR20 embodies, but citing PR20 by name for it was
+imprecise, and the original heading is left below, struck through, as the visible record of the
+correction rather than silently retitled.)**
+
+~~PR20 — a schema correction found before any query ran~~
 
 The prompt's suggested query was:
 
@@ -273,29 +298,69 @@ same remedy. `principled` and `reflexive` respectively.
 
 ---
 
-## 4. Why the base rate is the whole answer
+## 4. The base rate — corrected 2026-08-29, weaker than first claimed, still informative
 
-Reading only the nine would have produced "8 of 9 are remediation-shaped — hypothesis confirmed."
-That answer is wrong, and only the 111 reveal why.
+**This section replaces the first version's claim of "essentially the entire population," which
+overstated what the evidence supports.** See §11 for the full review record; this section states
+the corrected finding directly.
 
-**The IDEA loop's generative frame is remediation.** Its seven heuristics are pointed at the
-project's own gaps; `friction_detection` is *definitionally* remediation-shaped, and
-`synthesis_over_novelty`, `context_transfer`, and `analogous_transfer` in practice almost always
-took the form "the system currently does X, which misleads / burdens / omits — do Y instead."
-Representative passing texts:
+Reading only the nine produces "8 of 9 are remediation-shaped — hypothesis confirmed." That
+reading is naive, because it ignores the base rate — but the corrected base rate is **materially
+below near-universal**, not near-zero-informative-either.
+
+**What is verified, in full, without sampling:** the entire 20-candidate `fifth_circle_weighting`
+heuristic bucket — every occurrence of the recurring "publish the SDK to a public package
+registry" proposal, cycles 1 through 20 — is uniformly **NOT remediation-shaped** (see §1's
+per-heuristic reading in this session's own working notes: no described defect, harm, or burden
+stands behind any of the twenty; each is a pure reach-maximizing proposal). That is a hard floor of
+**20 of 120 (16.7%) confirmed not-remediation-shaped**, found by re-reading the entire bucket, not
+by inference from a sample.
+
+**What is estimated, by independent sample:** a PR19 reviewer, blind to this document's verdicts,
+classified 30 of the 111 non-rejected candidates against this document's own stated criterion and
+found **19/30 (≈63%) remediation-shaped** — naming a second concentrated non-remediation cluster
+this session had not itself isolated: several `synthesis_over_novelty`/`combinatorial_generation`
+candidates that propose assembling existing published material into a new page or guide with no
+described defect standing behind the proposal (their own examples: a cycle-10 verify-before-
+delegating guide, a cycle-2 documented-recipe synthesis, a cycle-7 "developer Stoa"). **Neither of
+these findings is disputed by this correction; both are folded in as evidence, from two different
+methods, converging on the same conclusion:** the true base rate sits somewhere in the
+**60–65% range**, not "essentially the entire population."
+
+**Representative passing texts remain genuinely remediation-shaped** — the loop does produce a
+great deal of real remediation, just not nearly all of it:
 
 - *"…closing the gap where an in-memory fake battery (23/0 green) agrees with whatever the code asks for while PostgREST's real relationship resolution silently fails."* — `principled`
 - *"…replacing the current enforcement — a human remembering to open both files and compare by eye — with a comparison that actually fails."* — `principled`
 - *"…so a developer discovers approaching quota exhaustion as a quota reading rather than discovering it only [when it fails]."* — `principled`
 - *"…naming for a developer audience which failure states their own integration will see named rather than silently massaged."* — `deliberate`
 
-If remediation-shape were the trigger, the rejection rate would approach the population rate.
-It is **9 of 120 — 7.5%**. The overwhelming majority of remediation-shaped candidates passed, many
-at the top of the scale.
+**The corrected statistical reading, computed honestly and shown in full rather than asserted:**
+under the binomial model P(X≥8 of 9 | independent trials at rate p), across the plausible range
+this session and its reviewer converged on:
 
-**Conclusion: remediation-shape does not predict rejection.** The mentor's mechanism is real — it
-was demonstrated at cycle 20 — but it fires **rarely and unpredictably**, not systematically
-against a class.
+| p (base rate) | P(≥8 of 9 remediation-shaped by chance) |
+|---|---|
+| 0.55 | 0.0385 |
+| 0.60 | 0.0705 |
+| 0.63 (review's estimate) | 0.0983 |
+| 0.65 | 0.1211 |
+| 0.70 | 0.1960 |
+
+**At the two independently-derived estimates (0.60–0.65), observing 8 of 9 by pure chance has an
+estimated probability of roughly 0.07–0.12.** That is a real, mild departure from what chance alone
+would predict — not the "indistinguishable from chance" the first version asserted, but also
+nowhere near a result that, on its own and at n=9, could carry a "systematic depression is ruled
+out" conclusion. **This section's honest contribution is: weakened, not dismissed.** The
+independence assumption underlying the whole table is itself questionable — the `fifth_circle_weighting`
+bucket shows heuristics produce highly correlated candidates, not independent draws, which the
+table does not model and which would, if accounted for, likely widen these probabilities further
+in either direction depending on which heuristics happened to generate the nine.
+
+**Conclusion, corrected:** remediation-shape at the observed rate does not, on its own, either
+confirm or rule out systematic depression at n=9. It contributes a mild signal against the
+hypothesis. **§3's within-run divergence control is the section that actually carries the "not
+systematic, rather unstable" conclusion — see the headline correction in §0.**
 
 ---
 
@@ -316,25 +381,63 @@ calibration fix targeted at that class. "The guardrail occasionally floors a pro
 well on other occasions" implies something else entirely — a **reproducibility** question about the
 examination path, not a class-calibration question.
 
+### The null hypothesis this section must not skip past (added 2026-08-29 per PR19 review, §11.1)
+
+**"Verdict instability" is a loaded framing, and an independent reviewer was right to flag that the
+first version adopted it without weighing the obvious alternative.** The guardrail's Layer 1 is a
+single bounded Sonnet extraction call — **a probabilistic extractor**. Two calls on the same prompt
+producing different domain-engagement readings, and therefore different `computeProximity` floors,
+is **not necessarily a defect at all**; it may be ordinary, expected model variance operating
+exactly as designed, surfacing through a deterministic Layer 2 that faithfully computes different
+outputs from different inputs.
+
+Both readings fit the c11 ↔ c13 evidence equally well. They are **not** distinguishable from this
+data:
+
+- **Reading A (defect):** something in the examination path is unstable in a way that warrants a
+  reproducibility fix.
+- **Reading B (expected variance):** a probabilistic extractor is behaving probabilistically, and
+  the "instability" is the designed cost of an LLM-based Layer 1 — in which case the design
+  question is not "fix the instability" but "what confidence does a single guardrail verdict
+  actually carry, and should a floor-class verdict be re-run before it is treated as final?"
+
+**Reading B is arguably the more consequential design input of the two**, because it bears on
+whether any single `reflexive` verdict should be load-bearing at all. **This document does not
+choose between them** — the data cannot, and asserting Reading A because it is the more
+interesting finding would be exactly the drift this session already caught itself in once. The
+decisive test named in §9 (re-running the c11 text several times) discriminates between A and B
+directly and cheaply, which is a further reason it belongs at the top of R8's evidence work.
+
 ---
 
 ## 6. What this does and does not license
 
+*(Revised 2026-08-29 to match the corrected base-rate finding — see §4 and §11.2.)*
+
 **Does:**
 - Closes the §6 report's named gap. All nine were read; none guessed.
-- Lowers confidence in the systematic-depression hypothesis, on the base rate.
+- **Mildly** lowers confidence in the systematic-depression hypothesis, on the corrected base rate
+  (P ≈ 0.07–0.12 at n=9 — a real but weak signal, not a refutation; the first version overstated
+  this and is corrected).
 - Raises a **new, better-evidenced** finding — near-identical-input verdict divergence — supported
-  by a control the run produced by accident.
-- Supplies the standing-runner design session (R8) the input its Q7 sequencing was waiting for.
+  by a control the run produced by accident and independently confirmed an outlier by review
+  (0.944 vs <0.25 similarity).
+- Supplies the standing-runner design session (R8) the input its Q7 sequencing was waiting for,
+  **plus a sharper successor question** (§5's Reading A vs Reading B) the first version did not
+  pose.
 
 **Does not:**
-- **Establish a rate.** n = 9. Nothing here is a statistical claim, and the base-rate comparison is
-  a qualitative reading of 120 texts by one classifier, not a measured proportion with an interval.
+- **Establish a rate.** n = 9. The base-rate comparison rests on one full-population reading of a
+  20-candidate bucket plus a 30-candidate independent sample — better evidenced than the first
+  version, still not a measured proportion with an interval.
+- **Rule out systematic depression.** The corrected statistics do not support that conclusion on
+  their own; the first version's claim that they did was wrong and is withdrawn.
 - **Refute the mentor's cycle-20 diagnosis.** The attribution defect is real and demonstrated. This
   finding bounds its *scope* (rare, not systematic), not its *existence*.
 - **Reverse any rejection**, including h1's — explicitly out of scope, per the §6 ruling.
-- **Prove instability.** The divergent-twin pairs are strong evidence but rest on an assumption
-  stated plainly in §7.
+- **Prove instability, or distinguish defect from expected model variance.** The divergent-twin
+  pairs are strong evidence of *divergence* but cannot settle §5's Reading A vs Reading B, and rest
+  on the assumption stated plainly in §7.
 - **Settle anything else.** GS-CYB-1, Q-C2b, §5d, the capacity axis and every other named-input
   register item keep exactly the status the 2026-08-29 register-completion pass left them.
 
@@ -384,7 +487,12 @@ that premise is now weaker than when it was set.
 
 ---
 
-## 9. PR19 status — independent review OWED, not discharged
+## 9. PR19 status — DISCHARGED 2026-08-29 (this section superseded by §11)
+
+> **Superseded.** This section recorded the state before independent review was run. Review has
+> since been run and its findings folded — **see §11 for the completed record.** The section is
+> retained unaltered below as the honest account of what was owed at first commit, and because its
+> priority-ordering of the review targets is what the review was actually pointed at.
 
 This finding has design consequences (it materially changes what the standing-runner design session
 inherits), so **PR19 engages**. It has **not** been discharged.
@@ -461,6 +569,113 @@ Tier-A pairs rather than on an undifferentiated eight.
 **No conclusion in §0, §4, §5 or §6 changes.** The base-rate finding never depended on the twin
 count, and the strongest single piece of evidence — the c11 ↔ c13 near-verbatim pair — was
 verified at full stored length before the first commit and is untouched.
+
+---
+
+## 11. PR19 independent review — RUN 2026-08-29, findings folded
+
+**PR19 is now discharged.** Three independent reviewers were run in parallel, each blind to the
+others and to any prior review, each instructed to re-derive from raw source rather than trust this
+document, and each told to try to break the finding rather than confirm it. (Parallel independent
+`Agent` calls are the validated equivalent when the Workflow opt-in gate is not met — the
+2026-07-29 / Phase-3 precedent, disclosed here as that precedent requires.)
+
+**Outcome: 1 material finding that forced a rewrite of this document's headline section, 1 real
+mislabeling, 1 reasoning gap, and broad confirmation of everything else. Every finding folded.**
+
+### 11.1 — Reviewer 1 (Tier-A pairs + payload assumption): PARTIALLY CONFIRMED
+
+**Confirmed, and strengthened:** the reviewer independently pulled the raw JSON and ran a
+**fuzzy-match sweep of all 9 rejected rows against all 111 non-rejected rows**. c11 ↔ c13 scored
+**0.944 similarity, against under 0.25 for every other pair in the set** — an outlier by a wide
+margin, and not an artifact of excerpting. **No cherry-picking found:** no unclaimed pair anywhere
+in the 120 is stronger than those cited.
+
+**Confirmed as honestly stated:** the submitted-payload assumption. The reviewer independently
+grepped for the guardrail call site across `idea-loop-watching-store.ts`,
+`practice/watching/handler.ts`, and `practice/fresh/handler.ts` and found **no code in this repo
+composes the guardrail request** — all three only read or store `guardrail_proximity` as a
+runner-reported field. §7's honest limit is complete and correct.
+
+**Folded — a real reasoning gap:** the reviewer flagged that this document adopted "verdict
+instability" as a framing without weighing the null hypothesis that a probabilistic Layer-1
+extractor producing variance is *expected*, not defective. **Folded into §5 as an explicit
+two-reading section that declines to choose between them.**
+
+**Fair criticism accepted:** the reviewer judged "near-identical wording" generous for the c9 ↔ c4
+and c15 ↔ c5/c7 pairs, which are semantic/functional duplicates rather than near-verbatim ones.
+§3's Tier A/Tier B split already separates these honestly and does not claim verbatim identity, so
+no further change was made — but the criticism is recorded as fair.
+
+**Corrected here, not in the reviewer's favour:** the reviewer could not verify §5's
+`guardrail_domains` claim because that field was absent from the JSON dump they were given. **It
+has since been re-queried directly from production and is confirmed exactly as stated:
+8 × `['phronesis','dikaiosyne']`, 1 × `['dikaiosyne']`.** The gap was in the evidence packet
+prepared for review, not in the finding.
+
+### 11.2 — Reviewer 2 (base rate + classification criterion): PARTIALLY CONFIRMED — **the material finding**
+
+**This review forced the rewrite of §0 and §4.** The reviewer independently classified **30 of the
+111** non-rejected candidates against this document's own criterion, blind to its verdicts, and
+found **19/30 ≈ 63% remediation-shaped — not "essentially the entire population."**
+
+**The root cause they named, which this session had not checked:** all 20 `fifth_circle_weighting`
+candidates are "publish the SDK" variants with no described defect — a uniform non-remediation
+bucket comprising 16.7% of the full population. This document had correctly classified the *one*
+member of that bucket that was rejected (c11) as not remediation-shaped, **but never checked
+whether its other 19 members shared that property. They do.** This session verified the full
+bucket, without sampling, after receiving the finding: all 20 confirmed. The reviewer also named a
+second non-remediation cluster (synthesis/combinatorial "assemble existing material into a new
+page" proposals) that this session had implicitly counted as remediation-shaped.
+
+**Consequence, folded into §0 and §4:** at a corrected base rate of 0.60–0.65, P(≥8 of 9) ≈
+**0.07–0.12**, not "indistinguishable from chance." The base-rate argument is **weakened from
+decisive to mildly corroborating**, and §3's divergence control now carries the primary weight —
+which the reviewer independently recommended, having not re-verified §3 themselves.
+
+**Confirmed:** the reviewer independently agreed with all nine of §2's classifications (8
+remediation-shaped / 1 not), differing only in judging c14 *more* confidently remediation-shaped
+than this document's "boundary case" hedge — which does not change the tally.
+
+**Confirmed against a challenge this session had not considered:** the reviewer cross-tabbed
+`cycle_outcome` against `guardrail_proximity` for all 120 rows to test whether a narrower
+denominator applied (whether some candidates never reached the guardrail). **Every one of the 120
+carries a non-null `guardrail_proximity`: 52 + 44 + 15 + 9 = 120. All 120 reached the gate.**
+The 9/120 = 7.5% denominator is correct as stated.
+
+### 11.3 — Reviewer 3 (claims-vs-source fidelity): CONFIRMED, with one drift
+
+**Confirmed line-by-line against source:** the schema claim (migration line 151 verified exact,
+`cycle_number` confirmed present only on `idea_loop_cycles` at line 88, the dual-FK embed
+disambiguation independently verified in the store header); **every mentor-ruling quote verbatim
+and in context** (the Q4 quote at `2026-08-23-mentor-rulings-oc-gate2-verbatim.md:89`; the Q7
+quote; the §6 report's phantasia diagnosis and its "NOT completed here" disclaimer); the Q4/Q7
+"no tension" reading judged **a fair, non-strained reading of both texts**; the h1/cycle-20
+non-re-derivation claim confirmed honest, with no new reasoning smuggled in; and **full
+cross-document consistency** across this deliverable and both decision-log entries.
+
+**DRIFT FOUND — folded:** this document invoked **PR20** by name for the schema-verification
+catch. PR20 actually governs *mentor-consultation briefs naming architectural mechanisms, and
+timestamp-checking present-tense facts in documents relayed for ruling* — **not** a general
+"verify schema before querying" discipline. No mentor brief or ruling was involved here. **A
+mislabeling, not a fabrication** — the underlying practice is real and was performed — but the
+rule citation was wrong. **Corrected in §1**, with the original heading struck through rather than
+silently retitled.
+
+**Milder stretch, recorded and accepted:** PR19's literal scope is trust-core/predicate/fold/engine
+changes, live-op-consequential build plans, and (since the 2026-08-10 widening) auth/security/
+R20a-perimeter and data-deleting code. This governance document is none of those. This document
+invoked PR19 **by analogy** — a design-consequential finding feeding a future build plan. The
+reviewer judged this "a defensible extension rather than a self-serving one," since invoking PR19
+*weakens* rather than strengthens this document's authority and the document was transparent that
+PR19 was undischarged. **Recorded as an extension by analogy, not a literal-scope invocation.**
+
+### 11.4 — What review did NOT resolve
+
+**The submitted-payload assumption remains open**, now independently confirmed unresolvable from
+this repo by a second party. It is still the single assumption §3's argument rests on, and still
+the first thing R8 should close — now joined by §5's A-vs-B question, which the same experiment
+(re-running the c11 text several times) settles simultaneously.
 
 ---
 
