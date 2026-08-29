@@ -487,20 +487,137 @@ the mechanism's outputs findable.
 **Rule:** a session recording a named input **also** adds a row here. A row is a pointer, never a
 restatement — the content lives in the holder, and the holder points back.
 
+**Completed pass, 2026-08-29** (`D-ATRF-REGISTER-ROW-COMPLETED-2026-08-29`, executing the mentor's
+Q7 sequencing step 3, `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md`): the widened
+sweep is complete and every hit classified. **File count, honestly stated:** the completion prompt's
+own drafting-time sweep found 44 files for the literal `"named input"` phrase; a fresh `grep -rl`
+at this pass's close found **47** — the corpus grew between drafting and execution (this session's
+own review record and its predecessor's decision-log entries are themselves now hits), not a
+discrepancy in method. The three near-synonym greps were also re-run. **The former "ATRF scoping session" row is retired, not merely updated** — that session
+closed 2026-08-23 (`D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`), so a row still
+naming it as a *receiving* session was exactly the stale-carry-forward class the 2026-08-19 ruling's
+own template addresses (`2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md`
+— *"formally correct and practically inert… the content is valid, the destination was wrong"*). Its
+disposition, per-item, is recorded in the **Resolved sessions** section below the table, not left as
+a table row pointing at a dead target.
+
 | Receiving session | Named input | Held in | Routed |
 | --- | --- | --- | --- |
 | **Standing-runner design** | **§5d** — is oikeiosis-only the doctrinally right reading of a deliberating ruling faculty? Resolution is **engine-class, `code-critical`** | `agent-circles-2026-08/2026-08-23-evaluative-engine-status-documentation-map.md` §5d | `…/2026-08-24-mentor-ruling-deliberation-reading-open-question-routing-verbatim.md` |
 | **Standing-runner design** | **GS-CYB-1** — proximity score as error signal + candidate weighting function. **Carries the weights-BLOCKED standing constraint as a gate that PRECEDES examination**; includes the equal-rank-spacing open sub-question | `agent-circles-2026-08/2026-08-24-agent-cybernetic-control-architecture.md` §3 | `…/2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md` |
-| **Standing-runner design** | **GS-CYB-2** — controlled system model + completion signal return path | `…/2026-08-24-agent-cybernetic-control-architecture.md` §4 | same ruling |
-| **Standing-runner design** | **GS-ATRF-3 as a named DEPENDENCY** — ruled a prerequisite the standing-runner session inherits, *not* a reason to split GS-CYB-2 to the ATRF session. **GS-ATRF-3 first, GS-CYB-2 second** | the same ruling, Q1 | same ruling |
-| **Standing-runner design** | **The conjectural entry type** ↔ GS-ATRF-4 — the 2026-08-19 worked case. **Was unregistered until this table existed** | `agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` | `…/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` |
-| **ATRF scoping session** | **GS-ATRF-1 / -2 / -3 / -4**, the sufficiency-examination content spec, the boulesis/normative-gap distinction, S3's mechanism design, S5's agent-profile architecture + completion-signal design, S8's GS-ATRF-3 build | `2026-08-09-generation-step-scope.md` (as ruled); `primal-substrate-2026-08/gs-atrf-corrections.md`; this index's §"sufficiency-examination finding" | `2026-08-09-mentor-instruction-prioritised-sequence-verbatim.md`; `2026-08-23-mentor-response-atrf-scoping-verbatim.md` |
+| **Standing-runner design** | **GS-CYB-2** — controlled system model + completion signal return path. **Update rule shape RULED 2026-08-29 (Q8): design-with-disclosed-absence** — the session designs the completion-signal consumption and the update rule at first pass, names the evidence gap explicitly (no completion-signal data exists yet), and phases activation on the runner's own first observed signals. GS-CYB-2 is confirmed as the update rule's ruled home | `…/2026-08-24-agent-cybernetic-control-architecture.md` §4 | `…/2026-08-24-mentor-ruling-cybernetics-instruction-four-questions-verbatim.md`; `…/2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q8 |
+| **Standing-runner design** | **GS-ATRF-3 as a named DEPENDENCY** — ruled a prerequisite the standing-runner session inherits, *not* a reason to split GS-CYB-2 to the ATRF session. **GS-ATRF-3 first, GS-CYB-2 second.** Status, re-confirmed 2026-08-29 (Q4): GS-ATRF-3's return-path design is ruled, and its endpoint code (`POST/GET /api/practice/completion-signal`) is **built dark** — this half is independently verified by a live HTTP check (a zero-footprint probe confirmed `503` with no auth and the flag off, which only requires the *code* to be deployed). **Whether the `idea_loop_completion_signals` table's own migration is actually applied to production shares the same contested-fact status as GS-ATRF-2's migration** (see the GS-ATRF-2 item in the Resolved-sessions section below — the 2026-08-29 standing opener names all four of that founder walk's migration steps, not only GS-ATRF-2's, as having "no apply record" and "presumed unapplied," against the same walk's own same-day addendum claiming completion). The dependency GS-CYB-2 inherits is on the *design*, which is settled either way, not on activation, which needs real completion-signal data regardless of the table's current apply status | the same ruling, Q1 | same ruling; the "built dark" status is sourced to `handoffs/founder/2026-08-23-atrf-ee-production-wave-CLOSE.md` (`D-ATRF-EE-PRODUCTION-WAVE-BUILT-PR19-FOLDED-2026-08-23`) and re-confirmed at `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q4 — **not** the 2026-08-23 sixteen-questions ruling itself, which never uses the word "dark"; the apply-status doubt is sourced to `D-STANDING-OPENER-2026-08-29-UPDATE` |
+| **Standing-runner design** | **The conjectural entry type** ↔ GS-ATRF-4 — the 2026-08-19 worked case | `agent-circles-2026-08/2026-08-19-DESIGN-THINKING-puzzle-taxonomy-entry-types-mathematical-discovery-modes.md` | `…/2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md` |
+| **Standing-runner design** | **Q-C2b** — the discriminating-signature design for the completion signal (the causal pattern that distinguishes genuine examination from apparent completion). Carries the Q4.3/F-Q43 precedent explicitly: *"detecting apparent completion is free and worthless; the Q4.3 precedent became useful only when narrowed to causal order."* Distinct from Q-C2a (the three-question examination *content*, confirmed by the M5 ruling and NOT open) | `2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md` Q-C2a/Q-C2b | same document |
+| **Standing-runner design** | **The Anandkumar/neural-control frame (F3), the cybernetics–neural-operator convergence frame (F4), and the Spinoza/scientia-intuitiva capstone frame (F5)** — presented together, per F5's own instruction, as the session's opening inputs. Condition-discharged 2026-08-29 (Q1); their input-status is binding **from this ruling**, not from assertion inside the (until-then-unadopted) instruction files themselves. **Subsumes** the pre-run-research response's "multi-scale coherence question" ("whether the harness's multi-scale structure — cycle, session, longitudinal — produces coherent signals at each scale") — explicitly named a candidate standing-runner input and routed here (rather than given its own row) because it "duplicates F4's convergence-instruction content in part," per the routing document's own judgement | `2026-08-27-mentor-instruction-neural-control-anandkumar-verbatim.md`; `2026-08-27-mentor-instruction-convergence-cybernetics-neural-operators-verbatim.md`; `2026-08-29-mentor-instruction-structural-causal-apprehension-verbatim.md` (F5); `2026-08-29-mentor-response-pre-run-research-verbatim.md` (multi-scale coherence question) | `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q1, Q6 |
+| **Standing-runner design** | **F5's long-horizon agent-side scientia-intuitiva question** — named orientation only, never a design directive. Re-anchored 2026-08-29 (Q9) from the bounded validation run's 20 cycles to *the standing runner's own longitudinal operation*: do not propose architectures claiming to implement it before the runner's longitudinal data would make that claim honest. Carried forward indefinitely as orientation until that data exists | `2026-08-29-mentor-instruction-structural-causal-apprehension-verbatim.md` (F5) | `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q9 |
+| **Standing-runner design** | **The seven-probe cybernetic adversarial review, in full** (governance tier, documents-only, PR19-reviewed). Ruled a named input by its own closing line, made binding by Q2d: *"Findings land as a named input to the standing-runner design session."* Its own Leverage Point Summary names three items this pass did **not** split into separate rows — **election-logic resolution** (#5, "unscoped — surfaced by this review"), **functional-vs-structural novelty** (#6, "self-declared placeholder; richer standard undesigned"), and **persisted per-cycle proximity delta + circle attribution** (#7, read-time derivation ruled sufficient for now, Q2c; persistence itself is a standing-runner design item) — on the editorial judgement that they are sub-items of one reviewed document with its own findable summary table, not independently-named open questions with their own identity the way GS-CYB-1/GS-CYB-2 have. This is a register-granularity choice, not a ruling; it is recorded here so it can be revisited, not silently assumed | `2026-08-29-ADVERSARIAL-REVIEW-cybernetic-seven-probes.md` (see its "Leverage Point Summary," items 5–7, for the sub-items) | `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q2, Q2d |
 
-> **Honest scope of this register, 2026-08-24.** The standing-runner rows are complete as of today and
-> each was verified at source. **The ATRF row is a summary, not a verified enumeration** — a
-> `grep "named input"` sweep found the phrase across roughly a dozen documents and no session has
-> checked each one's registration status. **Completing the ATRF row is owed before that session
-> opens.**
+**Held open, owned by no session (not a "not-yet-opened session" pointer — recorded here only for
+findability, per the same rule):**
+
+- **GS-ATRF-4's "vocabulary direction"** — named as still-open by the 2026-08-29 ruling (Q4: *"What
+  remains open is Q-C2b at the standing-runner session, the GS-ATRF-4 vocabulary direction, §5d…"*)
+  and again by the F3 instruction file, but neither document elaborates the question beyond that
+  phrase. No session is proposed for it. **PR20 note:** this entry states only what the source says,
+  deliberately not inferring more. `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md` Q4;
+  `2026-08-27-mentor-instruction-neural-control-anandkumar-verbatim.md`.
+- **The capacity axis** (Q-F4, sixteen-questions ruling) — ruled explicitly *outside* the agent-profile
+  design; "remains held in the examination document, owned by no session, status unchanged." Held at
+  `2026-08-22-DESIGN-EXAMINATION-deterministic-engine-evolution-four-directions.md`.
+- **The Evaluative Engine's §7.3 composition question** — whether the per-surface disclosure regimes
+  (engine-output epistemic status, trajectory, practice suggestions, orientation readings, loop fold)
+  should one day converge on one entry vocabulary. Ruled "held as a named open question (§7.3),
+  unowned, with no session proposed." `2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md`
+  §7.3 (`D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`).
+
+### Resolved sessions — where the retired "ATRF scoping session" row's items actually landed
+
+The ATRF scoping session ran and closed 2026-08-23 (sixteen questions, all ruled:
+`2026-08-23-mentor-rulings-atrf-sixteen-questions-verbatim.md`,
+`D-MENTOR-RULINGS-ATRF-SIXTEEN-ADOPTED-EXECUTED-2026-08-23`). Per the 2026-08-19 ruling's template
+(redirect to the fitting session or name a genuine unowned hold; never leave a row pointing at a
+closed session with no note), here is where each item the old row listed actually stands, verified
+against the sixteen-questions verbatim directly:
+
+- **GS-ATRF-1** (blast-radius four-virtue proxy) — resolved. The ruled 2026-08-11 answer is untouched;
+  its one open gap, §(c-bis) (the `friction_detection` basis-lessness case), is closed **directly by
+  GS-ATRF-4's `unknown` category** (Q-A3) — no amendment to GS-ATRF-1 itself.
+- **GS-ATRF-2** (proposal-shape/watching-row extension) — **the design question is resolved**; whether
+  the migration is actually applied to production is a **genuinely contested fact the project's own
+  records disagree on, surfaced here rather than picked**. Shape confirmed as the migration's scope
+  (Q-B1); `target_circle` elected as a required column, not a preference; null-plus-flag elected for
+  the no-basis case (Q-A4); migration bundling ruled conditional on Q-D1 (Q-B2). The migration
+  (`website/supabase-idea-loop-candidates-atrf-blast-radius-and-s4-migration.sql`) adds **six**
+  columns — `blast_radius`, `agent_blast_radius`, `target_circle`, `blast_radius_basis`,
+  `traceability_check`, `extraction_evidence`. **The contested fact:** the 2026-08-23 close's own
+  same-day addendum claims the founder walk "ran to completion, live, interactively" and that
+  "production carries 120 real candidate rows" with "all six new columns `NULL`"
+  (`handoffs/founder/2026-08-23-atrf-ee-production-wave-CLOSE.md`, its Addendum section). **But the
+  2026-08-29 standing-opener update, re-deriving the whole window from primary sources, states the
+  opposite:** *"the ATRF-EE founder walk's four migration steps have NO apply record and are
+  presumed unapplied pending founder confirmation, while its deploy half is demonstrably live"*
+  (`D-STANDING-OPENER-2026-08-29-UPDATE`). Neither claim is independently re-verified by this pass —
+  doing so would require a live DB read, outside a documents-only session's reach. **This
+  discrepancy is not resolved here; it is named as a question for the founder to settle** (a
+  one-query check against production would do it), because the register's own honesty standard
+  forbids restating either side as settled fact.
+- **GS-ATRF-3** (completion-signal return path) — resolved, with one item **routed onward**. Actor,
+  transport, schema, endpoint, and persistence target all ruled (Q-C1); the three-question examination
+  content confirmed per the M5 directives (Q-C2a); the refuse-to-attest branch ruled required (Q-C3,
+  closing §(d) of `gs-atrf-corrections.md`); the signal's own provenance statuses ruled (Q-C4). **The
+  discriminating-signature design (Q-C2b) was explicitly not resolved here** — it is routed to the
+  standing-runner design session (its own register row above). The endpoint + table were then built
+  dark 2026-08-23 (see the GS-ATRF-3-dependency row above).
+- **GS-ATRF-4** (epistemic-status framework) — resolved on the provenance axis, **routed on the
+  credence axis**. One framework, two orthogonal axes confirmed (Q-A1); provenance assigned/checked
+  by the runner at generation, disclosed on the proposal shape (Q-A2); the credence axis was ruled
+  **outside the ATRF's scope** and homed at the Evaluative Engine Epistemic Status Scoping Session —
+  which is **itself a closed session**, not a not-yet-opened one: it opened and ruled the same day
+  (`2026-08-23-mentor-rulings-evaluative-engine-epistemic-status-verbatim.md`,
+  `D-MENTOR-RULINGS-EVALUATIVE-ENGINE-EPISTEMIC-STATUS-ADOPTED-EXECUTED-2026-08-23`), so nothing from
+  it needs a register row pointing forward. A further "vocabulary direction" sub-item remains open
+  and unowned (see the held-open list above). Separately, the ruled provenance-axis question's *text*
+  was published on the project-context surface 2026-08-19 (`D-GSATRF4-EPISTEMIC-STATUS-LIVE-2026-08-19`)
+  — this is the narrow, correct sense in which "GS-ATRF-4 is live"; it is not a built mechanism.
+- **The sufficiency-examination content specification** — resolved. Confirmed per the M5 directives
+  as GS-ATRF-3's content (Q-C2a); see the "sufficiency-examination finding" section of this index.
+- **The boulesis/normative-gap distinction** — resolved. Pre-generation step elected (Q-D1); the
+  normative-candidate distinction confirmed; `S3-boulesis-generation-mechanism-scope.md`'s Q3-d
+  is marked RULED by its own dated note.
+- **S3's mechanism design** — resolved by the same Q-D1 ruling (the pre-generation-step election
+  *is* S3's mechanism design decision); the mechanism's actual build is future work, gated on its
+  own founder election, not an open question needing a register row.
+- **S5's agent-profile architecture + completion-signal design** — resolved, with one item held
+  **outside** the design entirely. The composing primitives, their evidence floors, provenance
+  statuses, and honesty bounds are all ruled (Q-F1–Q-F3); the capacity axis is explicitly ruled
+  *outside* the profile design (Q-F4) and held unowned (see the held-open list above).
+- **S8's GS-ATRF-3 build** — executed. The endpoint and table were built dark 2026-08-23 (see
+  the GS-ATRF-3-dependency row above); nothing further is owed here.
+
+**No item from the old row is left dangling.** Every one is either resolved-with-citation, routed to
+a specific still-open or not-yet-opened session (its own register row above), or named as genuinely
+held-open-and-unowned (the held-open list above) — never voided, per the 2026-08-19 template.
+
+> **Honest scope of this register, 2026-08-29.** The sweep described in the completion note above is
+> complete: the literal `"named input"` phrase (47 files at close; see the file-count note above)
+> plus the three near-synonym phrasings were re-run and every hit classified; the five pre-existing
+> standing-runner rows were re-verified at source (their "Held in"/"Routed" citations all resolve;
+> two needed content updates, applied above); the retired ATRF row's every item was traced to its
+> actual current disposition. A spot-check of `website/` and `adopted/` for the literal phrase found
+> five files; none used it in the registrable session-handoff sense — **two are genuinely incidental**
+> (`adopted/rag-mentor-alt3/rule-dependency-map.md`'s "named input parameter" and
+> `adopted/rag-mentor-alt3/canonical-framework.md`'s "named inputs and named outputs" are a
+> data-schema/parameter meaning unrelated to this mechanism) **and three discuss the mechanism
+> itself, already captured by citations elsewhere in this register or already resolved** —
+> `adopted/standing-protocol-cache.md` and `adopted/project-instructions-snapshot.md` both carry the
+> same PR20/carry-forward-redirect rule text this register's own completion note above already cites
+> as its governing template, and `adopted/adr/2026-07-08-sage-trust-layer.md`'s "named input" is the
+> now-closed provenance-ledger arc's own scoping discovery, consumed by that arc's 2026-08-26
+> closure (`operations/handoffs/founder/2026-08-26-provenance-ledger-arc-closed-CLOSE.md`) before
+> this pass began. **Not independently re-verified this pass:** an exhaustive sweep of
+> every non-`operations/` directory (`website/src`, `harness/`, etc.) — the check above was a targeted
+> grep, not the full multi-pattern sweep this pass ran against `operations/`.
 
 Every scope document's §0 names which of these its parked half waits on, by name, rather than
 repeating "the first build gate."
