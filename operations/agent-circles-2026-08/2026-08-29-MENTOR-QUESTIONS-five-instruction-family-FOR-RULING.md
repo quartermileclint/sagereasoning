@@ -1,6 +1,10 @@
 # Mentor questions — the five-instruction family in `inbox/` — FOR RULING
 
-**Date:** 2026-08-29. **Status:** FOR RULING — nothing below is adopted, executed, or built.
+**Date:** 2026-08-29. **Status: RULED 2026-08-29 — all eleven questions answered in one round**
+(verbatim canonical: `2026-08-29-mentor-ruling-five-instruction-family-verbatim.md`; the ruling
+wins over this document; execution recorded at
+`D-FIVE-INSTRUCTION-FAMILY-RULED-ADOPTED-EXECUTED-2026-08-29`). Original status line preserved
+below for the record: FOR RULING — nothing below is adopted, executed, or built.
 **Authored by:** the 2026-08-29 grounding session (Fable 5), at the founder's direction: *read the
 five newest inbox files, assess them in full against the project purpose, engine, and harness
 before acting, and draft detailed mentor questions first — there may be contradictions across the
