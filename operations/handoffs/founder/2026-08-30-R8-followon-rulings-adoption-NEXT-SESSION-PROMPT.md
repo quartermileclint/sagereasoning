@@ -1,5 +1,21 @@
 # Next-session prompt — R8 follow-on: rulings adoption and the build-path elections
 
+> **STATUS NOTE, 2026-08-30 (same day): branch B1 is ALREADY EXECUTED.** The founder relayed the
+> mentor's ruling back into the R8 session itself; the ruling is captured verbatim
+> (`operations/agent-circles-2026-08/2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md`),
+> annotated into the R8 design, and dispositioned into the register
+> (`D-MENTOR-RULING-R8-PRODUCER-FLOOR-SEMANTICS-ADOPTED-EXECUTED-2026-08-30`). Headlines the next
+> session inherits: **Q1a** founder-only v1 producer (ruled correct design, not a deficiency);
+> **Q1b** the designed cycle-identity handoff on the dashboard adoption surface; **Q1c distinct
+> identities required at mint** (runner ≠ executing agent, enforced, not convention); **Q2**
+> Q-C2a's first question AMENDED to the producer's adoption-assent (the built handler/migration
+> comments quote the old wording — a build item); **Q3** Option S buildable now, **M-vs-W
+> deferred with locked framing** to the standing-runner track's next design-capable session
+> (which opens with Option S's disagreement-rate data), and the R8-D7 backward-edge evaluation
+> held AWAITING CONFIRMATION by that session. **The operative work below is therefore §B2's
+> ruling-independent items and §C's elections — read §B1 as a record of what was done, not a
+> task.**
+
 **Paste this as the task after the standing session opener.** Tier: `governance` at open,
 branching per §B — nothing in this prompt licenses a build, schema, flag, credential, or
 activation; each build item below is its own founder election with its own prompt if elected.

@@ -20,6 +20,41 @@ the adversarial review's findings as a named input."* Steps 1–4 are done and r
 document. Where the context-injection layer live on `/api/reason` is meant, it is named as such;
 the per-consumer prose service (not live) does not arise here.
 
+> **RULED 2026-08-30 — the design's routed questions are answered; these annotations are
+> BINDING and win over the body wherever they differ**
+> (`2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md`, relayed same day;
+> verbatim wins over this summary too):
+> - **§4.0 (the producer question): RULED.** Q1a — the founder (or a founder-directed agent
+>   session) on a founder-minted `completion_signal_write` credential is the ONLY v1 producer;
+>   the low, adoption-bounded rate is "the correct design for this instrument at this stage…
+>   not a deficiency to be engineered around." Q1b — the designed handoff is ruled: the elected
+>   proposal carries its own `loop_id`/`cycle_number` on the founder-dashboard adoption surface
+>   (a build-session precision item). Q1c — **distinct identities required at mint, not
+>   convention**: the runner and the executing agent may not share an `agent_id`.
+> - **§4.0's fourth item (the Q-C2a elector/attester tension): RULED, reading (a) — the first
+>   examination question is AMENDED, binding on relay:** *"What impression did you assent to
+>   when you adopted and executed this idea?"* Questions two and three unchanged. The runner's
+>   election/tie-break behaviour stays where it is already recorded (the watching table's
+>   candidate rows) and belongs to the election-mechanism analysis, not the signal.
+>   **Consequence for the built surface, named as a build item:** the dark handler's header
+>   comment and the migration's COMMENT text quote the pre-amendment first question, and the
+>   `impression_assented_to` field's documented semantic is now the amended one — the wording
+>   update rides the next code session touching that surface; the ruling governs the semantic
+>   from relay regardless of the comments.
+> - **§5.3 (the M/W/S election): PARTIALLY RULED.** Option S is **buildable now** (pure
+>   measurement; first verdict operative). **M-vs-W is deferred** — with the doctrinal framing
+>   locked exactly as §5.3 states it (per-examination vs per-judgement; the measured
+>   10%→2.8% / →27% consequences as the empirical basis) — to the standing-runner track's next
+>   design-capable session, once Option S has produced disagreement-rate data (see the
+>   sequencing note in the verbatim capture: the ruling's "standing-runner design session"
+>   names that future session, this one having already run).
+> - **§4.9's R8-D7 single-backward-edge evaluation: carried as a named evaluation AWAITING
+>   CONFIRMATION** by that same future session — "not treated as settled in any build or design
+>   work before that confirmation."
+> - **§11's follow-on 1 (the mentor brief): EXECUTED and answered same day.** The build brief's
+>   producer-side gating is now open on the Q1 answers; the M-vs-W gate remains on R8-D7's
+>   verdict-changing variants, with S unblocked.
+
 ---
 
 ## 1. The four frames, received together — and how they govern what follows

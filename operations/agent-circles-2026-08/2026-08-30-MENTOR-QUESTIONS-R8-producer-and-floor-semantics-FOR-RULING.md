@@ -1,5 +1,12 @@
 # Mentor questions — the completion signal's producer, the elector/attester tension, and floor semantics under sampling — FOR RULING
 
+> **STATUS: RULED 2026-08-30, same day** — the ruling is captured verbatim at
+> `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (binding on relay; verbatim
+> wins) and applied as dated annotations to the R8 design
+> (`D-MENTOR-RULING-R8-PRODUCER-FLOOR-SEMANTICS-ADOPTED-EXECUTED-2026-08-30`). Q1a/b/c ruled as
+> R8 recommended; Q2 ruled reading (a) with Q-C2a's first question AMENDED; Q3 ruled Option S
+> buildable now, M-vs-W deferred with the framing locked. This file is the question record only.
+
 **Date authored:** 2026-08-30. **Source:** the R8 standing-runner design session
 (`2026-08-30-standing-runner-design-R8.md`, PR19-folded;
 `D-STANDING-RUNNER-DESIGN-R8-COMPLETE-C11-EXPERIMENT-RUN-PR19-FOLDED-2026-08-30`). **Relay:** the
