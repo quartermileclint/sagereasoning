@@ -30108,3 +30108,69 @@ presence**; the `p5-force` probe-set redesign question, now governed by Q2 if it
 **Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, R18, Q1.
 
 **Status:** Adopted.
+
+---
+
+## `D-CLASS-SPLIT-AND-DISCLOSURE-ADDITIONS-APPLIED` — the borderline class split, the kathekon role-deficiency, and the hexis-vs-drift limit (2026-08-30)
+
+**Tier:** `code-elevated`. The same seven places; **no auth, perimeter, encryption, schema, flag or
+behaviour change; AC7 not engaged.** Commit `2c18cdb`, on the founder-signed bundled package.
+**Five rulings recorded verbatim first** (`bb0a744`): A5, and Ruling Set E covering A2/A3/A4/D.
+**No figure changed.**
+
+**A5 — the split.** "Borderline" was ruled to conflate two populations that *"were always different
+but were called by one name"*: **grave-vocabulary traffic** (what the harness and loop submit — what
+n=100 measured) and **near-boundary inputs** (what a disagreement rate is properly about — never
+measured as a defined population). **Disambiguation, not repartitioning.** The mentor supplied the test
+that licenses it: *"could this revision criterion have been stated before the sweep ran, as a
+clarification of what the definition intends?"* — "near the proceed/block boundary" passes; "exclude
+the probes that showed zero variance" does not. **A2:** role-blindness reclassified from a scoping
+statement to *"a confirmed design deficiency, not a design choice"*. **A3 item 1:** consistency is
+evidence of stable disposition, **not proof** — the harness cannot distinguish hexis from drift from
+the outside.
+
+**The classification step earned its place, and found something the signed draft did not anticipate.**
+All 25 "borderline" occurrences were classified and **the classification recorded before any was
+edited** (`2026-08-30-borderline-occurrence-classification.md`). The draft's feared failure — a
+blanket replace rewriting the frozen definition quotation — was **unreachable**: that text is in
+`d6a-probes.json` and the run records, not on these surfaces. But **four occurrences carried a claim
+the split makes FALSE**: *"what distinguishes the borderline class is that its variance crosses the
+proceed/block boundary"* — untrue of the measured population, since two of five never cross it. **A
+rename alone would have produced a stronger falsehood than the sentence it replaced.** All four were
+**rewritten as the disambiguation** rather than renamed.
+
+**Disclosed:** seven renamed occurrences sit inside the **mentor's own stated Q5 form**, authored
+earlier the same day, before the split. The adjective changes; the claim does not. Two further gaps
+were caught in verification and closed — (g) and (e) used the renamed term with **no gloss anywhere
+near it**.
+
+**Pins S2-65/66/67/68 added, all mutation-verified.** S2-66 and S2-67 deliberately **split the hedge
+from the mechanism**, so a later edit cannot keep *"evidence, not proof"* while dropping the
+hexis/drift explanation that gives it meaning. **S2-64 re-verified against an actual re-inversion
+after the rename**, not merely re-run. **S2-54 untouched for a fourth consecutive revision.** Battery
+**156/0**; `tsc` 0; build compiles; agent-card parses at **25**.
+
+**A process failure, recorded.** The first envelope edit introduced **unescaped apostrophes inside a
+single-quoted TS literal** and broke the file; `tsc` caught it immediately and it was fixed before any
+commit. The at-action elicitation fired on that exact command and the honest answer was that the
+examination had not preceded the decision — the run that followed failed.
+
+**Routed, not landed** — three items to the **standing-runner design session**, itself gated on the
+bounded validation run's §6 report and not to be opened early: A2's role-relative evaluation, A3's
+**melete** surface, A4's per-consumer rendering with the Stage-2 relational-context framing locked.
+**A4 reopens nothing; `SUBSTRATE_LAYER3_ENABLED` remains unlicensed.** **D** gave the byte-identity
+guard **an end condition where it had none** — `GATE1_FALSE_HOLD_CAPTURE` restored plus ≥20 false-hold
+records, **or** the standing-runner session deprecating the mechanism — and routes there as a priority
+item, its lapsed operational basis disclosed. D1 and D2 stay blocked.
+
+**Risk classification:** Elevated. Weights-**BLOCKED**, Q1 and the §A boundary unchanged. **Nothing
+bears on the 0h call.**
+
+**Rollback:** `git revert 2c18cdb`. The prior text is not false; it is less precisely described.
+
+**Carried:** push, then live `curl` verification — **order, the rename, and that no frozen quotation
+was rewritten.**
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, R18, Q1.
+
+**Status:** Adopted.
