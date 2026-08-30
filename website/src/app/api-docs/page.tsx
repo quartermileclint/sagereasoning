@@ -846,7 +846,8 @@ export default function ApiDocsPage() {
           it. A finding about that input, not the class. At this sample size the class is distinguished
           from the clean anchor solely by that input; the anchor moved once in twenty on proximity and
           held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one
-          date, spanning a redeploy in which the gate&rsquo;s code path did not change. Not measured on
+          date, spanning a redeploy in which the gate&rsquo;s code path did not change; the deploy
+          identifier is a local proxy and attests nothing about production. Not measured on
           /api/reason. Revised as better evidence arrives</em>). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
