@@ -30530,3 +30530,65 @@ pre-existing untracked path left untouched.
 
 **Status:** Adopted — BUILT and folded. **Not deployed. Not R18-signed. The flag question is open and
 gates the push.**
+
+## 2026-08-30 — D-PROVENANCE-LEDGER-SLICE3-R18-SIGNED-APPLIED-OPTION-B-ELECTED
+
+**Decision.** The founder **signed the R18 package** and **elected option B — slice 3 ships live on
+deploy, no separate flag.** Both recorded as given; neither re-decided by the build. The three R18
+public surfaces are **applied**, in the **same commit** as the code. `code-critical`. **Still not
+pushed and not deployed** — under option B, **push + deploy IS the activation**, and it is the
+founder's. AC7 engages there.
+
+**Why the R18 docs ship WITH the code rather than after it.** The standing rule is that public
+surfaces never lead the code and never precede signature. Option B removes the dark interval that
+made "after" meaningful: the flag is already live, so the field goes public the moment the code
+deploys. Applying the docs afterwards would publish an **undocumented live field** in the gap — the
+worse of the two orderings. The rule's purpose (never document behaviour that is not yet real) is met
+by **simultaneity**. Recorded so the departure from the literal sequence is visible.
+
+**Applied.** `llms.txt`: new "Provenance gaps (extraction origin — MEASURE, and currently EMPTY)"
+section. `agent-card.json`: new extension **#26** `provenance-gaps/v1` — **26 total, parse-verified**
+(the reserialisation was checked and touched 7 lines, not the whole file). `api-docs/page.tsx`: new
+paragraph. All three state plainly that the field is **empty for every agent until enforcement
+begins** and that **the classification step has never executed in production** — an empty list means
+the mechanism has not run, not that no gaps exist.
+
+**Two findings while applying, both from sweeping rather than assuming.** (1) The superseded trigger
+clause sat on **all three** surfaces in **three different phrasings** — three separate edits, not one
+find/replace; post-apply sweep for `structural fix (is|was) in place` across `public/` and `src/`
+returns **zero**. (2) **The relaxation made a live public claim FALSE**, on two surfaces: *"404 = no
+examined trust evidence has been folded… so a 200 genuinely implies at least one domain carries
+examined evidence"* (`llms.txt`, and the same claim inside the `trust-record/v1` agent-card
+extension), plus the equivalent in api-docs. Corrected on all three: a 200 now implies examined domain
+evidence **OR** a determinate ledger verdict about an artifact's origin, with `aggregate.level` named
+as the discriminator, and 503 disclosed for the failed-gaps-read case. **This was not in the sign-off
+package** — it was found by sweeping the surfaces for consequences of the change rather than only
+inserting the new paragraph.
+
+**Checked and deliberately left:** the held-event statements (`llms.txt` ~651, api-docs ~922) that a
+*"404 trust record stays 404"* — explicitly scoped to what a held curator-flagged event does, a
+different mechanism, and accurate in that scope.
+
+**Verified.** `agent-card.json` parses, 26 extensions. `tsc --noEmit` clean. `npm run build` exit 0,
+`/api-docs` and `/api/trust-record/[agent_id]` registered. S10 battery **194/0**. Trigger sweep zero.
+All five pre-commit checks pass (the ByteString check inspected the staged API file's header literals
+and passed — the new served text is body-only).
+
+**Carried (founder-walked).** Push + deploy; then a **live `curl`** against production — three of the
+four defects in the recent envelope arc were found only that way. A **mentor note** is carried, not
+blocking: §6.5.6's instruction was followed but its stated reason (*"the change is inert until the
+ledger itself ships"*) expired when the ledger shipped four days later.
+
+**Rollback:** `git revert` ONLY. **Unsetting the flag is NOT a rollback path** — it would also stop
+the live ledger write, a standing production change.
+
+**Risk classification:** Critical. Weights **BLOCKED**; Q1 and the §A boundary unchanged. **Nothing
+bears on the 0h call.**
+
+**Concurrency:** `git status` before staging; commit path-scoped;
+`website/src/data/environmental-context.json` and every other pre-existing untracked path untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, PR22, PR23, PR25, Q1, AC5, AC7, R18.
+
+**Status:** Adopted. **R18 signed + applied; option B elected. Push + deploy is the activation and is
+the founder's.**

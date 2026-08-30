@@ -768,9 +768,14 @@ honesty).
 
 Response envelope: { status: 'ok'|'not_found'|'error', data?, message?, documentation_url }.
 data.schema = 'sage-trust-record/v1'. 404 = no examined trust evidence has been folded for that
-agent — declaration-class records alone do not surface a public record, so a 200 genuinely
-implies at least one domain carries examined evidence (an honest miss, never a low score).
-503 = the surface or the trust core is not enabled, or a store read failed (never cached).
+agent AND no provenance-gap entry exists — declaration-class records alone do not surface a
+public record (an honest miss, never a low score). A 200 therefore implies EITHER at least one
+domain carries examined evidence OR the ledger reached a determinate verdict about an artifact's
+origin; where only the latter holds, the record honestly carries aggregate.level null and
+sparse true, so check aggregate.level before treating a 200 as evaluative.
+503 = the surface or the trust core is not enabled, a store read failed, or the provenance-gap
+read failed where a 404 would otherwise be served — a 404 is a positive claim of absence and is
+not made from a read that did not succeed (never cached).
 
 MEASURE MODE: nothing in a trust record binds any decision. A human's right to override,
 correct, or disagree with an agent's reasoning is absolute regardless of any level shown here
@@ -800,7 +805,8 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
 - extraction origin on caller-supplied consults — where the caller supplied the extraction
   rather than the server producing it, that origin is NOT verified at the point trust events
   are minted, and a supplied extraction is not distinguishable, at that point, from one the
-  server produced; this list will be updated when a structural fix is in place, and that fix
+  server produced; this list will be updated when a structural fix begins enforcing
+  which events are minted, and that fix
   will surface any artifact whose origin it cannot verify as a named coverage gap, never as
   silence — an absent event will say why it is absent, and that it does not mean the agent
   did not practise;
@@ -912,6 +918,56 @@ Like every server-side extraction signal, the orientation reading rests on the h
 of the submitted text and inherits the same extraction-trust ceiling as the corroboration check
 (reasoning narrated as examination reads as examination) and the same field limits as every other
 consult input.
+
+### Provenance gaps (extraction origin — MEASURE, and currently EMPTY)
+
+A trust record's `provenance_gaps` field is a capped list (50 most recent, newest first) of
+accreditation writes whose submitted artifact the extraction-provenance ledger could not verify
+the origin of. Each entry names ONE such write, gives the reason in one of four closed values
+(`no_ledger_entry`, `out_of_window`, `identity_mismatch`, `caller_supplied_extraction`), and
+carries a not-attestable clause inline. It is a SIBLING of `coverage_gaps`, never a widening of
+it: `coverage_gaps` is a property of the aggregate's evidence composition across an agent's
+history, whereas a provenance gap is a property of one accreditation write at one moment. They
+are different kinds of fact at different grains and are deliberately not merged.
+
+Alongside the capped list the record carries `total_provenance_gaps_count`: the true total, so a
+reader sees "showing 50 of 847," never a bare window implying completeness. The count is OMITTED,
+never fabricated, if the count read fails. No signature-derived value is ever served on an entry.
+
+READ THIS BEFORE INTERPRETING THE FIELD. As published, `provenance_gaps` is EMPTY for every
+agent, and it will stay empty until enforcement begins. The ledger runs in record-only mode: it
+records where each consult's extraction came from, but nothing yet refuses a mint or writes a gap
+entry. Further, as of 2026-08-30 the classification step that would produce these entries has
+never once executed in production — it is reached only from the accreditation-write route, which
+returns 409 for a repeat `seed` write before reaching it, and every close observed since the
+ledger was activated took that path. The field is published ahead of enforcement deliberately,
+because the surface must exist before the first refusal can fire; it is NOT evidence that any
+artifact has been examined for origin and passed. An empty `provenance_gaps` today means the
+mechanism has not run, not that no gaps exist. The record says so itself: whenever the list is
+empty it carries a note stating that origin classification is in a record-only phase.
+
+The four served reasons say different things and should not be read as one. `no_ledger_entry`,
+`out_of_window` and `identity_mismatch` each report a limit of the instrument — the ledger had no
+record, or one it will not accept as current, or one whose identity scope does not match the
+submitting credential's. Only `caller_supplied_extraction` reports a positive finding: the ledger
+had data and the data disqualified the mint.
+
+Every served entry carries this clause inline, verbatim:
+
+> The record can attest that this mint was declined and why. It cannot attest that the agent did
+> not practise — a declined mint is a fact about what could be established about this artifact's
+> origin, never a finding about the agent's reasoning.
+
+One consequence of the field participating in the record's own availability: an agent with no
+virtue-domain evidence but at least one provenance-gap entry now receives a 200 rather than a
+404, because a gap entry is proof the ledger genuinely examined an artifact's origin and reached
+a determinate verdict. Such a record honestly carries `aggregate.level: null` and `sparse: true`.
+An integration that reads a 200 as meaning "an evaluative level exists" must additionally check
+`aggregate.level`. Where the gap read itself fails and no domain carries evidence, the endpoint
+returns 503 rather than 404, because a 404 is a positive claim of absence and it is not made from
+a read that did not succeed.
+
+Gap entries age out on the same 90-day clock as the events they stand in for.
 
 ### Score a Document (V3)
 

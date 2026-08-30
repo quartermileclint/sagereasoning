@@ -1,9 +1,14 @@
 # R18 sign-off package — the `provenance_gaps` served field (provenance-ledger slice 3)
 
-**Status: STAGED — AWAITING FOUNDER SIGNATURE. Nothing in §3–§5 is applied.**
-**Authored 2026-08-30.** (Note on dating: today's later sessions have been labelling artifacts
-`2026-08-31`; the verifiable local date is 2026-08-30 and this file uses it. If the founder
-prefers arc-consistency, this file and the slice-3 close rename together.)
+**Status: SIGNED by the founder 2026-08-30, and APPLIED. §3, §3b, §4 and §5 are live in the repo,
+pending the founder's push + deploy.**
+
+**FOUNDER ELECTION, same moment: OPTION B — ship live on deploy.** No separate flag. Slice 3 rides
+`SUBSTRATE_PROVENANCE_LEDGER_ENABLED`, which is already `true` in Production, so **there is no
+activation step: push + deploy IS the activation.** Consequently the R18 surfaces were applied in the
+SAME commit as the code rather than after it — under option B there is no dark window in which to
+document ahead of exposure, so the ordering rule is satisfied by simultaneity, not by sequence.
+**Authored 2026-08-30.** (Dating: the founder elected to leave the label as-is.)
 
 **What is already signed and is NOT re-asked here:** the §10 attestation amendment's exact
 replacement wording, founder-signed 2026-08-26 (SCOPE §10). It is applied in the code edit this
@@ -12,12 +17,16 @@ owed on this wording unless the built PR19 review surfaces a reason to revisit i
 review of this build ran; if it surfaced such a reason it is recorded in the slice-3 close, and
 this line should be read against that.
 
-**What IS being asked:** signature on (a) the four served `reason_text` templates + the shared
-`not_attestable_clause`, which are **new public text** shipped inside the code edit, and (b) the
-three R18 surface additions in §3–§5.
+**What was asked, and SIGNED:** (a) the four served `reason_text` templates + the shared
+`not_attestable_clause`, **new public text** shipped inside the code edit, and (b) the three R18
+surface additions in §3–§5. Both signed 2026-08-30 and applied.
 
-**The ordering rule this package obeys** (2026-08-15 / 08-25 / 08-31 precedent): the public
-surfaces carry the amendment **after** the code edit, never ahead of it, and never before signature.
+**The ordering rule, and how option B satisfies it** (2026-08-15 / 08-25 / 08-31 precedent): public
+surfaces never lead the code and never precede signature. Under option B the code is not dark, so
+"after" collapses to "with" — the surfaces ship in the SAME commit and the SAME deploy as the code.
+The rule's purpose (never document behaviour that is not yet real) is met by simultaneity; the
+alternative — applying them after the deploy — would have been strictly worse, publishing an
+undocumented live field in the interval.
 
 ---
 
@@ -54,7 +63,11 @@ Both keys are **absent entirely** while `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` is
 > ruling's stated reason is discharged while its instruction still stands — a **PR20-class stale
 > mechanism fact**, surfaced rather than silently re-decided.
 >
-> **This is a founder decision and possibly a mentor question. Two options:**
+> **DECIDED 2026-08-30: the founder elected OPTION B.** Recorded below as given. A mentor note may
+> still be owed on the expired premise (§6.5.6's reason, not its instruction) — that is carried, not
+> blocking. The two options as put:
+>
+> **Two options:**
 >
 > **(A) Give the served field + gate relaxation their own flag** (e.g.
 > `SUBSTRATE_PROVENANCE_GAPS_SURFACE_ENABLED`), so slice 3 ships dark and activates as its own
@@ -67,8 +80,8 @@ Both keys are **absent entirely** while `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` is
 > ADR and these docs saying so plainly, and the R18 surfaces applied **at the same time** as the
 > deploy rather than after it (there is no dark window in which to document ahead of exposure).
 >
-> Until this is settled, **do not push.** The rollback line for (B) is `git revert` only; unsetting
-> the flag would also stop the live ledger write, which is a standing production change.
+> **(B) was elected.** The rollback line is therefore `git revert` ONLY — unsetting the flag is NOT a
+> rollback path, because it would also stop the live ledger write, a standing production change.
 
 ---
 

@@ -1,12 +1,12 @@
 # Close — Provenance-ledger slice 3: the served `provenance_gaps` field + the §10 attestation amendment
 
-**Date authored: 2026-08-30** (verifiable local date; today's later sessions have been labelling
-artifacts `2026-08-31` — see "Open for the founder" below).
+**Date authored: 2026-08-30** (the founder elected to leave the label as-is).
 **Tier:** `code-critical` (corrected from the predecessor prompt's `code-elevated`, per SCOPE §13).
 **Decision-log entry:** `D-PROVENANCE-LEDGER-SLICE3-SERVED-FIELD-AND-ATTESTATION-BUILT-PR19-FOLDED`.
 
 **Production state at close: UNCHANGED.** Nothing pushed, nothing deployed, no flag set, no schema
-applied, no credential minted or revoked. AC7 engages at the deploy, which is the founder's.
+applied, no credential minted or revoked. **AC7 engages at the deploy, which is the founder's — and
+under the elected option B the deploy IS the activation.**
 
 ---
 
@@ -31,15 +31,19 @@ giving as its reason that *"the change is inert until the ledger itself ships."*
 four days later. The instruction stands; the reason is discharged. **PR20-class stale mechanism fact
 — surfaced, not silently re-decided.**
 
-**This is your call, and it gates the push.** Both options are set out in §1 of the R18 sign-off
-package: **(A)** give the served field + gate relaxation their own flag so slice 3 ships dark and
-activates as its own founder-walked step (consistent with how slices 1 and 2 were each walked;
-departs from §6.5.6's literal instruction, so it likely owes the mentor a note); or **(B)** ship on
-the existing flag — live on deploy — with the records saying so plainly and the R18 surfaces applied
-*at the same time* as the deploy, since there is no dark window in which to document ahead of
-exposure.
+**DECIDED 2026-08-30 — the founder elected option B: ship live on deploy.** No separate flag. Slice 3
+rides the already-live ledger flag, so **push + deploy IS the activation** and there is no separate
+0c-ii step. Consequently the **R18 surfaces were applied in the SAME commit as the code** — under
+option B there is no dark window in which to document ahead of exposure, so the never-lead-the-code
+rule is met by simultaneity rather than sequence, and applying them *after* the deploy would have been
+strictly worse (an undocumented live field in the interval).
 
-**Do not push until this is settled.**
+**Rollback is `git revert` ONLY.** Unsetting the flag is **not** a rollback path: it would also stop
+the live ledger write, which is a standing production change.
+
+**A mentor note is carried, not blocking:** §6.5.6's *instruction* (tie the gate to the ledger flag)
+was followed; its *stated reason* (*"the change is inert until the ledger itself ships"*) expired when
+the ledger shipped four days later. Worth putting to the mentor at the next consultation.
 
 ---
 
@@ -145,20 +149,36 @@ Slice 5 cannot happen before late November regardless.
 
 ## Carried (founder-walked; nothing pre-approved)
 
-1. **The flag decision — before any push.** R18 package §1.
-2. **R18 signature**, then apply the three surfaces. **The superseded trigger sits on all three in
-   three different phrasings** — not one find/replace; exact before/after per surface is in §3b.
-3. **The deploy, then a live `curl`.** Three of the four defects in the recent envelope arc were found
-   only that way, never by a local sweep.
+1. **Push + deploy.** This is the activation. Everything else follows it.
+2. **Live `curl` against production immediately after** — three of the four defects in the recent
+   envelope arc were found only that way, never by a local sweep. On a real agent's record check:
+   `provenance_gaps` + `total_provenance_gaps_count` present; the empty-state note in `notes`; the
+   amended `does_not_attest[1]` trigger; and that a previously-404 agent still 404s.
+3. **A mentor note, carried not blocking:** §6.5.6's instruction was followed but its stated reason
+   (*"inert until the ledger itself ships"*) expired when the ledger shipped four days later.
 4. **Not taken, reviewer-proposed:** behavioural coverage for `readProvenanceGaps` (two source-greps
    only today); `capped`×`totalCount` consistency validation.
 
-## Open for the founder
+## R18 — SIGNED and APPLIED (2026-08-30)
 
-- **The flag question** (above) — the only blocking item.
-- **Dating:** artifacts from today's later sessions are labelled `2026-08-31` but were authored
-  `2026-08-30` (mtimes and commit dates agree). This session used the verifiable date. If you prefer
-  arc-consistency, this close, the R18 package and the decision-log heading rename together.
+All three public surfaces carry the change, in the **same commit** as the code (option B leaves no
+dark window in which to document ahead of exposure):
+
+- **`llms.txt`** — new "Provenance gaps" section; the trigger clause; **and the 404/200 contract,
+  which the relaxation made false** (*"a 200 genuinely implies at least one domain carries examined
+  evidence"* — now scoped: a 200 implies examined domain evidence **or** a determinate ledger verdict).
+- **`agent-card.json`** — new extension **#26** `provenance-gaps/v1` (**26 total**, parse-verified);
+  the trigger clause; the same 404/200 correction inside `trust-record/v1`.
+- **`api-docs`** — new paragraph; the trigger clause; the same 404/200 correction.
+
+**Found while applying:** the superseded trigger sat on all three surfaces in **three different
+phrasings** — three edits, not one find/replace. Post-apply sweep for `structural fix (is|was) in
+place` across `public/` and `src/`: **zero hits.** The stale 404/200 claim was found by sweeping for
+it rather than by assuming the new paragraph was the whole job.
+
+**Checked and deliberately left:** the held-event statements (`llms.txt` ~651, api-docs ~922) saying
+*"a 404 trust record stays 404"* — explicitly scoped to what a **held curator-flagged event** does, a
+different mechanism, and accurate in that scope.
 
 ## Rollback
 

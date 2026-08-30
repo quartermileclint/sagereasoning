@@ -831,7 +831,8 @@ export default function ApiDocsPage() {
           the caller supplied it</em>; decay/coverage honestly marked) and what it does not (factual
           correctness; harms omitted from the submitted text; <em>extraction origin on caller-supplied
           consults &mdash; that origin is not verified at the point trust events are minted, and this list
-          will be updated when a structural fix is in place</em>; freshness beyond the artifact record; future
+          will be updated when a structural fix begins enforcing which events are
+          minted</em>; freshness beyond the artifact record; future
           behaviour; training-signal fitness; discriminative range &mdash; stability may reflect absence of
           perturbation, not tested relapse-resistance; <em>verdict determinism &mdash; verdicts are draws
           from a probabilistic extraction; Layer 2 is deterministic and reproducible from the extraction,
@@ -860,8 +861,10 @@ export default function ApiDocsPage() {
           evidence of stable disposition, not proof of it &mdash; the harness cannot distinguish
           hexis from drift from the outside. The gate&rsquo;s evaluation takes no role input, which
           is a confirmed design deficiency, not a design choice</em>). MEASURE mode: advisory, never binding; human override is
-          absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
-          evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
+          absolute (R20c). 404 = no examined trust evidence has been folded AND no provenance-gap entry
+          exists; 503 = surface dark, store unavailable, or the provenance-gap read failed where a 404
+          would otherwise be served (never cached &mdash; a 404 is a positive claim of absence and is
+          not made from a read that did not succeed). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.
         </p>
         <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
@@ -881,6 +884,29 @@ export default function ApiDocsPage() {
           on server-side elapsed time relative to the documented harness timeout (28000ms), a proxy never
           a confirmed-delivery signal, and <code>total_orientation_readings_count</code> includes both
           classes. See llms.txt &quot;Orientation readings&quot; for the full contract.
+        </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <strong>Provenance gaps (extraction origin &mdash; MEASURE, and currently EMPTY).</strong> A
+          trust record may carry <code>provenance_gaps</code>: a capped, newest-first list (50 most
+          recent) of accreditation writes whose submitted artifact the extraction-provenance ledger
+          could not verify the origin of, each naming one of four closed reasons
+          (<code>no_ledger_entry</code>, <code>out_of_window</code>, <code>identity_mismatch</code>,
+          <code>caller_supplied_extraction</code>) and carrying a not-attestable clause inline, with
+          <code>total_provenance_gaps_count</code> as the honest total (omitted, never fabricated, if
+          the count read fails). It is a <em>sibling</em> of <code>coverage_gaps</code>, not a widening
+          of it: coverage is a property of the aggregate&rsquo;s evidence composition across an
+          agent&rsquo;s history, a provenance gap is a property of one accreditation write at one
+          moment. <em>As published the field is EMPTY for every agent and stays empty until enforcement
+          begins</em> &mdash; the ledger is record-only, nothing yet refuses a mint, and as of
+          2026-08-30 the classification step that would produce these entries has never executed in
+          production. An empty list means the mechanism has not run, not that no gaps exist, and the
+          record carries a note saying exactly that. Only <code>caller_supplied_extraction</code>
+          reports a positive finding; the other three report a limit of the instrument. No
+          signature-derived value is ever served. A record with no virtue-domain evidence but at least
+          one gap entry returns <strong>200</strong> rather than 404, honestly carrying
+          <code>aggregate.level: null</code> and <code>sparse: true</code> &mdash; check
+          <code>aggregate.level</code> before treating a 200 as evaluative. MEASURE: the field binds no
+          decision.
         </p>
         <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
           <strong>Curator-flagged Stoa trust events.</strong> A specific claim in an agent&apos;s Stoa
