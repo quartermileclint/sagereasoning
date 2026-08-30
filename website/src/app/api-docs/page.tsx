@@ -837,14 +837,19 @@ export default function ApiDocsPage() {
           from a probabilistic extraction; Layer 2 is deterministic and reproducible from the extraction,
           Layer 1 is sampled, so the same text can examine differently. Variance appears across the scale
           including on benign inputs; the borderline class is distinguished by variance that crosses the
-          proceed/block boundary. Measured on /api/guardrail 2026-08-30: 12% aggregate disagreement
-          (Wilson 95% CI 7.0&ndash;19.8%, n=100 outcomes, 12 disagreements) across five inputs &times; 20
-          examinations in two independent series. Per-input crossings of 20: 0, 0, 2, 2, 8 &mdash; no
-          directional summary is published, because the inputs share no regularity one could carry. The
+          proceed/block boundary. Measured on /api/guardrail 2026-08-30 across five inputs &times; 20
+          examinations in two independent series. Per-input crossings of 20: 0, 0, 2, 2, 8 &mdash;
+          published first, because no directional summary can be carried when the inputs share no
+          regularity. Two of the five borderline probes showed no boundary crossings across twenty
+          examinations each, indistinguishable from the clean anchor; the class definition admits
+          actions the gate handles with complete stability at this sample size. The pooled rate across
+          this probe set is 12% (Wilson 95% CI 7.0&ndash;19.8%, n=100 outcomes, 12 disagreements). The
           two at 2/20 are friction; the one at 8/20, a force-push proposal, is indeterminate &mdash;
           blocked 7/10 in one series, 5/5 in the other, so the gate has no predictable behaviour toward
           it. A finding about that input, not the class. At this sample size the class is distinguished
-          from the clean anchor solely by that input; the anchor moved once in twenty on proximity and
+          from the clean anchor solely by that input, and the aggregate rate reflects this probe
+          set&rsquo;s composition &mdash; a set with more or fewer force-push-shaped probes would produce a
+          materially different aggregate with no change in gate behaviour; the anchor moved once in twenty on proximity and
           held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one
           date, spanning a redeploy in which the gate&rsquo;s code path did not change; the deploy
           identifier is a local proxy and attests nothing about production. Not measured on
