@@ -1,3 +1,21 @@
+> # ⛔ SPENT — DO NOT RUN. Slice 3 was BUILT, REVIEWED, SHIPPED and LIVE-VERIFIED on 2026-08-30.
+>
+> Commits `df894ec` (build) + `38bc55d` (signed R18 surfaces) + `5416749` (live verification).
+> **C4 is DISCHARGED.** Records: `D-PROVENANCE-LEDGER-SLICE3-SERVED-FIELD-AND-ATTESTATION-BUILT-PR19-FOLDED`,
+> `D-PROVENANCE-LEDGER-SLICE3-R18-SIGNED-APPLIED-OPTION-B-ELECTED`,
+> `D-PROVENANCE-LEDGER-SLICE3-LIVE-VERIFIED-C4-DISCHARGED`; close at
+> `2026-08-30-provenance-ledger-slice3-served-field-and-attestation-CLOSE.md`.
+>
+> **Two of this prompt's own statements were found wrong while executing it, recorded here so the
+> file is not read as accurate:**
+> 1. It said `attests[1]` "currently has none" (a content pin). **Stale** — S2-46 pinned its scoping
+>    clause at the 2026-08-25 edit. Its *core* claim was genuinely unpinned and is now S2-72.
+> 2. It framed the work as gated behind a flag. **Slice 3 was never dark:**
+>    `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` had been `true` in Production since 2026-08-26, so deploy
+>    was the activation. The founder elected that path knowingly (option B).
+>
+> **Successor:** `2026-08-31-post-slice3-carried-tail-and-election-NEXT-SESSION-PROMPT.md`.
+
 # Next-session prompt — provenance-ledger slice 3: the served field + the attestation amendment
 
 **Paste this as the task after the standing session opener.** Authored 2026-08-30 at the close of the
