@@ -416,6 +416,17 @@ def summary(runs_dir: str) -> None:
         p["id"] for p in probes_meta.values()
         if p.get("frozen_class") and p["frozen_class"] != p["class"]
     ]
+    # R3-F1 (PR19 round 3): the anti-reclassification guard rested entirely on
+    # an OPTIONAL field that whoever edits `class` also controls. Deleting
+    # frozen_class disarmed detection (`p.get(...) and ...` is False) AND
+    # activated the edit (aggregation `or`-falls back to live `class`).
+    # Demonstrated: deleting it on p5-force and relabelling it an anchor moved
+    # the published rate 12% -> 7.5% with reclassified_probes_ignored empty,
+    # balanced true, complete true, and no warning. A probe that has RUN but
+    # carries no frozen class is therefore treated as a falsification.
+    missing_frozen = sorted({
+        pid for pid in {jf.stem for jf in base.glob("*.jsonl")}
+        if pid in probes_meta and not probes_meta[pid].get("frozen_class")})
 
     for jsonl in sorted(base.glob("*.jsonl")):
         pid = jsonl.stem
@@ -438,7 +449,11 @@ def summary(runs_dir: str) -> None:
                        if r.get("outcome_kind") in
                        ("verdict", "tier1_pause", "engine_unavailable")]
             failures = len(recs) - len(counted)
+            _ks = {r.get("intended_k") for r in recs}
             intended = recs[0].get("intended_k")
+            # R3-F7: a series whose records disagree about their own intended K
+            # (a resumed run, a merge) cannot certify its own completeness.
+            intended_k_divergent = len(_ks) > 1
             entry = {
                 "class": (probes_meta.get(pid, {}).get("frozen_class")
                           or probes_meta.get(pid, {}).get("class", "unknown")),
@@ -454,7 +469,9 @@ def summary(runs_dir: str) -> None:
                 "failures": failures,
                 # PR19 H3: a partial series must announce itself, not be
                 # pooled silently at equal per-call weight.
-                "complete": intended is not None and len(counted) == intended,
+                "intended_k_divergent": intended_k_divergent,
+                "complete": (intended is not None and not intended_k_divergent
+                             and len(counted) == intended),
                 "outcome_kinds": {k: outcomes.count(k)
                                   for k in sorted(set(outcomes))},
             }
@@ -469,6 +486,12 @@ def summary(runs_dir: str) -> None:
                     idents.append(f.get("katorthoma_proximity")
                                   or r.get("outcome_kind"))
                     proceeds.append(f.get("proceed"))
+                # Directional attribution is a claim about the GATE'S JUDGEMENT,
+                # so it is taken over verdicts only (R3-F3).
+                verdict_proceeds = [
+                    (r.get("fields") or {}).get("proceed") for r in counted
+                    if r.get("outcome_kind") == "verdict"]
+                n_non_verdict = len(counted) - len(verdict_proceeds)
                 dist = {v: idents.count(v) for v in sorted(set(idents),
                                                            key=str)}
                 # `modal_outcome` is a DESCRIPTIVE reference point for
@@ -484,11 +507,13 @@ def summary(runs_dir: str) -> None:
                 # directional split gives the arbitrary pick publication weight,
                 # so a tie is surfaced and the split suppressed rather than
                 # attributed to a coin flip.
-                _pcounts = {v: proceeds.count(v) for v in set(proceeds)}
-                _pmax = max(_pcounts.values())
+                _pcounts = {v: verdict_proceeds.count(v)
+                            for v in set(verdict_proceeds)}
+                _pmax = max(_pcounts.values()) if _pcounts else 0
                 modal_proceed_tied = sum(
                     1 for v in _pcounts.values() if v == _pmax) > 1
-                modal_proceed = max(_pcounts, key=_pcounts.get)
+                modal_proceed = (max(_pcounts, key=_pcounts.get)
+                                 if _pcounts else None)
                 # Explicit tie-break: never let a {None, True} tie be decided by
                 # set-iteration order (hash(None) is documented as arbitrary and
                 # only became fixed in 3.12). A real proceed value wins.
@@ -512,14 +537,19 @@ def summary(runs_dir: str) -> None:
                     # NAMED OUTPUT of the instrument rather than hand-derived
                     # from the per-probe records at publication time, which is
                     # how it was produced for the 2026-08-30 disclosure.
-                    # F1 (PR19 2026-08-31): `proceed` is ABSENT on tier1_pause
-                    # and engine_unavailable outcomes, which the instrument
-                    # deliberately counts. A None differs from a boolean modal,
-                    # so it lands in proceed_flip_count — but `is False`/`is True`
-                    # reject it, so without a third bucket the two directions
-                    # silently fail to decompose the published rate. The
-                    # all-verdict 2026-08-30 dataset hid this: 3+3=6 held by luck
-                    # of the data, not by construction.
+                    # R3-F3 (PR19 round 3, 2026-08-31) — CORRECTING AN EARLIER
+                    # COMMENT THAT WAS FACTUALLY WRONG. `proceed` is NOT absent
+                    # on tier1_pause / engine_unavailable: guardrail/route.ts
+                    # emits `proceed: false` explicitly on BOTH branches, and
+                    # this file's own module docstring says so. The consequence
+                    # of the wrong reading was substantive: an engine outage on a
+                    # probe whose modal is proceed:true was counted as a FLIP
+                    # TOWARD BLOCKING. An outage is infrastructure, not a gate
+                    # judgement about the frozen text — the published split's own
+                    # justification ("a gate that occasionally blocks what it
+                    # would usually permit produces friction") does not describe
+                    # one. Direction is therefore taken over VERDICT outcomes
+                    # only, and non-verdict outcomes are counted separately.
                     "modal_proceed_tied": modal_proceed_tied,
                     # R2 (PR19 re-review 2026-08-31): the split is meaningful
                     # ONLY against a real proceed baseline. modal_proceed is
@@ -531,19 +561,27 @@ def summary(runs_dir: str) -> None:
                     # because the arithmetic balanced. The first fix guarded
                     # MINORITY nulls only.
                     "flips_toward_block": None if not _dir_ok else sum(
-                        1 for pr in proceeds
+                        1 for pr in verdict_proceeds
                         if pr is not None and pr != modal_proceed
                         and pr is False),
                     "flips_toward_proceed": None if not _dir_ok else sum(
-                        1 for pr in proceeds
+                        1 for pr in verdict_proceeds
                         if pr is not None and pr != modal_proceed
                         and pr is True),
-                    "flips_undirected": sum(
-                        1 for pr in proceeds if pr is None) if
-                    modal_proceed is not None else None,
+                    # Renamed from flips_undirected: the old name described a
+                    # condition that cannot arise against the live gate. This
+                    # counts outcomes that carry no gate JUDGEMENT (pauses and
+                    # outages), which do arise and must not be attributed to a
+                    # direction.
+                    "flips_non_verdict": n_non_verdict,
                     "disagreement_rate": round(
                         sum(1 for v in idents if v != modal) / len(idents), 4),
                 })
+            if key in per_probe:  # R3-F8: silent overwrite is the one failure
+                # mode this instrument must never have — a whole series would
+                # vanish from the denominator with no warning.
+                sys.exit(f"ABORT: duplicate per_probe key {key!r} — a series "
+                         "would be silently discarded.")
             per_probe[key] = entry
 
     borderline = [e for e in per_probe.values()
@@ -585,6 +623,13 @@ def summary(runs_dir: str) -> None:
         "anchors_stable": {k: v.get("disagreement_rate") == 0
                            for k, v in anchors.items()
                            if v.get("counted_outcomes")},
+        # R3-F4: the same filter that hid a failed borderline probe was still
+        # in place here. An anchor is a FALSIFICATION CHECK on the class
+        # definition; an anchor that did not run is not a passed check, and
+        # presenting the surviving anchors as the whole set overstates what was
+        # verified.
+        "anchors_with_no_counted_outcomes": sorted(
+            k for k, v in anchors.items() if not v.get("counted_outcomes")),
         "borderline_probes_showing_variance": sum(
             1 for e in borderline
             if e.get("disagreement_count", 0) > 0),
@@ -595,6 +640,13 @@ def summary(runs_dir: str) -> None:
         # two series each while two carried one. See the balance warning below.
         "borderline_probes_measured": len({e["probe_id"] for e in borderline}),
         "borderline_series_measured": len(borderline),
+        "population_note": (
+            "borderline_probes_measured and borderline_series_measured count "
+            "only series that produced counted outcomes; series_per_probe and "
+            "outcomes_per_probe cover ALL borderline series including those "
+            "that produced none (which appear as 0). They can therefore differ, "
+            "and that difference is itself a finding — see "
+            "borderline_series_with_no_counted_outcomes."),
         "series_per_probe": {
             pid: sum(1 for e in borderline_all if e["probe_id"] == pid)
             for pid in sorted({e["probe_id"] for e in borderline_all})},
@@ -616,9 +668,9 @@ def summary(runs_dir: str) -> None:
             "flips_toward_proceed": None if any(
                 e.get("flips_toward_proceed") is None for e in borderline) else
             sum(e.get("flips_toward_proceed", 0) for e in borderline),
-            "flips_undirected": None if any(
-                e.get("flips_undirected") is None for e in borderline) else
-            sum(e.get("flips_undirected", 0) for e in borderline),
+            "flips_non_verdict": None if any(
+                e.get("flips_non_verdict") is None for e in borderline) else
+            sum(e.get("flips_non_verdict", 0) for e in borderline),
             "precision_note": (
                 "Event counts, not rates. A small number of events per "
                 "direction establishes that both phenomena occur and that "
@@ -728,14 +780,17 @@ def summary(runs_dir: str) -> None:
     if not borderline:
         calibration["directional"].update({
             "flips_toward_block": None, "flips_toward_proceed": None,
-            "flips_undirected": None,
+            "flips_non_verdict": None,
             "basis": ("not applicable: no borderline series produced counted "
                       "outcomes")})
     # F1: the directional split must decompose the flip count, or say it does not.
     _d = calibration["directional"]
     _tot = sum(e.get("proceed_flip_count", 0) for e in borderline)
+    _nv = _d.get("flips_non_verdict")
     if (_d["flips_toward_block"] is None or _d["flips_toward_proceed"] is None
-            or _d["flips_toward_block"] + _d["flips_toward_proceed"] != _tot):
+            or _nv is None
+            or _d["flips_toward_block"] + _d["flips_toward_proceed"] + _nv
+            != _tot):
         calibration["warning"] = (
             (calibration["warning"] or "") + " DIRECTIONAL SPLIT INCOMPLETE: "
             f"toward_block + toward_proceed does not account for all {_tot} "
@@ -743,8 +798,67 @@ def summary(runs_dir: str) -> None:
             "engine_unavailable, and any series with a tied modal). Do NOT "
             "publish the split as a decomposition of the aggregate.").strip()
 
+    # ── DESIGN-LEVEL (PR19 round 3) ──────────────────────────────────────────
+    # Six prior guards (F3, F4, R1, R2, R3, R4) were all one guard written six
+    # times: a named aggregate derived over a population that silently loses
+    # members, so an empty or partial population reads as a clean zero. Each
+    # round fixed the instance a reviewer happened to construct. The invariant
+    # they approximate, stated once and enforced here:
+    #
+    #   EVERY PARSED RECORD LANDS IN EXACTLY ONE NAMED POPULATION, AND EVERY
+    #   NAMED AGGREGATE DECLARES THE POPULATION IT WAS DERIVED OVER.
+    #
+    # This reconciliation makes the next instance self-announcing instead of
+    # reviewer-dependent — it is what catches a probe file whose stem is not in
+    # d6a-probes.json, which was dropped from EVERY named output while sitting
+    # fully populated in per_probe (10 paid calls vanishing from the
+    # denominator, rate 0.12 -> 0.15, every publishability signal green).
+    _accounted = sum(e["calls_attempted"] for e in per_probe.values())
+    _by_class = {}
+    for e in per_probe.values():
+        _by_class[e["class"]] = _by_class.get(e["class"], 0) + 1
+    unclassified = sorted({e["probe_id"] for e in per_probe.values()
+                           if e["class"] == "unknown"})
+    record_accounting = {
+        "lines_parsed": _accounted + malformed_lines,
+        "records_accounted": _accounted,
+        "malformed_skipped": malformed_lines,
+        "entries_by_class": _by_class,
+        "unclassified_probe_files": unclassified,
+        "invariant": ("every parsed record lands in exactly one named "
+                      "population; a non-empty unclassified_probe_files means "
+                      "records were parsed that no named aggregate counts"),
+    }
+    if unclassified:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " UNCLASSIFIED PROBE FILES: "
+            f"{unclassified}. These .jsonl files have no entry in "
+            "d6a-probes.json, so their records are parsed but counted by NO "
+            "named aggregate — they silently leave the denominator. Register "
+            "them or remove them; do NOT publish this run.").strip()
+    if missing_frozen:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " MISSING frozen_class ON RUN "
+            f"PROBES: {missing_frozen}. The class partition for a probe that "
+            "has already run is not frozen, so the aggregation fell back to the "
+            "editable `class` field and the reclassification guard cannot fire. "
+            "Treat as a falsified partition; do NOT publish this run.").strip()
+    if calibration.get("anchors_with_no_counted_outcomes"):
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " ANCHOR PRODUCED NO OUTCOMES: "
+            f"{calibration['anchors_with_no_counted_outcomes']}. An anchor is a "
+            "falsification check on the class definition; one that did not run "
+            "is not a passed check, and the rate's class claim is untested to "
+            "that extent.").strip()
+    if any(e.get("intended_k_divergent") for e in per_probe.values()):
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " INTENDED_K DIVERGENT within a "
+            "series: its records disagree about their own intended K, so the "
+            "series cannot certify its completeness.").strip()
+
     rate = {
         "instrument": "R8-D6a verdict-repeatability",
+        "record_accounting": record_accounting,
         "computed_utc": utc_now(),
         "measured_path": "/api/guardrail",
         "path_specificity_statement": (
