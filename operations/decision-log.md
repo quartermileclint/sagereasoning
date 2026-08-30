@@ -29526,3 +29526,93 @@ forward). Successor:
 a 28s timeout; the writes and the commit proceeded unguarded, and that is recorded rather than passed
 over. Same class as both predecessor sessions in this arc — and, as one of them noted, the same
 instrument whose variance the arc is disclosing.
+
+## 2026-08-30 — D-VERDICT-VARIANCE-RATE-PRESENTATION-RULED-ADOPTED-WORDING-REVISED-FOR-SIGNATURE
+
+**Decision:** The four rate-presentation questions arising from the first D6a sweep were put to the
+mentor and **answered the same day. All four rulings are ADOPTED.** The signed-but-unapplied
+disclosure wording is **revised in draft to carry the measured rate** and awaits the founder's
+signature; the superseded package is banner-marked, not edited. **Nothing was applied to any public
+surface.**
+
+**Reasoning:** The sweep inverted the mentor's sequencing (rate measured before the disclosure was
+applied) and thereby falsified four deliberate assertions in the signed wording. The mechanical fix
+was the founder's; what may honestly be *claimed* from the measurement was the mentor's.
+
+**The rulings (verbatim at
+`operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-presentation-verbatim.md`,
+which wins over this entry):**
+- **Q1 — publish once, carrying the measured rate.** *"Publishing a statement known to be false at
+  the moment of publication is not a sequencing discipline, it is a honesty failure of exactly the
+  kind the disclosure was designed to correct."* **The interim "rate unknown" language is never
+  published.** The two-step's rationale did not survive the inversion.
+- **Q2 — the rate MUST be decomposed by direction**, each component carrying its event count and an
+  explicit precision caveat, **no derived intervals on n=3**. *"A gate that occasionally blocks what
+  it would usually allow produces friction. A gate that occasionally allows what it would usually
+  block fails at its purpose."* Pooling them *"misrepresents what the recipient needs to calibrate
+  against."* **This went FURTHER than the executing session's recommendation**, which was to disclose
+  the asymmetry qualitatively and publish no directional figures — the mentor ruled the event counts
+  must be published, with the caveat, because implying symmetry by aggregation *"implies something
+  equally false and more consequential."*
+- **Q3 — the interval rides the point estimate.** Published form fixed verbatim: *"aggregate
+  disagreement rate 12% (Wilson 95% CI: 5.6–23.8%, n=50 outcomes, 6 disagreements)"* — the n and the
+  count ride the figure *"so the recipient can assess the interval's basis directly rather than
+  taking it on authority."*
+- **Q4a — the class label survives the anchor falsification**, because the anchor held on the
+  proceed boundary, which is the dimension the rate is computed over. The falsification is named on
+  the surface, not repaired: *"measured on a borderline input class; the clean anchor showed
+  proximity variance but held on the proceed boundary."* The refusal to re-partition is confirmed as
+  *"the correct treatment."*
+- **Q4b — the sharper formulation is ruled the disclosure's PRIMARY CLAIM**, and is a change to what
+  the disclosure claims rather than a rewording: variance appears across the verdict scale including
+  on benign inputs; the borderline class is distinguished by variance that **crosses the
+  proceed/block boundary**. *"The second formulation tells the recipient where the gate's
+  probabilistic behaviour matters for their decisions, not merely that it exists."*
+- **`llms.txt:118` confirmed OUT of doctrine** — a surface-accuracy question for the R18 pass, the
+  founder's, not ruled here.
+
+**Files touched:**
+- `2026-08-30-mentor-ruling-verdict-variance-rate-presentation-verbatim.md` — NEW, binding. Capture
+  note records that this relay, unlike the two prior in this arc, does **not** end on a trailing
+  hyphen.
+- `2026-08-30-verdict-variance-disclosure-REVISED-WORDING-FOR-SIGNATURE.md` — NEW. **DRAFT, UNSIGNED.**
+  All four surfaces re-drafted to the ruling, with a measured-facts table, a clause-by-clause
+  traceability table, and an explicit what-changed-and-why section. Carries the aggregate + Wilson
+  interval + n + disagreement count, the directional decomposition with event counts and the
+  precision caveat, the anchor's honest description, the ruled primary claim, and the binding path
+  specificity.
+- `2026-08-30-verdict-variance-disclosure-R18-SIGNOFF-PACKAGE.md` — **banner only.** A supersession
+  warning was inserted above the title naming §3/§6a/§6b/§6c as not-to-be-applied. **The signed text
+  itself is untouched**, deliberately, so the record of what the founder signed pre-sweep survives.
+  **Disclosed: this is still a modification to a founder-signed artifact, made by the executing
+  session on its own judgement.** It was surfaced to the founder rather than passed over, and is
+  reverted by `git checkout` on that one file if unwanted.
+
+**Honest note on the executing session's own recommendation.** Its Q2 recommendation — asymmetry
+qualitatively, no second figure — was **not** adopted; the mentor required the figures. The
+reasoning offered against publishing them (n=3 implies absent precision) was answered directly: the
+caveat carries that, and the alternative implies a symmetry that is *"equally false and more
+consequential."* Recorded because a session's recommendations being partly overridden is worth
+seeing in the log rather than smoothed into "adopted in full."
+
+**Risk classification:** Standard under 0d-ii — documents only. **AC7 not engaged.** No code, schema,
+flag, credential, migration, or public surface; no production call. Weights-BLOCKED unchanged; Q1
+unchanged; the §A boundary unchanged; nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this commit. The two new documents are additive and the banner is a
+single insertion; nothing is applied, wired, or served.
+
+**Still owed before anything reaches a surface:** the founder's signature on the revised wording, and
+**PR19 on the revised text** — which has not been reviewed, and whose reviewer must be told the sweep
+happened and handed `runs/2026-08-30/d6a-rate.json`, because a claims-vs-source pass against the
+2026-08-29 sources cannot see a defect created after sign-off.
+
+**Rules served:** PR6, PR17, PR18, PR19 (named, not discharged), PR20, PR21, PR23, R18, AC7 (not
+engaged), Q1.
+
+**Status:** Adopted. Cross-references:
+`D-R8-D6A-FIRST-LIVE-SWEEP-RATE-MEASURED-ANCHOR-FALSIFICATION-RECORDED-2026-08-30` and its addendum,
+`2026-08-30-mentor-question-verdict-variance-rate-presentation.md`,
+`2026-08-30-mentor-ruling-verdict-variance-disclosure-verbatim.md`,
+`2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md`,
+`operations/handoffs/founder/2026-08-30-verdict-variance-disclosure-APPLICATION-NEXT-SESSION-PROMPT.md`.
