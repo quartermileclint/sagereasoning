@@ -29906,3 +29906,74 @@ describes, and smaller than what is now known.**
 **Rules served:** PR6, PR10, PR15, PR18, **PR19 (six independent rounds)**, **PR20**, PR23, R18, Q1.
 
 **Status:** Adopted.
+
+---
+
+## `D-VERDICT-VARIANCE-N100-APPLIED` — the signed n=100 wording is applied to all seven places (2026-08-30)
+
+**Tier:** `code-elevated`. Live public-contract surfaces plus the battery-locked
+`TRUST_RECORD_ENVELOPE`. **No auth, perimeter, encryption or schema surface; no flag flipped; no
+behaviour changed. AC7 NOT engaged.** Two path-scoped commits, in the ruled order: `2630ced` (the
+envelope + the ADR-013 §8 dated amendment + the battery pins, together) then `cb8bd1c` (the six R18
+places). Nothing is deployed until the founder pushes.
+
+**What was published.** The pooled two-sweep measurement replaces the n=50 figures on all seven
+places: **12% aggregate disagreement (Wilson 95% CI 7.0–19.8%, n=100 outcomes, 12 disagreements)** on
+`/api/guardrail`; per-input crossings of twenty of **0, 0, 2, 2 and 8**; the force-push input's
+behaviour published as **indeterminate** rather than "refused seven times in ten"; **no directional
+decomposition at all**; the class limit at **K=20**, the class distinguished from the clean anchor
+**solely** by that one input. The Q4a falsification record and pin **S2-54** are untouched. Pin
+**S2-51 is retired as a decision**, the way S2-49 was, with **S2-58/59/60/61** added — all four
+mutation-verified, including the typographic-apostrophe class on S2-59 that PR19 P2 warned of. Battery
+**149/0**; `tsc` 0; `npm run build` 0 with `/api-docs` registered; `agent-card.json` parses and the
+extension count, **re-derived from the file rather than quoted, is 25 — unchanged**.
+
+**Every published figure was re-derived first-hand from the raw probe records**, not taken from the
+wording or the instrument's summary: per-probe crossings computed against each series' own modal
+returned 0/2/0/2/8 summing to 12 over 100 counted outcomes, p5-force at 7-of-10 in one series and 5/5
+in the other, the clean anchor holding proceed 20/20 with one proximity movement, the floor anchor
+stable. All agree with what was signed. **No figure was in dispute and none moved.**
+
+**Three coverage defects in the signed wording, found and folded — the whole substance of this
+session.** The prompt named coverage as the failure class of all six prior review rounds and invited
+one review before applying; it was run first-hand, and it found three:
+
+1. **A truncated sentence in the (a) envelope block.** The signed replacement ended
+   *"…states the best available evidence at the time of publication…"* — no subject and a stray
+   closing bold marker. A fold had eaten its opening. Completed to *"This disclosure states…"*.
+2. **A section mislabel.** The ranges note attributes two stale adjacent items — the *"benign control
+   … 10/10"* sentence and the closing `urgency_indicators` note — to **(b)**, the trust-record
+   bullet. **Both are in (g)**, the epistemic-status map; the trust-record bullet has neither, and
+   phrases its benign sentence differently. Applied against the live text of each place separately.
+   **This is the same letters-skip class the prompt warned of, and it would have left (g) stale.**
+3. **A silently dropped live claim.** The (a) replacement range covers the sentence *"What
+   distinguishes the borderline input class is that its variance crosses the proceed/block
+   boundary"*, and the replacement block does not restate it. No ruling removes it; the wording
+   justified only the benign-action sentence's subsumption; and `params.primary_claim` still carries
+   it. Without it the envelope would say "borderline inputs" seven times and never say what makes
+   them borderline. **Retained.** This adds text to a signed wording and is disclosed as such rather
+   than taken silently — it changes no figure and removes nothing any ruling requires removed.
+
+**Honest limits, stated rather than left to be discovered.** The founder signed on a summary, not a
+line-by-line reading. **The PR19 fold was self-verified** — no second review ran on it. **This
+session's review was also first-hand**, not independent, so it shares the applying author's blind
+spots; against this arc's own record that fold rounds introduce defects, a genuinely independent pass
+on `2630ced..cb8bd1c` remains the stronger check and was not run.
+
+**Live verification is NOT done.** The surfaces are committed, not deployed. `curl` against production
+follows the founder's push.
+
+**Risk classification:** Elevated. Weights-**BLOCKED**, Q1 (the loop proposes, never executes) and the
+§A boundary unchanged; path specificity binding and pinned (S2-52); **nothing bears on the 0h call**.
+
+**Rollback:** `git revert cb8bd1c` then `2630ced` — in that order, so the public surfaces never outlive
+the envelope item they describe.
+
+**Carried:** the live `curl` verification after the push; the quota restore
+(`UPDATE api_keys SET daily_limit = 200 WHERE id = '4d96307f-2c19-4c82-a1fe-bd901c3bee4d'`); the date
+correction (17 commits, 4 documents); the `p5-force` class-composition question, still live and
+unreached by any ruling; a third sweep, not needed.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19 (first-hand, disclosed as such), PR20, R18, Q1.
+
+**Status:** Adopted.
