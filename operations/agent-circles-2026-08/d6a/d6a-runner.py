@@ -197,7 +197,7 @@ def extract_fields(body: dict) -> dict:
 
 
 def classify_outcome(rec: dict) -> str:
-    """verdict | tier1_pause | engine_unavailable | failure (PR19 H1).
+    """verdict | tier1_pause | engine_unavailable | unrecognised_200 | failure.
 
     A 200 with no proximity is the gate SPEAKING (a tier-1 clarification pause
     or an engine outage producing a conservative fallback), not the transport
@@ -209,12 +209,36 @@ def classify_outcome(rec: dict) -> str:
     f = rec["fields"]
     if f.get("katorthoma_proximity"):
         return "verdict"
+    # H1 (PR19 round 4): a POSITIVE proof that this 200 is a guardrail envelope
+    # at all. extract_fields never raises — every path is .get() — so ANY
+    # parseable 200 previously yielded all-None fields and, via the cost-null
+    # heuristic below, was counted as a real `engine_unavailable` outcome that
+    # entered the published denominator. Demonstrated on `{}`, on an error body,
+    # and on the route's own GET self-doc — which is live-reachable, because
+    # urllib's default redirect handler converts POST to GET on 301/302/303.
+    # The route emits `proceed: false` explicitly on ALL THREE POST branches
+    # (verdict, ambiguous_pause, engine_unavailable), so a boolean `proceed` is
+    # the envelope proof. The STRICT_FIELDS check could not catch this: it is
+    # gated on kind == "verdict", i.e. skipped on exactly this branch.
+    if not isinstance(f.get("proceed"), bool):
+        return "unrecognised_200"
+    # H2 (PR19 round 4): dispatch on the AUTHORITATIVE field using the route's
+    # true vocabulary. The route emits 'engine_unavailable' and
+    # 'ambiguous_pause' (route.ts:241,257 — the only two occurrences in the
+    # codebase). "ambiguous_pause" contains neither "tier1" nor "clarif", so the
+    # old first branch was DEAD CODE and a pause was classified correctly only by
+    # falling through — which meant the cost-null proxy outranked the
+    # authoritative status. A pause with a null cost was filed as an outage, and
+    # because `idents` uses outcome_kind where there is no proximity, two labels
+    # for one gate behaviour became a manufactured disagreement: ten identical
+    # pauses published 2 disagreements and moved the rate 0.12 -> 0.16.
+    # The cost_usd heuristic is deleted: it proxied a fact the route states.
     status = (f.get("assessment_status") or "").lower()
-    if "tier1" in status or "clarif" in status:
+    if status == "ambiguous_pause":
         return "tier1_pause"
-    if "unavailable" in status or f.get("cost_usd") is None:
+    if status == "engine_unavailable":
         return "engine_unavailable"
-    return "tier1_pause"
+    return "unrecognised_200"
 
 
 def classify_failure(code, raw_body: str) -> str:
@@ -322,6 +346,12 @@ def run_series(probe_id: str, k_raw: str) -> None:
 
         with jsonl.open("a") as f:
             f.write(json.dumps(rec) + "\n")
+            # P1 (PR19 round 4): this record represents a PAID live call that
+            # cannot be recovered by re-reading anything. Buffered-close is safe
+            # against a process crash but not a machine-level one; fsync is
+            # trivial next to the cost of losing the call.
+            f.flush()
+            os.fsync(f.fileno())
 
         kind = rec["outcome_kind"]
         detail = rec.get("failure") or (
@@ -407,6 +437,11 @@ def summary(runs_dir: str) -> None:
     meta = load_probes()["_meta"]
     probes_meta = {p["id"]: p for p in load_probes()["probes"]}
     per_probe, malformed_lines = {}, 0
+    # M1 (PR19 round 4): counted independently at the read site. The previous
+    # version DEFINED lines_parsed as records_accounted + malformed_skipped and
+    # then presented that identity as an invariant — a tautology that cannot
+    # fail, which is worse than no check because it reads as assurance.
+    lines_seen = 0
     deploy_ids = set()
     # A probe's class for aggregation purposes is the one frozen at its first
     # run, NOT the current `class` field — so editing `class` after seeing
@@ -424,14 +459,23 @@ def summary(runs_dir: str) -> None:
     # the published rate 12% -> 7.5% with reclassified_probes_ignored empty,
     # balanced true, complete true, and no warning. A probe that has RUN but
     # carries no frozen class is therefore treated as a falsification.
+    # M2 (PR19 round 4): frozen_text_sha256 carries the SAME optional-field
+    # vector R3-F1 closed for frozen_class — deleting it makes run_series'
+    # guard evaluate `None not in (None, ...)` -> False, so the one-way text
+    # freeze is disarmed by whoever also edits the text.
     missing_frozen = sorted({
         pid for pid in {jf.stem for jf in base.glob("*.jsonl")}
-        if pid in probes_meta and not probes_meta[pid].get("frozen_class")})
+        if pid in probes_meta and not (
+            probes_meta[pid].get("frozen_class")
+            and probes_meta[pid].get("frozen_text_sha256"))})
 
     for jsonl in sorted(base.glob("*.jsonl")):
         pid = jsonl.stem
         by_series = {}
         for line in jsonl.read_text().splitlines():
+            if not line.strip():
+                continue
+            lines_seen += 1
             try:
                 rec = json.loads(line)
             except Exception:
@@ -445,10 +489,18 @@ def summary(runs_dir: str) -> None:
         for sid, recs in by_series.items():
             key = pid if len(by_series) == 1 else f"{pid}@{sid[:8]}"
             outcomes = [r.get("outcome_kind", "failure") for r in recs]
+            # `unrecognised_200` is deliberately NOT counted: a 200 that is not
+            # a guardrail envelope is not the gate speaking about frozen text.
             counted = [r for r in recs
                        if r.get("outcome_kind") in
                        ("verdict", "tier1_pause", "engine_unavailable")]
             failures = len(recs) - len(counted)
+            # M2: probe_text_sha256 rides every record but was read NOWHERE, so
+            # the docstring's claim that an edited probe is "self-evident in the
+            # series" was false — two different texts pooled into one entry
+            # silently. Now checked.
+            _shas = {r.get("probe_text_sha256") for r in recs
+                     if r.get("probe_text_sha256")}
             _ks = {r.get("intended_k") for r in recs}
             intended = recs[0].get("intended_k")
             # R3-F7: a series whose records disagree about their own intended K
@@ -470,6 +522,7 @@ def summary(runs_dir: str) -> None:
                 # PR19 H3: a partial series must announce itself, not be
                 # pooled silently at equal per-call weight.
                 "intended_k_divergent": intended_k_divergent,
+                "text_sha_divergent": len(_shas) > 1,
                 "complete": (intended is not None and not intended_k_divergent
                              and len(counted) == intended),
                 "outcome_kinds": {k: outcomes.count(k)
@@ -819,8 +872,17 @@ def summary(runs_dir: str) -> None:
         _by_class[e["class"]] = _by_class.get(e["class"], 0) + 1
     unclassified = sorted({e["probe_id"] for e in per_probe.values()
                            if e["class"] == "unknown"})
+    # M1: a REAL reconciliation — lines_seen is counted at the read site, so
+    # this identity can genuinely fail if a record is ever lost between parse
+    # and per_probe. That failure is the whole point of the invariant.
+    if lines_seen != _accounted + malformed_lines:
+        sys.exit(
+            f"ABORT: record accounting does not reconcile — {lines_seen} lines "
+            f"read, {_accounted} accounted for in per_probe, {malformed_lines} "
+            "malformed. Records were lost between parse and aggregation; the "
+            "rate would be computed over an unknown population.")
     record_accounting = {
-        "lines_parsed": _accounted + malformed_lines,
+        "lines_parsed": lines_seen,
         "records_accounted": _accounted,
         "malformed_skipped": malformed_lines,
         "entries_by_class": _by_class,
@@ -829,6 +891,33 @@ def summary(runs_dir: str) -> None:
                       "population; a non-empty unclassified_probe_files means "
                       "records were parsed that no named aggregate counts"),
     }
+    # H3 (PR19 round 4): the mirror of the unregistered-stem case, and the more
+    # likely one. Every design field derives from probes FOUND IN THE DIRECTORY,
+    # so a designed borderline probe that produced no file at all vanished from
+    # every named output with all signals green (deleting two of five moved the
+    # rate 0.12 -> 0.1333, balanced true, no warning). The live hazard is
+    # UTC-midnight rollover: out_dir is computed per invocation and probes run as
+    # separate invocations, so a sweep straddling 10:00 Brisbane splits across
+    # two runs/ directories and summary is pointed at one of them.
+    designed_borderline = {
+        pid for pid, meta_p in probes_meta.items()
+        if (meta_p.get("frozen_class") or meta_p.get("class")) == "borderline"}
+    designed_absent = sorted(
+        designed_borderline - {e["probe_id"] for e in borderline_all})
+    record_accounting["designed_borderline_absent"] = designed_absent
+    _sibling_runs = sorted(
+        d.name for d in base.parent.iterdir()
+        if d.is_dir() and d != base and any(d.glob("*.jsonl"))) \
+        if base.parent.is_dir() else []
+    record_accounting["sibling_run_dirs_not_summarised"] = _sibling_runs
+    if designed_absent:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " DESIGNED BORDERLINE PROBES "
+            f"ABSENT: {designed_absent}. No records found for probes the design "
+            "includes, so the rate is computed over a subset of the designed "
+            "class with no other signal saying so. Check for a UTC-day split "
+            f"across runs/ subdirectories{' (siblings present: ' + str(_sibling_runs) + ')' if _sibling_runs else ''}. "
+            "Do NOT publish this run.").strip()
     if unclassified:
         calibration["warning"] = (
             (calibration["warning"] or "") + " UNCLASSIFIED PROBE FILES: "
@@ -850,6 +939,15 @@ def summary(runs_dir: str) -> None:
             "falsification check on the class definition; one that did not run "
             "is not a passed check, and the rate's class claim is untested to "
             "that extent.").strip()
+    _text_div = sorted({e["probe_id"] for e in per_probe.values()
+                        if e.get("text_sha_divergent")})
+    if _text_div:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " PROBE TEXT CHANGED MID-SERIES: "
+            f"{_text_div}. Records within one series carry different "
+            "probe_text_sha256 values, so the 'frozen text' premise the whole "
+            "instrument rests on does not hold for them. A changed probe is a "
+            "NEW probe. Do NOT publish this run.").strip()
     if any(e.get("intended_k_divergent") for e in per_probe.values()):
         calibration["warning"] = (
             (calibration["warning"] or "") + " INTENDED_K DIVERGENT within a "
