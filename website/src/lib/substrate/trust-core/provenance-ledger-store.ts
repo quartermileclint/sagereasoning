@@ -424,3 +424,99 @@ export async function purgeExpiredProvenanceGaps(
     return { deleted: 0, error: `purgeExpiredProvenanceGaps threw: ${(e as Error).message}` }
   }
 }
+
+// ============================================================================
+// SLICE 3 — the SERVING read for the public trust record (SCOPE §6.4)
+// ============================================================================
+
+/**
+ * The cap, mirroring ORIENTATION_READINGS_ROW_CAP (trust-core-store.ts:628) —
+ * SCOPE §6.4's precedent detail 2, which is explicit that the cap is enforced
+ * at the STORE READ via a `.limit(CAP + 1)` truncation probe, not at the
+ * serialiser. Same value (50) for the same reason: each entry is individually
+ * RENDERED on the public payload (reason text + inline clause), not folded to
+ * one count.
+ */
+export const PROVENANCE_GAPS_ROW_CAP = 50
+
+/** One gap row as the payload composer needs it.
+ *
+ *  DELIBERATELY TWO FIELDS. `correlation_id` is NEVER selected: the migration's
+ *  own header calls it "internal only — NEVER served on the public payload
+ *  (F-2's hard exclusion)". Selecting only what is rendered means the exclusion
+ *  is structural at the QUERY, not merely at the serialiser's field list —
+ *  the same discipline readOrientationReadings uses to make it impossible for
+ *  a public composition to leak consult content. */
+export interface ProvenanceGapLedgerEntry {
+  reason: string
+  occurredAt: string
+}
+
+/**
+ * The bounded, newest-first read backing the served `provenance_gaps` field.
+ *
+ * FAIL-HONEST, and a missing table is NOT benign here — deliberately unlike
+ * this file's data-rights `selectBy` (where "nothing to delete" is a true
+ * answer) and deliberately LIKE `lookupProvenanceLedgerEntry` directly above:
+ * this read's result participates in the public 404/200 decision (SCOPE §6.5),
+ * so a table that cannot be read is an INSTRUMENT failure, never the positive
+ * claim "this agent has no provenance gaps". The handler turns that into a
+ * 503 for the population where it would otherwise become a false, cacheable
+ * 404 — the S10-ABUSE-1 lesson applied to the new read.
+ *
+ * `totalCount: null` ⇒ the count query failed transiently; the list still
+ * serves and the payload OMITS the count rather than fabricating one (SCOPE
+ * §6.4's precedent detail 3).
+ */
+export async function readProvenanceGaps(
+  agentId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<
+  StoreResult<{
+    entries: ProvenanceGapLedgerEntry[]
+    capped: boolean
+    totalCount: number | null
+  }>
+> {
+  try {
+    const { data, error } = await client
+      .from(GAPS_TABLE)
+      .select('reason, occurred_at')
+      .eq('agent_id', agentId)
+      .order('occurred_at', { ascending: false })
+      .limit(PROVENANCE_GAPS_ROW_CAP + 1)
+    if (error) {
+      return { ok: false, error: `readProvenanceGaps: ${error.message}` }
+    }
+    const rows = (data ?? []) as { reason: string; occurred_at: string }[]
+    // The genuine truncation probe (SCOPE §6.4 detail 2, and the 2026-08-08
+    // PR19 fold it encodes): `rows.length >= CAP` cannot distinguish "exactly
+    // CAP exist" from "CAP+1 or more, truncated". CAP+1 returned ⇒ real
+    // truncation; CAP or fewer ⇒ capped:false, never a false "not listed".
+    const capped = rows.length > PROVENANCE_GAPS_ROW_CAP
+    const entries: ProvenanceGapLedgerEntry[] = rows
+      .slice(0, PROVENANCE_GAPS_ROW_CAP)
+      .map((r) => ({ reason: r.reason, occurredAt: r.occurred_at }))
+
+    // Below the cap the probe already proves the row set IS the total — no
+    // second query. Above it, one exact-count head query.
+    let totalCount: number | null = rows.length <= PROVENANCE_GAPS_ROW_CAP ? rows.length : null
+    if (totalCount === null) {
+      const countRes = (await client
+        .from(GAPS_TABLE)
+        .select('id', { count: 'exact', head: true })
+        .eq('agent_id', agentId)) as { count?: number | null; error: { message?: string } | null }
+      if (countRes.error || typeof countRes.count !== 'number') {
+        console.error(
+          '[trust-core] readProvenanceGaps: total-count query failed (count omitted this read):',
+          countRes.error?.message ?? 'no count returned',
+        )
+      } else {
+        totalCount = countRes.count
+      }
+    }
+    return { ok: true, value: { entries, capped, totalCount } }
+  } catch (e) {
+    return { ok: false, error: `readProvenanceGaps threw: ${(e as Error).message}` }
+  }
+}

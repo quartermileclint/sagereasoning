@@ -30411,3 +30411,122 @@ untouched.
 **Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, Q1.
 
 **Status:** Adopted. **C2 DISCHARGED on the corrected basis.**
+
+## 2026-08-30 — D-PROVENANCE-LEDGER-SLICE3-SERVED-FIELD-AND-ATTESTATION-BUILT-PR19-FOLDED
+
+**Decision.** Provenance-ledger **slice 3** is BUILT and PR19-folded across two rounds: the served
+`provenance_gaps` field, the §10 attestation trigger amendment, the ENV-1 gate relaxation, the
+ADR-013 §8 dated amendment, and pins **S2-69..S2-102** — in ONE edit, as SCOPE §13's slice-3 row
+requires. `code-critical` (a served public attestation + a relaxed 404 gate). **Nothing is pushed,
+nothing is deployed, no flag was set, no schema changed, no credential touched.** AC7 engages at the
+deploy, which is the founder's.
+
+**Tier correction inherited and applied:** the 2026-08-30 predecessor prompt said `code-elevated`;
+SCOPE §13's founder-signed build table says `code-critical`. Treated as Critical throughout.
+
+**THE HEADLINE, AND IT IS A CORRECTION TO THIS SESSION'S OWN FRAMING: slice 3 is NOT a dark build.**
+`SUBSTRATE_PROVENANCE_LEDGER_ENABLED` has been `true` in Vercel across **all environments, Production
+included, since 2026-08-26** (`D-PROVENANCE-LEDGER-SLICE2-ACTIVATION-LIVE-2026-08-26`; corroborated
+by 187 live ledger rows). "Byte-identical flag-off" is true of the CODE and misleading about the
+DEPLOYMENT: **there is no dark interval and no activation step** — on the next push+deploy this ships
+live, every trust-record 200 gains two keys and one DB read, and the relaxed gate plus the new 503
+branch go live. **Three independent PR19 reviewers converged on it.** It is the standing lesson
+`shared-flag-dark-is-per-flag-not-per-feature` in its sharpest form: not a sibling on a shared flag,
+**the same flag, already on**. **§6.5.6's tie was ruled with the stated reason that "the change is
+inert until the ledger itself ships"; the ledger shipped four days later, so the reason is discharged
+while the instruction stands** — a PR20-class stale mechanism fact. **Surfaced, NOT re-decided:**
+whether slice 3 takes its own flag is the founder's call and may owe the mentor a note. Recorded in
+the R18 sign-off package's §1 box. **Do not push until it is settled.**
+
+**Built (five components, one edit).** (1) `provenance_gaps` + `total_provenance_gaps_count`, shaped
+on the C2c `orientation_readings` precedent — capped 50 at the STORE READ via a genuine `+1`
+truncation probe, honest total OMITTED never fabricated, not-attestable clause INLINE per entry. A
+**sibling field, never a widening of `coverage_gaps`** (ruled twice: unmodified reuse LAUNDERS a
+refusal into an A2-zeroed-domain signal; widening breaks a documented public shape). F-2's hard
+exclusion is structural **at the query** — only `reason` and `occurred_at` are selected, so
+`correlation_id` is never read. (2) The §10 amendment, **exact founder-signed text**, minimal-diff:
+only the trigger clause moves (`is in place` → `begins enforcing which events are minted`), so
+S2-45's pin keeps applying to the unchanged clause. **Edit one of two — the substantive coverage
+update fires at enforcement (slice 5) and was NOT pre-empted.** (3) The gate relaxes to
+`domains.some(hasEvidence) || provenance_gaps.length > 0`. (4) ADR-013 §8. (5) The pins.
+
+**One behaviour built that no ruling states, named so no reader assumes otherwise:** the
+`!hasDomainEvidence && gapsReadFailed → 503 no-store` branch. Derived from the S10-ABUSE-1 precedent
+(a 404 is a positive claim of absence and may not be made from a read that failed); inert flag-off;
+pinned both directions.
+
+**PR19 — two rounds, five independent reviewers, and the second round falsified this session's own
+claim.** Round 1 (five dimensions) returned the flag finding ×3, plus a served-wording review that
+confirmed **five wording defects**, all folded: `no_ledger_entry` carried an empirical **frequency
+claim with a zero-observation denominator** that also **inverts in steady state** (ledger
+`retain_until` = 90d = the classification window, and its purge is wired into the scheduled sweep, so
+routine aged-out artifacts arrive at `no_ledger_entry`, not `out_of_window`); `out_of_window`
+conflated **retention** with **acceptance** and asserted the ledger "can no longer speak to" an origin
+it had in fact read; **`identity_mismatch` read as a near-accusation** about a population that is
+owner-less **by design** — and it is the string this system would serve FIRST (187/187 live rows are
+`identity_kind: 'credential'`; the C2 baseline's own sample outcome is `identity_mismatch`); the
+shared clause's causal half **flatly contradicted** the `caller_supplied_extraction` text beside it;
+and — the headline — an empty `provenance_gaps: []` beside `total_provenance_gaps_count: 0` carried
+**no note**, a machine-readable claim that this agent's artifacts were checked and none failed, **from
+a pipeline that has never run**. The envelope prose was kept future-tense for exactly that reason and
+the data field then made the present-tense claim numerically. An empty-state note now fires.
+
+**Round 2 (pin adequacy) falsified the claim "all 22 pins mutation-verified".** True for wiring; false
+for content. The reviewer replaced all four reason texts with `'provenance unverified 1..4'` —
+collapsing the Q2 distinction — and the battery scored **179/0**: S2-74 compares the served value
+against the constant that produced it, S2-75 asserts only pairwise inequality. **Corrected**: pins are
+now anchored on the meaning in the words, in both directions. Four further unpinned properties closed:
+the serve set is now **DERIVED** from the wording map (a widening adding both the type member and its
+template passed `tsc` AND the battery while silently dropping entries under a note falsely claiming no
+wording existed); the **migration CHECK** — the vocabulary's third copy, read by nothing — is pinned
+against the served set; **newest-first ordering** and the **cap value** are pinned; **`REAL_DEPS`** is
+pinned to the real flag and real store read. Also folded: the gate now counts the **renderable** set,
+not raw rows (raw counting could serve a cacheable 200 whose `provenance_gaps` was `[]`); a
+served-copy grammar defect; a stale 2026-08-25 comment marked superseded.
+
+**A process failure this session caused, recorded rather than smoothed.** I instructed the pin-adequacy
+reviewer to mutate the **shared working tree** and restore from its own backups, while I was editing
+the same files. Its restores silently reverted three of my folds **twice**, and my verification greps
+reported them present because the phrases also occur in doc comments — the
+`content-pins-assert-exported-values` lesson, committed by the same session that cites it. Separately,
+my own mutation harness silently failed to apply three times and printed a green battery; fixed by
+making it assert the mutation applied. **Standing correction: a review agent that mutates must work on
+a COPY, never the shared tree.**
+
+**Verified.** S10 battery **194/0** (from 156/0) with every new pin mutation-verified individually,
+including the reviewer's own Q2-collapse mutation, which now fails. Regressions all green:
+provenance-classification 14/0 · provenance-ledger-store 18/0 · write-lookup-purge 33/0 ·
+emission-hooks 19/0 · orientation-trust-events 57/0 · trust-core 112/0 · retention-sweep 43/0.
+`tsc --noEmit` clean; `npm run build` exit 0, `/api/trust-record/[agent_id]` registered.
+
+**Scope fidelity independently confirmed:** §10 text character-matched against the signed replacement;
+edit two not pre-empted; `coverage_gaps` untouched; §6.4's three precedent details all copied not
+approximated; nothing slice 2 or slice 5 owns was touched (`classifyProvenanceArtifact` byte-unchanged
+— a pure append).
+
+**Switch-on scoreboard: C1 ✅ · C2 ✅ · C3 ~4/90 days (the binding clock) · C4 = built, NOT discharged
+until the R18 docs land.**
+
+**Carried (founder-walked; nothing pre-approved).** (a) **The flag decision above — before any push.**
+(b) R18 signature on `operations/agent-circles-2026-08/2026-08-30-provenance-gaps-R18-SIGNOFF-PACKAGE.md`,
+then apply the three surfaces — noting the superseded trigger sits on **all three** in **three
+different phrasings**, so it is not one find/replace. (c) The deploy, and a **live `curl`** afterwards:
+three of the four defects in the recent envelope arc were found only that way. (d) Reviewer-proposed
+follow-ups not taken: behavioural coverage for `readProvenanceGaps` (two source-greps only today), and
+`capped`×`totalCount` consistency validation.
+
+**Rollback:** `git revert` the build commit — the served-field edit, the public-claim edit and the ADR
+amendment are separable. **Note for option (B): unsetting the flag is NOT a rollback path** — it would
+also stop the live ledger write, a standing production change.
+
+**Risk classification:** Critical. Weights **BLOCKED**; Q1 and the §A boundary unchanged. **Nothing
+bears on the 0h call.**
+
+**Concurrency:** `ListAgents` showed 19 peers (11 interactive) at open. `git status` run at open and
+before staging; commit path-scoped; `website/src/data/environmental-context.json` and every other
+pre-existing untracked path left untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, PR22, PR23, PR24, PR25, Q1, AC5, AC7.
+
+**Status:** Adopted — BUILT and folded. **Not deployed. Not R18-signed. The flag question is open and
+gates the push.**

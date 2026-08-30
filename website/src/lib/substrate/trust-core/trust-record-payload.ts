@@ -35,6 +35,11 @@
 
 import type { KatorthomaProximity } from '@/lib/translation-sandwich/layer2-mechanisms'
 import { selectOrientationEntryWording } from '@/lib/translation-sandwich/orientation-reading'
+import {
+  isServableProvenanceGapReason,
+  selectProvenanceGapWording,
+  type ProvenanceClassificationOutcome,
+} from './provenance-classification'
 import type { TrustVerdict } from './harness-integration'
 import type { EffectiveDomainTrust, VirtueTrustDomain } from './types'
 
@@ -57,7 +62,39 @@ export const TRUST_RECORD_ENVELOPE = {
     // FUTURE TENSE IS DELIBERATE on the coverage-gap clause: no provenance ledger exists and no
     // mint is being refused at the time of writing, so a present-tense claim would publish
     // behaviour that does not exist — the exact defect class this item corrects.
-    'Extraction origin on caller-supplied consults. The served attestation that decisions were reasoned as narrated and extracted from the submitted text does not hold for consults where the caller supplied the extraction rather than the server producing it. On those consults the extraction\u2019s origin is not verified at the point where trust events are minted, and a supplied extraction is not distinguishable, at that point, from one the server produced. This disclaimer list will be updated when a structural fix is in place; that fix will surface any artifact whose origin it cannot verify as a named coverage gap on this record, never as silence \u2014 an absent event will say why it is absent, and that it does not mean the agent did not practise.',
+    // ^^ SUPERSEDED IN PART (PR19 fold): "no provenance ledger exists" was true when written and
+    // is now FALSE — the ledger has been live since 2026-08-26 (187 rows). The future tense
+    // remains correct, but on the CURRENT ground stated below: the ledger exists and records, yet
+    // nothing refuses a mint and the classification step has never run. Marked rather than
+    // rewritten, because this arc's own lesson is that a stale comment is not ground truth.
+    //
+    // ── SLICE 3 TRIGGER AMENDMENT (SCOPE §10, FOUNDER-SIGNED 2026-08-26; applied here) ──
+    // ONLY the trigger clause changes: 'is in place' → 'begins enforcing which events are
+    // minted'. Everything from 'that fix will surface…' onward is byte-identical, so S2-45's
+    // existing content pin keeps applying to the unchanged clause — the minimal diff the
+    // sign-off specifies, for exactly that reason.
+    //
+    // WHY it changes. §9's C4 requires the provenance_gaps field live and R18-signed BEFORE
+    // the first refusal can fire, so this slice opens an interval — months, given C3's 90-day
+    // soak — in which the record DISPLAYS provenance_gaps and total_provenance_gaps_count
+    // while this sentence still describes that machinery as something a not-yet-in-place fix
+    // WILL do. The record would simultaneously display the mechanism and disclaim that it
+    // exists. The trigger now names the event that actually changes what this list must say:
+    // enforcement, not existence.
+    //
+    // THE FUTURE TENSE ON 'that fix will surface…' IS STILL CORRECT AND IS NOT TOUCHED.
+    // agent_provenance_gaps is empty at this edit and stays empty until slice 5; further, as
+    // of the 2026-08-30 finding the classification pipeline that would populate it has never
+    // once run (classifyProvenanceArtifact is reached only from the accreditation-write
+    // route, which 409s the harness's `seed` writes before the emission call — 15 of 15
+    // closes since activation logged `already-exists`, zero `accred=written`). A
+    // present-tense claim here would publish behaviour that does not exist, the same defect
+    // class this item was written to correct.
+    //
+    // THIS IS EDIT ONE OF TWO. Edit two — the disclaimer's SUBSTANTIVE update describing the
+    // fix's actual coverage — fires at ENFORCEMENT (slice 5). SCOPE §10 states the split
+    // explicitly so a build session does not conflate them; do not pre-empt edit two here.
+    'Extraction origin on caller-supplied consults. The served attestation that decisions were reasoned as narrated and extracted from the submitted text does not hold for consults where the caller supplied the extraction rather than the server producing it. On those consults the extraction\u2019s origin is not verified at the point where trust events are minted, and a supplied extraction is not distinguishable, at that point, from one the server produced. This disclaimer list will be updated when a structural fix begins enforcing which events are minted; that fix will surface any artifact whose origin it cannot verify as a named coverage gap on this record, never as silence \u2014 an absent event will say why it is absent, and that it does not mean the agent did not practise.',
     'Freshness beyond the artifact record. A genuinely-earned signed assessment re-submitted inside later writes can sustain a domain at — never above — its once-demonstrated proximity (the disclosed stale-artifact replay class, PA-10; structural closure is scheduled with recency-tier confidence weighting at the S2 fold wiring).',
     'Reasoning quality beyond what the signed artifacts carry. No claim rests on agent self-report alone; a reflect history is a modulate-only record, not a verified pattern of honesty.',
     'Future behaviour. Trust here is evaluative and present-looking; it decays without exercise and is never a prediction or a guarantee.',
@@ -199,6 +236,42 @@ export interface TrustRecordOrientationEntry {
   occurred_at: string
 }
 
+/**
+ * SLICE 3 (SCOPE §6, RULED 2026-08-26) — one served provenance-gap entry: an
+ * accreditation mint the provenance ledger could not verify the origin of.
+ *
+ * A SIBLING FIELD, NOT A WIDENING OF `coverage_gaps` — ruled out twice over.
+ * Unmodified reuse of coverage_gaps would make a provenance refusal
+ * indistinguishable from an A2-zeroed domain (it would LAUNDER the refusal into
+ * a domain-coverage signal); widening its element type would break a documented
+ * public field's shape, the same class of harm this whole arc exists to correct.
+ * The two are "different kinds of fact at different grains" — coverage_gaps is a
+ * property of the AGGREGATE's evidence composition across an agent's history; a
+ * provenance gap is a property of ONE accreditation write at one moment.
+ *
+ * Shaped on the C2c `orientation_readings` precedent exactly: a capped list, an
+ * honest total count, and the not-attestable clause carried INLINE per entry —
+ * "the entry is the unit that will be read in isolation."
+ *
+ * F-2's HARD EXCLUSION holds structurally, not by convention: no
+ * signature-derived value is serialisable through this type, because
+ * readProvenanceGaps selects only `reason` and `occurred_at` from the row and
+ * `correlation_id` is never read at all.
+ */
+export interface TrustRecordProvenanceGapEntry {
+  /** The closed four-value refusal vocabulary — the SAME type the classifier
+   *  produces and the migration's CHECK admits, so all three cannot drift. */
+  reason: Exclude<ProvenanceClassificationOutcome, 'permit'>
+  /** selectProvenanceGapWording(reason).reasonText — per-reason, because the Q2
+   *  ruling requires the served reason to distinguish "the instrument had no
+   *  data" from "the instrument had data and the data disqualified the mint". */
+  reason_text: string
+  /** selectProvenanceGapWording(reason).notAttestableClause — the
+   *  did-not-stop-practising clause, inline (F-2's minimum content). */
+  not_attestable_clause: string
+  occurred_at: string
+}
+
 export interface TrustRecordPayload {
   schema: 'sage-trust-record/v1'
   subject: { agent_id: string }
@@ -223,6 +296,19 @@ export interface TrustRecordPayload {
      *  whenever orientation_readings is present AND the count read succeeded
      *  (omitted on a transient count failure — never fabricated). */
     total_orientation_readings_count?: number
+    /** SLICE 3: ABSENT entirely while SUBSTRATE_PROVENANCE_LEDGER_ENABLED is
+     *  unset (byte-identical payload — the same optional-field pattern
+     *  orientation_readings uses, and the condition the §6.5 gate relaxation is
+     *  tied to); flag-on, the capped recent-entries list (newest first).
+     *  EMPTY UNTIL SLICE 5 — nothing writes agent_provenance_gaps in the
+     *  record-only phase, by design (C4 requires the surface live BEFORE the
+     *  first refusal can fire). */
+    provenance_gaps?: TrustRecordProvenanceGapEntry[]
+    /** The "showing N of M" honesty rule, mirroring
+     *  total_orientation_readings_count. Present whenever provenance_gaps is
+     *  present AND the count read succeeded — OMITTED, never fabricated, on a
+     *  transient count failure. */
+    total_provenance_gaps_count?: number
   }
   envelope: typeof TRUST_RECORD_ENVELOPE
   evidence: {
@@ -295,6 +381,19 @@ export interface ComposeTrustRecordInput {
    *  the mentor-§6(b) total count (null ⇒ count omitted, never fabricated). */
   orientationReadings?: {
     entries: { reading: string; occurredAt: string; deliveryClass: 'examined' | 'observed' }[]
+    capped: boolean
+    totalCount?: number | null
+  } | null
+  /** SLICE 3 (SCOPE §6): the capped provenance-gap slice. Mirrors
+   *  `orientationReadings`'s three-state contract exactly — `undefined` ⇒ the
+   *  ledger flag is OFF, no read happened, and the payload carries NO
+   *  provenance_gaps key at all (byte-identity, and the condition the §6.5 gate
+   *  relaxation is tied to); `null` ⇒ the flag is on but the read failed
+   *  honestly, so the field is omitted this read with an honest note; a value ⇒
+   *  composed entries, each carrying its inline not-attestable clause, plus the
+   *  total count (null ⇒ count omitted, never fabricated). */
+  provenanceGaps?: {
+    entries: { reason: string; occurredAt: string }[]
     capped: boolean
     totalCount?: number | null
   } | null
@@ -394,6 +493,71 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
       notes.push(cappedNote)
     }
   }
+  // SLICE 3: the provenance-gap entries. Same three-state contract as the
+  // orientation block above (`undefined` ⇒ dark, key absent; `null` ⇒ honest
+  // outage, key omitted + note; a value ⇒ composed). The defensive filter to the
+  // four known reasons mirrors the orientation filter's purpose: a future
+  // vocabulary widening in the DB CHECK that has not yet reached this code can
+  // never render an entry with no template text — it is dropped, and said so.
+  let provenanceGapEntries: TrustRecordProvenanceGapEntry[] | undefined
+  if (input.provenanceGaps === null) {
+    notes.push(
+      'provenance gaps unavailable (fail-honest) — provenance_gaps omitted this read',
+    )
+  } else if (input.provenanceGaps !== undefined) {
+    const rows = input.provenanceGaps.entries
+    provenanceGapEntries = rows
+      .filter((e): e is { reason: Exclude<ProvenanceClassificationOutcome, 'permit'>; occurredAt: string } =>
+        isServableProvenanceGapReason(e.reason),
+      )
+      .map((e) => {
+        const wording = selectProvenanceGapWording(e.reason)
+        return {
+          reason: e.reason,
+          reason_text: wording.reasonText,
+          not_attestable_clause: wording.notAttestableClause,
+          occurred_at: e.occurredAt,
+        }
+      })
+    // THE EMPTY-STATE DISCLOSURE (PR19 fold — the wording review's headline).
+    // Without it an ordinary agent is served `provenance_gaps: []` beside
+    // `total_provenance_gaps_count: 0` and NO note. Read in isolation that is a
+    // quantitative, machine-readable claim that this agent's artifacts were
+    // checked for origin and none failed. Nothing has been checked: the ledger is
+    // record-only, no mint has ever been refused, and per the 2026-08-30 finding
+    // the classification step that would write a gap row has never once executed
+    // in production. The envelope prose beside this field was deliberately kept
+    // FUTURE-tense for exactly this reason — and then the data field made the
+    // present-tense claim numerically. Fixing the prose and not the payload would
+    // have been the same defect wearing the other hat.
+    if (provenanceGapEntries.length === 0) {
+      notes.push(
+        'provenance_gaps is empty because origin classification is in a record-only phase: no ' +
+          'mint has yet been refused, and no gap entry can be written until enforcement begins. ' +
+          'An empty list here is not a finding that this agent’s artifacts had verified origins.',
+      )
+    }
+    const dropped = rows.length - provenanceGapEntries.length
+    if (dropped > 0) {
+      notes.push(
+        `${dropped} provenance gap ${dropped === 1 ? 'entry carries' : 'entries carry'} a reason ` +
+          `this record has no served wording for and ${dropped === 1 ? 'was' : 'were'} omitted — ` +
+          'a coverage gap in the display, not an absence of gaps',
+      )
+    }
+    if (input.provenanceGaps.capped) {
+      const total = input.provenanceGaps.totalCount
+      notes.push(
+        (typeof total === 'number'
+          ? `provenance_gaps shows the ${provenanceGapEntries.length} most recent of ${total} ` +
+            'total entries (a recency window, not the full record); '
+          : 'provenance_gaps is capped at the bounded read window (older entries not listed; ' +
+            'the total count was unavailable this read); ') +
+          'each entry describes one accreditation write only — see its inline ' +
+          'not-attestable clause',
+      )
+    }
+  }
   if (profile.unevaluatedCardinalDomains.length > 0) {
     notes.push(
       `unevaluated cardinal domain(s): ${profile.unevaluatedCardinalDomains.join(', ')} — ` +
@@ -451,6 +615,14 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
       ...(orientationEntries !== undefined &&
       typeof input.orientationReadings?.totalCount === 'number'
         ? { total_orientation_readings_count: input.orientationReadings.totalCount }
+        : {}),
+      // SLICE 3: attached ONLY when composed — the key is structurally absent
+      // when the ledger flag is off (byte-identical payload), which is what makes
+      // the §6.5 gate relaxation inert flag-off.
+      ...(provenanceGapEntries !== undefined ? { provenance_gaps: provenanceGapEntries } : {}),
+      ...(provenanceGapEntries !== undefined &&
+      typeof input.provenanceGaps?.totalCount === 'number'
+        ? { total_provenance_gaps_count: input.provenanceGaps.totalCount }
         : {}),
     },
     envelope: TRUST_RECORD_ENVELOPE,

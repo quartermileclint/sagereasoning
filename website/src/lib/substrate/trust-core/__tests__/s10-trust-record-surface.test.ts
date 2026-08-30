@@ -46,6 +46,17 @@ import {
   REFLECT_MODULATE_ONLY_NOTE,
   TRUST_RECORD_ENVELOPE,
 } from '../trust-record-payload'
+// Slice 3 (2026-08-30) — the provenance_gaps served field's wording pins.
+import {
+  PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE,
+  PROVENANCE_GAP_REASON_TEXT,
+} from '../provenance-classification'
+import {
+  PROVENANCE_GAPS_ROW_CAP,
+  PROVENANCE_LEDGER_RETENTION_DAYS,
+} from '../provenance-ledger-store'
+import { SERVABLE_PROVENANCE_GAP_REASONS } from '../provenance-classification'
+import { ORIENTATION_READINGS_ROW_CAP } from '../trust-core-store'
 import {
   isServableAgentId,
   runTrustRecordGet,
@@ -997,6 +1008,462 @@ async function main(): Promise<void> {
     assert(
       resOutage.status === 200 && !('orientation_readings' in outageBody.data.record),
       'S6-9 orientation outage never blocks the record (200, field omitted)',
+    )
+  }
+
+  // ═══ §7 — SLICE 3: the provenance_gaps served field, the §10 attestation
+  //     amendment, and the ENV-1 gate relaxation (SCOPE §6/§6.5/§10, all RULED;
+  //     the wording founder-signed 2026-08-26). Pins start at S2-69 — S2-48 is
+  //     long taken (the verdict-variance arc consumed through S2-68).
+  {
+    // ── S2-69..S2-72: the amended §10 trigger clause + attests[1]'s core claim.
+    // Both mutation-verified at authoring: deleting the pinned clause fails.
+    const env7 = JSON.stringify(TRUST_RECORD_ENVELOPE)
+    assert(
+      env7.includes('This disclaimer list will be updated when a structural fix begins enforcing which events are minted;'),
+      'S2-69 envelope: the §10 trigger amendment ships EXACTLY the founder-signed clause',
+    )
+    // The INVERSE guard. The whole point of the amendment is that the old
+    // trigger fires at existence rather than enforcement, so its survival
+    // anywhere in the envelope is the defect, not a duplicate.
+    assert(
+      !env7.includes('when a structural fix is in place'),
+      'S2-70 envelope: the superseded "is in place" trigger is GONE (inverse guard)',
+    )
+    // Edit two must not be pre-empted: the commitment stays FUTURE-tense until
+    // enforcement (slice 5). agent_provenance_gaps is empty at this edit and the
+    // classification pipeline has never run (2026-08-30 finding).
+    assert(
+      env7.includes('that fix will surface any artifact whose origin it cannot verify'),
+      'S2-71 envelope: the commitment is still FUTURE tense (edit two is slice 5, not this one)',
+    )
+    // attests[1]'s CORE claim — S2-46 pins only its scoping clause, so the
+    // sentence the scoping qualifies was itself unpinned.
+    assert(
+      env7.includes('HOW the aggregated decisions were reasoned, as narrated and extracted from the submitted text'),
+      'S2-72 envelope: attests[1]’s core claim (fact 8b — it had no pin on the claim itself)',
+    )
+
+    // ── S2-73..S2-77: the composer.
+    // Dark (no input) ⇒ NEITHER key. This is what makes the gate relaxation
+    // inert flag-off.
+    const darkGaps = composeTrustRecordPayload({ verdict, reflectSummary: null, generatedAt: NOW })
+    assert(
+      !('provenance_gaps' in darkGaps.record) &&
+        !('total_provenance_gaps_count' in darkGaps.record),
+      'S2-73 no input ⇒ no provenance_gaps key at all (flag-off byte-identity)',
+    )
+
+    const gapsOn = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: {
+        entries: [
+          { reason: 'caller_supplied_extraction', occurredAt: NOW_ISO },
+          { reason: 'no_ledger_entry', occurredAt: NOW_ISO },
+        ],
+        capped: false,
+        totalCount: 2,
+      },
+      generatedAt: NOW,
+    })
+    const served = gapsOn.record.provenance_gaps ?? []
+    assert(
+      served.length === 2 &&
+        served[0].reason_text === PROVENANCE_GAP_REASON_TEXT.caller_supplied_extraction &&
+        served[1].reason_text === PROVENANCE_GAP_REASON_TEXT.no_ledger_entry,
+      'S2-74 each entry carries its OWN per-reason text (Q2: "had data and it disqualified" ≠ "had no data")',
+    )
+    // Non-vacuity: the two texts must genuinely differ, or the per-reason pin
+    // above passes while the Q2 distinction has been collapsed.
+    assert(
+      PROVENANCE_GAP_REASON_TEXT.caller_supplied_extraction !==
+        PROVENANCE_GAP_REASON_TEXT.no_ledger_entry &&
+        PROVENANCE_GAP_REASON_TEXT.out_of_window !== PROVENANCE_GAP_REASON_TEXT.no_ledger_entry &&
+        PROVENANCE_GAP_REASON_TEXT.identity_mismatch !== PROVENANCE_GAP_REASON_TEXT.out_of_window,
+      'S2-75 the four reason texts are genuinely DISTINCT (non-vacuity guard on S2-74)',
+    )
+    assert(
+      served.every((e) => e.not_attestable_clause === PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE) &&
+        PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE.includes('did not practise'),
+      'S2-76 the did-not-stop-practising clause is INLINE on every entry (F-2 minimum content)',
+    )
+    // F-2's HARD EXCLUSION, asserted on the served bytes rather than trusted to
+    // the store's select list: nothing signature-derived, and correlation_id
+    // (the migration's "internal only, NEVER served") is absent.
+    const servedJson = JSON.stringify(gapsOn.record.provenance_gaps)
+    assert(
+      !/signature|correlation/i.test(servedJson) &&
+        served.every(
+          (e) => Object.keys(e).sort().join(',') === 'not_attestable_clause,occurred_at,reason,reason_text',
+        ),
+      'S2-77 F-2 hard exclusion: the served entry shape carries NO signature-derived or correlation field',
+    )
+
+    // ── S2-78..S2-80: honest-count + outage + unknown-reason behaviour.
+    const gapsCapped = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: {
+        entries: [{ reason: 'out_of_window', occurredAt: NOW_ISO }],
+        capped: true,
+        totalCount: null,
+      },
+      generatedAt: NOW,
+    })
+    assert(
+      !('total_provenance_gaps_count' in gapsCapped.record) &&
+        gapsCapped.notes.some((n) => n.includes('the total count was unavailable this read')),
+      'S2-78 a failed count is OMITTED, never fabricated (SCOPE §6.4 precedent detail 3)',
+    )
+    const gapsCappedKnown = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: {
+        entries: [{ reason: 'out_of_window', occurredAt: NOW_ISO }],
+        capped: true,
+        totalCount: 847,
+      },
+      generatedAt: NOW,
+    })
+    assert(
+      gapsCappedKnown.record.total_provenance_gaps_count === 847 &&
+        gapsCappedKnown.notes.some((n) => n.includes('most recent of 847')),
+      'S2-79 capped + count known ⇒ the "showing N of M" honesty rule',
+    )
+    const gapsOutage = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: null,
+      generatedAt: NOW,
+    })
+    assert(
+      !('provenance_gaps' in gapsOutage.record) &&
+        gapsOutage.notes.some((n) => n.includes('provenance gaps unavailable')),
+      'S2-80 read outage ⇒ field omitted + honest note (never fabricated)',
+    )
+    // An unrecognised reason is DROPPED and SAID SO — never rendered with no
+    // text, and never silently swallowed into a shorter list.
+    const gapsUnknown = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: {
+        entries: [
+          { reason: 'some_future_reason', occurredAt: NOW_ISO },
+          { reason: 'identity_mismatch', occurredAt: NOW_ISO },
+        ],
+        capped: false,
+        totalCount: 2,
+      },
+      generatedAt: NOW,
+    })
+    assert(
+      (gapsUnknown.record.provenance_gaps ?? []).length === 1 &&
+        gapsUnknown.notes.some((n) => n.includes('has no served wording for')),
+      'S2-81 an unknown reason is dropped AND disclosed (never rendered blank, never silent)',
+    )
+
+    // ── S2-82..S2-85: the handler legs — the ENV-1 gate relaxation (§6.5).
+    const gapsDepsBase: TrustRecordDeps = {
+      ...liveDeps,
+      isProvenanceLedgerEnabled: () => true,
+      readProvenanceGaps: async () => ({
+        ok: true,
+        value: {
+          entries: [{ reason: 'no_ledger_entry', occurredAt: NOW_ISO }],
+          capped: false,
+          totalCount: 1,
+        },
+      }),
+    }
+    // THE RULED CONDITION: an agent with NO domain evidence but a gap entry now
+    // gets a 200, not a 404. This is the whole point — without it the agent the
+    // fix exists to make visible has no public record at all.
+    const resRelax = await runTrustRecordGet('test:unknown@v1', gapsDepsBase)
+    // Optional-chained on purpose: when this pin FAILS the response is a 404
+    // whose body has no `data`, and a battery that CRASHES instead of failing
+    // stops every later pin from running. Found by mutation-testing this very
+    // pin — the first version dereferenced `.data.record` unguarded.
+    const relaxBody = (await resRelax.json()) as {
+      data?: { record?: { provenance_gaps?: unknown[]; sparse?: boolean; aggregate?: { level: string | null } } }
+    }
+    assert(
+      resRelax.status === 200 && (relaxBody.data?.record?.provenance_gaps ?? []).length === 1,
+      'S2-82 §6.5 relaxation: zero domain evidence + a gap entry ⇒ 200, not 404',
+    )
+    // The DISCLOSED COST (§6.5.5), asserted so it cannot be forgotten: that 200
+    // carries a null aggregate level and sparse:true, honestly. An integration
+    // that reads 200 as "evaluative" must additionally check aggregate.level.
+    // PR25 HONESTY MARKER (PR19 round 2): S2-83 CHARACTERISES the disclosed cost;
+    // it does not defend it. Both fields restate the fixture's own construction and
+    // pre-existing composer wiring this slice does not touch, so a
+    // semantics-preserving rewrite of either leaves it green. The property that
+    // genuinely defends §6.5.5 — that this same agent 404s flag-off, so the
+    // non-evaluative 200 is reachable ONLY via the relaxed path — is held by S2-84.
+    assert(
+      relaxBody.data?.record?.aggregate?.level === null && relaxBody.data?.record?.sparse === true,
+      'S2-83 the relaxed 200 honestly serves a NULL aggregate level + sparse:true (§6.5.5 disclosed cost)',
+    )
+    // Flag-off byte-identity of the GATE itself, not merely of the field: the
+    // same zero-evidence agent still 404s when the ledger flag is off, and the
+    // read is never called (bomb untripped).
+    // Split into two pins deliberately (the first version combined them behind a
+    // throwing bomb, so an over-relaxed gate CRASHED the battery instead of
+    // failing it — found by mutation-testing). S2-84 proves the gate is genuinely
+    // TIED TO THE FLAG using a non-throwing read that WOULD return a gap entry;
+    // S2-84b separately proves no read happens at all flag-off.
+    const resOff = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      isProvenanceLedgerEnabled: () => false,
+    })
+    assert(
+      resOff.status === 404,
+      'S2-84 flag-off ⇒ the ENV-1 gate is byte-identical even when gaps EXIST (tied to the ledger flag)',
+    )
+    let gapsReadCalled = false
+    await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      isProvenanceLedgerEnabled: () => false,
+      readProvenanceGaps: async () => {
+        gapsReadCalled = true
+        return { ok: true as const, value: { entries: [], capped: false, totalCount: 0 } }
+      },
+    })
+    assert(!gapsReadCalled, 'S2-84b flag-off ⇒ ZERO DB work: the gaps read is never called')
+    // Flag-on but ZERO gaps ⇒ still 404. The relaxation admits gap entries, not
+    // the bare rows ENV-1 exists to exclude.
+    const resNoGaps = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({ ok: true, value: { entries: [], capped: false, totalCount: 0 } }),
+    })
+    assert(resNoGaps.status === 404, 'S2-85 flag-on + zero gaps ⇒ still 404 (ENV-1’s bare-row exclusion intact)')
+
+    // ── S2-86..S2-87: a 404 is a POSITIVE claim about absence, so it may only
+    // be made from a read that succeeded (the S10-ABUSE-1 lesson, applied to the
+    // read this slice adds).
+    const errSaved7 = console.error
+    console.error = () => {}
+    const resFail404 = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({ ok: false, error: 'boom' }),
+    })
+    // ...but where a domain DOES carry evidence, the same outage never blocks
+    // the record — a supplementary read's failure is not the primary record's.
+    const resFail200 = await runTrustRecordGet(AGENT, {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({ ok: false, error: 'boom' }),
+    })
+    console.error = errSaved7
+    assert(
+      resFail404.status === 503 && resFail404.headers.get('Cache-Control') === 'no-store',
+      'S2-86 gaps read fails + no domain evidence ⇒ 503 no-store, NEVER a false cacheable 404',
+    )
+    const fail200Body = (await resFail200.json()) as {
+      data: { record: Record<string, unknown>; notes: string[] }
+    }
+    assert(
+      resFail200.status === 200 &&
+        !('provenance_gaps' in fail200Body.data.record) &&
+        fail200Body.data.notes.some((n) => n.includes('provenance gaps unavailable')),
+      'S2-87 same outage with domain evidence present ⇒ 200, field omitted, honest note',
+    )
+
+    // PR25 HONESTY MARKER (PR19 round 2): S2-88 is WEAK and is retained as
+    // documentation, not as defence. An independent reviewer's unguarded-deref
+    // mutation CRASHED the battery at an earlier pre-existing test before this
+    // scenario ran — the very class S2-82/S2-84 were hardened against — and it
+    // adds no coverage S2-84b does not already give. Labelled, not counted.
+    // ── S2-88: back-compat. A pre-slice-3 deps object (no provenance fns) still
+    // serves exactly as before.
+    const resPreSlice3 = await runTrustRecordGet(AGENT, liveDeps)
+    const preBody = (await resPreSlice3.json()) as { data: { record: Record<string, unknown> } }
+    assert(
+      resPreSlice3.status === 200 && !('provenance_gaps' in preBody.data.record),
+      'S2-88 pre-slice-3 deps ⇒ 200, field absent (back-compat)',
+    )
+
+    // ── S2-95..S2-99 — the SECOND PR19 fold (2026-08-30). An independent
+    //    reviewer broke the Q2 distinction by replacing all four reason texts
+    //    with 'provenance unverified 1..4' and scored 179/0: S2-74 compares the
+    //    served value against the constant that produced it (wiring only) and
+    //    S2-75 asserts only pairwise INEQUALITY. Four numbered strings satisfy
+    //    both while collapsing the ruling. The pins below are anchored on the
+    //    MEANING, in the words, so the collapse cannot pass.
+    const T = PROVENANCE_GAP_REASON_TEXT
+    assert(
+      /had data and the data disqualified the mint/.test(T.caller_supplied_extraction) &&
+        /absence of instrument data, not a finding about the artifact/.test(T.no_ledger_entry) &&
+        /limit on what the instrument will accept, not a finding about the artifact/.test(T.out_of_window) &&
+        /do not resolve to the same longitudinal scope/.test(T.identity_mismatch),
+      'S2-95 the Q2 distinction is IN THE WORDS: absence-of-data vs data-that-disqualified',
+    )
+    // The inverse half: only ONE reason may claim a positive finding. Without
+    // this, wording drift could let an absence reason assert the disqualifying
+    // claim — the Q2 collapse in the other direction.
+    assert(
+      ![T.no_ledger_entry, T.out_of_window, T.identity_mismatch].some((x) =>
+        /the data disqualified/.test(x),
+      ),
+      'S2-95b no absence-reason claims a positive finding (inverse half of the Q2 pin)',
+    )
+    // F-2's minimum content is TWO commitments; S2-76 pinned only the first.
+    assert(
+      PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE.includes('never a finding about the agent'),
+      'S2-96 the clause carries its SECOND commitment too (not-a-finding-about-reasoning)',
+    )
+    // The vocabulary widening that passed BOTH tsc and the battery while silently
+    // dropping entries: the serve set is now DERIVED from the wording map, so this
+    // pin ties the type, the map and the filter to one number.
+    assert(
+      SERVABLE_PROVENANCE_GAP_REASONS.length === 4 &&
+        Object.keys(PROVENANCE_GAP_REASON_TEXT).length === 4 &&
+        SERVABLE_PROVENANCE_GAP_REASONS.every((r) => typeof T[r] === 'string'),
+      'S2-97 the servable set is DERIVED from the wording map and is exactly the ruled four',
+    )
+    // The migration's CHECK is the third copy of the vocabulary and NOTHING read
+    // it. A widening there, ahead of the code, is now detected here.
+    const gapsMigration = fs.readFileSync(
+      path.join(process.cwd(), 'supabase-agent-provenance-gaps-migration.sql'),
+      'utf8',
+    )
+    const checkBlock = gapsMigration.slice(
+      gapsMigration.indexOf('reason TEXT NOT NULL CHECK'),
+      gapsMigration.indexOf('occurred_at  TIMESTAMPTZ'),
+    )
+    assert(
+      SERVABLE_PROVENANCE_GAP_REASONS.every((r) => checkBlock.includes(`'${r}'`)) &&
+        (checkBlock.match(/'[a-z_]+'/g) ?? []).length === SERVABLE_PROVENANCE_GAP_REASONS.length,
+      'S2-98 the migration CHECK vocabulary matches the served vocabulary exactly (no third-copy drift)',
+    )
+    // Newest-first is a documented wire contract resting on ONE store line that
+    // no pin read. The author grepped .select and .limit but not .order.
+    const storeSrcOrder = fs.readFileSync(
+      path.join(process.cwd(), 'src/lib/substrate/trust-core/provenance-ledger-store.ts'),
+      'utf8',
+    )
+    const gapsFn = storeSrcOrder.slice(storeSrcOrder.indexOf('export async function readProvenanceGaps'))
+    assert(
+      /\.order\('occurred_at',\s*\{\s*ascending:\s*false\s*\}\)/.test(gapsFn) &&
+        /\.slice\(0, PROVENANCE_GAPS_ROW_CAP\)/.test(gapsFn),
+      'S2-99 INV: newest-first ordering AND the slice bound both use the constant (unpinned before)',
+    )
+    // The cap VALUE — S2-90 pinned the probe's shape symbolically, never the number.
+    assert(
+      PROVENANCE_GAPS_ROW_CAP === 50 && PROVENANCE_GAPS_ROW_CAP === ORIENTATION_READINGS_ROW_CAP,
+      'S2-100 the cap is 50 and tracks its C2c precedent (the shape pin never held the number)',
+    )
+    // REAL_DEPS wiring: every handler pin injects deps, so nothing connected the
+    // production route to the real flag and the real store fn.
+    const handlerSrc = fs.readFileSync(
+      path.join(process.cwd(), 'src/app/api/trust-record/[agent_id]/handler.ts'),
+      'utf8',
+    )
+    const realDeps = handlerSrc.slice(
+      handlerSrc.indexOf('const REAL_DEPS'),
+      handlerSrc.indexOf('function json('),
+    )
+    assert(
+      /isProvenanceLedgerEnabled,/.test(realDeps) &&
+        /readProvenanceGaps: \(agentId\) => readProvenanceGaps\(agentId\)/.test(realDeps),
+      'S2-101 INV: REAL_DEPS binds the REAL flag and the REAL store read (only injected deps were tested)',
+    )
+    // Present-but-empty vs absent is the consumer-visible semantics of the field;
+    // only the ABSENT branches were pinned.
+    const presentEmpty = await runTrustRecordGet(AGENT, {
+      ...liveDeps,
+      isProvenanceLedgerEnabled: () => true,
+      readProvenanceGaps: async () => ({ ok: true, value: { entries: [], capped: false, totalCount: 0 } }),
+    })
+    const peBody = (await presentEmpty.json()) as {
+      data: { record: Record<string, unknown> & { provenance_gaps?: unknown[] } }
+    }
+    assert(
+      presentEmpty.status === 200 &&
+        'provenance_gaps' in peBody.data.record &&
+        (peBody.data.record.provenance_gaps ?? []).length === 0 &&
+        peBody.data.record.total_provenance_gaps_count === 0,
+      'S2-102 "looked, found none" is served as an EMPTY list, distinct from dark/outage omission',
+    )
+
+    // ── S2-91..S2-94: the PR19 folds of 2026-08-30. Each pins a property a
+    //    reviewer had to find because no pin held it.
+
+    // S2-91 — THE EMPTY-STATE DISCLOSURE. Without it the record serves
+    // `provenance_gaps: []` + `total_provenance_gaps_count: 0` with no note: a
+    // machine-readable claim that this agent's artifacts were checked and none
+    // failed, from a pipeline that has never run. Pinned in BOTH directions, so
+    // the note cannot become unconditional either.
+    const emptyGaps = composeTrustRecordPayload({
+      verdict,
+      reflectSummary: null,
+      provenanceGaps: { entries: [], capped: false, totalCount: 0 },
+      generatedAt: NOW,
+    })
+    assert(
+      (emptyGaps.record.provenance_gaps ?? []).length === 0 &&
+        emptyGaps.record.total_provenance_gaps_count === 0 &&
+        emptyGaps.notes.some((n) => n.includes('record-only phase')) &&
+        emptyGaps.notes.some((n) => n.includes('not a finding that this agent’s artifacts had verified origins')),
+      'S2-91 an EMPTY provenance_gaps carries the record-only note (never a bare, unqualified zero)',
+    )
+    assert(
+      !gapsOn.notes.some((n) => n.includes('record-only phase')),
+      'S2-91b the record-only note fires ONLY when the list is empty (not unconditionally)',
+    )
+
+    // S2-92 — the gate counts what is RENDERABLE, not raw store rows. A row set
+    // consisting only of unrenderable reasons must NOT flip a 404 to a cacheable
+    // 200 whose provenance_gaps is [].
+    const resUnrenderable = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({
+        ok: true,
+        value: { entries: [{ reason: 'some_future_reason', occurredAt: NOW_ISO }], capped: false, totalCount: 1 },
+      }),
+    })
+    assert(
+      resUnrenderable.status === 404,
+      'S2-92 an unrenderable-only gap set does NOT relax the gate (gate counts the served set)',
+    )
+
+    // S2-93 — DRIFT LOCK. The retention window appears in the constant, the
+    // migration interval, and (until this fold, as prose) the served text. The
+    // text now interpolates the constant; this pins that it still does, so the
+    // two cannot silently diverge again.
+    assert(
+      PROVENANCE_GAP_REASON_TEXT.out_of_window.includes(`${PROVENANCE_LEDGER_RETENTION_DAYS}-day`),
+      'S2-93 the out_of_window text carries the retention constant, not a hardcoded number',
+    )
+    // And the frequency claim the review struck must not creep back.
+    assert(
+      !PROVENANCE_GAP_REASON_TEXT.no_ledger_entry.includes('most often'),
+      'S2-93b no_ledger_entry makes NO frequency claim (inverse guard on the struck "most often")',
+    )
+
+    // S2-94 — the half-present deps cell (flag fn present, read fn absent). Not
+    // production-reachable, but it is the vacuous-pass shape: it must behave as
+    // pre-slice-3 rather than throw or half-apply.
+    const resHalf = await runTrustRecordGet('test:unknown@v1', {
+      ...liveDeps,
+      isProvenanceLedgerEnabled: () => true,
+    })
+    assert(resHalf.status === 404, 'S2-94 flag fn present + read fn absent ⇒ pre-slice-3 behaviour, no throw')
+
+    // ── S2-89..S2-90: INV source-grep wiring pins — the store read's two
+    // load-bearing disciplines, which no composer test can observe.
+    const storeSrc = fs.readFileSync(
+      path.join(process.cwd(), 'src/lib/substrate/trust-core/provenance-ledger-store.ts'),
+      'utf8',
+    )
+    const gapsReadSrc = storeSrc.slice(storeSrc.indexOf('export async function readProvenanceGaps'))
+    assert(
+      /\.select\('reason,\s*occurred_at'\)/.test(gapsReadSrc),
+      'S2-89 INV: the serving read selects ONLY reason + occurred_at (F-2 exclusion structural at the QUERY)',
+    )
+    assert(
+      /\.limit\(PROVENANCE_GAPS_ROW_CAP \+ 1\)/.test(gapsReadSrc) &&
+        /rows\.length > PROVENANCE_GAPS_ROW_CAP/.test(gapsReadSrc),
+      'S2-90 INV: the cap is enforced at the STORE READ via a genuine +1 truncation probe (§6.4 detail 2)',
     )
   }
 

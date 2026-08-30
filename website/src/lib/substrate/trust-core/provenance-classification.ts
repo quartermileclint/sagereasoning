@@ -145,3 +145,175 @@ function writeSideIdentityMatches(
     entry.agent_id === write.agent_id
   )
 }
+
+// ============================================================================
+// SLICE 3 — the SERVED wording for one public provenance-gap entry
+// ============================================================================
+//
+// Placed in THIS file, beside the closed reason vocabulary it renders, so the
+// two cannot drift: a build widening ProvenanceClassificationOutcome must
+// widen PROVENANCE_GAP_REASON_TEXT in the same edit or `tsc` fails (the
+// Record<> below is exhaustive over the four refusal reasons by type, not by
+// convention).
+//
+// PURE TEMPLATES, never composed and never LLM-authored — the discipline
+// ORIENTATION_ENTRY_TEXT / selectOrientationEntryWording established for the
+// only other per-entry rendered list on this payload (C2c).
+//
+// THE Q2 RULING IS WHAT THESE FOUR STRINGS ENCODE. It requires the served
+// reason to distinguish "the instrument had no data" from "the instrument had
+// data and the data disqualified the mint" — so `caller_supplied_extraction`
+// carries DISTINCT text naming a positive finding, and the other three each
+// name the specific limit that produced them (never recorded / aged out /
+// recorded under another identity). A single shared "provenance unverified"
+// string would collapse exactly the distinction the ruling exists to preserve.
+
+/** The four served reason templates — one per refusal reason (F-2's "the
+ *  reason", made explicit rather than delegated to an unpinned string).
+ *
+ *  PRECONDITION for every string below (PR19 fold): a gap row — and therefore
+ *  any of this text — renders ONLY under enforcement (SCOPE §5 step 4). "The
+ *  mint was declined" is true because nothing writes agent_provenance_gaps in
+ *  the record-only phase. IF ANY FUTURE SLICE OR DIAGNOSTIC WRITES A GAP ROW
+ *  WITHOUT REFUSING A MINT, every string here and the shared clause below become
+ *  false the moment they render. That coupling is a precondition of this
+ *  wording, not an incidental fact about it. */
+export const PROVENANCE_GAP_REASON_TEXT: Record<
+  Exclude<ProvenanceClassificationOutcome, 'permit'>,
+  string
+> = {
+  // PR19 fold: the first draft said "most often because the artifact was signed
+  // before the ledger began recording" — an empirical FREQUENCY claim with a
+  // ZERO-observation denominator (no gap row has ever existed). It also did, one
+  // layer up, exactly what this file's header forbids ("callers must never
+  // distinguish 'genuinely missing' from 'predates the ledger'"). And it INVERTS
+  // in steady state: the ledger row's retain_until is 90 days and
+  // purgeExpiredProvenanceLedger is wired into the scheduled sweep, so a row is
+  // purged at almost exactly the moment the artifact crosses the classification
+  // window — routine aged-out artifacts arrive HERE, not at out_of_window, and
+  // would have been served a pre-ledger explanation. Other reachable causes: the
+  // consult-side write failed; signing was off; the flag was off at consult time;
+  // the owner exercised data rights. The ledger cannot tell these apart, so the
+  // text no longer pretends to.
+  no_ledger_entry:
+    'No provenance record exists for this artifact. The ledger was consulted and has no record ' +
+    'of where this examination’s extraction came from — the artifact may predate the ledger, or ' +
+    'its record may have passed the ledger’s retention window, or none was ever written. The ' +
+    'ledger cannot distinguish these. This is an absence of instrument data, not a finding about ' +
+    'the artifact.',
+  // PR19 fold, three corrections. (1) The first draft conflated two windows:
+  // retention governs DELETION (retain_until); this outcome governs ACCEPTANCE
+  // (ageMs <= windowMs). A row truly aged out of RETENTION would be deleted and
+  // classify as no_ledger_entry. (2) "The ledger can no longer speak to where the
+  // extraction came from" was FALSE: by the precedence order, reaching this
+  // outcome means the entry WAS found and read `server`. The ledger does say; the
+  // record is older than the policy accepts. (3) A malformed/unparseable
+  // recorded_at also lands here (the NaN-safe conservative refusal above), where
+  // nothing aged out at all. The window is INTERPOLATED from the constant: three
+  // copies of "90" existed (constant, migration interval, served prose) and only
+  // two were coupled.
+  out_of_window:
+    'A provenance record for this artifact exists, but it falls outside the ' +
+    `${PROVENANCE_LEDGER_RETENTION_DAYS}-day window within which the ledger will accept a ` +
+    'record as current — or it carries a timestamp the ledger could not read. The record is too ' +
+    'old, or too uncertain, to verify this artifact’s origin against. This is a limit on what ' +
+    'the instrument will accept, not a finding about the artifact.',
+  // PR19 fold, the sharpest: this is the string the system would serve FIRST.
+  // All 187 live ledger rows are identity_kind 'credential' and the C2 baseline's
+  // own recorded sample outcome for the first row against its own identity is
+  // `identity_mismatch`. The first draft's opening sentence — "it was recorded
+  // under a different identity than the one submitting it" — reads as a
+  // near-accusation that some other party presented someone else's artifact. For
+  // that population the truth is a credential-configuration difference the
+  // harness has BY DESIGN: its consult credential is owner-less
+  // (external_consumer) while its write credential is owner+agent bound under the
+  // 6e §A invariant — same operator, same agent. Worse,
+  // writeSideIdentityMatches ALSO returns false when write.kind !==
+  // 'owner_agent_pair', a fact about the SUBMITTING credential decided before the
+  // entry is examined at all, where "recorded under a different identity" is
+  // simply not what happened. The causal first sentence is dropped; the second
+  // was already correctly scoped to what cannot be CONFIRMED.
+  identity_mismatch:
+    'A provenance record for this artifact exists, but the identity it was recorded under and ' +
+    'the identity submitting it do not resolve to the same longitudinal scope — which can mean a ' +
+    'different agent, or the same agent using credentials whose identity scopes differ. The ' +
+    'ledger cannot confirm that the agent presenting this artifact is the agent whose consult ' +
+    'produced it.',
+  // Reviewed as accurate as first drafted: the entry exists, layer1_source ===
+  // 'supplied', and that value is computed unconditionally at the consult from
+  // `preExtractedLayer1Schema !== undefined`, never flag-gated.
+  caller_supplied_extraction:
+    'A provenance record for this artifact exists, and it records that the extraction was ' +
+    'supplied by the caller rather than produced by the server. The instrument had data and ' +
+    'the data disqualified the mint: the served attestation that a decision was reasoned as ' +
+    'narrated and extracted from the submitted text does not hold where the caller supplied ' +
+    'the extraction.',
+}
+
+/**
+ * The did-not-stop-practising clause, carried INLINE on every entry (SCOPE
+ * §6.4; the C2c ruling's structural reason applies unchanged — "the entry is
+ * the unit that will be read in isolation", so a clause served once at the top
+ * of the payload does not travel with an entry that is quoted alone).
+ *
+ * ONE shared clause across all four reasons, deliberately: F-2 makes a single
+ * commitment ("an absent event will say why it is absent, and that it does not
+ * mean the agent did not practise") and that commitment is uniform across the
+ * reasons. The per-reason differentiation the Q2 ruling requires lives in
+ * `reason_text` above, which is where the ruling put it.
+ */
+export const PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE =
+  'The record can attest that this mint was declined and why. It cannot attest that the ' +
+  'agent did not practise — a declined mint is a fact about what could be established ' +
+  'about this artifact’s origin, never a finding about the agent’s reasoning.'
+
+/**
+ * The reasons this record can actually RENDER — DERIVED from the wording map
+ * above, never hand-written beside it.
+ *
+ * PR19 fold (2026-08-30), and the derivation is the point. A hand-written
+ * `known` list in the composer looked equivalent and was not: TypeScript never
+ * requires a plain `T[]` literal to be exhaustive, so a reviewer widened
+ * `ProvenanceClassificationOutcome` AND added its template — satisfying the
+ * exhaustive Record and `tsc` — and the new reason was still silently dropped
+ * from the public record, disclosed with a note saying the record "has no served
+ * wording for" it, which was FALSE: the wording existed; only the filter was
+ * stale. Entries vanished from an honesty surface under a misleading
+ * explanation. Deriving from `Object.keys` makes the wording map the single
+ * source of truth for the type, the serve set and the filter at once.
+ */
+export const SERVABLE_PROVENANCE_GAP_REASONS = Object.keys(
+  PROVENANCE_GAP_REASON_TEXT,
+) as Exclude<ProvenanceClassificationOutcome, 'permit'>[]
+
+/**
+ * Is this reason one the record can render?
+ *
+ * Shared by the HANDLER's 404/200 gate and the COMPOSER's render filter, so the
+ * two cannot diverge. They did: the gate counted RAW store rows while the
+ * composer rendered a FILTERED set, and the ruled condition is stated on the
+ * SERVED field (`provenance_gaps.length > 0`). A DB CHECK widened ahead of the
+ * code therefore served a publicly CACHEABLE 200 whose `provenance_gaps` was `[]`
+ * and whose `total_provenance_gaps_count` was 1 — a record contradicting itself
+ * in one object, justified by a gap the reader cannot see.
+ */
+export function isServableProvenanceGapReason(
+  reason: string,
+): reason is Exclude<ProvenanceClassificationOutcome, 'permit'> {
+  return (SERVABLE_PROVENANCE_GAP_REASONS as readonly string[]).includes(reason)
+}
+
+/**
+ * Select the served wording for ONE gap entry. Pure; mirrors
+ * selectOrientationEntryWording's shape. Takes the refusal reason only — the
+ * clause is reason-independent (see above), and NOTHING signature-derived is
+ * an input, so F-2's hard exclusion cannot be violated through this seam.
+ */
+export function selectProvenanceGapWording(
+  reason: Exclude<ProvenanceClassificationOutcome, 'permit'>,
+): { reasonText: string; notAttestableClause: string } {
+  return {
+    reasonText: PROVENANCE_GAP_REASON_TEXT[reason],
+    notAttestableClause: PROVENANCE_GAP_NOT_ATTESTABLE_CLAUSE,
+  }
+}

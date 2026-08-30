@@ -28,6 +28,8 @@
  *   flag off / core dark / store failure → 503 (Cache-Control: no-store)
  *   malformed agent_id                   → 400
  *   no trust rows for the agent          → 404 (honest miss)
+ *   no evidence AND the gaps read failed → 503 (a 404 is a positive absence
+ *                                          claim; slice 3, SCOPE §6.5)
  *   record                               → 200 (public, max-age=300)
  */
 
@@ -45,6 +47,11 @@ import {
   readOrientationReadings,
 } from '@/lib/substrate/trust-core/trust-core-store'
 import { isOrientationReadingEnabled } from '@/lib/translation-sandwich/orientation-reading'
+import {
+  isProvenanceLedgerEnabled,
+  readProvenanceGaps,
+} from '@/lib/substrate/trust-core/provenance-ledger-store'
+import { isServableProvenanceGapReason } from '@/lib/substrate/trust-core/provenance-classification'
 import {
   composeTrustRecordPayload,
   type TrustRecordPayload,
@@ -113,6 +120,23 @@ export interface TrustRecordDeps {
       }
     | { ok: false; error: string }
   >
+  /** SLICE 3 (SCOPE §6/§6.5, OPTIONAL so pre-slice-3 dep objects stay valid —
+   *  the C2c precedent). Absent or flag-off ⇒ no read, no payload field, and
+   *  the ENV-1 gate keeps its pre-slice-3 condition exactly. */
+  isProvenanceLedgerEnabled?: () => boolean
+  readProvenanceGaps?: (
+    agentId: string,
+  ) => Promise<
+    | {
+        ok: true
+        value: {
+          entries: { reason: string; occurredAt: string }[]
+          capped: boolean
+          totalCount: number | null
+        }
+      }
+    | { ok: false; error: string }
+  >
   now: () => Date
 }
 
@@ -126,6 +150,8 @@ const REAL_DEPS: TrustRecordDeps = {
   readReflectSummary: (agentId) => readHonestReflectSummary(agentId),
   isOrientationEnabled: isOrientationReadingEnabled,
   readOrientationReadings: (agentId) => readOrientationReadings(agentId),
+  isProvenanceLedgerEnabled,
+  readProvenanceGaps: (agentId) => readProvenanceGaps(agentId),
   now: () => new Date(),
 }
 
@@ -212,6 +238,23 @@ export async function runTrustRecordGet(
     )
   }
 
+  // 4b. SLICE 3 — the capped provenance-gap slice, read BEFORE the ENV-1 gate
+  //     because its result now participates in the 404/200 decision (§6.5).
+  //     Flag-off (the pre-slice-3 state) NOTHING is read: `provenanceGaps` stays
+  //     `undefined`, the composer receives no key, and the gate below is exactly
+  //     its pre-slice-3 self.
+  let provenanceGaps:
+    | { entries: { reason: string; occurredAt: string }[]; capped: boolean; totalCount: number | null }
+    | null
+    | undefined
+  if (deps.isProvenanceLedgerEnabled?.() && deps.readProvenanceGaps) {
+    const gapsRes = await deps.readProvenanceGaps(agentId)
+    provenanceGaps = gapsRes.ok ? gapsRes.value : null
+    if (!gapsRes.ok) {
+      console.error('[trust-record] provenance gaps read failed (fail-honest):', gapsRes.error)
+    }
+  }
+
   // 5. Honest miss — no domain carries EXAMINED evidence (S10-ENV-1 fold,
   //    2026-07-12): a declaration-class record-only event (e.g. the v1
   //    harness_computed calling acknowledgement) SEEDS a state row at the
@@ -219,7 +262,61 @@ export async function runTrustRecordGet(
   //    existence would have served such an agent a 200, falsifying the
   //    published "a record implies examined evidence" contract. A 200 now
   //    genuinely implies at least one domain carries evidence.
-  if (!verdict.profile.domains.some((d) => d.hasEvidence)) {
+  //
+  //    SLICE 3 RELAXATION (SCOPE §6.5, RULED 2026-08-26). The gate now reads
+  //    `domains.some(hasEvidence) || provenance_gaps.length > 0`, TIED TO THE
+  //    LEDGER'S OWN FLAG so it is byte-identical flag-off (the read below does
+  //    not run, `provenanceGaps` stays undefined, and this condition is exactly
+  //    its pre-slice-3 self).
+  //
+  //    WHY this is a faithful extension of ENV-1 and not a violation of it: the
+  //    thing ENV-1 rejects is a BARE ROW — evidence of nothing dressed as
+  //    evidence of something. A provenance-gap entry is not that. It is proof
+  //    the ledger genuinely examined an artifact's origin and reached a
+  //    determinate verdict (refuse, and why) — a different KIND of examination
+  //    than virtue-domain evaluation, not a lesser one. Without this, the agent
+  //    the fix exists to make visible would 404 — "the silent carve-out I
+  //    rejected, arriving through a different path" (mentor, Q4).
+  //
+  //    DISCLOSED COST (§6.5.5): today every 200 implies at least one domain has
+  //    evidence. Flag-on, a 200 can now carry `aggregate.level: null` and
+  //    `sparse: true`. The payload states both honestly; an integration that
+  //    treats a 200 as "evaluative" must additionally check aggregate.level.
+  //
+  //    THE 404 IS A POSITIVE CLAIM ABOUT ABSENCE, so it may only be made from a
+  //    read that succeeded. If the gaps read FAILED and no domain carries
+  //    evidence, this handler cannot honestly say the agent has no record — it
+  //    503s instead of serving a cacheable, false 404. That is the S10-ABUSE-1
+  //    lesson (a missing-table-shaped error must never read as a benign empty)
+  //    applied to the read this slice adds. When some domain DOES carry
+  //    evidence the outcome is unaffected, so the record still serves with the
+  //    field omitted and an honest note — a supplementary read's outage never
+  //    blocks the primary record.
+  const hasDomainEvidence = verdict.profile.domains.some((d) => d.hasEvidence)
+  const gapsReadFailed = provenanceGaps === null
+  // PR19 fold: count what the payload will RENDER, not raw store rows. The ruled
+  // condition is stated on the SERVED field; counting raw rows let a widened DB
+  // CHECK serve a cacheable 200 whose provenance_gaps was [] — justified by a gap
+  // the reader cannot see. One shared predicate now governs both sides.
+  const hasProvenanceGaps = (provenanceGaps?.entries ?? []).some((e) =>
+    isServableProvenanceGapReason(e.reason),
+  )
+  if (!hasDomainEvidence && gapsReadFailed) {
+    console.error(
+      '[trust-record] provenance-gaps read failed and no domain carries evidence; ' +
+        'refusing to serve an unverified 404',
+    )
+    return json(
+      {
+        status: 'error',
+        message: 'The trust-record service is temporarily unavailable. Please try again shortly.',
+        documentation_url: TRUST_RECORD_DOCUMENTATION_URL,
+      },
+      503,
+      NO_STORE_HEADERS,
+    )
+  }
+  if (!hasDomainEvidence && !hasProvenanceGaps) {
     return json(
       {
         status: 'not_found',
@@ -270,6 +367,7 @@ export async function runTrustRecordGet(
     verdict,
     reflectSummary,
     ...(orientationReadings !== undefined ? { orientationReadings } : {}),
+    ...(provenanceGaps !== undefined ? { provenanceGaps } : {}),
     generatedAt: deps.now(),
   })
 
