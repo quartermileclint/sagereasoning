@@ -768,11 +768,13 @@ honesty).
 
 Response envelope: { status: 'ok'|'not_found'|'error', data?, message?, documentation_url }.
 data.schema = 'sage-trust-record/v1'. 404 = no examined trust evidence has been folded for that
-agent AND no provenance-gap entry exists — declaration-class records alone do not surface a
-public record (an honest miss, never a low score). A 200 therefore implies EITHER at least one
-domain carries examined evidence OR the ledger reached a determinate verdict about an artifact's
-origin; where only the latter holds, the record honestly carries aggregate.level null and
-sparse true, so check aggregate.level before treating a 200 as evaluative.
+agent AND no provenance-gap entry the record can surface — declaration-class records alone do
+not surface a public record (an honest miss, never a low score). A 200 therefore implies EITHER
+at least one domain carries examined evidence OR the ledger reached a determinate verdict whose
+reason the record can surface; where only the latter holds, the record honestly carries
+aggregate.level null and sparse true, so check aggregate.level before treating a 200 as
+evaluative. Gap rows whose reason this version cannot render do not lift a 404 — the gate
+counts what the record would actually show you, not what the store holds.
 503 = the surface or the trust core is not enabled, a store read failed, or the provenance-gap
 read failed where a 404 would otherwise be served — a 404 is a positive claim of absence and is
 not made from a read that did not succeed (never cached).

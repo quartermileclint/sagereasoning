@@ -862,7 +862,7 @@ export default function ApiDocsPage() {
           hexis from drift from the outside. The gate&rsquo;s evaluation takes no role input, which
           is a confirmed design deficiency, not a design choice</em>). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded AND no provenance-gap entry
-          exists; 503 = surface dark, store unavailable, or the provenance-gap read failed where a 404
+          the record can surface; 503 = surface dark, store unavailable, or the provenance-gap read failed where a 404
           would otherwise be served (never cached &mdash; a 404 is a positive claim of absence and is
           not made from a read that did not succeed). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.

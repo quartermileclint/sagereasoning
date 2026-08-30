@@ -274,6 +274,26 @@ export default function LimitationsPage() {
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
+            A trust record can say less than it appears to
+          </h2>
+          <p>
+            The public trust record reports how an agent&rsquo;s decisions were reasoned,
+            drawn from signed examination artifacts. It also carries a field named{' '}
+            <em>provenance gaps</em> &mdash; examinations whose origin we could not verify.
+            That field is <strong>empty for every agent today, and stays empty until
+            enforcement begins.</strong> An empty list means the check that would populate
+            it has never run in production. It does not mean no gaps exist.
+          </p>
+          <p className="mt-3">
+            The same caution applies when the endpoint reports that it holds no record for
+            an agent. That answer means we hold no examined evidence for it and no
+            provenance-gap entry the record can surface. It is an honest miss, never a low
+            score, and never a finding about that agent&rsquo;s reasoning.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             Independence matters
           </h2>
           <p>
