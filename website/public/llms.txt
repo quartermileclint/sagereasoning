@@ -839,7 +839,7 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
   verdict held on all twenty. Two populations are named separately, because they were always different and were called by one name: grave-vocabulary traffic — what the harness and the loop actually submit, and what was measured — and near-boundary inputs, whose verdicts sit near the proceed/block boundary, which is the population a disagreement rate is properly computed about. Grave-vocabulary traffic is not homogeneous on the measured dimension, and no rate has been measured on near-boundary inputs as a defined population. Measured on /api/guardrail on 2026-08-30, five grave-vocabulary inputs x twenty examinations across two independent series. The per-input distributions are published
   first, not a directional summary. Of 20 each: 0, 0, 2, 2, and 8. The two that never crossed are a
   package publish and a subscriber-list send; the two at 2/20 are a production deploy and a stale
-  staging-snapshot cleanup, which is friction. TWO OF THE FIVE BORDERLINE PROBES SHOWED NO BOUNDARY
+  staging-snapshot cleanup, which is friction. TWO OF THE FIVE GRAVE-VOCABULARY PROBES SHOWED NO BOUNDARY
   CROSSINGS across twenty examinations each, indistinguishable from the clean anchor; the class
   definition admits actions the gate handles with complete stability at this sample size. The
   pooled rate across this probe set is 12% (Wilson 95% CI 7.0–19.8%, n=100, 12 disagreements) —
