@@ -55,8 +55,10 @@ prompt warns the mandatory re-run "has been missed once already"; do not make it
 | # | Item | Recommendation | Whose |
 |---|---|---|---|
 | 1 | `llms.txt:118` — *"identical inputs produce identical assessments"* | **Fix in this same pass.** Mentor confirmed it is surface-accuracy, not doctrine. It borrows `/api/reason`'s own request-field name while the three sibling claims are each explicitly scoped | Founder |
-| 2 | A second D6a sweep to tighten the interval | **Worth it, not blocking.** ~$0.93, ~30 min; 140 of 600 monthly units used, ~3 sweeps remain. Halves the interval far more than raising K. **If run, the published figures change and the surfaces need re-updating** — so either do it *before* application or accept a later revision | Founder |
-| 3 | Directional split inside the runner | **Not without its own PR19.** Currently computed by hand from the run records; the runner emits only the aggregate. Must precede item 2 if both happen | Founder |
+| 2 | **Complete the balanced second sweep** — p4, p5, p6, p7 ONLY | **Attempted 2026-08-30 and ABORTED at 3 of 7 on the daily quota cap.** 40 calls / 80 units on a later day balances the design at 2 series x 7 probes and gives a poolable n=100. **Do NOT re-run p1/p2/p3** — they already have two series and re-running them deepens the imbalance | Founder |
+| 2b | **QUOTA — corrected** | **The daily cap is 200 units = ONE sweep per day** (70 calls x 2 = 140). An earlier version of this prompt said "~3 sweeps remain", which was monthly-true and daily-false, and is what caused the abort. Monthly stands at ~200 of 600 | — |
+| 3 | **Calibration-block balance check** (NEW, from the abort) | **Needs its own PR19 before any further sweep.** The block cannot see an unbalanced design: it reported 7.5% from 3-probes-x2 + 2-probes-x1 with `all_borderline_series_complete: true` and no warning. `borderline_probes_measured` counts series, not probes. Add a balance warning and count probes | Founder |
+| 3b | Directional split inside the runner | **Not without its own PR19**, and bundle it with item 3 if both are done. Currently hand-computed from the records; the runner emits only the aggregate | Founder |
 | 4 | The supersession banner on the signed package | The executing session inserted 21 lines into a founder-signed artifact on its own judgement, and disclosed it. `git checkout` that one file to revert | Founder |
 | 5 | `runs/` size | Recorded correction: **1.3MB**/sweep, not the recorded ~300KB. Archive, never delete | — |
 
@@ -77,7 +79,8 @@ prompt warns the mandatory re-run "has been missed once already"; do not make it
 - Committed at `350dd29` (sweep + evidence + predecessor build) and `64639d9` (brief + successor).
   This session's adoption commit follows.
 - **Nothing is applied to any public surface.** Verified first-hand 2026-08-30, not inherited.
-- Probe credential: **140 of 600 monthly units** consumed.
+- Probe credential: **~200 of 600 monthly units** consumed, and the **daily 200 cap was reached on 2026-08-30** by a second sweep that aborted at 3 of 7 probes.
+- **`runs/2026-08-30/` now holds three rate files.** `d6a-rate.json` is the **balanced sweep-1 result (12%, 6/50)** — the publishable one, and the figure the revised wording carries. `d6a-rate-sweep1-only.json` is its snapshot. `d6a-rate-UNBALANCED-DO-NOT-PUBLISH.json` is the composition-biased 7.5% pooled figure, retained **only** as evidence of the calibration defect at item 3. **The three sweep-2 series in the per-probe JSONL are valid data and are simply not poolable until the design is balanced.**
 - **Session honesty note:** at-action Gate-2 checks were UNAVAILABLE on a 28s timeout for most of the
   authoring session; one later check returned `deliberate` with a `pause_for_review` caution and fired
   the G3 elicitation, answered genuinely in-conversation — the answers named a real prior preference

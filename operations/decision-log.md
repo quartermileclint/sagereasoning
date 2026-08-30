@@ -29616,3 +29616,95 @@ engaged), Q1.
 `2026-08-30-mentor-ruling-verdict-variance-disclosure-verbatim.md`,
 `2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md`,
 `operations/handoffs/founder/2026-08-30-verdict-variance-disclosure-APPLICATION-NEXT-SESSION-PROMPT.md`.
+
+## 2026-08-30 — D-R8-D6A-SWEEP2-QUOTA-ABORT-AND-DESIGN-BALANCE-DEFECT-FOUND
+
+**Decision:** A second D6a sweep was founder-elected and **aborted at 3 of 7 probes on the daily
+quota cap.** The partial data is **NOT pooled**; `d6a-rate.json` is restored to the balanced sweep-1
+result. **The abort surfaced a real defect in the instrument's calibration block, which is recorded
+here and NOT fixed** (a runner change binds to its own PR19 review).
+
+**The executing session's error, stated plainly.** The sweep was sized against the credential's
+**monthly** limit (600) and the **daily** limit (200) was ignored — despite the first-run prompt's
+own pre-condition naming both. Sweep 1 consumed 140 units (70 calls × 2). Sweep 2's first three
+probes consumed 60. That is exactly 200, and p4-delete's first call returned `quota_429`. **The daily
+cap permits ONE full sweep per day, not two.** The session had also told the founder "~3 sweeps of
+quota left" — monthly-true, daily-false, and the basis on which the second sweep was elected.
+
+**The runner behaved correctly throughout.** It aborted at the first quota 429 rather than burning
+the remainder, wrote the failure record honestly, and did not start a partial series (PR19 L19).
+Sweep 2's three completed series are complete and valid.
+
+**THE FINDING — composition bias, and the instrument cannot see it.** The three probes that received
+a second series were p1-c11, p2-deploy and p3-email — which in sweep 1 were the **three
+lowest-variance borderline probes** (0, 2 and 0 flips). p4-delete (1) and p5-force (3) received none.
+Pooling therefore double-weights the quiet probes and single-weights the noisy ones:
+
+| Basis | Design | Rate | Wilson 95% |
+|---|---|---|---|
+| Sweep 1 only | balanced — 5 probes × 1 series | **6/50 = 12.0%** | 5.6–23.8% |
+| Naive pool | **unbalanced** — 3 probes × 2, 2 probes × 1 | **6/80 = 7.5%** | 3.5–15.4% |
+
+**None of that 38% reduction is sampling.** It is which probes happened to run before a quota cap,
+which was alphabetical order. **And the summary reports the 7.5% figure with every guard green** —
+`all_borderline_series_complete: true`, `incomplete_series: []`, no warning beyond the unrelated
+anchor one. `calibration.borderline_probes_measured` reads **8**, because it counts *series* and not
+*probes*; eight series across five probes is silently unequal. **The calibration block was built to
+detect a partial series and is structurally blind to an unbalanced design.** A number 38% below the
+balanced figure passes every check the instrument has.
+
+This is the same class as the PR19 H1 finding the instrument was rewritten for — a defect that makes
+the binding public number dishonest in the lenient direction while everything looks clean.
+
+**Not fixed here.** A balance check in the calibration block is a runner change and binds to its own
+independent review before any further sweep (PR19). Named as a successor.
+
+**Disposition of the data.** `runs/2026-08-30/d6a-rate.json` is restored to the balanced sweep-1
+result (**12%, 6/50**) — the figure the mentor ruled on and the figure the revised wording carries;
+nothing in the disclosure changes. The pooled output is retained as
+`d6a-rate-UNBALANCED-DO-NOT-PUBLISH.json` as evidence of the defect, and the sweep-1 snapshot as
+`d6a-rate-sweep1-only.json`. All three are committed. **The three sweep-2 series are retained in the
+per-probe JSONL and are valid data; they are simply not poolable into a headline until the design is
+balanced.**
+
+**What sweep 2's partial data does establish (descriptive, not a rate).** Zero flips in 30 outcomes
+across p1/p2/p3, against 2 flips in 30 for the same three probes in sweep 1. p1-c11 — the continuity
+probe carrying the c11 text the whole arc rests on — is now **20 consecutive stable runs today, 1
+flip in 30 pooled across all three series including the 2026-08-29 pilot.** Its own flip rate is
+looking closer to 3% than to the pilot's 10%, which its Wilson bound (2–40%) always permitted. **This
+does not weaken the disclosure:** variance on that text is established by the observed flip, three
+other probes flipped independently, and the mentor's Q3 ruling — the interval rides the point
+estimate — exists precisely for this.
+
+**Whether sweep 2's quietness is chance or a between-sweep effect is UNRESOLVED and should not be
+guessed.** At a true 12% rate, zero flips in 30 occurs about 2% of the time, which is low enough to
+be worth naming and far too thin to conclude from — especially as the three probes run were the quiet
+ones by sweep-1 measurement, so the sample is not neutral on the question. A balanced completion
+would answer it; this session's partial cannot.
+
+**Cost and footprint.** 31 additional calls (30 completed + 1 quota-rejected), **~$0.40**, taking the
+day to ~200–202 of 600 monthly units and **the daily 200 cap reached**. Same three tables, same
+`agent_id` excludability, unchanged.
+
+**Risk classification:** Standard under 0d-ii. **AC7 not engaged.** No code, schema, flag, migration,
+credential, or public surface; no runner change. Weights-BLOCKED, Q1, and the §A boundary unchanged;
+nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this commit; delete the three sweep-2 series from the per-probe JSONL
+if the partial data is judged not worth retaining (**not recommended** — it is the evidence for the
+defect above).
+
+**Successors named, not built:**
+1. **A balance check in the calibration block** — warn when series-per-probe is unequal within a
+   class, and count probes rather than series in `borderline_probes_measured`. **Needs its own PR19
+   before any further sweep.**
+2. **Complete the balanced second sweep** — p4, p5, p6, p7 only, 40 calls / 80 units, on a later day.
+   That gives 2 series × 7 probes and a poolable n=100.
+3. **Correct the quota guidance** wherever it appears: **one sweep per day**, 140 of a 200 daily cap.
+
+**Rules served:** PR6, PR10 ("I caused this"), PR18, PR19 (named, not discharged), PR23, Q1.
+
+**Status:** Adopted. Cross-references:
+`D-R8-D6A-FIRST-LIVE-SWEEP-RATE-MEASURED-ANCHOR-FALSIFICATION-RECORDED-2026-08-30`,
+`D-VERDICT-VARIANCE-RATE-PRESENTATION-RULED-ADOPTED-WORDING-REVISED-FOR-SIGNATURE-2026-08-30`,
+`operations/agent-circles-2026-08/d6a/runs/2026-08-30/d6a-rate-UNBALANCED-DO-NOT-PUBLISH.json`.
