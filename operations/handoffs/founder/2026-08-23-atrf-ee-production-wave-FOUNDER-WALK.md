@@ -8,8 +8,23 @@ you move on. Do not run ahead of the verification of the previous step.
 performs no Supabase, Vercel, git-push, or mint operation at any point** — every live action
 below is yours.
 
-**Everything below is built, PR19-reviewed twice, and green.** Nothing live has been touched
-yet: no SQL run, no flag set, no push.
+> ## ⛔ STOP — STEPS 1–4 ARE ALREADY APPLIED ON PRODUCTION (determined 2026-08-31)
+>
+> **Do not execute steps 1–4.** Step 0 was run against production on 2026-08-31 and returned
+> **APPLIED on all four**, plus the added Q5 grants check clean (`service_role` only, zero
+> `anon`/`authenticated`/`PUBLIC`). Steps 5 and 6 were separately confirmed already live — the
+> EE-C1 wording serves in production Gate-1 frames. **The Q5c precedent repeated exactly:
+> production was found at target from an application no decision-log entry records.**
+>
+> Re-running these would re-apply migrations against live tables carrying real rows, including a
+> section that DROPs and recreates a policy. **This walk is now a record reconciliation, not an
+> execution.** See `D-ATRF-EE-WAVE-STEP0-PRODUCTION-STATE-DETERMINED-ALREADY-APPLIED`.
+>
+> **TEST's state is still UNDETERMINED.** Step 0 there is unrun and remains safe to run.
+
+**Everything below was built, PR19-reviewed twice, and green.** The sentence that stood here —
+*"Nothing live has been touched yet: no SQL run, no flag set, no push"* — was **true at authoring
+on 2026-08-23 and is false now**; it is corrected rather than deleted so the drift is legible.
 
 ---
 
@@ -49,7 +64,8 @@ eyeball output:
 
 | Q | Step | Verdict values |
 |---|---|---|
-| Q1 | Class B RLS on the three tables | policy count + roles per table (applied = 1 policy, `service_role`) |
+| Q1 | Class B RLS on the three tables | policy count + names per table. **The `roles` cell is BLANK when applied** — the policies carry no `TO` clause. Determine by policy NAME against each table's documented pre-state, and read Q1 **with Q5** |
+| Q5 | Class B **grants** on the three tables | `service_role` only. Any `anon`/`authenticated`/`PUBLIC` row is a live hole. **Q1 alone cannot determine step 1** — it reads policies, not grants |
 | Q2 | `idea_loop_candidates` columns | `APPLIED` / `NOT APPLIED` / `PARTIAL -- STOP AND INVESTIGATE` |
 | Q3 | `idea_loop_completion_signals` table | `APPLIED` / `NOT APPLIED` + column count vs 17 |
 | Q4 | `api_keys` capability CHECK | `APPLIED` / `NOT APPLIED` + the full constraint definition |
@@ -86,7 +102,9 @@ of these three tables is committed, pushed, and deployed (`2277ec2`, confirmed a
 **Step 5 without step 6 is not a verified lockdown.** The `impulse_entries` precedent is
 explicit: prove the hole closed *and* prove you did not break the legitimate path.
 
-**Watch for:** `reflections` currently has **no service-role policy at all** — the 2026-08-16
+**Watch for (PRODUCTION: now historical — this pre-state no longer holds there; see the STOP
+banner. Still accurate for TEST, which is undetermined):** `reflections` had **no service-role
+policy at all** — the 2026-08-16
 row-25 fix relied on `service_role`'s `BYPASSRLS`. The migration adds one for consistency.
 Its `§PRE-P1` expectation reflects that; if it does not match, stop.
 

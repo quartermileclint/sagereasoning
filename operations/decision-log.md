@@ -30829,3 +30829,98 @@ other pre-existing stray untouched.
 **Rules served:** PR10, PR18, PR20, PR23, Q1, R18.
 
 **Status:** Adopted. **The 404-contract alignment is live and verified on all eight checks.**
+
+## 2026-08-31 — D-ATRF-EE-WAVE-STEP0-PRODUCTION-STATE-DETERMINED-ALREADY-APPLIED
+
+**Decision.** Step 0 of the ATRF/EE production wave was run against **production**. **All four
+migration steps are APPLIED.** The walk's blocker — *"no decision-log entry records any of its four
+migration steps being applied, in either direction"*, named as the most uncomfortable open item in
+the queue — is **resolved**. **The walk is re-scoped from an execution into a record
+reconciliation. Steps 1-4 must NOT be run.**
+
+**The Q5c precedent has repeated exactly**: production found already at target from an application
+no decision-log entry records, while the repo's own files described a different world. That is now
+**twice**, and is worth treating as a pattern rather than a coincidence.
+
+| Q | Step | Result |
+|---|---|---|
+| Q1 | A1 Class B RLS policies | **APPLIED** on all three tables (by name; see below) |
+| Q5 | A1 Class B **grants** (added this session) | **CLEAN** — `service_role` only; zero `anon`/`authenticated`/`PUBLIC` |
+| Q2 | A2 `idea_loop_candidates` columns | **APPLIED** — 6 of 6 |
+| Q3 | A3a `idea_loop_completion_signals` | **APPLIED** — table present, 17 columns = 17 expected |
+| Q4 | A3b `api_keys` capability CHECK | **APPLIED** — subset CHECK carries seven values incl. `completion_signal_write`; the owner+agent invariant likewise |
+
+**Steps 5 and 6 were already done too, and this was established first-hand rather than inferred.**
+The EE-C1 wording (*"No kathekon factors were extracted from the submitted text; on that basis, the
+engine reads the action as contrary to appropriate action"*) served **twice in this session's own
+Gate-1 frames**. The deploy half landed through ordinary pushes, as the standing opener suspected.
+
+**Q1 IS THE ONE THAT NEARLY WENT WRONG, AND THE WALK'S OWN EXPECTATION WAS THE CAUSE.** Q1 returns
+no computed verdict — it requires interpretation — and the walk stated applied looks like
+`roles = {service_role}`. **The migration it describes can never produce that.** Its policies are
+created with **no `TO` clause**:
+
+    CREATE POLICY "Service role full access to action evaluations v3"
+      ON public.action_evaluations_v3 FOR ALL USING (auth.role() = 'service_role');
+
+so `polroles` is `{0}` (PUBLIC), the `rolname` lookup returns an empty array, and the roles column
+renders **blank**. A blank cell is the **correct applied state**. Read against the documented
+expectation it looks like the `founder_conversations` Class-C defect, and this session's first
+reading of it was exactly that alarm. **It is not that defect**: there the predicate was
+`USING (true)` over un-revoked grants; here the predicate itself restricts and the grants are
+revoked. Resolved by reading the migration rather than the description of it, then determined per
+table **by policy name against each table's documented pre-state** (`action_evaluations_v3`: two
+owner policies gone; `journal_entries`: 3 → 1, the pre-existing service-role policy untouched;
+`reflections`: `Users can read own reflections` replaced).
+
+**Q1 ALONE CANNOT DETERMINE STEP 1 — a genuine gap in Step 0 as authored.** Q1 reads `pg_policy`
+only. Because these policies carry no `TO` clause, the lockdown rests on the **grants** as much as
+on the policies, and Q1 never looks at them. A policy-only reading would have certified the step on
+half its evidence — the precise Class-C shape this project has already been bitten by twice. **Q5
+was authored and run to close it**, and returned clean.
+
+**INCIDENT — I caused this; harmless, and a near-miss rather than benign by design.** In explaining
+the blank roles column, the AI quoted the migration's `CREATE POLICY` inside a fenced `sql` block,
+as evidence. In a sitting where the founder is pasting the AI's blocks into a production SQL editor,
+that read as an instruction; the founder ran it after the Q5 grants check. It failed
+**`42710: policy already exists`**. **No change occurred** — DDL is atomic, so a failed
+`CREATE POLICY` alters nothing, and the error is itself independent corroboration that the policy
+pre-existed. **Why it was a near-miss and not a non-event:** what was quoted was the `CREATE` only.
+The migration's `DROP POLICY` on the preceding line was **not** in the quoted text. Had the
+DROP+CREATE pair been quoted together, the DROP would have succeeded and this would be a different
+entry. **Standing correction adopted: never place executable DDL in a runnable code block during a
+live SQL-editor walk** — quote it indented, as prose, or broken.
+
+**Files corrected this session, so the next reader is not misled the same way:**
+- `website/supabase-atrf-ee-wave-step0-state-determination-READONLY.sql` — **Q5 grants query added**
+  (with why Q1 is insufficient); the Q1 header's wrong `roles = {service_role}` expectation replaced
+  with the blank-cell explanation, the Class-C distinction, and the three per-table pre-states.
+- `operations/handoffs/founder/2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md` — a **STOP banner**
+  at the head; the header sentence *"Nothing live has been touched yet: no SQL run"* corrected in
+  place rather than deleted, so the drift stays legible; the Q verdict table rewritten; Step 1's
+  `reflections` pre-state marked historical-for-production, still-accurate-for-TEST.
+
+**TEST's state is UNDETERMINED and is carried.** Only production was determined. Step 0 is unrun
+there and remains safe to run. This should not silently become the next unrecorded unknown.
+
+**Risk classification:** **Standard** under 0d-ii for what this session performed — a read-only
+state determination plus documentation corrections. **AC7 not engaged: no successful production
+change was made.** The one write statement executed was accidental and failed atomically. The
+migrations whose applied state is recorded here were applied by some earlier, unrecorded act, not by
+this session. Weights **BLOCKED**; Q1 and the §A boundary unchanged. **Nothing bears on the 0h call.**
+
+**Rollback:** nothing to roll back — no live change. The two file corrections are `git revert`-able
+independently of the decision-log entry.
+
+**Carried:** TEST determination; re-scoping the walk's remaining content (Step 7 optional activation
+is untouched and still the founder's election, and its own reasoning to defer still stands — nothing
+consumes a persisted completion signal yet); and the open question of **how an entire four-step
+production wave was applied without a record**, which the twice-now pattern makes worth asking.
+
+**Concurrency:** `ListAgents` showed 21 peers (13 interactive) at open; `git status` re-run before
+staging; commit path-scoped; `website/src/data/environmental-context.json` untouched.
+
+**Rules served:** PR6, PR10, PR17, PR18, PR20, PR23, Q1, AC7 (assessed, not engaged), AC5.
+
+**Status:** Adopted. **Step 0 discharged on production; the walk's blocker is resolved and the walk
+is re-scoped. Steps 1-4 are not to be executed.**
