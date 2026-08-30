@@ -836,11 +836,14 @@ export default function ApiDocsPage() {
           perturbation, not tested relapse-resistance; <em>verdict determinism &mdash; verdicts are draws
           from a probabilistic extraction; Layer 2 is deterministic and reproducible from the extraction,
           Layer 1 is sampled, so the same text can examine differently. Variance appears across the scale
-          including on benign inputs; the borderline class is distinguished by variance that crosses the
-          proceed/block boundary. Measured on /api/guardrail 2026-08-30 across five inputs &times; 20
+          including on benign inputs. Two populations are named separately: grave-vocabulary traffic
+          &mdash; what the harness and loop submit, and what was measured &mdash; and near-boundary
+          inputs, whose verdicts sit near the proceed/block boundary, which is the population a
+          disagreement rate is properly about. Grave-vocabulary traffic is not homogeneous on the
+          measured dimension, and no rate has been measured on near-boundary inputs. Measured on /api/guardrail 2026-08-30 across five inputs &times; 20
           examinations in two independent series. Per-input crossings of 20: 0, 0, 2, 2, 8 &mdash;
           published first, because no directional summary can be carried when the inputs share no
-          regularity. Two of the five borderline probes showed no boundary crossings across twenty
+          regularity. Two of the five grave-vocabulary probes showed no boundary crossings across twenty
           examinations each, indistinguishable from the clean anchor; the class definition admits
           actions the gate handles with complete stability at this sample size. The pooled rate across
           this probe set is 12% (Wilson 95% CI 7.0&ndash;19.8%, n=100 outcomes, 12 disagreements). The
@@ -853,7 +856,10 @@ export default function ApiDocsPage() {
           held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one
           date, spanning a redeploy in which the gate&rsquo;s code path did not change; the deploy
           identifier is a local proxy and attests nothing about production. Not measured on
-          /api/reason. Revised as better evidence arrives</em>). MEASURE mode: advisory, never binding; human override is
+          /api/reason. Revised as better evidence arrives. Consistency of examination outputs is
+          evidence of stable disposition, not proof of it &mdash; the harness cannot distinguish
+          hexis from drift from the outside. The gate&rsquo;s evaluation takes no role input, which
+          is a confirmed design deficiency, not a design choice</em>). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.

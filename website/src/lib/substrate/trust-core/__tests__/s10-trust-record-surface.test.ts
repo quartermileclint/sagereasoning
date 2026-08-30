@@ -359,6 +359,32 @@ async function main(): Promise<void> {
     env.includes('solely by the force-push input'),
     'S2-61 envelope: the class limit is stated — p5-force is the sole distinguishing member',
   )
+  // ═══ 2026-08-30 CLASS SPLIT (A5) + two disclosure additions (Ruling Set E: A2, A3 item 1).
+  //
+  // S2-65 — the Q4 population name. "Borderline" was ruled to conflate two populations that were
+  // always different: grave-vocabulary traffic (what the harness and loop submit, and what was
+  // measured) and near-boundary inputs (what a disagreement rate is properly about, and on which
+  // nothing has been measured). The measured population is named accurately here.
+  assert(
+    env.includes('grave-vocabulary traffic'),
+    'S2-65 envelope: the measured population is named accurately (ruling A5 Q4)',
+  )
+  // S2-66/S2-67 — the A3 item-1 limit, pinned as TWO assertions on purpose. S2-66 holds the hedge
+  // and S2-67 the mechanism: a later edit could keep "evidence, not proof" while dropping the
+  // hexis/drift explanation that makes it meaningful, and a single pin would not notice.
+  assert(
+    env.includes('evidence of stable disposition, not proof'),
+    'S2-66 envelope: consistency is evidence of stable disposition, not proof (Ruling Set E, A3)',
+  )
+  assert(
+    env.includes('cannot distinguish hexis'),
+    'S2-67 envelope: the hexis-vs-drift mechanism survives, not only the hedge (Ruling Set E, A3)',
+  )
+  // S2-68 — A2: role-blindness reclassified from a scoping statement to a confirmed deficiency.
+  assert(
+    env.includes('confirmed design deficiency, not a design choice'),
+    'S2-68 envelope: the kathekon role gap is named a deficiency, not a choice (Ruling Set E, A2)',
+  )
   // ═══ 2026-08-30 COMPOSITION RULING (p5-force class-composition, verbatim and binding;
   // founder-signed wording of the same day). No figure changes; the disclosure is REORDERED and
   // two statements are added in the mentor's own stated forms.
