@@ -27,7 +27,10 @@
  * ─── Status → HTTP mapping (mirrors the accreditation GET) ───────────────────
  *   flag off / core dark / store failure → 503 (Cache-Control: no-store)
  *   malformed agent_id                   → 400
- *   no trust rows for the agent          → 404 (honest miss)
+ *   no examined domain evidence AND     → 404 (honest miss; "no trust rows"
+ *   no servable provenance-gap entry        described the BARE-ROW gate
+ *                                           ENV-1 rejected, and slice 3
+ *                                           widened it further)
  *   no evidence AND the gaps read failed → 503 (a 404 is a positive absence
  *                                          claim; slice 3, SCOPE §6.5)
  *   record                               → 200 (public, max-age=300)
@@ -298,10 +301,42 @@ export async function runTrustRecordGet(
   // condition is stated on the SERVED field; counting raw rows let a widened DB
   // CHECK serve a cacheable 200 whose provenance_gaps was [] — justified by a gap
   // the reader cannot see. One shared predicate now governs both sides.
+  //
+  // NAMED LIMIT (PR19 independent review, 2026-08-31 -- F2). This gate reads
+  // ONLY `.entries`, and the store read is CAPPED at PROVENANCE_GAPS_ROW_CAP
+  // (50, newest-first). It ignores `capped` and `totalCount`. So the 404's
+  // absence claim is scoped to the read WINDOW, not to the agent: an agent with
+  // more than 50 gap rows whose newest 50 all carry reasons absent from the
+  // wording map, and a servable row beyond the cap, would 404 while a servable
+  // entry exists. Note the asymmetry the product already shows -- a 200
+  // discloses "showing N of M" via total_provenance_gaps_count; the 404
+  // discloses nothing about truncation.
+  //
+  // CHECK (PR25): not reachable in production today. `agent_provenance_gaps`
+  // holds ZERO rows and the classification step has never executed in
+  // production -- published as such on agent-card.json's provenance-gaps/v1
+  // extension, and recorded at D-PROVENANCE-LEDGER-SLICE3-LIVE-VERIFIED-C4-
+  // DISCHARGED (2026-08-30). Reaching it additionally requires the
+  // widened-CHECK-ahead-of-code drift the classification module's own fold
+  // comment documents. Carried as a named follow-up rather than fixed here:
+  // the two candidate fixes (503 on `capped`, or disclose truncation in the
+  // message) are a design choice with a public-contract consequence, not a
+  // one-line correction, and slice 5 is the point at which it becomes live.
   const hasProvenanceGaps = (provenanceGaps?.entries ?? []).some((e) =>
     isServableProvenanceGapReason(e.reason),
   )
   if (!hasDomainEvidence && gapsReadFailed) {
+    // THE 503 IS DELIBERATELY VAGUER THAN THE 404 BELOW, and the asymmetry is
+    // intentional rather than an oversight (recorded here after PR19 asked,
+    // 2026-08-31 -- F4). The rule this session applied to the 404 is "name
+    // exactly the conditions this request evaluated"; the 503 names none of
+    // them. Two reasons it should stay that way: the accreditation 503 posture
+    // this surface mirrors is deliberately vague (see the store-failure 503
+    // above), and enumerating internal read failures to unauthenticated callers
+    // is a reconnaissance surface. The distinguishing basis IS published --
+    // llms.txt names the failed-provenance-gap read as a distinct 503 cause --
+    // and is logged operator-side on the line below. Vague to the caller,
+    // specific in the log and in the contract.
     console.error(
       '[trust-record] provenance-gaps read failed and no domain carries evidence; ' +
         'refusing to serve an unverified 404',
@@ -317,13 +352,43 @@ export async function runTrustRecordGet(
     )
   }
   if (!hasDomainEvidence && !hasProvenanceGaps) {
+    // THE SERVED MESSAGE MUST NAME EXACTLY THE CONDITIONS THIS REQUEST
+    // EVALUATED — no more, and no fewer. Slice 3 widened the gate above to
+    // `no examined evidence AND no servable gap entry`, and all three R18
+    // surfaces publish both halves; until 2026-08-31 this body still named
+    // only the first. Not false and not user-harmful, but a served-message /
+    // published-contract mismatch — precisely the class this arc exists to
+    // close. Found by the slice-3 LIVE verification, not by a local sweep
+    // (D-PROVENANCE-LEDGER-SLICE3-LIVE-VERIFIED-C4-DISCHARGED, 2026-08-30).
+    //
+    // WHY THE MESSAGE IS CONDITIONAL RATHER THAN ONE WIDENED STRING. Flag-off
+    // (and with a pre-slice-3 deps object) the gaps read never runs, so
+    // `provenanceGaps` stays undefined and this handler has looked at exactly
+    // ONE thing. Appending the gaps half unconditionally would assert an
+    // absence the request never checked — the same unverified-absence sin the
+    // 503 branch above exists to prevent (S10-ABUSE-1, applied to the read
+    // slice 3 added). So the second clause is emitted iff the read happened.
+    // Flag-off the string is byte-identical to its pre-slice-3 self.
+    //
+    // `provenanceGaps === null` (read failed) cannot reach here: that case is
+    // caught by the 503 branch above, which requires the same
+    // `!hasDomainEvidence`. `undefined` therefore means "never attempted".
+    //
+    // "available to surface" is deliberate, not loose: the gate counts the
+    // RENDERABLE set (S2-92 / the PR19 fold), so an agent whose only gap rows
+    // carry unservable reasons still 404s. Claiming "no gap entry exists"
+    // would overstate what the gate actually established.
+    const gapsWereRead = provenanceGaps !== undefined && provenanceGaps !== null
     return json(
       {
         status: 'not_found',
         message:
           `No trust record is available for agent: ${agentId}. ` +
           'No examined trust evidence has been folded for it ' +
-          '(declaration-class records alone do not surface a public record).',
+          '(declaration-class records alone do not surface a public record)' +
+          (gapsWereRead
+            ? ', and no provenance-gap entry is available to surface for it.'
+            : '.'),
         documentation_url: TRUST_RECORD_DOCUMENTATION_URL,
       },
       404,

@@ -1385,6 +1385,112 @@ async function main(): Promise<void> {
       'S2-102 "looked, found none" is served as an EMPTY list, distinct from dark/outage omission',
     )
 
+    // ── S2-103: THE 404 BODY DESCRIBES ITS OWN GATE. Slice 3 widened the gate
+    //    to `no examined evidence AND no servable gap entry` and published both
+    //    halves on all three R18 surfaces, but the served 404 message still
+    //    named only the first — a served-message / published-contract mismatch,
+    //    found by the slice-3 LIVE curl verification rather than by any local
+    //    sweep, and carried into 2026-08-31 as the slice-3 tail.
+    //
+    //    Pinned in BOTH directions, deliberately, because each direction guards
+    //    a different failure:
+    //      (a) drop the clause  -> the mismatch returns;
+    //      (b) emit it always   -> the handler asserts an absence it never
+    //                              checked (flag-off the gaps read does not
+    //                              run), which is the S10-ABUSE-1 sin the 503
+    //                              branch exists to prevent.
+    //    A one-directional pin would have passed the naive "just append it"
+    //    fix, which is why (b) is here.
+    const GAPS_CLAUSE = 'no provenance-gap entry is available to surface for it'
+    // Provenance of this constant, VERIFIED against git history rather than
+    // asserted (PR19 LOW): the message is byte-unchanged across a802fcd (the
+    // original S10 build) -> f3eabc7 -> c06fa6a -> 253580a -> df894ec (slice 3).
+    // It has never differed since the surface existed, so "PRE_SLICE3" names it
+    // accurately and no rename is warranted.
+    const PRE_SLICE3_404_MESSAGE =
+      'No trust record is available for agent: test:unknown@v1. ' +
+      'No examined trust evidence has been folded for it ' +
+      '(declaration-class records alone do not surface a public record).'
+
+    // (a) Flag-on, read succeeded, zero gaps: the gate looked at TWO things, so
+    //     the body must name two.
+    //     PR19 fold: asserted as a FULL STRING, not a substring pair. The first
+    //     version checked only `.includes(GAPS_CLAUSE) && .includes('declaration-
+    //     class')`, which a divergent flag-on template (wrong separator, dropped
+    //     agent id, duplicated clause) would have passed — 103b pins the whole
+    //     string only on the flag-OFF branch.
+    const FLAG_ON_404_MESSAGE =
+      PRE_SLICE3_404_MESSAGE.slice(0, -1) +
+      ', and no provenance-gap entry is available to surface for it.'
+    const res404On = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({ ok: true, value: { entries: [], capped: false, totalCount: 0 } }),
+    })
+    const body404On = (await res404On.json()) as { message: string }
+    assert(
+      res404On.status === 404 &&
+        body404On.message === FLAG_ON_404_MESSAGE &&
+        body404On.message.includes(GAPS_CLAUSE) &&
+        body404On.message.includes('declaration-class'),
+      'S2-103 flag-on 404 names BOTH halves of the gate it actually evaluated',
+    )
+
+    // (b) Flag-off: the read never ran, so the body must claim only what it
+    //     checked -- and byte-identically to its pre-slice-3 self.
+    const res404Off = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      isProvenanceLedgerEnabled: () => false,
+    })
+    const body404Off = (await res404Off.json()) as { message: string }
+    assert(
+      res404Off.status === 404 &&
+        !body404Off.message.includes(GAPS_CLAUSE) &&
+        body404Off.message === PRE_SLICE3_404_MESSAGE,
+      'S2-103b flag-off 404 asserts ONLY the half it checked, byte-identical to pre-slice-3',
+    )
+
+    // (c) Flag-on with unservable-only rows still 404s (S2-92) -- and the body
+    //     still names both halves, because the read DID happen. This is why the
+    //     wording is "available to surface" and not "no gap entry exists": rows
+    //     can exist while none is renderable, and the gate counts the rendered
+    //     set. The looser wording would overstate what was established.
+    const res404Unservable = await runTrustRecordGet('test:unknown@v1', {
+      ...gapsDepsBase,
+      readProvenanceGaps: async () => ({
+        ok: true,
+        value: { entries: [{ reason: 'some_future_reason', occurredAt: NOW_ISO }], capped: false, totalCount: 1 },
+      }),
+    })
+    const body404Unservable = (await res404Unservable.json()) as { message: string }
+    assert(
+      res404Unservable.status === 404 && body404Unservable.message.includes(GAPS_CLAUSE),
+      'S2-103c unservable-only rows: still 404, and the body still names the half that was read',
+    )
+
+    // (d) THE HALF-PRESENT DEPS CELL -- flag fn present, read fn ABSENT.
+    //     PR19 HIGH (independent review, 2026-08-31). Without this pin the set
+    //     proved only "clause iff FLAG", while the handler's stated invariant --
+    //     and its code -- is "clause iff the read actually RAN". Those two agree
+    //     in every cell EXCEPT this one, because the read is guarded on BOTH the
+    //     flag fn and the read fn being present (handler.ts, the `if` above the
+    //     gaps read). The reviewer demonstrated the gap by mutating the handler
+    //     to `deps.isProvenanceLedgerEnabled?.() === true` -- the whole battery
+    //     stayed GREEN at 197/0 while the half-present cell wrongly asserted an
+    //     absence nothing had checked. That is the exact S10-ABUSE-1 sin the
+    //     conditional exists to prevent, so it must not be reachable by mutation.
+    //     S2-94 already visits this cell but asserts only the STATUS.
+    const resHalfMsg = await runTrustRecordGet('test:unknown@v1', {
+      ...liveDeps,
+      isProvenanceLedgerEnabled: () => true,
+    })
+    const bodyHalfMsg = (await resHalfMsg.json()) as { message: string }
+    assert(
+      resHalfMsg.status === 404 &&
+        !bodyHalfMsg.message.includes(GAPS_CLAUSE) &&
+        bodyHalfMsg.message === PRE_SLICE3_404_MESSAGE,
+      'S2-103d flag ON but read fn ABSENT: no read ran, so the body must NOT claim the gaps half',
+    )
+
     // ── S2-91..S2-94: the PR19 folds of 2026-08-30. Each pins a property a
     //    reviewer had to find because no pin held it.
 
