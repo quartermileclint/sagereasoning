@@ -489,6 +489,13 @@ def summary(runs_dir: str) -> None:
                 modal_proceed_tied = sum(
                     1 for v in _pcounts.values() if v == _pmax) > 1
                 modal_proceed = max(_pcounts, key=_pcounts.get)
+                # Explicit tie-break: never let a {None, True} tie be decided by
+                # set-iteration order (hash(None) is documented as arbitrary and
+                # only became fixed in 3.12). A real proceed value wins.
+                if modal_proceed_tied:
+                    modal_proceed = max(
+                        _pcounts, key=lambda k: (_pcounts[k], k is not None))
+                _dir_ok = not modal_proceed_tied and modal_proceed is not None
                 entry.update({
                     "outcome_distribution": dist,
                     "modal_outcome": modal,
@@ -514,11 +521,20 @@ def summary(runs_dir: str) -> None:
                     # all-verdict 2026-08-30 dataset hid this: 3+3=6 held by luck
                     # of the data, not by construction.
                     "modal_proceed_tied": modal_proceed_tied,
-                    "flips_toward_block": None if modal_proceed_tied else sum(
+                    # R2 (PR19 re-review 2026-08-31): the split is meaningful
+                    # ONLY against a real proceed baseline. modal_proceed is
+                    # None when the MAJORITY outcome carries no proceed field
+                    # (tier1_pause / engine_unavailable) — there is then no
+                    # "usually permits" or "usually blocks" behaviour to flip
+                    # away from, and counting both directions against a
+                    # non-decision produced a clean-looking 2+2 with no warning,
+                    # because the arithmetic balanced. The first fix guarded
+                    # MINORITY nulls only.
+                    "flips_toward_block": None if not _dir_ok else sum(
                         1 for pr in proceeds
                         if pr is not None and pr != modal_proceed
                         and pr is False),
-                    "flips_toward_proceed": None if modal_proceed_tied else sum(
+                    "flips_toward_proceed": None if not _dir_ok else sum(
                         1 for pr in proceeds
                         if pr is not None and pr != modal_proceed
                         and pr is True),
@@ -550,7 +566,15 @@ def summary(runs_dir: str) -> None:
     # (PR19 2a/L14).
     n_disagree = sum(e.get("disagreement_count", 0) for e in borderline)
     n_flips = sum(e.get("proceed_flip_count", 0) for e in borderline)
-    incomplete = [e["series_id"] for e in borderline if not e["complete"]]
+    # R1 (PR19 re-review 2026-08-31): these derive over borderline_all, NOT
+    # borderline. A wholly-failed series has counted_outcomes == 0, so deriving
+    # them over `borderline` reported `borderline_failures: 0` while ten
+    # failures sat in the per-probe entry, and `all_borderline_series_complete:
+    # true` for a run in which an entire probe failed — and the report's own
+    # note tells a reader that an empty incomplete_series means the aggregate is
+    # publishable. n_total stays on `borderline`: a failed series contributes no
+    # outcomes and must not dilute the rate.
+    incomplete = [e["series_id"] for e in borderline_all if not e["complete"]]
 
     anchors = {k: v for k, v in per_probe.items()
                if v["class"].endswith("anchor")}
@@ -592,8 +616,9 @@ def summary(runs_dir: str) -> None:
             "flips_toward_proceed": None if any(
                 e.get("flips_toward_proceed") is None for e in borderline) else
             sum(e.get("flips_toward_proceed", 0) for e in borderline),
-            "flips_undirected": sum(
-                e.get("flips_undirected") or 0 for e in borderline),
+            "flips_undirected": None if any(
+                e.get("flips_undirected") is None for e in borderline) else
+            sum(e.get("flips_undirected", 0) for e in borderline),
             "precision_note": (
                 "Event counts, not rates. A small number of events per "
                 "direction establishes that both phenomena occur and that "
@@ -640,26 +665,53 @@ def summary(runs_dir: str) -> None:
     # series was `complete` and the block reported `balanced: true`.
     _opp = calibration["outcomes_per_probe"]
     _spp = calibration["series_per_probe"]
-    if len(_opp) < 2:
-        # F4: a positive balance claim on zero or one probe asserts something
-        # about a design that does not exist. Say "not applicable", not "true".
+    # R3 (PR19 re-review): count probes that produced DATA, not probes that
+    # produced an entry. Keying on len(_opp) left `balanced: true` standing on a
+    # run where all five probes failed entirely — every value 0, therefore
+    # "equal" — which is the exact defect F4 was written to close, one level in.
+    _measured = {pid: k for pid, k in _opp.items() if k}
+    if len(_measured) < 2:
         calibration["balanced"] = None
         calibration["balance_basis"] = (
-            "not applicable: fewer than two borderline probes measured")
+            "not applicable: fewer than two borderline probes produced counted "
+            f"outcomes ({_opp})")
     elif len(set(_opp.values())) > 1:
         _mx, _mn = max(_opp.values()), min(_opp.values())
         calibration["balanced"] = False
-        calibration["warning"] = (
-            (calibration["warning"] or "") + " UNBALANCED DESIGN: counted "
-            f"outcomes per probe range from {_mn} to {_mx} ({_opp}; series per "
-            f"probe {_spp}). The pooled rate is composition-biased toward the "
-            "over-sampled probes and MUST NOT be published as a class rate. "
-            "Either balance the design by sampling the under-weighted probes to "
-            "parity, or publish a single balanced subset. NOTE: per-series "
-            "completeness does not detect this — every series can reach its own "
-            "intended K while the probes carry unequal weight.").strip()
+        # R5: severity is stratified. `balanced: false` is factually right at
+        # 9-vs-10, but emitting byte-identical MUST-NOT-PUBLISH text for a lost
+        # call and for a 2x weight difference trains an operator to ignore it —
+        # and since transient failures are why `outcome_kind: failure` exists,
+        # essentially no real sweep would ever read balanced:true. The bias this
+        # check exists to catch was 12% -> 7.5% from a probe carrying 2x weight.
+        _material = _mn == 0 or (_mx / _mn) >= 1.25
+        calibration["balance_basis"] = (
+            f"counted outcomes per probe {_mn}-{_mx}; "
+            f"{'material' if _material else 'minor'} imbalance")
+        if _material:
+            calibration["warning"] = (
+                (calibration["warning"] or "") + " UNBALANCED DESIGN: counted "
+                f"outcomes per probe range from {_mn} to {_mx} ({_opp}; series "
+                f"per probe {_spp}). The pooled rate is composition-biased "
+                "toward the over-sampled probes and MUST NOT be published as a "
+                "class rate. Either balance the design by sampling the "
+                "under-weighted probes to parity, or publish a single balanced "
+                "subset. NOTE: per-series completeness does not detect this — "
+                "every series can reach its own intended K while the probes "
+                "carry unequal weight.").strip()
+        else:
+            calibration["warning"] = (
+                (calibration["warning"] or "") + " MINOR IMBALANCE: counted "
+                f"outcomes per probe {_mn}-{_mx} ({_opp}); heaviest probe "
+                f"carries {_mx / sum(_opp.values()):.1%} of the pooled weight "
+                f"against {1 / len(_opp):.1%} nominal. Composition bias is "
+                "small, but the pooled rate is not exactly equal-weighted — "
+                "state the range when publishing.").strip()
     else:
         calibration["balanced"] = True
+        calibration["balance_basis"] = (
+            f"equal weight: {min(_opp.values())} counted outcomes on each of "
+            f"{len(_opp)} borderline probes")
     # F3: an all-failure series is a fact about the run; a passive JSON field in
     # a block whose consumers read `warning` is close to silent.
     if borderline_empty:
@@ -669,6 +721,16 @@ def summary(runs_dir: str) -> None:
             "the rate and are excluded from it; they appear in "
             "outcomes_per_probe as 0 so the design description stays "
             "honest.").strip()
+    # R4 (PR19 re-review): with no borderline series at all, `any()` over an
+    # empty list is False and `sum()` over empty is 0, so the block published
+    # three clean zeros and no warning for a run containing no borderline data.
+    # F4's discipline applied to `balanced` and not to its sibling.
+    if not borderline:
+        calibration["directional"].update({
+            "flips_toward_block": None, "flips_toward_proceed": None,
+            "flips_undirected": None,
+            "basis": ("not applicable: no borderline series produced counted "
+                      "outcomes")})
     # F1: the directional split must decompose the flip count, or say it does not.
     _d = calibration["directional"]
     _tot = sum(e.get("proceed_flip_count", 0) for e in borderline)
@@ -705,7 +767,7 @@ def summary(runs_dir: str) -> None:
                                         if n_total else None),
         "borderline_counted_outcomes": n_total,
         "borderline_disagreements": n_disagree,
-        "borderline_failures": sum(e["failures"] for e in borderline),
+        "borderline_failures": sum(e["failures"] for e in borderline_all),
         "all_borderline_series_complete": not incomplete,
         "incomplete_series": incomplete,
         # -------------------------------------
