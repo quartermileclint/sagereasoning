@@ -358,7 +358,7 @@ extraction itself is not stable across occasions. The same text examined twice c
 different Layer-1 classifications and therefore a different verdict. This is not a defect in any
 rule; the deterministic layer faithfully computes what it is given, and what it is given varies.
 Measured on /api/guardrail on 2026-08-30 over five borderline inputs at ten examinations each:
-12% aggregate disagreement (Wilson 95% CI 5.6-23.8%, n=50 outcomes, 6 disagreements), splitting
+12% aggregate disagreement (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements), splitting
 3 toward blocking and 3 toward permitting — event counts, not rates, at that n. Measured on a
 borderline input class; a benign control varied on proximity but held its proceed verdict 10/10.
 NO RATE HAS BEEN MEASURED ON /api/reason, and this one does not transfer to it. Note that
@@ -825,7 +825,7 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
   inputs — a benign action re-examined ten times moved one proximity reading while its proceed
   verdict held on all ten. What distinguishes the borderline class is that its variance CROSSES
   THE PROCEED/BLOCK BOUNDARY. Measured on /api/guardrail on 2026-08-30, five borderline inputs x
-  ten examinations: aggregate disagreement rate 12% (Wilson 95% CI 5.6-23.8%, n=50, 6
+  ten examinations: aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50, 6
   disagreements), decomposing into 3 flips toward blocking (friction) and 3 toward permitting —
   the latter all on one force-push input the gate refused 7/10 and permitted 3/10, which is a
   failure mode, not a friction cost. Three events per direction shows both occur and that their
