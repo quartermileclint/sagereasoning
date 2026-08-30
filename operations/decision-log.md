@@ -29813,3 +29813,96 @@ supersession banner on the signed package — `git checkout` reverts it) and 5 a
 `D-VERDICT-VARIANCE-RATE-PRESENTATION-RULED-ADOPTED-WORDING-REVISED-FOR-SIGNATURE-2026-08-30`,
 `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-presentation-verbatim.md`,
 `operations/agent-circles-2026-08/2026-08-30-verdict-variance-disclosure-REVISED-WORDING-FOR-SIGNATURE.md`.
+
+---
+
+## D-VERDICT-VARIANCE-APPLIED-THEN-SUPERSEDED-TWICE-N100-SIGNED-2026-08-30
+
+**Date:** 2026-08-30. **Tier:** `code-elevated`, with a founder-walked credential limit-raise.
+**Session:** PR19 the revised wording → apply → carried items → balanced sweep → two mentor rulings.
+
+**What happened, in order.** The verdict-variance disclosure was reviewed, corrected, applied to four
+live surfaces carrying the measured rate, and then **superseded twice in the same day** — once by a
+finding about how its figures were produced, once by a larger measurement. It is signed again at
+n=100 and **not applied**; application is the successor's first task.
+
+**1 — The disclosure went live** (`a2428b4`, `098a5ff`). PR19 on the revised wording found **zero
+numeric defects and a disqualifying scope defect**: the draft superseded four sections of an
+eleven-section signed package and called it "four false assertions". Three more were governing with
+falsified content — §4 (in Ordering step 1, asserting *"the item publishes no rate"* in the commit
+that publishes 12%), §7 (**elected in full**, targeting the *same `llms.txt`* as the trust-record
+bullet, so applying both would have published the rate and its denial in one document), §8 — **and
+pin S2-49 pinned the exact string the revision deletes.** True count: **fourteen strings, seven
+sections, one pin.** The undercount *was* the defect: the audit swept only what it had already chosen
+to rewrite. S2-49 was **retired as a decision**, with S2-51 as its inverse guard on the published
+interval. `llms.txt:118` fixed in the same pass — `input` is the request field's own name, so
+*"identical inputs produce identical assessments"* read as a claim about identical `input` text.
+
+**2 — Carried items 1, 4, 5 closed.** Dash normalisation; the signed package **restored** to its
+pre-banner state with the supersession recorded in a **sibling** file (founder-elected — restoring is
+not editing, writing into it is); `runs/` retention policy, with the size figure corrected for the
+**third** time (~14.5 KB/record; derive it, do not quote a constant).
+
+**3 — The instrument, five independent review rounds.** Rounds 1–3 each found defects in the
+previous round's fixes. Round 4 **cleared round 3** and found two HIGH in the **collection path no
+round had read** — `classify_outcome` counted any parseable 200 as a real `engine_unavailable`, and
+its status matcher tested for `"tier1"`/`"clarif"` when the route emits `ambiguous_pause`, making that
+branch dead code and letting a cost-null proxy decide. Round 4 also found round 3's
+`record_accounting` "invariant" was a **tautology**. Round 5 found the two things that mattered most,
+and neither was in the code: **the published Wilson interval existed nowhere in the repository**
+(hand-computed in chat; the runner now emits it, names the method — Wald gives 3.0–21.0% on the same
+data — and regenerates the published string byte-for-byte), and **the directional 3/3 split was
+arithmetically forced by the probe mix**, since direction is deviation from each probe's own modal and
+only one probe was block-modal.
+
+**4 — Two mentor rulings, both binding** (verbatims:
+`2026-08-31-mentor-ruling-directional-split-probe-composition-verbatim.md` — misdated, see below —
+and `2026-08-30-mentor-ruling-pooled-sweep-n100-verbatim.md`). The first required the attribution on
+the surface and **scoped "the gate failing at its purpose" to p5-force by name, not the class**. The
+second, after the sweep: **publish n=100**; restate the sharpest claim as **indeterminacy** rather
+than a 70/30 rate; **remove the directional decomposition from publication entirely**, replaced by the
+per-probe distributions; the falsification record **stands as recorded**.
+
+**5 — The balanced sweep ran** (founder raised the daily quota 200→400 by SQL; p4/p5/p6/p7 at K=10).
+**n=100, rate 0.12 — identical to sweep 1 — interval tightening 5.6–23.8% → 7.0–19.8%.** Two
+independent sweeps agreeing to the digit. **But p5-force came back 5/5 against sweep 1's 7/3** (Fisher
+p=0.650 — not significant, one underlying rate), and the tie made the modal baseline arbitrary, so the
+instrument **suppressed the directional split** — the guard from review round 2 firing on live data,
+on the one probe the sharpest claim rests on. At K=20 the class limit **sharpens**: p5-force is the
+only member distinguishable from the clean anchor (p=0.0033).
+
+**6 — Three wording drafts, three blocking defects, all the executing session's own.** Draft 1
+asserted *"the four usually-permitted inputs show variance"* — **false**, two showed none — and missed
+a fifth live surface. Draft 2 (n=100) asserted **"two sweeps against one deployment"** — false, and in
+the reassuring direction: two deploy proxies, with **one of the two force-push series on each**, so
+the indeterminacy claim is itself a cross-boundary comparison. Chasing it produced the better answer:
+production **did** redeploy, but **no file in the gate's code path changed** (verified by diff), so
+both sweeps measure the same code — while the proxy attests nothing about production. Draft 2 also
+dropped **"calibration falsification"**, pinned that morning by S2-54 on the founder's own election.
+**Every blocking defect across all three drafts was scope, never arithmetic.**
+
+**A divergence from a ruling, taken deliberately and disclosed.** The directional-split ruling's Q4
+says *"the other four probes show variance that produces friction"* — false on the data. The **same
+answer** contains the precise form (*"p1 and p3 at 10/0 are not borderline"*). The wording follows the
+precise clause. **The founder accepted this explicitly.** A ruling binds on what it decides; it does
+not license publishing a claim its own text elsewhere contradicts.
+
+**A process error of the executing session's, disclosed to the mentor as fact 9.** Seventeen commits
+and four documents — including the first ruling's verbatim record — are **filed as 2026-08-31 when
+today is 2026-08-30**. Caught only when the quota arithmetic would not reconcile. The *measurement*
+dates inside every wording are correct. **Not corrected in-session; carried.**
+
+**Risk classification:** Elevated, with one founder-walked Critical step (the credential limit-raise,
+`§INVERSE` recorded). AC7 engaged only there. Weights-BLOCKED, Q1, and the §A boundary unchanged;
+nothing bears on the 0h call.
+
+**Rollback:** `git revert 098a5ff` then `a2428b4` (surfaces must not outlive the envelope item);
+`UPDATE api_keys SET daily_limit = 200 WHERE id = '4d96307f-…'`.
+
+**Carried:** the n=100 application (signed, unapplied); the date correction; the quota restore; a
+possible third sweep. **Live surfaces currently carry the sweep-1 wording — accurate for the sample it
+describes, and smaller than what is now known.**
+
+**Rules served:** PR6, PR10, PR15, PR18, **PR19 (six independent rounds)**, **PR20**, PR23, R18, Q1.
+
+**Status:** Adopted.
