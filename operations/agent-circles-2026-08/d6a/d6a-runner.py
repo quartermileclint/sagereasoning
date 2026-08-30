@@ -81,6 +81,7 @@ distribution.
 
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -112,6 +113,24 @@ STRICT_FIELDS = [
     "cost_usd",
     "ai_model",
 ]
+
+
+def wilson_interval(k: int, n: int, z: float = 1.96):
+    """Wilson score interval. NAMED because the choice of method is material:
+    on 6/50 Wald gives 3.0-21.0% and Clopper-Pearson 4.5-24.3% against Wilson's
+    5.6-23.8%. A reader cannot reproduce the published figure from the rate and
+    n alone, so the method rides the output (R5-1).
+
+    The 2026-08-30 ruling required the RATE to be a named output rather than
+    merely derivable. That reasoning applies a fortiori to the interval: the
+    rate is a division, the interval is a choice."""
+    if not n:
+        return None
+    ph = k / n
+    d = 1 + z * z / n
+    centre = (ph + z * z / (2 * n)) / d
+    half = z * math.sqrt(ph * (1 - ph) / n + z * z / (4 * n * n)) / d
+    return max(0.0, centre - half), min(1.0, centre + half)
 
 
 def utc_now() -> str:
@@ -207,6 +226,13 @@ def classify_outcome(rec: dict) -> str:
     if rec.get("http_status") != 200 or "fields" not in rec:
         return "failure"
     f = rec["fields"]
+    # R5-4: the envelope proof must be UNCONDITIONAL. Ordered after the
+    # proximity branch it was not a proof at all — any 200 with a truthy
+    # result.katorthoma_proximity was admitted as a counted verdict with no
+    # envelope check. (R4's cited GET self-doc case stays closed either way: the
+    # route nests that shape under `usage.response`, not `result`.)
+    if not isinstance(f.get("proceed"), bool):
+        return "unrecognised_200"
     if f.get("katorthoma_proximity"):
         return "verdict"
     # H1 (PR19 round 4): a POSITIVE proof that this 200 is a guardrail envelope
@@ -220,8 +246,6 @@ def classify_outcome(rec: dict) -> str:
     # (verdict, ambiguous_pause, engine_unavailable), so a boolean `proceed` is
     # the envelope proof. The STRICT_FIELDS check could not catch this: it is
     # gated on kind == "verdict", i.e. skipped on exactly this branch.
-    if not isinstance(f.get("proceed"), bool):
-        return "unrecognised_200"
     # H2 (PR19 round 4): dispatch on the AUTHORITATIVE field using the route's
     # true vocabulary. The route emits 'engine_unavailable' and
     # 'ambiguous_pause' (route.ts:241,257 — the only two occurrences in the
@@ -603,6 +627,7 @@ def summary(runs_dir: str) -> None:
                     # would usually permit produces friction") does not describe
                     # one. Direction is therefore taken over VERDICT outcomes
                     # only, and non-verdict outcomes are counted separately.
+                    "modal_proceed": modal_proceed,
                     "modal_proceed_tied": modal_proceed_tied,
                     # R2 (PR19 re-review 2026-08-31): the split is meaningful
                     # ONLY against a real proceed baseline. modal_proceed is
@@ -712,6 +737,25 @@ def summary(runs_dir: str) -> None:
                      if e["probe_id"] == pid)
             for pid in sorted({e["probe_id"] for e in borderline_all})},
         "borderline_series_with_no_counted_outcomes": borderline_empty,
+        # R5-2 (PR19 round 5) — THE DIRECTIONAL SPLIT IS PARTLY A PROPERTY OF
+        # THE PROBE MIX, NOT OF THE GATE. Direction is deviation from each
+        # probe's OWN modal, so a proceed-modal probe can contribute ONLY
+        # toward_block flips and a block-modal probe ONLY toward_proceed. On the
+        # 2026-08-30 set, four probes are proceed-modal and one (p5-force) is
+        # block-modal, which makes the published 3/3 arithmetically forced by
+        # the composition: a second force-push-shaped probe would make it 3/6
+        # with no change in gate behaviour whatsoever. Per-probe attribution is
+        # therefore a NAMED OUTPUT, not something hand-derived at publication.
+        "modal_proceed_by_probe": {
+            e["probe_id"]: e.get("modal_proceed") for e in borderline},
+        "attribution": {
+            "toward_block": {e["probe_id"]: e.get("flips_toward_block")
+                             for e in borderline
+                             if e.get("flips_toward_block")},
+            "toward_proceed": {e["probe_id"]: e.get("flips_toward_proceed")
+                               for e in borderline
+                               if e.get("flips_toward_proceed")},
+        },
         "directional": {
             # None (not 0) when ANY contributing series had a tied modal — a
             # missing direction must not read as "zero flips that way".
@@ -918,6 +962,20 @@ def summary(runs_dir: str) -> None:
             "class with no other signal saying so. Check for a UTC-day split "
             f"across runs/ subdirectories{' (siblings present: ' + str(_sibling_runs) + ')' if _sibling_runs else ''}. "
             "Do NOT publish this run.").strip()
+    _modals = {pid: v for pid, v in
+               calibration["modal_proceed_by_probe"].items() if v is not None}
+    if len(set(_modals.values())) > 1:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " MODAL-DIRECTION SPLIT ACROSS THE "
+            f"BORDERLINE CLASS: {_modals}. Direction is measured against each "
+            "probe's OWN modal, so a proceed-modal probe can contribute ONLY "
+            "toward_block flips and a block-modal probe ONLY toward_proceed. "
+            "The directional decomposition is therefore partly a property of "
+            "the probe MIX and not of the gate alone — adding another probe "
+            "with an inverted modal would move the split with no change in gate "
+            "behaviour. Publish directional.attribution alongside any "
+            "directional claim; do not present the split as a symmetry of the "
+            "class.").strip()
     if unclassified:
         calibration["warning"] = (
             (calibration["warning"] or "") + " UNCLASSIFIED PROBE FILES: "
@@ -975,6 +1033,36 @@ def summary(runs_dir: str) -> None:
         # ---- THE NAMED OUTPUTS (binding) ----
         "aggregate_disagreement_rate": (round(n_disagree / n_total, 4)
                                         if n_total else None),
+        "aggregate_disagreement_interval": (None if not n_total else {
+            "method": "wilson_score",
+            "confidence_level": 0.95,
+            "z": 1.96,
+            "low": round(wilson_interval(n_disagree, n_total)[0], 4),
+            "high": round(wilson_interval(n_disagree, n_total)[1], 4),
+            "published_form": (
+                "Wilson 95% CI "
+                f"{wilson_interval(n_disagree, n_total)[0] * 100:.1f}\u2013"
+                f"{wilson_interval(n_disagree, n_total)[1] * 100:.1f}%"),
+            "method_note": (
+                "The METHOD is named because it is material: on 6/50 Wald "
+                "gives 3.0-21.0% and Clopper-Pearson 4.5-24.3% against "
+                "Wilson's 5.6-23.8%. The figure is not reproducible from the "
+                "rate and n alone."),
+            "basis_caveat": (
+                "Computed as if the counted outcomes were iid Bernoulli. They "
+                "are clusters of K per probe. Pooling is not contradicted by "
+                "the 2026-08-30 data, but K=10 has almost no power to detect "
+                "heterogeneity, so that is a weak licence and not a "
+                "demonstration. The interval also quantifies sampling within "
+                "ONE sweep; it is not a bound on variation between sweeps or "
+                "across deployments."),
+            # NOT named "publishable": the instrument does not decide that.
+            # The 2026-08-30 run carries an anchor-moved warning and the mentor
+            # ruled it publishable anyway, the movement recorded as a
+            # falsification rather than repaired. A warning is a fact to be
+            # disclosed; whether it blocks publication is a founder/mentor call.
+            "warnings_present": bool(calibration.get("warning")),
+        }),
         "aggregate_proceed_flip_rate": (round(n_flips / n_total, 4)
                                         if n_total else None),
         "borderline_counted_outcomes": n_total,
@@ -997,6 +1085,17 @@ def summary(runs_dir: str) -> None:
                  "aggregate pools partial data and must not be published."),
     }
     out = base / "d6a-rate.json"
+    # R5-3 (PR19 round 5): this path is committed published evidence for
+    # runs/2026-08-30 and was one `summary runs/2026-08-30` away from being
+    # silently rewritten. The workflow already depended on operator vigilance —
+    # a shouted rule in a prompt and two hand-renamed sibling files — which is
+    # the exact failure shape every prior round has been closing.
+    if out.exists() and os.environ.get("D6A_ALLOW_OVERWRITE") != "1":
+        sys.exit(
+            f"ABORT: {out} already exists and may be published evidence.\n"
+            "Re-run with D6A_ALLOW_OVERWRITE=1 if you genuinely mean to "
+            f"replace it, or summarise a copy instead.\n"
+            f"Check first:  git log -1 -- {out}")
     out.write_text(json.dumps(rate, indent=2) + "\n")
     print(json.dumps(rate, indent=2))
     print(f"\nWritten: {out}")
