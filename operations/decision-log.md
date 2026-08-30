@@ -29708,3 +29708,108 @@ defect above).
 `D-R8-D6A-FIRST-LIVE-SWEEP-RATE-MEASURED-ANCHOR-FALSIFICATION-RECORDED-2026-08-30`,
 `D-VERDICT-VARIANCE-RATE-PRESENTATION-RULED-ADOPTED-WORDING-REVISED-FOR-SIGNATURE-2026-08-30`,
 `operations/agent-circles-2026-08/d6a/runs/2026-08-30/d6a-rate-UNBALANCED-DO-NOT-PUBLISH.json`.
+
+---
+
+## D-VERDICT-VARIANCE-DISCLOSURE-APPLIED-CARRYING-MEASURED-RATE-2026-08-31
+
+**Date:** 2026-08-31. **Tier:** `code-elevated`. **Session:** PR19 on the revised verdict-variance
+wording, then application to the four surfaces.
+
+**What happened.** The revised disclosure wording — which carries the rate the 2026-08-30 D6a sweep
+measured — was independently reviewed under PR19, corrected, approved by the founder, and applied.
+The interim "rate unknown" language was never published, as the rate-presentation ruling requires.
+
+**PR19 ran BEFORE the signature, deliberately.** The prompt named two gates without ordering them
+relative to each other. The executing session ran the review first, on the reasoning that asking the
+founder to sign unreviewed text and then reviewing it inverts what a signature is for. The reviewer
+was told the sweep had happened and handed `d6a-rate.json` — the prompt's own instruction, given
+because a claims-vs-source pass against the pre-sweep sources cannot see a defect created after
+sign-off, which is exactly how four false assertions survived the original review.
+
+**The review found zero numeric defects and a disqualifying scope defect.** Every figure was
+independently reproduced — the Wilson interval recomputed, the directional assignment checked against
+the live `threshold='deliberate'` proceed/block semantics rather than assumed, the p5 arithmetic
+confirmed free of double-count. But the draft superseded four sections of an eleven-section signed
+package and described the problem as "four false assertions". **Three more sections were still
+governing with falsified rate claims** — §4 (in Ordering step 1, asserting *"The item publishes no
+rate"* in the very commit that publishes 12%), §7 (**elected in full**, targeting the *same
+`llms.txt` file* as the trust-record bullet, so applying both as scoped would have published
+"aggregate disagreement rate 12%" and "the rate ... has not been measured" in one live document), and
+§8 (**elected**, *"Its rate is unmeasured"*) — **and battery pin S2-49 pinned the exact string the
+revision deletes.** The exhaustive count is **fourteen falsified strings across seven sections and a
+pin**, now enumerated rather than counted. **The undercount was itself the defect:** the audit swept
+only the sections the revision had already chosen to rewrite.
+
+**S2-49 retired deliberately, not broken.** It pinned *"Its rate has not been measured"* as the guard
+against a rate reaching the surface without sign-off — the package calls it *"the pin that matters
+most"*. Its guarded condition is discharged by the founder's approval and its string is now false.
+**S2-51 replaces it as the inverse guard** on the published interval (so the signed figure cannot be
+silently altered or dropped) and **S2-53 asserts the retired string's absence**. All six pins
+(S2-48/50/51/52/53/54) mutation-verified.
+
+**A vacuous-verification catch, recorded because it nearly stood.** The first mutation harness used
+`perl -CSD -i -pe`, which silently failed to substitute on the non-ASCII dashes — so two "pins pass
+under mutation" results were tests of an *unmodified file*. Caught because the results looked too
+clean (the one ASCII mutation failed its pin; the two non-ASCII ones did not). Re-run under a
+UTF-8-safe Python harness, all pins fail correctly. **The lesson is the standing one: a guard that
+stops guarding still prints pass** — assert the mutation applied, never infer it from the runner.
+
+**Two founder elections, both approved and folded.** (1) The clean anchor's movement now reaches the
+**public** surfaces as a **calibration falsification** — the instrument's own class-boundary check did
+not hold — left recorded rather than repaired by re-partitioning, per Q4a. It had been offered rather
+than folded because how much instrument self-criticism a disclosure carries is a judgement, not a
+correction. (2) The `llms.txt:118` replacement wording. **Recorded honestly: the founder approved on
+the session's summary of the findings and corrections, not on a line-by-line reading** — stated
+plainly because this arc has already carried a signed wording that a later measurement falsified.
+
+**`llms.txt:118` fixed in the same pass, raised from carried item to a gate.** The line read
+*"identical inputs produce identical assessments"*; `input` is the literal request-body field name
+(`llms.txt:106`), so the claim read as being about identical `input` text — false, and false on the
+consult path too, where only the *rate* is unmeasured. Its three sibling determinism claims were each
+already scoped to the extraction; :118 alone was not. Deferring it would have left `llms.txt` saying
+in one document both that verdicts are probabilistic draws and that identical inputs produce
+identical assessments.
+
+**Also corrected:** the evidence pointer (the JSONL went **70 → 101 lines** when the aborted sweep 2
+landed, so a verifier following it reproduces **7.5%**, not 12%; now cites the seven sweep-1 series
+ids and states the exclusion is composition bias by design); **surface (d)**, which had dropped both
+the disagreement count and the borderline-class scoping two rulings require; and a **single-sweep /
+one-deployment qualifier** on every surface — **not ruled**, added on honest-calibration grounds
+because the Wilson interval quantifies sampling *within* one sweep only.
+
+**What is published.** 12% aggregate disagreement (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6
+disagreements) on `/api/guardrail`, **decomposed by direction** into 3 events toward blocking
+(friction) and 3 toward permitting (a failure mode — all three on one force-push proposal refused
+7/10, permitted 3/10), as **event counts, not derived rates**. The **primary claim changed rather
+than being reworded** (Q4b): variance is scale-wide, and the borderline class is distinguished by
+variance crossing the proceed/block boundary.
+
+**Ordering honoured.** Edit 1 (`a2428b4`) landed `TRUST_RECORD_ENVELOPE` + the ADR-013 §8 dated
+amendment + the pins in **one commit**; Edit 2 (`098a5ff`) then took the three R18 surfaces, never
+ahead of it. Agent-card extension count **re-derived from the file: 24 → 25**, not re-quoted.
+
+**Verification.** tsc 0; `npm run build` passes; S10 battery **146/0**; agent-card parses at 25
+extensions; cross-surface sweep confirms no residual "rate not measured" claim, no inter-surface
+contradiction, and `/api/reason` stated as unmeasured on every surface.
+
+**Risk classification:** Elevated under 0d-ii. **AC7 NOT engaged** — no auth, perimeter, encryption,
+schema, migration, credential, or flag surface; **no flag flipped and no behaviour changed**. The
+edits are disclosure text, an ADR amendment, and battery pins. Weights-BLOCKED, Q1, and the §A
+boundary unchanged; nothing bears on the 0h call.
+
+**Rollback path:** `git revert 098a5ff` (public surfaces) and/or `git revert a2428b4` (envelope + ADR
++ pins), in that order — the surfaces must not outlive the envelope item they describe.
+
+**Carried, not done:** the founder's push, and **live `curl` verification against production after
+it** — the session cannot verify a surface it has not deployed. Carried items 2 (balanced second
+sweep), 3/3b (calibration balance check + directional split, each needing its own PR19), 4 (the
+supersession banner on the signed package — `git checkout` reverts it) and 5 are untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, **PR19 (run and discharged)**, PR23, R18, Q1.
+
+**Status:** Adopted. Cross-references:
+`D-R8-D6A-FIRST-LIVE-SWEEP-RATE-MEASURED-ANCHOR-FALSIFICATION-RECORDED-2026-08-30`,
+`D-VERDICT-VARIANCE-RATE-PRESENTATION-RULED-ADOPTED-WORDING-REVISED-FOR-SIGNATURE-2026-08-30`,
+`operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-presentation-verbatim.md`,
+`operations/agent-circles-2026-08/2026-08-30-verdict-variance-disclosure-REVISED-WORDING-FOR-SIGNATURE.md`.
