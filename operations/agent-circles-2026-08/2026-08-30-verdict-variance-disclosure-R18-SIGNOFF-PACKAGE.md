@@ -1,26 +1,5 @@
 # R18 sign-off package — the instrument-level verdict-variance disclosure (layer 1 of 2)
 
-> ## ⚠ SUPERSEDED IN PART — DO NOT APPLY §3, §6a, §6b, §6c AS WRITTEN
->
-> **Added 2026-08-30, after this package was signed.** The first D6a live sweep ran on 2026-08-30 and
-> **measured the rate this package four times asserts is unmeasured** — §3 (*"Its rate has not been
-> measured"*, *"an instrument to measure it is scheduled"*), §6a, §6b (`"rate": "not measured"`,
-> `"rate_location": "not yet determined"`), §6c (*"rate not yet measured"*). Every one was true at
-> signature. **All four are now false**, and applying them would publish false statements onto live
-> public surfaces.
->
-> The mentor ruled on 2026-08-30 that the disclosure **publishes once, already carrying the measured
-> rate**, and that *"the interim 'rate unknown' language is never published"*
-> (`2026-08-30-mentor-ruling-verdict-variance-rate-presentation-verbatim.md`, binding).
->
-> **Replacement wording — unsigned, awaiting the founder:**
-> `2026-08-30-verdict-variance-disclosure-REVISED-WORDING-FOR-SIGNATURE.md`.
->
-> **This file is NOT edited below this banner.** It remains the record of what the founder signed on
-> the pre-sweep wording, and the traceability of that signature is preserved deliberately. Its
-> §"Ordering", battery pins, and application sequencing are unaffected and still govern.
-
-
 **Authored 2026-08-30.** `code-elevated` session, but **this file is documents only — NOTHING IS
 APPLIED.** No public surface, code file, ADR, or battery has been touched. This is the wording put
 to the founder for R18 sign-off.
