@@ -357,14 +357,21 @@ has nothing to corroborate against — this is structural, disclosed, not addres
 extraction itself is not stable across occasions. The same text examined twice can produce
 different Layer-1 classifications and therefore a different verdict. This is not a defect in any
 rule; the deterministic layer faithfully computes what it is given, and what it is given varies.
-Measured on /api/guardrail on 2026-08-30 over five borderline inputs at ten examinations each:
-12% aggregate disagreement (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements), splitting
-3 toward blocking and 3 toward permitting — event counts, not rates, at that n. Measured on a
-borderline input class; a benign control varied on proximity but held its proceed verdict 10/10.
-NO RATE HAS BEEN MEASURED ON /api/reason, and this one does not transfer to it. Note that
-`urgency_indicators` — class (b) in the map above — is the field that carried the variance in the
-single-input demonstration, so the map's provenance entry for it describes where the value comes
-from, not how stable it is between occasions.
+Measured on /api/guardrail on 2026-08-30 over five borderline inputs at twenty examinations
+each, across two independent series: 12% aggregate disagreement (Wilson 95% CI 7.0–19.8%, n=100
+outcomes, 12 disagreements) — the same rate both series returned. Per-input, of 20 each: 0, 0, 2,
+2, and 8. No directional summary is published; the inputs do not share a regularity one could
+honestly carry. The one at 8/20 is a force-push proposal, and on it the gate's behaviour is
+INDETERMINATE — blocked 7 of 10 in one series, split 5/5 in the other, so a recipient cannot
+predict the outcome or describe a usual behaviour toward it. A finding about that input, not the
+class. At this sample size the class is distinguished from the clean anchor solely by that input's
+distribution. The clean anchor varied on proximity but held its proceed verdict 20/20 — recorded as
+a calibration falsification, left recorded rather than repaired. NO RATE HAS BEEN MEASURED ON
+/api/reason, and this one does not transfer to it. Two sweeps on one date, spanning a redeploy in
+which the gate's code path did not change (verified by diff); revised as better evidence arrives.
+Note that `urgency_indicators` — class (b) in the map above — is among the fields that carried the
+variance, so the map's provenance entry for it describes where the value comes from, not how stable
+it is between occasions.
 
 This map covers ENGINE outputs only. The trajectory overlay, practice suggestions, orientation
 readings, and the loop fold each sit under their own disclosure regime and are outside it.
@@ -409,7 +416,7 @@ Use this as middleware before executing any consequential action. `risk_class` c
 
 The verdict is computed **deterministically** from `extraction` by a free Layer-2 mechanism pass and then Ed25519-signed (`signed_assessment`; verify against `GET /api/public-key`) — there is no LLM prose render. `evaluation_depth` is the constant `"deterministic"`; only the mechanism count follows `risk_class`. `is_kathekon` may be `null` when the extraction is too sparse to judge — the gate then floors to a conservative non-proceed rather than guessing. **Dikaiosyne (justice) is weighted NATIVELY (ADR-010 §4):** when the action engages a justice-toward-others dimension, `katorthoma_proximity` is the unity-thesis minimum across the engaged virtue domains — a calmly-reasoned injustice floors to `reflexive`, not rated near-virtuous — and the signed assessment carries `proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis}` plus, per engaged circle, `oikeiosis.relevant_circles[].obligation_assessment {status, justification}`. The floor is folded into the **signed** proximity, so a justice-floored verdict is **fully reproducible from the signed assessment** (the earlier near-term LLM justice bridge was retired 2026-06-26). The same deterministic **corroboration check** runs on the gate: the extraction's self-report claims (`obligation_assessment: met/indeterminate`; `examined_before_acting` on a grave act) are cross-referenced against the verbatim `action` text, and a grounded contradiction floors the affected domain (monotone — the gate can only become MORE conservative, never less). The full `corroboration` report (findings vocabulary `corroborated|uncorroborated|contradicted`, verbatim marker quotes) rides inside `signed_assessment.assessment.corroboration`. Availability: on a signing outage the gate fails **closed** (HTTP 503); on an engine outage it returns a conservative pause — never a silent proceed.
 
-**What "deterministic" scopes to.** The determinism above is Layer 2's: given an `extraction`, the verdict is a pure function of it and is reproducible by re-running the mechanisms. It is **not** a claim that the same `action` text re-submitted produces the same `extraction`, and therefore not a claim that it produces the same verdict. Layer 1 is a sampled model output. **Measured on this endpoint on 2026-08-30** — five borderline actions, ten byte-identical submissions each at the default band — **aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements)**. The six split evenly by direction and the two directions are not equivalent: **three ran toward blocking**, the gate declining what it would usually permit, which is friction; **three ran toward permitting**, all on one force-push proposal this gate refused seven times in ten and permitted three times in ten, which is the gate failing at its purpose rather than a friction cost. Three events per direction establishes that both occur and that their consequences differ; it does not establish relative frequency, and no directional rate is claimed. A deliberately benign control action varied on proximity (1 of 10) but held `proceed` on all ten — variance appears across the scale, and what distinguishes the borderline class is that its variance crosses the proceed/block boundary. Single sweep, one deployment. If a verdict is consequential to you, treat one call as one draw — re-submitting is a legitimate way to see whether the reading is stable.
+**What "deterministic" scopes to.** The determinism above is Layer 2's: given an `extraction`, the verdict is a pure function of it and is reproducible by re-running the mechanisms. It is **not** a claim that the same `action` text re-submitted produces the same `extraction`, and therefore not a claim that it produces the same verdict. Layer 1 is a sampled model output. **Measured on this endpoint on 2026-08-30** — five borderline actions, twenty byte-identical submissions each at the default band, across two independent series — **aggregate disagreement rate 12% (Wilson 95% CI 7.0–19.8%, n=100 outcomes, 12 disagreements)**, the same rate both series returned. **No directional summary is published**: the inputs do not share a regularity one could honestly carry. The per-input distributions are published instead — **of 20 examinations each: 0, 0, 2, 2 and 8**. The two that never varied are a package-registry publish and a subscriber-list send; the two at 2/20 are a production deploy and a stale staging-snapshot cleanup, which is friction — occasional blocks on actions the gate otherwise permits. **The one at 8/20 is a force-push proposal, and on it the gate's behaviour is indeterminate:** it blocked 7 of 10 in one series and split 5/5 in the other — 12 blocked and 8 permitted across the twenty — so a recipient cannot predict whether it will be blocked or permitted, and cannot describe the gate as having a usual behaviour toward it. That is the gate failing at its purpose rather than a friction cost, and it is a finding about **that input**, not about the class. At this sample size the borderline class is distinguished from the clean anchor **solely** by that input's distribution; the other four are statistically indistinguishable from the anchor on the proceed boundary. A deliberately benign control action varied on proximity (1 of 20) but held `proceed` on all twenty — recorded as a calibration falsification and left recorded rather than repaired; variance appears across the scale, and what distinguishes the borderline class is that its variance crosses the proceed/block boundary. Two sweeps on one date, spanning a production redeploy in which no file in the gate's code path changed (verified by diff), so both sweeps measure the same code; the deploy identifier is a local-repository proxy and attests nothing about production. Revised as better evidence arrives. If a verdict is consequential to you, treat one call as one draw — re-submitting is a legitimate way to see whether the reading is stable.
 
 **What the gate evaluates (it is not a fact-checker):** the Sage Risk Gate evaluates the **reasoning over the premises you supply** — it diagnoses passions, value-errors, and proximity in the framing of the action. It does **not** independently verify arithmetic, claims, or external facts in your `context`. Supplying false or incomplete facts yields a verdict over those facts. Verify your inputs before trusting the gate's framing.
 
@@ -822,19 +829,26 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
   from the extraction it was given (that is what the signature attests); Layer 1, which produces
   that extraction, is a sampled model output, so the same text examined twice can yield different
   extractions and different verdicts. Variance appears across the scale, including on benign
-  inputs — a benign action re-examined ten times moved one proximity reading while its proceed
-  verdict held on all ten. What distinguishes the borderline class is that its variance CROSSES
+  inputs — a benign action re-examined twenty times moved one proximity reading while its proceed
+  verdict held on all twenty. What distinguishes the borderline class is that its variance CROSSES
   THE PROCEED/BLOCK BOUNDARY. Measured on /api/guardrail on 2026-08-30, five borderline inputs x
-  ten examinations: aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50, 6
-  disagreements), decomposing into 3 flips toward blocking (friction) and 3 toward permitting —
-  the latter all on one force-push input the gate refused 7/10 and permitted 3/10, which is a
-  failure mode, not a friction cost. Three events per direction shows both occur and that their
-  consequences differ; it does not establish relative frequency, so no directional rate is
-  claimed. Measured on a borderline input class; the clean anchor showed proximity variance but
-  held on the proceed boundary — the instrument recorded that as a calibration falsification and
-  it is left recorded, not repaired. Single sweep, one deployment, one date — the interval is
-  sampling error within that sweep, not stability across sweeps. NO RATE IS MEASURED ON
-  /api/reason and this one does not transfer to it. Read a single verdict as one draw.
+  twenty examinations across two independent series: aggregate disagreement 12% (Wilson 95% CI
+  7.0–19.8%, n=100, 12 disagreements) — the same rate both series returned. Per-input, of 20 each:
+  0, 0, 2, 2, and 8. The two that never varied are a package publish and a subscriber-list send;
+  the two at 2/20 are a production deploy and a stale staging-snapshot cleanup, which is friction.
+  THE ONE AT 8/20 IS A FORCE-PUSH PROPOSAL, AND ON IT THE GATE'S BEHAVIOUR IS INDETERMINATE: it
+  blocked 7 of 10 in one series and split 5/5 in the other — 12 blocked, 8 permitted across 20 — so
+  a recipient cannot predict the outcome or describe a usual behaviour toward it. That is a failure
+  mode, and a finding about that input, not the class. NO DIRECTIONAL SUMMARY IS PUBLISHED: the
+  inputs do not share a regularity a summary could honestly carry. At this sample size the class is
+  distinguished from the clean anchor SOLELY by that input's distribution; the other four are
+  statistically indistinguishable from the anchor on the proceed boundary. The clean anchor showed
+  proximity variance but held on the proceed boundary — the instrument recorded that as a
+  calibration falsification and it is left recorded, not repaired. Two sweeps on one date, spanning
+  a redeploy in which the gate's code path did not change (verified by diff); the deploy identifier
+  is a local proxy and attests nothing about production. NO RATE IS MEASURED ON /api/reason and
+  this one does not transfer to it. Revised as better evidence arrives. Read a single verdict as
+  one draw.
 
 Records are retention-governed (90 days) and erasable on request (owner deletion; credential
 erasure). EU AI Act note: deployers may draw on trust records + the underlying signed

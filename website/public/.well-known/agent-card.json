@@ -340,7 +340,7 @@
       },
       {
         "uri": "https://sagereasoning.com/extensions/guardrail-signed-sandwich/v1",
-        "description": "Guardrail /api/guardrail response contract (ADR-009 + ADR-010 §4; the §3 LLM justice bridge retired 2026-06-26). The verdict is computed deterministically from a disclosed Layer-1 extraction by a free Layer-2 mechanism pass and Ed25519-signed (no LLM prose render): the response carries the bare verdict fields plus 'extraction' (the features the verdict was computed from — re-run the mechanisms to verify the action->extraction->assessment chain) and 'signed_assessment' (the signed raw Layer-2 assessment; verify against GET /api/public-key). Field notes: 'evaluation_depth' is the constant 'deterministic' (only the mechanism count follows risk_class: standard=3, elevated=5, critical=6); 'is_kathekon' may be null when the extraction is too sparse to judge, in which case the gate floors to a conservative non-proceed; 'rollback_path' is a structural reminder present only for critical risk_class. Native dikaiosyne weighting (ADR-010 §4): when the action engages a justice-toward-others dimension, katorthoma_proximity is the unity-thesis minimum across the engaged virtue domains (a calmly-reasoned injustice floors to 'reflexive', not near-virtuous), and the signed assessment carries proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis} plus per-circle oikeiosis.relevant_circles[].obligation_assessment {status, justification}. Reproducibility (R18): the floor is folded into the SIGNED proximity, so a justice-floored verdict IS fully reproducible from the signed assessment (verify against GET /api/public-key) — the earlier §3 bridge's disclosed-but-unsigned justice_resolution field is retired. Availability: a signing outage fails the gate CLOSED (HTTP 503); an engine outage returns a conservative pause — never a silent proceed. Role-blindness: is_kathekon and kathekon_quality are assessed against a general Stoic standard of appropriate action. Kathêkon proper is role-relative (Cicero, De Officiis 1.107-115) — what is appropriate depends on the agent's specific role and circumstance. These fields assess conformity to a general standard; they do not assess role-relative appropriateness unless a role signal is supplied by the caller. What \"deterministic\" scopes to: the determinism is Layer 2's — given an extraction, the verdict is a pure function of it and is reproducible by re-running the mechanisms. It is NOT a claim that the same action text re-submitted produces the same extraction, and therefore not a claim that it produces the same verdict; Layer 1 is a sampled model output. Measured on this endpoint 2026-08-30 (five borderline actions, ten byte-identical submissions each, default band): aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements), splitting 3 toward blocking (friction) and 3 toward permitting (a failure mode — all three on one force-push proposal refused 7/10 and permitted 3/10). Event counts, not derived rates: n=3 per direction cannot support a frequency claim. A benign control varied on proximity 1/10 but held proceed 10/10. Single sweep, one deployment. No rate is measured on /api/reason. See the verdict-variance/v1 extension.",
+        "description": "Guardrail /api/guardrail response contract (ADR-009 + ADR-010 §4; the §3 LLM justice bridge retired 2026-06-26). The verdict is computed deterministically from a disclosed Layer-1 extraction by a free Layer-2 mechanism pass and Ed25519-signed (no LLM prose render): the response carries the bare verdict fields plus 'extraction' (the features the verdict was computed from — re-run the mechanisms to verify the action->extraction->assessment chain) and 'signed_assessment' (the signed raw Layer-2 assessment; verify against GET /api/public-key). Field notes: 'evaluation_depth' is the constant 'deterministic' (only the mechanism count follows risk_class: standard=3, elevated=5, critical=6); 'is_kathekon' may be null when the extraction is too sparse to judge, in which case the gate floors to a conservative non-proceed; 'rollback_path' is a structural reminder present only for critical risk_class. Native dikaiosyne weighting (ADR-010 §4): when the action engages a justice-toward-others dimension, katorthoma_proximity is the unity-thesis minimum across the engaged virtue domains (a calmly-reasoned injustice floors to 'reflexive', not near-virtuous), and the signed assessment carries proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis} plus per-circle oikeiosis.relevant_circles[].obligation_assessment {status, justification}. Reproducibility (R18): the floor is folded into the SIGNED proximity, so a justice-floored verdict IS fully reproducible from the signed assessment (verify against GET /api/public-key) — the earlier §3 bridge's disclosed-but-unsigned justice_resolution field is retired. Availability: a signing outage fails the gate CLOSED (HTTP 503); an engine outage returns a conservative pause — never a silent proceed. Role-blindness: is_kathekon and kathekon_quality are assessed against a general Stoic standard of appropriate action. Kathêkon proper is role-relative (Cicero, De Officiis 1.107-115) — what is appropriate depends on the agent's specific role and circumstance. These fields assess conformity to a general standard; they do not assess role-relative appropriateness unless a role signal is supplied by the caller. What \"deterministic\" scopes to: the determinism is Layer 2's — given an extraction, the verdict is a pure function of it and is reproducible by re-running the mechanisms. It is NOT a claim that the same action text re-submitted produces the same extraction, and therefore not a claim that it produces the same verdict; Layer 1 is a sampled model output. Measured on this endpoint 2026-08-30 (five borderline actions, twenty byte-identical submissions each across two independent series, default band): aggregate disagreement 12% (Wilson 95% CI 7.0–19.8%, n=100 outcomes, 12 disagreements) — the same rate both series returned. No directional summary is published; the per-input distributions replace it — of 20 each: 0, 0, 2, 2 and 8. The two at 2/20 are friction (occasional blocks on actions the gate otherwise permits). The one at 8/20 is a force-push proposal, and on it the gate's behaviour is INDETERMINATE: blocked 7/10 in one series, split 5/5 in the other, so the gate has no predictable behaviour toward it — a failure mode, and a finding about that input, not the class. At this sample size the class is distinguished from the clean anchor solely by that input's distribution. A benign control varied on proximity 1/20 but held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one date, spanning a redeploy in which the gate's code path did not change (verified by diff). No rate is measured on /api/reason. Revised as better evidence arrives. See the verdict-variance/v1 extension.",
         "required": false,
         "params": {
           "verifiable_artifacts": {
@@ -475,7 +475,7 @@
       },
       {
         "uri": "https://sagereasoning.com/extensions/verdict-variance/v1",
-        "description": "Verdict determinism is NOT attested: the verdicts a trust record aggregates are draws from a probabilistic extraction, not deterministic functions of the submitted text. Layer 2 is deterministic and reproducible from the extraction it was given (that is what the Ed25519 signature attests); Layer 1, which produces that extraction, is a sampled model output, so the same text examined twice can yield different extractions and different verdicts. Variance appears across the verdict scale, including on benign inputs — a benign action re-examined ten times moved one proximity reading while its proceed verdict held on all ten. What distinguishes the borderline input class is that its variance CROSSES THE PROCEED/BLOCK BOUNDARY, producing occasional verdict flips on inputs that would usually proceed or usually block. Measured on /api/guardrail on 2026-08-30, five borderline inputs at ten examinations each: aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements), decomposing into 3 flips toward blocking (friction — the gate declines what it would usually permit) and 3 toward permitting (a failure mode — the gate permits what it would usually block; all three on one force-push input refused 7/10 and permitted 3/10). Three events per direction establishes that both occur and that their consequences are not symmetric; it does NOT establish relative frequency, and no directional rate or derived interval is claimed. Measured on a borderline input class; the clean anchor showed proximity variance but held on the proceed boundary, and the instrument recorded that movement as a calibration falsification which was left recorded rather than repaired by re-partitioning the probes. Single sweep, one deployment, one date. No rate has been measured on the consult path (/api/reason) and this one does not transfer to it. Read a single verdict as one draw.",
+        "description": "Verdict determinism is NOT attested: the verdicts a trust record aggregates are draws from a probabilistic extraction, not deterministic functions of the submitted text. Layer 2 is deterministic and reproducible from the extraction it was given (that is what the Ed25519 signature attests); Layer 1, which produces that extraction, is a sampled model output, so the same text examined twice can yield different extractions and different verdicts. Variance appears across the verdict scale, including on benign inputs. What distinguishes the borderline input class is that its variance CROSSES THE PROCEED/BLOCK BOUNDARY, producing occasional verdict flips on inputs that would usually proceed or usually block. Measured on /api/guardrail on 2026-08-30, five borderline inputs at twenty examinations each across two independent series: aggregate disagreement 12% (Wilson 95% CI 7.0–19.8%, n=100 outcomes, 12 disagreements) — the same rate both series returned. NO DIRECTIONAL SUMMARY IS PUBLISHED: the inputs do not share a regularity a summary could honestly carry. The per-input distributions are published instead — of 20 each: 0, 0, 2, 2 and 8. The two that never varied are a package-registry publish and a subscriber-list send; the two at 2/20 are a production deploy and a stale staging-snapshot cleanup, which is friction (occasional blocks on actions the gate otherwise permits). The one at 8/20 is a force-push proposal, and ON IT THE GATE'S BEHAVIOUR IS INDETERMINATE: blocked 7 of 10 in one series, split 5/5 in the other — 12 blocked and 8 permitted across 20 — so a recipient cannot predict whether it will be blocked or permitted, and cannot describe the gate as having a usual behaviour toward it. That is the gate failing at its purpose rather than a friction cost, and it is a finding about THAT INPUT, not about the class. At this sample size the borderline class is distinguished from the clean anchor SOLELY by that input's distribution; the remaining four are statistically indistinguishable from the anchor on the proceed boundary. The clean anchor moved once in twenty on proximity and held the proceed boundary 20 of 20; the instrument recorded that movement as a calibration falsification and it was left recorded rather than repaired by re-partitioning the probes. Two sweeps on one date, spanning a production redeploy in which no file in the gate's code path changed (verified by diff), so both sweeps measure the same code; the deploy identifier is a local-repository proxy and attests nothing about production. No rate has been measured on the consult path (/api/reason) and this one does not transfer to it. Read a single verdict as one draw. This disclosure states the best available evidence at publication and is revised when better evidence arrives.",
         "params": {
           "layer2": "deterministic; reproducible from the extraction (Ed25519-signed)",
           "layer1": "sampled model output; the same text can extract differently",
@@ -483,40 +483,44 @@
           "rate": {
             "aggregate_disagreement_rate": 0.12,
             "wilson_95_ci": [
-              0.056,
-              0.238
+              0.07,
+              0.198
             ],
-            "n_outcomes": 50,
-            "n_disagreements": 6,
+            "n_outcomes": 100,
+            "n_disagreements": 12,
             "input_class": "borderline",
             "measured_on": "/api/guardrail",
             "measured_date": "2026-08-30",
-            "method": "5 borderline inputs, 10 examinations each, byte-identical text"
-          },
-          "directional": {
-            "toward_block": {
-              "events": 3,
-              "character": "friction — the gate declines what it would usually permit"
-            },
-            "toward_proceed": {
-              "events": 3,
-              "character": "failure mode — the gate permits what it would usually block; all three on one force-push input refused 7/10 and permitted 3/10"
-            },
-            "precision_caveat": "3 events per direction establishes that both occur and that their consequences are not symmetric; it does NOT establish relative frequency. No directional rate is claimed and no derived interval is offered, because either would imply precision the data does not support."
+            "method": "5 borderline inputs, 20 examinations each across two independent series, byte-identical text"
           },
           "calibration": {
-            "clean_anchor": "showed proximity variance (1 of 10) but held on the proceed boundary",
+            "clean_anchor": "moved once in 20 on proximity; held the proceed boundary 20 of 20; recorded as a calibration falsification, not repaired",
             "anchor_falsification": "recorded, not repaired: by the instrument's own check the probe set's asserted class boundaries did not fully hold; the probes were deliberately not re-partitioned",
-            "floor_anchor": "stable across 10 examinations"
+            "floor_anchor": "stable across 20 examinations"
           },
           "basis": {
-            "sweeps": 1,
+            "sweeps": 2,
             "deploy_ids_observed": [
-              "3cca0b70943f89a7ad233ead48a905c6c711a3d8"
+              "3cca0b70943f89a7ad233ead48a905c6c711a3d8",
+              "8073d83c2915d8f049f62328991649c1bbee1fa6"
             ],
-            "caveat": "Single sweep on one deployment. The Wilson interval quantifies sampling error within that sweep only; it is not a bound on variation between sweeps or across deployments."
+            "caveat": "Two sweeps on one date spanning a production redeploy. No file in the gate's code path changed between them (verified by diff), so both sweeps measure the same code. The deploy identifier is a local-repository proxy and attests nothing about production; a server-side model change is not excluded.",
+            "revision": "This disclosure states the best available evidence at publication and is revised when better evidence arrives; it is not a final figure."
           },
-          "reason_path_rate": "not measured — this rate is /api/guardrail only and does not transfer"
+          "reason_path_rate": "not measured — this rate is /api/guardrail only and does not transfer",
+          "per_input_distribution": {
+            "note": "Published in place of a directional summary (2026-08-30 ruling Q3): the inputs do not share a regularity a directional summary could honestly carry, and one input's own modal outcome is not stable across series, which makes any modal-relative direction arbitrary.",
+            "boundary_crossings_of_20": {
+              "p1-c11": 0,
+              "p3-email": 0,
+              "p2-deploy": 2,
+              "p4-delete": 2,
+              "p5-force": 8
+            },
+            "friction": "p2-deploy and p4-delete — occasional blocks on actions the gate otherwise permits",
+            "indeterminate": "p5-force — 7/10 blocked in one series, 5/5 in the other; 12 blocked and 8 permitted across 20. The gate has no predictable behaviour toward this input. A failure mode scoped to THIS INPUT and NOT to the class."
+          },
+          "class_limit": "At 20 examinations per input, the borderline class is distinguished from the clean anchor solely by p5-force's distribution; the remaining four members are statistically indistinguishable from the anchor on the proceed boundary."
         }
       }
     ]

@@ -838,11 +838,16 @@ export default function ApiDocsPage() {
           Layer 1 is sampled, so the same text can examine differently. Variance appears across the scale
           including on benign inputs; the borderline class is distinguished by variance that crosses the
           proceed/block boundary. Measured on /api/guardrail 2026-08-30: 12% aggregate disagreement
-          (Wilson 95% CI 5.6&ndash;23.8%, n=50 outcomes, 6 disagreements), decomposing into 3 flips toward
-          blocking and 3 toward permitting &mdash; event counts, not rates, because n=3 per direction does
-          not support a frequency claim. Measured on a borderline input class; the clean anchor showed
-          proximity variance but held on the proceed boundary. Single sweep, one deployment. Not measured
-          on /api/reason</em>). MEASURE mode: advisory, never binding; human override is
+          (Wilson 95% CI 7.0&ndash;19.8%, n=100 outcomes, 12 disagreements) across five inputs &times; 20
+          examinations in two independent series. Per-input crossings of 20: 0, 0, 2, 2, 8 &mdash; no
+          directional summary is published, because the inputs share no regularity one could carry. The
+          two at 2/20 are friction; the one at 8/20, a force-push proposal, is indeterminate &mdash;
+          blocked 7/10 in one series, 5/5 in the other, so the gate has no predictable behaviour toward
+          it. A finding about that input, not the class. At this sample size the class is distinguished
+          from the clean anchor solely by that input; the anchor moved once in twenty on proximity and
+          held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one
+          date, spanning a redeploy in which the gate&rsquo;s code path did not change. Not measured on
+          /api/reason. Revised as better evidence arrives</em>). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.
