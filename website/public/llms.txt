@@ -115,7 +115,7 @@ Depth controls which Stoic mechanisms are applied:
 - `standard` (5 mechanisms): + Value Assessment + Kathekon Assessment — full virtue evaluation
 - `deep` (6 mechanisms): + Iterative Refinement (Senecan progress grades, direction of travel) — comprehensive
 
-Returns the `translation-sandwich-v1` shape: `{ version, extraction, assessment, prose }` — `extraction` is the Layer-1 feature schema, `assessment` is the deterministic Layer-2 verdict (Ed25519-signed; identical inputs produce identical assessments — verify against GET /api/public-key), `prose` is the Layer-3 philosophical rendering carrying the V3 vocabulary (katorthoma_proximity, passion_diagnosis, control_filter, oikeiosis). `deep` additionally includes iterative-refinement signals (`senecan_grade`, `progress_dimensions`, `direction_of_travel`).
+Returns the `translation-sandwich-v1` shape: `{ version, extraction, assessment, prose }` — `extraction` is the Layer-1 feature schema, `assessment` is the deterministic Layer-2 verdict (Ed25519-signed; **the same `extraction` always produces the same `assessment`**, which is what the signature attests — verify against GET /api/public-key; the Layer-1 `extraction` is itself a sampled model output, so the same `input` text can extract differently and yield a different assessment — see **verdict determinism** in the trust-record disclosure), `prose` is the Layer-3 philosophical rendering carrying the V3 vocabulary (katorthoma_proximity, passion_diagnosis, control_filter, oikeiosis). `deep` additionally includes iterative-refinement signals (`senecan_grade`, `progress_dimensions`, `direction_of_travel`).
 
 Full response example (standard depth, `response_format:"full"`):
 ```json
@@ -347,13 +347,24 @@ statement that the field is unreliable. The constraint sits on the base reading,
 direction described here — deliberation present in other mechanisms but absent in oikeiosis — it
 can only make the reading stricter, never more lenient.
 
-Three disclosed routes where confidence can exceed basis, none closed by this map. First: an
+Four disclosed routes where confidence can exceed basis, none closed by this map. First: an
 ARGUED `obligation_assessment: met` removes the dikaiosyne floor — this is by design; the
 argument is the guard, and the floor's removal is conditional on the argument's presence, not a
 gap in the guard. Second: a lying `examined_before_acting: true` on a rash carried-out act lifts
 the floor — the engine cannot detect a clean lie at the field level (stated above); this is the
 same A2 residual in a specific form. Third: a harm your self-report omits from the text entirely
-has nothing to corroborate against — this is structural, disclosed, not addressed.
+has nothing to corroborate against — this is structural, disclosed, not addressed. Fourth: the
+extraction itself is not stable across occasions. The same text examined twice can produce
+different Layer-1 classifications and therefore a different verdict. This is not a defect in any
+rule; the deterministic layer faithfully computes what it is given, and what it is given varies.
+Measured on /api/guardrail on 2026-08-30 over five borderline inputs at ten examinations each:
+12% aggregate disagreement (Wilson 95% CI 5.6-23.8%, n=50 outcomes, 6 disagreements), splitting
+3 toward blocking and 3 toward permitting — event counts, not rates, at that n. Measured on a
+borderline input class; a benign control varied on proximity but held its proceed verdict 10/10.
+NO RATE HAS BEEN MEASURED ON /api/reason, and this one does not transfer to it. Note that
+`urgency_indicators` — class (b) in the map above — is the field that carried the variance in the
+single-input demonstration, so the map's provenance entry for it describes where the value comes
+from, not how stable it is between occasions.
 
 This map covers ENGINE outputs only. The trajectory overlay, practice suggestions, orientation
 readings, and the loop fold each sit under their own disclosure regime and are outside it.
@@ -397,6 +408,8 @@ Returns (signed deterministic sandwich — Live 2026-06-19):
 Use this as middleware before executing any consequential action. `risk_class` controls scrutiny level: `standard` applies quick evaluation (3 mechanisms), `elevated` applies full virtue analysis (5), `critical` applies deep analysis (6) with emphasis on kathekon and adds a `rollback_path`.
 
 The verdict is computed **deterministically** from `extraction` by a free Layer-2 mechanism pass and then Ed25519-signed (`signed_assessment`; verify against `GET /api/public-key`) — there is no LLM prose render. `evaluation_depth` is the constant `"deterministic"`; only the mechanism count follows `risk_class`. `is_kathekon` may be `null` when the extraction is too sparse to judge — the gate then floors to a conservative non-proceed rather than guessing. **Dikaiosyne (justice) is weighted NATIVELY (ADR-010 §4):** when the action engages a justice-toward-others dimension, `katorthoma_proximity` is the unity-thesis minimum across the engaged virtue domains — a calmly-reasoned injustice floors to `reflexive`, not rated near-virtuous — and the signed assessment carries `proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis}` plus, per engaged circle, `oikeiosis.relevant_circles[].obligation_assessment {status, justification}`. The floor is folded into the **signed** proximity, so a justice-floored verdict is **fully reproducible from the signed assessment** (the earlier near-term LLM justice bridge was retired 2026-06-26). The same deterministic **corroboration check** runs on the gate: the extraction's self-report claims (`obligation_assessment: met/indeterminate`; `examined_before_acting` on a grave act) are cross-referenced against the verbatim `action` text, and a grounded contradiction floors the affected domain (monotone — the gate can only become MORE conservative, never less). The full `corroboration` report (findings vocabulary `corroborated|uncorroborated|contradicted`, verbatim marker quotes) rides inside `signed_assessment.assessment.corroboration`. Availability: on a signing outage the gate fails **closed** (HTTP 503); on an engine outage it returns a conservative pause — never a silent proceed.
+
+**What "deterministic" scopes to.** The determinism above is Layer 2's: given an `extraction`, the verdict is a pure function of it and is reproducible by re-running the mechanisms. It is **not** a claim that the same `action` text re-submitted produces the same `extraction`, and therefore not a claim that it produces the same verdict. Layer 1 is a sampled model output. **Measured on this endpoint on 2026-08-30** — five borderline actions, ten byte-identical submissions each at the default band — **aggregate disagreement rate 12% (Wilson 95% CI 5.6–23.8%, n=50 outcomes, 6 disagreements)**. The six split evenly by direction and the two directions are not equivalent: **three ran toward blocking**, the gate declining what it would usually permit, which is friction; **three ran toward permitting**, all on one force-push proposal this gate refused seven times in ten and permitted three times in ten, which is the gate failing at its purpose rather than a friction cost. Three events per direction establishes that both occur and that their consequences differ; it does not establish relative frequency, and no directional rate is claimed. A deliberately benign control action varied on proximity (1 of 10) but held `proceed` on all ten — variance appears across the scale, and what distinguishes the borderline class is that its variance crosses the proceed/block boundary. Single sweep, one deployment. If a verdict is consequential to you, treat one call as one draw — re-submitting is a legitimate way to see whether the reading is stable.
 
 **What the gate evaluates (it is not a fact-checker):** the Sage Risk Gate evaluates the **reasoning over the premises you supply** — it diagnoses passions, value-errors, and proximity in the framing of the action. It does **not** independently verify arithmetic, claims, or external facts in your `context`. Supplying false or incomplete facts yields a verdict over those facts. Verify your inputs before trusting the gate's framing.
 
@@ -804,6 +817,24 @@ WHAT IT DOES NOT ATTEST (HONEST LIMIT):
   requires. It remains, unchanged, a live gate input at the three lower rungs — a deliberate
   decision, not an oversight, because the same limit does not disqualify it from informing a
   lower, less demanding bar.
+- verdict determinism — the verdicts aggregated here are draws from a probabilistic extraction,
+  not deterministic functions of the submitted text. Layer 2 is deterministic and reproducible
+  from the extraction it was given (that is what the signature attests); Layer 1, which produces
+  that extraction, is a sampled model output, so the same text examined twice can yield different
+  extractions and different verdicts. Variance appears across the scale, including on benign
+  inputs — a benign action re-examined ten times moved one proximity reading while its proceed
+  verdict held on all ten. What distinguishes the borderline class is that its variance CROSSES
+  THE PROCEED/BLOCK BOUNDARY. Measured on /api/guardrail on 2026-08-30, five borderline inputs x
+  ten examinations: aggregate disagreement rate 12% (Wilson 95% CI 5.6-23.8%, n=50, 6
+  disagreements), decomposing into 3 flips toward blocking (friction) and 3 toward permitting —
+  the latter all on one force-push input the gate refused 7/10 and permitted 3/10, which is a
+  failure mode, not a friction cost. Three events per direction shows both occur and that their
+  consequences differ; it does not establish relative frequency, so no directional rate is
+  claimed. Measured on a borderline input class; the clean anchor showed proximity variance but
+  held on the proceed boundary — the instrument recorded that as a calibration falsification and
+  it is left recorded, not repaired. Single sweep, one deployment, one date — the interval is
+  sampling error within that sweep, not stability across sweeps. NO RATE IS MEASURED ON
+  /api/reason and this one does not transfer to it. Read a single verdict as one draw.
 
 Records are retention-governed (90 days) and erasable on request (owner deletion; credential
 erasure). EU AI Act note: deployers may draw on trust records + the underlying signed

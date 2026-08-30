@@ -833,7 +833,16 @@ export default function ApiDocsPage() {
           consults &mdash; that origin is not verified at the point trust events are minted, and this list
           will be updated when a structural fix is in place</em>; freshness beyond the artifact record; future
           behaviour; training-signal fitness; discriminative range &mdash; stability may reflect absence of
-          perturbation, not tested relapse-resistance). MEASURE mode: advisory, never binding; human override is
+          perturbation, not tested relapse-resistance; <em>verdict determinism &mdash; verdicts are draws
+          from a probabilistic extraction; Layer 2 is deterministic and reproducible from the extraction,
+          Layer 1 is sampled, so the same text can examine differently. Variance appears across the scale
+          including on benign inputs; the borderline class is distinguished by variance that crosses the
+          proceed/block boundary. Measured on /api/guardrail 2026-08-30: 12% aggregate disagreement
+          (Wilson 95% CI 5.6&ndash;23.8%, n=50 outcomes, 6 disagreements), decomposing into 3 flips toward
+          blocking and 3 toward permitting &mdash; event counts, not rates, because n=3 per direction does
+          not support a frequency claim. Measured on a borderline input class; the clean anchor showed
+          proximity variance but held on the proceed boundary. Single sweep, one deployment. Not measured
+          on /api/reason</em>). MEASURE mode: advisory, never binding; human override is
           absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
           evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
           &quot;Trust Record&quot; section for the full contract.
