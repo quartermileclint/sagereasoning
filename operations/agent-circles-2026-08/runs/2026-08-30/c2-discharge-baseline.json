@@ -1,10 +1,10 @@
 {
   "schema": "provenance-c2-discharge-baseline-v1",
-  "generated_at": "2026-08-30T09:30:14.336Z",
+  "generated_at": "2026-08-30T09:42:48.712Z",
   "window": {
     "days": 30,
-    "start": "2026-07-31T09:30:14.336Z",
-    "end": "2026-08-30T09:30:14.336Z"
+    "start": "2026-07-31T09:42:48.712Z",
+    "end": "2026-08-30T09:42:48.712Z"
   },
   "c2_population": {
     "agents": [
@@ -30,12 +30,17 @@
       {
         "agent_id": "sagereasoning:stoa-q5c-smoke@v1",
         "wrote_at": "2026-08-12T04:47:29+00:00",
+        "ledger_began_recording_for_this_identity": null,
+        "predates_ledger_global_reading": true,
+        "predates_ledger_per_identity_reading": true,
+        "readings_agree": true,
         "predates_ledger_recording": true,
         "ledger_eligible_artifacts": 0,
         "excluded_from_completeness_denominator": true
       }
     ],
     "all_members_excluded_as_pre_ledger": true,
+    "reading_divergence": [],
     "undischargeable_members": [],
     "basis": "SCOPE's pre-ledger exclusion — every member's ledger-eligible artifact set is empty"
   },

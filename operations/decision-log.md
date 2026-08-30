@@ -30349,3 +30349,65 @@ left untouched.
 
 **Status:** Adopted in part — step 5 corrected and the ruling recorded; **the C2 discharge itself is
 HELD** pending the mentor's answer on the corrected premise.
+
+## 2026-08-30 — D-C2-DISCHARGED-ON-PRE-LEDGER-EXCLUSION-REVISED-RULING-APPLIED
+
+**Decision:** The mentor **accepted the premise erratum, WITHDREW the first ruling's option-(a)
+discharge, and issued a REVISED CONDITIONAL ruling.** The named contested fact was **verified before
+acting**, the condition **holds**, and **C2 is now DISCHARGED — on SCOPE's pre-ledger exclusion, NOT
+on the C1 empty-population precedent.** `code-elevated`; no schema, flag, credential, migration, or
+public-surface change; production untouched; AC7 not engaged.
+
+**§VERIFY — four independent lines, all agreeing** (the mentor: *"This is a named contested fact — not
+asserted, verified before acting"*):
+
+| Check | Value |
+|---|---|
+| Ledger activation | **2026-08-26** (`D-PROVENANCE-LEDGER-SLICE2-ACTIVATION-LIVE-2026-08-26`) |
+| Consult-side write **code** first committed | **2026-08-26** (`935fae6`) |
+| Earliest ledger row, global | **2026-08-26T06:28:15.863Z** |
+| Ledger rows ever for that identity | **0** |
+| The contested write | **2026-08-12T04:47:29Z** |
+
+**The write predates activation by 14 days**, and on that date the ledger's write path **did not exist
+in the codebase** — an independent line that holds under any flag state.
+
+**BOTH readings of SCOPE's clause were computed and agree** (`readings_agree: true`,
+`reading_divergence: []`). The tally was refined this session to encode the **literal per-identity
+reading** (*"began recording for its identity"*) alongside the global one and to apply the exclusion
+**only when both hold** — a correctness improvement over the first draft, which used the global
+reading alone.
+
+**Surfaced, NOT relied on:** under the strict per-identity reading, an identity the ledger never
+recorded for has no *"began recording"* point, so everything for it is pre-ledger and excluded —
+conservative here, but **at switch-on it could exclude an agent that simply never consulted.** Named
+for the mentor; this run's conclusion holds under the global reading regardless.
+
+**Errata resolved in place** on the finding, the question and the first ruling — each now records that
+the claim was false, that the mentor withdrew the original discharge, and what the corrected basis is.
+**No verbatim mentor text was altered** in either ruling.
+
+**What stands untouched:** the **step-5 correction** (`8a34e18`) — the mentor confirmed it *"does not
+depend on the population premise and is not affected by the erratum."* **Option (d)** stands
+regardless of the population question. **Options (b) and (c)** remain ruled out.
+
+**Standing obligations, recorded so they cannot be lost:** the **switch-on re-check is a HARD C2
+obligation**, not a courtesy, and must ride into slice-5's prerequisites; **C2 does not discharge C3**
+(90-day soak, ~4 days elapsed) **or C4** (the surface live — slice 3's job); **the tally must never be
+scheduled.**
+
+**C2 is 1 of 4 switch-on conditions. C1 satisfied (empty population, re-check at switch-on); C2
+satisfied (this entry); C3 ~4/90 days; C4 = slice 3.**
+
+**Risk classification:** Elevated. `tsc` clean. Weights-**BLOCKED**, Q1 and the §A boundary unchanged.
+**Nothing bears on the 0h call.**
+
+**Rollback:** `git revert` the records commit. `8a34e18` is separately revertible and should NOT be
+reverted with it.
+
+**Concurrency:** `git status` before staging; commit path-scoped; `environmental-context.json` left
+untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, Q1.
+
+**Status:** Adopted. **C2 DISCHARGED on the corrected basis.**

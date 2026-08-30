@@ -4,14 +4,16 @@
 **Tier:** read-only. **No code, schema, flag, credential, migration, or public-surface change.
 Production untouched. AC7 not engaged.**
 
-> **⚠ ERRATUM — 2026-08-30, same day.** A claim in this document is **FALSE AS STATED**: that no agent
-> had a completed accreditation write in the trailing 30 days, and that C2's denominator is empty.
-> **`sagereasoning:stoa-q5c-smoke@v1` had a seed write on 2026-08-12**, inside the window. The
-> `credential-completed` signal this document relied on **under-reports**, because smoke teardowns
-> delete trust-event rows — the Q5c teardown deleted that agent's events while leaving its
-> accreditation row standing. The conclusion may survive on a different basis (SCOPE's pre-ledger
-> exclusion, since that write predates the ledger), but **the stated basis is wrong and C2 is NOT
-> declared discharged.** See `operations/agent-circles-2026-08/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
+> **⚠ ERRATUM — RAISED AND RESOLVED, 2026-08-30.** A claim in this document was **FALSE AS STATED**:
+> that no agent had a completed accreditation write in the trailing 30 days, and that C2's denominator
+> is empty. **`sagereasoning:stoa-q5c-smoke@v1` had a seed write on 2026-08-12**, inside the window;
+> the `credential-completed` signal **under-reports** because smoke teardowns delete trust-event rows.
+> **The mentor accepted the erratum, withdrew the original option-(a) discharge, and issued a revised
+> conditional ruling. The condition was verified (the write predates ledger activation by 14 days,
+> under four independent checks) and C2 is now DISCHARGED on SCOPE's pre-ledger exclusion — NOT on the
+> C1 empty-population precedent this document wrongly supplied.** See
+> `2026-08-30-mentor-ruling-provenance-ledger-C2-reachability-verbatim.md` § Revised ruling, and
+> `2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
 
 **Occasion.** The successor prompt
 (`operations/handoffs/founder/2026-08-30-provenance-ledger-slice3-and-carried-NEXT-SESSION-PROMPT.md`)

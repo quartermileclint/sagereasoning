@@ -227,19 +227,45 @@ async function main() {
   // "100% of that write's ledger-eligible submitted artifacts resolve" is
   // satisfied vacuously FOR THAT AGENT — at the artifact level, which is a
   // different and more specific vacuity than an empty agent population.
+  // SCOPE's clause is PER-IDENTITY, not global: ledger-eligible "only if it was
+  // consulted at or after the point the ledger's consult-side write began
+  // recording FOR ITS IDENTITY". Both readings are computed and BOTH must agree
+  // before the exclusion is applied — if they ever diverge, that divergence is
+  // surfaced rather than silently resolved in favour of either.
+  //
+  // NOTE, surfaced deliberately: under the strict per-identity reading, an
+  // identity the ledger has NEVER recorded for has no "began recording" point,
+  // so every artifact for it is pre-ledger and excluded. That is the literal
+  // text and it is conservative in the right direction here — but at switch-on,
+  // when the population is real, it could exclude an agent that simply never
+  // consulted. Named for the mentor, not relied on: this run's conclusion holds
+  // under the GLOBAL reading too, so it does not depend on resolving this.
   const ledgerStart = ledger[0]?.recorded_at ?? null
+  const firstByAgent = new Map<string, string>()
+  for (const r of ledger) {
+    if (r.agent_id && !firstByAgent.has(r.agent_id)) firstByAgent.set(r.agent_id, r.recorded_at)
+  }
   const perAgent = [...population].sort().map((agent_id) => {
     const wroteAt = writeTimeOf.get(agent_id) ?? null
-    const predatesLedger =
+    const identityStart = firstByAgent.get(agent_id) ?? null
+    const preGlobal =
       ledgerStart !== null && wroteAt !== null && new Date(wroteAt) < new Date(ledgerStart)
+    // never recorded for this identity ⇒ no "began recording" point ⇒ pre-ledger
+    const perIdentity =
+      wroteAt !== null && (identityStart === null || new Date(wroteAt) < new Date(identityStart))
     return {
       agent_id,
       wrote_at: wroteAt,
-      predates_ledger_recording: predatesLedger,
-      ledger_eligible_artifacts: predatesLedger ? 0 : null, // null = NOT DETERMINABLE by this script
-      excluded_from_completeness_denominator: predatesLedger,
+      ledger_began_recording_for_this_identity: identityStart,
+      predates_ledger_global_reading: preGlobal,
+      predates_ledger_per_identity_reading: perIdentity,
+      readings_agree: preGlobal === perIdentity,
+      predates_ledger_recording: preGlobal && perIdentity, // BOTH must hold
+      ledger_eligible_artifacts: preGlobal && perIdentity ? 0 : null,
+      excluded_from_completeness_denominator: preGlobal && perIdentity,
     }
   })
+  const readingDivergence = perAgent.filter((a) => !a.readings_agree).map((a) => a.agent_id)
   // A member is DISCHARGEABLE only if its ledger-eligible set is provably empty.
   // Anything else this script CANNOT tally — a past write's submitted artifacts
   // live in a request body that is not retained.
@@ -265,6 +291,7 @@ async function main() {
       ledger_recording_began: ledgerStart,
       per_agent: perAgent,
       all_members_excluded_as_pre_ledger: undischargeable.length === 0 && population.size > 0,
+      reading_divergence: readingDivergence,
       undischargeable_members: undischargeable.map((a) => a.agent_id),
       basis:
         population.size === 0
