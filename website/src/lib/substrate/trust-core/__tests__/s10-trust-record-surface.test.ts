@@ -304,14 +304,16 @@ async function main(): Promise<void> {
     env.includes('not distinguishable, at that point, from one the server produced'),
     'S2-47 envelope: the founder-elected indistinguishability clause (§2b)',
   )
-  // ═══ S2-48/S2-50/S2-51 — the 2026-08-31 verdict-variance disclosure, carrying the
-  // measured rate (mentor rulings 2026-08-30: disclosure, rate-presentation, rate-location).
+  // ═══ S2-48/S2-50/S2-52/S2-53/S2-54 + S2-58..S2-61 — the verdict-variance disclosure,
+  // carrying the measured rate (mentor rulings 2026-08-30: disclosure, rate-presentation,
+  // rate-location; then the n=100 ruling of the same day, below).
   //
   // S2-49 IS DELIBERATELY RETIRED AND MUST NOT BE RE-ADDED. It pinned
   // 'Its rate has not been measured' — the guard against a rate reaching this surface
   // without sign-off. The D6a sweep of 2026-08-30 measured the rate and the founder
   // approved publishing it on 2026-08-31, so the guarded condition is discharged and the
-  // pinned string is now FALSE. S2-51 replaces it as the inverse guard.
+  // pinned string is now FALSE. S2-58 is the standing inverse guard (S2-51, which first
+  // held that role at n=50, is itself now retired — see below).
   assert(
     env.includes('Verdict determinism'),
     'S2-48 envelope: the verdict-determinism does-not-attest item exists at all',
@@ -320,12 +322,42 @@ async function main(): Promise<void> {
     env.includes('same code path, model and sampling temperature'),
     'S2-50 envelope: the honest cross-path scoping clause survives (gate-measured, instrument-wide)',
   )
-  // S2-51 is the INVERSE of retired S2-49: that pin stopped a rate appearing without
-  // sign-off; this one stops the signed rate being silently altered or dropped. The
-  // en-dash in 5.6–23.8% is significant — it must match the envelope byte-for-byte.
+  // ═══ 2026-08-30 n=100 REVISION (mentor ruling: publish n=100; the indeterminacy form;
+  // per-probe distributions replace the directional split; class limit at K=20 — verbatim
+  // and binding. Founder-signed wording of 2026-08-30, PR19 run.)
+  //
+  // S2-51 IS DELIBERATELY RETIRED AND MUST NOT BE RE-ADDED. It pinned
+  // 'Wilson 95% CI 5.6–23.8%' — the n=50 interval — as the inverse of retired S2-49.
+  // The pooled two-sweep n=100 measurement supersedes that figure, so the pinned string is
+  // now FALSE. S2-58 replaces it as the same guard at the current figure. Retired as a
+  // decision, the way S2-49 was, so the change is a ruling and not a broken test.
+  //
+  // S2-58 — the current interval, exact. The en-dash in 7.0–19.8% is significant: it must
+  // match the envelope byte-for-byte.
   assert(
-    env.includes('Wilson 95% CI 5.6\u201323.8%'),
-    'S2-51 envelope: the published interval is exact and cannot be silently altered or dropped',
+    env.includes('Wilson 95% CI 7.0\u201319.8%'),
+    'S2-58 envelope: the published n=100 interval is exact and cannot be silently altered or dropped',
+  )
+  // S2-59 — the Q2 characterisation in its ruled form. The apostrophe is ASCII U+0027, NOT
+  // the typographic U+2019 the envelope uses elsewhere: an author matching the surrounding
+  // register would silently red this pin.
+  assert(
+    env.includes("the gate's behaviour is indeterminate"),
+    'S2-59 envelope: the force-push indeterminacy characterisation (ruling Q2)',
+  )
+  // S2-60 — the directional decomposition stays OUT (ruling Q3). Pinning only one half
+  // passes if that half is removed and the other left standing, so both directions and the
+  // mechanism word are pinned absent.
+  assert(
+    !env.includes('toward blocking') &&
+      !env.includes('toward permitting') &&
+      !env.includes('decompose'),
+    'S2-60 envelope: no directional decomposition is published (ruling Q3)',
+  )
+  // S2-61 — the K=20 class limit (ruling Q4): what the class label rests on at this sample size.
+  assert(
+    env.includes('solely by the force-push input'),
+    'S2-61 envelope: the class limit is stated — p5-force is the sole distinguishing member',
   )
   // Path specificity is BINDING (2026-08-30 rate-location ruling): the rate is
   // /api/guardrail only and the consult path must be stated as unmeasured.
