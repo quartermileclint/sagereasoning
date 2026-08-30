@@ -29977,3 +29977,74 @@ unreached by any ruling; a third sweep, not needed.
 **Rules served:** PR6, PR10, PR15, PR18, PR19 (first-hand, disclosed as such), PR20, R18, Q1.
 
 **Status:** Adopted.
+
+---
+
+## `D-VERDICT-VARIANCE-N100-CORRECTED-AFTER-INDEPENDENT-REVIEW` — two inherited defects fixed; the composition ruling recorded and drafted (2026-08-30)
+
+**Tier:** `code-elevated`. Same four public surfaces as `D-VERDICT-VARIANCE-N100-APPLIED`; no auth,
+perimeter, encryption, schema, flag or behaviour change. **AC7 not engaged.** Commits `9cdf155`,
+`36b7206`, plus `aad866c` (the earlier path-specificity fix) and the records commits.
+
+**The independent PR19 pass was run — and it justified itself.** The prior entry disclosed that its
+review was first-hand and therefore shared the author's blind spots. A genuinely independent pass over
+`2630ced..aad866c` returned **nothing blocking on coverage** — the failure mode that broke seven prior
+rounds is clean — and **two real defects on figures, both of which the first-hand review missed, both
+inherited verbatim from the founder-signed wording, and both running in the direction of understating
+instrument instability.**
+
+1. **HIGH — *"two inputs never varied at all"* is FALSE.** Confirmed first-hand before acceptance:
+   p1-c11 varied on `is_kathekon` (19 null / 1 true) and both p1-c11 and p3-email varied on
+   `urgency_indicators` (4 and 3 distinct values across twenty records each). What is 0 of 20 is
+   **boundary crossings** — the term the governing ruling itself uses — and the pooled instrument file's
+   own `borderline_probes_showing_variance` reads **5, not 3**. The envelope asserted *"Variance appears
+   across the verdict scale"* two sentences earlier and then contradicted it; `llms.txt` separately
+   states `urgency_indicators` *"is among the fields that carried the variance"*, which was p3's only
+   variance. **Five instances corrected across four files** — the reviewer found three, a repo sweep
+   found two more.
+2. **MEDIUM — the deploy-proxy caveat was absent from three of the seven places** (api-docs, the
+   `guardrail-signed-sandwich/v1` extension, the epistemic-status map). The two-sweep basis standing
+   alone reads as evidence of stability **across deployments**, the exact inference the caveat exists to
+   block and which the envelope elsewhere explicitly disclaims. Added to all three.
+
+**No figure changed and no pinned phrase was touched.** Battery **149/0**, `tsc` 0, build compiles,
+`agent-card.json` parses at **25** extensions.
+
+**A process failure of this session's, recorded rather than amended away.** Commit `9cdf155`'s message
+asserted three ADR corrections and the commit contained one: a Python assertion failed mid-script and
+the commit ran regardless, because the steps were newline-separated rather than chained on success.
+Caught immediately after, landed in `36b7206`, and **left as two commits rather than an amend so the
+overclaim and its correction both stay visible.** The at-action elicitation fired on that exact command
+and the honest answer was that the examination did **not** precede the decision.
+
+**The p5-force class-composition ruling is recorded and requires a further application.** Verbatim at
+`2026-08-30-mentor-ruling-p5-force-class-composition-verbatim.md`; **all five answers require action.**
+**Q1:** the per-probe distributions **lead** and the aggregate **follows**, described as the pooled rate
+across this probe set — the same reasoning that withdrew the directional split, applied one level up.
+**Q4:** the **composition dependence must be published**, in the same location as the class limit, in
+the mentor's own stated form. **Q5:** the two 0-of-20 probes are **a finding in its own right** — the
+class definition admits actions the gate handles with complete stability — stated rather than left as
+zeroes. **Q2:** the freeze governs the recorded observation, **not forward design**; a future probe set
+is legitimate if its selection basis is frozen in advance and **never chosen by observed variance**.
+**Q3:** this record **stands**; a differently-composed future sweep is published **beside** it, not over
+it. **Nothing published is false under this ruling** — the mentor is explicit the aggregate is retained
+and merely repositioned.
+
+**The wording draft is authored and UNAPPLIED, awaiting signature**
+(`2026-08-30-verdict-variance-composition-WORDING-FOR-SIGNATURE.md`). It changes **no figure**. It
+introduces one pin class this arc has never had: **S2-64, an ordering pin**
+(`indexOf('0 of 20') < indexOf('pooled rate across this probe set')`), because Q1 is an ordering claim
+and no substring pin can catch a re-inversion.
+
+**Risk classification:** Elevated. Weights-**BLOCKED**, Q1 (the loop proposes, never executes) and the
+§A boundary unchanged. **Nothing bears on the 0h call.**
+
+**Rollback:** `git revert 36b7206` then `9cdf155` restores the pre-correction text — which is the text
+the independent review refuted, so this should not be done without re-opening finding 1.
+
+**Carried:** the founder's signature on the composition wording, then its application; the errata are
+written on all seven misdated documents; the quota restore is founder-confirmed done.
+
+**Rules served:** PR6, PR10, PR15, PR18, **PR19 (independent, and it earned its place)**, PR20, R18, Q1.
+
+**Status:** Adopted.
