@@ -442,6 +442,11 @@ def summary(runs_dir: str) -> None:
             entry = {
                 "class": (probes_meta.get(pid, {}).get("frozen_class")
                           or probes_meta.get(pid, {}).get("class", "unknown")),
+                # Carried explicitly, never re-derived by splitting the key on
+                # "@": the key's shape depends on how many series a probe has,
+                # so deriving the probe id from it couples the count to the
+                # very imbalance this field exists to measure.
+                "probe_id": pid,
                 "series_id": sid,
                 "intended_k": intended,
                 "calls_attempted": len(recs),
@@ -473,13 +478,53 @@ def summary(runs_dir: str) -> None:
                 # "D6a data characterises the instrument. It has no standing
                 # in the deferred M-vs-W ruling").
                 modal = max(dist, key=dist.get)
-                modal_proceed = max(set(proceeds), key=proceeds.count)
+                # F5 (PR19 2026-08-31): on a 50/50 proceed split `max` returns
+                # whichever value the set iterates first — arbitrary. That was
+                # tolerable while modal_proceed only fed a flip COUNT; the
+                # directional split gives the arbitrary pick publication weight,
+                # so a tie is surfaced and the split suppressed rather than
+                # attributed to a coin flip.
+                _pcounts = {v: proceeds.count(v) for v in set(proceeds)}
+                _pmax = max(_pcounts.values())
+                modal_proceed_tied = sum(
+                    1 for v in _pcounts.values() if v == _pmax) > 1
+                modal_proceed = max(_pcounts, key=_pcounts.get)
                 entry.update({
                     "outcome_distribution": dist,
                     "modal_outcome": modal,
                     "disagreement_count": sum(1 for v in idents if v != modal),
                     "proceed_flip_count": sum(1 for p in proceeds
                                               if p != modal_proceed),
+                    # Directional split (carried item 3b, 2026-08-31). The two
+                    # directions are NOT equivalent and the 2026-08-30
+                    # rate-presentation ruling requires the published rate be
+                    # decomposed by direction: a gate that occasionally blocks
+                    # what it would usually permit produces friction; one that
+                    # occasionally permits what it would usually block fails at
+                    # its purpose. Computed here so the decomposition is a
+                    # NAMED OUTPUT of the instrument rather than hand-derived
+                    # from the per-probe records at publication time, which is
+                    # how it was produced for the 2026-08-30 disclosure.
+                    # F1 (PR19 2026-08-31): `proceed` is ABSENT on tier1_pause
+                    # and engine_unavailable outcomes, which the instrument
+                    # deliberately counts. A None differs from a boolean modal,
+                    # so it lands in proceed_flip_count — but `is False`/`is True`
+                    # reject it, so without a third bucket the two directions
+                    # silently fail to decompose the published rate. The
+                    # all-verdict 2026-08-30 dataset hid this: 3+3=6 held by luck
+                    # of the data, not by construction.
+                    "modal_proceed_tied": modal_proceed_tied,
+                    "flips_toward_block": None if modal_proceed_tied else sum(
+                        1 for pr in proceeds
+                        if pr is not None and pr != modal_proceed
+                        and pr is False),
+                    "flips_toward_proceed": None if modal_proceed_tied else sum(
+                        1 for pr in proceeds
+                        if pr is not None and pr != modal_proceed
+                        and pr is True),
+                    "flips_undirected": sum(
+                        1 for pr in proceeds if pr is None) if
+                    modal_proceed is not None else None,
                     "disagreement_rate": round(
                         sum(1 for v in idents if v != modal) / len(idents), 4),
                 })
@@ -487,6 +532,19 @@ def summary(runs_dir: str) -> None:
 
     borderline = [e for e in per_probe.values()
                   if e["class"] == "borderline" and e.get("counted_outcomes")]
+    # A borderline series that produced ZERO counted outcomes is excluded from
+    # the aggregate above (correctly — it contributes no data), but it must not
+    # vanish silently: an all-failure series is a fact about the run.
+    borderline_empty = [
+        e["series_id"] for e in per_probe.values()
+        if e["class"] == "borderline" and not e.get("counted_outcomes")]
+    # F3 (PR19 2026-08-31): the DESIGN description must cover every borderline
+    # series, including those that contributed no outcomes. Deriving it from
+    # `borderline` alone makes a wholly-failed probe disappear rather than
+    # appear with 0 — so a 5-probe design that yielded 4 reads as a balanced
+    # 4-probe design.
+    borderline_all = [e for e in per_probe.values()
+                      if e["class"] == "borderline"]
     n_total = sum(e["counted_outcomes"] for e in borderline)
     # Raw integer counts, summed — not reconstructed from rounded rates
     # (PR19 2a/L14).
@@ -504,17 +562,55 @@ def summary(runs_dir: str) -> None:
                            for k, v in anchors.items()
                            if v.get("counted_outcomes")},
         "borderline_probes_showing_variance": sum(
-            1 for e in borderline if e.get("disagreement_count", 0) > 0),
-        "borderline_probes_measured": len(borderline),
+            1 for e in borderline
+            if e.get("disagreement_count", 0) > 0),
+        # COUNTS PROBES, NOT SERIES (corrected 2026-08-31, carried item 3).
+        # This field previously returned len(borderline), which is a count of
+        # SERIES: on the 2026-08-30 pooled run it read 8 where five probes were
+        # measured, and nothing in the block could see that four probes carried
+        # two series each while two carried one. See the balance warning below.
+        "borderline_probes_measured": len({e["probe_id"] for e in borderline}),
+        "borderline_series_measured": len(borderline),
+        "series_per_probe": {
+            pid: sum(1 for e in borderline_all if e["probe_id"] == pid)
+            for pid in sorted({e["probe_id"] for e in borderline_all})},
+        # F2 (PR19 2026-08-31): SAMPLING WEIGHT, not series count. A 10-record
+        # series and a 3-record series are one series each, so a series-count
+        # predicate cannot see unequal weight. This is the field the balance
+        # check actually keys on.
+        "outcomes_per_probe": {
+            pid: sum(e.get("counted_outcomes", 0) for e in borderline_all
+                     if e["probe_id"] == pid)
+            for pid in sorted({e["probe_id"] for e in borderline_all})},
+        "borderline_series_with_no_counted_outcomes": borderline_empty,
+        "directional": {
+            # None (not 0) when ANY contributing series had a tied modal — a
+            # missing direction must not read as "zero flips that way".
+            "flips_toward_block": None if any(
+                e.get("flips_toward_block") is None for e in borderline) else
+            sum(e.get("flips_toward_block", 0) for e in borderline),
+            "flips_toward_proceed": None if any(
+                e.get("flips_toward_proceed") is None for e in borderline) else
+            sum(e.get("flips_toward_proceed", 0) for e in borderline),
+            "flips_undirected": sum(
+                e.get("flips_undirected") or 0 for e in borderline),
+            "precision_note": (
+                "Event counts, not rates. A small number of events per "
+                "direction establishes that both phenomena occur and that "
+                "their consequences are not symmetric; it does NOT establish "
+                "their relative frequency, and no directional rate or derived "
+                "interval should be computed from these counts."),
+        },
         "warning": None,
     }
     if calibration["borderline_probes_measured"] and not \
             calibration["borderline_probes_showing_variance"]:
         calibration["warning"] = (
-            "NO borderline probe varied. Either the instrument is more stable "
+            (calibration["warning"] or "") + " NO borderline probe varied. "
+            "Either the instrument is more stable "
             "than c11 suggested, or the probe set is not the borderline class "
             "it claims to be. Do not publish the rate as a class rate without "
-            "resolving which.")
+            "resolving which.").strip()
     if reclassified:
         calibration["warning"] = (
             (calibration["warning"] or "") + " POST-HOC RECLASSIFICATION "
@@ -527,6 +623,63 @@ def summary(runs_dir: str) -> None:
             (calibration["warning"] or "") + " An ANCHOR moved: the clean or "
             "floor probe disagreed with itself, so the class boundaries the "
             "probe set asserts are not holding.").strip()
+
+    # BALANCE (carried item 3, 2026-08-31). An unbalanced design biases
+    # COMPOSITION, not merely precision: pooling series unequally across probes
+    # weights the over-sampled probes more heavily, so if those happen to be the
+    # low-variance ones the pooled rate is pulled down by the design rather than
+    # by the instrument. This is exactly what the aborted 2026-08-30 second
+    # sweep produced — 7.5% pooled against 12% balanced — and the block reported
+    # `all_borderline_series_complete: true` with no warning, because
+    # "complete" asks whether each series reached its intended K and cannot see
+    # that the probes were not sampled equally.
+    # The predicate keys on COUNTED OUTCOMES per probe (F2). An earlier version
+    # keyed on series count, which closed only the specific 2026-08-30 shape
+    # (a probe gaining an extra series) and left the general one open: truncating
+    # two zero-variance probes to K=3 moved the rate 12% -> 16.7% while every
+    # series was `complete` and the block reported `balanced: true`.
+    _opp = calibration["outcomes_per_probe"]
+    _spp = calibration["series_per_probe"]
+    if len(_opp) < 2:
+        # F4: a positive balance claim on zero or one probe asserts something
+        # about a design that does not exist. Say "not applicable", not "true".
+        calibration["balanced"] = None
+        calibration["balance_basis"] = (
+            "not applicable: fewer than two borderline probes measured")
+    elif len(set(_opp.values())) > 1:
+        _mx, _mn = max(_opp.values()), min(_opp.values())
+        calibration["balanced"] = False
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " UNBALANCED DESIGN: counted "
+            f"outcomes per probe range from {_mn} to {_mx} ({_opp}; series per "
+            f"probe {_spp}). The pooled rate is composition-biased toward the "
+            "over-sampled probes and MUST NOT be published as a class rate. "
+            "Either balance the design by sampling the under-weighted probes to "
+            "parity, or publish a single balanced subset. NOTE: per-series "
+            "completeness does not detect this — every series can reach its own "
+            "intended K while the probes carry unequal weight.").strip()
+    else:
+        calibration["balanced"] = True
+    # F3: an all-failure series is a fact about the run; a passive JSON field in
+    # a block whose consumers read `warning` is close to silent.
+    if borderline_empty:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " BORDERLINE SERIES WITH NO "
+            f"COUNTED OUTCOMES: {borderline_empty}. These contribute nothing to "
+            "the rate and are excluded from it; they appear in "
+            "outcomes_per_probe as 0 so the design description stays "
+            "honest.").strip()
+    # F1: the directional split must decompose the flip count, or say it does not.
+    _d = calibration["directional"]
+    _tot = sum(e.get("proceed_flip_count", 0) for e in borderline)
+    if (_d["flips_toward_block"] is None or _d["flips_toward_proceed"] is None
+            or _d["flips_toward_block"] + _d["flips_toward_proceed"] != _tot):
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " DIRECTIONAL SPLIT INCOMPLETE: "
+            f"toward_block + toward_proceed does not account for all {_tot} "
+            "proceed flips (outcomes with no proceed field, e.g. tier1_pause or "
+            "engine_unavailable, and any series with a tied modal). Do NOT "
+            "publish the split as a decomposition of the aggregate.").strip()
 
     rate = {
         "instrument": "R8-D6a verdict-repeatability",
