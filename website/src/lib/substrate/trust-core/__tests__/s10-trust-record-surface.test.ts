@@ -304,6 +304,48 @@ async function main(): Promise<void> {
     env.includes('not distinguishable, at that point, from one the server produced'),
     'S2-47 envelope: the founder-elected indistinguishability clause (§2b)',
   )
+  // ═══ S2-48/S2-50/S2-51 — the 2026-08-31 verdict-variance disclosure, carrying the
+  // measured rate (mentor rulings 2026-08-30: disclosure, rate-presentation, rate-location).
+  //
+  // S2-49 IS DELIBERATELY RETIRED AND MUST NOT BE RE-ADDED. It pinned
+  // 'Its rate has not been measured' — the guard against a rate reaching this surface
+  // without sign-off. The D6a sweep of 2026-08-30 measured the rate and the founder
+  // approved publishing it on 2026-08-31, so the guarded condition is discharged and the
+  // pinned string is now FALSE. S2-51 replaces it as the inverse guard.
+  assert(
+    env.includes('Verdict determinism'),
+    'S2-48 envelope: the verdict-determinism does-not-attest item exists at all',
+  )
+  assert(
+    env.includes('same code path, model and sampling temperature'),
+    'S2-50 envelope: the honest cross-path scoping clause survives (gate-measured, instrument-wide)',
+  )
+  // S2-51 is the INVERSE of retired S2-49: that pin stopped a rate appearing without
+  // sign-off; this one stops the signed rate being silently altered or dropped. The
+  // en-dash in 5.6–23.8% is significant — it must match the envelope byte-for-byte.
+  assert(
+    env.includes('Wilson 95% CI 5.6\u201323.8%'),
+    'S2-51 envelope: the published interval is exact and cannot be silently altered or dropped',
+  )
+  // Path specificity is BINDING (2026-08-30 rate-location ruling): the rate is
+  // /api/guardrail only and the consult path must be stated as unmeasured.
+  assert(
+    env.includes('No rate has been measured on the consult path (/api/reason)'),
+    'S2-52 envelope: /api/reason is stated as unmeasured wherever the rate appears',
+  )
+  // Founder-elected clause (approved 2026-08-31): the anchor movement reaches the PUBLIC
+  // surface as a falsification, not only the ADR. The Q4a ruling requires the class label
+  // survive and the anchor be named honestly; it does not require the instrument's own
+  // failed calibration check be published. The founder elected to publish it, so it is
+  // pinned — a later edit must not quietly soften it back to a bare "the anchor moved".
+  assert(
+    env.includes('calibration falsification'),
+    'S2-54 envelope: the founder-elected anchor-falsification clause (2026-08-31 election)',
+  )
+  assert(
+    !env.includes('Its rate has not been measured'),
+    'S2-53 envelope: the retired S2-49 string is GONE — the disclosure no longer claims the rate is unmeasured',
+  )
   eq(payload.envelope, TRUST_RECORD_ENVELOPE, 'S2-37 the payload ships THE envelope object')
   eq(payload.interop.published_externally, false, 'S2-38 interop: nothing published externally')
 

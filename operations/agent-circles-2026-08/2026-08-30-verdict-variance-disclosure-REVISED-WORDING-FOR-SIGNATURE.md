@@ -1,6 +1,12 @@
 # Verdict-variance disclosure — REVISED wording, carrying the measured rate
 
-**STATUS: DRAFT. NOT SIGNED. NOTHING HERE IS LICENSED FOR APPLICATION.**
+**STATUS: APPROVED BY THE FOUNDER, 2026-08-31, AFTER PR19.** Both open elections were approved in
+the same message ("approved, fold them in and proceed") and are folded below.
+
+> **Scope of the approval, recorded honestly.** The founder approved on the executing session's
+> summary of the PR19 findings and the correction set, not on a line-by-line reading of the text
+> below. Given that this arc has already published-ready a signed wording that a later measurement
+> falsified, the record states what the approval actually was rather than implying more.
 Authored 2026-08-30 after the first D6a live sweep and the mentor's rate-presentation ruling.
 
 **Supersedes** the corresponding sections of
@@ -98,7 +104,9 @@ Replaces the §3 entry in the signed package in full.
 > than intervals for that reason.
 >
 > The rate was measured on a borderline input class; the clean anchor showed proximity variance but
-> held on the proceed boundary. The measurement was taken on the guardrail gate; the extraction stage
+> held on the proceed boundary. The instrument recorded that movement as a **calibration
+> falsification** — by its own check, the class boundaries its probe set asserts did not fully hold —
+> and it is left recorded rather than repaired by re-partitioning the probes. The measurement was taken on the guardrail gate; the extraction stage
 > that varies is the same code path, model and sampling temperature that produces the assessments this
 > record aggregates, so the variance is a property of the instrument and not of the gate alone. **No
 > rate has been measured on the consult path (`/api/reason`)**, and the figures above must not be read
@@ -124,7 +132,8 @@ Replaces the §3 entry in the signed package in full.
 >   all on one force-push input the gate refused 7/10 and permitted 3/10, which is a failure mode, not
 >   a friction cost. Three events per direction shows both occur and that their consequences differ;
 >   it does not establish relative frequency, so no directional rate is claimed. Measured on a
->   borderline class; the clean anchor showed proximity variance but held on the proceed boundary. **No
+>   borderline class; the clean anchor showed proximity variance but held on the proceed boundary — the
+>   instrument recorded that as a calibration falsification and it is left recorded, not repaired. **No
 >   rate is measured on `/api/reason`** and this one does not transfer to it. Single sweep, one
 >   deployment, one date — the interval is sampling error within that sweep, not stability across
 >   sweeps. Read a single verdict as one draw.
@@ -159,6 +168,7 @@ rather than re-quoting.
   },
   "calibration": {
     "clean_anchor": "showed proximity variance (1 of 10) but held on the proceed boundary",
+    "anchor_falsification": "recorded, not repaired: by the instrument's own check the probe set's asserted class boundaries did not fully hold; the probes were deliberately not re-partitioned",
     "floor_anchor": "stable across 10 examinations"
   },
   "basis": {
@@ -443,7 +453,12 @@ CRITICAL and HIGH one was verified first-hand by the executing session against t
 git history before being folded. §(e) through §(j) above, the (d) completion, the evidence-pointer
 repair and the single-sweep qualifiers are that fold.
 
-**One finding was offered and is left to the founder rather than folded:** the instrument recorded
+**Both open elections were APPROVED and folded, 2026-08-31.** (1) The anchor falsification now reaches
+the public surfaces (a)/(b)/(c), not only the ADR. (2) The `llms.txt:118` replacement wording at §(i)
+is adopted as proposed. The paragraph below records what the first of these was, and why it was put to
+the founder rather than decided by the executing session.
+
+**The finding as it was offered:** the instrument recorded
 `anchors_stable: {"p6-clean": false}` with the warning *"An ANCHOR moved ... the class boundaries the
 probe set asserts are not holding."* The surfaces report the movement accurately and do not
 re-partition — compliant with Q4a — but the word *falsification*, and the instrument's own verdict
