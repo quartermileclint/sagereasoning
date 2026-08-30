@@ -16,7 +16,7 @@ nothing; the build runs only under this prompt's own future session and the elec
 run files; no auth/encryption/safety-surface *change* — the build calls a live gate, it does not
 modify one).
 
-**Two steps escalate, and both are `code-critical`:**
+**Two steps escalate, at different tiers:**
 
 1. **The probe-credential mint AND the SQL limit-raise it requires (§C.3)** — **`code-critical`,
    AC7 engaged, PR6, PR17 founder-walked.** Issuing a production access credential is an
@@ -74,29 +74,47 @@ honestly and **drift attribution to a deploy must not be claimed.**
    §10. **R8 is a founder-unadopted proposal** — electing to build follow-on 4 is not adoption of
    any other part of it, including its Prerequisite-Criterion index.
 2. `operations/agent-circles-2026-08/2026-08-30-c11-rerun-experiment-record.md` — the evidence
-   record. It carries **four** distinct inline corrections (the circle-set stability
-   qualification at line 63; the four-state indicator distribution at lines 82/90-94; the
-   rank-magnitude arithmetic at lines 108-111; the cost recomputation at lines 143-147). **The
-   first two bear directly on probe-set design — read them, not just the cost one.**
+   record. It carries **five** distinct inline corrections, cited here by their opening text
+   rather than by line number (**this document's first version cited line numbers into this file
+   and every one of them broke** when a correction was later inserted near the top — see §F):
+   *"Qualification added 2026-08-30…"* (the dikaiosyne floor was stable ten times but the circle
+   set was not); *"This paragraph's first committed draft read 'absent ×7…'"* (the indicator
+   distribution is **four** states, not three); *"Both magnitude figures corrected…"* (the swing
+   is 2 ranks, not 4); the §Footprint cost recomputation; and *"Correction added 2026-08-30 per
+   the D6a prompt's independent PR19 re-run…"* (the stale cost and the incomplete write set).
+   **The first two bear directly on probe-set design — read them, not just the cost ones.**
 3. `operations/agent-circles-2026-08/2026-08-30-c11-rerun-experiment-script.sh` — the pilot.
    **Read it as a shape reference and as a defect to NOT repeat**, not as a reference
-   implementation: its CSV extractor reads top-level response keys and is **wrong** (record lines
-   51-56 document the mis-extraction). The pilot's findings survived only because full response
+   implementation: its CSV extractor reads top-level response keys and is **wrong** — the record
+   documents this in the parenthetical beginning *"The run script's own live summary CSV
+   mis-extracted the verdict fields…"*. The pilot's findings survived only because full response
    bodies were retained and re-extracted by hand — a K=10 one-off tolerates that; a standing time
    series does not.
 4. The mentor ruling's Q3 + its sequencing note.
 
 ## C. Build items
 
-1. **The probe set** — 3–5 texts spanning the grade range, frozen verbatim in a repo evidence file
-   with per-text byte-length guards (the pilot's pattern: assert length before every submission).
-   **Freezing is one-way — a changed probe is a NEW probe with its own series, never an edit**, or
-   drift measurement dies. **Hard ceiling: each probe text must be under 5000 chars**
-   (`TEXT_LIMITS.medium`, validated at `guardrail/route.ts:138-148`) or the call 400s.
-   *Recommendations, not mandates — membership is DQ-1 and stays open:* include the c11 text
-   itself (the only input with a measured distribution, so continuity is worth something — note
-   design §5.2(a) asks only for a text "of c11's kind"); a clean high-grade text; an unambiguous
-   floor-class text.
+1. **The probe set** — frozen verbatim in a repo evidence file with per-text byte-length guards
+   (the pilot's pattern: assert length before every submission). **Freezing is one-way — a changed
+   probe is a NEW probe with its own series, never an edit**, or drift measurement dies. **Hard
+   ceiling: each probe text must be under 5000 chars** (`TEXT_LIMITS.medium`, validated for
+   `action` at `guardrail/route.ts:138-141`) or the call 400s.
+
+   **⚠ BINDING (mentor ruling 2026-08-30, verdict-variance disclosure — verbatim capture at
+   `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-disclosure-verbatim.md`,
+   which wins over this summary): the probe set must be scoped to produce a disagreement rate on a
+   REPRESENTATIVE INPUT CLASS, not only on the c11 candidate.** The rate is destined for a public
+   disclosure ("on the input class examined, the floor-flip rate was approximately N%"), so probe
+   membership is no longer only an instrument-calibration choice — it determines what that public
+   number is *about*, and a rate derived from one atypical text would be a claim whose confidence
+   exceeds its basis. **DQ-1 is correspondingly narrowed: what counts as a representative input
+   class is now the question, and it must be answered explicitly and recorded**, not left implicit
+   in a text selection.
+
+   *Recommendations within that constraint:* include the c11 text itself (the only input with a
+   measured distribution, so continuity is worth something — note design §5.2(a) asks only for a
+   text "of c11's kind"); a clean high-grade text; an unambiguous floor-class text; and enough of
+   the borderline class that the rate is about that class rather than about one candidate.
 
 2. **The runner script.** **Read this whole item before writing code — the field paths are the
    thing the first version of this prompt got wrong.**
@@ -112,9 +130,12 @@ honestly and **drift attribution to a deploy must not be claimed.**
 
    because `signLayer2Assessment` returns `{ assessment, signature, key_id }`
    (`layer2-signer.ts:193`). These differ by a *level*, not just a key name. **This is the field
-   the entire c11 finding turned on** (run 8's divergence was visible only in
-   `proximity_floors.andreia`); getting it wrong yields a runner that completes, writes
-   clean-looking JSONL, and is blind to the exact phenomenon it exists to measure.
+   the c11 finding's causal localisation rested on** — run 8's divergence was visible in
+   `katorthoma_proximity` alone (`reflexive`, `proceed: false`), so a runner recording only the
+   verdict would still see *that* it diverged; what needs `proximity_floors` is attributing the
+   divergence to the andreia floor and the grave-indicator stage assignment, which is the entire
+   mechanism finding. Getting the path wrong yields a runner that completes, writes clean-looking
+   JSONL, and records nulls for the field that explains *why*.
 
    Record per call: timestamp; the deploy identifier per §A's elected option; the full response
    body (as the pilot did); `result.katorthoma_proximity`; `result.extraction` (where the
@@ -123,15 +144,32 @@ honestly and **drift attribution to a deploy must not be claimed.**
    `guardrail/route.ts:412`; the `X-Loop-*` headers are CI-10 loop metering and are a different
    thing). `meta.cost_usd` is the figure §C.4's cost model derives from.
 
+   `meta.cost_usd` is computed on the live path at `guardrail/route.ts:306-314` and passed to the
+   envelope at `:347` (the CI-8 comment at `:412` sits in the **dark legacy branch** — accurate as
+   a statement of intent, but do not verify against it).
+
    **Mandatory first-run assertion:** before any run counts as evidence, assert every recorded
    field is non-null on the first call and halt if not. A silent-null instrument is worse than no
-   instrument.
+   instrument. **PR25 applies to this script:** any verification claim written in a comment
+   carries its check — a comment asserting a field is present must name the check that
+   established it.
 
    **Failures must be recorded as failures, never omitted** — a dropped failed call silently
    biases the distribution. Carry the pilot's error handling forward (`set -u`, non-2xx capture,
    `--max-time`, per-run stderr).
 
    Append-only run records (JSONL or dated files) so the time series is the artifact.
+
+   **⚠ TWO BINDING REQUIREMENTS from the same 2026-08-30 mentor ruling — these are no longer
+   design latitude:**
+   - **Persist every per-examination verdict, never only the modal or operative one.** The ruling:
+     *"persistence is not optional instrumentation; it is the evidential basis for the per-verdict
+     disclosure. If only the operative verdict is persisted, the disclosure cannot be made
+     honestly."* A design that summarises K down to one recorded verdict is ruled out.
+   - **Emit the aggregate disagreement rate as a NAMED OUTPUT**, not merely something derivable
+     from the stored rows. The public instrument-level disclosure needs a specific rate, and
+     *"'variance exists' is honest but weak."* Name the field; do not leave the rate implicit in
+     a pile of JSONL.
 
 3. **The dedicated probe credential** — **founder-minted; `code-critical`, AC7, PR6, PR17 (see
    Tier).** Labelled (e.g. `sagereasoning:d6a-probe@v1`), `consult`-class (verified: the route
@@ -152,11 +190,21 @@ honestly and **drift attribution to a deploy must not be claimed.**
      429 surfaces, because this route returns `keyCheck.error` directly with no substitution.
      **A 401 here means a genuinely invalid/revoked/wrong-prefix credential — do not misread it as
      the quota trap.**
-   - (b) A full run at 3–5 probes × K=10 is 30–50 calls, at or over the monthly-30 default in a
-     single run (the check is `new_monthly_total > monthly_limit`, so exactly 30 does not trip).
-   - (c) The mint **CLI has no `--daily`/`--monthly` flags at all**, so limits must be raised
-     separately. (The admin *route* does honour body `monthly_limit`/`daily_limit`; the SQL remedy
-     is the more conservative path.)
+   - (b) **Each metered call consumes TWO quota units, not one.** `increment_api_usage`
+     unconditionally increments `total_calls` and `daily_calls`, and `/api/guardrail` invokes it
+     **twice per request** with CI-10 live: once inside `validateApiKey` (`security.ts:439`
+     legacy / `:582` UPC — the UPC variant is the live one) and again inside `recordLoopBilling`
+     (`loop-cost-tracker.ts:369`) reached via `finalizeLoopResponse` (`guardrail/route.ts:361`).
+     So a 3–5 probe run at K=10 is 30–50 calls but **60–100 quota units**, and the monthly-30
+     default is exhausted at **15 calls**, not 30. **Size limits from calls × 2**, or the run dies
+     mid-series.
+   - (c) The mint **CLI has no `--daily`/`--monthly` flags at all**, so limits must be set or
+     raised by another path. **Prefer the application's own audited route over raw SQL:**
+     `/api/admin/api-keys` accepts `monthly_limit`/`daily_limit` at mint and exposes a PATCH that
+     updates them. A direct SQL write to the live `api_keys` table is **less** conservative than
+     the route, not more — an earlier version of this prompt asserted the opposite. (The mint
+     itself remains founder-walked Critical on independent grounds: it issues a production
+     access credential.)
    - (d) **Increment-then-check**: every failed call still consumes monthly quota, so a run that
      trips the daily cap burns its remaining K against the monthly allowance.
 
@@ -188,11 +236,20 @@ honestly and **drift attribution to a deploy must not be claimed.**
    chunk it per probe — decide before starting, not after watching a series die mid-run (partial
    data is not usable for a distribution).
 
-   **Depth election, previously inherited silently:** `risk_class: 'standard'` (the server default
-   the pilot used) maps to **quick** depth — 3 mechanisms (`guardrail/route.ts:131-136`). A probe
-   set "spanning the grade range" is therefore measured at the shallowest depth only, and drift at
-   `elevated`/`critical` depth is invisible to this instrument. Defensible (it matches the live
-   default), but make it an explicit election rather than an inherited default.
+   **There is NO depth election on the live path — do not construct one.** An earlier version of
+   this prompt said `risk_class: 'standard'` maps to quick depth (3 mechanisms) and invited an
+   election over it. **That is false for production.** In the live sandwich branch
+   (`SUBSTRATE_GUARDRAIL_SANDWICH_ENABLED=true`), `runGuardrailSandwich` is called with **no depth
+   argument** (`guardrail/route.ts:176-182`), `applyMechanisms(schema, options?: ApplyOptions)`
+   takes **no depth parameter** at all (`layer2-mechanisms.ts:2843-2846`), and the response
+   hardcodes `evaluation_depth: 'deterministic'`. `risk_class` shapes only the Layer-1
+   `domain_context` string and the critical-only `alternatives_warning`/`rollback_path`; the
+   `evaluationDepth` variable is referenced solely inside the **dark legacy branch**. The route's
+   own GET self-doc still repeats the stale "mechanism count follows risk_class" claim — **do not
+   reproduce it** (this is the same in-repo-docstring-over-live-code error §F records twice, and
+   it is consistent with CI-16, parked precisely because the gate does not inherit the sandwich's
+   depth machinery). Vary `risk_class` across probes only if you want to characterise its Layer-1
+   `domain_context` effect, and say that is what you are doing.
 
    No cron is created without the founder walking it.
 
@@ -231,11 +288,19 @@ strength, not just presence)
 - **PR19** — the probe set and runner script get independent review **before the first live run is
   executed**, not merely before its output is treated as evidence: an unreviewed script firing
   real metered calls at a live safety gate is itself the live-op-consequential act PR19 governs.
+  **If that review dies on the account session limit** — which happened twice to this prompt —
+  the first-hand fallback is available, but the cache's wording is *"a **mandatory-not-recommended**
+  independent re-run before downstream reliance"*: **re-run it after the limit resets, before the
+  live run.** Do not treat a first-hand pass as discharging the obligation. This document's own
+  history is the argument: the first-hand pass found 2 findings, the independent re-run found 6
+  HIGH, and a third pass found 3 more HIGH that the re-run's own folds had introduced.
 - **Excludability** — disclose every live run's footprint in the close, and note that **three
   tables are written per call, not one** (verified): `api_key_usage` (via the
-  `increment_api_usage` RPC in `validateApiKey`), `analytics_events` (unconditional awaited insert,
-  `guardrail/route.ts:317-335`, `event_type: 'guardrail_check_v3'`), and `loop_billing_events`
-  (CI-10, `loop-cost-tracker.ts:697`); plus `throttle_events` on any throttle.
+  `increment_api_usage` RPC in `validateApiKey`, `security.ts:439`/`:582`), `analytics_events`
+  (unconditional awaited insert, `guardrail/route.ts:317-335`, `event_type: 'guardrail_check_v3'`),
+  and `loop_billing_events` (CI-10, written by `recordLoopBilling` at `loop-cost-tracker.ts:359`
+  and `:369` — **not** `:697`, which is `aggregateLoopCost`'s read); plus `throttle_events` on any
+  throttle.
   **⚠ The `analytics_events` row carries NO credential reference** — only `agent_id`, which is
   `null` unless the runner sends `agent_id` in the POST body (the pilot's minimal payload does
   not). **So send `agent_id` in the payload**, or a standing cadence permanently pollutes
@@ -303,7 +368,45 @@ self-review to operator strength, not constraint presence.
 **Verified correct across reviewers:** the 9/10 verdict split; the corrected cost figures and every
 derived estimate; the credential shape and auth path; the deploy-identifier absence; the one-way
 freeze discipline; the weights-BLOCKED framing; the Option-S separation; the Q1c scoping; and the
-licensing discipline (judged the document's strongest dimension). Individual file:line citations
-were accurate — the errors were in what surrounded them.
+licensing discipline (judged the document's strongest dimension).
+
+> **STRUCK 2026-08-30.** This paragraph previously ended *"Individual file:line citations were
+> accurate — the errors were in what surrounded them."* **That assurance was false and is
+> withdrawn** — it was the single sentence most likely to stop a reader re-checking, and the
+> third review round found an entire citation set that did not resolve. Re-check citations; do
+> not rely on any claim that they were checked.
+
+**Third round — fold-verification of the rewrite (same day).** Because the rewrite was itself
+unreviewed, one further reviewer verified it against source. **It found 3 HIGH, 3 MEDIUM, 1 LOW
+and 3 NITs — defects the rewrite itself introduced while fixing the earlier ones.** All folded:
+(1) **every line citation into the c11 evidence record was wrong**, offset by ~13 lines — the
+authoring session had cited them, then *itself inserted a 13-line correction block into that
+record*, shifting every line below and silently invalidating its own citations; **all such
+citations are now by quoted opening text, not line number** (the durable fix — a line number is a
+pointer into a file someone will edit); (2) **the depth election described a lever that is dead on
+the live path** — `applyMechanisms` takes no depth parameter and `runGuardrailSandwich` is called
+without one, so `risk_class` selects no mechanism count in production; the claim came from the
+route's own stale GET self-doc rather than the live code, the same docstring-over-source error
+recorded twice already in this document; (3) **the quota model was off by 2×** —
+`increment_api_usage` fires twice per metered call (`validateApiKey` and `recordLoopBilling`), so
+the monthly-30 default is exhausted at 15 calls, not 30, and the sizing instruction would have
+produced limits half of what is needed. Also folded: two citations pointing into the dark legacy
+branch; the PR19 mandatory-re-run instruction, which the second round *described* as a finding but
+never actually folded into §D; the SQL-vs-admin-route claim, which had it backwards; the
+overstated "visible only in `proximity_floors`"; and PR25, which the document had omitted.
+
+**Binding ruling folded (2026-08-30, verdict-variance disclosure).** Verbatim at
+`operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-disclosure-verbatim.md`.
+Three consequences bind this build (§C.1, §C.2): the probe set must be scoped to a **representative
+input class**, because the disagreement rate is destined for a public disclosure; **every
+per-examination verdict persists**, never only the operative one; and the **aggregate disagreement
+rate is a named output**. A fourth consequence runs **before** this build and is not licensed here:
+the instrument-level disclosure on the trust record and R18 surfaces, which the ruling places
+*now*, ahead of D6a, with the rate stated as unknown and updated once D6a measures it.
+
+**The pattern, now confirmed across three rounds:** round one (self-review) checked constraint
+*presence* and missed operator *strength*; round two fixed the substance but introduced citation
+rot and a false lever; round three caught both. **No single pass has yet been clean.** Budget for
+independent review of whatever this build produces, and do not treat a fold as verification.
 
 End of prompt.
