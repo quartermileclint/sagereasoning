@@ -178,10 +178,31 @@ hard exclusion, flag-off byte-identity, and the sweep's genuine flag independenc
 4. Confirm the sweep's JSON response reports `deleted.provenance_ledger` and `deleted.provenance_gaps`
    (both `0`, since the tables start empty at activation) alongside `flag_enabled.provenance_ledger:
    true`.
-5. Watch the `[trust-core][provenance-ledger] classify ...` log lines accumulate in Vercel's function
+5. ~~Watch the `[trust-core][provenance-ledger] classify ...` log lines accumulate in Vercel's function
    logs — this is the founder-run readiness-check input SCOPE §9's C2 threshold needs (two consecutive
    weeks of 100% ledger-eligible-artifact resolution before slice 5 can switch on enforcement for any
-   agent beyond the already-excluded harness).
+   agent beyond the already-excluded harness).~~
+
+   **CORRECTED 2026-08-30 — this instruction could not succeed and is superseded.** The mentor's
+   correction, verbatim:
+
+   > the classification pipeline is active and record-only; on current mechanics it will not produce
+   > log lines until the C2 discharge path below is implemented; the watch instruction is superseded
+   > by this correction.
+
+   *(The mentor's "below" refers to the C2 discharge ruled in the same response; in this document the
+   pointer is:* `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-provenance-ledger-C2-
+   reachability-verbatim.md`. *That cross-reference is this correction's, not the mentor's.)*
+
+   **Why it could not succeed** (evidence: `.../2026-08-30-provenance-ledger-C2-observation-input-
+   unreachable-FINDING.md`): `classifyProvenanceArtifact` is reached only from the accreditation-write
+   route, which returns 409 for a `seed` write against an existing row **before** the emission call;
+   the harness close hook sends only `kind: "seed"` and the `s9-loop` row exists. 15 of 15 closes since
+   activation logged `already-exists`; zero `accred=written` across the log's full span.
+
+   **This correction was made before any other action on the ruling**, per the ruling's own
+   instruction that it *"goes into the record before any other action. It does not wait on the C2
+   ruling."* The original text is struck rather than deleted, so the record shows what was corrected.
 
 ## Constraints honoured
 
