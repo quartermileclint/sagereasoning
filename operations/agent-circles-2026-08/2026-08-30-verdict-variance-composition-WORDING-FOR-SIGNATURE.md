@@ -1,6 +1,9 @@
 # Verdict-variance wording — per-probe leads, aggregate follows, composition dependence and the stability finding published
 
-**STATUS: DRAFT FOR THE FOUNDER'S SIGNATURE. NOT APPLIED. Authoring this licensed nothing.**
+**STATUS: SIGNED BY THE FOUNDER, 2026-08-30. LICENSED FOR APPLICATION.**
+The two inherited defects the independent PR19 pass found (the false *"never varied"* claim and the
+missing deploy-proxy caveat) were **corrected before this was signed** — `9cdf155`/`36b7206` — so the
+draft's own ordering pre-condition is discharged.
 Authored 2026-08-30, executing the p5-force class-composition ruling of the same day.
 
 **Binding source (wins over this draft):**

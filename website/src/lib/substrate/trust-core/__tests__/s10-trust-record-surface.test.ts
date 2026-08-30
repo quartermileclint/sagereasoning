@@ -359,6 +359,35 @@ async function main(): Promise<void> {
     env.includes('solely by the force-push input'),
     'S2-61 envelope: the class limit is stated — p5-force is the sole distinguishing member',
   )
+  // ═══ 2026-08-30 COMPOSITION RULING (p5-force class-composition, verbatim and binding;
+  // founder-signed wording of the same day). No figure changes; the disclosure is REORDERED and
+  // two statements are added in the mentor's own stated forms.
+  //
+  // S2-62 — the Q4 composition dependence, published beside the class limit. The class limit alone
+  // was ruled "necessary but not sufficient": a recipient could INFER the dependence, and inference
+  // is not disclosure. ASCII apostrophe in "set's", as with S2-59.
+  assert(
+    env.includes("reflects this probe set's composition"),
+    'S2-62 envelope: the composition dependence is published, not merely inferable (ruling Q4)',
+  )
+  // S2-63 — the Q5 stability finding, stated in its own right rather than left as two zeroes.
+  assert(
+    env.includes('handles with complete stability'),
+    'S2-63 envelope: the two 0-of-20 probes are stated as a finding (ruling Q5)',
+  )
+  // S2-64 — AN ORDERING PIN, and the only one in this battery. Ruling Q1 is a claim about ORDER:
+  // the per-input distributions lead and the pooled rate follows, because a headline whose
+  // magnitude tracks the probe mix implies a property of the class the data does not support. No
+  // substring pin can catch a re-inversion — includes() is order-blind — so this asserts the
+  // relative position of the two blocks directly.
+  {
+    const perInput = env.indexOf('0 of 20')
+    const pooled = env.indexOf('pooled rate across this probe set')
+    assert(
+      perInput !== -1 && pooled !== -1 && perInput < pooled,
+      'S2-64 envelope: the per-input distributions precede the pooled rate (ruling Q1 ordering)',
+    )
+  }
   // Path specificity is BINDING (2026-08-30 rate-location ruling): the rate is
   // /api/guardrail only and the consult path must be stated as unmeasured.
   assert(
