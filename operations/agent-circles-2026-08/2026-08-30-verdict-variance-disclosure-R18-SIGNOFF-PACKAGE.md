@@ -15,25 +15,31 @@ acknowledgement. The second layer (a per-verdict disagreement count riding K-sam
 **The founder signs off the WORDING before any surface changes.** That is the R18 gate, and it is
 why this file exists rather than a commit.
 
-> ## STATUS 2026-08-30, after the founder's elections: **SIGNED, AND HELD.**
+> ## STATUS 2026-08-30 — **SIGNED. HOLD RELEASED BY THE MENTOR. ONE GATE REMAINS (PR19).**
 >
-> The founder **signed the wording as drafted** (§3, §4, §6), **elected the guardrail R10 addition
-> in full including its advisory sentence** (§7), and **elected to take the optional
-> epistemic-status-map route** (§8) — and then, on §1, elected to **put the rate-location question
-> to the mentor first and hold every edit until it is answered.**
+> **Sequence of the day, in order.** The founder **signed the wording as drafted** (§3, §4, §6),
+> **elected the guardrail R10 addition in full including its advisory sentence** (§7), and
+> **elected to take the epistemic-status-map route** (§8) — then, on §1, elected to **put the
+> rate-location question to the mentor and hold every edit** rather than let the executing session
+> resolve it on its own reading.
 >
-> **Consequence: NOTHING IS APPLIED.** No envelope item, no ADR amendment, no battery pin, no
-> public surface. This session is documents-only. The signed wording sits here awaiting the mentor's
-> answer; the question is at
-> `2026-08-30-mentor-question-verdict-variance-rate-location.md`.
+> **The mentor answered the same day, and the hold is released.** Verbatim:
+> `2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md` (binding; it wins over this
+> package). The ruling: *"Available in the watching table" described where I assumed aggregate
+> measurement data would naturally accumulate… It was not a ruling that D6a's output must persist
+> there. The executing session's reading is correct… **That wording stands.** D6a's DQ-2 remains
+> open.* See §1 below, now resolved, for the two new obligations the ruling creates.
 >
-> **The trade the founder accepted, recorded plainly rather than glossed:** the ruling placed this
-> disclosure BEFORE the measurement precisely to avoid *"withholding that knowledge from recipients
-> while we measure how much."* Holding it extends that withholding by the length of the mentor
-> round-trip. The founder made that call knowing it, over the alternative of shipping wording whose
-> location clause the executing session had resolved on its own judgement. **Nothing in the held
-> wording depends on the answer** — it names no location — so the likely outcome is that it applies
-> unchanged.
+> **NOTHING IS APPLIED YET, and the reason is no longer the hold.** The remaining gate is **PR19** —
+> an independent adversarial review of this wording has not been run (§11). The authoring session
+> was under a standing no-subagent constraint and recorded that rather than claiming the gate
+> discharged. **The wording is final; the review is what is owed.**
+>
+> **On the founder's call to hold, judged after the fact rather than before:** the executing
+> session's reading was vindicated word-for-word, so the hold cost a round-trip and changed no
+> published text. It also produced two binding constraints that would otherwise have been
+> discovered later, downstream, by someone building against a disclosure whose update path did not
+> work (§1). That is the trade, stated in both directions.
 
 ---
 
@@ -51,36 +57,54 @@ envelope does not yet carry."* The 2026-08-25 amendment repeated it.
 
 ---
 
-## §1 — THE ONE OPEN QUESTION THE PROMPT FLAGS: where does the rate live?
+## §1 — THE LOCATION QUESTION — **RESOLVED BY THE MENTOR, 2026-08-30**
 
-The ruling locates the rate *"a measured property of the instrument available in the watching
-table."* **That is not true today**, and the prompt is right that publishing a location the number
-is not in would reproduce the very failure the ruling corrects.
+**The question was:** the prior ruling located the rate *"a measured property of the instrument
+available in the watching table"*, which is not true today. Verified this session: the watching
+table is the IDEA-loop runner's per-cycle ledger (`POST /api/practice/watching`, live 2026-08-10);
+its read route `/api/founder/watching` is **FOUNDER_USER_ID Bearer-gated** while the trust record is
+**public and unauthenticated**; and it writes **no trust event** by its own ruled scope §2.9. D6a is
+unbuilt and its persistence question (**DQ-2**) was an open election whose *recommended* default —
+repo evidence files — is not publicly readable either.
 
-**Verified this session:** the watching table is the IDEA-loop runner's per-cycle transparency
-ledger (`POST /api/practice/watching`, `GET /api/founder/watching`). D6a has **not been built**, and
-its persistence question is an **open election** — its own prompt lists **DQ-2** as unresolved
-("repo evidence files (pilot pattern, zero schema, recommended) vs a DB table"), explicitly *not*
-pre-answered.
+**The executing session's proposed resolution** was that today's wording names **no location at
+all**, because today there is no rate; the ruling's locator describes the **post-measurement** state
+and belongs to the update, not this edit.
 
-**Recommended resolution — the tension dissolves for THIS wording, and does not need the mentor:**
+**The mentor's answer — the reading is correct, and the wording stands unchanged:**
 
-> **Today's disclosure names no location at all**, because today there is no rate. The ruling's own
-> timing section already separates the two: the disclosure ships now *"with the rate as unknown,
-> updated when D6a produces the rate."* The location sentence describes the **post-measurement**
-> state — it belongs to the update, not to this edit. Saying "the rate is not yet measured; a
-> measurement is scheduled; this entry will be updated to state it **and where it can be read**"
-> makes no location claim, and makes no claim that outruns its evidence.
+> *"'Available in the watching table' described where I assumed aggregate measurement data would
+> naturally accumulate given the watching table's role as the loop's transparency ledger. It was not
+> a ruling that D6a's output must persist there. The executing session's reading is correct, and its
+> interim wording — location-free, stating the rate is not yet measured and that the entry will be
+> updated to name both the rate and where it can be read — is the right response to that ambiguity.
+> That wording stands. D6a's DQ-2 remains open."*
 
-**What this hands forward, recorded so it is not lost:** D6a's **DQ-2 now carries an inherited
-obligation** — whatever it elects becomes the location this disclosure must name when it is
-updated, and the elected location must actually be readable by the recipients this envelope
-addresses. Repo evidence files are not readable by a public trust-record consumer. That is a real
-constraint on DQ-2, and it did not exist before this ruling.
+**So §3, §4 and §6 need no change on this axis.** No word of the held wording moves.
 
-**If the founder prefers to put it to the mentor instead**, the question is narrow: *does the
-"available in the watching table" phrase bind D6a's persistence election, or was it a description
-of where the mentor assumed such measurements live?* Nothing in this package assumes an answer.
+### The two obligations the ruling creates, which did not exist before it
+
+**(1) A publicly-readable location is a BINDING constraint on the eventual update** — *"derived
+directly from the disclosure's purpose: to calibrate the recipient who reads
+`GET /api/trust-record/{agent_id}`. A rate that lives only in a founder-facing route or in repo
+evidence files satisfies the measurement requirement but not the disclosure requirement. The
+disclosure exists for the recipient, not for the instrument's own records."*
+
+DQ-2 must therefore answer **two questions, not one**: where D6a persists the measurement for the
+instrument's own purposes, **and** how the rate reaches somewhere a trust-record recipient can read.
+These *may* converge (a DB table feeding a public surface) or may not (repo files, in which case
+**a separate served field or public document is owed**). The mentor confirms that separate delivery
+is **its own scoped work, not a line in D6a**, and directs that it be **named as such in D6a's build
+prompt so the scope boundary is explicit before the build opens.** — *folded into that prompt this
+session.*
+
+**(2) The eventual rate must name the path it was measured on.** *"'The variance rate is N%' without
+that qualification would be a confidence-exceeds-evidence failure of exactly the kind the disclosure
+corrects."* The update carries a single rate with its path named, or separate rates if both paths are
+measured, or an explicit statement that one path's rate is unknown. **D6a's probe design should note
+this** — *folded into that prompt this session.* This vindicates the path-scoping clause already in
+the held wording (§2, §3): the mentor calls mechanism fact 6 *"a genuine complication the disclosure
+must address honestly."*
 
 ---
 
@@ -318,13 +342,13 @@ The founder signs off, per surface. Nothing is applied until then.
 
 | # | Item | Founder's election, 2026-08-30 |
 |---|---|---|
-| §1 | The watching-table location question | **PUT TO THE MENTOR** — not resolved by the executing session's reading; all edits held pending the answer |
-| §3 | The `does_not_attest` entry wording | **SIGNED as drafted** (held, not applied) |
-| §4 | The ADR-013 §8 amendment | **SIGNED as drafted** (held, not applied) |
-| §5 | The three battery pins | **SIGNED as drafted** (held, not applied) |
-| §6 | The three R18 public surfaces | **SIGNED as drafted** (held, not applied) |
-| §7 | The guardrail R10 addition | **ELECTED IN FULL**, advisory sentence retained (held, not applied) |
-| §8 | The optional epistemic-status-map route | **ELECTED — take it** (held, not applied) |
+| §1 | The watching-table location question | **PUT TO THE MENTOR → ANSWERED 2026-08-30.** The executing session's reading confirmed correct; *"that wording stands"*; DQ-2 open. Two new obligations created — see §1 |
+| §3 | The `does_not_attest` entry wording | **SIGNED as drafted; mentor-confirmed unchanged.** Blocked only on PR19 |
+| §4 | The ADR-013 §8 amendment | **SIGNED as drafted.** Blocked only on PR19 |
+| §5 | The three battery pins | **SIGNED as drafted.** Blocked only on PR19 |
+| §6 | The three R18 public surfaces | **SIGNED as drafted; mentor-confirmed unchanged.** Blocked only on PR19 |
+| §7 | The guardrail R10 addition | **ELECTED IN FULL**, advisory sentence retained. Blocked only on PR19 |
+| §8 | The optional epistemic-status-map route | **ELECTED — take it.** Blocked only on PR19 |
 
 ---
 

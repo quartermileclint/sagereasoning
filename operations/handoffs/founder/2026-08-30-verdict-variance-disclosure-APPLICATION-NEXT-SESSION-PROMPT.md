@@ -6,18 +6,25 @@ the rate-location question.** Authored 2026-08-30.
 **Tier:** `code-elevated`. Live public-contract surfaces + the battery-locked `TRUST_RECORD_ENVELOPE`.
 No auth, perimeter, encryption, or schema surface; no flag is flipped; no behaviour changes.
 
-## The pre-condition, and it is hard
+## Pre-conditions
 
-**Do not open this session until the mentor has answered**
-`operations/agent-circles-2026-08/2026-08-30-mentor-question-verdict-variance-rate-location.md`.
-The founder elected to hold every edit pending that answer. Opening early defeats the election.
+**1. The mentor answer — DISCHARGED 2026-08-30.** The question was put and answered the same day:
+`operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md`
+(binding). *"'Available in the watching table' described where I assumed aggregate measurement data
+would naturally accumulate… It was not a ruling that D6a's output must persist there. The executing
+session's reading is correct… **That wording stands.** D6a's DQ-2 remains open."* **No word of the
+held wording changes.** The ruling's two forward obligations bear on D6a and on the eventual rate
+update, not on this application — both are folded into the D6a build prompt and recorded at
+sign-off-package §1. **This pre-condition no longer blocks; do not re-litigate it.**
 
-**Second hard pre-condition: PR19.** An independent adversarial review of the held wording has
+**2. The one remaining gate — PR19.** An independent adversarial review of the held wording has
 **not** been run — the authoring session was under a no-subagent constraint and said so rather than
 claiming the gate discharged. Run it **before** anything reaches a surface. Tell the reviewer that
 the author's own claims-vs-source pass already ran (package §11) so it hunts for what that pass
 missed. The prompt this arc inherits warns that the mandatory-re-run obligation *"has been missed
 once already in this arc"* — do not make it twice.
+
+**Nothing else blocks.** The wording is signed and mentor-confirmed; run the review, then apply.
 
 ## What is already done, and must not be re-litigated
 
@@ -28,8 +35,8 @@ carries the exact text for every surface, plus the founder's elections:
 - §7 guardrail R10 addition — **elected in full, advisory sentence retained**
 - §8 the epistemic-status-map fourth route — **elected, take it**
 
-**Re-open the wording only if** the mentor's answer requires it, or if PR19 finds a defect in it, or
-to adopt package **§11's F-1** (replace *"is scheduled"* with *"has been designed and is queued"* —
+**Re-open the wording only if** PR19 finds a defect in it (the mentor's answer did not require any
+change — it confirmed the wording), or to adopt package **§11's F-1** (replace *"is scheduled"* with *"has been designed and is queued"* —
 recommended, and it needs the founder's word since they signed the current phrasing).
 
 ## Ordering — binding, from ADR-013 §8's own 2026-08-15 and 2026-08-25 precedents
@@ -65,9 +72,9 @@ does not yet carry is the defect the precedent exists to prevent.
 
 ## What "done" looks like
 
-Mentor answered and recorded; PR19 run and folded; edit 1 committed with the battery green and the
+PR19 run and folded; edit 1 committed with the battery green and the
 three pins mutation-verified; edit 2 committed with the extension count re-derived; a decision-log
-entry at the tail; a lean close. The rate ships **unknown**, and D6a's DQ-2 carries whatever
-location obligation the mentor's answer creates.
+entry at the tail; a lean close. The rate ships **unknown**; D6a's DQ-2 carries the
+publicly-readable-location obligation the mentor's answer created, already folded into its prompt.
 
 End of prompt.

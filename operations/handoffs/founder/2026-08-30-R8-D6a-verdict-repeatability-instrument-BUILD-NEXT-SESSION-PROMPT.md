@@ -258,6 +258,43 @@ count (§C.1's list is a recommendation; the byte-guard, one-way-freeze, and 500
 requirements); DQ-2 — persistence: repo evidence files (pilot pattern, zero schema, recommended)
 vs a DB table; DQ-3 — K, cadence, and depth.
 
+> ### ⚠ BINDING FOLD, 2026-08-30 — two constraints on this build from the verdict-variance
+> rate-location ruling. Verbatim (wins over this summary):
+> `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md`.
+>
+> **(1) DQ-2 now has TWO questions, not one, and the second is the binding one.** The prior ruling's
+> phrase *"available in the watching table"* was **descriptive, not binding** — *"It was not a ruling
+> that D6a's output must persist there… D6a's DQ-2 remains open. The persistence election is D6a's own
+> design question."* **But** the instrument-level disclosure requires that when the rate is eventually
+> named, it is named **at a location a recipient of the public trust record can actually read** —
+> *"derived directly from the disclosure's purpose: to calibrate the recipient who reads
+> `GET /api/trust-record/{agent_id}`. A rate that lives only in a founder-facing route or in repo
+> evidence files satisfies the measurement requirement but not the disclosure requirement. The
+> disclosure exists for the recipient, not for the instrument's own records."*
+>
+> So DQ-2 must answer: **(a)** where D6a persists the measurement for the instrument's own purposes
+> (repo evidence files / a DB table / another form), **and (b)** how the rate reaches somewhere a
+> trust-record recipient can read. These *may* converge — a DB table that feeds a public surface — or
+> may not. **If repo evidence files are elected (this prompt's own recommendation), a separate served
+> field or public document is owed**, and the mentor rules that delivery is **its own scoped work, NOT
+> a line in this build**: *"It should be named as such in D6a's build prompt so the scope boundary is
+> explicit before the build opens."* **That is what this fold does. Do not absorb it into D6a's scope;
+> name it as a successor and hand it on.** Note the live facts that make it real: `/api/founder/watching`
+> is FOUNDER_USER_ID Bearer-gated, `/api/trust-record/{agent_id}` is public and unauthenticated, and no
+> served field for a variance rate exists today on any public surface.
+>
+> **(2) The probe design must note path-specificity, and the eventual rate must name its path.** The
+> c11 variance was measured on **`/api/guardrail`**; the trust record aggregates **`/api/reason`**-derived
+> events. `extractFeatures` is shared (Sonnet, temperature 0.2, no module-level cache — verified
+> 2026-08-30), but the consult path passes additional Layer-1 context and **no rate has ever been
+> measured there**. The mentor: *"'The variance rate is N%' without that qualification would be a
+> confidence-exceeds-evidence failure of exactly the kind the disclosure corrects."* The eventual
+> disclosure update therefore carries **either** a single rate with its path named, **or** separate
+> rates if both are measured, **or** an explicit statement that one path's rate is unknown. **Decide and
+> record which of the three this build's probe set produces** — if it measures only the guardrail path,
+> say so in the output, and leave the reason-path measurement to a later commission by the
+> standing-runner design session rather than implying coverage this build does not have.
+
 **If DQ-2 elects a DB table**, it carries more than a migration: **service-role-only RLS with an
 explicit `REVOKE ALL` from anon/authenticated/PUBLIC, verified behaviourally by an unauthenticated
 probe returning `42501`** — this project fixed four separate RLS/grant defects on 2026-08-16,
