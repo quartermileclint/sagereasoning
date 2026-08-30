@@ -5,6 +5,15 @@ faithfully — this document does not dispute it, and the evidence below is that
 letter. The question is what to do about a fact that neither the round-6 question nor its ruling had
 in view.
 
+> **⚠ ERRATUM — 2026-08-30, same day.** A claim in this document is **FALSE AS STATED**: that no agent
+> had a completed accreditation write in the trailing 30 days, and that C2's denominator is empty.
+> **`sagereasoning:stoa-q5c-smoke@v1` had a seed write on 2026-08-12**, inside the window. The
+> `credential-completed` signal this document relied on **under-reports**, because smoke teardowns
+> delete trust-event rows — the Q5c teardown deleted that agent's events while leaving its
+> accreditation row standing. The conclusion may survive on a different basis (SCOPE's pre-ledger
+> exclusion, since that write predates the ledger), but **the stated basis is wrong and C2 is NOT
+> declared discharged.** See `operations/agent-circles-2026-08/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
+
 **Evidence document:**
 `2026-08-30-provenance-ledger-C2-observation-input-unreachable-FINDING.md` (same directory) — every
 figure below was counted first-hand this session against production and the founder-loop log.

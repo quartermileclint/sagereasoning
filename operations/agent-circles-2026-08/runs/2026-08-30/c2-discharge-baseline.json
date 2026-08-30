@@ -1,0 +1,70 @@
+{
+  "schema": "provenance-c2-discharge-baseline-v1",
+  "generated_at": "2026-08-30T09:30:14.336Z",
+  "window": {
+    "days": 30,
+    "start": "2026-07-31T09:30:14.336Z",
+    "end": "2026-08-30T09:30:14.336Z"
+  },
+  "c2_population": {
+    "agents": [
+      "sagereasoning:stoa-q5c-smoke@v1"
+    ],
+    "count": 1,
+    "by_credential_completed_event": [],
+    "by_accreditation_seed_created_at": [
+      "sagereasoning:stoa-q5c-smoke@v1"
+    ],
+    "seed_signal_only_divergence": [
+      "sagereasoning:stoa-q5c-smoke@v1"
+    ],
+    "updated_at_but_not_written": [
+      "sagereasoning:s9-loop@v1"
+    ],
+    "updated_at_note": "updated_at is NOT a population signal — the Sage Reflect feed upserts the same row (sage-reflect/sage-assent-feed.ts:177), so it bumps on every harness session close.",
+    "empty_population": false
+  },
+  "c2_completeness": {
+    "ledger_recording_began": "2026-08-26T06:28:15.863+00:00",
+    "per_agent": [
+      {
+        "agent_id": "sagereasoning:stoa-q5c-smoke@v1",
+        "wrote_at": "2026-08-12T04:47:29+00:00",
+        "predates_ledger_recording": true,
+        "ledger_eligible_artifacts": 0,
+        "excluded_from_completeness_denominator": true
+      }
+    ],
+    "all_members_excluded_as_pre_ledger": true,
+    "undischargeable_members": [],
+    "basis": "SCOPE's pre-ledger exclusion — every member's ledger-eligible artifact set is empty"
+  },
+  "ledger_baseline": {
+    "total_rows": 187,
+    "first_recorded_at": "2026-08-26T06:28:15.863+00:00",
+    "last_recorded_at": "2026-08-30T09:04:28.079+00:00",
+    "by_identity_kind": {
+      "credential": 187
+    },
+    "by_layer1_source": {
+      "server": 187
+    },
+    "by_credential_ref": {
+      "api_key:1727d770-8bff-4b0f-beff-797c9e84bede": 1,
+      "api_key:33bef3d4-018d-4313-bcfd-65a75132155c": 186
+    },
+    "by_agent_id": {
+      "(null)": 1,
+      "sagereasoning:s9-loop@v1": 186
+    },
+    "structurally_resolvable_rows": 0,
+    "structurally_unresolvable_rows": 187,
+    "gaps_table_rows": 0
+  },
+  "classifier_provenance": {
+    "imported_from": "src/lib/substrate/trust-core/provenance-classification.ts",
+    "identity_resolved_by": "src/lib/substrate/longitudinal-identity.ts (resolveLongitudinalIdentity)",
+    "note": "IMPORTED, not re-implemented — the round-6 sync-drift objection is closed at the root, in addition to the point-in-time scope this ruling relies on.",
+    "sample_outcome_first_row_against_own_identity": "identity_mismatch"
+  }
+}

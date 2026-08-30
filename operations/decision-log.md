@@ -30254,3 +30254,98 @@ other pre-existing untracked path were left untouched.
 **Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, Q1.
 
 **Status:** Adopted (the finding and the question only — nothing ruled, nothing built).
+
+## 2026-08-30 — D-C2-RULING-ADOPTED-STEP5-CORRECTED-POPULATION-PREMISE-FOUND-WRONG
+
+**Decision:** The mentor's C2 ruling was received and **partially executed**: the step-5 record
+correction is **APPLIED** (first, alone, as instructed), the ruling is **recorded verbatim**, and the
+scoped reading-B tally is **built and run**. **C2 is NOT declared discharged** — running the tally
+found that **the ruling's factual premise, which this project supplied, is false.** `code-elevated`
+(one new read-only script; no schema, flag, credential, migration, or public-surface change;
+production untouched; AC7 not engaged).
+
+**1. The step-5 correction — applied FIRST, alone, in `8a34e18`.** The mentor: *"That correction goes
+into the record before any other action. It does not wait on the C2 ruling."* Taken literally: it was
+committed by itself, ahead of even recording the ruling, accepting a momentary forward reference to a
+file that did not yet exist rather than bundling for tidiness. The original text is **struck, not
+deleted**, with the mentor's superseding wording quoted verbatim.
+
+**2. The ruling, recorded verbatim** at `agent-circles-2026-08/2026-08-30-mentor-ruling-provenance-
+ledger-C2-reachability-verbatim.md` — **(a)** for the population question (vacuous as C1 is, mandatory
+re-check at switch-on), **(d) scoped** for the observation question (reading B reinstated: run once,
+point-in-time, never scheduled), **(b)** and **(c)** ruled out.
+
+**3. The tally, built to the ruling's scope** — `website/scripts/provenance-c2-discharge-tally.ts`,
+read-only, no schedule, no ongoing-stream claim. It **imports** `classifyProvenanceArtifact` and
+`resolveLongitudinalIdentity` rather than mirroring either, which closes the round-6 sync-drift
+objection **at the root** in addition to the point-in-time scope the ruling relies on. It **fails loud
+and exits non-zero** rather than reporting "100% of nothing" as a pass.
+
+**THE FINDING — AND IT IS A CORRECTION OF THIS PROJECT'S OWN ERROR.** The tally's fail-loud branch
+fired on its first run. **C2's agent population is NOT empty.**
+**`sagereasoning:stoa-q5c-smoke@v1` has an accreditation row created 2026-08-12** (`created_at ==
+updated_at` — one seed write), **18 days ago, inside the 30-day window.** The prior session's
+population claim used `credential-completed` trust events as its sole signal; **that signal
+under-reports because trust-event rows are deletable and smoke teardowns delete them** — the Q5c
+teardown deleted that agent's events and left its accreditation row standing. **An absent event was
+treated as evidence of an absent write, and it is not.**
+
+**A second, opposite error was caught in the same run.** The tally's first draft used
+`agent_accreditation.updated_at` as its independent signal. It **over-reports**: the Sage Reflect feed
+calls the same `upsertAccreditationRecord` chokepoint (`sage-reflect/sage-assent-feed.ts:177`), so the
+harness's reflect-at-close bumps `updated_at` at **every session close** with no accreditation write —
+it wrongly placed `sagereasoning:s9-loop@v1` in the population. **Neither obvious observable is sound
+alone: one under-reports through deletion, the other over-reports through a shared write chokepoint.**
+The population signal is now `created_at`; `updated_at` is reported as a diagnostic, labelled not-a-
+signal. **The dual-observable check that caught both was built precisely because the arc's standing
+lesson is that a verification method must not share an assumption with what it verifies.**
+
+**WHY THE CONCLUSION MAY SURVIVE, AND WHY THAT IS NOT BEING TREATED AS SUFFICIENT.** The one member
+wrote 2026-08-12; the ledger began recording 2026-08-26. Its artifacts **predate the ledger**, and
+SCOPE's own C2 clause already excludes those *"from C2's completeness denominator"* — so its
+ledger-eligible set is empty and completeness holds **vacuously for that agent**. But the ruling
+discharges C2 on an **empty agent population** via the **C1 precedent**; what obtains is a **non-empty
+population with empty per-agent artifact sets** via **SCOPE's pre-ledger exclusion**. Same conclusion,
+**different basis**. Substituting one for the other is not this session's call — and the pull to call
+it harmless *because it lands in the same place* is the confidence-exceeds-evidence move the
+disclosure rulings keep naming.
+
+**Put back to the mentor** (`…/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`):
+does the discharge stand on the corrected facts; is the pre-ledger basis an adequate substitute, or
+does a non-empty population make the two-week clause applicable again; should a torn-down smoke
+artifact count as an agent at all; and is the residual smoke row itself a teardown defect — it
+covered three tables and missed `agent_accreditation`, which now bears weight on a readiness
+threshold.
+
+**Errata applied, no verbatim text altered.** The finding, the question, and the ruling record each
+carry a dated erratum block; the mentor's own text is **untouched** — it is the record of what was
+ruled on the facts as given.
+
+**Baseline recorded either way** at `agent-circles-2026-08/runs/2026-08-30/c2-discharge-baseline.json`
+(`provenance-c2-discharge-baseline-v1`): 187 ledger rows, span 2026-08-26 → 2026-08-30, `credential`
+187/187, `server` 187/187, **structurally resolvable 0 / unresolvable 187**, gaps 0. The ruling
+requires this artifact for the switch-on re-check regardless of how the premise question resolves.
+**Nothing has been declared satisfied on it.**
+
+**Also verified this session:** the founder's push landed — live `llms.txt` now returns **0** for a
+case-insensitive `borderline` sweep, discharging the predecessor session's carried item 1.
+
+**Standing obligations recorded so they cannot be lost:** the **re-check at switch-on is a hard C2
+obligation, not a courtesy**, and must ride into the slice-5 prerequisites. **C2's discharge does not
+discharge C3** (90-day soak, at 4 days) **or C4** (the surface live — slice 3's job).
+
+**Risk classification:** Elevated. `tsc` clean. Weights-**BLOCKED**, Q1 and the §A boundary unchanged.
+**Nothing bears on the 0h call.**
+
+**Rollback:** `git revert` the records commit; the step-5 correction (`8a34e18`) is separately
+revertible and should NOT be reverted with it — it stands on its own instruction. The script is
+read-only and additive; deleting it changes no behaviour.
+
+**Concurrency:** `ListAgents` at open showed 18 peers. `git status` before each staging; commits
+path-scoped; `website/src/data/environmental-context.json` and all other pre-existing untracked paths
+left untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, Q1.
+
+**Status:** Adopted in part — step 5 corrected and the ruling recorded; **the C2 discharge itself is
+HELD** pending the mentor's answer on the corrected premise.

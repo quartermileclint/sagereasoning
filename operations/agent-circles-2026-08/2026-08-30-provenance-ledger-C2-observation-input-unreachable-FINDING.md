@@ -4,6 +4,15 @@
 **Tier:** read-only. **No code, schema, flag, credential, migration, or public-surface change.
 Production untouched. AC7 not engaged.**
 
+> **⚠ ERRATUM — 2026-08-30, same day.** A claim in this document is **FALSE AS STATED**: that no agent
+> had a completed accreditation write in the trailing 30 days, and that C2's denominator is empty.
+> **`sagereasoning:stoa-q5c-smoke@v1` had a seed write on 2026-08-12**, inside the window. The
+> `credential-completed` signal this document relied on **under-reports**, because smoke teardowns
+> delete trust-event rows — the Q5c teardown deleted that agent's events while leaving its
+> accreditation row standing. The conclusion may survive on a different basis (SCOPE's pre-ledger
+> exclusion, since that write predates the ledger), but **the stated basis is wrong and C2 is NOT
+> declared discharged.** See `operations/agent-circles-2026-08/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
+
 **Occasion.** The successor prompt
 (`operations/handoffs/founder/2026-08-30-provenance-ledger-slice3-and-carried-NEXT-SESSION-PROMPT.md`)
 named this as carried item 2: *"Check whether the slice-2 provenance ledger is accumulating — cheap,
@@ -111,9 +120,13 @@ the founder-run readiness-check input SCOPE §9's C2 threshold needs."* There ar
 there will be none while the harness's write path is a seed against an existing row. Not "few" —
 **zero, by construction, indefinitely.** Nothing in the arc records this.
 
-**2. C2's denominator is empty on its own terms.** C2 is scoped to *"every agent with an
-accreditation write in the trailing 30 days."* The last completed accreditation write was 32 days
-ago. Whether an empty denominator satisfies C2 vacuously — as SCOPE explicitly reasons for **C1**
+**2. C2's denominator is ~~empty~~ NOT empty on its own terms — CORRECTED, see the erratum above.**
+C2 is scoped to *"every agent with an accreditation write in the trailing 30 days."* This document
+originally read *"the last completed accreditation write was 32 days ago"*, derived from
+`credential-completed` events alone. That signal under-reports: **`sagereasoning:stoa-q5c-smoke@v1`
+wrote on 2026-08-12**, inside the window, and its events were deleted at the Q5c teardown. Its
+artifacts nonetheless **predate the ledger** (2026-08-12 < 2026-08-26), so SCOPE's pre-ledger clause
+excludes them from the completeness denominator — a different basis for a similar conclusion. Whether an empty denominator satisfies C2 vacuously — as SCOPE explicitly reasons for **C1**
 (*"the population is empty — every other agent already coheres… C1 is satisfied as of the measurement
 date"*) — or whether C2's *"observed across at least two consecutive weeks of record-only
 operation"* clause makes an empty population unobservable and therefore unsatisfiable, **is a
