@@ -601,7 +601,9 @@ distribution and its drift across deploys — the quantity Probe 3(c) named late
 (sampling-variation vs movement) and the c11 record now demonstrates is real. Operational
 requirements named at design time: probe traffic runs on a dedicated, labelled credential so it
 is excludable from every billing/usage/trajectory sample by `credential_ref`; each run's cost is
-bounded and disclosed (~$0.15 per 10 calls at today's metering); activation is a founder
+bounded and disclosed ($0.142215 per 10 calls measured, mean $0.014222/call — corrected
+2026-08-30 from the rounded "~$0.15" per the experiment record's §Footprint recomputation);
+activation is a founder
 election with a stated cadence. **Boundary: the instrument characterises the scorer; nothing
 consumes its output as a signal into generation or election.**
 

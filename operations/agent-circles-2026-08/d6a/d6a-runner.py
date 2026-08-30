@@ -1,0 +1,592 @@
+#!/usr/bin/env python3
+"""R8-D6a verdict-repeatability runner — probes the LIVE /api/guardrail.
+
+Built 2026-08-30 under the D6a build prompt
+(operations/handoffs/founder/2026-08-30-R8-D6a-verdict-repeatability-instrument-BUILD-NEXT-SESSION-PROMPT.md),
+then substantially rewritten the same day after three independent PR19
+reviewers returned 4 HIGH and a long MEDIUM tail against the first version.
+Findings folded are cited inline as (PR19 <id>).
+
+MEASURE-only: this script submits fixed frozen texts to the live gate and
+records responses. Nothing consumes its output as a signal into generation or
+election (binding boundary, build prompt section A). It changes no gate
+behaviour.
+
+USAGE — one probe per invocation. Chunking is deliberate: at pilot latency
+(14.5-19.1s/call) plus 6s spacing, K=10 is ~4 min, and the 120s per-call
+timeout makes the worst case ~21 min against a 10-minute tool ceiling. Run
+probes as separate invocations, or in the background.
+
+    python3 d6a-runner.py run <probe_id> <K>
+    python3 d6a-runner.py summary <runs_dir>
+
+CREDENTIAL. Read from a gitignored file, NOT the command line: an inline
+`D6A_PROBE_CREDENTIAL=sr_prac_... python3 ...` writes a live production token
+into shell history, and this project had a public-credential-exposure incident
+on 2026-07-17 (PR19 M9). Default path below; override with D6A_CREDENTIAL_FILE.
+There is NO fallback to the dogfood credential — identity separation per the
+build prompt's Q1c note.
+
+QUOTA — SIZE THE CREDENTIAL BEFORE RUNNING (PR19 M7 / 10a). Every metered call
+consumes TWO quota units, not one: `increment_api_usage` fires in
+validateApiKey AND again in recordLoopBilling on the live CI-10 path. So:
+
+    quota units = probes x K x 2
+
+The frozen 7-probe set at K=10 is 70 calls = 140 units. A credential minted at
+the CI-6 free-tier defaults (monthly 30 / daily 1) is exhausted at 15 calls,
+and a single K=10 series is 20 units against a daily of 1. Raising limits and
+reading the stored row back is a founder-walked Critical step; this script
+refuses to guess and will abort the series on the first quota 429 rather than
+burn the remainder (PR19 L19).
+
+Field paths. Each was resolved by reading the named source file in the
+2026-08-30 build session; the check is recorded next to the claim rather than
+deferred to another document (PR25, tightened after PR19 8b):
+  - Envelope {result, meta} — read of buildEnvelope's return in
+    lib/response-envelope.ts and its call in the guardrail route.
+  - Verdict fields under result.* — read of the route's resultBody assembly.
+  - proximity_floors: result.signed_assessment.assessment.proximity_floors
+    when signing is ON (production), else result.assessment.proximity_floors —
+    read of layer2-signer.ts, whose sign function returns
+    {assessment, signature, key_id}, i.e. one level deeper.
+  - meta.ai_model (NOT meta.model_used, which is emitted nowhere and appears
+    only in a stale header comment — PR19 F1/M4/8a, which found the first
+    version recording a permanent silent null here).
+  - meta.cost_usd is a BODY field (CI-8). On the LIVE sandwich branch a null
+    means the ENGINE WAS UNAVAILABLE, not a cache hit — guardrail-sandwich.ts
+    has no response cache; the cache-hit story belongs to the dark legacy
+    runSageReason path (PR19 F2).
+  - The IP-keyed limiter (RATE_LIMITS.publicAgent, 30 req/60s) is checked
+    BEFORE auth in the route — read of the route's first two statements. This
+    is why calls are sequential with 6s spacing: a REQUIREMENT carried from the
+    pilot, not a nicety.
+  - agent_id is sent in every payload so the unconditional analytics_events
+    insert is excludable. It also reaches loop_billing_events via the loop
+    accumulator (PR19 F4), so BOTH tables' probe rows are excludable by it. It
+    is not validated, not passed to the sandwich, and not in the extraction
+    context, so it does not perturb the verdict.
+
+THREE OUTCOME KINDS, not two (PR19 H1 — the worst defect in the first
+version). runGuardrailSandwich can return tier1_pause and engine_unavailable.
+Both are HTTP 200 with katorthoma_proximity null and proceed false. The first
+version counted them as transport failures, so a probe that paused on 2 of 10
+runs — which IS verdict variance, the proceed flag flipping on frozen text —
+reported a disagreement rate of ZERO. That would have made the binding public
+number dishonest in exactly the direction the disclosure ruling exists to
+prevent. Outcomes are now classified as verdict / tier1_pause /
+engine_unavailable / failure, and the first three all count in the
+distribution.
+"""
+
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+PROBES_FILE = HERE / "d6a-probes.json"
+ENDPOINT = "https://www.sagereasoning.com/api/guardrail"
+AGENT_ID = "sagereasoning:d6a-probe@v1"
+SPACING_SECONDS = 6
+TIMEOUT_SECONDS = 120
+MAX_K = 25  # hard ceiling on calls per invocation at a live metered gate
+DEFAULT_CRED_FILE = Path.home() / ".sage-d6a-probe-credential"
+
+# Fields whose absence means the instrument is broken rather than the gate
+# having spoken. Checked on EVERY call, not only the first (PR19 M5: a
+# first-call-only check goes silent exactly when a mid-series shape change
+# fires, which is the event this instrument exists to detect).
+STRICT_FIELDS = [
+    "katorthoma_proximity",
+    "proceed",
+    "proximity_floors",
+    "extraction",
+    "cost_usd",
+    "ai_model",
+]
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def load_probes() -> dict:
+    return json.loads(PROBES_FILE.read_text())
+
+
+def load_probe(probe_id: str) -> dict:
+    for p in load_probes()["probes"]:
+        if p["id"] == probe_id:
+            return p
+    sys.exit(f"ABORT: unknown probe id {probe_id!r}. Known: "
+             + ", ".join(p["id"] for p in load_probes()["probes"]))
+
+
+def read_credential() -> str:
+    path = Path(os.environ.get("D6A_CREDENTIAL_FILE", DEFAULT_CRED_FILE))
+    if not path.exists():
+        sys.exit(
+            f"ABORT: no credential file at {path}. Write the dedicated probe\n"
+            "credential there (chmod 600) — do NOT pass it on the command\n"
+            "line (PR19 M9). The mint and its limit-raise are founder-walked\n"
+            "Critical steps; this script mints nothing.")
+    cred = path.read_text().strip()
+    if not cred:
+        sys.exit(f"ABORT: credential file {path} is empty.")
+    return cred
+
+
+def deploy_identity() -> dict:
+    """Re-read per call (PR19 M6): a deploy landing mid-series would otherwise
+    stamp every later record with the pre-series commit."""
+    env_id = os.environ.get("D6A_DEPLOY_ID")
+    if env_id:
+        return {"deploy_id": env_id, "deploy_id_source": "vercel_dashboard"}
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "origin/main"],
+            capture_output=True, text=True, check=True, cwd=HERE,
+        ).stdout.strip()
+        return {
+            "deploy_id": sha,
+            "deploy_id_source": "origin_main_proxy",
+            "deploy_id_caveat": (
+                "local origin/main is not necessarily the deployed commit, and "
+                "without a fetch may not even be the latest pushed one; drift "
+                "attribution to a deploy must NOT be claimed from this proxy "
+                "(build prompt section A verified blocker)"
+            ),
+        }
+    except Exception as e:  # recorded, never dropped
+        return {"deploy_id": None, "deploy_id_source": "absent",
+                "deploy_id_error": str(e)}
+
+
+def extract_fields(body: dict) -> dict:
+    """Pull the discriminating fields from the envelope. Never raises — a
+    missing path yields None, which the per-call assertion then catches."""
+    result = body.get("result") or {}
+    meta = body.get("meta") or {}
+    signed = result.get("signed_assessment") or {}
+    floors = (signed.get("assessment") or {}).get("proximity_floors")
+    if floors is None:
+        floors = (result.get("assessment") or {}).get("proximity_floors")
+    extraction = result.get("extraction")
+    urgency = extraction.get("urgency_indicators") if isinstance(
+        extraction, dict) else None
+    return {
+        "katorthoma_proximity": result.get("katorthoma_proximity"),
+        "proceed": result.get("proceed"),
+        "recommendation": result.get("recommendation"),
+        "is_kathekon": result.get("is_kathekon"),
+        "assessment_status": result.get("assessment_status"),
+        "proximity_floors": floors,
+        "extraction": extraction,
+        "urgency_indicators": urgency,
+        "cost_usd": meta.get("cost_usd"),
+        "ai_model": meta.get("ai_model"),
+    }
+
+
+def classify_outcome(rec: dict) -> str:
+    """verdict | tier1_pause | engine_unavailable | failure (PR19 H1).
+
+    A 200 with no proximity is the gate SPEAKING (a tier-1 clarification pause
+    or an engine outage producing a conservative fallback), not the transport
+    failing. Those are outcomes on frozen text and belong in the distribution;
+    filing them as failures understated disagreement to zero in the first
+    version."""
+    if rec.get("http_status") != 200 or "fields" not in rec:
+        return "failure"
+    f = rec["fields"]
+    if f.get("katorthoma_proximity"):
+        return "verdict"
+    status = (f.get("assessment_status") or "").lower()
+    if "tier1" in status or "clarif" in status:
+        return "tier1_pause"
+    if "unavailable" in status or f.get("cost_usd") is None:
+        return "engine_unavailable"
+    return "tier1_pause"
+
+
+def classify_failure(code, raw_body: str) -> str:
+    """Quota 429 vs IP-limiter 429 vs 503 flavours (PR19 L13, L15).
+
+    Read of src/lib/security.ts on 2026-08-30, in validateApiKeyUpc (the live
+    validator for an sr_prac_ credential) and checkRateLimit: the daily body is
+    error 'Daily limit exceeded'; the monthly body is error 'Monthly QUOTA
+    exceeded' — not 'limit', which the first version misquoted — and the IP
+    limiter is 'Too many requests. Please try again later.'"""
+    lower = (raw_body or "").lower()
+    if code == 429:
+        if "daily limit" in lower or "monthly quota" in lower \
+                or "monthly limit" in lower:
+            return "quota_429"
+        if "too many requests" in lower:
+            return "rate_limit_429"
+        return "unclassified_429"
+    if code == 503:
+        if "signing" in lower:
+            return "signing_unavailable_503"
+        if "rate limit system" in lower:
+            return "quota_system_offline_503"
+        return "unclassified_503"
+    return f"http_{code}"
+
+
+def run_series(probe_id: str, k_raw: str) -> None:
+    try:
+        k = int(k_raw)
+    except ValueError:
+        sys.exit(f"ABORT: K must be an integer, got {k_raw!r}")
+    if k < 1 or k > MAX_K:  # PR19 M12: unbounded K at a live metered gate
+        sys.exit(f"ABORT: K must be between 1 and {MAX_K}, got {k}")
+
+    cred = read_credential()
+    probe = load_probe(probe_id)
+    text = probe["text"]
+
+    actual_bytes = len(text.encode("utf8"))
+    if actual_bytes != probe["bytes"]:
+        sys.exit(f"ABORT: probe {probe_id} text is {actual_bytes} bytes, "
+                 f"frozen record says {probe['bytes']} — the probe file has "
+                 "drifted; a changed probe is a NEW probe (one-way freeze).")
+    if len(text) >= 5000:
+        sys.exit("ABORT: probe text at/over the 5000-char action ceiling")
+
+    # The freeze is enforced by recording, not by prose (PR19 7a/M11: the
+    # first version's _meta claimed a `series_started` mechanism the runner
+    # never wrote). The text hash rides EVERY record, so a probe edited
+    # between run 1 and run 20 is self-evident in the series rather than
+    # requiring git archaeology against a file the discipline assumes nobody
+    # edits (PR19 7b).
+    text_sha = hashlib.sha256(text.encode("utf8")).hexdigest()
+    stamp_first_run(probe_id, text_sha)
+
+    series_id = str(uuid.uuid4())  # PR19 H2: same-day re-runs must not pool
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    out_dir = HERE / "runs" / day
+    out_dir.mkdir(parents=True, exist_ok=True)
+    jsonl = out_dir / f"{probe_id}.jsonl"
+
+    payload = json.dumps({"action": text, "agent_id": AGENT_ID}).encode("utf8")
+    print(f"{probe_id}: series {series_id}, K={k} "
+          f"({k * 2} quota units), text sha256 {text_sha[:12]}", flush=True)
+
+    for i in range(1, k + 1):
+        rec = {
+            "probe_id": probe_id,
+            "series_id": series_id,
+            "intended_k": k,
+            "run_index": i,
+            "timestamp_utc": utc_now(),
+            "probe_text_sha256": text_sha,
+            **deploy_identity(),
+        }
+        req = urllib.request.Request(
+            ENDPOINT, data=payload, method="POST",
+            headers={"Content-Type": "application/json", "X-Api-Key": cred},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+                raw = resp.read().decode("utf8")
+                rec["http_status"] = resp.status
+        except urllib.error.HTTPError as e:
+            raw = e.read().decode("utf8", errors="replace")
+            rec["http_status"] = e.code
+            rec["failure"] = classify_failure(e.code, raw)
+        except Exception as e:
+            raw = ""
+            rec["http_status"] = None
+            rec["failure"] = f"transport_error: {e}"
+            rec["failure_note"] = (
+                "a timeout does NOT mean the gate did not process the call: "
+                "it likely consumed two quota units and wrote its "
+                "analytics_events and loop_billing_events rows (PR19 L18)")
+
+        rec["response_body_raw"] = raw  # full body retained, always
+        if rec.get("http_status") == 200:
+            try:
+                rec["fields"] = extract_fields(json.loads(raw))
+            except Exception as e:
+                rec["failure"] = f"parse_error: {e}"
+        rec["outcome_kind"] = classify_outcome(rec)
+
+        with jsonl.open("a") as f:
+            f.write(json.dumps(rec) + "\n")
+
+        kind = rec["outcome_kind"]
+        detail = rec.get("failure") or (
+            f"{rec['fields']['katorthoma_proximity']} / "
+            f"proceed={rec['fields']['proceed']}" if "fields" in rec else "")
+        print(f"{probe_id} run {i}/{k}: HTTP {rec['http_status']} "
+              f"[{kind}] {detail}", flush=True)
+
+        # Instrument-integrity check, EVERY call (PR19 M5). Only a `verdict`
+        # outcome is expected to carry all the fields; a pause or an outage
+        # legitimately carries none, and misreporting that as an instrument
+        # defect sends an operator hunting a bug that isn't there (PR19 H1's
+        # second face). `is None` is load-bearing and must not be
+        # "simplified" to a truthiness test: `proceed` is a boolean and False
+        # is the expected value on the floor-anchor probe (PR19 N23).
+        if kind == "verdict":
+            nulls = [f for f in STRICT_FIELDS if rec["fields"].get(f) is None]
+            if nulls and i == 1:
+                sys.exit(f"ABORT: first call recorded null for {nulls} — "
+                         "field-path or instrument defect; fix before any run "
+                         "counts as evidence (build prompt section C.2).")
+            if nulls:
+                print(f"  SHAPE-DRIFT WARNING: run {i} recorded null for "
+                      f"{nulls}. The response shape may have changed "
+                      "mid-series. Recorded, not halted — but this series' "
+                      "later runs are suspect.", flush=True)
+        elif i == 1 and kind == "failure":
+            sys.exit(f"ABORT: first call of {probe_id} failed "
+                     f"({rec.get('failure')}); series not started.")
+
+        if rec.get("failure") == "quota_429":
+            # Every remaining call is a guaranteed 429 that still burns
+            # monthly quota (increment-then-check), so stop (PR19 L19).
+            sys.exit(f"ABORT: quota exhausted at run {i}/{k}. Series "
+                     f"{series_id} is INCOMPLETE and must not be pooled into "
+                     "a distribution. Raise the credential's limits (calls x "
+                     "2 units), verify by reading the row back, and re-run.")
+
+        if i != k:
+            time.sleep(SPACING_SECONDS)
+
+
+def stamp_first_run(probe_id: str, text_sha: str) -> None:
+    """Make the one-way freeze real: record when a probe's series began and
+    the hash it began on (PR19 7a/M11 — the first version declared this
+    mechanism in prose and implemented none of it). After this stamp, editing
+    the text changes the hash and every later run records the mismatch."""
+    data = load_probes()
+    changed = False
+    for p in data["probes"]:
+        if p["id"] == probe_id:
+            if p.get("series_started") is None:
+                p["series_started"] = utc_now()
+                p["frozen_text_sha256"] = text_sha
+                # The CLASS freezes with the text (founder-approved 2026-08-30,
+                # recommendation 6). Reclassifying a probe after seeing its
+                # results is post-hoc selection on the number destined for
+                # publication: dropping a low-variance probe from the
+                # borderline set raises the rate, adding one lowers it, and
+                # either move is defensible-sounding after the fact. If the
+                # run falsifies the class definition, that is REPORTED as a
+                # finding alongside the rate as-defined — never fixed by
+                # re-partitioning.
+                p["frozen_class"] = p["class"]
+                changed = True
+            elif p.get("frozen_text_sha256") not in (None, text_sha):
+                sys.exit(
+                    f"ABORT: probe {probe_id} text hash has changed since its "
+                    f"series began on {p['series_started']}. The freeze is "
+                    "ONE-WAY: a changed probe is a NEW probe with a new id "
+                    "and its own series, never an edit.")
+    if changed:
+        PROBES_FILE.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def summary(runs_dir: str) -> None:
+    """Emit the NAMED aggregate outputs (binding: the disagreement rate must be
+    a named output, not merely derivable — 2026-08-30 disclosure ruling)."""
+    base = Path(runs_dir)
+    if not base.is_dir():  # PR19 L17
+        sys.exit(f"ABORT: {base} is not a directory")
+
+    meta = load_probes()["_meta"]
+    probes_meta = {p["id"]: p for p in load_probes()["probes"]}
+    per_probe, malformed_lines = {}, 0
+    deploy_ids = set()
+    # A probe's class for aggregation purposes is the one frozen at its first
+    # run, NOT the current `class` field — so editing `class` after seeing
+    # results cannot move the published rate (founder-approved 2026-08-30,
+    # recommendation 6). Any divergence is surfaced, not silently honoured.
+    reclassified = [
+        p["id"] for p in probes_meta.values()
+        if p.get("frozen_class") and p["frozen_class"] != p["class"]
+    ]
+
+    for jsonl in sorted(base.glob("*.jsonl")):
+        pid = jsonl.stem
+        by_series = {}
+        for line in jsonl.read_text().splitlines():
+            try:
+                rec = json.loads(line)
+            except Exception:
+                malformed_lines += 1  # PR19 M8: one truncated line must not
+                continue              # destroy the whole summary
+            if rec.get("deploy_id"):
+                deploy_ids.add(rec["deploy_id"])
+            sid = rec.get("series_id", "unidentified")
+            by_series.setdefault(sid, []).append(rec)
+
+        for sid, recs in by_series.items():
+            key = pid if len(by_series) == 1 else f"{pid}@{sid[:8]}"
+            outcomes = [r.get("outcome_kind", "failure") for r in recs]
+            counted = [r for r in recs
+                       if r.get("outcome_kind") in
+                       ("verdict", "tier1_pause", "engine_unavailable")]
+            failures = len(recs) - len(counted)
+            intended = recs[0].get("intended_k")
+            entry = {
+                "class": (probes_meta.get(pid, {}).get("frozen_class")
+                          or probes_meta.get(pid, {}).get("class", "unknown")),
+                "series_id": sid,
+                "intended_k": intended,
+                "calls_attempted": len(recs),
+                "counted_outcomes": len(counted),
+                "failures": failures,
+                # PR19 H3: a partial series must announce itself, not be
+                # pooled silently at equal per-call weight.
+                "complete": intended is not None and len(counted) == intended,
+                "outcome_kinds": {k: outcomes.count(k)
+                                  for k in sorted(set(outcomes))},
+            }
+            if counted:
+                # An outcome's identity for disagreement purposes is its
+                # verdict where it has one, else its kind — a tier-1 pause is
+                # a different outcome from `deliberate` on the same frozen
+                # text, and that IS the variance being measured (PR19 H1).
+                idents, proceeds = [], []
+                for r in counted:
+                    f = r.get("fields") or {}
+                    idents.append(f.get("katorthoma_proximity")
+                                  or r.get("outcome_kind"))
+                    proceeds.append(f.get("proceed"))
+                dist = {v: idents.count(v) for v in sorted(set(idents),
+                                                           key=str)}
+                # `modal_outcome` is a DESCRIPTIVE reference point for
+                # computing dispersion. It is NOT an operative-verdict
+                # selection rule, and it bears on the deferred M-vs-W ruling
+                # in neither direction (PR19 5a; build prompt section D:
+                # "D6a data characterises the instrument. It has no standing
+                # in the deferred M-vs-W ruling").
+                modal = max(dist, key=dist.get)
+                modal_proceed = max(set(proceeds), key=proceeds.count)
+                entry.update({
+                    "outcome_distribution": dist,
+                    "modal_outcome": modal,
+                    "disagreement_count": sum(1 for v in idents if v != modal),
+                    "proceed_flip_count": sum(1 for p in proceeds
+                                              if p != modal_proceed),
+                    "disagreement_rate": round(
+                        sum(1 for v in idents if v != modal) / len(idents), 4),
+                })
+            per_probe[key] = entry
+
+    borderline = [e for e in per_probe.values()
+                  if e["class"] == "borderline" and e.get("counted_outcomes")]
+    n_total = sum(e["counted_outcomes"] for e in borderline)
+    # Raw integer counts, summed — not reconstructed from rounded rates
+    # (PR19 2a/L14).
+    n_disagree = sum(e.get("disagreement_count", 0) for e in borderline)
+    n_flips = sum(e.get("proceed_flip_count", 0) for e in borderline)
+    incomplete = [e["series_id"] for e in borderline if not e["complete"]]
+
+    anchors = {k: v for k, v in per_probe.items()
+               if v["class"].endswith("anchor")}
+    # Calibration assertion (PR19 3a): the class definition is a claim the run
+    # can falsify. If an anchor moved, or no borderline probe varied at all,
+    # the headline rate is not about the class it says it is.
+    calibration = {
+        "anchors_stable": {k: v.get("disagreement_rate") == 0
+                           for k, v in anchors.items()
+                           if v.get("counted_outcomes")},
+        "borderline_probes_showing_variance": sum(
+            1 for e in borderline if e.get("disagreement_count", 0) > 0),
+        "borderline_probes_measured": len(borderline),
+        "warning": None,
+    }
+    if calibration["borderline_probes_measured"] and not \
+            calibration["borderline_probes_showing_variance"]:
+        calibration["warning"] = (
+            "NO borderline probe varied. Either the instrument is more stable "
+            "than c11 suggested, or the probe set is not the borderline class "
+            "it claims to be. Do not publish the rate as a class rate without "
+            "resolving which.")
+    if reclassified:
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " POST-HOC RECLASSIFICATION "
+            f"DETECTED on {reclassified}: the `class` field was edited after "
+            "the series began. The frozen class was used for aggregation and "
+            "the edit was ignored. Report the falsified class definition as a "
+            "finding; do not re-partition to move the rate.").strip()
+    if any(v is False for v in calibration["anchors_stable"].values()):
+        calibration["warning"] = (
+            (calibration["warning"] or "") + " An ANCHOR moved: the clean or "
+            "floor probe disagreed with itself, so the class boundaries the "
+            "probe set asserts are not holding.").strip()
+
+    rate = {
+        "instrument": "R8-D6a verdict-repeatability",
+        "computed_utc": utc_now(),
+        "measured_path": "/api/guardrail",
+        "path_specificity_statement": (
+            "This rate was measured on /api/guardrail ONLY. The trust record "
+            "aggregates /api/reason-derived events. extractFeatures is shared, "
+            "but the consult path passes additional Layer-1 context and NO "
+            "rate has ever been measured there. The reason-path rate is "
+            "UNKNOWN and must be stated as unknown wherever this rate is "
+            "named (binding: 2026-08-30 rate-location ruling)."),
+        "input_class": meta["input_class_definition"],
+        # Collected during the guarded parse above — NOT by re-reading the
+        # files, which is how the first rewrite reintroduced the very
+        # malformed-line crash it had just fixed (caught by this module's own
+        # self-test on 2026-08-30).
+        "deploy_ids_observed": sorted(deploy_ids),
+        # ---- THE NAMED OUTPUTS (binding) ----
+        "aggregate_disagreement_rate": (round(n_disagree / n_total, 4)
+                                        if n_total else None),
+        "aggregate_proceed_flip_rate": (round(n_flips / n_total, 4)
+                                        if n_total else None),
+        "borderline_counted_outcomes": n_total,
+        "borderline_disagreements": n_disagree,
+        "borderline_failures": sum(e["failures"] for e in borderline),
+        "all_borderline_series_complete": not incomplete,
+        "incomplete_series": incomplete,
+        # -------------------------------------
+        "calibration": calibration,
+        "reclassified_probes_ignored": reclassified,
+        "malformed_lines_skipped": malformed_lines,
+        "per_probe": per_probe,
+        "note": ("Rates cover the borderline class only; the clean and floor "
+                 "anchors are calibration checks and are excluded. A tier-1 "
+                 "pause or an engine-unavailable fallback counts as an "
+                 "outcome, not a failure — on frozen text those ARE verdict "
+                 "variance. n at K=10 per probe is a rate demonstration, not "
+                 "a precise measurement (the c11 record's Wilson-interval "
+                 "caveat carries). If incomplete_series is non-empty the "
+                 "aggregate pools partial data and must not be published."),
+    }
+    out = base / "d6a-rate.json"
+    out.write_text(json.dumps(rate, indent=2) + "\n")
+    print(json.dumps(rate, indent=2))
+    print(f"\nWritten: {out}")
+    if incomplete:
+        print("\nWARNING: incomplete series pooled — do not publish this rate.")
+    if calibration["warning"]:
+        print(f"\nCALIBRATION WARNING: {calibration['warning']}")
+
+
+def main() -> None:
+    if len(sys.argv) == 4 and sys.argv[1] == "run":
+        run_series(sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 3 and sys.argv[1] == "summary":
+        summary(sys.argv[2])
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    main()

@@ -25,11 +25,14 @@ memory `verdict-battery-test-the-default-threshold`). No `context`, no `agent_id
 any kind. Auth: `X-Api-Key` with the founder-loop dogfood credential (`sr_prac_…`, the credential
 in `.claude/settings.local.json`) — the traffic is real-internal and is disclosed here as
 experiment traffic: **exclude these 10 calls from billing/latency/usage samples** (10
-`loop_billing_events` rows via CI-10, 2026-08-29T15:59–16:03Z UTC, ~$0.15 metered total).
+`loop_billing_events` rows via CI-10, 2026-08-29T15:59–16:03Z UTC, $0.142215 metered total —
+figure corrected in place 2026-08-30 at the D6a build session; it originally read "~$0.15", the
+uncorrected first-draft figure the correction paragraph below describes).
 
 *(Correction added 2026-08-30 per the D6a prompt's independent PR19 re-run — this paragraph
-carries two defects the §Footprint block below already fixes or supersedes. **(i) The cost is
-wrong here:** "~$0.15 metered total" is the uncorrected first-draft figure; the measured total is
+carries two defects the §Footprint block below already fixes or supersedes. **(i) The cost was
+wrong here** *(now corrected in place, 2026-08-30, at the D6a build session)*: the paragraph
+originally read "~$0.15 metered total", the uncorrected first-draft figure; the measured total is
 **$0.142215**, mean **$0.014222**/call, per §Footprint. **(ii) The write set is incomplete:**
 `loop_billing_events` is not the only table written per call — `api_key_usage` (the
 `increment_api_usage` RPC inside `validateApiKey`) and `analytics_events` (an unconditional
