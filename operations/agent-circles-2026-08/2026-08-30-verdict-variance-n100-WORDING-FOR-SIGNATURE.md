@@ -1,7 +1,15 @@
 # Verdict-variance wording at n=100 — indeterminacy, per-probe distributions, no directional split
 
-**STATUS: DRAFT. NOT SIGNED. NOTHING HERE IS LICENSED FOR APPLICATION.**
-Authored 2026-08-30 executing the n=100 ruling of the same day.
+**STATUS: SIGNED BY THE FOUNDER, 2026-08-30, after PR19. LICENSED FOR APPLICATION.**
+Authored 2026-08-30 executing the n=100 ruling of the same day; PR19 run and eleven findings folded
+(two blocking, both the executing session's own — see `628fadd`).
+
+> **Scope of the signature, recorded honestly.** The founder signed on the executing session's summary
+> of the PR19 findings and the fold, not on a line-by-line reading. **The fold is self-verified** —
+> no second review ran on it, by the founder's election, after three wording drafts and five
+> instrument reviews in one day. Stated plainly because this arc's own record is that fold rounds
+> introduce defects, and because the last three drafts each carried a blocking defect of scope rather
+> than of arithmetic.
 
 **Binding source (wins over this draft):** `2026-08-30-mentor-ruling-pooled-sweep-n100-verbatim.md`.
 Prior binding and still governing: the rate-presentation, disclosure, rate-location and
@@ -233,5 +241,5 @@ attempt at the clean anchor's second series. It contributed nothing; the retry s
 
 ---
 
-*Draft only. The founder signs; the mentor's verbatim ruling governs; PR19 runs before any surface is
-touched.*
+*Signed 2026-08-30. The mentor's verbatim ruling governs. PR19 has run. **Application is the next
+session's first task** — nothing here has been applied.*
