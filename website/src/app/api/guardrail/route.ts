@@ -90,10 +90,21 @@ export async function POST(request: NextRequest) {
   const keyCheck = await validateApiKey(request, 'guardrail')
   if (!keyCheck.valid) return keyCheck.error
 
-  // M4 CI-10 (2026-06-13): gate loop metering. Flag-gated — UNSET in production
-  // = today's behaviour (no loop_billing_events row, no X-Loop-* headers). The
-  // CI-8 meta cost honesty below is NOT flag-gated: it always retires the stale
-  // competitor-anchored $0.0025. KG1: the metering write goes through
+  // M4 CI-10 (2026-06-13): gate loop metering. Flag-gated, and the flag is SET in
+  // production — every call writes a loop_billing_events row and emits X-Loop-*
+  // headers. (Corrected 2026-08-30: this comment previously read "UNSET in
+  // production = today's behaviour (no loop_billing_events row...)", which was
+  // stale from the day it was written. Checked against
+  // D-MECHANISM-CORRECTION-CI10-PRODUCTION-ACTIVATION-2026-06-13, which set the
+  // Vercel Production var, and corroborated empirically: the 2026-08-29 c11
+  // re-submission experiment wrote 10 loop_billing_events rows through this
+  // route. The live env cannot be read from source, so that decision record plus
+  // the observed rows are the check — re-verify in Vercel before relying on it.)
+  // Consequence worth knowing: with the flag on, increment_api_usage runs TWICE
+  // per request — once in validateApiKey, once in recordLoopBilling — so each
+  // call consumes two quota units.
+  // The CI-8 meta cost honesty below is NOT flag-gated: it always retires the
+  // stale competitor-anchored $0.0025. KG1: the metering write goes through
   // finalizeLoopResponse (awaited; no fire-and-forget; no self-call).
   const ci10LoopMeteringEnabled = process.env.SUBSTRATE_GATE_LOOP_METERING_ENABLED === 'true'
   const loopId = ci10LoopMeteringEnabled
@@ -556,8 +567,10 @@ export async function POST(request: NextRequest) {
 
     // CI-10: when metering is enabled, persist the loop_billing_events row and
     // emit X-Loop-* headers (the bill computed from the accumulator). KG1 rule 2:
-    // finalizeLoopResponse awaits the RPC write. Flag UNSET ⇒ today's response
-    // shape exactly (no DB write, no X-Loop headers).
+    // finalizeLoopResponse awaits the RPC write. Flag UNSET ⇒ the pre-CI-10
+    // response shape (no DB write, no X-Loop headers) — but the flag is SET in
+    // production, so that is the rollback shape, not the current one (corrected
+    // 2026-08-30; see the CI-10 comment at the top of POST for the check).
     if (loopAccumulator && loopId) {
       return await finalizeLoopResponse({
         loopId,
