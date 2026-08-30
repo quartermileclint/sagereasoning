@@ -1,5 +1,13 @@
 # Close — the verdict-variance disclosure applied, carrying the measured rate
 
+> **ERRATUM — the date in this document's filename is wrong.** It is filed as **2026-08-31**; the day
+> it was authored was **2026-08-30**. The error was the executing session's, caught only when quota
+> arithmetic would not reconcile, and disclosed to the mentor as fact 9 of the pooled-sweep question.
+> **Every measurement date INSIDE this document is correct** — the D6a sweeps were run on 2026-08-30.
+> The file is **deliberately not renamed**: this document is cited by filename elsewhere in the
+> repository, and renaming a cited record — a binding mentor verbatim among them — would break those
+> references to hide a clerical error rather than record it. Recorded 2026-08-30.
+
 **2026-08-31.** `code-elevated`. **AC7 not engaged; no flag flipped; no behaviour changed.**
 Full record: `D-VERDICT-VARIANCE-DISCLOSURE-APPLIED-CARRYING-MEASURED-RATE-2026-08-31`.
 

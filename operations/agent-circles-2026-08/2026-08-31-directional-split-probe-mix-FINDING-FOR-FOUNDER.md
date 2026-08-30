@@ -1,5 +1,13 @@
 # The directional split is partly a property of the probe mix — a finding on published wording
 
+> **ERRATUM — the date in this document's filename is wrong.** It is filed as **2026-08-31**; the day
+> it was authored was **2026-08-30**. The error was the executing session's, caught only when quota
+> arithmetic would not reconcile, and disclosed to the mentor as fact 9 of the pooled-sweep question.
+> **Every measurement date INSIDE this document is correct** — the D6a sweeps were run on 2026-08-30.
+> The file is **deliberately not renamed**: this document is cited by filename elsewhere in the
+> repository, and renaming a cited record — a binding mentor verbatim among them — would break those
+> references to hide a clerical error rather than record it. Recorded 2026-08-30.
+
 **2026-08-31.** Found by PR19 round 5, verified first-hand. **Nothing has been edited on any public
 surface.** This is raised, not acted on: the wording in question is mentor-ruled (Q2, 2026-08-30
 rate-presentation ruling) and founder-signed, so amending it is not the executing session's to do.

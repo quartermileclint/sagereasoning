@@ -1,5 +1,13 @@
 # Mentor ruling — the directional split and probe composition (verbatim)
 
+> **ERRATUM — the date in this document's filename is wrong.** It is filed as **2026-08-31**; the day
+> it was authored was **2026-08-30**. The error was the executing session's, caught only when quota
+> arithmetic would not reconcile, and disclosed to the mentor as fact 9 of the pooled-sweep question.
+> **Every measurement date INSIDE this document is correct** — the D6a sweeps were run on 2026-08-30.
+> The file is **deliberately not renamed**: this document is cited by filename elsewhere in the
+> repository, and renaming a cited record — a binding mentor verbatim among them — would break those
+> references to hide a clerical error rather than record it. Recorded 2026-08-30.
+
 **Date relayed:** 2026-08-31, by the founder, same day the question was put.
 **Status:** BINDING. **This verbatim record wins over every summary, including the decision-log
 entry, the amended wording, and any successor prompt.**
