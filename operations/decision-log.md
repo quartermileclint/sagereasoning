@@ -29483,3 +29483,46 @@ published number should be directionally split (Finding 3).
 `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-disclosure-verbatim.md`,
 `operations/agent-circles-2026-08/2026-08-30-mentor-ruling-verdict-variance-rate-location-verbatim.md`,
 `operations/agent-circles-2026-08/2026-08-30-c11-rerun-experiment-record.md`.
+
+### ADDENDUM (same session, 2026-08-30) — the sweep falsified the signed-but-unapplied disclosure wording
+
+Appended after the entry above was written, on a finding that surfaced while authoring the successor
+prompt. Recorded as its own block rather than folded silently into the entry.
+
+**The finding.** The mentor's sequencing assumed the existence-of-variance disclosure would be
+applied BEFORE any rate existed. **That order inverted:** the disclosure remains unapplied (blocked
+on its own PR19), and this session measured the rate. The signed wording at
+`2026-08-30-verdict-variance-disclosure-R18-SIGNOFF-PACKAGE.md` therefore now asserts, in **four**
+places and deliberately, something false — `TRUST_RECORD_ENVELOPE` §3 (*"Its rate has not been
+measured"*, *"an instrument to measure it is scheduled"*), `llms.txt` §6(a), `agent-card.json`
+(`"rate": "not measured"`, `"rate_location": "not yet determined"`), and api-docs (*"measured on one
+input… rate not yet measured"* — now five inputs and 50 outcomes). **Applying that wording unchanged
+would publish four false statements onto live public surfaces, in exactly the honesty class this arc
+exists to correct.** The `agent-card` instance is the sharpest: the package itself argues that param
+is a positive machine-read claim rather than an absence.
+
+**Why the scheduled PR19 could not have caught it.** The application prompt scopes the review to
+"re-open the wording only if PR19 finds a defect in it." A reviewer checking the wording against its
+2026-08-29 sources would find it faithful — **the defect was created after sign-off, by a later run,
+and is invisible to a claims-vs-source pass.** The successor prompt therefore instructs that the
+reviewer be told the sweep happened and be handed the rate file.
+
+**Attribution.** This session caused it. The D6a prompt permitted the sweep to precede the
+disclosure and warned only that the output must not be treated as feeding an unpublished disclosure;
+neither it nor the ruling anticipated that running the sweep first would falsify a signed document.
+That is a genuine gap in the sequencing analysis, not a defect in the sweep.
+
+**Not resolved here.** The mechanical fix is the founder's and small; the substantive questions —
+whether the disclosure now publishes once carrying the rate rather than in two steps, whether a
+single rate may be published when the variance is bidirectional, whether a point estimate is honest
+against a 5.6–23.8% interval, and what the rate is *about* after the clean anchor moved — are put to
+the mentor at
+`operations/agent-circles-2026-08/2026-08-30-mentor-question-verdict-variance-rate-presentation.md`
+(PR20-compliant; seven mechanism facts, each verified first-hand this session rather than carried
+forward). Successor:
+`operations/handoffs/founder/2026-08-31-verdict-variance-wording-reconcile-and-PR19-NEXT-SESSION-PROMPT.md`.
+
+**Session honesty note.** Every at-action Gate-2 guardrail check this session returned UNAVAILABLE on
+a 28s timeout; the writes and the commit proceeded unguarded, and that is recorded rather than passed
+over. Same class as both predecessor sessions in this arc — and, as one of them noted, the same
+instrument whose variance the arc is disclosing.
