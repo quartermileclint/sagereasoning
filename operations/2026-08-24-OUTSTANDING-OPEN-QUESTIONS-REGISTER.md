@@ -106,3 +106,41 @@ throughout — see A1/Q2, which is the first item in months to press directly on
 - `operations/decision-log.md` — the authoritative trail; this register is a convenience, never a substitute
 
 *End of register. Read-only; nothing decided.*
+
+---
+
+# Addendum — 2026-08-30
+
+**Appended at the physical tail, per the concurrency convention. The snapshot above is unchanged and
+still dated 2026-08-24.** This addendum records only what the verdict-variance arc added or closed;
+it is **not** a re-verification of sections A–E.
+
+## New — awaiting a mentor ruling (extends section A)
+
+| # | Question | Where |
+|---|---|---|
+| **A5** | **Is the borderline class definition well-formed for the use it is put to?** Two of five members are statistically indistinguishable from the clean anchor on the measured dimension while satisfying every stated criterion — so the definition may be conflating *grave vocabulary* with *proximity to the boundary*. Five questions, including whether doing nothing is right. **This is the Q2-endorsed lever**: the composition ruling permits revising the class definition through a governed revision, and forbids reaching the same end by selecting probes that show more variance | `2026-08-30-mentor-question-borderline-class-definition.md` |
+
+**Gate:** nothing is blocked on it. No sweep is commissioned, no probe drawn, no public surface
+changes on any answer. It is asked **before** anything is designed, which is the point.
+
+## Closed since the snapshot
+
+- **The verdict-variance disclosure arc.** Applied at n=100, corrected after an independent PR19 pass
+  found two inherited defects, then restructured per the composition ruling — per-probe distributions
+  lead, the pooled rate follows, composition dependence and the stability finding published.
+  **Live-verified at all seven places including ordering.** Decisions
+  `D-VERDICT-VARIANCE-N100-APPLIED`, `-CORRECTED-AFTER-INDEPENDENT-REVIEW`, `-COMPOSITION-APPLIED`.
+- **The p5-force class question** the successor prompt carried as *"live and unreached by any
+  ruling"* — **ruled 2026-08-30**, all five answers, all requiring action, all executed. Its
+  successor is A5 above.
+- **The date correction.** Seven documents (not the four the carried item named) now carry an erratum
+  banner; **deliberately not renamed**, because the mentor verbatim among them is cited by filename in
+  four files.
+- **The D6a quota restore** — founder-confirmed.
+
+## Standing, unchanged
+
+**A0 remains the most consequential unscheduled item** and nothing in the verdict-variance arc touched
+it. **Weights BLOCKED. Q1 holds: the loop proposes; it never executes. The 0h call remains the
+founder's.**
