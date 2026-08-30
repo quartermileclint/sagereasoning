@@ -1,4 +1,4 @@
-# Next-session prompt — the C2 premise correction, slice 3, and the carried tail
+# Next-session prompt — slice 3, and the carried tail (C2 is closed)
 
 **Paste this as the task after the standing session opener.** Authored 2026-08-30, **rewritten the
 same day** after the C2 ruling arrived and its premise was found wrong. **Authoring this prompt
@@ -14,24 +14,23 @@ are pushed** before anything else.
 git log origin/main..HEAD --oneline      # expect empty
 ```
 
-## THE ONE THING THAT BLOCKS THE MOST — the C2 premise correction is unanswered
+## C2 is DISCHARGED — settled 2026-08-30, do not reopen it
 
-**Read first:**
-`operations/agent-circles-2026-08/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
+The premise correction was raised, **accepted**, the original discharge **withdrawn**, and a **revised
+conditional ruling** issued. The condition was verified under four independent lines and holds, so
+**C2 is discharged on SCOPE's pre-ledger exclusion — NOT on the C1 empty-population precedent.**
 
-The mentor ruled C2 discharged **on a premise this project supplied and which is false**: that no
-agent had an accreditation write in the trailing 30 days. **`sagereasoning:stoa-q5c-smoke@v1` wrote on
-2026-08-12**, inside the window. **C2 is NOT declared discharged.** The conclusion may survive on a
-different clause — that write predates the ledger, so SCOPE excludes its artifacts from the
-completeness denominator — but **that is a different basis than the ruling's C1-precedent reasoning,
-and the substitution is the mentor's call.**
+Read `2026-08-30-mentor-ruling-provenance-ledger-C2-reachability-verbatim.md` **§ Revised ruling**.
+**Nothing about C2's discharge needs re-deriving.** What remains from it:
 
-**Do not declare C2 discharged in a build session.** Do not treat "it lands in the same place anyway"
-as sufficient; that is the move the correction document exists to refuse.
+- **The switch-on re-check is a HARD C2 obligation** — carry it into slice-5's prerequisites.
+- **Open, named for the mentor, not blocking:** under SCOPE's literal per-identity reading, an
+  identity the ledger never recorded for is excluded outright — which at switch-on could exclude an
+  agent that simply never consulted. The current conclusion does not depend on it.
+- **Open, small:** the Q5c teardown covered three tables and **missed `agent_accreditation`**; that
+  leftover row was load-bearing on a readiness threshold.
 
-**What IS settled and needs no revisiting:** the step-5 correction (applied, `8a34e18`); the ruling's
-disposition on options (b) and (c) — both **ruled out**; the tally's shape (run once, point-in-time,
-**never scheduled**); and the ruling recorded verbatim.
+**Switch-on scoreboard: C1 ✅ · C2 ✅ · C3 ~4/90 days · C4 = slice 3.**
 
 ## A standing methodological fact this session established — worth more than the finding
 
