@@ -1,113 +1,123 @@
-# Next-session prompt — slice 3, or the C2 ruling, and the carried tail
+# Next-session prompt — the C2 premise correction, slice 3, and the carried tail
 
-**Paste this as the task after the standing session opener.** Authored 2026-08-30 at the close of the
-C2-reachability finding session. **Authoring this prompt licensed nothing.**
+**Paste this as the task after the standing session opener.** Authored 2026-08-30, **rewritten the
+same day** after the C2 ruling arrived and its premise was found wrong. **Authoring this prompt
+licensed nothing.**
 
-## First — two things are unpushed and one of them is a live-surface fix
+## Push state
 
-`1db52c8` renames the last **uppercase** `BORDERLINE` in `llms.txt`; `2752cf9` is the prior successor
-prompt. **The previous session could not push them** — no git credentials in that environment, `gh`
-absent. **Verify whether they are pushed before anything else**, and if not, that is a founder step.
+The predecessor's two commits are **pushed and live-verified** — `curl … | grep -ci borderline`
+returns **0**. This session added three more (`cd52dbd`, `8a34e18`, `4f92030`); **check whether they
+are pushed** before anything else.
 
 ```
-git log origin/main..HEAD --oneline                                    # expect empty
-curl -s https://www.sagereasoning.com/llms.txt | grep -ci borderline   # expect 0
+git log origin/main..HEAD --oneline      # expect empty
 ```
 
-Pre-push state was measured on 2026-08-30: **live = 1, local = 0.**
+## THE ONE THING THAT BLOCKS THE MOST — the C2 premise correction is unanswered
 
-## The state that changed since the last prompt
+**Read first:**
+`operations/agent-circles-2026-08/2026-08-30-MENTOR-CORRECTION-C2-population-premise-was-wrong.md`.
 
-**The provenance ledger's classification side is structurally dead, and this is now recorded.** Read
-before choosing a task:
+The mentor ruled C2 discharged **on a premise this project supplied and which is false**: that no
+agent had an accreditation write in the trailing 30 days. **`sagereasoning:stoa-q5c-smoke@v1` wrote on
+2026-08-12**, inside the window. **C2 is NOT declared discharged.** The conclusion may survive on a
+different clause — that write predates the ledger, so SCOPE excludes its artifacts from the
+completeness denominator — but **that is a different basis than the ruling's C1-precedent reasoning,
+and the substitution is the mentor's call.**
 
-- `operations/agent-circles-2026-08/2026-08-30-provenance-ledger-C2-observation-input-unreachable-FINDING.md`
-- `operations/agent-circles-2026-08/2026-08-30-MENTOR-QUESTION-provenance-ledger-C2-reachability.md`
-- `D-PROVENANCE-LEDGER-C2-OBSERVATION-INPUT-UNREACHABLE-FOUND` in the decision log
+**Do not declare C2 discharged in a build session.** Do not treat "it lands in the same place anyway"
+as sufficient; that is the move the correction document exists to refuse.
 
-In one line: the write side is healthy (187 rows), but `classifyProvenanceArtifact` is reached only
-from the accreditation-write route, which 409s a `seed` write against an existing row **before** the
-emission call — and the harness close hook only ever seeds. **15 of 15 closes since activation logged
-`already-exists`; zero `accred=written` in the log's whole seven-week span.** So slice 5's C2
-observation has no inputs and C2's denominator is empty besides.
+**What IS settled and needs no revisiting:** the step-5 correction (applied, `8a34e18`); the ruling's
+disposition on options (b) and (c) — both **ruled out**; the tally's shape (run once, point-in-time,
+**never scheduled**); and the ruling recorded verbatim.
 
-**The mentor question is drafted and unasked.** Four shapes are laid out in it; **do not pick one in a
-build session** — threshold definition has been mentor territory throughout this arc.
+## A standing methodological fact this session established — worth more than the finding
+
+**Neither obvious observable for "did an agent write an accreditation" is sound alone:**
+
+- `credential-completed` trust events **UNDER-report** — the rows are deletable and **smoke teardowns
+  delete them**. An absent event is *not* evidence of an absent write.
+- `agent_accreditation.updated_at` **OVER-reports** — the Sage Reflect feed calls the same
+  `upsertAccreditationRecord` chokepoint (`sage-reflect/sage-assent-feed.ts:177`), so it bumps at
+  **every harness session close** with no write occurring.
+
+The sound seed signal is `created_at`. **Any future session reasoning about accreditation-write
+history must not use either signal alone.**
 
 ## Candidate tasks
 
-### A — Slice 3 (still the recommended build)
+### A — Slice 3 (the recommended build, unchanged and unblocked)
 
 `code-elevated`. The served `provenance_gaps` field plus the **§10 attestation amendment**. Governed
-by `2026-08-25-extraction-provenance-and-independent-extractor-SCOPE.md` and by the slice-2 close's
-**§"What is inherited by slice 3 and slice 5"**, which remains accurate: slice 3 inherits nothing from
-slice 2's code and should not need to touch it.
+by `2026-08-25-extraction-provenance-and-independent-extractor-SCOPE.md` and the slice-2 close's
+**§"What is inherited by slice 3 and slice 5"**.
 
-**One thing changed for slice 3.** Its §10 amendment must now describe the field as reading a table
-that is empty **and** name that the pipeline which would populate it has never run — not merely
-"empty until slice 5." That is a sharper and more honest claim, and it is available only because of
-the finding.
+**Its §10 amendment should now say more than "empty until slice 5":** the table is empty **and** the
+pipeline that would fill it has never run (the classifier sits behind a route branch that 409s the
+harness's seed writes before reaching it). That is available only because of this arc's finding.
 
-**The standing caution is unchanged and now stronger:** slice 3 amends `TRUST_RECORD_ENVELOPE`, which
-took **four separate edits on 2026-08-30**. This would be the fifth pass. **Every blocking defect in
-that arc was coverage, and coverage risk compounds with passes.** Deferring remains legitimate.
+**Standing caution, now at five:** slice 3 amends `TRUST_RECORD_ENVELOPE`, which took **four separate
+edits on 2026-08-30**. **Every blocking defect in that arc was coverage, and coverage risk compounds
+with passes.** Deferring remains legitimate.
 
-### B — Carry the mentor question and act on the ruling
-
-If the question has been put and answered, the ruling governs. Note shape (b) and shape (c) are
-**code-critical** if elected; shape (a) and shape (d) are records/tooling.
-
-### C — The rest of the carried tail, unchanged from the previous prompt
+### B — The carried tail
 
 | # | Item | Tier |
 |---|---|---|
-| 1 | **Correct the slice-2 close's step 5** — it instructs an observation that cannot succeed. Arguably do this regardless of the ruling, per the Stoa lesson that the durable harm is the contradiction persisting in the record | records |
+| 1 | **The residual smoke row** — the Q5c teardown covered `agent_trust_events`, `agent_trust_state` and `stoa_entries` but **missed `agent_accreditation`**, and that leftover is now load-bearing on a readiness threshold. Raised in the correction as its own question | records / `code-standard` |
 | 2 | **`api/mentor/private/reflect/route.ts:660`** — the body-supplied `user_id` on a reflections insert; the only live **security** surface in the named-and-unbuilt list, founder-elected first of that list | `code-critical`, PR19 |
 | 3 | **The RLS backlog remainder** — carrying the standing warning that a table-level RLS fix is **invisible** to a `SECURITY DEFINER` function writing the same table | `code-critical` |
 | 4 | **The p5-force probe-set redesign**, governed by A5 Q2 — selection basis frozen **in advance**, **never** chosen by observed variance; and by Q3/Q4, a differently-defined sweep publishes **beside** the n=100 record, not over it | founder's call |
 | 5 | Register D4, AE-3, P1/P6/P7/P8, C1c, the `/api/reason` status-masking fix, the reflect-path `loop_id` UUID bug, the `target_circle` gap, Resend provisioning, `agent_hold_observations` retention, the two LOW `founder_conversations` findings | various |
 
 **Routed and NOT to be opened here** — **A2**, **A3**, **A4** and **D** belong to the
-**standing-runner design session**, itself gated on the bounded validation run's §6 report. **D1** and
-**D2** remain blocked.
+**standing-runner design session**, gated on the bounded validation run's §6 report. **D1** and **D2**
+remain blocked. **The A0 register entry is still stale** — the asymmetry is real, open and
+instrumented; do not re-scope it.
 
-**The A0 state is unchanged and the register is still stale on it** — the asymmetry is real, open, and
-**instrumented**; do not re-scope it, and do not treat the register as current on that item.
+## Standing obligations that must not be lost
+
+- **The re-check at switch-on is a HARD C2 obligation, not a courtesy** — carry it into the slice-5
+  prerequisites.
+- **C2 does not discharge C3 or C4.** C3 (90-day soak) is at ~4 days. C4 is slice 3's job.
+- **The tally must never be put on a schedule.** Recurring it reinstates exactly the sync-drift shape
+  the round-6 ruling rejected.
 
 ## What keeps going wrong — read before drafting anything
 
-**Nine review rounds across the predecessor arc. Not one found a wrong number. Every defect was
-coverage.** Three were found only by a **live `curl` after deploy**. The 2026-08-30 session added a
-tenth instance of the same shape in a different register: a claim about to be written as *"20+"* from
-a visual scan, which counted exactly is **15**.
+**Ten rounds now. Not one found a wrong number. Every defect was coverage — and the newest one was a
+signal that was *silently incomplete* rather than wrong.** The C2 population error was not a
+miscount; it was counting the right thing with an instrument that had been quietly emptied by an
+unrelated teardown.
 
 **Therefore:** apply by quoted first/last words against the live file; **sweep case-insensitively**;
-diff every surface; verify **order**, not only presence; **count rather than estimate**; and **never
-let the verification method share an assumption with the edit method.**
+diff every surface; verify **order**, not only presence; **count rather than estimate**; **ask what
+could have deleted or inflated your evidence before trusting its absence**; and **never let the
+verification method share an assumption with the edit method.**
 
 ## Standing constraints — unchanged
 
-- **Weights-BLOCKED.** Nothing in the C2 finding bears on it in either direction.
-- **Q1 — the loop proposes; it never executes.**
-- **The §A boundary.** Nothing consumes D6a's output as a signal into generation or election.
-- **Path-specificity is binding.** The rate is `/api/guardrail` ONLY; `/api/reason` unmeasured, stated
-  at all seven places and pinned (S2-52).
-- **The class split is binding.** **Grave-vocabulary traffic** is what was measured; **near-boundary
-  inputs** is the population a rate is properly about and **has never been measured**. Do not
-  reintroduce the old term.
-- **Concurrency:** `ListAgents` at open; `git status` twice; path-scoped commits; never `git add -A`;
-  append shared records at the physical tail.
+- **Weights-BLOCKED.** Nothing in the C2 arc bears on it.
+- **Q1 — the loop proposes; it never executes.** **The §A boundary** holds.
+- **Path-specificity is binding.** The rate is `/api/guardrail` ONLY; `/api/reason` unmeasured, at all
+  seven places, pinned (S2-52).
+- **The class split is binding.** **Grave-vocabulary traffic** was measured; **near-boundary inputs**
+  has never been measured. Do not reintroduce the old term.
+- **Concurrency:** `ListAgents` at open; `git status` twice; path-scoped commits; never `git add -A`.
 - **Nothing bears on the 0h call, which remains the founder's.**
 
 ## State at authoring
 
-- The verdict-variance disclosure is live and verified at all seven places **except** the single
-  uppercase occurrence `1db52c8` fixes, which is **still live and still unpushed**.
-- Battery **156/0**; `tsc` 0; build compiles. **Not re-run on 2026-08-30's finding session** — that
-  session changed no code, so the figures are inherited, not re-verified.
-- **Pins S2-58 through S2-68 all mutation-verified. S2-64 is an ORDERING pin** — `includes()` is
-  order-blind, so re-verify it against an **actual re-inversion**, never merely re-run it. **S2-54 has
-  survived four consecutive revisions untouched — leave it alone.**
-- `agent_provenance_ledger` 187 rows and growing; `agent_provenance_gaps` **0**, correctly.
+- Ledger **187 rows**, span 2026-08-26 → 2026-08-30; `credential` 187/187; **structurally resolvable
+  0 / unresolvable 187**; `agent_provenance_gaps` **0**. Baseline artifact:
+  `agent-circles-2026-08/runs/2026-08-30/c2-discharge-baseline.json`.
+- The tally script is at `website/scripts/provenance-c2-discharge-tally.ts` — read-only, `tsc` clean,
+  run twice against production this session.
+- Battery **156/0** and build-compiles are **inherited from 2026-08-29, not re-run** — this session
+  added only a standalone script outside the build graph and changed no measured file.
+- **Pins S2-58 through S2-68 mutation-verified. S2-64 is an ORDERING pin** — re-verify against an
+  **actual re-inversion**, never merely re-run. **S2-54 has survived four revisions — leave it alone.**
 
 End of prompt.
