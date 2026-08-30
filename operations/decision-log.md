@@ -30048,3 +30048,63 @@ written on all seven misdated documents; the quota restore is founder-confirmed 
 **Rules served:** PR6, PR10, PR15, PR18, **PR19 (independent, and it earned its place)**, PR20, R18, Q1.
 
 **Status:** Adopted.
+
+---
+
+## `D-VERDICT-VARIANCE-COMPOSITION-APPLIED` — per-probe leads, the aggregate follows; composition dependence and the stability finding published (2026-08-30)
+
+**Tier:** `code-elevated`. The same seven places; **no auth, perimeter, encryption, schema, flag or
+behaviour change; AC7 not engaged.** Two path-scoped commits in the ruled order: `1931d92` (envelope +
+ADR-013 §8 dated amendment + pins) then `39e1ae7` (the six R18 places). **The fourth application of
+this disclosure in three days, and the first that changes no figure at all.**
+
+**What the ruling required, and what was done.** **(Q1)** The per-input distributions now **lead** and
+the pooled rate **follows**, described as *"the pooled rate across this probe set"* — the reasoning
+that withdrew the directional split, applied one level up: a headline whose magnitude tracks the probe
+mix implies a property of the class the data does not support. The aggregate is **repositioned, not
+removed**. **(Q4)** The composition dependence is **published** beside the class limit, in the
+mentor's own stated form — the class limit alone was ruled *"necessary but not sufficient"*, because a
+recipient *"can infer this, but inference is not disclosure."* **(Q5)** The two 0-of-20 probes are
+stated as **a finding in their own right** — the class definition admits actions the gate handles with
+complete stability — since a recipient who knows that calibrates differently from one who reads
+"borderline class" as uniform instability. **(Q2/Q3)** change no published text and are recorded in the
+ADR amendment only: the freeze governs the recorded observation and **not forward design**, a future
+probe set must have its selection basis frozen in advance and **may never be chosen by observed
+variance**, and this record **stands** — a differently-composed future sweep is published beside it,
+not over it.
+
+**Every figure is unchanged and was verified unchanged at all seven places:** 12%, Wilson 7.0–19.8%,
+n=100, 12 disagreements, 0/0/2/2/8 of 20, 7-of-10 and 5-of-5, 20/20.
+
+**S2-64 is the first ORDERING pin in this battery.** Q1 is a claim about order and `includes()` is
+order-blind, so no substring pin could catch a re-inversion; S2-64 asserts
+`indexOf('0 of 20') < indexOf('pooled rate across this probe set')` and was **mutation-verified against
+an actual re-inversion of the two blocks**, not merely against a deletion. **S2-62** (composition
+dependence) and **S2-63** (stability finding) likewise mutation-verified. **No pin retired — no figure
+superseded. S2-54 untouched for the third consecutive revision.** Battery **152/0**; `tsc` 0; build
+compiles; agent-card parses at **25** extensions, re-derived from the file.
+
+**Verification method changed, because the last presence-only sweep shipped a gap.** Each place was
+checked individually for **order**, both new statements, and every figure — not by a repo-wide grep
+for absent stale strings. Two apparent gaps surfaced and both proved to be artifacts of the checker
+(a backslash-escaped apostrophe in the TS source; an `&rsquo;` in the JSX), confirmed by direct
+inspection rather than assumed.
+
+**Pre-condition discharged before signature.** The signed wording required the independent PR19 pass's
+findings to be folded first or in the same edit; both were corrected in `9cdf155`/`36b7206` before the
+founder signed.
+
+**Risk classification:** Elevated. Weights-**BLOCKED**, Q1 (the loop proposes, never executes) and the
+§A boundary unchanged; path specificity binding and pinned at all seven. **Nothing bears on the 0h
+call.**
+
+**Rollback:** `git revert 39e1ae7` then `1931d92` — in that order, so the public surfaces never outlive
+the envelope item. Reverting restores the previous ordering, which is not false but is the ordering
+this ruling replaced.
+
+**Carried:** the push and the live `curl` verification, **which must check ORDER and not only
+presence**; the `p5-force` probe-set redesign question, now governed by Q2 if it is ever taken up.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, R18, Q1.
+
+**Status:** Adopted.
