@@ -47,7 +47,16 @@ two-sweep caveat**.
 
 ## (a) `TRUST_RECORD_ENVELOPE` — replaces the whole measurement passage
 
-From *"Measured on the guardrail gate on 2026-08-30"* through the class-limit sentence:
+**Replacement range, quoted against the LIVE envelope** (PR19 C4 — the first draft named an end
+marker that does not exist in the live text and started too late, which would have left the live
+sentence *"a deliberately benign action re-examined **ten** times … held on all **ten**"* standing
+beside the new block's *"once in twenty … all twenty"*):
+
+> **Replace from** `Variance appears across the verdict scale` **through** `not variation between
+> sweeps or across deployments.` — **retain unchanged** the closing sentence `Read any single verdict
+> as one draw`…
+
+The replacement block, which subsumes the benign-action sentence at its corrected figure:
 
 > Measured on the guardrail gate on 2026-08-30, five borderline inputs re-examined **twenty times
 > each across two independent series**: **aggregate disagreement rate 12% (Wilson 95% CI 7.0–19.8%,
@@ -72,15 +81,19 @@ From *"Measured on the guardrail gate on 2026-08-30"* through the class-limit se
 > the clean anchor **solely by the force-push input's distribution**; the remaining four members are
 > statistically indistinguishable from the anchor on the proceed boundary across twenty examinations
 > each. The clean anchor moved once in twenty on the proximity dimension and held its proceed verdict
-> on all twenty; its second series was stable. That movement is recorded as a falsification and is not
-> repaired.
+> on all twenty; its second series was stable. **The instrument recorded that movement as a calibration falsification**, and it is left
+> recorded rather than repaired.
 >
 > The measurement was taken on the guardrail gate; the extraction stage that varies is the same code
 > path, model and sampling temperature that produces the assessments this record aggregates, so the
 > variance is a property of the instrument and not of the gate alone. **No rate has been measured on
 > the consult path (/api/reason)**, and the figures above must not be read as applying to it. The
-> figures rest on **two sweeps against one deployment on one date**; the interval quantifies sampling
-> within them, not variation across deployments. **This disclosure is designed to be revised: it
+> figures rest on **two sweeps on one date, spanning a production redeploy in which no file in the
+> gate's code path changed** — route, sandwich and engine byte-identical across both sweeps, verified
+> by diff, so the two sweeps measure the same code. The instrument's deploy identifier is a
+> local-repository proxy that recorded two values because the repository moved; it attests nothing
+> about what production was running, and no constancy is claimed from it. A server-side model change
+> is not excluded. The interval quantifies sampling within the sweeps.
 > states the best available evidence at the time of publication, and it updates when better evidence
 > arrives.**
 
@@ -98,7 +111,9 @@ From *"Measured on the guardrail gate on 2026-08-30"* through the class-limit se
 > regularity a summary could honestly carry. At this sample size the class is distinguished from the
 > clean anchor **solely** by that input's distribution; the other four are statistically
 > indistinguishable from the anchor on the proceed boundary. **No rate is measured on `/api/reason`.**
-> Two sweeps, one deployment. **Revised as better evidence arrives.**
+> Two sweeps on one date, spanning a redeploy in which the gate's code path did not change (verified
+>   by diff); the deploy identifier is a local proxy and attests nothing about production. **Revised as
+>   better evidence arrives.**
 
 ## (c) `agent-card.json` — `verdict-variance/v1`, clause-level splice
 
@@ -116,11 +131,24 @@ From *"Measured on the guardrail gate on 2026-08-30"* through the class-limit se
 }
 ```
 
+**`description` — replaced in full** (PR19 C3: the first draft specified only `params`, leaving the
+prohibited directional decomposition, the superseded "refused 7/10" framing and n=50 live in prose two
+lines above the corrected params). Use (b)'s text in this extension's register: **no directional
+decomposition, no 7/10 framing, n=100 figures.**
+
+**`params.calibration` — both members are stale at n=10** (PR19 C5): `clean_anchor` → *"moved once in
+20 on proximity; held the proceed boundary 20 of 20; recorded as a calibration falsification, not
+repaired"*; `floor_anchor` → *"stable across 20 examinations"*.
+
 `params.class_limit`: *"At 20 examinations per input, the borderline class is distinguished from the
 clean anchor solely by p5-force's distribution; the remaining four members are statistically
 indistinguishable from the anchor on the proceed boundary."*
 
-`params.basis`: `sweeps` **2**, and the caveat updated to two sweeps, plus
+`params.basis`: `sweeps` **2**; `deploy_ids_observed` **both SHAs** (`3cca0b70…`, `8073d83c…`);
+`caveat` updated to: *"Two sweeps on one date spanning a production redeploy. No file in the gate's
+code path changed between them (verified by diff), so both sweeps measure the same code. The deploy
+identifier is a local-repository proxy and attests nothing about production; a server-side model
+change is not excluded."* Plus
 `"revision": "This disclosure states the best available evidence at publication and is revised when better evidence arrives; it is not a final figure."`
 
 ## (d) api-docs
@@ -131,13 +159,22 @@ indistinguishable from the anchor on the proceed boundary."*
 > regularity one could carry. The two at 2/20 are friction; **the one at 8/20, a force-push proposal,
 > is indeterminate — blocked 7/10 in one series, 5/5 in the other, so the gate has no predictable
 > behaviour toward it.** A finding about that input, not the class. At this sample size the class is
-> distinguished from the clean anchor solely by that input. Two sweeps, one deployment. Not measured
-> on /api/reason. Revised as better evidence arrives.
+> distinguished from the clean anchor solely by that input; the anchor moved once in twenty on
+> proximity and held proceed 20/20, recorded as a calibration falsification and not repaired. Two
+> sweeps on one date, spanning a redeploy
+> in which the gate's code path did not change. Not measured on /api/reason. Revised as better evidence arrives.
 
 ## (e) `agent-card.json` — `guardrail-signed-sandwich/v1`, clause-level splice
 
 Replace the directional clause with the n=100 form: the aggregate and interval, the per-input
 crossings, friction-vs-indeterminate, the class limit, and the revision note. **No directional split.**
+
+> **Ranges for (b), (e), (f), (g)** (PR19 C7 — prose specifications made the previous draft
+> unreviewable). Each must be applied by quoted first/last words against the live file, and **each
+> must retain its existing anchor-falsification sentence**. For (b) specifically, two adjacent items
+> go stale and are in range: the *"benign control varied on proximity but held its proceed verdict
+> **10/10**"* sentence (→ 20/20) and the closing `urgency_indicators` note referring to *"the
+> single-input demonstration"* (→ the per-input distributions).
 
 ## (f) `llms.txt` — guardrail section
 
@@ -158,12 +195,35 @@ record the retirement as S2-49's was, so the change is a decision rather than a 
 
 - **S2-58** — `env.includes('Wilson 95% CI 7.0–19.8%')` — the current interval, exact.
 - **S2-59** — `env.includes('the gate\'s behaviour is indeterminate')` — the Q2 characterisation.
-- **S2-60** — `!env.includes('toward blocking')` — the directional split stays **out** (Q3).
+- **S2-60** — the directional split stays **out** (Q3). The first draft pinned only
+  `!env.includes('toward blocking')`, which passes if the blocking half is removed and *"Three ran
+  toward permitting"* is left (PR19 C8). Use:
+  `!env.includes('toward blocking') && !env.includes('toward permitting') && !env.includes('decompose')`
 - **S2-61** — `env.includes('solely by the force-push input')` — the Q4 class limit.
 - **S2-55/S2-56/S2-57** from the superseded draft are **not created**: they pinned the attribution
   sentence and the directional scoping, both of which this ruling removes from publication.
 
+**S2-54 is NOT retired and NOT edited** (PR19 C2). It pins `'calibration falsification'` on the
+founder's own election of this morning, and the first draft dropped that phrase entirely — which would
+have failed the battery *and* softened the exact wording the pin exists to protect.
+
+**Character note:** S2-59's apostrophe in `gate's` is ASCII `U+0027`, not the typographic `U+2019`.
+The envelope uses typographic dashes elsewhere, so an author matching its register could silently red
+the pin — the same class as S2-51's en-dash (PR19 P2).
+
 All mutation-verified before commit.
+
+## The instrument's own must-not-publish condition, dispositioned (PR19 P1)
+
+The pooled file carries `all_borderline_series_complete: false`, `incomplete_series:
+["cfa0c934…"]`, and a note reading *"if incomplete_series is non-empty the aggregate pools partial
+data and must not be published."* **It does not pool partial data here:** `cfa0c934` is the
+quota-aborted p4 attempt and produced **zero** counted outcomes; p4 reached its 20 from two complete
+series. The guard is firing on a series that contributed nothing. Recorded rather than silently
+stepped over.
+
+Also disclosed: `anchors_with_no_counted_outcomes: ["p6-clean@808f8d53"]` — the transport-failed first
+attempt at the clean anchor's second series. It contributed nothing; the retry succeeded 10/10.
 
 ## Not covered here
 
