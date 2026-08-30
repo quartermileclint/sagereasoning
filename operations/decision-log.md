@@ -30755,3 +30755,77 @@ before each staging; both commits path-scoped;
 
 **Status:** Adopted. **Built, reviewed, signed, committed. Push + deploy is the activation and is the
 founder's.**
+
+## 2026-08-31 — D-TRUST-RECORD-404-CONTRACT-ALIGNMENT-LIVE-VERIFIED
+
+**Decision.** The 404-contract alignment tail is **LIVE in production and live-verified**. The
+founder pushed all four commits (`7facbe5`, `d08c6b9`, `0b3f826`, `5416749`) as one deploy; under
+elected option B the push was itself the activation (no flag flip —
+`SUBSTRATE_PROVENANCE_LEDGER_ENABLED` has been `true` since 2026-08-26). **Production is
+intentionally NOT byte-equivalent — a deliberate, standing change.** This entry verifies the
+predecessor session's built-but-unpushed work; **C4 was already discharged 2026-08-30 and is
+unchanged by it.**
+
+**Verified by direct `curl` against `www.sagereasoning.com`, not by a local sweep.** All eight
+checks green:
+
+| # | Check | Expected | Actual |
+|---|---|---|---|
+| 1 | `GET /api/trust-record/test:definitely-unknown@v1` | 404; body names BOTH halves; contains `available to surface` | **404**; message carries both halves and the exact phrase (1 occurrence) |
+| 2 | Same response `documentation_url` | present → `/limitations` | **`https://sagereasoning.com/limitations`** |
+| 3 | `GET /api/trust-record/sagereasoning:s9-loop@v1` | 200; `provenance_gaps: []`; count `0` | **200**; `provenance_gaps: []`, `total_provenance_gaps_count: 0` |
+| 4 | `llms.txt` grep `provenance-gap entry exists` | 0 | **0** |
+| 5 | `llms.txt` grep `the record can surface` | 2 | **2** (lines 771 and 774 — the 404 clause and the 200 clause) |
+| 6 | `agent-card.json` | parses; 26 extensions; phrase ×2; superseded ×0 | **parses; 26 extensions; 2; 0** |
+| 7 | `GET /api-docs` | corrected 404 clause serves | **200**; corrected clause serves; superseded phrasing **0 hits** |
+| 8 | `GET /limitations` | new section renders | **200**; *"A trust record can say less than it appears to"* renders |
+
+**Precision on check 3, because the prompt's table named no path.** The two fields are served at
+**`data.record.provenance_gaps` / `data.record.total_provenance_gaps_count`** — not at the response
+root and not at `data`. Stated rather than left implied, so a later session greps the right place.
+
+**§1's stop condition was discharged in the good direction, and not by citation.** The check exists
+because the failure mode is silent: a clause asserting an absence nothing checked. A live `curl`
+alone cannot distinguish a conditional clause from an unconditional one, so the handler was read.
+`handler.ts` emits the second clause iff `gapsWereRead = provenanceGaps !== undefined &&
+provenanceGaps !== null` — **conditional on the READ, not on the flag**, which is precisely the
+invariant the predecessor session's own pin set got backwards and `S2-103d` now closes. The clause's
+presence live is therefore positive evidence that the gaps read ran, not merely evidence that a
+string was deployed.
+
+**`/limitations` does more than point.** Its new section states outright that the empty list *"means
+the check that would populate it has never run in production. It does not mean no gaps exist."* The
+unverified-absence caveat is now legible to a caller who lands there from a 404, which was the
+pointer's whole purpose.
+
+**Repo state re-derived at open, not read from the prompt.** `git log origin/main..HEAD` is **empty**
+— everything pushed, including the predecessor's close commit `a00ce25`. (The predecessor prompt's
+identical expectation had been false; this one is true. Re-derived, per its own instruction.) S10
+battery re-run at HEAD: **198 passed, 0 failed**, exit 0.
+
+**Risk classification:** **Standard** under 0d-ii — read-only live verification plus a decision-log
+entry. No code, schema, flag, credential or public-surface change was made this session. **AC7 not
+engaged** (the production change it verifies was activated by the founder's push before this session
+opened). Weights **BLOCKED**; Q1 and the §A boundary unchanged. **Nothing bears on the 0h call.**
+
+**Rollback:** nothing to roll back from this session (documentation only). For the change verified:
+`git revert` the four commits. **Unsetting `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` is NOT a rollback
+path** — it would also stop the live ledger write, a standing production change.
+
+**Carried, unchanged and not re-opened:** the row cap (deliberately carried to slice 5; unreachable
+at zero rows), the predicate-wording residual (settled by founder election — *"available to
+surface"* vs *"the record can surface"*, synonymous; recorded so a reviewer does not re-raise it),
+the owed non-urgent mentor note on SCOPE §6.5.6's expired stated reason, and `readProvenanceGaps`'s
+absent behavioural coverage.
+
+**Switch-on scoreboard, unchanged by this session: C1 ✅ (empty population; re-check at switch-on
+remains a HARD obligation) · C2 ✅ · C4 ✅ · C3 ⏳ ~5 of 90 days** (began 2026-08-26). **C3 is the
+only remaining gate and it is a clock. Slice 5 is late November at the earliest. Not opened.**
+
+**Concurrency:** `ListAgents` showed 21 peers (13 interactive) at open. `git status` run at open and
+before staging; the commit is path-scoped; `website/src/data/environmental-context.json` and every
+other pre-existing stray untouched.
+
+**Rules served:** PR10, PR18, PR20, PR23, Q1, R18.
+
+**Status:** Adopted. **The 404-contract alignment is live and verified on all eight checks.**
