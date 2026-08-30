@@ -30174,3 +30174,83 @@ was rewritten.**
 **Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, R18, Q1.
 
 **Status:** Adopted.
+
+## 2026-08-30 — D-PROVENANCE-LEDGER-C2-OBSERVATION-INPUT-UNREACHABLE-FOUND
+
+**Decision:** The successor prompt's carried item 2 — *"check whether the slice-2 provenance ledger is
+accumulating"* — was executed as a read-only diagnostic and returned a **two-sided answer the arc did
+not anticipate: the ledger's write side is healthy, and its classification side has produced nothing
+and cannot, on current mechanics, produce anything.** The finding is recorded
+(`operations/agent-circles-2026-08/2026-08-30-provenance-ledger-C2-observation-input-unreachable-
+FINDING.md`) and the threshold question it raises is **put to the mentor, not decided**
+(`…/2026-08-30-MENTOR-QUESTION-provenance-ledger-C2-reachability.md`). **No code, schema, flag,
+credential, migration, or public-surface change; production untouched; AC7 not engaged.**
+
+**What was measured, first-hand.** Production (`jdbefwkonfbhjquozgxr`, identified as production by
+`founder_conversations` = 71, not assumed from the filename) and the founder-loop `gate1.log`:
+
+| | |
+|---|---|
+| `agent_provenance_ledger` rows | **187**, 2026-08-26T06:28Z → 2026-08-30T09:04Z |
+| `identity_kind` / `layer1_source` | `credential` **187/187** · `server` **187/187** |
+| By credential | 186 = the harness `sagereasoning:s9-loop@v1`; 1 = the activation smoke |
+| `agent_provenance_gaps` | **0** — correct, slice 5's table |
+| `credential-completed` + `justice-surface*` since activation | **0** and **0** |
+| Most recent completed accreditation write **ever** | 2026-07-29 — **32 days ago**, a smoke agent |
+| `CLOSE` lines since activation / `accred=already-exists` | **15** / **15 of 15** |
+| `accred=written` across the log’s full span, 2026-07-12 → 2026-08-30 (line count deliberately not quoted — the log appends live) | **0** |
+
+**ROOT CAUSE, traced to a line, not inferred.** `classifyProvenanceArtifact` has exactly one
+production call site (`emission-hooks.ts:152`, inside `emitAccreditationTrustEvents`), which itself
+has exactly one caller (`api/accreditation/[agent_id]/route.ts:835`). At route step 6, **before** that
+call: `if (validated.body.kind === 'seed' && existing !== null) return buildWriteConflictResponse()`.
+The harness close hook sends **exactly one body kind** — `close-hook.mjs:168`, `kind: "seed"`, the
+sole `kind:` occurrence in the file, no `update` path — and the `s9-loop` row already exists.
+**Therefore every close-hook write 409s before classification, permanently.**
+
+**WHAT THIS CHANGES.** The slice-2 close's carried step 5 instructs the founder to *"watch the
+`[trust-core][provenance-ledger] classify …` log lines accumulate… the readiness-check input SCOPE
+§9's C2 threshold needs."* **That observation cannot succeed** — not "slowly", zero by construction.
+And C2's denominator (*"every agent with an accreditation write in the trailing 30 days"*) **is
+empty** independently. The round-6 Q5 ruling chose reading A over reading B **on the stated ground
+that B could not observe C2** — and A, built faithfully, also does not observe it, for a reason
+orthogonal to that choice. **This is not a defect in the ruling and not a defect in slice 2**, which
+does what its documents specify; it is a fact neither the question nor the ruling had in view.
+
+**WHAT THIS DOES NOT CHANGE.** Slice 3 is **not blocked** — it reads `agent_provenance_gaps`, which
+is legitimately empty and stays so until slice 5; the finding sharpens how honestly its §10 amendment
+should describe that emptiness. The harness's `identity_mismatch`-by-construction outcome **is
+anticipated** (SCOPE §3.1/§3.3 defers it by name) and is recorded for completeness, not as a defect.
+C3's 90-day soak is unaffected and at 4 days.
+
+**Four shapes put to the mentor, none chosen here:** (a) C2 vacuous on an empty population as C1 is,
+with a switch-on re-check; (b) classify on the 409 path too, record-only; (c) give the harness an
+update path; (d) reinstate reading B for a retrospective tally only — the shape the round-6 ruling
+itself calls right for a retrospective audit. Plus a sub-question: correct the slice-2 close's step 5
+in the record now, independently of the shape chosen, per the Stoa lesson that **the durable harm is
+the contradiction persisting in the record**.
+
+**Method.** Each inferential step was independently re-confirmed against the code path rather than
+left as an inference — *"no `credential-completed`" ⇒ "no classification ran"* was checked by reading
+the route branch, and the one residual (a dedup-suppressed repeat write) is closed by the 15/15
+`already-exists` log evidence and stated openly in the finding.
+
+**Carried, unchanged and NOT done this session:** `1db52c8` (the uppercase-`BORDERLINE` live-surface
+fix) and `2752cf9` **remain unpushed** — `git push` failed with *"could not read Username for
+'https://github.com'"* and `gh` is absent from this environment. **This is a founder step.** The live
+`curl` re-verification (expect 0) is still outstanding and the live text still carries the one
+uppercase occurrence.
+
+**Risk classification:** read-only. Weights-**BLOCKED**, Q1 and the §A boundary unchanged. **Nothing
+bears on the 0h call, which remains the founder's.**
+
+**Rollback:** `git revert` the records commit — documents only; nothing live was touched.
+
+**Concurrency:** `ListAgents` at open showed 18 peers (10 interactive `sagereasoning-*`, 8
+idle/offline). `git status` run at open and before staging; the commit is path-scoped to this
+session's own four documents and this entry; `website/src/data/environmental-context.json` and every
+other pre-existing untracked path were left untouched.
+
+**Rules served:** PR6, PR10, PR15, PR18, PR19, PR20, Q1.
+
+**Status:** Adopted (the finding and the question only — nothing ruled, nothing built).
