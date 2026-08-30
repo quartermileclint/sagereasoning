@@ -30642,3 +30642,116 @@ also stop the live ledger write, a standing production change.
 **Rules served:** PR6, PR10, PR17, PR18, PR20, Q1, AC7, R18.
 
 **Status:** Adopted. **Slice 3 CLOSED — live, verified, C4 discharged.**
+
+## 2026-08-31 — D-TRUST-RECORD-404-CONTRACT-ALIGNED-SERVED-AND-PUBLISHED-BUILT-R18-SIGNED
+
+**Decision.** The slice-3 tail (§1a) is **built, PR19-reviewed, folded, R18-signed and committed —
+NOT pushed and NOT deployed.** Under the elected option B the push IS the activation, and it is the
+founder's. `code-elevated` for the served-message half; **`code-critical` in effect** once the R18
+surfaces joined it. AC7 engages at the push.
+
+**What the tail actually was, and why it was not one string.** The slice-3 live `curl` found the
+served 404 body naming one half of a gate that now has two. The obvious fix — append the clause — is
+**wrong**, and the session's first act was establishing that by reading the gate rather than the
+description of it. Flag-off the provenance-gaps read never runs, so an unconditional clause has the
+handler assert an absence it never checked, **on a response cached five minutes** — the same
+unverified-absence fault the 503 branch immediately above exists to prevent. The clause is therefore
+emitted iff the read ran, and `S2-103b` pins that it stays conditional.
+
+**PR19 earned its keep, again, and the headline finding was against the session's own claim.** Three
+adversarial reviewers on an isolated copy. Two found independently that **the pin set proved "clause
+iff FLAG" while the code says "clause iff READ"** — they agree in every cell but one (flag fn
+present, read fn absent; the read is guarded on both). A mutation deriving the condition from flag
+intent left **the whole battery green at 197/0** while that cell wrongly claimed an absence. This
+session had already claimed its mutation verification was two-directional and rigorous; it was
+rigorous over the two directions the author thought of. **`S2-103d` closes it and fails that
+mutation.**
+
+**THE FINDING THAT CHANGED THE SHAPE OF THE WORK.** Two reviewers converged on a second defect: the
+**published contract itself overstates the gate.** All three R18 surfaces said a 404 means *"no
+provenance-gap entry EXISTS"*. The gate counts only the **servable** set, so rows can exist while
+none is renderable and the agent still 404s — pinned by S2-92 and by this session's S2-103c. The
+handler's own new comment says claiming *"no gap entry exists"* would overstate; that was verbatim
+what the contract claimed. **The mismatch this arc exists to close had survived the fix, inverted,
+with the served message as the honest side.** One reviewer made correcting it an explicit condition
+on its approval.
+
+**Founder elected: hold and ship together** (the slice-3 option-B precedent — simultaneity, not
+sequence). A sign-off package was authored with **every "before" quote verified byte-accurate and
+unique against source**, signed, and applied: the 404 clause corrected on all three surfaces, the
+**200 clause tightened in the same breath** because it inherited the identical error ("reached a
+determinate verdict" is broader than the gate), and llms.txt gained a sentence stating the
+servable-set rule outright.
+
+**The pointer fix, elected separately by the founder.** `/limitations` carried **zero** mention of
+the trust record or provenance, so a caller landing there from a 404 could not reach the context that
+makes the new clause interpretable — the classification step has never executed in production, so
+the clause is currently true of every agent. A section was added. **`documentation_url` was
+deliberately NOT re-pointed**: it is shared by all nine responses on the surface, so it is the
+surface's doc URL, not the 404's.
+
+**Folded from review, additionally:** `S2-103` asserts the full flag-on string rather than two
+substrings; the handler header's status map no longer describes the **bare-row gate ENV-1 rejected
+in 2026-07-12** (slice 3 edited that block and left the line stale); the **row-cap limit** is named
+in-code with its check; the **503's vagueness is recorded as intentional** rather than left to read
+as an oversight.
+
+**`PRE_SLICE3_404_MESSAGE`'s provenance was CHECKED, not renamed.** A reviewer flagged the name as
+asserting more than the review copy could establish. The cheap move was a rename. Git history shows
+the string **byte-unchanged across `a802fcd` -> `f3eabc7` -> `c06fa6a` -> `253580a` -> `df894ec`** —
+unchanged since the surface was born. The name is accurate and was kept, with the evidence recorded
+in the pin.
+
+**CARRIED, NOT FIXED — named with reasons.**
+- **The row cap (PR19 F2).** The gate reads only `.entries` and ignores `capped`/`totalCount`, so the
+  404's absence claim is scoped to the newest 50 rows. **Not reachable today** — `agent_provenance_gaps`
+  holds zero rows and classification has never executed in production. Both candidate fixes (503 on
+  `capped`, or disclose truncation) are design choices with contract consequences. **Carried to
+  slice 5**, which is when it becomes live.
+- **The predicate-wording residual (PR19 F3), deliberate.** Served says *"available to surface"*;
+  the contract says *"the record can surface"*. Synonymous, and F3's actual complaint — a qualifier
+  on no published surface — is closed. **Founder elected to ship what was signed.** Recorded here so
+  a future reviewer does not re-raise it as a finding.
+
+**AN ORCHESTRATION ERROR OF THIS SESSION'S OWN, recorded because it produced a false HIGH.** All
+three reviewers were given **the same copy directory**, one of them licensed to mutate it. A copy
+shared by N agents is not isolation. One reviewer ran the battery mid-mutation and saw contradictory
+results; another read the tree with the mutation applied and raised a **HIGH — "the tree does not
+match the diff, the fix is broken."** Disposing of it took three independent checks on the real tree
+(the ternary present; `tsc` with `noUnusedLocals` proving the local is read; the pin that only passes
+on the conditional form). **Both reviewers behaved correctly** — each labelled its dynamic results
+unreproduced and separated them from static findings, and their static findings included the
+session's most valuable catch. The `review-isolation-must-cover-filesystem` memory is extended:
+**one copy per mutating agent.**
+
+**Verified.** S10 battery **198/0** (pins through **S2-103d**; next free is **S2-104**). `tsc` clean.
+`npm run build` exit 0 with `/api-docs`, `/limitations` and `/api/trust-record/[agent_id]`
+registered. `agent-card.json` parses, **26 extensions** (no new extension; existing wording
+corrected). Sweep for the superseded phrasing across `public/` and `src/` returns **zero**. All five
+pre-commit checks passed on both commits.
+
+**Commits (local, unpushed at authoring):** `d08c6b9` (served fix + pins + folds + package),
+`7facbe5` (the signed R18 correction). Trailing from the prior session: `5416749`, `0b3f826`.
+
+**Carried (founder-walked).** Push all four as **one deploy**; then a **live `curl`** against
+production — this arc's own history is that three of the last four envelope defects, and this
+session's headline defect, were found only that way.
+
+**Rollback:** `git revert` the two commits. **Unsetting `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` is NOT
+a rollback path** — it would also stop the live ledger write, a standing production change.
+
+**Risk classification:** Critical (a live public-surface change). Weights **BLOCKED**; Q1 and the §A
+boundary unchanged. **Nothing bears on the 0h call.**
+
+**Switch-on scoreboard, unchanged by this session: C1 ✅ · C2 ✅ · C4 ✅ · C3 ⏳ ~5/90 days** (began
+2026-08-26; the only remaining gate, and it is a clock). **Slice 5 remains late-November at the
+earliest. Do not open it.**
+
+**Concurrency:** `ListAgents` showed 20 peers (12 interactive) at open. `git status` run at open and
+before each staging; both commits path-scoped;
+`website/src/data/environmental-context.json` and every other pre-existing stray untouched.
+
+**Rules served:** PR6, PR10, PR15, PR17, PR18, PR19, PR20, PR22, PR23, PR25, Q1, AC5, AC7, R18.
+
+**Status:** Adopted. **Built, reviewed, signed, committed. Push + deploy is the activation and is the
+founder's.**

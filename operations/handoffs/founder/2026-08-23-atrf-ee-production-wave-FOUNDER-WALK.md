@@ -29,6 +29,40 @@ yet: no SQL run, no flag set, no push.
 
 ---
 
+## Step 0 — READ-ONLY: determine what already ran (ADDED 2026-08-31)
+
+**Run this before Step 1, in each environment. It changes nothing.**
+
+**File:** `website/supabase-atrf-ee-wave-step0-state-determination-READONLY.sql`
+
+**Why this exists.** This walk was authored 2026-08-23 and, as of 2026-08-31, **no decision-log
+entry records any of steps 1-4 being applied — in either direction.** Production schema state for
+this wave is genuinely unknown, and that is the most uncomfortable open item in the queue.
+
+Repo evidence was checked 2026-08-31 and is *consistent with* unapplied — all four migration files
+exist and **none carries an APPLIED marker** — but that proves nothing about the database. The Q5c
+precedent is exactly this: production was found **already at target** from an unrecorded partial
+application, while the migration file's own comments described a different world.
+
+**What it returns.** Four queries, each computing an explicit verdict rather than leaving you to
+eyeball output:
+
+| Q | Step | Verdict values |
+|---|---|---|
+| Q1 | Class B RLS on the three tables | policy count + roles per table (applied = 1 policy, `service_role`) |
+| Q2 | `idea_loop_candidates` columns | `APPLIED` / `NOT APPLIED` / `PARTIAL -- STOP AND INVESTIGATE` |
+| Q3 | `idea_loop_completion_signals` table | `APPLIED` / `NOT APPLIED` + column count vs 17 |
+| Q4 | `api_keys` capability CHECK | `APPLIED` / `NOT APPLIED` + the full constraint definition |
+
+**Two disciplines are baked in, not assumed.** Q4 re-derives the CHECK via `pg_get_constraintdef`
+rather than trusting any migration file's comments — the standing lesson. And Q3's expected column
+count (17) was derived by enumerating the `CREATE TABLE` body, not read from the comment beside it.
+
+**A `PARTIAL` verdict on Q2 stops the walk.** A half-applied additive migration is a different
+situation from either extreme and must be understood before anything else runs.
+
+---
+
 ## Step 1 — A1: Class B RLS lockdown
 
 **File:** `website/supabase-class-b-rls-lockdown-migration.sql`

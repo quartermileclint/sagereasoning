@@ -1,5 +1,28 @@
 # Next-session prompt — post-slice-3: the carried tail, then a founder election
 
+> **SPENT — discharged 2026-08-31.** Successor:
+> `2026-08-31-post-404-alignment-verification-and-atrf-walk-NEXT-SESSION-PROMPT.md`.
+> Close: `2026-08-31-trust-record-404-contract-alignment-CLOSE.md`.
+>
+> **Two statements in this file turned out to be wrong. Recorded so it is not later read as
+> accurate:**
+>
+> 1. **§0's `git log origin/main..HEAD --oneline # expect empty`.** It was **not** empty — two
+>    records-only commits (`5416749`, `0b3f826`, the latter being this file) were found trailing at
+>    open. Nothing live was affected, but the slice-3 verification record existed only locally on a
+>    checkout with twelve active peers. **Run the check; never read the expectation.**
+> 2. **§1a's scoping as "one string + one pin + a commit + a deploy," `code-elevated`.** The obvious
+>    one-string fix **reintroduces the fault it exists to remove** — flag-off the gaps read never
+>    runs, so an unconditional clause asserts an absence nothing checked, on a cacheable response.
+>    The fix is conditional. And independent review then found the **published contract itself
+>    overstated** the gate on all three R18 surfaces, which pulled R18 sign-off into the work and
+>    made it `code-critical` in effect. §1a's own description of the defect was accurate; its
+>    estimate of the remedy was not.
+>
+> §1b (the mentor note) and §1c/§1d (the carried follow-ups) remain open and are carried forward in
+> the successor.
+
+
 **Founder: paste this file as the first message of a new session.**
 
 Open under the standing opener first — `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`
