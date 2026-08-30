@@ -55,6 +55,30 @@ the per-consumer prose service (not live) does not arise here.
 >   producer-side gating is now open on the Q1 answers; the M-vs-W gate remains on R8-D7's
 >   verdict-changing variants, with S unblocked.
 
+> **FACTUAL CORRECTIONS 2026-08-30 (not mentor rulings — findings from the independent PR19
+> re-run on the D6a build prompt, `D-R8-D6a-PROMPT-INDEPENDENT-RERUN-RUN-SIX-HIGH-FOLDED-2026-08-30`).
+> These correct §5.2(a) and bind over its body:**
+> - **The cost figure in §5.2(a) is stale.** It reads "~$0.15 per 10 calls at today's metering";
+>   the measured figure is **$0.142215 per 10 calls, mean $0.014222/call** (experiment record
+>   §Footprint, which corrects the same rounding). Derived per-run estimates should use the mean.
+> - **§5.2(a)'s excludability claim is incomplete.** "Probe traffic runs on a dedicated, labelled
+>   credential so it is excludable from every billing/usage/trajectory sample by `credential_ref`"
+>   holds for `loop_billing_events` and `api_key_usage` but **not** for `analytics_events`, which
+>   `/api/guardrail` writes unconditionally per call (`route.ts:317-335`) carrying **no credential
+>   reference** — only `agent_id`, which is null unless the caller sends it in the POST body.
+>   **A dedicated credential alone does not make probe traffic excludable**; the runner must also
+>   send `agent_id`, or a standing cadence permanently pollutes production `guardrail_check_v3`
+>   analytics with synthetic verdicts. Carried into the D6a build prompt as a requirement.
+> - **§5.2(a)'s stated purpose over-reaches on one half.** "Its drift across deploys" has **no
+>   mechanism today** — no deploy identifier is reachable from any guardrail response,
+>   `/api/health` (hardcoded `version: '0.4.0'`), or `VERCEL_GIT_COMMIT_SHA` (absent from
+>   `website/src/` entirely). Drift attribution to a deploy must not be claimed until the D6a
+>   build elects one of the three options its prompt names.
+> - **Probe 3(c)'s quantity is cross-cycle** (a one-rank move between adjacent cycles on
+>   *differing* texts); D6a measures fixed-input repeat distribution and therefore supplies the
+>   **noise floor** that makes such a move interpretable, rather than measuring Probe 3(c)'s
+>   quantity itself. §5.2(a)'s "the quantity Probe 3(c) named latent" elides this.
+
 ---
 
 ## 1. The four frames, received together — and how they govern what follows

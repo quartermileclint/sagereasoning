@@ -27,6 +27,19 @@ in `.claude/settings.local.json`) — the traffic is real-internal and is disclo
 experiment traffic: **exclude these 10 calls from billing/latency/usage samples** (10
 `loop_billing_events` rows via CI-10, 2026-08-29T15:59–16:03Z UTC, ~$0.15 metered total).
 
+*(Correction added 2026-08-30 per the D6a prompt's independent PR19 re-run — this paragraph
+carries two defects the §Footprint block below already fixes or supersedes. **(i) The cost is
+wrong here:** "~$0.15 metered total" is the uncorrected first-draft figure; the measured total is
+**$0.142215**, mean **$0.014222**/call, per §Footprint. **(ii) The write set is incomplete:**
+`loop_billing_events` is not the only table written per call — `api_key_usage` (the
+`increment_api_usage` RPC inside `validateApiKey`) and `analytics_events` (an unconditional
+awaited insert, `guardrail/route.ts:317-335`, `event_type: 'guardrail_check_v3'`) are also
+written, plus `throttle_events` on any throttle. The `analytics_events` rows carry **no credential
+reference** — only `agent_id`, which this experiment's minimal payload never sent — so **those ten
+analytics rows are NOT excludable by `credential_ref`** and the exclusion instruction above
+reaches only the billing rows. Both defects were inherited from the run script's own header
+comment, which claims "no other writes" and is wrong. The verdict findings are unaffected.)*
+
 **What it was for (the R8 prompt's recommendation, carried from the nine-candidate
 classification §9/§11.4):** the single experiment that bears on both open questions at once —
 the §7(1) submitted-payload assumption (does near-identical-input divergence need a per-cycle
