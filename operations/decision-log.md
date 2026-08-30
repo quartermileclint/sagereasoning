@@ -30592,3 +30592,53 @@ bears on the 0h call.**
 
 **Status:** Adopted. **R18 signed + applied; option B elected. Push + deploy is the activation and is
 the founder's.**
+
+## 2026-08-30 — D-PROVENANCE-LEDGER-SLICE3-LIVE-VERIFIED-C4-DISCHARGED
+
+**Decision.** Slice 3 is **LIVE in production and live-verified**. The founder pushed both commits
+(`df894ec`, `38bc55d`); Vercel green. **Production is intentionally NOT byte-equivalent — a
+deliberate, standing change**, and under the elected option B the deploy was itself the activation
+(no flag flip: `SUBSTRATE_PROVENANCE_LEDGER_ENABLED` was already `true`). **C4 — "the
+`provenance_gaps` surface live, deployed, pinned and R18-signed" — is DISCHARGED.**
+
+**Verified by direct `curl` against `www.sagereasoning.com`, not by a local sweep** — this arc's
+standing caution is that three of the four defects in the recent envelope arc were found only that
+way. All eight checks green:
+
+| # | Check | Result |
+|---|---|---|
+| 1 | `provenance_gaps` served | present, `[]` |
+| 2 | `total_provenance_gaps_count` served | present, `0` |
+| 3 | Empty-state note in `notes` | **present, verbatim** — "…record-only phase… not a finding that this agent's artifacts had verified origins" |
+| 4 | §10 trigger amendment | serving `begins enforcing which events are minted`; superseded trigger **absent** |
+| 5 | `attests[1]` scoping + commitment tense | scoped; commitment still **future** ("that fix will surface") — edit two not pre-empted |
+| 6 | ENV-1 bare-row exclusion | unknown agent → **404**, `public, max-age=300` — the relaxation is not a blanket loosening |
+| 7 | R18 `llms.txt` | Provenance-gaps section live; superseded trigger **0 hits**; corrected 404/200 contract live |
+| 8 | R18 `agent-card.json` + api-docs | **26 extensions**, `provenance-gaps/v1` present; api-docs paragraph live |
+
+**On the sample record** (`sagereasoning:s9-loop@v1`): `aggregate.level: deliberate`, `sparse: false`
+— i.e. served via the ordinary examined-evidence path, so the §6.5.5 disclosed-cost branch (a 200
+with `aggregate.level: null`) is **not yet exercised live** and cannot be until a gap entry exists,
+which is slice 5. Stated rather than implied.
+
+**ONE SMALL DEFECT FOUND BY THIS VERIFICATION, carried not fixed.** The **404 response body** still
+reads *"No examined trust evidence has been folded for it (declaration-class records alone do not
+surface a public record)"* — accurate as far as it goes, but it now **under-describes the condition**,
+which is `no examined evidence AND no provenance-gap entry`. The published contract on all three R18
+surfaces states both halves; the served message states one. Not a false statement and not
+user-harmful, but a documented-contract/served-message mismatch of exactly the class this arc exists
+to close. **Fix in the next session** (one string + one pin); not hot-fixed here because it needs its
+own commit, pin and deploy rather than riding an unrelated push.
+
+**Risk classification:** Critical (a live public surface change, now discharged). Weights **BLOCKED**;
+Q1 and the §A boundary unchanged. **Nothing bears on the 0h call.**
+
+**Rollback:** `git revert` the two commits. **Unsetting the flag is NOT a rollback path** — it would
+also stop the live ledger write, a standing production change.
+
+**Switch-on scoreboard after this entry: C1 ✅ · C2 ✅ · C3 ~4/90 days (the binding clock, began
+2026-08-26) · C4 ✅ DISCHARGED.** Slice 5 waits on C3 alone — late November at the earliest.
+
+**Rules served:** PR6, PR10, PR17, PR18, PR20, Q1, AC7, R18.
+
+**Status:** Adopted. **Slice 3 CLOSED — live, verified, C4 discharged.**
