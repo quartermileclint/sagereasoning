@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import {
+  buildMildSupportResources,
+  composeDistressSubject,
+  hasScreenableSubject,
+  isR20aGapClosureEnabled,
+} from '@/lib/r20a-gap-closure'
 
 /**
  * POST /api/score/save
@@ -29,18 +37,43 @@ import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
  *
  * Bearer-JWT only — callers must use `authFetch`, never a bare `fetch`.
  *
- * ⚠ DISCLOSED, NOT INTRODUCED BY THIS ROUTE: no R20a distress check runs
- * here. `/api/score` (the caller of this route, one step earlier in the same
- * client flow) screens only the `action` field via `detectDistressTwoStage`
- * before this route is ever reached — `context`/`relationships`/
- * `emotional_state` are not screened by anything, in this route or its
- * caller. This is a PRE-EXISTING gap: the client's direct browser insert this
- * route replaces had ZERO distress screening on any field, so net exposure
- * is unchanged (arguably improved — this route is at least rate-limited and
- * auth-gated). Fixing /api/score's own field coverage is out of scope here
- * (an engine-adjacent, measurement-neutral-protected route this codebase is
- * deliberately careful about touching outside a dedicated session) — named
- * as its own follow-up, not silently absorbed into this refactor.
+ * R20a PERIMETER MEMBER since 2026-08-31, by mentor ruling
+ * (operations/agent-circles-2026-08/2026-08-31-mentor-consultation-r20a-two-
+ * unclassified-routes-verbatim.md). The block that stood here disclosed that
+ * no check ran; the ruling closed it. Three converging reasons, each held
+ * sufficient alone: `emotional_state` is a field whose entire purpose is to
+ * capture what the practitioner was feeling, and the 2026-08-17 family ruling
+ * puts that material at the HIGHEST distress likelihood, not the lowest; an
+ * authenticated caller can POST here directly with `/api/score` never
+ * executing, so that route's check was never a gate on this one; and six of
+ * the seven free-text fields were screened by nothing anywhere.
+ *
+ * SCREENED SUBJECT — all seven free-text fields composed, not `action` alone.
+ * Ruled explicitly: screening `action` alone here "is not closing the gap — it
+ * is relocating it." The check precedes field validation and every DB call.
+ *
+ * FLAG — the SHARED `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED`, not a new one. It is
+ * already `true` in production, so this protection lands on deploy with no
+ * separate activation step. Named as a deliberate trade: a safety advantage
+ * bought at the cost of rollback granularity (reverting it reverts the other
+ * gap-closure routes too). Flag-off, this route is byte-identical to its
+ * pre-ruling self.
+ *
+ * ⚠ STANDING DISCLOSED LIMITATION (ruled, not closed): `/api/score` still
+ * screens `action` ALONE. Its other fields are screened at persistence, here,
+ * and nowhere earlier. The asymmetry — this persister screening MORE than the
+ * member route that gates it — is the ruled-correct outcome: the persister is
+ * the last line before persistence and should screen everything that reaches
+ * it. `/api/score` is deliberately unchanged; it is engine-adjacent and
+ * measurement-neutrality-protected, and the ruling does not require it to
+ * change.
+ *
+ * Not screened, and deliberately so: `katorthoma_proximity`, `is_kathekon`,
+ * `kathekon_quality`, `passions_detected`, `false_judgements`,
+ * `ruling_faculty_state` — engine outputs echoed back by the client, not
+ * practitioner-authored prose. The ruling names seven free-text fields; these
+ * are the other six body fields and are recorded here as a considered
+ * omission rather than an oversight.
  */
 export async function POST(request: NextRequest) {
   // Shares /api/score's own bucket — this fires once per cloud-mode
@@ -75,6 +108,42 @@ export async function POST(request: NextRequest) {
     improvement_path,
     oikeiosis_context,
   } = body
+
+  // ── R20a perimeter check ──────────────────────────────────────
+  // BEFORE field validation and BEFORE any DB call, per the ruling and the
+  // r20a-gap-closure pattern: distress in an otherwise-invalid body must still
+  // catch. Field order is the body's own. Default field cap (5000) is correct
+  // here and must NOT be raised — this is a MULTI-field route, where the cap
+  // stops one oversized field pushing later fields out of the classifier
+  // window (an input-inducible fail-open). See composeDistressSubject.
+  let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  if (isR20aGapClosureEnabled()) {
+    const subject = composeDistressSubject([
+      action,
+      context,
+      relationships,
+      emotional_state,
+      philosophical_reflection,
+      improvement_path,
+      oikeiosis_context,
+    ])
+    // Empty subject ⇒ skip. Not an optimisation: detectDistressTwoStage has no
+    // empty short-circuit and would pay for a real billed Haiku call before
+    // this route's own 400 fires (PR19 2026-08-18, CONFIRMED).
+    if (hasScreenableSubject(subject)) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+      if (gate.result.distress_detected && gate.result.severity !== 'mild') {
+        return NextResponse.json({
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        })
+      }
+      if (gate.result.severity === 'mild') {
+        mildSupport = buildMildSupportResources('practice')
+      }
+    }
+  }
 
   if (typeof action !== 'string' || !action.trim()) {
     return NextResponse.json({ error: 'action is required' }, { status: 400 })
@@ -112,5 +181,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save evaluation' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, id: data.id })
+  // Mild folds onto the success path — it never blocks the save.
+  return NextResponse.json({
+    success: true,
+    id: data.id,
+    ...(mildSupport ? { support_resources: mildSupport } : {}),
+  })
 }

@@ -30924,3 +30924,83 @@ staging; commit path-scoped; `website/src/data/environmental-context.json` untou
 
 **Status:** Adopted. **Step 0 discharged on production; the walk's blocker is resolved and the walk
 is re-scoped. Steps 1-4 are not to be executed.**
+
+## 2026-08-31 — D-R20A-SCORE-SAVE-JOINS-PERIMETER-COMPLETION-SIGNAL-EXCLUDED-MENTOR-RULED
+
+**Decision.** The mentor's 2026-08-31 ruling on the two R20a-unclassified routes is **ADOPTED IN
+FULL and BUILT**. `/api/score/save` **joins the perimeter** (fifteenth route-level member);
+`/api/practice/completion-signal` is a **recorded reasoned exclusion** on the ST4 precedent. Verbatim
+(binding, wins over this summary):
+`operations/agent-circles-2026-08/2026-08-31-mentor-consultation-r20a-two-unclassified-routes-verbatim.md`.
+
+**⚠ THIS IS LIVE ON DEPLOY. There is no separate activation step.** The check is wired under the
+**SHARED `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED`**, which is already `true` in production. That was a
+deliberate election, named per the ruling's requirement that the flag be named and its default
+documented: protection lands with the push, bought at the cost of rollback granularity (reverting it
+reverts the other gap-closure routes too). Given the ruling found this route "doing exactly what the
+perimeter was built to prevent," the safety advantage was judged to outweigh the granularity cost.
+**Flag-off, the route is byte-identical to its pre-ruling self.**
+
+**How the question arose.** The R20a exhaustiveness backstop — a mentor-ruled prerequisite for any
+coverage claim — was found **RED at 689/2** during an unrelated Next.js patch. Two routes added
+2026-08-23 were neither members nor exclusions. Verified pre-existing by reproducing the identical
+failure on a pristine `git archive HEAD` checkout; the sweep had been red **eight days**, and the
+standing opener's present-tense claim that it was GREEN was stale.
+
+**What was built.**
+- `/api/score/save` screens a composition of **all seven free-text fields** — `action`, `context`,
+  `relationships`, `emotional_state`, `philosophical_reflection`, `improvement_path`,
+  `oikeiosis_context` — **before field validation and before any DB call**, per
+  `r20a-gap-closure.ts`. Mild folds onto the success path; moderate/acute return the redirect.
+  Empty-subject short-circuit retained (the PR19 2026-08-18 billed-call finding).
+- Default field cap (5000) deliberately NOT raised: this is a multi-field route, where the cap stops
+  one oversized field pushing later fields out of the classifier window.
+- Registry: `HUMAN_FACING_POST_ROUTES` **42 → 43**, count floor bumped **in the same edit**, flag
+  entry added.
+- `/api/practice/completion-signal` exclusion recorded with the ruled reasoning verbatim **and its
+  revisit trigger** (if the route's design changes to carry caller-supplied human text).
+- `/api/score` **deliberately UNCHANGED** — engine-adjacent and measurement-neutrality-protected;
+  the ruling does not require it to change.
+
+**THE MUTATION TESTING FOUND THE RULING'S CENTRAL HOLDING UNPINNED, AND THAT IS THE FINDING WORTH
+CARRYING.** With the fix in and the battery at **707/0**, regressing the subject to
+`composeDistressSubject([action])` — *the exact form the ruling rejects* — left the battery **fully
+green**. Membership, import and call-site assertions all pass on the ruled-against form, because
+they assert THAT the check runs, never WHAT it runs over. A later "simplification" would have
+shipped silently. This is the second consecutive session in which a pin set proved something
+adjacent to, rather than identical to, the written invariant. **A pin was added and verified in both
+directions**: the `action`-alone regression now produces 7 failures, and dropping the single
+`emotional_state` field produces exactly 1, correctly naming it. Final: **715/0**.
+
+**Two items named, neither silently absorbed:**
+1. **A collision between two rulings, recorded rather than resolved.** This ruling places the
+   `/api/score` disclosure "in the registry entry for `/api/score/save` **and in the standing
+   limitations record**." The registry half is done. But the public `/limitations` page carries
+   mentor-ruled verbatim wording under an explicit **2026-08-18 Q3 bound: "without naming routes"** —
+   and this disclosure is irreducibly route-level. The session applied the safe half and did **not**
+   pick a winner. Follows the 2026-08-10 precedent for exactly this shape.
+2. **No behavioural test for the new check.** `src/app/api/score/save/__tests__/route.test.ts` passes
+   **33/0 unchanged** and contains **zero** R20a coverage — the new path has static pins only.
+   Consistent with the standing "15 of 22 routes without per-route invocation tests," so not a
+   regression, but named so PR19 sees it rather than discovers it.
+
+**Verified:** `tsc` 0 · `npm run build` 0 (on Next 16.3.3) · r20a-invocation-guard **715/0** (from
+689/2) · score/save route 33/0 · S10 198/0. Mutation-verified ×3, each asserted to apply exactly
+once.
+
+**PR19 NOT YET RUN.** The ruling states it applies. This entry records a build that is **verified but
+not independently reviewed**; that review is owed before the change is treated as verified.
+
+**Risk classification:** **Critical** under 0d-ii (R20a perimeter change — AC5 + PR6). AC7 engages at
+the push, which is the activation. Weights **BLOCKED**; Q1 and the §A boundary unchanged. **Nothing
+bears on the 0h call.**
+
+**Rollback:** `git revert` this commit — registry, route and pin revert together; the shared flag is
+untouched either way, and reverting does not disturb the other gap-closure routes.
+
+**Concurrency:** 21 peers (13 interactive) at open; `git status` re-run before staging; path-scoped.
+
+**Rules served:** PR6, PR10, PR17, PR18, PR19 (owed, not discharged), PR20, PR23, PR25, Q1, AC5, AC7.
+
+**Status:** Adopted; built and self-verified. **PR19 independent review outstanding. The push is the
+activation and is the founder's.**
