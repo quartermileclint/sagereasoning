@@ -302,8 +302,10 @@ const HUMAN_FACING_POST_ROUTES = [
   // calling page reads 200 as success, and a practitioner writing acute distress
   // into `emotional_state` received a silently unsaved record, the word "saved",
   // and no crisis resources — worse than the unscreened state it replaced. This
-  // route therefore returns 422, alone among the 62 distress redirects in this
-  // codebase, and score/page.tsx discriminates on the BODY. Both halves are
+  // route therefore returns 422 — the ONLY non-200 distress redirect in the
+  // codebase (checked 2026-08-31 by parsing the argument span of every
+  // NextResponse.json call containing `distress_detected: true`: 45 calls, 44 of
+  // them 200) — and score/page.tsx discriminates on the BODY. Both halves are
   // pinned: the status in the gap-closure wiring battery's ROUTE_WIRING row,
   // the page in score-save-response.test.ts + the page structural pin.
   'src/app/api/score/save/route.ts',

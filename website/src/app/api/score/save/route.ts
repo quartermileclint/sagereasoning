@@ -88,12 +88,22 @@ import { isScoreSaveR20aEnabled, SCORE_SAVE_PERSISTED_FIELD_CAP } from './r20a'
  * HTTP 200, `score/page.tsx` reads a 200 as success, and a practitioner writing
  * acute distress into `emotional_state` received a silently unsaved record, the
  * word "saved", and no crisis resources — worse than the unscreened state it
- * replaced, for exactly the population the perimeter protects. Every one of the
- * 62 other distress redirects in this codebase returns 200; this route is the
- * deliberate exception, because it is the only one whose caller treats 200 as a
- * durable write having happened. A 422 here is a SAFETY EVENT, not an
- * error-rate regression — alert on the body flag, never suppress 4xx on this
- * route. The calling page discriminates on the BODY, not the status.
+ * replaced, for exactly the population the perimeter protects.
+ *
+ * This route is the ONLY non-200 distress redirect in the codebase, and that
+ * divergence is deliberate: it is the only one whose caller treats a 200 as a
+ * durable write having happened. CHECKED 2026-08-31 by parsing every
+ * `NextResponse.json(...)` call under src/app/api whose argument span contains
+ * `distress_detected: true` — 45 such calls, of which 44 are 200 (12 explicit,
+ * 32 by omitting the second argument) and 1 is this one at 422.
+ * (Do NOT restate that as a count of `distress_detected: true` OCCURRENCES —
+ * that grep returns a larger number because it also matches type definitions,
+ * comments and non-response contexts. An earlier draft of this comment made
+ * exactly that error.)
+ *
+ * A 422 here is a SAFETY EVENT, not an error-rate regression — alert on the
+ * body flag, never suppress 4xx on this route. The calling page discriminates
+ * on the BODY, not the status.
  *
  * FLAG: SUBSTRATE_SCORE_SAVE_R20A_ENABLED (dedicated — see ./r20a.ts for why it
  * is not the shared gap-closure flag, and for the rollback lever, which is this

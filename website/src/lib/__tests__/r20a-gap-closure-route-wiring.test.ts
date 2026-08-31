@@ -184,10 +184,10 @@ interface BlockSpec {
    * payload.
    *
    * OPTIONAL, and asserted only when present, so all pre-existing rows stay
-   * byte-identical. It deliberately does NOT default to 200: 50 of the 62
-   * distress redirects in this codebase express 200 by OMITTING the second
-   * argument, so a required field with an implicit-200 sentinel would have to
-   * touch every row for no safety gain.
+   * byte-identical. It deliberately does NOT default to 200: of the 45 distress
+   * redirect calls in this codebase, 32 express 200 by OMITTING the second
+   * argument (12 pass it explicitly), so a required field with an implicit-200
+   * sentinel would have to touch every row for no safety gain.
    *
    * /api/score/save is the only route that sets it. It returns 422 because its
    * calling page treats a 200 as a durable write having happened — the exact
