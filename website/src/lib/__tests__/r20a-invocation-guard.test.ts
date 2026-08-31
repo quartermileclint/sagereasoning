@@ -287,6 +287,26 @@ const HUMAN_FACING_POST_ROUTES = [
   'src/app/api/founder/hub/ring-proof/route.ts',
   'src/app/api/mentor/ring/proof/route.ts',
   'src/app/api/support/agent/proof/route.ts',
+
+  // ── RULED 2026-08-31, built, PR19-reviewed, REVERTED, and rebuilt ────────
+  // /api/score/save screens TEN caller-supplied fields — every one capable of
+  // carrying prose, enumerated from the route's destructure against
+  // supabase-v3-migration.sql rather than from a criterion the code does not
+  // enforce (the mentor's A2b reasoning; the earlier seven-field scope rested
+  // on "engine outputs echoed back by the client", which does not partition the
+  // fields and which the route cannot enforce because a caller can POST here
+  // directly with /api/score never executing).
+  //
+  // THE FIRST IMPLEMENTATION WAS REVERTED, and the reason belongs here rather
+  // than only in the record: it returned the distress redirect as HTTP 200, the
+  // calling page reads 200 as success, and a practitioner writing acute distress
+  // into `emotional_state` received a silently unsaved record, the word "saved",
+  // and no crisis resources — worse than the unscreened state it replaced. This
+  // route therefore returns 422, alone among the 62 distress redirects in this
+  // codebase, and score/page.tsx discriminates on the BODY. Both halves are
+  // pinned: the status in the gap-closure wiring battery's ROUTE_WIRING row,
+  // the page in score-save-response.test.ts + the page structural pin.
+  'src/app/api/score/save/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -423,6 +443,17 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
   { route: 'src/app/api/compose/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
   { route: 'src/app/api/execute/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
   { route: 'src/app/api/founder/hub/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
+  // score/save takes a DEDICATED flag, not the shared gap-closure one — the
+  // /impulse shape (flagSource './r20a'). Two reasons, both from the PR19
+  // review of the reverted first attempt: the shared flag is already true in
+  // production, so deploy would equal activation and the live distress smoke
+  // could not precede it (register M6); and the shared flag covers 26 routes,
+  // so unsetting it to mitigate an incident HERE would also strip screening
+  // from passion-log, passion-classify and view-from-above — the most
+  // distress-likely tools in the product (register M2, the safety-inverting
+  // rollback lever). The route still imports the shared HELPERS, so it keeps
+  // its full ROUTE_WIRING row.
+  { route: 'src/app/api/score/save/route.ts', flag: 'isScoreSaveR20aEnabled', flagSource: './r20a' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -597,12 +628,12 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // The flag-gated floor had ALSO never been bumped alongside a registry
   // addition before 2026-08-12, which is how it came to be the weakest of the
   // three. It is now bumped on the same line of reasoning as the other two.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 42, `${label} (>=42 route-level)`)
+  assert(HUMAN_FACING_POST_ROUTES.length >= 43, `${label} (>=43 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
   // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
   // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12
   // distinct routes (draft-reflect carries two flags, one entry each).
-  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 30, `${label} (>=30 flag-gated route-level flag-pairs)`)
+  assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 31, `${label} (>=31 flag-gated route-level flag-pairs)`)
 }
 
 // test('detectDistressTwoStage result is awaited (async safety)')
@@ -915,6 +946,30 @@ const PERIMETER_EXCLUSIONS: readonly PerimeterExclusion[] = [
       AGENT_FACING +
       'ST4, a RECORDED design decision: its free text (what_i_bring / what_i_seek) is AGENT-authored ' +
       'over a credential-authenticated call. Its human twin /api/mentor/stoa IS a perimeter member.',
+  },
+  {
+    route: 'src/app/api/practice/completion-signal/route.ts',
+    reason:
+      AGENT_FACING +
+      'RULED 2026-08-31 on CORRECTED facts, and the correction is part of the reason — read it before ' +
+      'trusting this entry. The original ruling request asserted this route "carries no human free-text ' +
+      'field". THAT WAS FALSE: handler.ts REQUIRES examination.impression_assented_to (non-empty string, ' +
+      'MAX_IMPRESSION_CHARS = 5000, handler.ts:162/338-344) and optionally accepts refusal_reason ' +
+      '(MAX_REFUSAL_REASON_CHARS = 2000, handler.ts:163/386-393). The error was made by grepping route.ts ' +
+      'alone while the fields live in the sibling handler.ts — the SAME split-file blindness class this ' +
+      'battery fixed in its own exhaustiveness walk (see readRouteAndHandler below). The exclusion ' +
+      'nevertheless STANDS, on the ground the mentor gave once corrected: the ST4 precedent is not "this ' +
+      'route has no free text", it is "AGENT-AUTHORED free text over a credential-authenticated call is ' +
+      'outside the perimeter, because it processes agent output rather than human distress input". ' +
+      'impression_assented_to is what the AGENT examined and assented to, submitted Bearer-ONLY on the ' +
+      'write-class completion_signal_write capability (handler.ts:24/220/235-240), never over a browser ' +
+      'session. There is no path by which a human practitioner’s distress enters this route. ' +
+      'REVISIT TRIGGER (corrected — the original was self-sealing, describing a change that had ' +
+      'ALREADY happened and so could never fire): revisit if the route’s authentication model changes ' +
+      'to permit browser-session callers, or if its field definitions are amended to accept ' +
+      'practitioner-typed input rather than agent-authored output. Neither condition is met today. ' +
+      'Ruling: operations/agent-circles-2026-08/2026-08-31-mentor-ruling-corrected-questionB-and-A2b-' +
+      'verbatim.md; correction: 2026-08-31-CORRECTION-to-r20a-ruling-question-B-false-fact.md.',
   },
   {
     route: 'src/app/api/guardrail/route.ts',
@@ -1332,6 +1387,98 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
     .join('\n')
   assert(bodySource.includes(REQUIRED_GATE_FUNCTION) === true, `${label} (${REQUIRED_GATE_FUNCTION})`)
   assert(bodySource.includes(REQUIRED_FUNCTION) === true, `${label} (${REQUIRED_FUNCTION})`)
+}
+
+// ── RULED MEMBERSHIP — the semantic defeat of register H8 ──────────────────
+//
+// H8 (PR19, 2026-08-31, CONFIRMED): reclassifying /api/score/save from a
+// perimeter MEMBER to a PERIMETER_EXCLUSIONS entry and dropping the route-level
+// floor by one left the whole battery GREEN at 708/0 — "the ruling's own named
+// failure mode, stopped only by a hand-maintained integer with a recorded
+// history of drifting." The backstop above cannot see it: an exclusion IS
+// "classified", so `known` stays true.
+//
+// Floors are a numeric defence and this is a semantic attack, so the remedy is
+// semantic too. These routes are members because a BINDING MENTOR RULING put
+// them there, not because a builder judged it. Downgrading one is therefore not
+// a refactor — it is overturning a governance decision, and it must fail loudly
+// and say so. The shape is the file's own established precedent
+// (KNOWN_SPLIT_FILE_IN_SCOPE_ROUTES above, added for exactly the reason that a
+// floor sized for catastrophic collapse is too loose to catch a narrow
+// regression).
+//
+// Asserting MEMBERSHIP specifically — not merely "classified" — is the whole
+// point. The ruling-record existence check makes the entry costly to fabricate:
+// deleting the row means also deleting or lying about a committed governance
+// document.
+{
+  const RULED_PERIMETER_MEMBERS: readonly { route: string; ruling: string }[] = [
+    {
+      route: 'src/app/api/score/save/route.ts',
+      ruling:
+        'operations/agent-circles-2026-08/2026-08-31-mentor-ruling-corrected-questionB-and-A2b-verbatim.md',
+    },
+    {
+      route: 'src/app/api/mentor/view-from-above/route.ts',
+      ruling:
+        'operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md',
+    },
+    {
+      route: 'src/app/api/evaluate/route.ts',
+      ruling:
+        'operations/agent-circles-2026-08/2026-08-18-mentor-rulings-perimeter-claim-bounds-and-curiosity-scoping-verbatim.md',
+    },
+  ]
+  const repoRoot = path.resolve(websiteRoot, '..')
+  for (const { route, ruling } of RULED_PERIMETER_MEMBERS) {
+    const label = `R20a Ruled Membership: ${route}`
+    assert(
+      HUMAN_FACING_POST_ROUTES.includes(route),
+      `${label} is a HUMAN_FACING_POST_ROUTES MEMBER — downgrading it to an exclusion overturns a binding mentor ruling (register H8)`
+    )
+    assert(
+      fs.existsSync(path.join(repoRoot, ruling)),
+      `${label} — its governing ruling record still exists at ${ruling}`
+    )
+  }
+}
+
+// ── The exclusion registry needs a floor of its own ────────────────────────
+// Every other registry in this file has one; PERIMETER_EXCLUSIONS had none, so
+// entries could be deleted wholesale and only the backstop would object — and
+// only for routes still in scope. Set below the true count with headroom, per
+// the floor discipline stated above (a floor pinned AT the measured value
+// catches nothing and goes stale on the next legitimate addition).
+assert(
+  PERIMETER_EXCLUSIONS.length >= 28,
+  `R20a registry floor: at least 28 reasoned exclusions (saw ${PERIMETER_EXCLUSIONS.length})`
+)
+
+// ── Assertion-total floor — register H8's numeric half ─────────────────────
+//
+// H8's mutation dropped the total 715 -> 708 with nothing objecting. Captured
+// BEFORE this assertion runs, so it is not self-referential.
+//
+// ⚠ BE HONEST ABOUT WHAT THIS DOES NOT CATCH. Measured at 714 on the commit
+// that added it. A floor set AT the measured value would catch H8's -7, but it
+// then goes red on the next legitimate addition and gets "fixed" by bumping the
+// integer — which is the hand-maintained-integer drift that produced H8 in the
+// first place, and which this file has already suffered twice on the in-scope
+// floor above (measured-and-wrong two times in one session). A floor set BELOW
+// the measured value survives ordinary churn but, by exactly that slack, does
+// NOT catch a narrow -7.
+//
+// So this floor is the CATASTROPHIC-COLLAPSE defence only: a deleted assertion
+// loop, a truncated registry, a broken walk. H8's specific mutation is caught
+// SEMANTICALLY by RULED_PERIMETER_MEMBERS above, which fails on the
+// reclassification itself regardless of any count. The two are a pair; neither
+// alone is sufficient, and reading this floor as H8 cover would be a mistake.
+{
+  const observed = passed + failed
+  assert(
+    observed >= 700,
+    `R20a assertion-total floor: the suite ran at least 700 assertions (saw ${observed}) — a net reduction of this size means a check or a whole loop was removed`
+  )
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed')

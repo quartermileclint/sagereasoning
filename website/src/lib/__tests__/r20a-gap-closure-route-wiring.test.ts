@@ -117,9 +117,13 @@ interface ExtractedBlock {
 }
 
 /** Extract every `if (isR20aGapClosureEnabled()…) { … }` block, in source order. */
-function extractFlagBlocks(code: string, label: string): ExtractedBlock[] {
+function extractFlagBlocks(code: string, label: string, flagFn: string): ExtractedBlock[] {
   const blocks: ExtractedBlock[] = []
-  const re = /if\s*\(\s*isR20aGapClosureEnabled\s*\(\s*\)/g
+  // The flag-check function name is per-route (see RouteWiring.flagFn). It
+  // defaults to the shared gap-closure flag, so all pre-existing rows are
+  // byte-identical; /api/score/save takes a dedicated flag and would otherwise
+  // have been invisible to this entire battery.
+  const re = new RegExp('if\\s*\\(\\s*' + escapeRe(flagFn) + '\\s*\\(\\s*\\)', 'g')
   let m: RegExpExecArray | null
   while ((m = re.exec(code)) !== null) {
     const condOpen = code.indexOf('(', m.index)
@@ -174,6 +178,22 @@ interface BlockSpec {
   /** Extra condition text that must appear in the flag condition (execute's
    *  human-branch gate). */
   extraCondition?: string
+  /**
+   * The HTTP status the non-mild redirect MUST carry, asserted inside the
+   * argument span of the NextResponse.json call that builds the distress
+   * payload.
+   *
+   * OPTIONAL, and asserted only when present, so all pre-existing rows stay
+   * byte-identical. It deliberately does NOT default to 200: 50 of the 62
+   * distress redirects in this codebase express 200 by OMITTING the second
+   * argument, so a required field with an implicit-200 sentinel would have to
+   * touch every row for no safety gain.
+   *
+   * /api/score/save is the only route that sets it. It returns 422 because its
+   * calling page treats a 200 as a durable write having happened — the exact
+   * defect that forced the 2026-08-31 revert.
+   */
+  redirectStatus?: number
 }
 
 interface LocalComposerSpec {
@@ -189,6 +209,13 @@ interface LocalComposerSpec {
 interface RouteWiring {
   route: string
   blocks: BlockSpec[]
+  /** The exported flag-check function gating this route's perimeter block.
+   *  Defaults to the shared 'isR20aGapClosureEnabled'. /api/score/save takes a
+   *  DEDICATED flag (see its ./r20a.ts for why the shared one was rejected:
+   *  no dark-deploy window, and a rollback lever that would strip screening
+   *  from 25 other routes). Without this field a dedicated flag is invisible
+   *  to extractFlagBlocks and the route silently leaves this battery. */
+  flagFn?: string
   mildVariant: 'passion' | 'practice' | 'skill'
   /** File-level counts of the two mild-fold attachment shapes. */
   attach: { spread: number; envelope: number }
@@ -244,6 +271,61 @@ const ROUTE_WIRING: readonly RouteWiring[] = [
     blocks: [{ gate: 'standard', subjectVar: 'subject', subjectExpr: 'const subject = composeDistressSubject(collectAppendixAnswerText(body?.answers))' }],
     mildVariant: 'practice',
     attach: { spread: 1, envelope: 0 },
+  },
+  {
+    // RULED 2026-08-31 (corrected Question A2b), built, PR19-reviewed,
+    // REVERTED, rebuilt. The row exists because three independent reviewers
+    // found its absence separately: it is the pin that kills the whole
+    // CRITICAL mutation class (empty subject, block-after-insert, missing
+    // return, severity inversion, dead flag) in a single config entry.
+    //
+    // TWO THINGS ARE UNIQUE TO THIS ROW, and both are deliberate:
+    //   flagFn         — a DEDICATED flag, not the shared gap-closure one.
+    //                    See ../../../app/api/score/save/r20a.ts.
+    //   redirectStatus — 422, not 200. The ONLY route in the perimeter that
+    //                    sets it, because it is the only one whose caller
+    //                    treats a 200 as a durable write having happened.
+    route: 'src/app/api/score/save/route.ts',
+    flagFn: 'isScoreSaveR20aEnabled',
+    blocks: [{
+      gate: 'standard',
+      subjectVar: 'subject',
+      subjectExpr: 'const subject = scoreSaveDistressSubject(body)',
+      redirectStatus: 422,
+    }],
+    mildVariant: 'practice',
+    attach: { spread: 1, envelope: 0 },
+    localComposers: [
+      {
+        // The shape-agnostic JSONB walker. `depth > 6` and the character bound
+        // are RECURSION bounds; what guarantees screened >= persisted for JSONB
+        // is the serialized-size rejection in the route. The two are
+        // load-bearing TOGETHER — relaxing one without the other reopens the
+        // hole silently, which is why both are pinned here.
+        name: 'collectScoreSaveJsonbText',
+        callsShared: false,
+        mustContain: ['depth > 6', 'SCORE_SAVE_PERSISTED_FIELD_CAP', 'parts.push(k)', 'DISTRESS_SUBJECT_SEPARATOR'],
+      },
+      {
+        // All TEN screened fields pinned by name. A field dropped from the
+        // composition is a silently narrowed perimeter — and this route's
+        // screened set is a binding mentor ruling, not a builder's judgement.
+        name: 'scoreSaveDistressSubject',
+        callsShared: true,
+        mustContain: [
+          'body?.emotional_state',
+          'body?.action',
+          'collectScoreSaveJsonbText(body?.false_judgements)',
+          'body?.context',
+          'body?.relationships',
+          'body?.philosophical_reflection',
+          'body?.improvement_path',
+          'body?.oikeiosis_context',
+          'body?.ruling_faculty_state',
+          'collectScoreSaveJsonbText(body?.passions_detected)',
+        ],
+      },
+    ],
   },
   {
     route: 'src/app/api/mentor-baseline-response/route.ts',
@@ -453,8 +535,8 @@ function findConsumerRoutes(dir: string, acc: string[]): string[] {
   const configured = ROUTE_WIRING.map((r) => r.route).slice().sort()
 
   assert(
-    ROUTE_WIRING.length >= 25,
-    `registry floor: at least 25 configured consumer routes (saw ${ROUTE_WIRING.length}) — bump this floor in the SAME edit as any registry addition (the guard battery's own standing lesson)`
+    ROUTE_WIRING.length >= 26,
+    `registry floor: at least 26 configured consumer routes (saw ${ROUTE_WIRING.length}) — bump this floor in the SAME edit as any registry addition (the guard battery's own standing lesson)`
   )
   for (const r of onDisk) {
     assert(configured.includes(r), `registry: consumer route ${r} imports r20a-gap-closure but has NO config row here — add one (it gets every wiring check for one row)`)
@@ -488,11 +570,12 @@ for (const cfg of ROUTE_WIRING) {
   // below (assertRedirectAndMild requires a real buildMildSupportResources(…)
   // call site inside the gated body), so this was a test-hygiene gap, not a
   // live vacuous pass — fixed anyway so this assertion means what it claims.
-  for (const sym of ['isR20aGapClosureEnabled', 'composeDistressSubject', 'buildMildSupportResources', 'hasScreenableSubject']) {
+  const flagFn = cfg.flagFn ?? 'isR20aGapClosureEnabled'
+  for (const sym of [flagFn, 'composeDistressSubject', 'buildMildSupportResources', 'hasScreenableSubject']) {
     assert(code.includes(sym), `${label}: imports/uses ${sym}`)
   }
 
-  const blocks = extractFlagBlocks(code, label)
+  const blocks = extractFlagBlocks(code, label, flagFn)
   assert(
     blocks.length === cfg.blocks.length,
     `${label}: exactly ${cfg.blocks.length} flag-gated perimeter block(s) (saw ${blocks.length}) — a lost write-path check or an unregistered new one`
@@ -553,7 +636,7 @@ for (const cfg of ROUTE_WIRING) {
         countOccurrences(block.body, classifierRe) === 1,
         `${blockLabel}: no classifier call outside the screenable gate within this block`
       )
-      assertRedirectAndMild(innerBody, blockLabel, cfg.mildVariant)
+      assertRedirectAndMild(innerBody, blockLabel, cfg.mildVariant, spec.redirectStatus)
     } else {
       // 'combined': subject composed BEFORE the block; the flag condition
       // itself carries the screenable gate.
@@ -570,7 +653,7 @@ for (const cfg of ROUTE_WIRING) {
         countOccurrences(block.body, classifierRe) === 1,
         `${blockLabel}: exactly one awaited classifier call on ${spec.subjectVar} inside the combined block`
       )
-      assertRedirectAndMild(block.body, blockLabel, cfg.mildVariant)
+      assertRedirectAndMild(block.body, blockLabel, cfg.mildVariant, spec.redirectStatus)
     }
   }
 
@@ -627,7 +710,12 @@ for (const cfg of ROUTE_WIRING) {
 }
 
 /** The non-mild redirect + mild fold, asserted inside the gated body. */
-function assertRedirectAndMild(gatedBody: string, blockLabel: string, variant: string): void {
+function assertRedirectAndMild(
+  gatedBody: string,
+  blockLabel: string,
+  variant: string,
+  redirectStatus?: number
+): void {
   const nb = normalise(gatedBody)
   assert(
     nb.includes("gate.result.distress_detected && gate.result.severity !== 'mild'"),
@@ -644,6 +732,37 @@ function assertRedirectAndMild(gatedBody: string, blockLabel: string, variant: s
     nb.includes("gate.result.severity === 'mild'") && nb.includes(`buildMildSupportResources('${variant}')`),
     `${blockLabel}: the mild path folds buildMildSupportResources('${variant}') inside the gated body`
   )
+
+  // ── The ruled HTTP status, bound to the SAME call as the payload ─────────
+  // Deliberately NOT a file-wide `nb.includes('status: 422')`: that is the
+  // register's H6 pin-false-pass class — an unrelated 422 elsewhere in the file
+  // would satisfy it while the redirect itself silently returned 200. Locate
+  // the NextResponse.json call whose ARGUMENT SPAN carries the distress
+  // payload, and assert the status inside that span.
+  if (redirectStatus !== undefined) {
+    let statusOnRedirect = false
+    let inspected = 0
+    const callRe = /NextResponse\.json\s*\(/g
+    let cm: RegExpExecArray | null
+    while ((cm = callRe.exec(gatedBody)) !== null) {
+      const open = gatedBody.indexOf('(', cm.index)
+      const close = findMatching(gatedBody, open, '(', ')')
+      if (close === -1) continue
+      const span = normalise(gatedBody.slice(open + 1, close))
+      if (!span.includes('distress_detected: true')) continue
+      inspected++
+      statusOnRedirect = span.includes(`status: ${redirectStatus}`)
+      break
+    }
+    assert(
+      inspected === 1,
+      `${blockLabel}: found exactly one NextResponse.json call carrying the distress payload (saw ${inspected}) — the status pin needs an unambiguous target`
+    )
+    assert(
+      statusOnRedirect,
+      `${blockLabel}: the distress redirect carries { status: ${redirectStatus} } in the SAME NextResponse.json call as the payload (the ruled non-200 response)`
+    )
+  }
 }
 
 function escapeRe(s: string): string {
@@ -658,8 +777,8 @@ function escapeRe(s: string): string {
 {
   const expectedBlocks = ROUTE_WIRING.reduce((acc, r) => acc + r.blocks.length, 0)
   assert(
-    blocksVerified === expectedBlocks && expectedBlocks >= 32,
-    `non-vacuity floor: verified ${blocksVerified} of ${expectedBlocks} configured blocks (floor 32) — the battery actually traversed every block`
+    blocksVerified === expectedBlocks && expectedBlocks >= 33,
+    `non-vacuity floor: verified ${blocksVerified} of ${expectedBlocks} configured blocks (floor 33) — the battery actually traversed every block`
   )
 }
 

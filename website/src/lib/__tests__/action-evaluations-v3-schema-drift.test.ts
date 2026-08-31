@@ -230,6 +230,71 @@ assert(selectsChecked >= 3, `READ-1: found a select on ${TABLE} in each reader (
     "NV-2: WRITE-5 would have caught the real bug — 'action_description' is not in the schema set")
 }
 
+// ---------------------------------------------------------------------
+// 6. ENUM PARITY — the route's own copies of two DB CHECK vocabularies.
+//
+// Added 2026-08-31 with the R20a perimeter rebuild. The mentor ruled that
+// katorthoma_proximity and kathekon_quality are EXCLUDED from distress
+// screening because prose cannot persist in them — but the original ground for
+// that ("there is a CHECK constraint") is a criterion enforced in a DIFFERENT
+// FILE, which is the same shape of reasoning the ruling rejected for the
+// seven-field scope. So the route now validates both enums ITSELF.
+//
+// That trade is only sound if the route's literal lists cannot drift from the
+// constraints they mirror. Hand-maintained lists in this codebase HAVE drifted
+// undetected — the R20a perimeter count itself drifted from 16 to 44 with an
+// anti-drift instruction embedded in the very artifact that was drifting. These
+// assertions are what stop the exclusion ground from quietly becoming false.
+//
+// If a future migration widens either CHECK, this goes red and the route must
+// be updated in the same change.
+// ---------------------------------------------------------------------
+{
+  const routeSrc = read(WRITE_PATH_FILE)
+  const migrationSrc = read('supabase-v3-migration.sql')
+
+  for (const [column, constName] of [
+    ['katorthoma_proximity', 'KATORTHOMA_PROXIMITY_VALUES'],
+    ['kathekon_quality', 'KATHEKON_QUALITY_VALUES'],
+  ] as const) {
+    const label = `ENUM-${column}`
+
+    // Pull the CHECK vocabulary out of the migration.
+    const checkRe = new RegExp(`${column}\\s+TEXT[^,]*?CHECK\\s*\\(\\s*${column}\\s+IN\\s*\\(([^)]*)\\)`, 'i')
+    const checkMatch = checkRe.exec(migrationSrc)
+    assert(checkMatch !== null, `${label}-1: the migration still declares a CHECK vocabulary for ${column}`)
+    if (!checkMatch) continue
+    const dbValues = checkMatch[1]
+      .split(',')
+      .map((v) => v.trim().replace(/^'|'$/g, ''))
+      .filter(Boolean)
+      .sort()
+
+    // Pull the route's literal list.
+    const constRe = new RegExp(`const ${constName} = \\[([^\\]]*)\\]`)
+    const constMatch = constRe.exec(routeSrc)
+    assert(constMatch !== null, `${label}-2: the route declares ${constName}`)
+    if (!constMatch) continue
+    const routeValues = constMatch[1]
+      .split(',')
+      .map((v) => v.trim().replace(/^'|'$/g, ''))
+      .filter(Boolean)
+      .sort()
+
+    assert(dbValues.length > 0, `${label}-3: the parsed DB vocabulary is non-empty (parser non-vacuity)`)
+    assert(
+      JSON.stringify(routeValues) === JSON.stringify(dbValues),
+      `${label}-4: the route's ${constName} matches the DB CHECK exactly ` +
+        `(route: [${routeValues.join(', ')}] vs DB: [${dbValues.join(', ')}]) — ` +
+        `a drift here silently falsifies the ruled exclusion ground for this field`
+    )
+    assert(
+      routeSrc.includes(`${constName}.includes(`),
+      `${label}-5: the route actually USES ${constName} to validate — a declared-but-unused list enforces nothing`
+    )
+  }
+}
+
 console.log(`${passed} passed, ${failed} failed`)
 if (failures.length > 0) {
   console.log('\nFailures:')

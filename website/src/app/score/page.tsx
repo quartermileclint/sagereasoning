@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
+import { classifySaveResponse, readSaveDistressPayload, readSaveSupportMessage } from '@/lib/score-save-response'
 import { trackEvent } from '@/lib/analytics'
 import {
   VIRTUE_EXPRESSIONS,
@@ -96,6 +97,11 @@ export default function ScoreActionPage() {
   const [result, setResult] = useState<V3EvaluationResult | null>(null)
   const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [saved, setSaved] = useState(false)
+  // R20a mild fold: /api/score/save attaches support_resources to a SUCCESSFUL
+  // save when the classifier read mild distress. Rendered below the result, the
+  // /impulse and /stoa precedent — 35 routes return this field and only two
+  // pages rendered it, so returning it unrendered would have been a dead path.
+  const [supportMessage, setSupportMessage] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
   // Practice reminders, human plan Phase 3 (the stage-crossing trigger) — the
   // earn moment. Populated ONLY from THIS page's own award call's response
@@ -134,6 +140,7 @@ export default function ScoreActionPage() {
     setResult(null)
     setDistressRedirect(null)
     setSaved(false)
+    setSupportMessage(null)
     setErrorMsg('')
     // Phase 3 — found by adversarial review: without this reset, a SECOND
     // evaluation in the same visit re-rendered the card from the FIRST
@@ -217,7 +224,47 @@ export default function ScoreActionPage() {
             oikeiosis_context: evalResult.oikeiosis_context,
           }),
         })
-        const error = saveRes.ok ? null : await saveRes.json().catch(() => ({ error: 'unknown' }))
+        // Read the body ONCE — a Response body is single-use — then classify.
+        const saveBody = await saveRes.json().catch(() => null)
+        const kind = classifySaveResponse(saveRes.status, saveBody)
+
+        // ─── R20a: the save was REFUSED because it carried acute distress ───
+        // This branch is the direct fix for the defect that forced the
+        // 2026-08-31 revert. The route returns 422 and the practitioner's
+        // record was deliberately NOT written; without this branch a 422 falls
+        // into the generic failure path below and tells someone in crisis
+        // "could not be saved… Please try again in a moment" — instructing
+        // them to resubmit the same acute text, framed as their own fault,
+        // with no crisis resources anywhere on screen.
+        //
+        // `result` MUST be cleared. setResult(evalResult) ran ~24 lines above,
+        // and {result} renders independently of {distressRedirect}, so leaving
+        // it set would put a proximity grade and a philosophical reflection
+        // directly beneath "We want to make sure you are okay". The crisis
+        // message also opens by saying the evaluation has been paused, which is
+        // simply false if the evaluation is rendered underneath it.
+        //
+        // setLoading(false) must precede the return: the trailing
+        // setLoading(false) sits after the try block and an early return would
+        // skip it, leaving the practitioner on a spinner. This mirrors the
+        // /api/score distress path above exactly.
+        if (kind === 'distress') {
+          const payload = readSaveDistressPayload(saveBody)
+          setDistressRedirect(payload)
+          setResult(null)
+          setSaved(false)
+          setErrorMsg('')
+          setStageCrossing(null)
+          setSupportMessage(null)
+          setLoading(false)
+          return
+        }
+
+        // Mild distress does NOT block the save — the row was written, and the
+        // route folds an additive support message onto the success response.
+        setSupportMessage(readSaveSupportMessage(saveBody))
+
+        const error = kind === 'ok' ? null : (saveBody ?? { error: 'unknown' })
         if (error) {
           // Fail LOUD. This branch did not exist before 2026-07-26: the insert
           // error was discarded and `saved` simply stayed false, so a total
@@ -494,6 +541,19 @@ export default function ScoreActionPage() {
                 {distressRedirect.redirect_message}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── R20a: mild support fold ───
+          MILD distress does not block the save — the row IS written, which is
+          why the founder-signed copy opens "Your entry is saved". Rendered
+          above the evaluation so the support is seen first. Absent (never
+          empty) on every other path. */}
+      {supportMessage && (
+        <div className="bg-white border border-sage-300 rounded-lg p-6 mb-8">
+          <div className="font-body text-sage-700 leading-relaxed whitespace-pre-line">
+            {supportMessage}
           </div>
         </div>
       )}
