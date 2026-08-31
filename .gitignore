@@ -63,3 +63,4 @@ website/scripts/.translation-sandwich-cache/
 
 website/tsconfig.tsbuildinfo
 operations/p1-rebuild-2026-06/transcripts/
+supabase/.temp/
