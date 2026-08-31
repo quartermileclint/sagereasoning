@@ -31103,3 +31103,102 @@ enumeration; no code, schema, flag or public surface changed. The rebuild it spe
 **Rules served:** PR6, PR10, PR18, PR19, PR20, PR23, Q1, AC5.
 
 **Status:** Adopted. **Rebuild specified and NOT started — it is the founder's to sequence.**
+
+---
+
+## D-R20A-SCORE-SAVE-PERIMETER-REBUILT-DARK-PR19-PENDING — 2026-08-31
+
+**Session tier:** `code-critical` (AC5 + PR6). **AC7 NOT engaged** — no deploy, no flag set, no
+production or TEST operation; this environment holds no production credential.
+**Production state: UNCHANGED.** Commits `299c3e9` (rebuild) + `3068868` (comment correction),
+**both local and unpushed**. Close:
+`operations/handoffs/founder/2026-08-31-score-save-perimeter-rebuild-CLOSE.md`.
+
+**What this is.** Executes the corrected mentor ruling
+(`2026-08-31-mentor-ruling-corrected-questionB-and-A2b-verbatim.md`) after the first implementation
+was reverted under PR19 (5 CRITICAL · 12 HIGH · 9 MEDIUM). `/api/score/save` is now the **43rd**
+route-level R20a member (ordinal derived from the array, not from prose); the exhaustiveness
+backstop is **GREEN 715/0**, up from the intended **RED 689/2**.
+
+**The dispositive prior defect and its fix.** The reverted build returned the distress redirect as
+HTTP 200; the calling page reads 200 as success; a practitioner writing acute distress into
+`emotional_state` got a silently unsaved record, the word "saved", and no crisis resources. The
+route now returns **422** — the only non-200 distress redirect in the codebase — and
+`score/page.tsx` discriminates on the **body**, clears `result`, and renders crisis resources. The
+branch sits before the generic error line, so `setSaved(true)` and the milestones POST are
+*structurally* unreachable on a refusal.
+
+**Screened set: TEN**, re-enumerated from the destructure against `supabase-v3-migration.sql`. The
+enumeration again caught the two the ruling did not name (`passions_detected`,
+`ruling_faculty_state`). **Excluded: THREE** — and the exclusion ground was MOVED into the route:
+`katorthoma_proximity` was previously checked only as a non-empty string and `kathekon_quality` not
+at all, so resting the exclusion on a DB CHECK was "a criterion enforced in another file", the same
+shape the mentor rejected. Both enums are now route-validated, with a drift pin against the
+migration.
+
+**Four corrections to the prompt's own framing**, all first-hand: the flag-gated floor was *tight*
+(30/30) not stale; `extractFlagBlocks` hardcodes the shared flag, so a dedicated flag would have
+forfeited the mandated `ROUTE_WIRING` pin without a battery extension; that row pins **nothing**
+about HTTP status; and `FLAG_GATED` entries never classify a route for the backstop — which is
+register H8's actual mechanism.
+
+**Flag election: DEDICATED** `SUBSTRATE_SCORE_SAVE_R20A_ENABLED` (colocated `r20a.ts`, the
+`/impulse` precedent), not the shared gap-closure flag — which is already live (no dark window, M6)
+and whose unsetting would strip screening from 25 other routes including the most distress-likely
+tools (M2, the safety-inverting rollback lever). The wiring battery gained optional `flagFn` and
+`redirectStatus` (defaulted, so all 25 existing rows are byte-identical).
+
+**Two new pins.** `RULED_PERIMETER_MEMBERS` defeats **H8 semantically** — reclassifying a
+ruling-backed member to an exclusion remains "classified" and so is invisible to the backstop, but
+now fails membership and the ruling-record existence check. An assertion-total floor covers
+catastrophic reduction and **says in its own comment that it does not cover H8's narrow −7**,
+because a floor tight enough would go stale on the next addition — the drift that produced H8.
+
+**Verified:** guard **715/0** · wiring **935/0** · **functional 81/0 (new)** · response **31/0
+(new)** · drift **75/0** · route 33/0 · gap-closure 64/64 · audience 66/66 · `tsc` 0 · `build` 0.
+**Mutation-tested, not assumed:** the register's C1/C3/C4/C5 produce 63/48/51/63 failures; status
+422→200 and a decoy-422-elsewhere both go red (the H6 pin-false-pass class); dropping any screened
+field or any enum value goes red. The functional battery was written **before** the route change and
+failed 58 assertions against the un-rebuilt route with its non-vacuity control passing.
+
+**TWO FOUNDER DECISIONS (close §6).** (a) The mild variant `'practice'` is founder-signed
+crisis-adjacent copy; selecting it was a builder's call and is offered for confirmation. (b) **The
+perimeter is bypassed entirely by a browser preference** — `score/page.tsx:312-314`'s
+`storageMode === 'local'` branch never calls this route, and `/api/score` screens `action` alone, so
+a local-mode practitioner writing acute distress into `emotional_state` is screened by nothing. That
+is a consequence of this ruling, not a pre-existing carry: the A2b reasoning that a route cannot
+enforce a distinction about a client it does not control applies equally to a page that routes
+around the route. The upstream fix was deliberately NOT taken here (`/api/score` is engine-adjacent
+and out of scope).
+
+**Honest limits.** Nothing verified live — all results repo-local; the §7 smoke is the real test. A
+green perimeter is not coverage: the ceiling remains the classifier's recall. A miscount ("62
+distress redirects") shipped in `299c3e9` and was corrected in `3068868` — the true figure is 45
+redirect calls, 44 at 200; it was a secondary characterisation restated as primary data, caught by
+checking my own claims. The first PR19 launch was killed, not reported: its worktrees held a
+half-applied mid-build state; the review was relaunched against `git archive` extracts with no
+`.git`, which structurally prevents the recorded `git checkout` accident.
+
+**Risk classification:** `code-critical` built **DARK**. Flag unset everywhere; flag-off asserted
+byte-identical on the screening path. **Activation is a founder-walked step** (close §7):
+push → flag → redeploy → a both-directions live smoke whose load-bearing assertion is that the row
+count does **not** move on acute. **Rollback:** unset the dedicated flag + redeploy, or `git revert`
+both commits — **never** the shared gap-closure flag.
+
+**Rules served:** AC5, PR6, PR10, PR15, PR19, PR20, PR22, PR23, PR25, R20a. Weights **BLOCKED**.
+**Nothing here bears on the 0h call.**
+
+**Status:** Built, dark, batteries green, **PR19 independent review COMPLETE and folded.**
+Seven dimensions on isolated `git archive` copies (two false starts recorded honestly — the first
+launch against inconsistent worktrees, killed; the second hit the session usage limit mid-flight and
+was relaunched). Two CRITICAL findings — a JSONB depth bypass and a separator-inflation bypass in
+`collectScoreSaveJsonbText`, the second independently found by the author in parallel with three
+reviewers — both fixed at the root and mutation-verified. One HIGH — "flag-off is byte-identical"
+was false, since the new validation ran unconditionally — closed by gating every new bound behind
+the same flag activation as the perimeter itself. Two self-authored pins were mutation-proven
+vacuous and corrected. Six commits total: `299c3e9` `3068868` `1907be4` `a23511b` `38d12ed`
+`355ea75`, none pushed. Final batteries: guard 715/0 · wiring 936/0 · functional 109/0 ·
+response 35/0 · drift 75/0 · route 33/0 · tsc 0 · build 0. One HIGH remains open by disclosure, not
+by omission: the response-handling layer's pins are source-index assertions, not execution (this
+project's `tsx` harness has no DOM/React execution path) — a reviewer reproduced the reverted
+defect's exact shape by removing the live branch, with every battery green. Full record: close §10.
