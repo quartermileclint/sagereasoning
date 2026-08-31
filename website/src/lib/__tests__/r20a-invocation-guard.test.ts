@@ -287,31 +287,6 @@ const HUMAN_FACING_POST_ROUTES = [
   'src/app/api/founder/hub/ring-proof/route.ts',
   'src/app/api/mentor/ring/proof/route.ts',
   'src/app/api/support/agent/proof/route.ts',
-  // 2026-08-31 (AC5, FIFTEENTH route-level member) — /api/score/save, the
-  // persister for cloud-mode evaluations, joined by MENTOR RULING
-  // (2026-08-31-mentor-consultation-r20a-two-unclassified-routes-verbatim.md).
-  //
-  // Three converging reasons, each ruled sufficient alone: `emotional_state`
-  // is a field whose entire purpose is to capture what the practitioner was
-  // feeling, and the 2026-08-17 family ruling places that material at the
-  // HIGHEST distress likelihood; an authenticated caller can POST here
-  // directly with /api/score never executing (no nonce, token or evaluation
-  // id enforces ordering), so /api/score's check was never a gate on this
-  // route; and six of the seven free-text fields were screened by nothing
-  // anywhere. Ruled: "Honest disclosure of a gap is not the same as closing
-  // it."
-  //
-  // SCREENED SUBJECT is all SEVEN free-text fields composed, not `action`
-  // alone — screening `action` here would be "not closing the gap" but
-  // "relocating it".
-  //
-  // ⚠ STANDING DISCLOSED LIMITATION, recorded here because the ruling put it
-  // here: /api/score screens `action` ALONE and is deliberately UNCHANGED —
-  // it is engine-adjacent and measurement-neutrality-protected. Its other
-  // fields are screened at persistence, by this route, and nowhere earlier.
-  // The asymmetry (persister screens MORE than the member gating it) is the
-  // ruled-correct outcome: the persister is the last line before persistence.
-  'src/app/api/score/save/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -448,8 +423,6 @@ const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
   { route: 'src/app/api/compose/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
   { route: 'src/app/api/execute/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
   { route: 'src/app/api/founder/hub/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
-  // 2026-08-31 mentor ruling — the persister joins on the SHARED flag.
-  { route: 'src/app/api/score/save/route.ts', flag: 'isR20aGapClosureEnabled', flagSource: 'r20a-gap-closure' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -624,10 +597,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // The flag-gated floor had ALSO never been bumped alongside a registry
   // addition before 2026-08-12, which is how it came to be the weakest of the
   // three. It is now bumped on the same line of reasoning as the other two.
-  // 2026-08-31: 42 -> 43. /api/score/save joined by mentor ruling; the floor is
-  // bumped in the SAME edit as the registry addition, per the standing discipline
-  // that produced the weakest-of-three drift this assertion exists to stop.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 43, `${label} (>=43 route-level)`)
+  assert(HUMAN_FACING_POST_ROUTES.length >= 42, `${label} (>=42 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
   // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
   // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12
@@ -1044,20 +1014,6 @@ const PERIMETER_EXCLUSIONS: readonly PerimeterExclusion[] = [
       'string "DELETE". No free text is accepted at all.',
   },
 
-  // ── 2026-08-31 MENTOR RULING (Question B) — agent-facing, ST4 precedent ──
-  {
-    route: 'src/app/api/practice/completion-signal/route.ts',
-    reason:
-      'RULED EXCLUSION 2026-08-31 (2026-08-31-mentor-consultation-r20a-two-unclassified-routes-' +
-      'verbatim.md, Question B). Agent-facing surface, dark behind ' +
-      'SUBSTRATE_COMPLETION_SIGNAL_ENABLED (unset => honest 503, confirmed live), no human ' +
-      'free-text field; the ST4 (/api/stoa/declare) precedent applies. Ruled reasoning, verbatim: ' +
-      'an agent-facing route carrying no human free text is \'outside the scope of that ' +
-      'protection by the perimeter\'s own rationale, not by exception to it\'. ⚠ REVISIT TRIGGER, ' +
-      'ruled explicitly: if the route\'s design changes to carry caller-supplied human text, this ' +
-      'exclusion is revisited at that point.',
-  },
-
   // ── Reasoned exclusions: free text present, but screened elsewhere or
   //    constrained to a non-examination allow-list ───────────────────────────
   {
@@ -1376,46 +1332,6 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
     .join('\n')
   assert(bodySource.includes(REQUIRED_GATE_FUNCTION) === true, `${label} (${REQUIRED_GATE_FUNCTION})`)
   assert(bodySource.includes(REQUIRED_FUNCTION) === true, `${label} (${REQUIRED_FUNCTION})`)
-}
-
-// ── The 2026-08-31 ruling's CENTRAL HOLDING, pinned ────────────────────────
-// "The screened subject at /api/score/save is a composition of all seven
-// free-text fields, not `action` alone… Screening `action` alone at the
-// persister would close the bypass path while leaving six fields unexamined.
-// That is not closing the gap — it is relocating it."
-//
-// WHY THIS PIN EXISTS. Mutation testing at the time of writing found that
-// regressing the subject to composeDistressSubject([action]) — the exact form
-// the ruling rejects — left this battery at 707/0, fully green. Membership,
-// import and call-site assertions all pass on the ruled-AGAINST form, because
-// they check THAT the check runs, never WHAT it runs over. A later
-// "simplification" back to `action` alone would have shipped silently.
-//
-// Derived from the written invariant, not from the branch under the author's
-// eye — the failure mode named in the 2026-08-31 process corrections.
-{
-  const label =
-    'R20a ruled subject composition: src/app/api/score/save/route.ts screens all seven free-text fields'
-  const code = stripCommentsAndStringLiterals(
-    readRouteAndHandler('src/app/api/score/save/route.ts')
-  )
-  const call = code.match(/composeDistressSubject\(\[([\s\S]*?)\]/)
-  assert(call !== null, `${label} (composeDistressSubject called with an array literal)`)
-  const args = call ? call[1] : ''
-  for (const field of [
-    'action',
-    'context',
-    'relationships',
-    'emotional_state',
-    'philosophical_reflection',
-    'improvement_path',
-    'oikeiosis_context',
-  ]) {
-    assert(
-      new RegExp(`(^|[^a-zA-Z_])${field}\\s*,`).test(args) === true,
-      `${label} (${field} is in the composed subject)`
-    )
-  }
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed')

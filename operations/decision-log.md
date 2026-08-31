@@ -31004,3 +31004,48 @@ untouched either way, and reverting does not disturb the other gap-closure route
 
 **Status:** Adopted; built and self-verified. **PR19 independent review outstanding. The push is the
 activation and is the founder's.**
+
+## 2026-08-31 — D-R20A-SCORE-SAVE-PERIMETER-IMPLEMENTATION-REVERTED-PR19
+
+**Decision.** The `/api/score/save` perimeter implementation (`137bf7a`) is **REVERTED** after PR19
+independent review returned **NOT CLEAN**. The code comes out; **every record stays**. The mentor
+ruling remains ADOPTED and UNEXECUTED — this reverts an implementation, not a ruling.
+
+**Why.** Six independent reviewers, one isolated checkout each: **5 CRITICAL · 12 HIGH · 9 MEDIUM**
+(register: `operations/agent-circles-2026-08/2026-08-31-PR19-review-register-score-save-perimeter.md`).
+The dispositive finding is not a test gap. **The shipped code was worse than what it replaced, for
+the population the perimeter exists to protect:** the redirect returns HTTP 200, `score/page.tsx:220`
+reads that as success, so a practitioner writing acute distress into `emotional_state` got their
+record silently not saved, the word "saved", and no crisis resources. Data loss plus false success on
+a distress path. Reverting restores a known-inadequate state that is not actively harmful.
+
+**What was reverted:** `website/src/app/api/score/save/route.ts` and
+`website/src/lib/__tests__/r20a-invocation-guard.test.ts` — the two code files only.
+
+**WHAT WAS DELIBERATELY NOT REVERTED, and a correction.** A plain `git revert 137bf7a` also stages
+the **mentor verbatim**, the **ruling request** and **80 lines of this log** for deletion — all three
+were in that commit. The AI had told the founder they "stay committed" without checking the commit's
+contents; that was wrong, and the staged deletion was caught and undone before it was committed.
+**A binding mentor record is governance history, not an artifact of the implementation that failed.**
+All three are restored at HEAD.
+
+**Consequences, stated plainly:**
+- The R20a exhaustiveness backstop returns to **RED (689/2)** — the posture the mentor explicitly
+  endorsed ("the battery returns to green only after the ruling, not before").
+- The route-wiring battery returns to **GREEN (885/0)** — it was red only because of the reverted change.
+- **The ruling is un-executed.** `/api/score/save` again screens nothing; `/api/score` still screens
+  `action` alone. That is the pre-ruling state the mentor judged inadequate.
+
+**Carried to the mentor, not resolvable here:** the PR20 brief told the mentor
+`/api/practice/completion-signal` "carries no human free-text field." It is **false** — its
+`handler.ts` requires `examination.impression_assented_to` (non-empty, 5000 chars). The AI grepped
+`route.ts` only, reproducing the split-file blindness class this codebase had already found and fixed
+inside the R20a sweep itself. The mentor ruled Question B on that fact, and the recorded revisit
+trigger cannot fire. A correction is owed.
+
+**Risk classification:** **Critical** (R20a perimeter, AC5 + PR6). AC7 engages at the push, which
+removes a live production behaviour. Weights **BLOCKED**. **Nothing bears on the 0h call.**
+
+**Rules served:** PR6, PR10, PR17, PR18, PR19, PR20, PR25, Q1, AC5, AC7.
+
+**Status:** Adopted. **Ruling remains adopted and unexecuted; rebuild spec is in the register.**
