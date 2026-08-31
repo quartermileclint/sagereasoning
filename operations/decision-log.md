@@ -31049,3 +31049,57 @@ removes a live production behaviour. Weights **BLOCKED**. **Nothing bears on the
 **Rules served:** PR6, PR10, PR17, PR18, PR19, PR20, PR25, Q1, AC5, AC7.
 
 **Status:** Adopted. **Ruling remains adopted and unexecuted; rebuild spec is in the register.**
+
+## 2026-08-31 — D-R20A-CORRECTED-RULING-ADOPTED-SCREENED-SET-ENUMERATED-FROM-SCHEMA
+
+**Decision.** The mentor's corrected 2026-08-31 ruling is **ADOPTED IN FULL**. Verbatim (binding):
+`operations/agent-circles-2026-08/2026-08-31-mentor-ruling-corrected-questionB-and-A2b-verbatim.md`.
+Nothing is built by this entry — it adopts the ruling and records the enumeration the ruling requires.
+
+**(B) The `/api/practice/completion-signal` exclusion STANDS, on the corrected ground.** Not "carries
+no free text" (false) but the true ST4 rule: *agent-authored free text over a credential-authenticated
+call is outside the perimeter, because it processes agent output rather than human distress input.*
+**The self-sealing revisit trigger is REPLACED** by: revisit if the authentication model changes to
+permit browser-session callers, or if the field definitions are amended to accept practitioner-typed
+input rather than agent-authored output. Neither is met today. *(The exclusion entry itself was in the
+reverted commit, so the corrected trigger lands with the rebuild — there is no live entry to amend.)*
+
+**(A2b) The screened set extends to every caller-supplied field capable of carrying prose**, and the
+ruling requires enumerating it **from the route's actual schema, not from a criterion**. Enumerated
+first-hand 2026-08-31 against the route's destructure and `supabase-v3-migration.sql`:
+
+| Disposition | Fields | Ground |
+|---|---|---|
+| **SCREEN (10)** | `action`, `context`, `relationships`, `emotional_state`, `philosophical_reflection`, `improvement_path`, `oikeiosis_context`, `false_judgements` (the 8 named) **+ `passions_detected`, `ruling_faculty_state`** | TEXT/JSONB accepted with no route validation and no DB CHECK |
+| EXCLUDE (3) | `katorthoma_proximity`, `kathekon_quality` | TEXT but DB-CHECK enum-constrained — prose cannot persist; a prose value fails the insert |
+| | `is_kathekon` | BOOLEAN — not prose-capable |
+
+**THE ENUMERATION CAUGHT TWO FIELDS THE RULING DID NOT NAME** — `passions_detected` and
+`ruling_faculty_state`, both accepted with zero validation. That is precisely why the mentor required
+enumeration over a criterion, and it vindicates the instruction: the prior seven-field scope, drawn
+from a criterion, was under-inclusive by three.
+
+**A design consequence, recorded now so the rebuild does not discover it late:** two of the ten are
+**JSONB**. `composeDistressSubject` accepts strings only and silently skips non-strings — the
+demonstrated MEDIUM-2 bypass. The rebuild needs a JSON-to-text collector in the established
+`collect*Text` idiom (cf. `collectAppendixAnswerText`), not a bare field list.
+
+**(A) The revert was confirmed correct.** The rebuild's binding constraints, from the ruling:
+1. Screen every caller-supplied prose-capable field, `r20a-gap-closure.ts` pattern, **before field
+   validation and before any DB call**.
+2. **The distress response MUST NOT be a 200** — it must be a status the calling page treats as an
+   error. *(This is the direct fix for the defect that forced the revert.)*
+3. **The calling page's handling of that response is IN PR19 SCOPE.** The prior failure was at the
+   response-handling layer; the review must verify that layer explicitly, not only detection.
+4. The backstop stays **RED** until the rebuild is complete, registered, and the count floors bumped —
+   sequencing confirmed correct.
+
+**Risk classification:** **Standard** under 0d-ii — this entry adopts a ruling and records an
+enumeration; no code, schema, flag or public surface changed. The rebuild it specifies is
+`code-critical` (AC5 + PR6). Weights **BLOCKED**. **Nothing bears on the 0h call.**
+
+**Rollback:** `git revert` this records commit; the ruling verbatim stands as record either way.
+
+**Rules served:** PR6, PR10, PR18, PR19, PR20, PR23, Q1, AC5.
+
+**Status:** Adopted. **Rebuild specified and NOT started — it is the founder's to sequence.**
