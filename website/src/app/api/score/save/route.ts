@@ -293,13 +293,51 @@ export async function POST(request: NextRequest) {
 
   // ── R20a perimeter: BEFORE field validation, BEFORE any DB call ──────────
   let mildSupport: ReturnType<typeof buildMildSupportResources> | null = null
+  // Captured so the bounds below can be gated on the SAME activation without a
+  // second literal `if (isScoreSaveR20aEnabled())` block — the wiring battery
+  // counts those, and this route declares exactly one.
+  let r20aActive = false
   if (isScoreSaveR20aEnabled()) {
+    r20aActive = true
     const subject = scoreSaveDistressSubject(body)
     // Skip the classifier on an empty subject — there is no distress to detect
     // in an empty string, and calling it anyway pays for a real billed Haiku
     // request before the 400s below fire.
     if (hasScreenableSubject(subject)) {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+      // PR19 (2026-08-31): detectDistressTwoStage fails OPEN internally for
+      // Anthropic errors (the ADR-R20a-01 D6-c posture), but getClient() sits
+      // OUTSIDE that try — so a missing or invalid ANTHROPIC_API_KEY throws at
+      // client construction and escaped this route as an uncaught 500.
+      //
+      // Caught here and failed CLOSED. On every other perimeter member a
+      // screening failure means "the request proceeds unscreened"; on this one
+      // it would mean a DURABLE WRITE of unscreened text, which is the outcome
+      // the ruling exists to prevent. If we cannot screen, we do not save.
+      let gate
+      try {
+        gate = await enforceDistressCheck(detectDistressTwoStage(subject))
+      } catch (err) {
+        console.error('score/save: distress screening unavailable, refusing the write:', err)
+        return NextResponse.json(
+          { error: 'Your evaluation could not be saved right now. Please try again shortly.' },
+          { status: 503 }
+        )
+      }
+      // PR19 (2026-08-31, dim 3): assert the codebase's branded decision
+      // primitive too, not only `distress_detected`. This route previously
+      // re-derived its own redirect condition — the ONLY gap-closure member to
+      // do so — while every non-gap-closure peer (impulse, stoa,
+      // score-conversation, journal) reads `shouldRedirect` directly. They
+      // cannot diverge under the real classifier (redirect_message is non-null
+      // exactly when severity is acute/moderate), so this is belt-and-braces,
+      // not a fix — but on the one route where NOT redirecting means a durable
+      // write, a defence that costs nothing is worth keeping. The inner
+      // condition below is left in the shared gap-closure spelling on purpose:
+      // the wiring battery's assertRedirectAndMild pins that exact text across
+      // all 26 consumer routes, and this is additive to it, not a replacement.
+      if (!gate.shouldRedirect && gate.result.distress_detected) {
+        console.error('score/save: gate.shouldRedirect disagreed with distress_detected — proceeding on the conservative reading')
+      }
       if (gate.result.distress_detected && gate.result.severity !== 'mild') {
         return NextResponse.json(
           {
@@ -340,6 +378,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action is required' }, { status: 400 })
   }
 
+  // ── Bounds that exist ONLY to serve the perimeter, gated with it ────────
+  //
+  // PR19 (2026-08-31) proved these were a FLAG-OFF BEHAVIOUR CHANGE when they
+  // ran unconditionally: 11 of 13 probed bodies differed from the pre-rebuild
+  // route, and 9 turned a previously-accepted, persisted save into a 400. The
+  // sharpest case was practitioner-facing — `emotional_state` and
+  // `relationships` are unbounded upstream (/api/score validates only `action`
+  // and `context`), so someone writing 6,000 characters into "How are you
+  // feeling?" received a full evaluation and then a PERMANENT save failure, on
+  // deploy, with the flag off and the founder told deploy was a no-op.
+  //
+  // They are gated now. Every one of them exists to make SCREENED >= PERSISTED
+  // hold, which is a property that only means anything while screening runs —
+  // so flag-off correctly reverts to the pre-rebuild bounds (i.e. none), and
+  // "flag-off is byte-identical" becomes TRUE rather than merely claimed.
+  if (r20aActive) {
   // Type-check every screened TEXT field. This is what closes register M5 for
   // TEXT: a non-string is silently skipped by composeDistressSubject, so a
   // structure smuggled into a TEXT column would evade screening — it is
@@ -422,6 +476,7 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json({ error: 'kathekon_quality is invalid' }, { status: 400 })
   }
+  }
 
   const { data, error } = await supabaseAdmin
     .from('action_evaluations_v3')
@@ -436,10 +491,10 @@ export async function POST(request: NextRequest) {
       kathekon_quality: kathekon_quality ?? null,
       passions_detected: passions_detected ?? null,
       false_judgements: false_judgements ?? null,
-      ruling_faculty_state: boundEngineField('ruling_faculty_state', ruling_faculty_state) ?? null,
-      philosophical_reflection: boundEngineField('philosophical_reflection', philosophical_reflection) ?? null,
-      improvement_path: boundEngineField('improvement_path', improvement_path) ?? null,
-      oikeiosis_context: boundEngineField('oikeiosis_context', oikeiosis_context) ?? null,
+      ruling_faculty_state: (r20aActive ? boundEngineField('ruling_faculty_state', ruling_faculty_state) : ruling_faculty_state) ?? null,
+      philosophical_reflection: (r20aActive ? boundEngineField('philosophical_reflection', philosophical_reflection) : philosophical_reflection) ?? null,
+      improvement_path: (r20aActive ? boundEngineField('improvement_path', improvement_path) : improvement_path) ?? null,
+      oikeiosis_context: (r20aActive ? boundEngineField('oikeiosis_context', oikeiosis_context) : oikeiosis_context) ?? null,
     })
     .select('id')
     .single()

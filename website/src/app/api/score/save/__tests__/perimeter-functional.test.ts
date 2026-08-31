@@ -60,6 +60,9 @@
  */
 
 import * as path from 'path'
+import { SCORE_SAVE_PERSISTED_FIELD_CAP } from '../r20a'
+import { DISTRESS_SUBJECT_FIELD_CAP } from '@/lib/r20a-gap-closure'
+import { TEXT_LIMITS } from '@/lib/security'
 
 const websiteRoot = path.resolve(__dirname, '../../../../../..')
 
@@ -581,6 +584,130 @@ async function main(): Promise<void> {
           `§16-${depth}: prose nested ${depth} deep was refused, and nothing persisted`
         )
       }
+    }
+  }
+
+  // ── §17 FLAG-OFF IDENTITY, TESTED PROPERLY. ─────────────────────────────
+  // PR19 found the previous claim FALSE and mis-cited. §6 tests flag-gating on
+  // ONE short valid body and never compares against pre-rebuild behaviour, yet
+  // r20a.ts cited it as the assertion backing "flag-off is byte-identical".
+  // The reviewer ran BEFORE-route.ts and the shipped route side by side and
+  // found 11 of 13 bodies differing, 9 of them turning an accepted, persisted
+  // save into a 400 — because the new bounds ran unconditionally.
+  //
+  // The bounds are now gated, so the property is real. This section tests it as
+  // a property over the exact body shapes that used to diverge: with the flag
+  // OFF, every one of them must persist, because the pre-rebuild route bounded
+  // none of them.
+  {
+    const previouslyAccepted: [string, Record<string, unknown>][] = [
+      ['emotional_state 6000 chars', { emotional_state: 'e'.repeat(6000) }],
+      ['relationships 6000 chars', { relationships: 'r'.repeat(6000) }],
+      ['context 6000 chars', { context: 'c'.repeat(6000) }],
+      ['philosophical_reflection 20000 chars', { philosophical_reflection: 'p'.repeat(20000) }],
+      ['improvement_path 20000 chars', { improvement_path: 'i'.repeat(20000) }],
+      ['oikeiosis_context 20000 chars', { oikeiosis_context: 'o'.repeat(20000) }],
+      ['ruling_faculty_state 20000 chars', { ruling_faculty_state: 'x'.repeat(20000) }],
+      ['non-string emotional_state', { emotional_state: { note: 'structured' } }],
+      ['huge false_judgements', { false_judgements: Array.from({ length: 900 }, () => 'j') }],
+      ['deeply nested false_judgements', { false_judgements: { a: { a: { a: { a: { a: { a: { a: { a: 'deep' } } } } } } } } }],
+      ['non-enum kathekon_quality', { kathekon_quality: 'not-an-enum-value' }],
+    ]
+    delete process.env[FLAG]
+    let divergences = 0
+    for (const [label, overrides] of previouslyAccepted) {
+      resetSpy('none')
+      const res = await POST(makeReq(validBody(overrides)))
+      const persisted = spy.inserts.length === 1 && res.status === 200
+      if (!persisted) {
+        divergences++
+        console.error(`  flag-off divergence: ${label} -> status ${res.status}, inserts ${spy.inserts.length}`)
+      }
+      assert(
+        spy.classifierCalls === 0,
+        `§17-${label}: flag OFF — no classifier call (no billed request, no added latency)`
+      )
+    }
+    assert(
+      divergences === 0,
+      `§17-identity: flag OFF — every body the PRE-REBUILD route accepted still persists (${divergences} divergence(s)). ` +
+        `This is the claim r20a.ts makes; a divergence here means the deploy is not the no-op the activation runbook promises.`
+    )
+
+    // And the engine fields must persist UNTRUNCATED flag-off, since the
+    // pre-rebuild route stored them whole.
+    resetSpy('none')
+    const long = 'z'.repeat(20000)
+    await POST(makeReq(validBody({ philosophical_reflection: long })))
+    assert(
+      spy.inserts[0]?.row?.philosophical_reflection === long,
+      '§17-truncation: flag OFF — engine fields are stored WHOLE, exactly as before the rebuild'
+    )
+    process.env[FLAG] = 'true'
+  }
+
+  // ── §18 THE H3 COUPLING — pinned from both ends. ─────────────────────────
+  // PR19 (two dimensions independently): the whole screened >= persisted
+  // property rests on SCORE_SAVE_PERSISTED_FIELD_CAP equalling the screening
+  // window, and nothing pinned that. Mutating TEXT_LIMITS.medium to 8000, or
+  // making boundEngineField a no-op, reopened register H3 with every battery
+  // green. Both are now pinned — the second behaviourally, which is what a
+  // constant-equality check alone would still miss.
+  {
+    // THREE constants in THREE modules must all stay <= the screening window,
+    // and they are equal today only by coincidence of authorship. PR19 proved
+    // the third leg with a one-token edit: TEXT_LIMITS.medium 5000 -> 8000 let
+    // a 5,500-character emotional_state persist while only its first 5,000
+    // characters were ever screened — every battery green.
+    //
+    // My first version of this pin compared only the first two and MISSED that
+    // mutation. Caught by mutation-testing my own pin, which is the only reason
+    // it is here.
+    assert(
+      SCORE_SAVE_PERSISTED_FIELD_CAP <= DISTRESS_SUBJECT_FIELD_CAP,
+      `§18-1a: the persisted cap (${SCORE_SAVE_PERSISTED_FIELD_CAP}) is within the screening window (${DISTRESS_SUBJECT_FIELD_CAP})`
+    )
+    assert(
+      TEXT_LIMITS.medium <= DISTRESS_SUBJECT_FIELD_CAP,
+      `§18-1b: TEXT_LIMITS.medium (${TEXT_LIMITS.medium}) — the bound on context/relationships/` +
+        `emotional_state — is within the screening window (${DISTRESS_SUBJECT_FIELD_CAP}). If it ever ` +
+        `exceeds it, a practitioner's own words persist beyond what the classifier ever saw.`
+    )
+    assert(
+      TEXT_LIMITS.short <= DISTRESS_SUBJECT_FIELD_CAP,
+      `§18-1c: TEXT_LIMITS.short (${TEXT_LIMITS.short}) — the bound on action — is within the screening window`
+    )
+
+    // The behavioural half: the constants could be re-plumbed without moving
+    // these names, so assert the PROPERTY on a practitioner-typed field too.
+    for (const field of ['emotional_state', 'relationships', 'context'] as const) {
+      resetSpy('none')
+      const marker = `OVERCAP${field}MARK`
+      const oversized = 'y'.repeat(DISTRESS_SUBJECT_FIELD_CAP + 500) + marker
+      const r = await POST(makeReq(validBody({ [field]: oversized })))
+      if (r.status === 200) {
+        assert(
+          spy.subjects.join('').includes(marker),
+          `§18-3-${field}: flag ON — an over-window '${field}' was ACCEPTED, so all of it must have been screened`
+        )
+      } else {
+        assert(
+          spy.inserts.length === 0,
+          `§18-3-${field}: flag ON — an over-window '${field}' is refused rather than persisted unscreened`
+        )
+      }
+    }
+    resetSpy('none')
+    const over = 'q'.repeat(SCORE_SAVE_PERSISTED_FIELD_CAP + 1200)
+    const res = await POST(makeReq(validBody({ philosophical_reflection: over })))
+    if (res.status === 200) {
+      const stored = spy.inserts[0]?.row?.philosophical_reflection
+      assert(
+        typeof stored === 'string' && stored.length <= SCORE_SAVE_PERSISTED_FIELD_CAP,
+        '§18-2: flag ON — an over-cap engine field is never PERSISTED beyond the screening window (boundEngineField is load-bearing, not decorative)'
+      )
+    } else {
+      assert(spy.inserts.length === 0, '§18-2: flag ON — an over-cap engine field is refused rather than persisted unscreened')
     }
   }
 

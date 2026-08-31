@@ -271,9 +271,21 @@ export default function ScoreActionPage() {
           // save failure was indistinguishable from a slow render. That is why
           // a broken write path went unnoticed for four months.
           console.error('Failed to save evaluation:', error)
+          // Surface the SERVER'S message when it gave one. PR19 (2026-08-31)
+          // found the route's length policy justified 400-on-breach for
+          // practitioner-typed fields on the ground that "a 400 is only a fair
+          // failure mode where the person can act on it" — while this page threw
+          // the actionable text away and showed a generic "try again", which for
+          // an over-length field is advice that can never succeed.
+          const serverMessage =
+            error && typeof error === 'object' && typeof (error as { error?: unknown }).error === 'string'
+              ? (error as { error: string }).error
+              : null
           setErrorMsg(
-            'Your evaluation was completed, but could not be saved to your record. ' +
-            'It is shown below. Please try again in a moment — if it keeps happening, the details are in the browser console.'
+            serverMessage
+              ? `Your evaluation was completed, but could not be saved to your record: ${serverMessage} It is shown below.`
+              : 'Your evaluation was completed, but could not be saved to your record. ' +
+                'It is shown below. Please try again in a moment — if it keeps happening, the details are in the browser console.'
           )
         }
         if (!error) {

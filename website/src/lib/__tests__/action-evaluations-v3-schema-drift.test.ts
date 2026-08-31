@@ -208,9 +208,17 @@ assert(selectsChecked >= 3, `READ-1: found a select on ${TABLE} in each reader (
   // The loud-failure UX still lives client-side — it now reacts to a failed
   // fetch to /api/score/save rather than a raw Supabase {error}, but the
   // console.error + setErrorMsg contract this guards is unchanged.
+  //
+  // WINDOW WIDENED 2026-08-31 (400 -> 1200): the branch legitimately grew when
+  // it began surfacing the SERVER'S message (PR19 found the route justified
+  // 400-on-breach on the ground that the practitioner can act on it, while this
+  // page discarded the actionable text and showed a generic "try again"). The
+  // window is a proximity heuristic, not the contract — what is being guarded is
+  // that a failed save is never silently discarded, which the two assertions
+  // below still state.
   const src = read('src/app/score/page.tsx')
   assert(
-    /if \(error\) \{[\s\S]{0,400}?setErrorMsg\(/.test(src),
+    /if \(error\) \{[\s\S]{0,1200}?setErrorMsg\(/.test(src),
     'LOUD-1: a failed evaluation save surfaces a message to the practitioner (never silently discarded)'
   )
   assert(
