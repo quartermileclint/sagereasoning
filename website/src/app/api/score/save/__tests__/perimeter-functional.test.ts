@@ -489,6 +489,67 @@ async function main(): Promise<void> {
     assert(!threw, '§13-1: a self-referential JSONB value does not throw out of the route')
   }
 
+  // ── §14 SEPARATOR-INFLATION BYPASS — a real defect, found and fixed. ─────
+  // The collector joins with a 7-character separator. An earlier version bounded
+  // the JSONB field on its SERIALIZED length and argued that made
+  // screened >= persisted hold. It did not: the separators are our own addition
+  // and are absent from the serialized form, so a caller could pad an array
+  // until the collected string crossed the 5,000-char screening cap while the
+  // serialized form stayed far under the persistence check — putting distress
+  // past the truncation boundary. Reproduced concretely before the fix:
+  //   700 x "a" + an acute phrase -> serialized 2,843 (persisted)
+  //                               -> collected  5,639 (truncated at 5,000)
+  //                               -> the acute phrase was NEVER screened.
+  // The bound now binds on the COLLECTED length, so the outcome must be either
+  // "screened in full" or "refused" — never "persisted unscreened".
+  //
+  // ⚠ HONEST LIMIT ON THIS SECTION, stated so it is not mistaken for the proof.
+  // §14 runs with severity scripted to 'acute', and the stub returns 'acute'
+  // regardless of what text it was handed — so a refusal here can come from the
+  // distress arm even when the classifier never saw the distress. §14 therefore
+  // proves only that the padded payload cannot PERSIST. The section that
+  // actually isolates the invariant is §15, which scripts 'none' so acceptance
+  // is possible and then checks whether the prose reached the classifier at all.
+  // Verified: reverting the bound to serialized length leaves §14 GREEN and
+  // fails §15. Do not delete §15 believing §14 covers it.
+  {
+    resetSpy('acute')
+    const padded = [...Array.from({ length: 700 }, () => 'a'), ACUTE_TEXT]
+    const res = await POST(makeReq(validBody({ false_judgements: padded })))
+    const screened = spy.subjects.join('')
+    const reachedClassifier = screened.includes(ACUTE_TEXT)
+    assert(
+      spy.inserts.length === 0,
+      '§14-1: separator-inflation padding cannot persist a record — either the distress is screened and blocks, or the write is refused'
+    )
+    assert(
+      reachedClassifier || res.status !== 200,
+      '§14-2: distress behind separator padding is either SEEN by the classifier or the request is REFUSED — never silently persisted'
+    )
+  }
+
+  // ── §15 THE INVARIANT ITSELF — stated as a property, over many shapes. ───
+  // Everything above tests instances. This tests the rule: for any JSONB value
+  // the route ACCEPTS, the classifier must have seen all of the prose that
+  // value carries.
+  {
+    let violations = 0
+    for (const n of [1, 5, 50, 300, 700, 1200]) {
+      resetSpy('none')
+      const marker = `ZZMARKER${n}ZZ`
+      const value = [...Array.from({ length: n }, () => 'a'), marker]
+      const res = await POST(makeReq(validBody({ false_judgements: value })))
+      if (res.status === 200) {
+        // Accepted => it persisted => every part must have been screened.
+        if (!spy.subjects.join('').includes(marker)) violations++
+      }
+    }
+    assert(
+      violations === 0,
+      `§15-1: INVARIANT — for every accepted JSONB value, all of its prose reached the classifier (${violations} violation(s))`
+    )
+  }
+
   console.log('\n' + passed + ' passed, ' + failed + ' failed')
   if (failures.length) {
     console.log('\nFailures:')

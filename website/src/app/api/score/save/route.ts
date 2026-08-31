@@ -150,20 +150,40 @@ const KATHEKON_QUALITY_VALUES = ['strong', 'moderate', 'marginal', 'contrary']
  * NEVER THROWS — it runs before this route's own 400s and receives raw wire
  * values. No JSON.stringify inside, no unguarded property access.
  *
- * The accumulation bound is on RAW PROSE CHARACTERS, not on entry count, and it
- * is what makes screened >= persisted hold for JSONB: a JSON serialization is
- * always at least as long as the sum of the raw strings inside it (quotes,
- * commas and braces only add), so a value whose serialized length passes the
- * SCORE_SAVE_PERSISTED_FIELD_CAP check below cannot carry more prose characters
- * than this collector will read. The two bounds are load-bearing TOGETHER:
- * relaxing the serialized-size rejection without revisiting this cap reopens the
- * hole silently.
+ * ⚠ THE BOUND HERE IS A WORK LIMIT, NOT THE SAFETY GUARANTEE. Read this before
+ * changing either it or the route's JSONB size check.
+ *
+ * An earlier version of this function bounded accumulation at
+ * SCORE_SAVE_PERSISTED_FIELD_CAP raw prose characters and claimed that made
+ * screened >= persisted hold, reasoning that a JSON serialization is always at
+ * least as long as the sum of the raw strings inside it. The premise is true.
+ * THE CONCLUSION WAS FALSE, because it compared the wrong quantity: what
+ * composeDistressSubject caps is not the sum of the raw strings, it is the
+ * JOINED string — and the joins are OUR OWN separator, 7 characters each.
+ *
+ * Demonstrated bypass (found by testing the claim, before review):
+ *   false_judgements = [ ...700 x "a", "I want to kill myself and I have a plan" ]
+ *   JSON.stringify -> 2,843 chars, comfortably under the cap, so it PERSISTED
+ *   collected      -> 5,639 chars (700 separators = 4,900 of that)
+ *   screened       -> truncated at 5,000, and the acute phrase sat past the cut
+ * Acute distress persisted having never been shown to the classifier. A caller
+ * can tune the padding to push anything past the boundary.
+ *
+ * THE GUARANTEE IS NOW EXACT AND LIVES IN THE ROUTE: the JSONB check rejects on
+ * the length of THIS FUNCTION'S OUTPUT, not on serialized size. If the collected
+ * text fits the cap, composeDistressSubject cannot truncate it, so everything
+ * that persists was screened. The ceiling below is only a work limit so a
+ * hostile payload cannot make us walk forever — it is deliberately well ABOVE
+ * the cap, so hitting it produces an over-cap string that the route then
+ * REJECTS, rather than a quietly-shortened one that it accepts.
  */
+const JSONB_COLLECTOR_WORK_CEILING = SCORE_SAVE_PERSISTED_FIELD_CAP * 4
+
 function collectScoreSaveJsonbText(value: unknown): string {
   const parts: string[] = []
   let chars = 0
   const walk = (v: unknown, depth: number): void => {
-    if (depth > 6 || chars >= SCORE_SAVE_PERSISTED_FIELD_CAP) return
+    if (depth > 6 || chars >= JSONB_COLLECTOR_WORK_CEILING) return
     if (typeof v === 'string') {
       if (v.trim().length > 0) {
         parts.push(v)
@@ -184,7 +204,7 @@ function collectScoreSaveJsonbText(value: unknown): string {
     }
     if (typeof v === 'object') {
       for (const [k, item] of Object.entries(v as Record<string, unknown>)) {
-        if (chars >= SCORE_SAVE_PERSISTED_FIELD_CAP) return
+        if (chars >= JSONB_COLLECTOR_WORK_CEILING) return
         if (k.trim().length > 0) {
           parts.push(k)
           chars += k.length
@@ -345,7 +365,17 @@ export async function POST(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: `${name} must be JSON-serialisable` }, { status: 400 })
     }
-    if (serialized.length > SCORE_SAVE_PERSISTED_FIELD_CAP) {
+    void serialized
+    // BIND ON THE COLLECTED LENGTH, NOT THE SERIALIZED LENGTH. This is the exact
+    // screened >= persisted guarantee: composeDistressSubject caps each value at
+    // SCORE_SAVE_PERSISTED_FIELD_CAP, so if the collected text fits that cap it
+    // is screened in full, and if it does not we refuse the write rather than
+    // persist text the classifier never saw. Serialized size is NOT a valid
+    // proxy — the collector's own separators inflate the collected string past
+    // the cap while the serialized form stays comfortably under it (see
+    // collectScoreSaveJsonbText's header for the demonstrated bypass).
+    const collectedLength = collectScoreSaveJsonbText(value).length
+    if (collectedLength > SCORE_SAVE_PERSISTED_FIELD_CAP) {
       return NextResponse.json(
         { error: `${name} exceeds maximum size of ${SCORE_SAVE_PERSISTED_FIELD_CAP} characters` },
         { status: 400 }

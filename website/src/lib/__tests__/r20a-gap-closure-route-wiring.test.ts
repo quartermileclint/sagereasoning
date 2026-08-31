@@ -297,14 +297,23 @@ const ROUTE_WIRING: readonly RouteWiring[] = [
     attach: { spread: 1, envelope: 0 },
     localComposers: [
       {
-        // The shape-agnostic JSONB walker. `depth > 6` and the character bound
-        // are RECURSION bounds; what guarantees screened >= persisted for JSONB
-        // is the serialized-size rejection in the route. The two are
-        // load-bearing TOGETHER — relaxing one without the other reopens the
-        // hole silently, which is why both are pinned here.
+        // The shape-agnostic JSONB walker. `depth > 6` and
+        // JSONB_COLLECTOR_WORK_CEILING are WORK bounds only — they stop a
+        // hostile payload making us walk forever. They are NOT the safety
+        // guarantee, and an earlier version of this row said they were.
+        //
+        // The guarantee is the route's JSONB check binding on the length of
+        // THIS FUNCTION'S OUTPUT (pinned separately on the composer row below,
+        // and in the route's own header). Binding it on SERIALIZED size instead
+        // was a demonstrated bypass: the collector's own 7-char separators
+        // inflate the collected string past the 5,000 screening cap while the
+        // serialized form stays far under it, so padded distress persisted
+        // having never been screened. The ceiling must stay ABOVE the cap, so
+        // that hitting it yields an over-cap string the route REJECTS rather
+        // than a quietly-shortened one it accepts.
         name: 'collectScoreSaveJsonbText',
         callsShared: false,
-        mustContain: ['depth > 6', 'SCORE_SAVE_PERSISTED_FIELD_CAP', 'parts.push(k)', 'DISTRESS_SUBJECT_SEPARATOR'],
+        mustContain: ['depth > 6', 'JSONB_COLLECTOR_WORK_CEILING', 'parts.push(k)', 'DISTRESS_SUBJECT_SEPARATOR'],
       },
       {
         // All TEN screened fields pinned by name. A field dropped from the
