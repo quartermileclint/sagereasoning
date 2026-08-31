@@ -345,13 +345,37 @@ exactly, by every dimension that checked. `npm run build` could not be run in on
 reproduced clean and the author's own `build 0` was independently re-confirmed after every fold in
 this repo.
 
-**Final state, all green:** guard 715/0 · wiring 936/0 · functional 109/0 · response 35/0 ·
+**Final state, all green:** guard 715/0 · wiring 936/0 · functional 111/0 · response 35/0 ·
 drift 75/0 · route 33/0 · gap-closure 64/64 · audience 66/66 · tsc 0 · build 0.
 
 **Commits (in order, none pushed):** `299c3e9` rebuild → `3068868` a self-caught miscount →
 `1907be4` the separator-inflation CRITICAL → `a23511b` the depth-bypass CRITICAL + two vacuous pins
 → `38d12ed` gate all new validation behind the flag (the "byte-identical" HIGH) + the H3 third leg +
-fail-closed on classifier-construction throw → `355ea75` three claim corrections.
+fail-closed on classifier-construction throw → `355ea75` three claim corrections → `60065f7` the
+last fold, from the review's independent-verification phase (below).
+
+**The review ran in two phases, and the second phase's own completion arrived after this close was
+first written.** Seven review dimensions ran to completion first; their findings are what this
+section described when originally drafted. A second phase — 22 independent refuters, one per
+raised finding, each told to try to REFUTE it and default to REFUTED absent a personal
+reproduction — then ran, and its full result (8.47M subagent tokens, 595 tool uses, 0 errors)
+arrived after the rebuild appeared closed. Of 22 verdicts: **12 CONFIRMED, 5 PARTIAL (real defect,
+overstated severity or an imprecise demonstration), 5 REFUTED** (three were the perimeter-wide
+unattributed-`userId` LOW, independently shown inert by tracing `buildVulnerabilityFlagRow`'s own
+null-return guard; two were documentation quibbles the refuters judged did not rise to a defect
+against this commit). Every CONFIRMED and PARTIAL finding matched something already folded from the
+first phase — **except one:**
+
+**HIGH, found only by the verify phase:** `§8-1` (the M5 non-string-smuggling test) ran under
+`resetSpy('acute')` — the classifier stub returns `'acute'` unconditionally regardless of the text
+it is handed, so `§8-1`'s "no insert" assertion passed whether the TYPE-CHECK LOOP rejected the
+non-string field or the stub blocked it for an unrelated reason. A refuter deleted the entire
+type-check loop and the suite stayed green. **This is the third instance in this session of the
+exact class §5-6 and §15 already named:** a severity-scripted stub can make a passing assertion
+mean nothing about the code path it claims to guard, and it recurred in a place neither the
+author's own re-check nor any of the seven review dimensions had looked. Fixed (`60065f7`) with a
+`§8-2` isolated at severity `'none'` so acceptance is possible; mutation-verified — deleting the
+type-check loop now fails 2 assertions, 0 before.
 
 **PR19's own lesson, once more, with a twist:** every substantive finding this round was reproduced
 by at least two independent dimensions, and in one case — the separator-inflation CRITICAL — the

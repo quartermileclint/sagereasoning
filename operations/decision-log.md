@@ -31196,9 +31196,13 @@ was relaunched). Two CRITICAL findings — a JSONB depth bypass and a separator-
 reviewers — both fixed at the root and mutation-verified. One HIGH — "flag-off is byte-identical"
 was false, since the new validation ran unconditionally — closed by gating every new bound behind
 the same flag activation as the perimeter itself. Two self-authored pins were mutation-proven
-vacuous and corrected. Six commits total: `299c3e9` `3068868` `1907be4` `a23511b` `38d12ed`
-`355ea75`, none pushed. Final batteries: guard 715/0 · wiring 936/0 · functional 109/0 ·
-response 35/0 · drift 75/0 · route 33/0 · tsc 0 · build 0. One HIGH remains open by disclosure, not
-by omission: the response-handling layer's pins are source-index assertions, not execution (this
-project's `tsx` harness has no DOM/React execution path) — a reviewer reproduced the reverted
-defect's exact shape by removing the live branch, with every battery green. Full record: close §10.
+vacuous and corrected. Seven commits total: `299c3e9` `3068868` `1907be4` `a23511b` `38d12ed` `355ea75` `60065f7`,
+none pushed. The review's full 29-agent result (7 review dimensions + 22 independent refuters)
+arrived after the rebuild first appeared closed; its verify phase confirmed everything already
+folded plus one new HIGH — `§8-1` (the M5 non-string test) was vacuous under a severity-scripted
+stub, the third instance this session of that exact class — folded in `60065f7`. Final batteries:
+guard 715/0 · wiring 936/0 · functional 111/0 · response 35/0 · drift 75/0 · route 33/0 · tsc 0 ·
+build 0. One HIGH remains open by disclosure, not by omission: the response-handling layer's pins
+are source-index assertions, not execution (this project's `tsx` harness has no DOM/React execution
+path) — a reviewer reproduced the reverted defect's exact shape by removing the live branch, with
+every battery green. Full record: close §10.
