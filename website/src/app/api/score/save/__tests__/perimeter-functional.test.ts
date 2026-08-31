@@ -401,6 +401,24 @@ async function main(): Promise<void> {
     void res
   }
 
+  // ── §8-2 M5, ISOLATED FROM THE STUB. PR19 (2026-08-31, verify phase) proved
+  // §8-1 vacuous: the classifier stub returns 'acute' unconditionally under
+  // resetSpy('acute'), so §8-1 passes whether the TYPE-CHECK LOOP rejects the
+  // non-string or the severity-scripted stub blocks it regardless of content
+  // — deleting the type-check loop entirely left the suite green. This is the
+  // exact class of the §5-6/§15 vacuous-pin lesson, recurring in a place I had
+  // not looked. Isolated with severity 'none': acceptance is possible, so a
+  // 400 here can only come from the type check actually running.
+  {
+    resetSpy('none')
+    const res2 = await POST(makeReq(validBody({ emotional_state: { note: 'benign nested object' } })))
+    assert(
+      res2.status === 400,
+      '§8-2: M5 ISOLATED — a non-string emotional_state is rejected by the TYPE-CHECK LOOP itself, independent of what the classifier stub returns'
+    )
+    assert(spy.inserts.length === 0, '§8-2b: and nothing persists')
+  }
+
   // ── §9 SCREENED WINDOW >= PERSISTED WINDOW — the register's H3. ───────────
   // A field longer than the screening cap must not persist unscreened: either
   // it is rejected, or the whole of it is screened. Proven by outcome, not by
