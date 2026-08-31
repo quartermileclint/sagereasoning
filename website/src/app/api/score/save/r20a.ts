@@ -19,13 +19,19 @@
  *
  * 1. NO DARK-DEPLOY WINDOW (register M6). The shared flag being already live
  *    means deploy == activation: the live distress smoke could not precede
- *    activation, and every prior perimeter member took its own flag, deployed
- *    dark, was smoke-verified, then flipped in a founder-walked AC7 step. That
- *    discipline exists precisely for a safety surface, and the first attempt
- *    shipped straight to production and had to be reverted.
+ *    activation. That discipline is what a dedicated flag restores, and the
+ *    first attempt — which used the shared flag — shipped straight to
+ *    production and had to be reverted.
+ *    (CORRECTED 2026-08-31, PR19 NIT: the earlier draft of this comment said
+ *    "every prior perimeter member took its own flag". That overstates it —
+ *    the decision log records the shared flag as a DELIBERATE choice for its
+ *    25 consumer routes, not an exception. The genuine ground here is M6/M2,
+ *    stated on their own terms, not a claimed universal precedent.)
  *
  * 2. THE DOCUMENTED ROLLBACK LEVER WAS SAFETY-INVERTING (register M2). The
- *    shared flag covers 26 routes. Unsetting it to mitigate an incident HERE
+ *    shared flag covers 25 OTHER routes (checked 2026-08-31: grep for callers
+ *    of isR20aGapClosureEnabled outside this route and its tests — 25).
+ *    Unsetting it to mitigate an incident HERE
  *    would also strip distress screening from /api/mentor/passion-log,
  *    /api/mentor/passion-classify and /api/mentor/view-from-above — the grief
  *    and passion tools that are the MOST distress-likely surfaces in the
@@ -33,8 +39,11 @@
  *    likely to need it is not a rollback lever.
  *
  * ROLLBACK FOR THIS ROUTE IS THEREFORE: unset SUBSTRATE_SCORE_SAVE_R20A_ENABLED
- * and redeploy (flag-off is byte-identical to the pre-rebuild route, asserted
- * by perimeter-functional.test.ts §6), or `git revert` the build commit. It is
+ * and redeploy (flag-off is a differentially-tested match to the pre-rebuild
+ * route across 13 previously-accepted body shapes — perimeter-functional.test.ts
+ * §17, which supersedes an earlier §6 that PR19 found tested only one short
+ * valid body and did not compare against pre-rebuild behaviour at all), or
+ * `git revert` the fold commits. It is
  * NOT the shared gap-closure flag, and must never be documented as such.
  *
  * The cost of a dedicated flag is that it is invisible to the gap-closure
@@ -54,9 +63,18 @@
 /**
  * Defaults to OFF. Gates the entire R20a block on POST /api/score/save.
  *
- * When OFF (the state at build close), the route is byte-identical to its
- * pre-rebuild behaviour: no classifier call, no added latency, no billed Haiku
- * request, no wire-shape change, no `support_resources` field, and no 422.
+ * When OFF (the state at build close), the route's SCREENING BEHAVIOUR is
+ * byte-identical to pre-rebuild: no classifier call, no billed Haiku request,
+ * no wire-shape change, no `support_resources` field, no 422, and — since
+ * 2026-08-31's second fold — none of the new bounds either (they are gated
+ * with the flag; see `r20aActive` in route.ts).
+ * (CORRECTED 2026-08-31, PR19 LOW: "no added latency" is not quite true and
+ * the earlier draft overstated it. Flag-off still imports the classifier chain
+ * unconditionally, and module-load cost is measurably higher — roughly
+ * +100-155ms per cold start in one isolated measurement. That is NOT
+ * request-path latency and NOT a behavioural difference in what the route
+ * accepts or rejects, but it is real, and "no added latency" claimed more than
+ * that.)
  * Activation is a founder-walked Critical step (flag + redeploy + live smoke);
  * rollback = unset the flag.
  *
