@@ -153,9 +153,43 @@ assert(
     distressBranch !== -1 && milestonesPost !== -1 && distressBranch < milestonesPost,
     '§5-5: the distress branch precedes the /api/milestones POST — a refused save awards no milestone'
   )
+  // ⚠ §5-6 AND §5-11 ARE SCOPED TO THE BRANCH BODY, NOT THE FILE.
+  //
+  // PR19 (2026-08-31) mutation-proved the file-wide form of §5-6 VACUOUS: it
+  // asserted `pageSrc.includes('setResult(null)')`, which is satisfied by
+  // handleEvaluate's preamble ~114 lines earlier. Deleting setResult(null) from
+  // the DISTRESS BRANCH left this suite at 31/0 — while a practitioner in acute
+  // distress would have seen the full scoring card rendered beneath the crisis
+  // message, since {result} renders independently of {distressRedirect}.
+  //
+  // The same reviewer found that setDistressRedirect(payload) — the single line
+  // that actually puts crisis resources on screen — had NO coverage at all:
+  // replacing it with `void payload` left every battery green.
+  //
+  // Both are now asserted against the SLICE of source between the branch and
+  // its return. A file-wide `includes` on a statement that legitimately appears
+  // elsewhere proves nothing about the branch, which is this project's standing
+  // lesson about presence-greps stated in a new place.
+  const branchStart = pageSrc.indexOf("if (kind === 'distress')")
+  const branchEnd = branchStart === -1 ? -1 : pageSrc.indexOf('return', branchStart)
+  const branchBody = branchStart !== -1 && branchEnd !== -1 ? pageSrc.slice(branchStart, branchEnd) : ''
+
+  assert(branchBody.length > 0, '§5-6a: located the distress branch body (pin is not vacuous)')
   assert(
-    pageSrc.includes('setResult(null)'),
-    '§5-6: the distress branch clears `result` — {result} renders independently of {distressRedirect}, so a scoring card would otherwise sit beneath the crisis message'
+    branchBody.includes('setResult(null)'),
+    '§5-6: the DISTRESS BRANCH clears `result` — {result} renders independently of {distressRedirect}, so a scoring card would otherwise sit beneath the crisis message'
+  )
+  assert(
+    branchBody.includes('setDistressRedirect('),
+    '§5-11: the DISTRESS BRANCH calls setDistressRedirect — the one line that actually renders crisis resources; PR19 proved its removal left every battery green'
+  )
+  assert(
+    branchBody.includes('setSaved(false)'),
+    '§5-12: the DISTRESS BRANCH clears `saved` — the reverted build\'s dispositive defect was the word "saved" on an unwritten record'
+  )
+  assert(
+    !/setSaved\(true\)/.test(branchBody),
+    '§5-13: the DISTRESS BRANCH never sets saved true'
   )
   assert(
     /if \(kind === 'distress'\)[\s\S]{0,700}?setLoading\(false\)[\s\S]{0,40}?return/.test(pageSrc),

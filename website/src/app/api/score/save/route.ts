@@ -178,12 +178,28 @@ const KATHEKON_QUALITY_VALUES = ['strong', 'moderate', 'marginal', 'contrary']
  * REJECTS, rather than a quietly-shortened one that it accepts.
  */
 const JSONB_COLLECTOR_WORK_CEILING = SCORE_SAVE_PERSISTED_FIELD_CAP * 4
+const JSONB_COLLECTOR_MAX_DEPTH = 32
 
-function collectScoreSaveJsonbText(value: unknown): string {
+interface JsonbCollected {
+  /** All prose found, joined with DISTRESS_SUBJECT_SEPARATOR. */
+  text: string
+  /** True when a bound stopped the walk, so `text` is INCOMPLETE. */
+  bounded: boolean
+}
+
+function collectScoreSaveJsonbText(value: unknown): JsonbCollected {
   const parts: string[] = []
   let chars = 0
+  // Set when a bound stopped the walk. The route REFUSES the write when it is
+  // true. A walk that stopped early has NOT seen everything that would persist,
+  // and a partial screen is exactly the failure this perimeter exists to
+  // prevent — so "we could not read all of it" must never resolve to "save it".
+  let bounded = false
   const walk = (v: unknown, depth: number): void => {
-    if (depth > 6 || chars >= JSONB_COLLECTOR_WORK_CEILING) return
+    if (depth > JSONB_COLLECTOR_MAX_DEPTH || chars >= JSONB_COLLECTOR_WORK_CEILING) {
+      bounded = true
+      return
+    }
     if (typeof v === 'string') {
       if (v.trim().length > 0) {
         parts.push(v)
@@ -204,7 +220,10 @@ function collectScoreSaveJsonbText(value: unknown): string {
     }
     if (typeof v === 'object') {
       for (const [k, item] of Object.entries(v as Record<string, unknown>)) {
-        if (chars >= JSONB_COLLECTOR_WORK_CEILING) return
+        if (chars >= JSONB_COLLECTOR_WORK_CEILING) {
+          bounded = true
+          return
+        }
         if (k.trim().length > 0) {
           parts.push(k)
           chars += k.length
@@ -214,7 +233,7 @@ function collectScoreSaveJsonbText(value: unknown): string {
     }
   }
   walk(value, 0)
-  return parts.join(DISTRESS_SUBJECT_SEPARATOR)
+  return { text: parts.join(DISTRESS_SUBJECT_SEPARATOR), bounded }
 }
 
 /**
@@ -230,14 +249,14 @@ function scoreSaveDistressSubject(body: Record<string, unknown> | null | undefin
   return composeDistressSubject([
     body?.emotional_state,
     body?.action,
-    collectScoreSaveJsonbText(body?.false_judgements),
+    collectScoreSaveJsonbText(body?.false_judgements).text,
     body?.context,
     body?.relationships,
     body?.philosophical_reflection,
     body?.improvement_path,
     body?.oikeiosis_context,
     body?.ruling_faculty_state,
-    collectScoreSaveJsonbText(body?.passions_detected),
+    collectScoreSaveJsonbText(body?.passions_detected).text,
   ])
 }
 
@@ -374,8 +393,14 @@ export async function POST(request: NextRequest) {
     // proxy — the collector's own separators inflate the collected string past
     // the cap while the serialized form stays comfortably under it (see
     // collectScoreSaveJsonbText's header for the demonstrated bypass).
-    const collectedLength = collectScoreSaveJsonbText(value).length
-    if (collectedLength > SCORE_SAVE_PERSISTED_FIELD_CAP) {
+    const collected = collectScoreSaveJsonbText(value)
+    if (collected.bounded) {
+      return NextResponse.json(
+        { error: `${name} is too deeply nested or too large to screen` },
+        { status: 400 }
+      )
+    }
+    if (collected.text.length > SCORE_SAVE_PERSISTED_FIELD_CAP) {
       return NextResponse.json(
         { error: `${name} exceeds maximum size of ${SCORE_SAVE_PERSISTED_FIELD_CAP} characters` },
         { status: 400 }

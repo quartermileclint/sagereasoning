@@ -550,6 +550,40 @@ async function main(): Promise<void> {
     )
   }
 
+  // ── §16 DEPTH BYPASS — found by PR19 review, not by the author. ──────────
+  // The collector originally returned silently at depth > 6, so a string nested
+  // seven levels deep was never read, never screened, and PERSISTED. A caller
+  // controls the nesting entirely, so this was a general bypass of the whole
+  // JSONB half of the ruling.
+  //
+  // The fix is the same discipline as the length bound: a walk that stopped
+  // early has NOT seen everything that would persist, so "we could not read all
+  // of it" resolves to REFUSE, never to save. Raising the depth number alone
+  // would not have been a fix — it would only have moved the boundary.
+  {
+    const deep = (n: number, leaf: string): unknown => {
+      let v: unknown = leaf
+      for (let i = 0; i < n; i++) v = { a: v }
+      return v
+    }
+    for (const depth of [3, 7, 20, 40, 200]) {
+      resetSpy('none') // 'none' so acceptance is POSSIBLE — see §15's reasoning
+      const marker = `DEEPMARK${depth}MARK`
+      const res = await POST(makeReq(validBody({ false_judgements: deep(depth, marker) })))
+      if (res.status === 200) {
+        assert(
+          spy.subjects.join('').includes(marker),
+          `§16-${depth}: prose nested ${depth} deep was ACCEPTED, so it must have been screened`
+        )
+      } else {
+        assert(
+          spy.inserts.length === 0,
+          `§16-${depth}: prose nested ${depth} deep was refused, and nothing persisted`
+        )
+      }
+    }
+  }
+
   console.log('\n' + passed + ' passed, ' + failed + ' failed')
   if (failures.length) {
     console.log('\nFailures:')

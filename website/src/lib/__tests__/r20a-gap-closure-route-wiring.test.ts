@@ -302,6 +302,14 @@ const ROUTE_WIRING: readonly RouteWiring[] = [
         // hostile payload making us walk forever. They are NOT the safety
         // guarantee, and an earlier version of this row said they were.
         //
+        // PR19 found a SECOND bypass in the same function: the depth bound
+        // returned SILENTLY, so prose nested 7 deep was never read and
+        // persisted unscreened. Pinning the literal `depth > 6` had cemented
+        // the defective number — raising it turned this battery red and read as
+        // the regression. The pin is now on the NAMED bounds and on
+        // `bounded = true`, because what must not be lost is not any particular
+        // number but the property that hitting a bound REFUSES the write.
+        //
         // The guarantee is the route's JSONB check binding on the length of
         // THIS FUNCTION'S OUTPUT (pinned separately on the composer row below,
         // and in the route's own header). Binding it on SERIALIZED size instead
@@ -313,7 +321,7 @@ const ROUTE_WIRING: readonly RouteWiring[] = [
         // than a quietly-shortened one it accepts.
         name: 'collectScoreSaveJsonbText',
         callsShared: false,
-        mustContain: ['depth > 6', 'JSONB_COLLECTOR_WORK_CEILING', 'parts.push(k)', 'DISTRESS_SUBJECT_SEPARATOR'],
+        mustContain: ['JSONB_COLLECTOR_MAX_DEPTH', 'JSONB_COLLECTOR_WORK_CEILING', 'bounded = true', 'parts.push(k)', 'DISTRESS_SUBJECT_SEPARATOR'],
       },
       {
         // All TEN screened fields pinned by name. A field dropped from the
@@ -694,6 +702,16 @@ for (const cfg of ROUTE_WIRING) {
   )
 
   // Local composers/collectors: definition present, bounds/fields pinned.
+  //
+  // ⚠ EXTRACTOR LIMITATION, found 2026-08-31 and recorded rather than papered
+  // over: the body scan below takes the FIRST '{' after the parameter list's
+  // closing paren. A function whose RETURN TYPE is an inline object literal
+  // (`): { a: string } {`) therefore has its TYPE ANNOTATION extracted as the
+  // body, and every mustContain entry then fails confusingly — or, for a row
+  // with no mustContain entries, silently verifies nothing. It failed loudly in
+  // the case that surfaced it, which is the safe direction, but the vacuous
+  // case is real. Use a NAMED return type on any local composer you pin here
+  // (score/save's collector uses `JsonbCollected` for exactly this reason).
   for (const lc of cfg.localComposers ?? []) {
     const defMatch = new RegExp(`function\\s+${lc.name}\\s*\\(`).exec(code)
     assert(defMatch !== null, `${label}: local function ${lc.name} is defined`)
