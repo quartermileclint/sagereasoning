@@ -31206,3 +31206,58 @@ build 0. One HIGH remains open by disclosure, not by omission: the response-hand
 are source-index assertions, not execution (this project's `tsx` harness has no DOM/React execution
 path) — a reviewer reproduced the reverted defect's exact shape by removing the live branch, with
 every battery green. Full record: close §10.
+
+---
+
+## D-MENTOR-INSTRUCTION-BIDIRECTIONAL-ALGORITHM-CAPTURED-2026-09-01
+
+**Session tier:** `governance`, documents-only. **AC7 not engaged** — no code, schema, flag,
+credential, or production change. Weights **BLOCKED unchanged**. **Nothing bears on the 0h call.**
+
+**What this is.** A mentor instruction relayed directly by the founder, captured verbatim
+(`operations/agent-circles-2026-08/2026-09-01-mentor-instruction-bidirectional-algorithm-verbatim.md`),
+naming two connection points between new research (a "bidirectional/reverse algorithm") and the
+project's own open questions. **The instruction states, in its own words, twice, that it is not a
+ruling and is not to be built now** — this session honoured that by construction: it captured, traced
+the connections against the current register state, and added two pointer rows. It designed nothing,
+evaluated no proxy basis, and did not touch GS-CYB-1's gate.
+
+**Connection 1 — GS-ATRF-1's blast-radius proxy.** The 2026-08-11 ruled answer and its classification
+vocabulary are untouched; the instruction offers a different underlying JUSTIFICATION for the same
+proxy — blast radius as a topological property (the number/kind of expanding moves from the
+generalisation of the practitioner's current state) rather than task-level consequence assessment —
+explicitly compatible with the proxy staying a disclosed assessed classification. Re-verified against
+`00-PRIORITY-INDEX.md`'s current GS-ATRF-1 entry before capture: its one open gap (`friction_detection`
+basis-lessness, §(c-bis)) is already closed via GS-ATRF-4's `unknown` category, not touched by this
+instruction. Named as a **candidate for GS-ATRF-1's resolution**, not a reopening of the ruling.
+
+**Connection 2 — the generation-step design.** A candidate architecture (anchor the practitioner's
+current state; generative fingers at virtue-domain/oikeiosis-circle branch points; four-virtue-scored
+expanding moves; grounding in concrete actions; a forward-pass prune), whose topological
+continuous-connection-to-core constraint is offered as a possible structural analogue of the weights
+constraint — potentially addressing the **GS-CYB-1** concern without a numerical weighting function.
+**GS-CYB-1's two independent conditions remain the gate on any weighting/scoring function entering the
+generation step, explicitly unmoved by this instruction** — the instruction states this itself, and
+the register row records it as still gating, not discharged.
+
+**Sequencing confirmed unchanged**, cross-checked against `00-PRIORITY-INDEX.md` and
+`06-PLAIN-TEXT-MIRROR.md` item 12's numbered chain: fresh endpoint scope → watching table scope →
+generation-step scope → first build gate → bounded validation run → standing-runner design. No drift
+found.
+
+**Register updated:** two new rows added to `00-PRIORITY-INDEX.md`'s named-input table, both labelled
+"Standing-runner design" (the receiving-session convention every other row in that table uses) with an
+explicit note that R8 already ran (2026-08-30) and this instruction post-dates it, so the actual
+receiver is the standing-runner track's next design-capable session, per the table's own framing note
+— not a per-row restatement, to stay consistent with the existing convention.
+
+**Risk classification:** Standard under 0d-ii (`governance`, documents-only; production untouched).
+**Rollback:** `git revert` this session's commit — removes the verbatim file and both register rows;
+nothing else is touched.
+
+**Rules served:** PR15 (routed via the register's own existing convention, not a new mechanism), PR18,
+PR20 (no present-tense mechanism fact was asserted by the instruction to verify; the connection to the
+two open questions was re-derived first-hand against source rather than assumed), PR23.
+
+**Status:** Captured. **Not a ruling; nothing built; nothing gated is discharged.** The two candidates
+wait on the standing-runner track's next design-capable session, per the standing sequencing.
