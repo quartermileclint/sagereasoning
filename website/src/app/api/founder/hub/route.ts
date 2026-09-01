@@ -1436,13 +1436,25 @@ export async function POST(request: NextRequest) {
     const conversationHistory = history || []
 
     // Save founder's message
+    //
+    // FAIL LOUD, not silently. This insert's error was previously discarded
+    // (`await ….insert({...})` with no `{ error }` check) — the same failure
+    // class this codebase has already hit twice (action_evaluations_v3's
+    // 2026-03-21→07-26 silent write outage; the Sage Reflect completion 503),
+    // both fixed by making a failed write surface rather than vanish. Here it
+    // meant a founder message could be lost while the mentor's reply — built
+    // entirely from the API response, never re-fetched — still rendered
+    // client-side and looked saved, until the next page refresh. Throwing
+    // routes through the existing debugStep catch handler below, which already
+    // reports the failed step + detail — no new response shape needed.
     debugStep = 'save_founder_message'
-    await supabaseAdmin.from('founder_conversation_messages').insert({
+    const { error: founderMsgErr } = await supabaseAdmin.from('founder_conversation_messages').insert({
       conversation_id: convId,
       role: 'founder',
       agent_type: null,
       content: message.trim(),
     })
+    if (founderMsgErr) throw founderMsgErr
 
     // Get primary agent response
     debugStep = `get_primary_response_${agent}`
@@ -1455,8 +1467,21 @@ export async function POST(request: NextRequest) {
     )
 
     // Save primary agent response
+    //
+    // Same unchecked-insert defect as the founder-message save above, on the
+    // side of the exchange that actually shows the reported symptom: the
+    // mentor's reply is built entirely from `primaryResponse.content` — the
+    // Anthropic call's own return value — never re-fetched from the DB, so a
+    // failed write here was invisible until the next page load, when
+    // `loadConversation()` re-reads from `founder_conversation_messages` and
+    // the exchange is simply gone. Throwing means the founder's ALREADY-PAID-
+    // FOR generated response is lost on the rare occasion this insert itself
+    // fails — a real trade-off, disclosed rather than silently accepted;
+    // returning `primaryResponse.content` in the error body so a caller could
+    // recover it is a reasonable follow-up, not done here to keep this fix to
+    // the defect actually reported.
     debugStep = 'save_primary_response'
-    await supabaseAdmin.from('founder_conversation_messages').insert({
+    const { error: primaryMsgErr } = await supabaseAdmin.from('founder_conversation_messages').insert({
       conversation_id: convId,
       role: 'agent',
       agent_type: agent,
@@ -1464,6 +1489,7 @@ export async function POST(request: NextRequest) {
       pipeline_meta: primaryResponse.pipeline_meta,
       decision_gate: primaryResponse.decision_gate || null,
     })
+    if (primaryMsgErr) throw primaryMsgErr
 
     // Fix 2: Knowledge persistence — record mentor interaction with hub_id
     // Awaited to ensure writes complete before Vercel terminates the function
@@ -1604,10 +1630,14 @@ If the conversation is too casual or brief to yield a meaningful observation, re
       const observerResults = await Promise.all(observerPromises)
       contributions = observerResults.filter((r): r is AgentResponse => r !== null)
 
-      // Save observer contributions
+      // Save observer contributions. Best-effort (matching the observer-fetch
+      // calls above, which are already non-blocking) — logged loudly rather
+      // than thrown, since an observer note failing to save should not fail
+      // the whole exchange the way losing the founder's message or the
+      // primary response would.
       debugStep = 'save_observers'
       for (const obs of contributions) {
-        await supabaseAdmin.from('founder_conversation_messages').insert({
+        const { error: obsErr } = await supabaseAdmin.from('founder_conversation_messages').insert({
           conversation_id: convId,
           role: 'observer',
           agent_type: obs.agent,
@@ -1615,6 +1645,7 @@ If the conversation is too casual or brief to yield a meaningful observation, re
           relevance_score: obs.relevance_score,
           pipeline_meta: obs.pipeline_meta,
         })
+        if (obsErr) console.error(`Failed to save observer ${obs.agent} message (non-blocking):`, obsErr)
       }
 
       // Get Ops recommended action (final synthesis pass)
@@ -1632,9 +1663,10 @@ If the conversation is too casual or brief to yield a meaningful observation, re
         return null
       })
 
-      // Save recommended action as an ops observer message
+      // Save recommended action as an ops observer message. Best-effort, same
+      // reasoning as the observer-contributions save above.
       if (recommendedAction) {
-        await supabaseAdmin.from('founder_conversation_messages').insert({
+        const { error: recActErr } = await supabaseAdmin.from('founder_conversation_messages').insert({
           conversation_id: convId,
           role: 'observer',
           agent_type: 'ops',
@@ -1642,15 +1674,25 @@ If the conversation is too casual or brief to yield a meaningful observation, re
           relevance_score: 1.0,
           pipeline_meta: { type: 'recommended_action', risk_classification: recommendedAction.risk_classification },
         })
+        if (recActErr) console.error('Failed to save recommended-action message (non-blocking):', recActErr)
       }
     }
 
     // Update conversation timestamp
+    // Non-blocking — the messages above are already durably saved by this
+    // point, so a failure here costs sort order, not data. BUT it is worth
+    // logging rather than discarding: GET's list ordering is
+    // `.order('updated_at', desc)` and the client's `loadConversation()` takes
+    // the FIRST 'mentor' match (src/app/private-mentor/page.tsx) — a silently
+    // stuck `updated_at` could rank an actively-used conversation behind a
+    // stale one, making genuinely-saved recent messages appear "lost" simply
+    // because the wrong conversation loads first on refresh.
     debugStep = 'update_timestamp'
-    await supabaseAdmin
+    const { error: timestampErr } = await supabaseAdmin
       .from('founder_conversations')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', convId)
+    if (timestampErr) console.error('Failed to bump conversation updated_at (non-blocking):', timestampErr)
 
     return NextResponse.json({
       conversation_id: convId,
