@@ -31261,3 +31261,91 @@ two open questions was re-derived first-hand against source rather than assumed)
 
 **Status:** Captured. **Not a ruling; nothing built; nothing gated is discharged.** The two candidates
 wait on the standing-runner track's next design-capable session, per the standing sequencing.
+
+---
+
+## D-R20A-SCORE-SAVE-PERIMETER-ACTIVATION-LIVE-2026-09-02
+
+**Session tier:** `code-critical` (AC5 + AC7 + PR6 + PR17). **AC7 ENGAGED AND DISCHARGED** — a
+production environment-variable activation extending the R20a distress perimeter to a live
+human-facing route. **Founder-walked throughout: the AI performed no Vercel, Supabase, git-push, or
+live operation, and did not itself observe production.** Every live step — push, deploy, flag, the
+three probes, the SQL, the teardown — was performed and observed by the founder; the AI prepared the
+walk, verified its claims against source, and records the outcome as reported. Weights **BLOCKED
+unchanged**. **Nothing bears on the 0h call.**
+
+**Production is intentionally NOT byte-equivalent — a deliberate standing change.**
+`SUBSTRATE_SCORE_SAVE_R20A_ENABLED=true` in Vercel Production. `POST /api/score/save` now screens ten
+caller-supplied fields for acute and moderate distress before persisting, refuses with **422** rather
+than a 200, and `/score` renders crisis resources in place of a scoring card. This closes the
+activation half of `D-R20A-SCORE-SAVE-PERIMETER-REBUILT-DARK-PR19-PENDING` (2026-08-31) and executes
+the mentor's corrected ruling of the same date.
+
+**The route is now the perimeter's 43rd route-level member.** Do not quote that number forward
+without re-deriving it from `HUMAN_FACING_POST_ROUTES` in
+`website/src/lib/__tests__/r20a-invocation-guard.test.ts` — the registry arrays are canonical, and
+this file's own history is the reason that rule exists.
+
+**Pre-flight, AI-run and repo-local (§0 of the activation prompt, re-derived not inherited):**
+`git log origin/main..HEAD` empty at open; HEAD `7fe838c`; `r20a-invocation-guard` **715/0**;
+`r20a-gap-closure-route-wiring` **936/0**; `score/save` `perimeter-functional` **111/0**;
+`founder/hub` `message-persistence` **13/0**. The dedicated flag was confirmed genuinely dedicated by
+source read (`score/save/r20a.ts:89`, five references, nothing routed through the shared gap-closure
+flag), so the documented rollback lever is structurally sound.
+
+**The smoke kit (`operations/handoffs/founder/2026-09-02-score-save-activation-SMOKE-KIT.md`, commit
+`c48ff46`).** Seven candidate phrases were executed against the real `detectDistress` rather than read
+off the regexes — three acute, one moderate, one mild, two clean controls — and the kit reproduces
+that output verbatim. All are stage-1 regex matches, which short-circuit before the Haiku call
+(`r20a-classifier.ts:289`), so the blocking probes are deterministic and unbilled while only the
+benign save incurs stage 2. The kit places benign text in `action` and the acute phrase in
+`emotional_state` deliberately: `/api/score` screens the bare `action` only
+(`api/score/route.ts:154`), so that combination reaches the save boundary untouched and the new
+screening is the sole thing between it and a durable row.
+
+**Founder-observed outcome — all three probes as specified, plus teardown:**
+- **Acute** (`I keep thinking I want to die.` in `emotional_state`): the four-part assertion held —
+  **the row count did not move**, 422 from `/api/score/save`, the seven-line crisis panel rendered,
+  and no scoring card beneath it.
+- **Benign:** 200, normal result card, row count +1. The no-over-block half, required rather than
+  optional: a 422 alone proves the route can refuse, not that it still works.
+- **Mild** (`Life is meaningless.`): saved as designed (mild does not block, row +1) with the support
+  panel rendered.
+- **Teardown** complete.
+
+**HONEST LIMIT ON THE ABOVE.** The AI did not witness the probes; this entry records the founder's
+report against expectations the AI stated in advance and in writing. The advance statement is what
+gives the report its force — the expected shape was fixed before the observation, not fitted to it.
+
+**§6(a) of the build close — SETTLED.** The mild path's `buildMildSupportResources('practice')`
+variant is **confirmed by the founder**, having been read on screen in the context a flagged
+practitioner sees it, rather than confirmed from a quotation. No code change follows.
+
+**§6(b) — STILL OPEN, and sharpened by a new finding.** The local-storage bypass stands
+(`score/page.tsx:324` — the branch calls `/api/score/save` not at all; the close's 312-314 citation
+had drifted, re-derived here). **New, found while preparing the walk: there is no in-app way to
+change storage mode after the first choice.** The chooser renders only when the localStorage lookup
+misses (`score/page.tsx:354`); thereafter the badge on the form is display-only. So which
+practitioners this ruling protects is decided by a browser value the practitioner cannot revisit
+through the product — the founder had to clear `action_storage_<user_id>` in devtools to run this
+smoke at all. The durable fix remains upstream in `/api/score`'s own field coverage; it was
+deliberately not touched here (engine-adjacent, outside the ruling's scope). **Disposition is the
+founder's, and plausibly the mentor's.**
+
+**Risk classification:** Critical under 0d-ii (production flag activation on a live human-facing
+safety surface). **Rollback:** unset `SUBSTRATE_SCORE_SAVE_R20A_ENABLED` and redeploy — flag-off is a
+differentially-tested byte-identical match to pre-rebuild across 13 previously-accepted body shapes
+(`perimeter-functional.test.ts` §17) — or `git revert` the rebuild commits. **NEVER** mitigate an
+incident on this route by unsetting the shared `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED`: that strips
+distress screening from 25 other routes including the passion and grief tools, which are the most
+distress-likely surfaces in the product.
+
+**Untouched:** every other R20a flag, the shared gap-closure flag, R18f, the distress classifier
+itself, Layer-2 signing, UPC auth, the provenance-ledger C2 readiness window and its watched surfaces
+(`emission-hooks.ts`, `provenance-*.ts`, `/api/reason`'s write block, the sweep handler), S10, S11.
+
+**Rules served:** R20a, AC5, AC7, PR6, PR17 (founder-walked; this environment holds no production
+admin credential), PR18, PR19 (the rebuild's own 29-agent review, recorded at the 08-31 close §10;
+this session added no code to review), PR20, PR22, PR25.
+
+**Status:** **Live.** The activation is discharged; §6(a) is settled; §6(b) is open and named.
