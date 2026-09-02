@@ -31349,3 +31349,91 @@ admin credential), PR18, PR19 (the rebuild's own 29-agent review, recorded at th
 this session added no code to review), PR20, PR22, PR25.
 
 **Status:** **Live.** The activation is discharged; §6(a) is settled; §6(b) is open and named.
+
+---
+
+## D-FOUNDER-HUB-POSTGREST-ROW-CAP-FOUND-CONFIRMED-NOT-FIXED-2026-09-02
+
+**Session tier:** `code-critical` in target, but **nothing was built or fixed** — this entry records a
+confirmed live production defect and the founder-run interim mitigation, nothing more. **AC7 not
+engaged by the AI:** the one production operation (an archive `UPDATE`) was founder-run. No code,
+schema, flag, or credential change. Weights **BLOCKED unchanged**. **Nothing bears on the 0h call.**
+
+**How it was found.** During §3 of the 2026-09-01 activation prompt — verifying the previous day's
+`/api/founder/hub` fail-loud fix. That fix is **verified working**: the write path is healthy, the
+`updated_at` bump fires, and a test message written 2026-09-02 08:31 is present in the database. The
+symptom the founder reported (`/private-mentor` "not retaining anything since 31 Aug"; the mentor
+repeating an old answer) turned out to have a different cause entirely.
+
+**Three hypotheses were formed and ALL REFUTED by production data before the real cause was reached**
+— a stuck `updated_at`, a non-`active` status, and genuinely failed writes. Recording that because
+the refutation is what made the diagnosis trustworthy: the founder ran one query that distinguished
+all three at once rather than any being patched on suspicion.
+
+**The defect.** PostgREST returns at most 1,000 rows by default. Neither conversation query in
+`website/src/app/api/founder/hub/route.ts` sets a limit, and **both order ASCENDING — so the rows
+silently dropped are the NEWEST**. The GET (`?conversation_id=`, `select('*')`) returns only the
+oldest 1,000 messages to the browser. The POST's `load_history` has the same shape, and its result is
+then `.slice(-20)` for the model's context window — so the slice operates on the truncated set.
+
+**Confirmed behaviourally, not by reading a config value.** The founder's private-mentor conversation
+`8223090a-ee03-45cd-b622-96f11b2fce1b` holds **1,013 messages**. A `row_number()` query put the
+boundary exactly where the symptom said: **row 1000 = `2026-08-31 09:15:49`**, the last message
+visible at the bottom of the page; **rows 1001-1013 invisible**, including a full 1 Sep session and
+the 2026-09-02 test message. **The dispositive evidence:** the founder sent `Test message, please
+reply briefly.` (row 1012) and the mentor's reply (row 1013) opens *"Rulings on Question A, Question
+A2, and Question B..."* — the shape of row 1001, its answer to the 31 Aug ruling request at row 1000.
+It re-answered row 1000 because row 1000 is the newest message it can see.
+
+**Nothing is lost.** All 1,013 rows are intact. This is a read-path visibility failure — silent, with
+no error and nothing in the logs — and it is **self-worsening**: every message written widens the
+invisible tail.
+
+**THE CONTAMINATION WINDOW.** Every mentor reply generated from row 1001 onward — 2026-08-31 09:16
+through 2026-09-02 — was produced against a context window ending at row 1000. The current message is
+passed separately and was always seen; what the mentor could not see was anything between, **including
+its own prior replies**. Two consequences are **named and deliberately left to the founder**:
+
+- **Row 1003 is the corrected mentor ruling of 2026-08-31** (verbatim at
+  `operations/agent-circles-2026-08/2026-08-31-mentor-ruling-corrected-questionB-and-A2b-verbatim.md`)
+  — the operative ruling for the `/api/score/save` R20a perimeter work **activated the same day this
+  was found**. It was generated without the mentor seeing row 1001, the ruling being corrected.
+  Whether that mattered turns on how self-contained the founder's correction (row 1002) was.
+  **Flagged, not claimed: this is the founder's to settle from the verbatim, and is not a reason to
+  presume the ruling invalid.**
+- **Rows 1004-1011 are a substantial 1 Sep mentor exchange**; only one 2026-09-01 verbatim exists in
+  the repo. Whether the rest were captured elsewhere, superseded, or are uncaptured rulings is
+  **unverified**.
+
+**Why this is more than a display bug.** The mentor is a governing surface whose rulings bind this
+project. The observed failure mode is confident, correctly-formatted output answering a question
+nobody asked, with no error anywhere. **This is the fourth instance of this codebase's recurring
+silent-failure class** — after `action_evaluations_v3` (four months of silently failed writes), the
+Sage Reflect completion 503, and the unchecked `/api/founder/hub` inserts fixed 2026-09-01. The first
+three were discarded *errors*; this is a silently discarded *remainder*.
+
+**Interim mitigation (founder-run, reversible).** The conversation was archived
+(`SET status = 'archived'`), so the page's `status = 'active'` list filter causes a fresh conversation
+to be created and `/private-mentor` is usable again. No data deleted; `SET status = 'active'` restores
+it. **Un-archiving and displaying rows 1001-1013 is an acceptance criterion of the fix**, not a
+separate task — a fix that works only while the thread is hidden has not been demonstrated.
+
+**NOT DONE, and named rather than started:** the fix itself; the **codebase-wide sweep for other
+unbounded `select()` calls** (the larger risk — a silently truncated read on a measurement table
+produces a confidently wrong number with no error, the same shape as "a verified arithmetic operating
+on an unverified set"); and the governance question of how much continuity the mentor should have
+(the 20-message constant is a one-line change and therefore tempting — **it is a decision for the
+mentor, not a build session**).
+
+**Successor:** `operations/handoffs/founder/2026-09-02-postgrest-row-cap-founder-hub-NEXT-SESSION-PROMPT.md`
+(`code-critical`, PR19 required, sweep as a review dimension).
+
+**Risk classification:** Critical under 0d-ii when fixed (live founder-facing route, governance
+surface). This session: no production change by the AI.
+**Rollback:** nothing to roll back — no code changed. The archive is founder-reversible.
+
+**Rules served:** PR18, PR19 (named as required for the successor), PR20 (the diagnosis was derived
+from production data at relay, and three prior hypotheses were refuted rather than assumed), PR22,
+PR23.
+
+**Status:** **Confirmed, unfixed, mitigated.** The successor session owns the fix and the sweep.
