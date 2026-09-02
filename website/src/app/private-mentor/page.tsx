@@ -35,6 +35,15 @@ export default function PrivateMentorPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  // Keyset pagination state (2026-09-02). The GET now returns the NEWEST page
+  // of the thread plus a cursor for the page before it — see
+  // api/founder/hub/conversation-history.ts for why (PostgREST's silent
+  // 1,000-row cap was hiding this thread's newest messages).
+  const [hasEarlier, setHasEarlier] = useState(false);
+  const [earliestCursor, setEarliestCursor] = useState<{ created_at: string; id: string } | null>(null);
+  const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+  // Prepending earlier messages must NOT jump the view to the bottom.
+  const suppressAutoScrollRef = useRef(false);
 
   const WELCOME_MESSAGE: Message = {
     id: '0',
@@ -68,42 +77,86 @@ export default function PrivateMentorPage() {
 
         setConversationId(mentorConv.id);
 
-        // Filter out observer messages — they belong in the Founder Hub, not the private mentor
-        const mentorMessages = (msgData.messages || []).filter(
-          (m: { role: string }) => m.role === 'founder' || m.role === 'agent'
-        );
-
-        const loaded: Message[] = mentorMessages.map(
-          (m: { id: string; role: string; agent_type: string | null; content: string; created_at: string }) => ({
-            id: m.id,
-            type: m.role === 'founder' ? 'human' : 'mentor',
-            content: m.content,
-            timestamp: new Date(m.created_at).toLocaleString('en-AU', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-              day: 'numeric',
-              month: 'short',
-            }),
-          })
-        );
+        const loaded = toMentorMessages(msgData.messages || []);
 
         if (loaded.length > 0) {
+          // Only now is the pagination state meaningful — setting it earlier
+          // (PR19 review, 2026-09-03) would let "Load earlier messages"
+          // prepend real history above the WELCOME_MESSAGE card on the rare
+          // page whose only rows are observer-role (filtered out by
+          // toMentorMessages) and therefore falls through below.
+          setHasEarlier(Boolean(msgData.page?.has_earlier));
+          setEarliestCursor(msgData.page?.earliest_cursor ?? null);
           setMessages(loaded);
           return;
         }
       }
 
-      // No existing conversation — show welcome message
+      // No existing conversation, or a page with nothing displayable — show
+      // the welcome message with pagination reset (nothing to page against).
+      setHasEarlier(false);
+      setEarliestCursor(null);
       setMessages([WELCOME_MESSAGE]);
     } catch (error) {
       console.error('Failed to load conversation:', error);
+      setHasEarlier(false);
+      setEarliestCursor(null);
       setMessages([WELCOME_MESSAGE]);
     }
   };
 
-  // Scroll to bottom when messages change
+  // Filter out observer messages — they belong in the Founder Hub, not the
+  // private mentor — and map API rows to the page's Message shape. Shared by
+  // the initial load and the load-earlier path.
+  function toMentorMessages(rows: Array<{ id: string; role: string; agent_type: string | null; content: string; created_at: string }>): Message[] {
+    return rows
+      .filter((m) => m.role === 'founder' || m.role === 'agent')
+      .map((m) => ({
+        id: m.id,
+        type: m.role === 'founder' ? 'human' : 'mentor',
+        content: m.content,
+        timestamp: new Date(m.created_at).toLocaleString('en-AU', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          day: 'numeric',
+          month: 'short',
+        }),
+      }));
+  }
+
+  // Load the page BEFORE the earliest currently-loaded message and prepend it.
+  const loadEarlierMessages = async () => {
+    if (!conversationId || !earliestCursor || isLoadingEarlier) return;
+    setIsLoadingEarlier(true);
+    try {
+      const params = new URLSearchParams({
+        conversation_id: conversationId,
+        before_created_at: earliestCursor.created_at,
+        before_id: earliestCursor.id,
+      });
+      const res = await authFetch(`/api/founder/hub?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to load earlier messages');
+      const data = await res.json();
+      const earlier = toMentorMessages(data.messages || []);
+      suppressAutoScrollRef.current = true;
+      setMessages((prev) => [...earlier, ...prev]);
+      setHasEarlier(Boolean(data.page?.has_earlier));
+      setEarliestCursor(data.page?.earliest_cursor ?? null);
+    } catch (error) {
+      console.error('Failed to load earlier messages:', error);
+    } finally {
+      setIsLoadingEarlier(false);
+    }
+  };
+
+  // Scroll to bottom when messages change — except when the change was a
+  // prepend of earlier history, which must leave the reader where they were.
   useEffect(() => {
+    if (suppressAutoScrollRef.current) {
+      suppressAutoScrollRef.current = false;
+      return;
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -581,7 +634,7 @@ export default function PrivateMentorPage() {
 
         {/* VIEW CONTAINER */}
         <div style={styles.viewContainer}>
-          {currentView === 'conversation' && <ConversationView messages={messages} composeInput={composeInput} setComposeInput={setComposeInput} onSendMessage={sendMessage} isLoading={isLoading} messagesEndRef={messagesEndRef} />}
+          {currentView === 'conversation' && <ConversationView messages={messages} composeInput={composeInput} setComposeInput={setComposeInput} onSendMessage={sendMessage} isLoading={isLoading} messagesEndRef={messagesEndRef} hasEarlier={hasEarlier} isLoadingEarlier={isLoadingEarlier} onLoadEarlier={loadEarlierMessages} />}
           {currentView === 'morning' && <MorningView onSubmit={() => submitRitual('morning')} isLoading={isLoading} />}
           {currentView === 'evening' && <EveningView onSubmit={() => submitRitual('evening')} isLoading={isLoading} />}
           {currentView === 'profile' && <ProfileView />}
@@ -636,6 +689,9 @@ function ConversationView({
   onSendMessage,
   isLoading,
   messagesEndRef,
+  hasEarlier,
+  isLoadingEarlier,
+  onLoadEarlier,
 }: {
   messages: Message[];
   composeInput: string;
@@ -643,6 +699,9 @@ function ConversationView({
   onSendMessage: () => void;
   isLoading: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  hasEarlier: boolean;
+  isLoadingEarlier: boolean;
+  onLoadEarlier: () => void;
 }) {
   return (
     <div style={styles.convoLayout}>
@@ -652,6 +711,27 @@ function ConversationView({
         </div>
 
         <div style={styles.messages}>
+          {hasEarlier && (
+            <div style={{ textAlign: 'center', marginBottom: 12 }}>
+              <button
+                type="button"
+                onClick={onLoadEarlier}
+                disabled={isLoadingEarlier}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #3A3A3A',
+                  borderRadius: 6,
+                  color: '#C4A265',
+                  cursor: isLoadingEarlier ? 'default' : 'pointer',
+                  fontSize: 12,
+                  padding: '6px 14px',
+                  opacity: isLoadingEarlier ? 0.6 : 1,
+                }}
+              >
+                {isLoadingEarlier ? 'Loading earlier messages…' : 'Load earlier messages'}
+              </button>
+            </div>
+          )}
           {messages.map((msg) => (
             <div key={msg.id} style={styles.msgGroup}>
               {msg.type !== 'human' && <div style={msg.type === 'mentor' ? styles.msgGroupLabelMentor : styles.msgGroupLabel}>{msg.type === 'mentor' ? 'Sage Mentor' : 'Mentor Observation'}</div>}

@@ -31437,3 +31437,140 @@ from production data at relay, and three prior hypotheses were refuted rather th
 PR23.
 
 **Status:** **Confirmed, unfixed, mitigated.** The successor session owns the fix and the sweep.
+
+---
+
+## D-FOUNDER-HUB-POSTGREST-ROW-CAP-FIXED-AND-SWEPT-2026-09-03
+
+**Session tier:** `code-critical`. **AC7 not engaged** — no push, deploy, or production op this
+session; the fix ships on the founder's next push, the un-archive is its own founder-walked step.
+**Session model:** `claude-opus-5` at open, switched to `claude-sonnet-5` mid-session by the
+founder's own `/model` commands (PR22, both disclosed). Weights BLOCKED unchanged. Nothing bears on
+the 0h call.
+
+**Fixes the defect recorded at** `D-FOUNDER-HUB-POSTGREST-ROW-CAP-FOUND-CONFIRMED-NOT-FIXED-2026-09-02`.
+**Close:** `operations/founder-hub-2026-09/2026-09-02-postgrest-row-cap-fix-CLOSE.md`.
+
+**The fix.** Both unbounded, ascending reads of `founder_conversation_messages` in
+`website/src/app/api/founder/hub/route.ts` are replaced by two explicitly-bounded reads in a new
+module, `conversation-history.ts`: `loadRecentHistory` (the mentor's context window — newest N rows
+via `.order(desc).limit(N)` then reversed, plus an exact PostgREST count) and `loadConversationPage`
+(keyset pagination on `(created_at, id)` for the GET, robust even if a page is itself truncated by a
+cap smaller than the requested limit — the property that makes this correct rather than merely
+"has a limit now"). `message_count` now derives from the exact count, not the fetched window's
+length. A DB read error on the POST path now throws (fail-loud, matching the 2026-09-01 precedent)
+instead of letting the mentor answer with no memory and no indication why. Both `private-mentor` and
+`founder-hub` pages gained a "Load earlier messages" affordance with scroll-suppression on prepend.
+`MENTOR_HISTORY_WINDOW` stays 20 — unchanged, test-pinned; widening it is a mentor question, not a
+build decision (the handoff prompt's explicit instruction), and is raised, not answered, in
+`2026-09-02-mentor-question-continuity-window-FOR-RULING.md`.
+
+**Verified, EXECUTED not merely asserted** (the handoff prompt's own requirement — "do not accept a
+source-pattern assertion alone where the behaviour can be executed"): a new regression test
+(`conversation-history-row-cap.test.ts`, 74 assertions) runs against a fake Supabase client that
+MODELS the row cap (truncates after ordering+limit; computes an exact count on the full matching set
+independent of the cap, exactly as PostgREST does). §1 is a negative control that reproduces the
+exact production symptom against the OLD chain shape (a 1,013-row fixture returns rows 1-1000; the
+20-row slice is rows 981-1000) before any positive assertion runs — proving the fake can fail before
+trusting that it passes. Mutation-verified four ways in an isolated scratch copy of the tree
+(reverting the fix; dropping the helper's `.limit`; flipping its order to ascending; disabling the
+keyset cursor branch) — all four reproduce a failure. `message-persistence.test.ts` (13/0)
+unaffected. `tsc --noEmit` exit 0; `npm run build` exit 0.
+
+**The codebase-wide sweep — done, recorded, NOT remediated this session** (per the handoff prompt's
+own instruction to record it "whatever it returns"). A new tool,
+`website/scripts/unbounded-select-sweep.ts`, walks `website/src`, `website/scripts`, and the
+repo-root `sage-mentor/`+`sdk/` directories, extracts every full fluent `.from().select()...` chain
+(literal or dynamic table names, string/template-literal-aware, multi-line), and classifies it
+unbounded-read / bounded-explicit / bounded-continuation (an assigned builder bounded on a LATER
+statement) / count-only / write / write-returning. Run against HEAD plus this session's fix: 441
+chains, 14 RPC calls, 85 unbounded-read candidates, 3 confirmed bounded-continuations. Every
+candidate was classified FIRST-HAND against the surrounding code (a table-cardinality dossier from
+production counts cited in the decision log + migrations fed the classification but did not
+substitute for reading the code) —
+`operations/founder-hub-2026-09/2026-09-02-unbounded-select-sweep-REPORT.md` is the artifact of
+record; `…-INVENTORY.md` is the raw mechanical output.
+
+**Headline finding: 12 sites on 4 tables can silently cross the cap now or within weeks, every one
+feeding a number someone reads as true** — the A13 cost-health Slack alerts and A19 abuse-detector
+identity enumeration both read `loop_billing_events`/`substrate_audit_events` whole-table with no
+aggregation-in-SQL (~3,200 rows on each by 2026-08-25, already past the cap); the A14 SLO tracker
+reads `substrate_audit_events` per-surface unbounded; the monthly LLM-cost/revenue figures
+(`translation_sandwich_comparisons`, `payment_events`) will cross within a month at current consult
+volume; and sharpest of all, **the provenance-ledger C2 discharge tally**
+(`scripts/provenance-c2-discharge-tally.ts:170`) — the readiness instrument gating slice 5's ENFORCE
+switch-on — crosses the cap at its current ~47 rows/day around **2026-09-17, inside the two-week
+window it is meant to measure**. This site sits in the watched-surface set the handoff prompt named
+(`provenance-*.ts`) — **report-only, not fixed, not perturbed, this session.** A second
+governing-surface finding, outside any watched list: `sage-mentor/profile-store.ts:876`
+(`computeRollingWindow`, live via `updateProfileFromReflection`, called from `/api/reflect` and
+`/api/mentor/private/reflect`) reads the ENTIRE `mentor_interactions` table with **no filter at
+all** — 485 rows in August, growing ~110/month for the founder alone. A third class, roughly 30
+sites, is **every data-rights export/access/delete-driving read** in `user/export/route.ts`,
+`user/delete/route.ts`, and `user-data-gathering.ts` — none crosses the cap today, all are
+structurally unbounded, so the day any per-user table passes 1,000 rows an Article 15/20 copy or a
+credential-driven deletion silently under-delivers while still reporting success — the compliance
+form of the same silent-remainder class. Full severity table, "structurally safe" table with
+reasons, unknown-cardinality items (two SQL counts settle them), RPC-function check, and a
+recommended remediation order are in the report; none of it was built this session.
+
+**The PR19 independent review died on the account session limit THREE separate times** across this
+session (14/15, then 11/12, then 34/40 agents errored across three launches of the same seven-
+dimension review). Four dimensions (`pagination-correctness`, `route-wiring-and-behaviour-deltas`,
+`client-pages`, `security`) returned real findings before their own refuters died; three
+(`fake-fidelity-and-test-adequacy`, `sweep-tool-correctness`, `claims-vs-code`) never ran. **A
+genuine defect in the review-workflow template's own adjudication logic surfaced here, worth naming
+for future PR19 launches**: when a finding's refuters both die, the script's `votes.length===0`
+falls through the same branch as "zero refutations recorded" and marks the finding REFUTED — not
+"unreviewed". Sixteen findings were raised; the workflow reported all sixteen as refuted, which was
+**false bookkeeping, not a false-positive review** — a defect in the aggregation code, not evidence
+the findings were wrong. This session re-adjudicated all sixteen first-hand, per PR19 §4's
+completion-under-outage fallback, invoked for the third time in one session:
+
+- **Two CONFIRMED and fixed**: (1) `route.ts:1463`'s `message_count` fallback to the window length
+  is real but a control-flow read shows `total` is guaranteed non-null on every path that reaches it
+  today (the throw above already returns on any read error, and the helper always requests
+  `{count:'exact'}`) — documented in place rather than restructured, so a future change degrades
+  honestly instead of silently. (2) `founder-hub/page.tsx`'s "Load earlier messages" applied an
+  in-flight response to whichever conversation was active WHEN IT LANDED, not the one it was
+  requested for — a genuine race (switch conversations mid-fetch → conversation A's history
+  prepends onto conversation B) — fixed by capturing the requested conversation id and discarding a
+  stale response.
+- **One more found and fixed by direct code-reading, adjacent to the workflow's list**:
+  `private-mentor/page.tsx` set pagination state (`hasEarlier`/`earliestCursor`) from a fetched page
+  BEFORE checking whether any messages survived the observer-role filter, so on the (currently
+  unreachable — private-mentor never writes observer rows) edge case of an all-observer first page,
+  "Load earlier messages" would have prepended real history above the `WELCOME_MESSAGE` card — fixed
+  by moving the pagination-state writes inside the non-empty branch and resetting them on every
+  fallback-to-welcome path.
+- **The remaining thirteen are real but low/nit and left as named follow-ups** (a cosmetic 500-vs-400
+  on a calendar-invalid timestamp; an `[object Object]` error-detail body on a pre-existing rendering
+  pattern, no new leak; no composite index for a conversation size this route will not reach; the
+  `.or()` cursor filter's grammar resting on the fake's parser until the founder-walk's live smoke
+  runs it against real PostgREST; no scroll-position restoration on prepend, only suppression of the
+  jump-to-bottom; no accessibility affordances on the new button; an intentional limit/cursor
+  strictness asymmetry) — each named in the close with its file:line.
+
+Re-tested after both fixes: `conversation-history-row-cap.test.ts` 74/0, `message-persistence.test.ts`
+13/0, `tsc` exit 0, `npm run build` exit 0.
+
+**Carried, founder-walked, not done this session:** (1) push + the founder-walk's un-archive +
+two-part smoke (`2026-09-02-founder-hub-row-cap-FOUNDER-WALK.md`); (2) the mentor-continuity ruling,
+gated on the founder's own reading of the contamination-window verbatim first; (3) **a genuinely
+independent re-run of the three dead review dimensions is REQUIRED, not merely recommended, before
+this fix or the sweep report is treated as fully verified for any downstream activation** (PR19 §4);
+(4) the sweep's remediation, in the order the report gives (§6 there).
+
+**Rollback:** `git revert` the commits carrying `conversation-history.ts`, the route/page changes,
+the test, and the sweep script — independently revertable from the sweep report and the mentor-
+question document (neither depends on the code).
+
+**Rules served:** PR6, PR15 (bespoke election recorded — checked against the existing
+`fake-supabase.ts`/`fake-stoa-supabase.ts` fakes; neither models the row cap), PR18, PR19 (three
+launches, three exhaustions, disclosed; first-hand completion; independent re-run named REQUIRED),
+PR20, PR22, PR23 (memory `postgrest-row-cap-silent-truncation` written this session).
+
+**Status:** Fix built + executed-tested + typechecked + built; two workflow-found defects plus one
+first-hand-found defect fixed; sweep complete and recorded (remediation not started); the governance
+question raised, not answered; independent review incomplete on all three launches, disclosed as a
+required carried follow-up rather than papered over. **Nothing bears on the 0h call.**

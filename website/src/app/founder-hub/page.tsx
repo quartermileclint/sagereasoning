@@ -120,6 +120,15 @@ export default function FounderHubPage() {
   const [showDomainDetails, setShowDomainDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Keyset pagination state (2026-09-02). The GET returns the NEWEST page of
+  // a conversation plus a cursor for the page before it — see
+  // api/founder/hub/conversation-history.ts (PostgREST's silent 1,000-row
+  // cap was hiding long threads' newest messages).
+  const [hasEarlier, setHasEarlier] = useState(false);
+  const [earliestCursor, setEarliestCursor] = useState<{ created_at: string; id: string } | null>(null);
+  const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+  // Prepending earlier messages must NOT jump the view to the bottom.
+  const suppressAutoScrollRef = useRef(false);
 
   // Load auth token from localStorage
   useEffect(() => {
@@ -139,8 +148,13 @@ export default function FounderHubPage() {
     if (authToken) loadConversations();
   }, [authToken]);
 
-  // Scroll to bottom
+  // Scroll to bottom — except after a prepend of earlier history, which must
+  // leave the reader where they were.
   useEffect(() => {
+    if (suppressAutoScrollRef.current) {
+      suppressAutoScrollRef.current = false;
+      return;
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -176,10 +190,41 @@ export default function FounderHubPage() {
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       setMessages(data.messages || []);
+      setHasEarlier(Boolean(data.page?.has_earlier));
+      setEarliestCursor(data.page?.earliest_cursor ?? null);
       setActiveConversation(id);
       setActiveAgent(data.conversation.primary_agent);
     } catch (err) {
       console.error('Failed to load conversation:', err);
+    }
+  }
+
+  // Load the page BEFORE the earliest currently-loaded message and prepend it.
+  async function loadEarlierMessages() {
+    if (!activeConversation || !earliestCursor || isLoadingEarlier) return;
+    // Captured so a switch to a different conversation while this request is
+    // in flight discards the response instead of prepending conversation A's
+    // history onto conversation B's messages (PR19 review, 2026-09-03).
+    const requestedConversation = activeConversation;
+    setIsLoadingEarlier(true);
+    try {
+      const params = new URLSearchParams({
+        conversation_id: requestedConversation,
+        before_created_at: earliestCursor.created_at,
+        before_id: earliestCursor.id,
+      });
+      const res = await fetch(`/api/founder/hub?${params.toString()}`, { headers: headers() });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      if (requestedConversation !== activeConversation) return;
+      suppressAutoScrollRef.current = true;
+      setMessages(prev => [...(data.messages || []), ...prev]);
+      setHasEarlier(Boolean(data.page?.has_earlier));
+      setEarliestCursor(data.page?.earliest_cursor ?? null);
+    } catch (err) {
+      console.error('Failed to load earlier messages:', err);
+    } finally {
+      setIsLoadingEarlier(false);
     }
   }
 
@@ -312,6 +357,8 @@ export default function FounderHubPage() {
   function startNewConversation() {
     setActiveConversation(null);
     setMessages([]);
+    setHasEarlier(false);
+    setEarliestCursor(null);
     setAskOrgResult(null);
     inputRef.current?.focus();
   }
@@ -715,6 +762,28 @@ export default function FounderHubPage() {
               <div style={{ fontSize: 13, color: '#555' }}>
                 Other agents will observe and contribute when relevant.
               </div>
+            </div>
+          )}
+
+          {hubMode === 'chat' && hasEarlier && (
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <button
+                type="button"
+                onClick={loadEarlierMessages}
+                disabled={isLoadingEarlier}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #3A3A3A',
+                  borderRadius: 6,
+                  color: '#C4A265',
+                  cursor: isLoadingEarlier ? 'default' : 'pointer',
+                  fontSize: 12,
+                  padding: '6px 14px',
+                  opacity: isLoadingEarlier ? 0.6 : 1,
+                }}
+              >
+                {isLoadingEarlier ? 'Loading earlier messages…' : 'Load earlier messages'}
+              </button>
             </div>
           )}
 

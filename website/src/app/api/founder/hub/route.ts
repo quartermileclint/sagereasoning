@@ -12,7 +12,11 @@
  *
  * GET: List conversations or load conversation history
  *   ?list=true — list all conversations
- *   ?conversation_id=<id> — load full conversation
+ *   ?conversation_id=<id>[&limit=&before_created_at=&before_id=] — load a
+ *     PAGE of the conversation (newest first, returned ascending; default
+ *     200, max 500; hand back `page.earliest_cursor` to load earlier). Both
+ *     conversation reads are bounded since 2026-09-02 — see
+ *     ./conversation-history.ts for the PostgREST 1,000-row cap defect.
  *
  * Access: Founder only (FOUNDER_USER_ID env var)
  */
@@ -20,6 +24,12 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import {
+  loadRecentHistory,
+  loadConversationPage,
+  parseConversationPageParams,
+  MENTOR_HISTORY_WINDOW,
+} from './conversation-history'
 import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { enforceDistressCheck } from '@/lib/constraints'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
@@ -520,8 +530,14 @@ ${brainContext}`
   // Build conversation messages
   const messages: Array<{ role: 'user' | 'assistant'; content: string }> = []
 
-  // Add conversation history (last 20 messages for context window management)
-  const recentHistory = conversationHistory.slice(-20)
+  // Conversation history for the context window. Since the 2026-09-02
+  // PostgREST row-cap fix the route FETCHES only the newest
+  // MENTOR_HISTORY_WINDOW rows (see ./conversation-history.ts), so this slice
+  // is a defensive no-op on the live path; it is kept so a caller passing a
+  // longer array still gets the same window. The window size is a
+  // GOVERNANCE constant — do not widen it here (conversation-history.ts
+  // header, "THE GOVERNANCE CONSTANT"; the question is the mentor's).
+  const recentHistory = conversationHistory.slice(-MENTOR_HISTORY_WINDOW)
   for (const msg of recentHistory) {
     if (msg.role === 'founder') {
       messages.push({ role: 'user', content: msg.content })
@@ -1425,15 +1441,33 @@ export async function POST(request: NextRequest) {
       convId = conv.id
     }
 
-    // Load conversation history
+    // Load conversation history — the NEWEST window only, bounded explicitly.
+    //
+    // 2026-09-02 fix. This read was `select(...).eq(conversation_id)
+    // .order(created_at ASC)` with NO limit, then sliced to its last 20 rows.
+    // PostgREST caps every response at max-rows (1,000) SILENTLY, so once the
+    // founder's thread passed 1,000 messages the slice ran over the OLDEST
+    // 1,000 and the mentor's working memory was pinned to rows 981-1000 of a
+    // 1,013-row conversation — it re-answered row 1000's ruling request in
+    // reply to "Test message, please reply briefly." Confirmed on production
+    // by row_number(). See ./conversation-history.ts for the full account and
+    // the governance note on the window size. The read now also FAILS LOUD:
+    // the old `const { data: history } = await …` discarded its error and let
+    // the mentor answer with no memory and no indication why.
     debugStep = 'load_history'
-    const { data: history } = await supabaseAdmin
-      .from('founder_conversation_messages')
-      .select('role, agent_type, content')
-      .eq('conversation_id', convId)
-      .order('created_at', { ascending: true })
-
-    const conversationHistory = history || []
+    const historyRead = await loadRecentHistory(supabaseAdmin, convId)
+    if (historyRead.error) throw historyRead.error
+    const conversationHistory = historyRead.history
+    // Exact count of the messages BEFORE this exchange — PostgREST computes
+    // it on the full set, independent of the row cap. Feeds message_count.
+    // The `?? conversationHistory.length` fallback is defensive only: the
+    // throw above already returns on any read error, and loadRecentHistory
+    // always requests `{ count: 'exact' }`, so `total` is non-null on every
+    // path that reaches this line today (PR19 review, 2026-09-03). Left in
+    // rather than asserted non-null, so a future change to the count request
+    // degrades to an honest (if approximate) window-length count instead of
+    // a runtime throw.
+    const priorMessageCount = historyRead.total ?? conversationHistory.length
 
     // Save founder's message
     //
@@ -1709,7 +1743,9 @@ If the conversation is too casual or brief to yield a meaningful observation, re
         relevance_score: obs.relevance_score,
       })),
       recommended_action: recommendedAction || null,
-      message_count: conversationHistory.length + 2 + contributions.length,
+      // Prior messages (the exact count, not the fetched window's length) +
+      // the founder's message + the primary reply + any observer notes.
+      message_count: priorMessageCount + 2 + contributions.length,
     }, {
       headers: corsHeaders(),
     })
@@ -1776,17 +1812,29 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Conversation not found.' }, { status: 404 })
       }
 
-      const { data: messages, error: msgErr } = await supabaseAdmin
-        .from('founder_conversation_messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
-
-      if (msgErr) throw msgErr
+      // Keyset-paginated, most-recent-first (returned ascending). 2026-09-02
+      // fix — this was an unbounded ASCENDING read, so a conversation past
+      // PostgREST's silent 1,000-row cap lost its NEWEST messages on every
+      // page load (the private-mentor page appeared to end on 31 Aug while
+      // 13 newer rows sat in the database). `?limit=` (default 200, max 500)
+      // and `?before_created_at=&before_id=` (the previous page's
+      // `page.earliest_cursor`) load earlier pages; `page.has_earlier` says
+      // whether any exist. A malformed cursor is a 400, never silently the
+      // first page. See ./conversation-history.ts.
+      const pageParams = parseConversationPageParams(searchParams)
+      if (!pageParams.ok) {
+        return NextResponse.json({ error: pageParams.error }, { status: 400, headers: corsHeaders() })
+      }
+      const pageRead = await loadConversationPage(supabaseAdmin, conversationId, {
+        limit: pageParams.limit,
+        before: pageParams.before,
+      })
+      if (pageRead.error) throw pageRead.error
 
       return NextResponse.json({
         conversation: conv,
-        messages: messages || [],
+        messages: pageRead.messages,
+        page: pageRead.page,
       }, { headers: corsHeaders() })
     }
 
