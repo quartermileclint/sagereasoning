@@ -32254,3 +32254,35 @@ complete; the only remaining M5-class item is `provenance-ledger-store.ts`, expl
 deliberately excluded per the standing provenance-ledger observation window (WATCHED, not carried as
 a gap). C5 (Stripe invoice aggregation) remains deferred until Stripe activation, as before. Nothing
 bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-C4-COMPLETE-LIVE-2026-09-03
+
+**Tier:** `code-elevated`. **AC7:** not engaged — code-only push, no schema/flag/data change; no
+production op for the AI to perform. **Predecessor:** `D-ROW-CAP-SWEEP-C4-REMAINING-SITES-BUILT-2026-09-03`.
+
+Commit `013d46c` pushed to `origin/main`; Vercel green (founder-confirmed). All 15 sites this entry's
+predecessor built (the 12 originally scoped + the 3 the PR19 review surfaced) are now live: every
+GDPR Article 15/20 data-rights read across `user-data-gathering.ts`, `agent-assessment-history-store.ts`,
+`stoa-store.ts`, `idea-loop-watching-store.ts`, `collaboration-store.ts`, `trust-core-store.ts`,
+`session-store.ts`, and `mentor-appendix-store.ts` now reads exhaustively via `pagedRows`/
+`pagedRangeSelect` rather than silently truncating at PostgREST's 1,000-row cap. Nothing observable
+changes in any route's response shape or the mentor-appendix product routes' behavior (the one site
+needing behavior preservation — `listAppendixRounds`'s newest-first order — was explicitly restored
+via a post-pagination re-sort, verified against its three live callers before shipping). No founder
+smoke required — none of these are human-facing UI surfaces a founder would visually verify;
+correctness rests on the independently re-run executed test suite (587 assertions, zero failures)
+and the two-dimension PR19 review, both already discharged in the predecessor entry.
+
+**Status: C4 is now COMPLETE** for every site the sweep report named, with two deliberate exceptions
+recorded, not silently dropped:
+- `provenance-ledger-store.ts` — excluded per the standing provenance-ledger observation window
+  (WATCHED, `provenance-*.ts` do-not-perturb list, in force until ~2026-09-09 at the earliest).
+- C5 (Stripe invoice aggregation, `webhooks/stripe/route.ts:315`) — deferred until Stripe activation,
+  as scoped from the original sweep report onward; dormant today (`payment_events`'s production
+  existence is itself unconfirmed per the report's own §2.3).
+
+**The whole row-cap sweep arc, opened 2026-09-02 with the founder-hub thread-truncation defect, is
+now substantially closed:** the originating founder-hub fix (LIVE), the codebase-wide sweep (85→54
+unbounded-read candidates addressed, only the two disclosed WATCHED/deferred exceptions remaining),
+C1 (all 9 cost-health/abuse/SLO/admin-metrics sites, LIVE), and C4 (all 15 data-rights sites, LIVE)
+are complete. Nothing bears on the 0h call.
