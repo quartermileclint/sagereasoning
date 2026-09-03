@@ -32386,3 +32386,60 @@ route (i) is ever built, flag-and-proceed is the recommended starting disagreeme
 
 **Status:** Scoped. Awaiting the founder's/mentor's ruling — nothing here decides Q1/Q2/Q3. Nothing
 bears on the 0h call.
+
+## D-DISCERNMENT-503-RATE-DIAGNOSED-AND-CLOSED-2026-09-03
+
+**Tier:** `code-elevated` — additive, fail-soft, already-proven library reuse (no new pattern; the
+same `logRouteError`/`isLlmOutage` pair already ships in `api/reflect/route.ts`). Discharges the
+standing opener's own named item: "the discernment-route 503-rate diagnosis is a named, unstarted,
+founder-prioritised task."
+
+**Diagnosis.** The reflections-examination arc (2026-08-22) found 63 identical `http 503 — service
+error` `ELICIT-OUTAGE` events from `/api/practice/discernment` between 2026-07-19 and 08-22, with
+elicitation completion declining 29.2%→7.0% Jul→Aug, but did not diagnose the cause. Traced this
+session: the elicitation branch of `runDiscernmentPost` (`handler.ts`) makes exactly one unguarded
+call — `await elicit(...)`, defaulting to the real `extractFeatures` (a Sonnet Layer-1 call) — with
+no try/catch of its own. `extractFeatures` rethrows on every failure mode (LLM call failure, JSON
+parse failure, prompt-injection-defence rejection, validation error); nothing in the elicitation
+branch catches it locally, so any such failure propagates to the handler's OUTER catch-all, which
+deliberately returns a vague `{ error: 'service error' }, 503` to the client (the R4 reflect posture
+— "the specific reason server-side only") and previously only `console.error`'d the real cause.
+
+**The sharper finding: this route writes to no observability surface at all.** Every sibling
+LLM-calling route (`api/reflect/route.ts` and others) writes to `route_errors` via
+`logRouteError`/`isLlmOutage` on exactly this class of failure; `handler.ts` never did. So the exact
+breakdown behind the 63 events (LLM outage vs. timeout vs. JSON-parse failure vs. something else) is
+**not recoverable from any database query** — only raw Vercel function logs carry it, which a repo
+session cannot read. This is why "the reason" was never established: the diagnostic surface to
+establish it did not exist.
+
+**Fixed at the root, both catch blocks (`runDiscernmentPost`'s elicitation/spawn/hand_back paths and
+`runDiscernmentGet`'s trust-verdict path):** added `logRouteError`/`isLlmOutage` calls, matching the
+established `api/reflect/route.ts` pattern exactly — fire-and-forget via `waitUntil`, missing-table-
+benign until any pending observability migration lands, PII-free (`context: { phase }` only, never
+request content), and **the client-facing response shape is deliberately unchanged** (still the vague
+`503`/`service error` — the R4 posture is a design decision, not a defect, and this fix does not
+touch it). Going forward, every occurrence is queryable via `route_errors` (`route =
+'/api/practice/discernment'`), closing the exact gap that made this diagnosis impossible from a repo
+session.
+
+**Founder-actionable, if the precise historical breakdown is wanted now rather than going forward:**
+the 63 already-occurred events predate this fix and are not recoverable from `route_errors`; only a
+Vercel function-log grep for `[discernment] handler error:` across 2026-07-19→08-22 would recover
+them, and that is the founder's own step (no repo session has Vercel log access).
+
+**Verified:** new source-pin wiring test `discernment-observability-wiring.test.ts` (15 assertions),
+mutation-verified (reverting the POST catch's `logRouteError` call fails exactly 6 of 15 assertions,
+restored and re-confirmed green); `tsc --noEmit` clean; `npm run build` exit 0; the sibling
+`s6-discernment-engine.test.ts` battery (84/0) unaffected, confirming the fix touched only the two
+catch blocks.
+
+**Rollback:** `git revert` this commit — independently revertable; no schema, no flag, no production
+deploy in this entry (ships on the next push).
+
+**Rules served:** PR6, PR15 (bespoke election avoided — reused the existing `observability-store.ts`/
+`llm-outage.ts` pair rather than inventing a new pattern), PR18, PR23.
+
+**Status:** Diagnosed and closed going forward. The historical 63-event breakdown remains
+unrecoverable without founder-run Vercel log access, named honestly rather than guessed at. Nothing
+bears on the 0h call.

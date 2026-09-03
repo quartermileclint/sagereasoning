@@ -104,6 +104,18 @@ import {
 } from '@/lib/translation-sandwich/layer1-extractor'
 import { examineElicitation } from '@/lib/substrate/trust-core/gate2-elicitation'
 import { isTrustCoreEnabled } from '@/lib/substrate/trust-core/trust-core-flag'
+// Standing-queue 503-rate diagnosis (2026-09-03): this route's outer catch
+// blocks previously only console.error'd on the way to a deliberately vague
+// client-facing 503 (the R4 reflect posture — that response shape is kept
+// unchanged). Neither catch wrote to the observability surface every other
+// LLM-calling route already uses, so the reflections-examination arc's 63
+// identical `http 503 — service error` ELICIT-OUTAGE events (Jul-Aug 2026,
+// completion rate 29.2%->7.0%) were undiagnosable from a DB query — only raw
+// Vercel function logs, which a repo session cannot read, carried the actual
+// cause. logRouteError/isLlmOutage close that gap going forward, matching the
+// pattern already established at src/app/api/reflect/route.ts.
+import { logRouteError } from '@/lib/observability-store'
+import { isLlmOutage } from '@/lib/llm-outage'
 import {
   validateCandidateProfile,
   validateOrchestratorProfile,
@@ -695,8 +707,22 @@ export async function runDiscernmentPost(
       metered.headers,
     )
   } catch (e) {
-    // Vague 503 with the specific reason server-side only (R4 — the reflect posture).
+    // Vague 503 with the specific reason server-side only (R4 — the reflect posture)
+    // — the client-facing shape is unchanged. logRouteError is the new part
+    // (2026-09-03, the standing-queue 503-rate diagnosis): PII-free (phase is
+    // one of 'spawn'/'hand_back'/'elicitation', never request content), fire-
+    // and-forget via waitUntil, missing-table-benign until the observability
+    // migration lands — never blocks or alters this response.
     console.error('[discernment] handler error:', e instanceof Error ? e.message : e)
+    const outage = isLlmOutage(e)
+    logRouteError({
+      route: '/api/practice/discernment',
+      method: 'POST',
+      error: e,
+      statusCode: 503,
+      isLlmOutage: outage,
+      context: { phase: typeof phase === 'string' ? phase : null },
+    })
     return json({ error: 'service error' }, 503)
   }
 }
@@ -717,7 +743,18 @@ export async function runDiscernmentGet(
     const verdict = await deps.trustVerdict(auth.agentId)
     return json({ schema: 'practice-discernment-response-v1', mode: 'measure', result: verdict }, 200)
   } catch (e) {
+    // Same 2026-09-03 observability addition as the POST catch above. This
+    // path reads the trust-core store, not an LLM — isLlmOutage will almost
+    // always read false here, kept anyway so the two catch blocks are
+    // uniform and a future read genuinely CAN distinguish the two classes.
     console.error('[discernment] trust-verdict error:', e instanceof Error ? e.message : e)
+    logRouteError({
+      route: '/api/practice/discernment',
+      method: 'GET',
+      error: e,
+      statusCode: 503,
+      isLlmOutage: isLlmOutage(e),
+    })
     return json({ error: 'service error' }, 503)
   }
 }
