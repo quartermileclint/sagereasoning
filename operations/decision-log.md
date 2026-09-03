@@ -32499,3 +32499,131 @@ propagating a three-week-old prompt's summary), Q1.
 SCOPE.md`, `adopted/adr/2026-07-18-agent-practice-trajectory.md` §3.4/§4/§7, `operations/handoffs/
 founder/2026-08-17-AE3-scoping-NEXT-SESSION-PROMPT.md`, `operations/trust-layer-2026-07/2026-07-18-
 S11a-extraction-gate-diagnosis.md`.
+
+---
+
+## 2026-09-03 — D-OC-GATE3-DESIGN-DOCUMENT-AUTHORED-PR19-REWRITTEN
+
+**Date:** 2026-09-03. **Tier:** `governance` — documents only. **Deliverables:**
+`operations/agent-circles-2026-08/2026-09-03-DESIGN-DOCUMENT-oc-per-consumer-rendering-FOR-RULING.md`
+and its companion `2026-09-03-MENTOR-QUESTIONS-oc-gate3-per-consumer-rendering.md`.
+
+**Decision:** Opened **Gate 3** of the O-C three-gate chain on founder election, under the five Q1–Q5
+rulings of `2026-08-23-mentor-rulings-oc-gate2-verbatim.md` as its agenda in the ruled (c) → (d) →
+(a)/(b)/(e) order, and produced a design document **for its own mentor ruling**. **Nothing is built,
+flagged, activated, or published; `SUBSTRATE_LAYER3_ENABLED` remains unset.**
+
+**PR19 — engaged by analogy (its literal scope does not cover a governance document; the
+nine-candidate classification's precedent), and the review changed the document materially.** Three
+independent blind reviewers ran in parallel — claims-vs-source / constraint compliance / design
+soundness — each instructed to break rather than confirm. **The first draft's central proposition was
+WITHDRAWN AS REFUTED and the document substantially rewritten.** Every load-bearing finding was
+**re-verified first-hand against source before folding**; the review record is design §10.
+
+**The withdrawn claim, and why.** The first draft's centre was *"the per-consumer part of
+per-consumer rendering is form, not content"* — that differentiating what is disclosed would tell one
+audience less than the truth. It fails on three independent grounds: **Ruling Set D's L-2 rules the
+opposite** (*"Human form names crisis resources and support paths. Agent form names endpoints,
+structured next steps, and the operator's own escalation process"*) and the first draft **never quoted
+L-2 at all**; the **crisis precedent the draft cited as its own support refutes it** (`developer_note`
+is agent-only and `safety_signal` is, in the source's words, *"ignored for human_user audience"* —
+content withheld from the human by design, on the surface Ruling Set D calls *"the only surface where
+structurally differentiated rendering is live"*); and the argument was **circular** — the block was
+first restricted to server-act claims, then "discovered" to be audience-invariant, retiring the O-C
+question while appearing to answer it. **Replacement, now §8 Q2: the disclosure floor — content may
+differ by audience; the floor may not. No audience may have withheld from it a limit bearing on how it
+should treat the verdict.**
+
+**Other folded findings, each source-verified:** **(1) a fabricated quotation** — the first draft
+presented as a mentor-source quotation a composite appearing in no primary source, and replaced "it"
+with "[the framing]", losing the antecedent (the object of assent is *the distorted impression*); the
+predecessor Gate-2 document had this **right**, so it was a regression. **(2) A false premise** — the
+claim that the consult `meta` is four fields describes the library construction site, not the served
+response, which also carries `previous_trigger`/`narrative_status`/`layer1_source`/**`trajectory`**
+under live flags; `meta.trajectory` is the nearest existing precedent for the proposed block and the
+draft never mentioned it. **(3) A self-defeating collision** — the draft's own §4.1 constraint
+(*"never address the reader as the one who reasoned"*) is violated by its own flagship element, since
+the ruled delivery sentence says the reasoning *"was not returned to **the agent**"* and, on a
+response addressed to that agent, "the agent" is the reader; in a relay sibling it engages R20d's
+other-side. **(4) An unreachable remedy** — the proposed pointer to the durable trust record **404s
+for orientation-only agents** under the ENV-1 gate (`domains.some(hasEvidence) || provenance_gaps`),
+i.e. for exactly the population it was meant to serve. **(5) Dimension (d) silently narrowed** to its
+"why" half, dropping L-2's affordance half entirely — now restored. **(6) Dimension (e) mislabelled
+as declined** while two (e) design decisions were being made; two of its three grounds fail (role
+material **does** exist — a validated `role` on `CandidateProfile`, an A2A-card mapper, an
+`incompatible-role` exclusion — it simply lives on the discernment path, not on `/api/reason`'s
+request), and it is relabelled a bounded design. **(7) No channel classification** — added as §6 with
+a falsifiable success criterion, and it is diagnostic: the record-channel elements are exactly those
+needing **no new wording**, while the two ADVISE-channel elements are the most expensive and, on this
+project's own measured history (the Gate-1 channel law; S6's *"negative-value/noise signal for the
+ADVISE channel"*), the most likely to be discounted. **(8) "Robust under both readings" withdrawn** —
+it was achieved by restating Reading A until it converged with B, and was false for the draft's own
+re-examination affordance; (d-3) is now conditional on the measured mechanism and therefore
+falsifiable. **(9) The L-5 inversion's strongest move** — the licensed *refusal* to answer — is
+declined **explicitly, with its reason**, rather than silently weakened to emit-and-annotate (§8 Q5).
+
+**Two corrections found by this session's own verification, not by review.** **(a) The prescribed
+Part A dormancy check was structurally blind.** The session prompt's command names
+`website/src/lib/substrate/layer3-prose.ts`, **which does not exist** (the file is under
+`translation-sandwich/`); `git log` does not error on a non-matching pathspec, so the check silently
+covered two of three files and would have reported clean regardless. Per-file, all three predate the
+chain — dormancy holds, but not because that check established it. **(b) An inherited misattribution:**
+the Gate-2 document cites the B7 scoping as *"Ruling Set D's B/R-6"*; Ruling Set D contains no such
+item. It is **Ruling Set B's R-6**, and its full wording ends with a clause the Gate-2 document drops
+— *"a served form needs its own scoping session"* — which bears directly on this document's own (c-3)
+position and sharpens the boundary question.
+
+**The delivery-classification polarity, corrected with its scope stated accurately.** Source:
+`elapsedMs <= 28000 ⇒ 'examined'`, `> 28000 ⇒ 'observed'` — so **19 of 22 (≈86%) landed OUTSIDE the
+window, not 3 of 22 (14%)**. Precisely: the Gate-2 document's **§2.2 is correct** and its **§3
+mis-summarises its own evidence**; the session prompt repeats §3's error **while citing §2.2**; the
+mentor's Q2 ruling inherits the figure. Q2's substance is untouched and strengthened — **but the
+correction is NOT uniformly favourable to the design**, and the first draft took the credit without
+the debit: at 86% outside, a response-borne delivery notice reaches ~14% of readers, so the
+circularity is the dominant case and the element's value shifts onto the pointer that 404s.
+
+**Both tracks the prompt told this session to check had moved:** the c11 experiment **ran**
+(2026-08-30; 9/10 `deliberate`, 1/10 `reflexive`, divergence localised to one extraction field, four
+states across ten identical draws), and R8-D6a's pooled n=100 disclosure is **live** on the R18
+surfaces — which also binds this document, since it states *"No rate has been measured on
+`/api/reason`, and this one does not transfer to it."*
+
+**A boundary tension surfaced and NOT resolved (§8 Q1, asked first).** Ruling Set E's **A4**
+(2026-08-30) routes the per-consumer rendering question to the standing-runner design session a week
+after Gate 2 licensed Gate 3 for it; A4's stated premise (*"Layer 3 exists and is injected on
+`/api/reason`"*) is **factually wrong today** (the call is flag-gated, flag unset), though it sits
+inside the mentor's restatement of the register's item; the standing-runner session has already run;
+and the 2026-08-19 carry-forward precedent says such content is *"examined when the session opens, not
+before"*. **This session proceeded on Gate 2's explicit naming of Gate 3 — a judgement, not a
+derivation — and says so.** If Q1 is answered the other way, §§2–6 belong to that track.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Production untouched — `git diff` empty; only two untracked markdown files added.
+
+**Rollback path:** `git rm` the two deliverables and revert this entry. Nothing else is affected.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "single credentialed loop identity" operations/agent-circles-2026-08/2026-09-03-DESIGN-DOCUMENT-oc-per-consumer-rendering-FOR-RULING.md
+git diff --stat -- website/
+```
+Expected: `7` (the Q5 caveat at each point of §6 citation); and an **empty** diff under `website/` —
+no code, schema, or config file touched. (`git diff` overall is non-empty: it shows this
+decision-log append, which is this session's only tracked-file change.)
+
+**Open questions:** seven, all for the mentor (design §8) — the A4 boundary first, then the disclosure
+floor, re-siting ruled text, the delivery sentence's referent, the refusal class, the pointer, and
+dimension (d)'s evidential position.
+
+**Rules served:** PR18, PR19 (by analogy, disclosed as such), PR20, PR23, PR25. Weights **BLOCKED**;
+Q1 hard constraint untouched; the P0 0h hold stands; nothing bears on the 0h call.
+
+**Status:** Adopted (the document as a deliverable for ruling; nothing designed here is licensed).
+Concurrency: `git status` run twice; commit path-scoped; appended at the physical tail per
+`D-DECISION-LOG-PLACEMENT-NOTE-2026-08-24`. Cross-references:
+`D-MENTOR-RULINGS-OC-GATE2-ADOPTED-GATE3-LICENSED-2026-08-23` (the licensing decision),
+`D-MENTOR-RULING-SET-D-LAYER3-SCOPE-DOCUMENT-RECORDED-2026-08-15` (L-1..L-5),
+`D-NINE-CANDIDATE-CLASSIFICATION-PR19-REVIEW-RUN-BASE-RATE-CORRECTED-2026-08-29`,
+`D-STANDING-RUNNER-DESIGN-R8-COMPLETE-C11-EXPERIMENT-RUN-PR19-FOLDED-2026-08-30`,
+`operations/handoffs/founder/2026-09-03-OC-Gate3-per-consumer-rendering-DESIGN-NEXT-SESSION-PROMPT.md`.
