@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { pagedRows } from '@/lib/db/paged-select'
 // R17c (CI-5 / M6, 2026-06-14): genuine deletion of the per-consult agent
 // trajectory keyed to the operator (owner_user_id = profiles.id = the auth user
 // id, per resolveProfileId's handle_new_user invariant).
@@ -213,14 +214,22 @@ export async function DELETE(request: NextRequest) {
     if (!stoaDelete.ok) {
       deletionErrors.push(`stoa_entries: ${stoaDelete.error}`)
     }
-    const { data: credRows, error: credError } = await supabaseAdmin
-      .from('api_keys')
-      .select('id')
-      .eq('owner_user_id', userId)
+    // M6, row-cap sweep 2026-09-02/-03: this key-list read DRIVES deletion —
+    // a truncated list at the 1,000-row cap would leave some credentials'
+    // agent-declared Stoa entries undeleted while the request still reports
+    // success. Paged on `id` (api_keys' UUID PK) so the list is always
+    // exhaustive, however many credentials this owner has.
+    const { rows: credRows, error: credError } = await pagedRows<{ id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id',
+      { eqColumn: 'owner_user_id', eqValue: userId }
+    )
     if (credError) {
-      deletionErrors.push(`stoa_entries (credential resolution): ${credError.message}`)
+      deletionErrors.push(`stoa_entries (credential resolution): ${credError}`)
     } else {
-      for (const { id } of (credRows ?? []) as { id: string }[]) {
+      for (const { id } of credRows ?? []) {
         const agentStoaDelete = await deleteStoaDataForCredential(`api_key:${id}`)
         if (!agentStoaDelete.ok) {
           deletionErrors.push(`stoa_entries (api_key:${id}): ${agentStoaDelete.error}`)
@@ -235,15 +244,21 @@ export async function DELETE(request: NextRequest) {
   // sessions. This is the standing prerequisite the reflect-persist activation was
   // gated on. Fail-collected like the siblings above.
   {
-    const { data: keyRows, error: keysError } = await supabaseAdmin
-      .from('api_keys')
-      .select('agent_id')
-      .eq('owner_user_id', userId)
-      .not('agent_id', 'is', null)
+    // M6, row-cap sweep 2026-09-02/-03: same class as the Stoa credential
+    // resolution above — this list DRIVES which agents' reflect sessions get
+    // deleted. Paged on `id` (api_keys' UUID PK; `agent_id` itself is not
+    // guaranteed unique so it cannot serve as the cursor).
+    const { rows: keyRows, error: keysError } = await pagedRows<{ id: string; agent_id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id, agent_id',
+      { eqColumn: 'owner_user_id', eqValue: userId, notNullColumn: 'agent_id' }
+    )
     if (keysError) {
-      deletionErrors.push(`sage_reflect_sessions (agent resolution): ${keysError.message}`)
+      deletionErrors.push(`sage_reflect_sessions (agent resolution): ${keysError}`)
     } else {
-      const agentIds = [...new Set(((keyRows ?? []) as { agent_id: string }[]).map((r) => r.agent_id))]
+      const agentIds = [...new Set((keyRows ?? []).map((r) => r.agent_id))]
       for (const agentId of agentIds) {
         const reflectDelete = await deleteAgentSessions(agentId)
         if (!reflectDelete.ok) {

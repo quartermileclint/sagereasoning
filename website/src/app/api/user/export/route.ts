@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-encryption'
+import { pagedRows, pagedRangeSelect } from '@/lib/db/paged-select'
 // R17i (CI-5 / M6, 2026-06-14): export the per-consult agent trajectory keyed to
 // the operator (owner_user_id = profiles.id = the auth user id).
 import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-history-store'
@@ -134,14 +135,26 @@ export async function GET(request: NextRequest) {
     { key: 'milestones', table: 'milestones', select: '*' },
   ]
 
+  // M5, row-cap sweep 2026-09-02/-03: this loop was an unbounded per-user
+  // read on every table — a silent truncation here is an incomplete Article
+  // 15/20 copy presented as complete. `pagedRangeSelect` walks each table
+  // exhaustively via offset pagination (no per-table PK knowledge needed —
+  // see the helper's own header for why offset pagination, not keyset, is
+  // the right tool here). `incomplete: true` is added to a table's export
+  // entry ONLY if its safety-valve ceiling (25,000 rows) is hit — an honest
+  // disclosure rather than a silently truncated "complete" export.
   for (const { key, table, select } of tables) {
-    const { data, error } = await supabaseAdmin
-      .from(table)
-      .select(select)
-      .eq('user_id', userId)
+    const { rows: data, error, incomplete } = await pagedRangeSelect(
+      supabaseAdmin,
+      table,
+      (q) => q.eq('user_id', userId),
+      select
+    )
 
-    if (error && !error.message.includes('does not exist')) {
-      exportData[key] = { error: error.message }
+    if (error && !error.includes('does not exist')) {
+      exportData[key] = { error }
+    } else if (incomplete) {
+      exportData[key] = { rows: data || [], incomplete: true }
     } else {
       exportData[key] = data || []
     }
@@ -245,14 +258,21 @@ export async function GET(request: NextRequest) {
     // owned credentials are owner-NULL by the identity XOR, yet the operator
     // is the accountable declarer (the ST4 design) — so they belong in the
     // Art 20 copy too. Keyed by credential_ref, exactly.
-    const { data: credRows, error: credError } = await supabaseAdmin
-      .from('api_keys')
-      .select('id')
-      .eq('owner_user_id', userId)
+    //
+    // M5, row-cap sweep 2026-09-02/-03: was an unbounded per-owner read —
+    // an incomplete key list here means an incomplete Art 20 export presented
+    // as complete. Paged on `id` (api_keys' UUID PK).
+    const { rows: credRows, error: credError } = await pagedRows<{ id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id',
+      { eqColumn: 'owner_user_id', eqValue: userId }
+    )
     if (credError) {
-      exportData.stoa_agent_entries = { error: credError.message }
+      exportData.stoa_agent_entries = { error: credError }
     } else {
-      const refs = ((credRows ?? []) as { id: string }[]).map((r) => `api_key:${r.id}`)
+      const refs = (credRows ?? []).map((r) => `api_key:${r.id}`)
       const agentStoa = await getStoaDataForCredentials(refs)
       exportData.stoa_agent_entries = agentStoa.ok ? agentStoa.value : { error: agentStoa.error }
     }
@@ -273,15 +293,20 @@ export async function GET(request: NextRequest) {
   //     owner-scoping schema step is a named register item gating any external
   //     multi-tenant onboarding.
   {
-    const { data: keyRows, error: keysError } = await supabaseAdmin
-      .from('api_keys')
-      .select('agent_id')
-      .eq('owner_user_id', userId)
-      .not('agent_id', 'is', null)
+    // M5, row-cap sweep 2026-09-02/-03: was an unbounded per-owner read —
+    // an incomplete key list here means some agents' reflect sessions
+    // silently missing from the export. Paged on `id` (api_keys' UUID PK).
+    const { rows: keyRows, error: keysError } = await pagedRows<{ id: string; agent_id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id, agent_id',
+      { eqColumn: 'owner_user_id', eqValue: userId, notNullColumn: 'agent_id' }
+    )
     if (keysError) {
-      exportData.sage_reflect_sessions = { error: `agent resolution: ${keysError.message}` }
+      exportData.sage_reflect_sessions = { error: `agent resolution: ${keysError}` }
     } else {
-      const agentIds = [...new Set(((keyRows ?? []) as { agent_id: string }[]).map((r) => r.agent_id))]
+      const agentIds = [...new Set((keyRows ?? []).map((r) => r.agent_id))]
       const reflectSessions: Record<string, unknown> = {}
       for (const agentId of agentIds) {
         const sessions = await getAgentSessionsForExport(agentId)
@@ -423,18 +448,23 @@ export async function GET(request: NextRequest) {
     'mentor_virtue_profile',
   ]
 
+  // M5, row-cap sweep 2026-09-02/-03: same fix as the user_id loop above,
+  // applied to the profile_id-scoped tables.
   for (const table of profileScopedTables) {
     if (profileIds.length === 0) {
       exportData[table] = []
       continue
     }
-    const { data, error } = await supabaseAdmin
-      .from(table)
-      .select('*')
-      .in('profile_id', profileIds)
+    const { rows: data, error, incomplete } = await pagedRangeSelect(
+      supabaseAdmin,
+      table,
+      (q) => q.in('profile_id', profileIds)
+    )
 
-    if (error && !error.message.includes('does not exist')) {
-      exportData[table] = { error: error.message }
+    if (error && !error.includes('does not exist')) {
+      exportData[table] = { error }
+    } else if (incomplete) {
+      exportData[table] = { rows: data || [], incomplete: true }
     } else {
       exportData[table] = data || []
     }

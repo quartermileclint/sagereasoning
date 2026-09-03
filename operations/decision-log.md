@@ -31909,3 +31909,121 @@ helper generalises it rather than duplicating it ad hoc per site), PR18, PR23 (m
 findings (H10, H11) from the same session's Part B fold. C4 (the data-rights paging class, M5/M6) is
 the next unbuilt item, its own PR19-REQUIRED session. C5 (Stripe invoice aggregation) remains
 deferred until Stripe activation. Nothing bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-C1-LIVE-2026-09-03
+
+**Tier:** `code-elevated`. **AC7:** not engaged — a code-only push, no schema/flag/data change; no
+production op for the AI to perform. **Predecessor:** `D-ROW-CAP-SWEEP-C1-BUILT-2026-09-03`.
+
+Commit `ca60f53` pushed to `origin/main`; Vercel green (founder-confirmed). The nine C1 sites (H2–H7,
+H10, H11) are now live: `pagedRows()` runs on every cost-alerts evaluation, every abuse-evaluate run,
+every SLO-health read, and every admin-metrics call. Nothing observable changes in the response shape
+for any of these routes — the fix corrects the underlying aggregate's completeness, it does not add
+or remove a field. No founder smoke is required (unlike the founder-hub row-cap fix, none of these
+nine routes is human-facing UI a founder would visually verify; they are service-token-gated
+observability/detection endpoints whose correctness the executed test suite already establishes).
+
+**Rollback:** `git revert ca60f53` + push. No schema, no flag, no data to unwind.
+
+**Status:** C1 LIVE. Proceeding to scope and build C4 (the data-rights paging class, `code-critical`,
+PR19 REQUIRED) per the founder's direction.
+
+## D-ROW-CAP-SWEEP-C4-BUILT-2026-09-03
+
+**Tier:** `code-critical` (touches data-deletion functionality per PR19's widened scope). **PR19
+independent adversarial review REQUIRED and DISCHARGED** — one dimension, one MEDIUM finding, folded
+before this entry. **Predecessor:** `D-ROW-CAP-SWEEP-C1-LIVE-2026-09-03` (founder: "record whatever
+close you need in order to proceed with the C4 here now").
+
+**Scoping decision, disclosed up front — this is a DELIBERATE NARROWING of C4's full M5/M6 scope,
+not a completion of it.** The report's M5 row names ~15 distinct sites across `user/export/route.ts`
+and eight separate store files (`user-data-gathering.ts`, `agent-assessment-history-store.ts`,
+`stoa-store.ts`, `idea-loop-watching-store.ts`, `collaboration-store.ts`, `trust-core-store.ts`,
+`sage-reflect/session-store.ts`, `mentor-appendix-store.ts`). Given the effort budget for this
+session and the report's own explicit priority ordering ("the deletion sites first — an incomplete
+deletion reported as success is the class that matters most"), this entry builds:
+
+1. **M6 in full** — both `api_keys` reads in `user/delete/route.ts` that DRIVE which credentials'
+   agent-linked data gets deleted (the Stoa credential resolution + the reflect-session agent
+   resolution). This is the highest-priority item in the whole M5/M6 class per the report's own
+   words.
+2. **The mirrored two `api_keys` reads in `user/export/route.ts`** (the same resolution logic,
+   feeding `stoa_agent_entries` and `sage_reflect_sessions` in the export rather than a delete).
+3. **The two GENERIC per-table export loops in `user/export/route.ts`** — the `user_id`-scoped
+   `tables` array (20 tables) and the `profile_id`-scoped `profileScopedTables` array (9 tables) —
+   covering the bulk of M5's named table list in two fixes rather than ~29 individual ones.
+
+**NOT built this entry, disclosed as carried:** the eight individual store-file sites named in M5
+(`user-data-gathering.ts` and seven `…Store.ts` files), and three individually-coded encrypted-table
+blocks in `user/export/route.ts` (`mentor_profiles`, `mentor_baseline_appendix`,
+`realtime_journal_entries` — each a per-user, structurally low-volume read: `mentor_profiles` is
+`UNIQUE(user_id)`, at most one row; the other two mirror the report's own LOW classification of
+`reflections`, "~3 years of nightly practice to reach 1000"). None of these carried sites showed as
+`now`/`plausible` in the report's severity table — all were `none today` per M5's own reading. The
+sweep re-run (below) confirms these remain the only unbounded reads left in the two touched routes.
+
+**Built:**
+
+1. **`pagedRangeSelect`**, a second export added to `website/src/lib/db/paged-select.ts` alongside
+   C1's `pagedRows`. Offset-based `.range()` pagination rather than keyset — chosen specifically
+   because the export loops iterate ~20-29 DIFFERENT tables generically and most have no `CREATE
+   TABLE` in this repo's tracked migrations, so their primary-key column names could not be verified
+   from source (the precondition `pagedRows`'s keyset strategy requires). Executed test
+   `paged-range-select.test.ts` (17 assertions: multi-page exhaustive walk, a negative control, eq
+   filter correctness across pages, empty-table termination, the `MAX_PAGES`=50 safety valve
+   correctly setting `incomplete:true` rather than looping forever, fail-honest error propagation).
+   **Mutation-verified**: removing the offset-advance line caused 3 assertions to fail correctly
+   (confirming that logic is load-bearing, not incidental).
+2. **Applied at 6 sites**: `user/delete/route.ts`'s two `api_keys` reads (via `pagedRows`, reusing
+   C1's helper unchanged — `api_keys.id` is a confirmed UUID PK), `user/export/route.ts`'s mirrored
+   two `api_keys` reads (same), and `user/export/route.ts`'s two generic loops (via
+   `pagedRangeSelect`, with an honest `incomplete: true` marker folded into a table's export entry
+   if the safety valve ever fires — never silently presenting a capped result as complete).
+3. **Wiring regression test** `paged-select-c4-wiring.test.ts` (15 assertions, source-pinning every
+   one of the six sites against the actual route files). **Non-vacuity confirmed by mutation**:
+   reverting `user/delete/route.ts`'s Stoa credential-resolution site to the old bare pattern failed
+   exactly the 2 assertions naming it, nothing else — restored and re-verified green.
+
+**PR19 independent review, dimension `data-deletion-correctness` (one small launch, first-hand):**
+- **Confirmed CLEAN:** both `api_keys` reads in `user/delete/route.ts` — correct `owner_user_id`
+  scoping (no cross-tenant risk), correct `notNullColumn` on the second read, correct cursor (`id`,
+  a genuine UUID PK, no tie residual), no unconverted `api_keys` reads remaining anywhere in either
+  file (grep-confirmed by the reviewer independently). The export route's mirrored `api_keys` reads,
+  same verdict. The `error.includes(...)` vs the old `error.message.includes(...)` change: confirmed
+  NOT a regression (`pagedRangeSelect` already reduces to a plain string before returning).
+- **1 MEDIUM confirmed and folded:** `pagedRangeSelect` issues `.range()` with no explicit
+  `.order()` — the header's original claim that PostgREST returns "typically insertion/heap order,
+  which is sufficient" is an assumption, not a guarantee, and each page is a separate HTTP
+  round-trip (no held cursor), so a plan change or concurrent write between pages can genuinely
+  reorder rows — reachable by ORDINARY concurrent use (e.g. the same user submitting a new journal
+  entry the same moment they export their data), not only adversarial timing. **Folded**: the
+  docstring is rewritten to name this explicitly as a confirmed, not merely theoretical, residual,
+  state it is NOT bounded away by the helper's own design (only by today's per-site data volumes,
+  all currently under one page), and clarify `incomplete:true` does not catch this class — only the
+  page-count ceiling. **Not code-fixed** (adding `.order()` would require per-table PK verification
+  across ~20-29 schemas, the exact problem `pagedRangeSelect` was built to avoid — the reviewer's own
+  verdict was ship-safe with the disclosure strengthened, not a blocking defect, and this is recorded
+  as a named follow-up rather than silently accepted).
+- **1 NIT, pre-existing, not introduced this session:** the `error.includes('does not exist')`
+  substring check could in principle mis-classify an unrelated error containing that text as
+  missing-table-benign — this pattern predates this session's changes.
+- **Reviewer's overall verdict:** both routes' `api_keys`-resolution changes (the primary M6/M5
+  target) are correct and safe to ship; the `pagedRangeSelect` disclosure was strengthened, not
+  code-changed, before shipping.
+
+**Verified:** `paged-range-select.test.ts` 17/0; `paged-select-c4-wiring.test.ts` 15/0; `tsc --noEmit`
+clean across the whole tree; `npm run build` exit 0. Sweep re-run: candidate count **75 → 69**. Zero
+unbounded reads remain in `user/delete/route.ts`; the four remaining hits in `user/export/route.ts`
+are `profiles` (by unique id, matches the report's own §2.4 NONE classification — no fix needed) and
+the three disclosed-carried encrypted per-user blocks named above.
+
+**Rollback:** `git revert` this commit — independently revertable; no schema, no flag.
+
+**Rules served:** PR6, PR15, PR18, PR19 (dimension run, one MEDIUM confirmed and folded, verdict
+recorded), PR23.
+
+**Status:** C4 PARTIALLY BUILT — M6 fully closed, M5's two generic loops + api_keys mirror closed;
+the eight individual store-file sites and the three encrypted per-user blocks are carried, named
+explicitly, not silently dropped. The next C4 session (if elected) should target
+`user-data-gathering.ts` and the seven `…Store.ts` files using the same `pagedRows`/`pagedRangeSelect`
+toolkit built here. Nothing bears on the 0h call.
