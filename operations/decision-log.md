@@ -32822,3 +32822,98 @@ twice, path-scoped commit, appended at the physical tail.
 `D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03` (Q1, §11),
 `2026-09-01-mentor-instruction-bidirectional-algorithm-verbatim.md`,
 `2026-08-24-agent-cybernetic-control-architecture.md` §3, `2026-08-29-nine-candidate-remediation-shape-classification.md`.
+
+## 2026-09-04 — D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — documents only. **Verbatim record:**
+`operations/agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-close-gate-discrepancy-verbatim.md`
+— **binding on the founder's relay; the verbatim wins over every summary, including this entry.**
+
+**Decision:** The mentor's ruling on the one internal discrepancy in the 2026-09-04 standing-runner
+relay — drafted as a question the same day
+(`2026-09-04-MENTOR-QUESTION-standing-runner-close-gate-discrepancy.md`, `02e6be6`) — is **adopted as
+binding**, captured verbatim, and executed documents-only. **Both questions answered.**
+
+**The ruling.** **Q1 — reading (a) governs: the governing brief's "Close gate" section is a DRAFTING
+SLIP; ruling A4 stands.** The nine-candidate close gate is **discharged**, the new-lens
+classification is **not** a close condition, and the charitable "required deliverable" reading is
+*"noted but not adopted"* because *"even as a required deliverable, the finding cannot be produced
+honestly in the sense the Close-gate section names."* **Q1a — the environment component is NOT
+REQUIRED.** The C1 (runner-attested) sense is **unavailable** for these nine and *"cannot be
+produced"*; the C5/M7 (assessed-classification) sense is producible as a **voluntary** finding
+recorded as a separate act, and **if produced must be recorded under a name distinct from the
+C1-defined environment tag** — conflating them *"would corrupt the trust posture of both."* **The
+expanding-move component is STRUCK**, present and future, as applied to these nine; an honest
+*"inapplicable to pre-reframe candidates"* note is a legitimate **scoping observation**, explicitly
+not a classification and not a discharge of one. **A5.1** confirmed cosmetic. **A5.2** noted, no
+ruling given, **the receiving session carries it**. **M1–M7 verified and accepted as stated.**
+
+**Two durable interpretive principles the ruling states, recorded because they will apply again
+beyond this item:** *"When two passages in the same document conflict, and one carries reasoning and
+the other does not, the one with reasoning governs."* And: *"A deliverable requirement that can only
+be discharged by producing something other than what it names is not a well-formed deliverable
+requirement. It dissolves on contact with the mechanism facts."*
+
+**What decided it was source, not wording.** The question was drafted to ask which sentence wins;
+checking the record to write it established that **neither component of the new lens is retroactively
+applicable to these nine in the sense C1 defines** — no environment was or could be runner-attested
+for a run closed 2026-08-16 and no column exists to hold one (M3/M6), and no expanding-move measure
+exists in any adopted document while the candidates were produced by the seven heuristics as
+candidate-production functions, so no move sequence exists to measure (M4/M5). The mentor accepted
+those facts as *"the independent structural confirmation that makes the choice unambiguous."*
+
+**Executed, documents only:** the verbatim capture (NEW); a dated **RULED** banner on the question
+document with both answers and the questions left legible beside them (the Gate-3 precedent); a dated
+**RESOLVED** note on the 2026-09-04 brief capture's §4.2, **the original statement preserved beneath
+it unedited** so the reasoning that was ruled on stays legible; the named-input register's
+nine-candidate row rewritten to the ruled state, carrying the **binding naming constraint** on any
+voluntary M7-mode classification and the inherited A5.2 design question; one clause added to
+`/CLAUDE.md`'s 2026-09-04 addendum.
+
+**Nothing else.** No design element evaluated; **no environment assigned to any candidate and no
+M7-mode classification produced** — it is voluntary and belongs to the receiving session, not this
+one; no schema, code, flag, or credential touched. The standing-runner design session was **not
+opened**: its gate (Option S's disagreement-rate data in hand) is unchanged by this ruling and
+remains unmet, Option S being unbuilt.
+
+**One item genuinely closed.** The 2026-09-04 relay's internal close-gate discrepancy is resolved.
+Nothing in the standing-runner track's named-input load is now recorded as an unresolved
+contradiction; what remains there is design work and the unmet Option S gate, not defects in the
+record.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Production untouched; `git diff -- website/` clean. Weights **BLOCKED**; the Q1 hard constraint
+untouched; the P0 0h hold stands; nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this session's commit — the capture, the two annotations, the register
+row, the CLAUDE.md clause and this entry are one path-scoped commit.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "RULED 2026-09-04" operations/agent-circles-2026-08/2026-09-04-MENTOR-QUESTION-standing-runner-close-gate-discrepancy.md
+git diff --stat HEAD~1 -- website/
+```
+Expected: at least `4`; no output from the second.
+
+**Open questions:** none on this item — it is closed. The receiving session carries a voluntary
+option (with its naming constraint), an optional scoping observation, and A5.2's design question.
+
+**Rules served:** PR18, PR20 (the mechanism facts that decided the ruling were verified at source,
+not inherited), PR23. Concurrency: `git status` run twice; commit path-scoped; appended at the
+physical tail.
+
+**Session honesty note.** The at-action guardrail returned CAUTION on the file-edit action that
+carried these annotations, on the documented sparse-extraction basis (*"no kathekon factors were
+extracted from the submitted text"*), and the Gate-2 elicitation fired; the three sub-questions were
+answered in-conversation. The honest answer to the third was that the resolution — capture verbatim
+and execute, per the convention followed earlier the same session — **preceded** the examination
+rather than following it. Recorded rather than smoothed over.
+
+**Status:** Adopted. Cross-references:
+`2026-09-04-MENTOR-QUESTION-standing-runner-close-gate-discrepancy.md` (the ruled question),
+`D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04` (the relay this corrects),
+`D-NINE-CANDIDATE-CLASSIFICATION-PR19-REVIEW-RUN-BASE-RATE-CORRECTED-2026-08-29` (the discharging
+record), `2026-08-16-idea-loop-S6-report.md`,
+`2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (the Option S gate; Q1a/Q1c),
+`2026-08-30-standing-runner-design-R8.md` §4.3.

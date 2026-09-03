@@ -640,7 +640,21 @@ primary record (PR20). The records cited in each question are the ones the sessi
   2026-09-04: no K-sampling, `verdict_basis`, median-of or worst-of logic exists on the guardrail
   path).
 
-### 4.2 Two internal discrepancies in the response — NAMED, NOT RESOLVED (the verbatim text is
+### 4.2 Two internal discrepancies in the response — **BOTH RESOLVED 2026-09-04, same day** (see the
+resolution note immediately below; the original statement of each is preserved beneath it, unedited,
+so the reasoning that was ruled on stays legible)
+
+> **⚖ RESOLVED 2026-09-04** (`agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-close-gate-discrepancy-verbatim.md`;
+> `D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04`). Item 1 was put to the
+> mentor as a drafted question (`2026-09-04-MENTOR-QUESTION-standing-runner-close-gate-discrepancy.md`)
+> and **ruled: reading (a) governs — the Close-gate section is a DRAFTING SLIP; A4 stands.** The
+> nine-candidate close gate is discharged and the new-lens classification is **not** a close
+> condition; the environment component is **not required** (the C1 runner-attested sense is
+> unavailable for those nine; the C5/M7 assessed sense is voluntary and, if produced, must be named
+> distinctly from the C1 tag); the expanding-move component is **struck**. Item 2 is **confirmed
+> cosmetic**. **Neither is an open discrepancy in the record any longer.**
+
+*(Original statement of both items, as recorded before the ruling — the verbatim text is
 preserved on both sides; the founder decides whether to put them back to the mentor)
 
 1. **The nine-candidate close gate — three statements, one of which differs.** Ruling A4 says the

@@ -1,6 +1,42 @@
 # Mentor question — is the new-lens classification of the nine candidates a session finding, or a close condition? And in which sense of "the new lens"?
 
-**Authored 2026-09-04.** `governance`, documents only. **Nothing here proposes a build, a schema
+> **⚖ RULED 2026-09-04 — ANSWERED, both questions. These annotations are BINDING and win over the
+> body wherever they differ; the verbatim record wins over them in turn**
+> (`agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-close-gate-discrepancy-verbatim.md`; relayed same day):
+>
+> - **Q1 — reading (a) governs. The Close-gate section is a DRAFTING SLIP; A4 stands.** The
+>   nine-candidate close gate is **discharged**; the new-lens classification is **not** a close
+>   condition. Part 3's structural facts are accepted as *"the independent structural confirmation
+>   that makes the choice unambiguous."* The Part 2 charitable reading is **noted but not adopted** —
+>   *"The grounding session was right not to adopt it"* — because *"even as a required deliverable,
+>   the finding cannot be produced honestly in the sense the Close-gate section names."*
+> - **The interpretive principle, stated generally and worth carrying:** *"When two passages in the
+>   same document conflict, and one carries reasoning and the other does not, the one with reasoning
+>   governs."* And: *"A deliverable requirement that can only be discharged by producing something
+>   other than what it names is not a well-formed deliverable requirement. It dissolves on contact
+>   with the mechanism facts."*
+> - **Q1a — the environment component is NOT REQUIRED.** The **C1 (runner-attested) sense is
+>   unavailable** for these nine and *"cannot be produced"*; the **C5/M7 (assessed-classification)
+>   sense is producible as a VOLUNTARY finding**, recorded as a separate act — and **if produced it
+>   must be recorded under a name that distinguishes it clearly from the C1-defined environment
+>   tag**, because conflating them *"would corrupt the trust posture of both."* No third form is
+>   named; *"the two forms above exhaust the honest options given the mechanism facts."*
+> - **The expanding-move component is STRUCK** from any requirement, present or future, as applied
+>   to these nine, on both of Part 3(b)'s independent grounds. An honest *"inapplicable to
+>   pre-reframe candidates"* note is a legitimate **scoping observation**, explicitly **not** a
+>   classification and **not** a discharge of one.
+> - **Annex: A5.1** confirmed cosmetic (correct the governing brief if reissued; no ruling affected).
+>   **A5.2** noted, **no ruling given**, and **the receiving session carries it** — *"the concrete
+>   form of the design work those rulings point toward,"* not an objection to B4 or C2.
+> - **M1–M7 are verified and accepted as stated.** Untouched by the ruling: the prior close gate's
+>   discharge, the Option S opening gate (unchanged, unmet), environment assignment on future
+>   candidates, the C5 Workshop mapping, and the vocabulary-direction question.
+>
+> **The questions below are left exactly as put, beside their answers.** Nothing in this ruling
+> licenses a build, an activation, a schema change, or the opening of the standing-runner design
+> session.
+
+**Authored 2026-09-04. ⚖ RULED 2026-09-04 — see the banner above.** `governance`, documents only. **Nothing here proposes a build, a schema
 change, or an activation**, and nothing here elects a reading. No code, migration, flag, credential,
 or public surface was touched. Weights BLOCKED. The standing-runner design session is **not opened**
 by this document; its gate (Option S's disagreement-rate data in hand) is unmet.
@@ -141,7 +177,7 @@ mentor to ratify it in preference to examining the question.
 
 ## PART 4 — The question
 
-**Q1. Which reading governs?**
+**Q1. Which reading governs?** — **⚖ RULED: (a).**
 
 - **(a) A4 governs.** The Close-gate section is a drafting slip. The new-lens finding is optional —
   the session may produce it and commission a re-classification as a separate act, and its close is
@@ -152,7 +188,7 @@ mentor to ratify it in preference to examining the question.
   not a *gate* in the blocking sense (Side A) — the session cannot close without having attempted it,
   and an honest "not applicable, for the reasons in Part 3" discharges the attempt.
 
-**Q1a — the sub-question that arises under (b) or (c), and that we cannot answer from the record.**
+**Q1a — the sub-question that arises under (b) or (c), and that we cannot answer from the record.** — **⚖ RULED: not required; C1 sense unavailable, C5/M7 sense voluntary under a binding naming constraint.**
 If the finding is required in any form, in which sense is the environment component to be produced:
 
 - **the C1 sense** (runner-attested) — which is **unavailable** for these nine, so the requirement
@@ -178,12 +214,12 @@ which stays held open and owned by no session (D1).
 Included because withholding them would leave the mentor deciding with less than the executing
 session knows. Neither is a question; both are already in the 2026-09-04 capture's notes.
 
-**A5.1 — A duplicated bullet in the governing brief (cosmetic).** The "What the session does not do"
+**A5.1 — A duplicated bullet in the governing brief (cosmetic). ⚖ CONFIRMED cosmetic 2026-09-04.** The "What the session does not do"
 list states the §5d exclusion twice, as bullets 3 and 5, in slightly different words. No substantive
 difference. Recorded so a later reader does not take the duplication for two distinct items; the
 mentor may wish to correct it in place if the brief is ever reissued.
 
-**A5.2 — Rulings B4 and C2 land on a read surface that does not exist today.** B4 has the runner
+**A5.2 — Rulings B4 and C2 land on a read surface that does not exist today. ⚖ NOTED 2026-09-04, no ruling given; the receiving session carries it.** B4 has the runner
 reading the executing agent's harness-held examined state *"at cycle start"*; C2 has the harness
 supplying a dwelling parameter *"at cycle start."* **There is no server → runner per-cycle read
 surface.** `POST /api/practice/watching` is the only runner-facing route (runner → server, no `GET`);
@@ -210,5 +246,6 @@ and the governing brief's "Close gate" section — **verbatim wins over this doc
 `2026-08-30-standing-runner-design-R8.md` §4.3 (A5.2) ·
 `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (Q1a, Q1c; the Option S gate).
 
-*End of question. Documents only; nothing built, activated, or published. The standing-runner design
-session remains unopened and its gate unmet.*
+*End of question. **Status: RULED 2026-09-04** — both questions answered; the verbatim record governs.
+Documents only; nothing built, activated, or published. The standing-runner design session remains
+unopened and its gate unmet.*
