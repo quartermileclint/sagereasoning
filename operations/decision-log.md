@@ -31746,3 +31746,62 @@ session's work descends from).
 **Status:** C3 and Part D CLOSED with executed regression pins. C1/C2/C4/C5 carried, each requiring
 its own founder-walked session (migration or PR19-required review) per the report's own remediation
 order. Part B's SQL counts are the founder's to run and report back. Nothing bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-PART-B-COUNTS-FOLDED-2026-09-03
+
+**Tier:** `governance`/records. No code, no schema, no flag — this entry folds founder-run SQL
+results into the sweep report and reclassifies four findings; no production change.
+**Predecessor:** `D-ROW-CAP-SWEEP-REMEDIATION-PARTIAL-C3-D-2026-09-03`.
+
+**The founder ran Part B's five SQL statements against production and reported:**
+
+| query | result |
+|---|---|
+| `translation_sandwich_comparisons` month-to-date | **0** |
+| `analytics_events` last 7 days | **752** |
+| `get_event_counts` RPC exists | **no (0 rows)** |
+| `agent_provenance_ledger` total | **308** |
+| `mentor_interactions` total | **605** |
+
+**Folded, with two genuine reclassifications discovered while folding (not just transcription):**
+
+1. **H8/M2 DOWNGRADED to no-risk.** The 0-row count prompted a direct read of the write path
+   (`parallel-run.ts`) rather than accepting it at face value. The write only happens inside
+   `runParallelSandwich()`, gated behind `TRANSLATION_SANDWICH_PARALLEL_RUN==='1'` at module load —
+   the retired ADR-004 shadow-comparison mechanism from the original sandwich cutover. Nothing in
+   `/api/reason/route.ts` calls it (grep-confirmed). **The original report's H8 finding overclaimed:
+   it cited this write as unconditional on the live path ("a row is written per sandwich consult"),
+   which is false.** Corrected in place; if the flag is ever re-activated this finding must reopen.
+2. **M3→H11 and M4→H10, both PROMOTED to confirmed HIGH.** 752/1,000 in 7 days confirms M3 is
+   near-term, not merely plausible. The RPC-existence check confirming `get_event_counts` is absent
+   from production means M4's conditional "now if the fallback is live" resolves to **CONFIRMED
+   NOW** — `admin/metrics/route.ts:83`'s unbounded `analytics_events` fallback is the live path on
+   every single admin-metrics request today, unconditionally.
+3. **H1 and H9 cross-checked against their already-completed fixes.** 308 (ledger) and 605
+   (mentor_interactions) both consistent with the report's projected growth trajectories; both
+   already fixed earlier this session (`D-ROW-CAP-SWEEP-REMEDIATION-PARTIAL-C3-D-2026-09-03`).
+
+**Report updated in place** (`operations/founder-hub-2026-09/2026-09-02-unbounded-select-sweep-REPORT.md`):
+§1 headline, the H1/H8/H9 rows, two new rows H10/H11 (promoted from M4/M3), the M2/M3/M4 rows marked
+superseded with pointers, the §2.3 provenance-tally row's stale "whole-table" claim on
+`:132/:141` corrected (only the ledger read genuinely was — a second finding of the same overclaim
+class as H8, caught by direct source read while updating this entry, not by a fresh review pass),
+§3's unknown-cardinality section resolved with dated founder-run counts, the RPC table's
+`get_event_counts` row resolved, and §6's remediation order reordered to put H10/H11 first (the most
+urgent, confirmed-live findings in the whole report).
+
+**Not built this entry:** H10/H11's fix (aggregate-in-SQL or a real `get_event_counts` RPC) — this
+is C1 from the predecessor's remediation order, needing a new SQL function/view and a founder-walked
+TEST-then-production migration. Recommended as the next session given the confirmation that H10 is
+truncating live traffic today, not hypothetically.
+
+**Rollback:** `git revert` this commit — a documents-only change, independently revertable.
+
+**Rules served:** PR6, PR18, PR20 (present-tense mechanism facts about `get_event_counts` and the
+`TRANSLATION_SANDWICH_PARALLEL_RUN` flag verified against source at the moment of folding, not
+carried forward from the original report unchecked).
+
+**Status:** Part B closed. Two findings resolved (H1, H9, already fixed), one downgraded to no-risk
+with a corrected overclaim (H8/M2), two confirmed and promoted to urgent (H10, H11). The founder's
+next call: whether to open the C1 session (H10/H11's SQL-aggregate fix) given the confirmed live
+truncation, or sequence it behind something else. Nothing bears on the 0h call.

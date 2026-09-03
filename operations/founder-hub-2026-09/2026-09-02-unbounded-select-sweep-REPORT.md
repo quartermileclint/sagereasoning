@@ -22,12 +22,20 @@ order = heap order, effectively arbitrary.
 
 ## 1. Headline
 
-Of 85 unbounded candidates, **12 sites on 4 global/ledger tables can cross the cap NOW or within
-weeks, and every one of them feeds a number somebody reads as true**: the A13 cost-health detectors
-(daily Slack), the A19 abuse detectors, the A14 SLO tracker, the monthly LLM-cost and revenue:cost
-figures, and the provenance-ledger C2 discharge tally that gates slice 5's ENFORCE switch-on. One
-more is a governing surface: the mentor profile's rolling-window update reads the ENTIRE
-`mentor_interactions` table with no filter (485 rows in August, growing ~110/month). A second class —
+**Updated 2026-09-03 with founder-run production counts (§3) — two findings resolved lower than
+scoped (H1, H9, both FIXED same day) or downgraded to no-risk (H8/M2, a report overclaim corrected
+in place), two findings CONFIRMED and PROMOTED from conditional MEDIUM to HIGH (M3→H11, M4→H10 — the
+`get_event_counts` RPC is confirmed absent from production, meaning the `analytics_events`
+all-time-fallback is silently truncating on every admin-metrics call right now).**
+
+Of 87 unbounded candidates (85 in the original inventory + 2 found by the retroactive review's fix
+to the sweep tool's own root list, 2026-09-03), the sites that can cross the cap NOW feed a number
+somebody reads as true: the A13 cost-health detectors (daily Slack), the A19 abuse detectors, the
+A14 SLO tracker, and — now confirmed rather than conditional — the admin metrics dashboard's
+all-time and weekly event counts. Two governing surfaces have already been fixed this session: the
+provenance-ledger C2 discharge tally (H1) and the mentor profile's rolling-window update (H9), both
+were reading whole tables with no filter and both now carry executed, mutation-verified regression
+pins. A second class —
 **every data-rights export/access read** (≈30 sites) — is structurally unbounded and will silently
 produce an incomplete Article 15/20 copy the day any per-user table passes 1,000 rows; none does
 today. Everything else is bounded by structure (a primary key, a vocabulary, a 56-day curriculum) or
@@ -46,24 +54,26 @@ Legend — **can_exceed**: `now` (evidence the set already exceeds or nearly exc
 
 | # | site | table | order | filter | can_exceed | consumer | what goes silently wrong | fix |
 |---|---|---|---|---|---|---|---|---|
-| H1 | `website/scripts/provenance-c2-discharge-tally.ts:170` | `agent_provenance_ledger` | asc `recorded_at` | none (whole table) | **now/weeks** — ~47 rows/day since 2026-08-26 (187 in 4 days); crosses 1,000 ≈ 2026-09-17; 90-day steady state ≈ 4,000 | the C2 discharge tally — the readiness instrument for slice 5 (ENFORCE) | the tally counts 1,000 of N entries, the NEWEST dropped; a "100% resolution" reading over an unverified set — the exact "verified arithmetic on an unverified set" class | **WATCHED** (`provenance-*.ts`) — report only. When the window closes: page the read (keyset on `recorded_at,id`) or tally in SQL |
+| H1 | `website/scripts/provenance-c2-discharge-tally.ts:170` | `agent_provenance_ledger` | asc `recorded_at` | none (whole table) | **now/weeks** — ~47 rows/day since 2026-08-26 (187 in 4 days); crosses 1,000 ≈ 2026-09-17; 90-day steady state ≈ 4,000. **Founder-confirmed 2026-09-03: 308 rows** — on track for the projected crossing. **FIXED 2026-09-03** (`D-ROW-CAP-SWEEP-REMEDIATION-PARTIAL-C3-D-2026-09-03`): the read is now keyset-paged on `(recorded_at, id)`, no longer WATCHED-as-a-risk (fix landed inside the watch window itself). | the C2 discharge tally — the readiness instrument for slice 5 (ENFORCE) | the tally counts 1,000 of N entries, the NEWEST dropped; a "100% resolution" reading over an unverified set — the exact "verified arithmetic on an unverified set" class | **DONE** — `pagedLedgerRead()` |
 | H2 | `website/src/app/api/billing/cost-alerts/evaluate/route.ts:246` | `loop_billing_events` | none (heap) | none (whole table) | **now** — ~3,200 rows by 2026-08-25, append-only, no retention | D4 per-call spike (global): count, total, max over "all loops" | computed over an arbitrary 1,000-row subset; the daily Slack cost-health signal is wrong with no indication | aggregate in SQL (`count`, `sum`, `max` via RPC or a view) — never fetch rows to sum them |
 | H3 | `…/cost-alerts/evaluate/route.ts:131` | `loop_billing_events` | none | `agent_id not null` (whole table) | **now** | enumerate identities to evaluate | identities beyond the first 1,000 rows are silently excluded from cost evaluation | `select distinct agent_id` via RPC/view, or page |
 | H4 | `…/cost-alerts/evaluate/route.ts:173` and `website/src/lib/substrate/substrate-identity-baseline.ts:70` | `loop_billing_events` | none | `.eq('agent_id')` | **now** for `sagereasoning:s9-loop@v1` (the dominant consult identity; thousands of loops) | per-identity anomaly detector; identity cost baseline | loop count, total and max computed on 1,000 arbitrary rows of one agent | aggregate in SQL |
 | H5 | `website/src/app/api/abuse/evaluate/route.ts:134` | `substrate_audit_events` | none | `agent_id not null` (whole table) | **now** — ~3,200+ rows, append-only, DELETE revoked | enumerate identities for the A19 abuse detectors | identities silently dropped from abuse detection | `distinct agent_id` via RPC/view |
 | H6 | `…/abuse/evaluate/route.ts:187` | `substrate_audit_events` | none | `.eq('agent_id')` | **now** for s9-loop | velocity + structural detectors (windowed request counts, input-size sets) | detectors run on an arbitrary 1,000-event subset; a burst can be invisible | bound by time window (`gte occurred_at`) AND aggregate in SQL |
 | H7 | `website/src/app/api/admin/slo-health/route.ts:54` | `substrate_audit_events` | none | `.eq('surface','api_reason')` | **now** | the A14 SLO/health tracker (percentile latencies) | the SLO figure is a percentile over 1,000 arbitrary rows, not the population | windowed read (last N days) with a limit, or percentiles in SQL |
-| H8 | `website/src/app/api/billing/usage-summary/route.ts:109` and `…/cost-alerts/evaluate/route.ts:285` | `translation_sandwich_comparisons` | none | month window | **plausible-now** — a row is written per sandwich consult (`parallel-run.ts:1281`); at ~48 consults/day ≈ 1,450/month | monthly LLM cost (D1 denominator, D3) and the usage summary | the month's cost is understated; the revenue:cost ratio is wrong | `sum()` in SQL; **founder SQL to confirm today's count:** `select count(*) from translation_sandwich_comparisons where created_at >= date_trunc('month', now());` |
-| H9 | `sage-mentor/profile-store.ts:876` (`computeRollingWindow`, called live from `updateProfileFromReflection` at `:1175`, which `/api/reflect` and `/api/mentor/private/reflect` call) | `mentor_interactions` | none | **none — the whole table, every user**; filtered by `profile_id` and date client-side | **plausible** — 485 rows on 2026-08-18, ~110/month → ≈ early 2027 for one practitioner; sooner with any second one | the mentor profile's rolling-window update (a governing surface's memory) | the window is computed on an arbitrary 1,000-row subset; also reads every practitioner's rows to find one (a privacy/perf smell outside this sweep) | `.eq('profile_id', …).gte('created_at', cutoff).order(desc).limit(HUMAN_ROLLING_WINDOW.max_interactions)` |
+| H8 | ~~`website/src/app/api/billing/usage-summary/route.ts:109` and `…/cost-alerts/evaluate/route.ts:285`~~ **DOWNGRADED to `no` 2026-09-03, see correction below** | `translation_sandwich_comparisons` | none | month window | ~~plausible-now~~ **NO — dormant.** Founder-confirmed count is **0 for month-to-date 2026-09**. Read first-hand: the write happens ONLY inside `runParallelSandwich()` (`parallel-run.ts:1227`), which is a no-op unless `TRANSLATION_SANDWICH_PARALLEL_RUN==='1'` at module load — the retired ADR-004 shadow-comparison mechanism from the original sandwich cutover. Nothing in `/api/reason/route.ts` calls `runParallelSandwich` today (grep-confirmed). **The report's original citation of `parallel-run.ts:1281` as "a row is written per sandwich consult" was an overclaim — that line is only reached under a flag that is not exercised by the live route.** | monthly LLM cost (D1 denominator, D3) and the usage summary | none currently — the table is not populated by the live path | none required; if `TRANSLATION_SANDWICH_PARALLEL_RUN` is ever re-activated, re-open this finding |
+| H9 | `sage-mentor/profile-store.ts:876` (`computeRollingWindow`, called live from `updateProfileFromReflection` at `:1175`, which `/api/reflect` and `/api/mentor/private/reflect` call) | `mentor_interactions` | none | **none — the whole table, every user**; filtered by `profile_id` and date client-side | **plausible** — 485 rows on 2026-08-18, ~110/month → ≈ early 2027 for one practitioner; sooner with any second one. **Founder-confirmed 2026-09-03: 605 rows** — actual growth ≈120 rows/16 days ≈ 7.5/day, faster than the report's ~3.7/day estimate; at this rate the table crosses 1,000 around **mid-October 2026**, sooner than "early 2027". **FIXED 2026-09-03** (`D-ROW-CAP-SWEEP-REMEDIATION-PARTIAL-C3-D-2026-09-03`): query now DB-filtered/windowed/ordered/limited. | the mentor profile's rolling-window update (a governing surface's memory) | the window is computed on an arbitrary 1,000-row subset; also reads every practitioner's rows to find one (a privacy/perf smell outside this sweep) | **DONE** — `.eq('profile_id', …).gte('created_at', cutoff).order(desc).limit(HUMAN_ROLLING_WINDOW.max_interactions)` |
+| H10 (new 2026-09-03, promoted from M4 §2.2) | `…/admin/metrics/route.ts:83` | `analytics_events` (whole table, fallback) | none | **CONFIRMED NOW.** `select proname from pg_proc where proname='get_event_counts'` returned zero rows in production — the RPC does not exist, so `totalEvents.error` is truthy on EVERY call and the unbounded `analytics_events.select('event_type')` fallback (`admin/metrics/route.ts:83-88`) is the live path, unconditionally, on every request to this route. | the admin metrics dashboard's all-time event counts | all-time counts are silently truncated to an arbitrary 1,000 rows on every admin-metrics page load, right now | either implement `get_event_counts` as a real SQL aggregate RPC, or replace the fallback's `select('event_type')` with a `count`-grouped SQL read |
+| H11 (new 2026-09-03, promoted from M3 §2.2) | `website/src/app/api/admin/metrics/route.ts:42` | `analytics_events` (7-day window) | none | **near-term, not merely plausible.** Founder-confirmed 2026-09-03: **752 rows in the trailing 7 days** — roughly 107 rows/day. The rolling 7-day window is within days of crossing 1,000 at this rate, not "sometime". | the admin metrics dashboard's weekly event counts | the week counts will silently truncate within days if the rate holds or grows | `count` by `event_type` in SQL, or a windowed read with an explicit `.limit()` well above any plausible weekly volume plus a `count`-only aggregate |
 
 ### 2.2 MEDIUM — wrong or incomplete, later or under a condition
 
 | # | site | table | can_exceed | consequence | fix |
 |---|---|---|---|---|---|
 | M1 | `website/src/app/api/webhooks/stripe/route.ts:315` | `loop_billing_events` (per api_key set, per invoice period) | dormant (Stripe `not_configured`); a customer at >1,000 loops/month | **under-billing** presented as an accurate invoice — critical the day Stripe activates | `sum(total_cents)` grouped by day in SQL; make this a Stripe-activation precondition |
-| M2 | `…/usage-summary/route.ts:180`, `…/cost-alerts/evaluate/route.ts:328` | `translation_sandwich_comparisons` (7-day window) | plausible (crosses at ~143 consults/day) | rolling 7-day spend understated | as H8 |
-| M3 | `website/src/app/api/admin/metrics/route.ts:42`, `:46` | `analytics_events` (7-day / today windows) | plausible (600 rows total 2026-07-20; per-week volume unknown) | admin week/today counts capped | `count` by `event_type` in SQL |
-| M4 | `…/admin/metrics/route.ts:83` | `analytics_events` (whole table, fallback) | **now if the fallback is live**: `get_event_counts` has NO definition anywhere in the repo, so if it is absent in production the fallback IS the live path | all-time admin counts capped at 1,000 | verify the RPC exists in production; otherwise count in SQL |
+| M2 | ~~`…/usage-summary/route.ts:180`, `…/cost-alerts/evaluate/route.ts:328`~~ | `translation_sandwich_comparisons` (7-day window) | **DOWNGRADED to `no` 2026-09-03 — see H8's correction** (same dormant `TRANSLATION_SANDWICH_PARALLEL_RUN` flag governs this read too) | none currently | none required |
+| M3 | ~~`website/src/app/api/admin/metrics/route.ts:42`, `:46`~~ **PROMOTED to H11 2026-09-03** | `analytics_events` (7-day / today windows) | **confirmed near-term — see H11** | see H11 | see H11 |
+| M4 | ~~`…/admin/metrics/route.ts:83`~~ **PROMOTED to H10 2026-09-03** | `analytics_events` (whole table, fallback) | **CONFIRMED — the RPC is absent, the fallback is live — see H10** | see H10 | see H10 |
 | M5 | **Every data-rights read** — `website/src/app/api/user/export/route.ts:139` (20-table loop incl. `analytics_events`, `reflections`, `action_evaluations_v3`), `:432` (9 profile-scoped tables incl. `mentor_interactions`), `:249/:277/:306/:337/:367`; `website/src/lib/user-data-gathering.ts:117/:279/:144/:162/:193/:222`; `agent-assessment-history-store.ts:625`; `stoa-store.ts:652/:674`; `idea-loop-watching-store.ts:369/:557`; `collaboration-store.ts:345`; `trust-core-store.ts:956` (via `:942/:944`); `provenance-ledger-store.ts:180` (via `:166/:168` — **WATCHED**); `sage-reflect/session-store.ts:636`; `mentor-appendix-store.ts:143` | per user / owner / credential | none today; **`mentor_interactions` (485) is the nearest**; `agent_assessment_history` per owner-bound credential (~48/day for s9-loop's class) would cross in weeks if a consult credential were owner-bound | an **incomplete Article 15 access copy or Article 20 export presented as complete** — the compliance form of the silent remainder | one shared paging helper (`selectAll(table, filter)` looping `.range()` or keyset until `count` is reached) used by every data-rights read; add an `incomplete: true` marker if a page ever comes back capped |
 | M6 | `website/src/app/api/user/delete/route.ts:217`, `:239` | `api_keys` per owner (60 total today) | unlikely (would need >1,000 credentials per owner) | these lists DRIVE deletes (`deleteStoaDataForCredential` per key; `deleteAgentSessions` per agent) — a truncated key list is an **incomplete deletion reported as success** | same paging helper; the class matters more than the number |
 
@@ -76,7 +86,7 @@ Legend — **can_exceed**: `now` (evidence the set already exceeds or nearly exc
 | `…/billing/usage-summary/route.ts:74`, `website/src/app/api/usage/route.ts:78` | `api_key_usage` per (key, year, month) | credentials × 1 month | fine |
 | `website/src/app/api/keys/route.ts:22`, `usage/route.ts:43`, `export:249/:277`, `user-data-gathering.ts:144`, `webhooks/stripe:298` | `api_keys` per owner | ≤60 total | `usage/route.ts:43` is an assigned builder with NO later bound on any path (the one true `assigned + unbounded`) |
 | `…/cost-alerts/evaluate/route.ts:273`, `…/usage-summary/route.ts:86` | `payment_events` monthly | Stripe dormant; the table's production existence is itself uncertain (2026-07-22 handoff) | revenue sum — same SQL-aggregate fix as H8 when Stripe lands |
-| `website/scripts/provenance-c2-discharge-tally.ts:123/:132/:141` | `agent_trust_events` (credential-completed, windowed) / `agent_accreditation` (whole table) | credential-completed events are rare; agents < 100 | `:132/:141` are whole-table and will truncate past 1,000 agents — **WATCHED** |
+| `website/scripts/provenance-c2-discharge-tally.ts:123/:132/:141` | `agent_trust_events` (credential-completed, windowed) / `agent_accreditation` (created_at-windowed) / `agent_accreditation` (updated_at-windowed, diagnostic only) | credential-completed events are rare; agents < 100 | **CORRECTED 2026-09-03:** direct source read shows all three carry `.gte(...windowStart...)` — none is genuinely whole-table (the report's original claim that `:132/:141` were whole-table was wrong; only the ledger read at what was `:170`, now `pagedLedgerRead()`, was — see H1) |
 | `website/src/lib/substrate/narrative-retention.ts:395` | `substrate_audit_narratives` (pending/failed sweep) | self-correcting — an hourly sweep that sees 1,000 completes 1,000 and returns for the rest; not silent loss | fine |
 | `website/src/app/api/deliberation-chain/[id]/route.ts:48` | `deliberation_steps_v3` per chain | a 1,000-step chain is implausible | fine |
 | `sage-mentor/profile-store.ts:626-631` (`loadProfile`) | six profile sub-tables, **no filter at all**, filtered client-side | writers dormant (`seedProfileFromIngestion` has no caller); `loadProfile` has no live caller (only `loadProfileWithCache`, itself uncalled) | dormant, but reads every user's rows — a privacy smell to fix if ever revived |
@@ -97,11 +107,13 @@ Legend — **can_exceed**: `now` (evidence the set already exceeds or nearly exc
 | `scripts/s9-instrument-fidelity-battery.ts:250/:262/:598` | TEST-only fixture ids |
 | `founder/hub/conversation-history.ts:249`, `mentor-context-private.ts:255`, `stoa-store.ts:574` | `bounded-continuation` — confirmed: `.limit(limit)` at `:264`, `.limit(limit)` at `:268`, `.range(offset, …)` at `:579`, each on every path |
 
-## 3. Unknown cardinality
+## 3. Unknown cardinality — RESOLVED 2026-09-03, founder-run SQL against production
 
-- `analytics_events`: no base `CREATE TABLE` in the repo; production volume per week unknown (600 rows total on 2026-07-20). One count settles M3/M4: `select count(*) from analytics_events where created_at > now() - interval '7 days';`
-- `translation_sandwich_comparisons`: whether every production consult writes a row is established from `parallel-run.ts:1281` but the current monthly count is not — the H8 SQL settles it.
-- `get_event_counts` (RPC): exists in production or not — settles whether M4's fallback is live.
+- `analytics_events`: **752 rows in the trailing 7 days.** Settles what is now H11 (confirmed near-term, was M3) and, combined with the RPC result below, H10 (confirmed now, was M4).
+- `translation_sandwich_comparisons`: **0 rows month-to-date.** Combined with the direct source read of `parallel-run.ts` (the write is gated behind the dormant `TRANSLATION_SANDWICH_PARALLEL_RUN` flag, not called from the live route), this DOWNGRADES H8/M2 from "plausible-now" to "no — dormant". The report's original citation of the write as unconditional on the live path was an overclaim, corrected in place.
+- `get_event_counts` (RPC): **does not exist in production** (`select proname from pg_proc where proname='get_event_counts'` returned zero rows). Settles H10: the `analytics_events` whole-table fallback in `admin/metrics/route.ts` is confirmed the live path, unconditionally, on every admin-metrics request.
+- `agent_provenance_ledger`: **308 rows** (2026-09-03), consistent with the ~47/day trajectory the report projected. Already fixed this session (H1).
+- `mentor_interactions`: **605 rows** (2026-09-03), growing faster than the report's estimate (~7.5/day vs ~3.7/day) — crosses 1,000 around mid-October 2026, not early 2027. Already fixed this session (H9).
 
 ## 4. RPC functions (the cap applies to set-returning RPC too)
 
@@ -110,21 +122,36 @@ Legend — **can_exceed**: `now` (evidence the set already exceeds or nearly exc
 | `match_passages_bm25`, `match_passages_vector` | TABLE | by `match_count` (caller passes a top-K); corpus is 186 rows |
 | `search_mentor_memory` | TABLE (`api/migrations/openbrain-memory-layer.sql:68`) | see the function's own `LIMIT`/`match_count` parameter — a memory search, small |
 | `get_classifier_cost_summary` | TABLE (aggregate summary) | a handful of rows |
-| `get_event_counts` | **no definition in the repo** | unknown — see M4 |
+| `get_event_counts` | **no definition in the repo, and confirmed ABSENT in production** (2026-09-03: `select proname from pg_proc where proname='get_event_counts'` → 0 rows) | N/A — does not exist; the `admin/metrics/route.ts:83` fallback it was meant to avoid is the live path — see H10 |
 | `increment_api_usage`, `get_or_create_stripe_customer`, `upgrade_api_key_to_paid`, `downgrade_api_key_to_free`, `increment_structured_observation_count`, `insert_mentor_raw_input` | scalar / void | not at risk |
 
 ## 5. The two founder-hub sites (fixed this session)
 
 `route.ts:1431` (POST `load_history`) and `:1780` (GET `?conversation_id=`) — both ascending, no limit, on a 1,013-row conversation. Replaced by `conversation-history.ts` (newest-window with explicit limit + exact count; keyset pagination with a cap-robust cursor). Executed regression test 74/0 with a cap-modelling fake and a negative control reproducing rows 981-1000; mutation-verified four ways.
 
-## 6. Recommended remediation order
+## 6. Recommended remediation order — UPDATED 2026-09-03 against founder-confirmed production counts
 
-1. **Fix now, non-watched, numbers people act on:** H2–H7 (cost-health + abuse + SLO). The right fix in every case is the same: **stop fetching rows to aggregate them** — `count`/`sum`/`max`/`distinct`/percentiles in SQL (an RPC or a view), or at minimum a time-windowed read with an explicit limit and a disclosed `capped` flag. One `code-elevated` session; each route already has a test file to extend.
-2. **Confirm then fix:** H8/M2 (`translation_sandwich_comparisons` month/7-day sums) and M3/M4 (`analytics_events`) — run the three SQL counts in §3 first; the fix shape is the same aggregate-in-SQL.
-3. **Governing surface:** H9 — filter `mentor_interactions` by `profile_id` + window + order + limit in `computeRollingWindow`. Small, isolated, and closes a privacy smell at the same time.
-4. **Data-rights class:** M5/M6 — one shared paging helper for every export/access/delete-driving read, with an honest `incomplete` marker. Compliance-class; not urgent by volume, urgent by kind.
-5. **Report-only (WATCHED):** H1 + the tally's `agent_accreditation` reads — fix after the provenance-ledger observation window closes; note that the tally will cross the cap ≈ 2026-09-17, i.e. **during the window it measures** — the founder should know the instrument's own ceiling before reading its 2-week figure.
-6. **Before Stripe activation:** M1 (invoice aggregation).
+**Done (2026-09-03):** H1 (provenance ledger tally, keyset-paged), H9 (mentor rolling window,
+DB-scoped) — both fixed with executed, mutation-verified regression tests, no migration needed. H8/M2
+downgraded to no-risk (the write path is dormant, not live — a report overclaim corrected in place).
+
+1. **Fix now — CONFIRMED live truncation, the most urgent item in this report:** H10
+   (`admin/metrics/route.ts:83`, the `analytics_events` all-time fallback — silently truncating on
+   every single admin-metrics request today, since `get_event_counts` does not exist in production)
+   and H11 (`admin/metrics/route.ts:42`, the 7-day window — 752/1,000 rows, within days of crossing
+   at the confirmed ~107 rows/day rate). Same fix shape as H2–H7: `count`/aggregate in SQL, or
+   implement `get_event_counts` as a real RPC. One `code-elevated` session; the route already has
+   this session's test-extension pattern to follow.
+2. **Fix now, numbers people act on:** H2–H7 (cost-health + abuse + SLO). The right fix in every
+   case is the same: **stop fetching rows to aggregate them** — `count`/`sum`/`max`/`distinct`/
+   percentiles in SQL (an RPC or a view), or at minimum a time-windowed read with an explicit limit
+   and a disclosed `capped` flag. Can fold into the same session as item 1 — same fix shape, same
+   table family in H2-H4/H5-H7.
+3. **Data-rights class:** M5/M6 — one shared paging helper for every export/access/delete-driving
+   read, with an honest `incomplete` marker. Compliance-class; not urgent by volume, urgent by kind.
+   Its own `code-critical`, PR19-REQUIRED session per the standing instruction.
+4. **Before Stripe activation:** M1 (invoice aggregation).
+5. ~~**Report-only (WATCHED):** H1~~ — DONE, no longer a remediation item.
 
 ## 7. Inventory completeness — what was checked for reads the tool cannot see
 
