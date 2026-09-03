@@ -32027,3 +32027,99 @@ the eight individual store-file sites and the three encrypted per-user blocks ar
 explicitly, not silently dropped. The next C4 session (if elected) should target
 `user-data-gathering.ts` and the seven `…Store.ts` files using the same `pagedRows`/`pagedRangeSelect`
 toolkit built here. Nothing bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-C4-PARTIAL-LIVE-2026-09-03
+
+**Tier:** `code-elevated`. **AC7:** not engaged — code-only push, no schema/flag/data change.
+**Predecessor:** `D-ROW-CAP-SWEEP-C4-BUILT-2026-09-03`.
+
+Commit `cf6b199` pushed to `origin/main`; Vercel green (founder-confirmed). M6 (both deletion-driving
+`api_keys` reads) and the mirrored export-route sites are live. Nothing observable changes in either
+route's response shape — the fix corrects completeness, not the API contract. No founder smoke
+required (service-role-authenticated data-rights routes; correctness rests on the executed,
+mutation-verified test suite + the PR19 review, not a UI smoke).
+
+**Status:** C4 (M6 + M5's two generic loops) LIVE. Proceeding to SCOPE (not build) the remaining
+carried M5 sites: the eight individual store-file reads named but not built in the predecessor entry.
+
+## D-ROW-CAP-SWEEP-C4-REMAINING-SITES-SCOPED-2026-09-03
+
+**Tier:** `governance`/scoping. No code change — a planning record only, per the founder's request to
+scope before building. **Predecessor:** `D-ROW-CAP-SWEEP-C4-PARTIAL-LIVE-2026-09-03`.
+
+Every one of the eight files the predecessor entry carried was read in full and cross-checked against
+its actual migration file for the confirmed PK column name (not assumed from the report's citation
+alone). All twelve remaining fixable call sites carry a genuine UUID primary key — meaning every one
+of them can use `pagedRows` (C1/C4's keyset strategy), NOT `pagedRangeSelect` (the export route's
+generic-loop fallback), EXCEPT `user-data-gathering.ts`'s two generic per-table loops, which face the
+identical problem `export/route.ts`'s loops did (many different tables, no single confirmable PK) and
+need `pagedRangeSelect` for the same reason.
+
+**A finding surfaced by this read, not in the original report: `user-data-gathering.ts` is a
+near-exact structural duplicate of `user/export/route.ts`** — the same generic `tables` user_id loop
+(20 tables), the same Stoa `api_keys` credential-resolution read, the same `profileScopedTables` loop
+(9 tables), the same three per-user encrypted blocks (`mentor_profiles`/`mentor_baseline_appendix`/
+`realtime_journal_entries`), the same `profiles`-by-id NONE-classified read. It backs `/api/user/access`
+(GDPR Article 15). **Leaving it unfixed while `export/route.ts` (Article 20) is now fixed creates an
+inconsistency: the Access and Portability surfaces for the SAME user's SAME data would carry
+DIFFERENT completeness guarantees** — an access request could still silently truncate where an export
+request no longer would. This makes `user-data-gathering.ts` the single highest-value remaining item,
+not merely one of eight peers.
+
+**Scope, in priority order:**
+
+1. **`user-data-gathering.ts`** (HIGH — the Article 15/20 consistency gap above). Three sites: the
+   `api_keys` Stoa-credential read (→ `pagedRows`, `api_keys.id` confirmed PK — identical fix to the
+   two already-shipped `export/route.ts` mirrors), the `tables` user_id loop (→ `pagedRangeSelect`,
+   same as `export/route.ts`'s), the `profileScopedTables` loop (→ `pagedRangeSelect`, same). The
+   three per-user encrypted blocks + the `profiles`-by-id read carry the SAME disposition as their
+   `export/route.ts` mirrors (low-volume/NONE, not fixed this pass, named not dropped).
+2. **`agent-assessment-history-store.ts:625`** (`getAssessmentHistoryForOwner`, MEDIUM — the report's
+   own reading: "would cross in weeks if a consult credential were owner-bound", the nearest of the
+   eight to becoming a live risk). One site. Table `agent_assessment_history`, PK `id` confirmed.
+3. **`stoa-store.ts:652`/`:674`** (`getStoaDataForCredentials`, `getStoaDataForOwner`). Two sites.
+   Table `stoa_entries`, PK `id` confirmed.
+4. **`idea-loop-watching-store.ts:369`/`:557`** (`getWatchingDataForOwner`, `getCompletionSignalsForOwner`).
+   Two sites. Tables `idea_loop_cycles`/`idea_loop_completion_signals`, PK `id` confirmed on both.
+   `getWatchingDataForOwner`'s select string embeds a child relation
+   (`*, idea_loop_candidates!idea_loop_candidates_cycle_id_fkey (*)`) — `pagedRows`'s `selectColumns`
+   parameter passes through verbatim, so this is compatible without change, but should be the one
+   site this pass explicitly executes-tests for embed correctness (not merely source-pinned), since
+   it is the one shape not yet exercised by any existing test.
+5. **`collaboration-store.ts:345`** (`getCollaborationDataForOwner`). One site. Table
+   `collaboration_records`, PK `id` confirmed.
+6. **`trust-core-store.ts:942`/`:944`** (`getTrustDataForOwner`, via the shared private `selectBy`
+   helper it calls twice — `agent_trust_events` and `agent_trust_state`). ONE fix (the helper) covers
+   BOTH tables. PK `id` confirmed on both.
+7. **`sage-reflect/session-store.ts:636`** (`getAgentSessionsForExport`). One site. Table
+   `sage_reflect_sessions`, PK `id` confirmed. Note: this read is per-`agent_id`, not per-owner — the
+   pre-existing disclosed bound (agent_id is not owner-unique; the S10 review carried item) is
+   unrelated to row-cap and untouched by pagination.
+8. **`mentor-appendix-store.ts:143`** (`listAppendixRounds`). One site. Table
+   `mentor_baseline_appendix` — the SAME table `export/route.ts` and `user-data-gathering.ts` already
+   read directly for their own per-user encrypted block (a third read path onto one low-volume table).
+   Low priority (matches the report's own low-risk reading for this table); note this function is
+   also called by two LIVE product routes (`mentor-appendix/route.ts`, `mentor-appendix/[id]/route.ts`)
+   and `mentor-context-private.ts` — not solely a data-rights surface, so its blast radius on a fix is
+   slightly broader than a pure compliance-only site, though its risk profile is unchanged.
+
+**Explicitly excluded from this scope, unchanged from the predecessor entry's disclosure:**
+`provenance-ledger-store.ts:180` (via `:166/:168`) — **WATCHED**, the standing provenance-ledger
+observation window names `provenance-*.ts` as a not-to-perturb surface until the window closes
+(~2026-09-09 at the earliest per the standing opener). This file stays untouched regardless of C4's
+progress.
+
+**Total remaining fixable call sites: 12, across 7 files** (all `pagedRows`, confirmed UUID PKs,
+except `user-data-gathering.ts`'s 2 generic loops which need `pagedRangeSelect`) **+ 1 file
+(`provenance-ledger-store.ts`) explicitly held out of scope.**
+
+**Not yet built.** This entry is the scope only, per the founder's explicit request ("scope the
+remaining store-file sites first"). Awaiting direction on whether to build now (one session, given
+the toolkit — `pagedRows`/`pagedRangeSelect` — already exists and every PK is pre-confirmed, unlike
+the export-route generic loops which needed the design decision to build `pagedRangeSelect` in the
+first place) or split further.
+
+**Rules served:** PR6, PR18, PR20 (every present-tense schema/PK claim in this entry re-verified
+against the actual migration file, not carried forward from the report's citation).
+
+**Status:** SCOPED, not built. Nothing bears on the 0h call.
