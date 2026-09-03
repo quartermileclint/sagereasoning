@@ -32728,3 +32728,97 @@ remains a gate on any eventual build. Cross-references:
 `D-MENTOR-RULING-SET-D-LAYER3-SCOPE-DOCUMENT-RECORDED-2026-08-15`,
 `2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md`,
 `2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md`.
+
+## 2026-09-04 — D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — documents only. **Verbatim record:**
+`operations/agent-circles-2026-08/2026-09-04-mentor-brief-standing-runner-design-session-and-rulings-verbatim.md`
+— **binding on the founder's relay; the verbatim wins over every summary, including this entry.**
+
+**Decision:** The mentor's consolidated input brief for the standing-runner design track (three
+research inputs: the bidirectional algorithm; the twelve cognitive environments; the phenomenology
+observation and the genetics/environment finding), relayed to the grounding session opened under
+`2026-09-04-grounding-and-await-runner-mentor-instructions-NEXT-SESSION-PROMPT.md`, was **not
+accepted at face value**: every present-tense mechanism fact in it was checked against the primary
+record first (PR20), and eighteen clarifying questions were put back through the founder. **The
+mentor answered all eighteen and issued a corrected governing brief**, which it names *"the single
+authoritative input document for that session."* Both messages, the questions, and the rulings are
+**adopted as binding and captured verbatim.**
+
+**What the rulings settle.** (A1) **The gate is unchanged** — the track's next design-capable session
+opens only when Option S is built and its disagreement-rate data is in hand; Option S is unbuilt
+(grep-confirmed). (A2) The load is **additive**; "measurement-versus-weighting election" = the M/W/S
+floor-semantics deferral. (A3) **§5d is removed** from this track's load — its R8 §9 / register
+redirect to a doctrinal session of its own stands; the brief's inclusion was *"an error inherited
+from the 2026-09-03 instruction."* (A4) The nine-candidate close gate is **discharged** by the
+2026-08-29 record. (B1/B2) **Per-move virtue scoring is a local acceptance criterion, not a scoring
+function under GS-CYB-1's gate**; the topological constraint keeps the proximity scorer out of the
+generation loop, making the two conditions **moot for the generation step only** — they remain live
+for the completion-signal return path and the feedback loop; **neither condition is met; weights
+BLOCKED.** (B3) The §(c-bis) closure is not re-opened. (B4) The clean residual is the **executing
+agent's harness-held examined state**, read by the runner at cycle start. (C1) The environment tag is
+runner-attested and harness-unverified, same posture as `heuristic`. (C2) "Harness-controlled"
+dwelling = a server-supplied parameter; extra LLM calls are a build-gate cost item. (C3)
+Cloister/Laboratory/Archive are labels only — no mechanism change. (C4) **Arena means adversarial
+examination of the assent attestation, never outcome comparison**; Q-C1/Q-C2a govern; the `manifest.md`
+ATRF item 3 wording is read in that light, any amendment the session's to draft for ruling. (C5)
+`heuristic` retained, many-to-one; `friction_detection` → Workshop (assessed, revisable). (D1) The
+GS-ATRF-4 vocabulary-direction question stays held open, owned by no session. (D2) No manifest ATRF
+amendment. (D3) The 84% figure is **UNVERIFIED-AT-RELAY, orienting, not load-bearing**; the
+directional principle is carried. (D4) The longitudinal environment sequence is the **runner's**
+(`sagereasoning:idea-loop@v1`) developmental record — a derived view over the watching table, not an
+addition to the executing agent's carried profile. (D5) The proposal-shape third classification is
+design-only.
+
+**Executed, documents only:** the verbatim capture (NEW); the named-input register
+(`00-PRIORITY-INDEX.md`) — a dated head-note, three new standing-runner rows (Input 2; Input 3; the
+new-lens nine-candidate finding), the two 2026-09-01 rows re-tagged received-and-ruled, the §5d row
+annotated with A3; a one-sentence pointer in `/CLAUDE.md`'s 2026-09-03 block.
+
+**Named, not resolved (capture note §4.2):** an internal discrepancy in the relay — ruling A4 and the
+named-input list say the new-lens classification is *"a session finding, not a gate condition"*, while
+the governing brief's final "Close gate" section says *"The session's close is gated on one
+condition"* on exactly that classification. Both readings preserved verbatim; the founder decides
+whether it goes back to the mentor. Also a duplicated §5d bullet (cosmetic).
+
+**Three PR20 mechanism facts recorded for the receiving session (capture note §4.3):** B4's
+runner-readable "harness-held examined state" and C2's server-supplied per-cycle parameter both
+presuppose a server → runner read surface that **does not exist today** (R8 §4.3: the read paths
+"none exist today"; the watching route is POST-only; the trust record 404s under ENV-1 for
+evidence-less identities; the v1 producer is the founder, whose profile here is the human mentor
+profile) — they land on R8-D1b's designed-but-unbuilt read; and C4 leaves `manifest.md` ATRF item 3's
+"how the outcome compared to the proposal" **standing as written** until the session drafts an
+amendment.
+
+**Reasoning:** PR20's discipline applied to the brief itself — the eighteen questions existed because
+the brief's mechanism facts were checked, not restated (the §5d mis-routing, the already-discharged
+close gate, the already-closed §(c-bis), the Arena/Q-C1 collision, and the Q1c identity question
+were all found by reading the records the brief cites). Nothing here opens the design session,
+which is explicitly *"not to be opened early"* and whose gate the mentor confirms unmet.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Production untouched; `git diff -- website/` clean. Weights **BLOCKED**; the Q1 hard constraint
+untouched; the P0 0h hold stands; nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this session's commit — the capture, the register edits, the CLAUDE.md
+pointer and this entry are one path-scoped commit.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "RECEIVED" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+git diff --stat HEAD~1 -- website/
+```
+Expected: at least `5` (the five 2026-09-04 tags); no output from the second.
+
+**Open questions:** the close-gate discrepancy above (founder's call whether to relay); the three
+mechanism facts are inputs to the receiving session, not questions for now.
+
+**Rules served:** PR18, PR20, PR23. Concurrency: `ListAgents` at open (three live peers), `git status`
+twice, path-scoped commit, appended at the physical tail.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-R8-PRODUCER-FLOOR-SEMANTICS-ADOPTED-EXECUTED-2026-08-30`
+(the Option S gate; Q1c), `2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md`,
+`D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03` (Q1, §11),
+`2026-09-01-mentor-instruction-bidirectional-algorithm-verbatim.md`,
+`2026-08-24-agent-cybernetic-control-architecture.md` §3, `2026-08-29-nine-candidate-remediation-shape-classification.md`.
