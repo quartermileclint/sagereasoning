@@ -32324,3 +32324,23 @@ unchanged from the opener's framing — a genuine, un-started scoping session.
 
 **Status:** verification only. Nothing bears on the 0h call. Proceeding per the founder's standing
 direction to the next self-doable queue item (the stale `guardrail/route.ts` comment).
+
+## D-WATCHING-HANDLER-STALE-DARK-COMMENT-CORRECTED-2026-09-03
+
+**Tier:** `code-standard` — comment-only, machine-verified (the diff touches only lines inside the
+file's top `/** ... */` block; `tsc --noEmit` clean). Discharges the standing opener's own named item
+("the `watching/handler.ts:10-14` stale 'DARK' comment").
+
+**Decision:** `website/src/app/api/practice/watching/handler.ts`'s header claimed
+`SUBSTRATE_WATCHING_ENABLED` is "UNSET everywhere" — true when the file was written (2026-08-09/10)
+but false since `D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10` set it in Vercel Production the very
+next day. CLAUDE.md's own Live-in-production list already states the IDEA-loop surfaces
+(`fresh`/`watching`/`loop_id`) have been live since 2026-08-10, and the sibling comment fix earlier
+this session (`D-GUARDRAIL-CI10-STALE-COMMENT-CORRECTED-2026-08-30`) is the precedent this entry
+follows: state what established the claim, name the record, and disclose that the live env cannot be
+read from source (PR25) rather than assert a repo-side claim as settled fact.
+
+**Verified:** the diff is comment-only; `tsc --noEmit` clean.
+
+**Status:** Adopted. Comment-only — no behaviour, schema, flag, or public-contract change; production
+byte-equivalent; AC7 not engaged; nothing bears on the 0h call.

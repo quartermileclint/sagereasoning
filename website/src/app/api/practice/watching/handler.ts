@@ -7,11 +7,15 @@
  * Implementation lives here; the thin route wrapper is ./route.ts per Next
  * route-export validation (memory `nextjs-route-export-validation`).
  *
- * DARK behind SUBSTRATE_WATCHING_ENABLED (UNSET everywhere ⇒ honest 503, zero
- * work, zero DB touch — the fresh/discernment/S10 dark-route pattern; the SAME
- * flag darkens the founder read route). Activation is its own founder-walked
- * `code-critical` step; nothing here pre-approves it. MIGRATION-BEFORE-FLAG is
- * standing discipline (ruled §2.8).
+ * LIVE behind SUBSTRATE_WATCHING_ENABLED (corrected 2026-09-03 — this comment
+ * previously read "DARK... UNSET everywhere", stale since the flag's own
+ * activation eight days after this file was written: SUBSTRATE_WATCHING_ENABLED
+ * was set in Vercel Production at D-RUNNER-SCOPING-SESSION-COMPLETE-2026-08-10,
+ * the same route pattern noted below — the SAME flag lights the founder read
+ * route too. The live env cannot be read from source; the decision record is
+ * the check — re-verify in Vercel before relying on it. MIGRATION-BEFORE-FLAG
+ * was standing discipline at build time (ruled §2.8) and was followed: both
+ * migrations were walked live before this flag flipped.
  *
  * WHAT IT DOES (ruled §2.3): the runner POSTs ONE call per COMPLETED cycle —
  * the cycle record + ALL its candidate rows in one body (never a mid-cycle
