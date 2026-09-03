@@ -32286,3 +32286,41 @@ now substantially closed:** the originating founder-hub fix (LIVE), the codebase
 unbounded-read candidates addressed, only the two disclosed WATCHED/deferred exceptions remaining),
 C1 (all 9 cost-health/abuse/SLO/admin-metrics sites, LIVE), and C4 (all 15 data-rights sites, LIVE)
 are complete. Nothing bears on the 0h call.
+
+## D-STANDING-QUEUE-ITEMS-3-AND-10-VERIFIED-2026-09-03
+
+**Tier:** `governance`, read-only. No code, schema, flag, or production change. Verifies two items
+the 08-29 standing opener carried as open, both of which had already moved before this check ran.
+
+**Item 3 (ATRF-EE founder walk) — LARGELY RESOLVED, not open as framed.** The opener's own list
+described this as "first VERIFY whether any of its four migration steps already ran (no record
+exists); if not: Class-B RLS apply, blast-radius/S4 columns, completion-signals table + `api_keys`
+widening, optional endpoint activation." Direct read of
+`operations/handoffs/founder/2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md` and its
+cross-referenced entry `2026-08-31 — D-ATRF-EE-WAVE-STEP0-PRODUCTION-STATE-DETERMINED-ALREADY-APPLIED`
+(missed by an earlier grep this session because its heading uses "## <date> — D-..." rather than
+"## D-...-<date>", a format inconsistency worth flagging) shows: **all four migration steps ARE
+applied on production**, confirmed by a read-only Step-0 SQL determination run 2026-08-31 (Q1-Q5, all
+green, including a grants-only check that closed a real gap in the original Q1-alone reading). Steps
+5-6 (the deploy + the EE-C1 wording) are also confirmed live — the wording served in that session's
+own Gate-1 frames. **The walk document itself now carries a STOP banner: do not run steps 1-4, they
+would re-apply migrations against live tables.** This is the "Q5c precedent" repeating — production
+found already at target with no recording session — flagged in-record as a pattern worth attention,
+not resolved by this entry. **What genuinely remains, confirmed still open by grepping every
+decision-log heading after line 30833:** TEST's state is undetermined (the same Step-0 SQL is safe to
+run there, read-only, not yet done) and Step 7 (the optional completion-signal endpoint activation)
+remains deliberately deferred, the founder's election, named as not urgent in the same entry.
+
+**Item 10 (AE-3 scoping) — CONFIRMED genuinely undischarged, exactly as the opener suspected.**
+`operations/handoffs/founder/2026-08-17-AE3-scoping-NEXT-SESSION-PROMPT.md`'s filesystem mtime is
+2026-08-17 05:46 — the day it was authored, no later edit. No close file exists
+(`find -iname "*AE3-scoping*CLOSE*"` returns nothing). No decision-log entry after its authoring
+mentions it running. This item is real and open, unlike item 3.
+
+**Corrected understanding for the standing queue going forward:** item 3 is no longer a
+"founder-walked migration session" — the migration is done. What's left is a cheap, read-only TEST
+determination (founder-run, low stakes) plus a deliberately-deferred optional activation. Item 10 is
+unchanged from the opener's framing — a genuine, un-started scoping session.
+
+**Status:** verification only. Nothing bears on the 0h call. Proceeding per the founder's standing
+direction to the next self-doable queue item (the stale `guardrail/route.ts` comment).
