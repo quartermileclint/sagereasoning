@@ -32123,3 +32123,134 @@ first place) or split further.
 against the actual migration file, not carried forward from the report's citation).
 
 **Status:** SCOPED, not built. Nothing bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-C4-REMAINING-SITES-BUILT-2026-09-03
+
+**Tier:** `code-elevated` (data-rights export/access reads; not deletion — distinct from M6's
+`code-critical` classification). **PR19 independent adversarial review REQUIRED and DISCHARGED** —
+two dimensions, run via an Anthropic-native Workflow (ultracode active, founder-directed), one
+MEDIUM confirmed and fixed at the root, several LOW/NIT findings disclosed. **Predecessor:**
+`D-ROW-CAP-SWEEP-C4-REMAINING-SITES-SCOPED-2026-09-03` (founder: "Build it now").
+
+**Method note (PR15):** built via a four-phase Workflow (Transform → Full verify → PR19 review →
+Fold) rather than sequential manual edits, per the standing ultracode directive — 8 independent
+transform agents (one per file, no shared-file conflicts, no worktree isolation needed), one
+full-tree verification agent, two independent PR19 review dimensions, one fold agent. Every claim
+the workflow made was independently re-verified first-hand by this session before being trusted (see
+§Verification below) — the workflow's self-report was NOT taken at face value.
+
+**Correction to the predecessor entry's own arithmetic:** the scope entry said "12 sites across 7
+files"; the true count is **12 sites across 8 files** (the scope entry's own numbered list correctly
+enumerated 8 files, but its summary line miscounted — corrected here).
+
+**Built, all 12 originally-scoped sites, across 8 files:**
+1. `user-data-gathering.ts` — 3 sites (the `api_keys` Stoa-credential read via `pagedRows`; the
+   generic user_id-scoped `tables` loop and the `profileScopedTables` loop via `pagedRangeSelect`,
+   mirroring `export/route.ts`'s already-shipped fix field-for-field).
+2. `agent-assessment-history-store.ts` — `getAssessmentHistoryForOwner`, via `pagedRows` on
+   `agent_assessment_history`, cursor `id`.
+3. `stoa-store.ts` — `getStoaDataForCredentials` (via `pagedRangeSelect`, `.in()` not being one of
+   `pagedRows`'s built-in filters) and `getStoaDataForOwner` (via `pagedRows`), both on
+   `stoa_entries`.
+4. `idea-loop-watching-store.ts` — `getWatchingDataForOwner` (via `pagedRows`, PRESERVING the
+   PostgREST child-relation embed string `*, idea_loop_candidates!...(*)` verbatim as
+   `selectColumns` — the one genuinely novel shape in this batch, execution-tested with a fake
+   client asserting embedded children survive a multi-page keyset walk, not merely source-pinned)
+   and `getCompletionSignalsForOwner`, on `idea_loop_cycles`/`idea_loop_completion_signals`.
+5. `collaboration-store.ts` — `getCollaborationDataForOwner`, via `pagedRows` on
+   `collaboration_records`.
+6. `trust-core-store.ts` — the shared private `selectBy` helper (called twice by
+   `getTrustDataForOwner`, covering both `agent_trust_events` and `agent_trust_state`), fixed once.
+7. `sage-reflect/session-store.ts` — `getAgentSessionsForExport`, via `pagedRows` on
+   `sage_reflect_sessions`.
+8. `mentor-appendix-store.ts` — `listAppendixRounds`, via `pagedRows`. **This site required a
+   genuine behavior-preservation fix, not merely pagination**: the function's own docstring promises
+   newest-first ordering, and — unlike the other seven sites, which feed only a data-rights export
+   dump where order is inert — this function is called by THREE live product routes including one
+   (`mentor-context-private.ts`) that takes `.slice(0, maxRounds)` on the result to build LLM
+   context, genuinely depending on recency order. Fixed by re-sorting the `pagedRows` result by
+   `submitted_at` descending immediately after the paginated read, restoring the exact caller-visible
+   contract despite the underlying query strategy changing.
+
+**Order-behavior disclosure (a systemic property of `pagedRows`, not a defect):** `pagedRows` always
+returns rows ascending by the cursor column (a UUID PK with no chronological meaning). Six of the
+eight files' original queries had NO explicit order at all (Postgres-default/unspecified); two
+(`agent-assessment-history-store.ts`, `mentor-appendix-store.ts`) explicitly ordered by a timestamp
+descending. Every site's actual callers were checked, not assumed: `mentor-appendix-store.ts`'s
+callers genuinely depend on order (fixed via re-sort, above);
+`agent-assessment-history-store.ts`'s sole caller (`export/route.ts`, a wholesale array dump) does
+not (left as ascending-by-id, disclosed in the export's row order without functional consequence).
+
+**PR19 review — two dimensions, first-hand, run inside the Workflow:**
+- **`correctness-and-scoping`:** verdict GO with fixes. Zero cross-tenant leaks or scoping
+  regressions across all eight files (every filter argument checked against its original query; PKs
+  spot-checked against migration files, not code comments). **1 MEDIUM confirmed**: three
+  per-user encrypted blocks left unconverted inside `user-data-gathering.ts` (`mentor_profiles`,
+  `mentor_baseline_appendix`, `realtime_journal_entries`) — a REAL correctness gap this dimension
+  caught that neither the predecessor scope entry nor the individual transform agent noticed: since
+  `mentor-appendix-store.ts`'s `listAppendixRounds` (site #8, same session, same table) WAS fixed,
+  leaving `user-data-gathering.ts`'s direct read of the SAME `mentor_baseline_appendix` table
+  unfixed would have meant the same user's same data was complete via one code path and silently
+  incomplete via another. **Folded at the root, same phase**: all three blocks fixed via `pagedRows`,
+  cursor `id` (confirmed against `supabase-mentor-profiles-migration.sql`/
+  `supabase-mentor-gaps-migration.sql`), preserving the existing decryption logic unchanged. 1 LOW
+  (`stoa-store.ts` dropping `pagedRangeSelect`'s `incomplete` safety-valve flag) + 1 NIT (a dangling
+  comment cross-reference in `agent-assessment-history-store.ts`) — both disclosed, the LOW
+  additionally fixed by this session directly after the workflow returned (see below).
+- **`completeness-and-test-adequacy`:** no functional defects; the substantive finding was
+  evidentiary — four of the eight sites (`user-data-gathering.ts`, `stoa-store.ts`, `session-store.ts`,
+  `mentor-appendix-store.ts`) are covered only by source-pin regex tests, not genuine fake-client
+  functional tests, because their functions have no injectable Supabase-client parameter under this
+  session's plain-`tsx` test harness (no mocking framework available) — matching the fallback this
+  session's own task brief explicitly authorized for exactly this shape, disclosed as lower-confidence
+  evidence rather than silently presented as equally strong. The remaining four sites
+  (`agent-assessment-history-store.ts`, `idea-loop-watching-store.ts`, `collaboration-store.ts`,
+  `trust-core-store.ts`) all carry genuine functional negative-controlled tests (a fake client
+  enforcing the real 1,000-row server cap, proving the fix returns more rows than the old code
+  would have). 1 NIT (the same dangling comment as above) + 1 LOW (a "mutation-verified" claim in a
+  PRIOR session's test-file header comment — `paged-select-wiring.test.ts` from C1 — lacking an
+  in-repo artifact substantiating it; a finding about this session's OWN earlier work, not this
+  batch's new code; carried, not addressed this entry, since it concerns C1's shipped commit).
+
+**Fixed by this session directly, after the workflow returned (the LOW `stoa-store.ts` finding):**
+`getStoaDataForCredentials` now surfaces `pagedRangeSelect`'s `incomplete` flag as a loud
+`console.warn` (StoaStoreResult's type has no field for a partial-success signal without a breaking
+change to every caller — a server-side warning was judged the right minimal fix rather than a type
+change, given the 25,000-row ceiling is not expected to fire at today's Stoa-entry volumes).
+
+**Verification — independently re-run by this session, not taken from the workflow's self-report:**
+`git status` confirms exactly 17 files changed (8 source, 6 new test files, 2 pre-existing test
+files extended) with no stray files, no collision with the untouched score-save prompt. `npx tsc
+--noEmit` clean across the whole tree (re-run twice, before and after the `stoa-store.ts`
+`incomplete`-flag fix). `npm run build` exit 0 (re-run twice). All 16 test files the workflow named
+independently re-run by this session, one at a time: 587 assertions total (paged-select-user-data-
+gathering-wiring 9/0, agent-assessment-history-store 124/0, paged-select-stoa-wiring 6/0, stoa-store
+65/0, idea-loop-watching-store 43/0, collaboration-store-row-cap 9/0, trust-core-store-row-cap 10/0,
+trust-core 112/0, s5-profiles-collaboration-record 87/0, session-store-export-paging 5/0,
+session-store 34/0, mentor-appendix-store-row-cap 6/0, paged-select 16/0, paged-select-wiring 29/0,
+paged-range-select 17/0, paged-select-c4-wiring 15/0) — every one green, zero failures, matching the
+workflow's per-file claims exactly. Sweep re-run independently: **69 → 54** (the workflow's own
+`verifyResult` reported 57, run BEFORE the fold phase's additional 3-site fix — 57−3=54,
+arithmetically consistent, confirmed by re-deriving the number myself rather than trusting either
+figure blind). Direct query of the sweep's JSON output confirms only TWO unbounded-read sites remain
+across all eight touched files, both correctly out of scope: `trust-core-store.ts:533`
+(`readTrustProfile`, a DIFFERENT function than the one this batch fixed, naturally bounded to the
+small fixed virtue-domain enum) and `user-data-gathering.ts:71` (the `profiles` by-id lookup,
+matches the report's own §2.4 NONE classification).
+
+**Rollback:** `git revert` this commit — independently revertable; no schema, no flag, no production
+deploy in this entry (ships on the next push).
+
+**Rules served:** PR6, PR15 (workflow orchestration disclosed, per ultracode's standing directive),
+PR18, PR19 (two dimensions run, one MEDIUM confirmed+folded, verdict recorded, all findings
+disclosed rather than only the folded one), PR20 (every PK/schema claim in the workflow's transform
+prompts was pre-verified against actual migration files by this session before dispatch, not
+assumed), PR23.
+
+**Status:** ALL 12 originally-scoped C4 sites across all 8 files now CLOSED, plus the one additional
+MEDIUM finding (3 more sites in `user-data-gathering.ts`) the review itself surfaced and folded — 15
+total sites fixed this entry. C4 as a whole (M6 + all of M5's named sites) is now essentially
+complete; the only remaining M5-class item is `provenance-ledger-store.ts`, explicitly and
+deliberately excluded per the standing provenance-ledger observation window (WATCHED, not carried as
+a gap). C5 (Stripe invoice aggregation) remains deferred until Stripe activation, as before. Nothing
+bears on the 0h call.

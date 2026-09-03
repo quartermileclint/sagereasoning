@@ -402,6 +402,223 @@ async function run(): Promise<void> {
     )
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // §8 Row-cap sweep (2026-09-02/-03): getWatchingDataForOwner and
+  // getCompletionSignalsForOwner now read through `pagedRows` (paged-select.ts)
+  // instead of a single unbounded `.select()` — a practitioner with more rows
+  // than the server's ~1,000-row cap would otherwise have their Article 15/20
+  // export silently truncated. This section is a GENUINE FUNCTIONAL test
+  // against a fake modelling pagedRows' own query-chain contract
+  // (select -> eq -> [gt on page 2+] -> order -> limit -> await), not a source
+  // pin: it generates more rows than one page (pageSize defaults to 500) and
+  // proves every row comes back.
+  //
+  // §8.1-§8.4 are the LOAD-BEARING check named in the task brief: the
+  // cycle -> candidates embed must survive a MULTI-PAGE walk, since
+  // pagedRows forwards `selectColumns` (the embed string) verbatim to every
+  // page's own `.select()` call — untested anywhere else in this build.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    // A minimal fake matching pagedRows' EXACT chain shape:
+    //   db.from(table).select(cols)[.eq(...)][.gt(cursorCol, cursor)]
+    //     .order(cursorCol, {ascending:true}).limit(pageSize)
+    // then awaited. `gt` is exercised for real here (unlike every fake above,
+    // which never crosses a page boundary) because this fixture deliberately
+    // generates MORE rows than one page.
+    function makePagedCyclesFake(rowCount: number, otherOwnerCount: number) {
+      const cycles: Row[] = []
+      const cands: Row[] = []
+      // Zero-padded ids so string `<`/`>` comparison matches numeric order —
+      // pagedRows' cursor is a strict string/value `.gt()`, and the real
+      // column (`id`, a uuid) has no numeric meaning either; what matters is
+      // that SOME total order over the cursor column is honoured, which this
+      // models faithfully.
+      for (let i = 0; i < rowCount; i++) {
+        const id = `cycle-${String(i).padStart(6, '0')}`
+        cycles.push({ id, owner_user_id: 'owner-1', loop_id: `loop-${i}`, cycle_number: i })
+        cands.push({ id: `cand-${i}`, cycle_id: id, heuristic: `heuristic-${i}` })
+      }
+      for (let i = 0; i < otherOwnerCount; i++) {
+        const id = `cycle-other-${String(i).padStart(6, '0')}`
+        cycles.push({ id, owner_user_id: 'owner-2', loop_id: `loop-other-${i}`, cycle_number: i })
+      }
+      const client = {
+        from(table: string) {
+          if (table !== 'idea_loop_cycles') throw new Error(`unexpected table ${table}`)
+          return {
+            select(cols: string) {
+              const joined = /idea_loop_candidates/.test(cols)
+              const filters: Array<{ op: 'eq' | 'gt'; col: string; val: unknown }> = []
+              // PostgREST enforces its own server-side row cap REGARDLESS of
+              // whether the caller ever called `.limit()` — this is precisely
+              // the silent-truncation behaviour the row-cap sweep exists to
+              // guard against, so the fake must model it: an explicit
+              // `.limit(n)` narrows to n, but omitting `.limit()` entirely
+              // (the OLD, pre-fix call shape) still caps at the server's
+              // ~1,000-row ceiling, never returns unbounded.
+              let lim = 1000
+              const api = {
+                eq(col: string, val: unknown) {
+                  filters.push({ op: 'eq', col, val })
+                  return api
+                },
+                gt(col: string, val: unknown) {
+                  filters.push({ op: 'gt', col, val })
+                  return api
+                },
+                not() {
+                  return api
+                },
+                gte() {
+                  return api
+                },
+                order() {
+                  return api
+                },
+                limit(n: number) {
+                  lim = n
+                  return api
+                },
+                then(resolve: (v: unknown) => void) {
+                  let out = cycles.filter((r) =>
+                    filters.every((f) =>
+                      f.op === 'eq' ? r[f.col] === f.val : (r[f.col] as string) > (f.val as string),
+                    ),
+                  )
+                  out = out.slice().sort((a, b) => ((a.id as string) < (b.id as string) ? -1 : 1))
+                  out = out.slice(0, lim)
+                  if (joined) {
+                    out = out.map((r) => ({
+                      ...r,
+                      idea_loop_candidates: cands.filter((c) => c.cycle_id === r.id),
+                    }))
+                  }
+                  resolve({ data: out, error: null })
+                },
+              }
+              return api
+            },
+          }
+        },
+      } as unknown as SupabaseClient
+      return { client, cycles, cands }
+    }
+
+    // Multi-page: 1,200 owner-1 rows (500 + 500 + 200 = 3 pages at the default
+    // pageSize) plus 15 owner-2 rows the filter must exclude on EVERY page.
+    const fake = makePagedCyclesFake(1200, 15)
+    const res = await getWatchingDataForOwner('owner-1', fake.client)
+    assert(res.ok === true, '§8.1 the multi-page owner export succeeds')
+    if (res.ok) {
+      assert(
+        res.value.length === 1200,
+        `§8.2 ALL 1,200 owner rows come back, not truncated at one 500-row page (got ${res.value.length})`,
+      )
+      const rows = res.value as Array<Record<string, unknown>>
+      assert(
+        rows.every((r) => r.owner_user_id === 'owner-1'),
+        '§8.3 the eq(owner_user_id) filter held across every page (no owner-2 row leaked through)',
+      )
+      assert(
+        rows.every((r) => {
+          const embedded = r.idea_loop_candidates as Array<Record<string, unknown>> | undefined
+          return (
+            Array.isArray(embedded) &&
+            embedded.length === 1 &&
+            embedded[0].cycle_id === r.id &&
+            embedded[0].heuristic === `heuristic-${(r.loop_id as string).replace('loop-', '')}`
+          )
+        }),
+        '§8.4 THE LOAD-BEARING CHECK: every one of the 1,200 rows, across all 3 pages, still carries its correctly-matched embedded idea_loop_candidates row — the embed survives pagedRows\' multi-page keyset walk',
+      )
+    }
+
+    // Zero-match: an owner with no rows gets an empty array, not an error —
+    // proves the loop terminates cleanly on a first, empty page.
+    const fakeEmpty = makePagedCyclesFake(0, 5)
+    const empty = await getWatchingDataForOwner('owner-1', fakeEmpty.client)
+    assert(
+      empty.ok === true && empty.value.length === 0,
+      '§8.5 an owner with zero cycles gets an empty (not error, not undefined) export',
+    )
+  }
+
+  // §8b — the same multi-page exhaustiveness proof for getCompletionSignalsForOwner
+  // (no embed on this table, so a plainer fake suffices).
+  {
+    function makePagedSignalsFake(rowCount: number, otherOwnerCount: number) {
+      const rows: Row[] = []
+      for (let i = 0; i < rowCount; i++) {
+        rows.push({ id: `sig-${String(i).padStart(6, '0')}`, owner_user_id: 'owner-1', assent_quality: 'examined' })
+      }
+      for (let i = 0; i < otherOwnerCount; i++) {
+        rows.push({ id: `sig-other-${String(i).padStart(6, '0')}`, owner_user_id: 'owner-2' })
+      }
+      const client = {
+        from(table: string) {
+          if (table !== 'idea_loop_completion_signals') throw new Error(`unexpected table ${table}`)
+          return {
+            select() {
+              const filters: Array<{ op: 'eq' | 'gt'; col: string; val: unknown }> = []
+              // Same server-side default cap as the cycles fake above — see
+              // its comment.
+              let lim = 1000
+              const api = {
+                eq(col: string, val: unknown) {
+                  filters.push({ op: 'eq', col, val })
+                  return api
+                },
+                gt(col: string, val: unknown) {
+                  filters.push({ op: 'gt', col, val })
+                  return api
+                },
+                not() {
+                  return api
+                },
+                gte() {
+                  return api
+                },
+                order() {
+                  return api
+                },
+                limit(n: number) {
+                  lim = n
+                  return api
+                },
+                then(resolve: (v: unknown) => void) {
+                  let out = rows.filter((r) =>
+                    filters.every((f) =>
+                      f.op === 'eq' ? r[f.col] === f.val : (r[f.col] as string) > (f.val as string),
+                    ),
+                  )
+                  out = out.slice().sort((a, b) => ((a.id as string) < (b.id as string) ? -1 : 1))
+                  out = out.slice(0, lim)
+                  resolve({ data: out, error: null })
+                },
+              }
+              return api
+            },
+          }
+        },
+      } as unknown as SupabaseClient
+      return { client }
+    }
+
+    const fake = makePagedSignalsFake(1100, 8)
+    const res = await getCompletionSignalsForOwner('owner-1', fake.client)
+    assert(res.ok === true, '§8b.1 the multi-page signals export succeeds')
+    if (res.ok) {
+      assert(
+        res.value.length === 1100,
+        `§8b.2 all 1,100 owner rows come back across 3 pages, none dropped at the 500-row cap (got ${res.value.length})`,
+      )
+      assert(
+        (res.value as Array<Record<string, unknown>>).every((r) => r.owner_user_id === 'owner-1'),
+        '§8b.3 the eq(owner_user_id) filter held across every page',
+      )
+    }
+  }
+
   // ==========================================================================
   // ATRF completion signal — the lookup/insert race (PR19 finding, 2026-08-23)
   //
@@ -469,14 +686,26 @@ async function run(): Promise<void> {
   // ==========================================================================
   {
     function clientFailingWith(err: { code?: string; message?: string }) {
+      // The select() branch models pagedRows' chain contract
+      // (select().eq().order().limit(), then awaited) — getCompletionSignalsForOwner
+      // now reads through pagedRows, so `.eq()` must return a chainable,
+      // thenable object rather than resolving directly (row-cap sweep fix,
+      // 2026-09-03).
+      const pagedApi = {
+        eq: () => pagedApi,
+        not: () => pagedApi,
+        gte: () => pagedApi,
+        gt: () => pagedApi,
+        order: () => pagedApi,
+        limit: () => pagedApi,
+        then: (resolve: (v: unknown) => void) => resolve({ data: null, error: err }),
+      }
       return {
         from: () => ({
           delete: () => ({
             eq: () => ({ select: async () => ({ data: null, error: err }) }),
           }),
-          select: () => ({
-            eq: async () => ({ data: null, error: err }),
-          }),
+          select: () => pagedApi,
         }),
       } as unknown as SupabaseClient
     }

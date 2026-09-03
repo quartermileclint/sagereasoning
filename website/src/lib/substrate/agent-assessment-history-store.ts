@@ -35,6 +35,8 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
+import { pagedRows } from '@/lib/db/paged-select'
+
 import type { EvaluatedAction } from './trust-layer/types/evaluation'
 
 // ============================================================================
@@ -621,19 +623,31 @@ export async function getAssessmentHistoryForOwner(
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<AssessmentHistoryRow[]>> {
   try {
-    const { data, error } = await client
-      .from(TABLE)
-      .select('*')
-      .eq('owner_user_id', ownerUserId)
-      .order('created_at', { ascending: false })
+    // M6, row-cap sweep 2026-09-02/-03: this SELECT had no .limit(), so any
+    // owner with >1,000 rows in agent_assessment_history had their EXPORT
+    // (R17i) silently truncated at the PostgREST server cap — an incomplete
+    // Article 15/20 copy presented as complete, with no error surfaced.
+    // Paged on `id` (the table's confirmed UUID primary key,
+    // website/supabase/migrations/20260614_m6_agent_assessment_history.sql)
+    // so the export is always exhaustive. pagedRows orders ASCENDING by the
+    // cursor column (id), not `created_at DESC` as the original .order()
+    // did — see the orderBehaviorNote at the call site below for why that
+    // is safe here.
+    const { rows, error } = await pagedRows<AssessmentHistoryRow>(
+      client,
+      TABLE,
+      'id',
+      '*',
+      { eqColumn: 'owner_user_id', eqValue: ownerUserId },
+    )
     if (error) {
       // Table not migrated yet (Live route) → nothing to export, benign empty.
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `getAssessmentHistoryForOwner: ${error.message}` }
+      return { ok: false, error: `getAssessmentHistoryForOwner: ${error}` }
     }
-    return { ok: true, value: (data as AssessmentHistoryRow[] | null) ?? [] }
+    return { ok: true, value: rows ?? [] }
   } catch (e) {
     return { ok: false, error: `getAssessmentHistoryForOwner threw: ${(e as Error).message}` }
   }

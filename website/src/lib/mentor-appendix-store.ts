@@ -23,6 +23,7 @@ import {
   decryptProfileData,
   ServerEncryptedPayload,
 } from '@/lib/server-encryption'
+import { pagedRows } from '@/lib/db/paged-select'
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -139,18 +140,38 @@ export async function saveAppendixRound(
 export async function listAppendixRounds(
   userId: string
 ): Promise<DecryptedAppendixRound[]> {
-  const { data, error } = await supabaseAdmin
-    .from('mentor_baseline_appendix')
-    .select('*')
-    .eq('user_id', userId)
-    .order('submitted_at', { ascending: false })
+  // row-cap sweep 2026-09-02/-03: an unbounded .select('*') silently
+  // truncates at PostgREST's confirmed 1,000-row server cap with no error —
+  // a practitioner past that many appendix rounds would have had older
+  // rounds (or, depending on which page PostgREST happened to return, newer
+  // ones) silently dropped from every listing, a per-user GDPR
+  // access/export read. pagedRows keyset-paginates over the confirmed UUID
+  // 'id' primary key to read every row exhaustively and fail-honestly.
+  //
+  // pagedRows orders ASCENDING by 'id', not by submitted_at descending as
+  // this function's contract requires (callers rely on "newest first" —
+  // see the re-sort below) — the id ordering is discarded once every row
+  // is in hand.
+  const { rows: pagedData, error } = await pagedRows<StoredAppendixRow>(
+    supabaseAdmin,
+    'mentor_baseline_appendix',
+    'id',
+    '*',
+    { eqColumn: 'user_id', eqValue: userId }
+  )
 
-  if (error || !data) {
+  if (error || !pagedData) {
     if (error) console.error('[mentor-appendix-store] List error:', error)
     return []
   }
 
-  const rows = data as StoredAppendixRow[]
+  // Restore the caller-visible contract: newest round first. Callers
+  // (getBaselineAppendixContext's rounds.slice(0, maxRounds), the list
+  // route's display order) rely on this ordering, unrelated to how the
+  // underlying paginated read is strategized.
+  const rows = [...pagedData].sort((a, b) =>
+    b.submitted_at.localeCompare(a.submitted_at)
+  )
   const results: DecryptedAppendixRound[] = []
 
   for (const row of rows) {

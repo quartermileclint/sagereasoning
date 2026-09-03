@@ -47,6 +47,16 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // The ONE allowlisted cross-boundary import — pure K1 identity grammar (see
 // the header note + the boundary battery's allowlist).
 import { isCanonicalAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
+// Row-cap sweep (2026-09-02/-03): the two data-rights export reads below used
+// an unbounded .select() that PostgREST silently truncates at ~1,000 rows —
+// see paged-select.ts's header for the full finding. Both reads here are
+// covered: getStoaDataForOwner uses pagedRows (a confirmed unique `id` PK,
+// eqColumn-filtered); getStoaDataForCredentials uses pagedRangeSelect (the
+// caller-supplied `.in('credential_ref', ...)` filter isn't one of
+// pagedRows's built-in opts, and this is a bounded, one-shot export read of
+// one operator's own credentials — the same C4 data-rights class
+// pagedRangeSelect was built for, not a live continuously-written feed).
+import { pagedRows, pagedRangeSelect } from '@/lib/db/paged-select'
 
 // ============================================================================
 // SHARED PLUMBING
@@ -648,17 +658,35 @@ export async function getStoaDataForCredentials(
 ): Promise<StoaStoreResult<unknown[]>> {
   if (credentialRefs.length === 0) return { ok: true, value: [] }
   try {
-    const { data, error } = await client
-      .from(TABLE)
-      .select('*')
-      .in('credential_ref', credentialRefs)
+    // Row-cap sweep (2026-09-02/-03): an unbounded .in() select silently
+    // truncated at PostgREST's ~1,000-row cap. pagedRangeSelect (not
+    // pagedRows — .in() isn't one of pagedRows's built-in filter opts).
+    const { rows, error, incomplete } = await pagedRangeSelect<unknown>(
+      client,
+      TABLE,
+      (q) => q.in('credential_ref', credentialRefs),
+      '*',
+    )
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${TABLE} by credentials: ${error.message}` }
+      return { ok: false, error: `select ${TABLE} by credentials: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    // PR19 fold (2026-09-03, row-cap sweep C4 remaining-sites): pagedRangeSelect's
+    // `incomplete` flag (its 25,000-row MAX_PAGES safety valve) was previously
+    // dropped silently — the exact silent-truncation class this sweep exists to
+    // close, just at a much higher ceiling. StoaStoreResult has no field for a
+    // partial-success signal without a breaking type change to every caller, so
+    // this is surfaced as a loud server-side warning (never expected to fire at
+    // today's Stoa entry volumes) rather than restructuring the return type.
+    if (incomplete) {
+      console.warn(
+        `[stoa-store] getStoaDataForCredentials: hit the ${credentialRefs.length}-credential ` +
+        `pagination safety valve (25,000 rows) — the returned set may be incomplete.`
+      )
+    }
+    return { ok: true, value: rows ?? [] }
   } catch (e) {
     return { ok: false, error: `select ${TABLE} threw: ${(e as Error).message}` }
   }
@@ -671,14 +699,20 @@ export async function getStoaDataForOwner(
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoaStoreResult<unknown[]>> {
   try {
-    const { data, error } = await client.from(TABLE).select('*').eq('owner_user_id', ownerUserId)
+    // Row-cap sweep (2026-09-02/-03): an unbounded .eq() select silently
+    // truncated at PostgREST's ~1,000-row cap. pagedRows keyset-pages on the
+    // confirmed unique `id` primary key.
+    const { rows, error } = await pagedRows<unknown>(client, TABLE, 'id', '*', {
+      eqColumn: 'owner_user_id',
+      eqValue: ownerUserId,
+    })
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${TABLE} by owner: ${error.message}` }
+      return { ok: false, error: `select ${TABLE} by owner: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    return { ok: true, value: rows ?? [] }
   } catch (e) {
     return { ok: false, error: `select ${TABLE} threw: ${(e as Error).message}` }
   }

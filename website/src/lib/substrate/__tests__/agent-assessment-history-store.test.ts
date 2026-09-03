@@ -368,7 +368,10 @@ async function main(): Promise<void> {
     assert(res.ok && res.value.length === 1, 'export: returns rows')
     assert(captures[0].select === '*', 'export: selects *')
     assert(captures[0].eq[0][0] === 'owner_user_id' && captures[0].eq[0][1] === 'owner-uuid', 'export: scoped to owner_user_id')
-    assert(captures[0].order !== undefined && captures[0].order[0] === 'created_at', 'export: ordered by created_at')
+    // M6, row-cap sweep: now paged via pagedRows, cursor-ordered ASCENDING by
+    // `id` (the table's PK) rather than the prior `created_at DESC` — see
+    // the multi-page exhaustiveness proof below for why this is safe.
+    assert(captures[0].order !== undefined && captures[0].order[0] === 'id', 'export: paged, ordered ascending by id (the cursor column)')
   }
 
   {
@@ -382,6 +385,91 @@ async function main(): Promise<void> {
     const { client } = makeClient(() => ({ data: null, error: { code: 'PGRST205', message: 'schema cache miss' } }))
     const res = await getAssessmentHistoryForOwner('owner-uuid', client as never)
     assert(res.ok && res.value.length === 0, 'export: missing table → benign empty (production-safe)')
+  }
+
+  // ==========================================================================
+  // 6b. Row-cap sweep 2026-09-02/-03 (M6): the negative control. A fake client
+  // whose PostgREST semantics genuinely enforce a 1,000-row server cap on any
+  // single request, over an owner with 1,200 rows. The PRE-FIX .select('*')
+  // (no .limit()) would have silently returned only 1,000 — this proves the
+  // pagedRows-based fix walks past the cap and assembles all 1,200.
+  // ==========================================================================
+  {
+    const SERVER_CAP = 1000
+    const TOTAL_ROWS = 1200
+    const allRows = Array.from({ length: TOTAL_ROWS }, (_, i) => ({
+      id: `id-${String(i).padStart(5, '0')}`, // fixed-width so lexical order === numeric order
+      owner_user_id: i < TOTAL_ROWS - 1 ? 'owner-uuid' : 'someone-else', // one row for a DIFFERENT owner
+      correlation_id: `c-${i}`,
+    }))
+
+    // A minimal chainable fake that (a) enforces the eq('owner_user_id', …)
+    // filter genuinely, (b) enforces a strict .gt() cursor, (c) sorts
+    // ascending by the requested order column, and (d) — the load-bearing
+    // negative control — truncates any single request's result at
+    // SERVER_CAP, exactly mirroring the real PostgREST behaviour this whole
+    // sweep exists to defend against.
+    class CappedFakeQuery {
+      private rows: typeof allRows
+      constructor(rows: typeof allRows) {
+        this.rows = rows
+      }
+      select(): this {
+        return this
+      }
+      eq(col: string, val: unknown): this {
+        this.rows = this.rows.filter((r) => (r as Record<string, unknown>)[col] === val)
+        return this
+      }
+      gt(col: string, val: unknown): this {
+        this.rows = this.rows.filter((r) => ((r as Record<string, unknown>)[col] as string) > (val as string))
+        return this
+      }
+      order(col: string, opts: { ascending?: boolean }): this {
+        this.rows = this.rows
+          .slice()
+          .sort((a, b) => {
+            const av = (a as Record<string, unknown>)[col] as string
+            const bv = (b as Record<string, unknown>)[col] as string
+            return av < bv ? -1 : av > bv ? 1 : 0
+          })
+        if (opts?.ascending === false) this.rows.reverse()
+        return this
+      }
+      limit(n: number): this {
+        this.rows = this.rows.slice(0, n)
+        return this
+      }
+      then<T>(resolve: (r: { data: unknown; error: unknown }) => T): Promise<T> {
+        // The negative control: a real PostgREST server enforces its OWN
+        // cap on the RESPONSE regardless of whether the caller ever calls
+        // .limit() at all — model that here, at resolution time, not inside
+        // limit(), so a caller that omits .limit() (the pre-fix code) is
+        // truncated exactly as production would truncate it.
+        return Promise.resolve({ data: this.rows.slice(0, SERVER_CAP), error: null }).then(resolve)
+      }
+    }
+
+    const cappedClient = {
+      from(_table: string): CappedFakeQuery {
+        return new CappedFakeQuery(allRows)
+      },
+    }
+
+    const res = await getAssessmentHistoryForOwner('owner-uuid', cappedClient as never)
+    assert(res.ok, 'row-cap sweep: paged export succeeds against a server that caps at 1,000/request')
+    if (res.ok) {
+      assert(
+        res.value.length === TOTAL_ROWS - 1,
+        `row-cap sweep: assembled all ${TOTAL_ROWS - 1} of this owner's rows, past the ${SERVER_CAP}-row server cap (got ${res.value.length})`,
+      )
+      const ids = new Set(res.value.map((r) => (r as unknown as { id: string }).id))
+      assert(ids.size === TOTAL_ROWS - 1, 'row-cap sweep: no duplicate rows across pages')
+      assert(
+        !res.value.some((r) => (r as unknown as { owner_user_id: string }).owner_user_id !== 'owner-uuid'),
+        'row-cap sweep: the eq(owner_user_id) filter still holds across every page (no cross-owner leak)',
+      )
+    }
   }
 
   // ==========================================================================

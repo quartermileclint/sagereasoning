@@ -48,6 +48,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { encryptForStorage, decryptFromStorage, type EncryptedField } from '@/lib/encryption-helpers'
+import { pagedRows } from '@/lib/db/paged-select'
 import type { KatorthomaProximityLevel } from '@/lib/substrate/trust-layer/types/accreditation'
 import type { PerDomainProximity } from './proximity-domains'
 import type {
@@ -633,8 +634,16 @@ export async function getAgentSessionsForExport(
 ): Promise<StoreResult<Array<Record<string, unknown>>>> {
   try {
     const admin = getAdminClient()
-    const { data, error } = await admin.from(SESSIONS).select('*').eq('agent_id', agent_id)
-    if (error) return { ok: false, error: `getAgentSessionsForExport: ${error.message}` }
+    // Row-cap sweep 2026-09-02/-03 (M-series): an unbounded .select('*').eq(agent_id) silently
+    // truncates at PostgREST's confirmed 1,000-row server cap with no error — an agent with more
+    // than 1,000 reflect sessions would previously get a silently-incomplete Article 15/20 export.
+    // pagedRows keyset-pages by the genuine 'id' primary key, exhaustive + fail-honest (an error on
+    // any page surfaces as {rows: null, error}, never a partial result presented as complete).
+    const { rows: data, error } = await pagedRows<SageReflectSessionRow>(admin, SESSIONS, 'id', '*', {
+      eqColumn: 'agent_id',
+      eqValue: agent_id,
+    })
+    if (error) return { ok: false, error: `getAgentSessionsForExport: ${error}` }
     const rows = (data ?? []) as SageReflectSessionRow[]
     const exported = rows.map((row) => {
       const { response_history_ciphertext, response_history_meta, ...plain } = row

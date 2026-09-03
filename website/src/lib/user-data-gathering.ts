@@ -22,6 +22,7 @@ import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-en
 // Stoa ST2 (R17g/R17i, 2026-08-03) — the practitioner's Stoa entries in the
 // Art 15 access copy (owner_user_id-keyed; missing-table-benign).
 import { getStoaDataForOwner, getStoaDataForCredentials } from '@/lib/stoa/stoa-store'
+import { pagedRows, pagedRangeSelect } from '@/lib/db/paged-select'
 
 /**
  * Decrypt an at-rest encrypted field (ciphertext column + encryption_meta JSONB)
@@ -112,14 +113,26 @@ export async function gatherUserPersonalData(
     { key: 'milestones', table: 'milestones' },
   ]
 
+  // M5, row-cap sweep 2026-09-02/-03: this loop was an unbounded per-user
+  // read on every table — a silent truncation here is an incomplete Article
+  // 15 copy presented as complete. `pagedRangeSelect` walks each table
+  // exhaustively via offset pagination (no per-table PK knowledge needed —
+  // see the helper's own header for why offset pagination, not keyset, is
+  // the right tool here). `incomplete: true` is added to a table's access
+  // entry ONLY if its safety-valve ceiling (25,000 rows) is hit — an honest
+  // disclosure rather than a silently truncated "complete" access copy.
+  // Mirrors the identical fix in /api/user/export/route.ts's 2. loop.
   for (const { key, table } of tables) {
-    const { data: rows, error } = await supabaseAdmin
-      .from(table)
-      .select('*')
-      .eq('user_id', userId)
+    const { rows, error, incomplete } = await pagedRangeSelect(
+      supabaseAdmin,
+      table,
+      (q) => q.eq('user_id', userId)
+    )
 
-    if (error && !error.message.includes('does not exist')) {
-      data[key] = { error: error.message }
+    if (error && !error.includes('does not exist')) {
+      data[key] = { error }
+    } else if (incomplete) {
+      data[key] = { rows: rows || [], incomplete: true }
     } else {
       data[key] = rows || []
     }
@@ -140,14 +153,21 @@ export async function gatherUserPersonalData(
     // PR19 fold F3 (2026-08-03): agent entries declared under this user's
     // owned credentials (owner-NULL rows; the operator is the accountable
     // declarer) join the Art 15 copy. Keyed by credential_ref, exactly.
-    const { data: credRows, error: credError } = await supabaseAdmin
-      .from('api_keys')
-      .select('id')
-      .eq('owner_user_id', userId)
+    // M5, row-cap sweep 2026-09-02/-03: was an unbounded per-owner read — an
+    // incomplete key list here means an incomplete Art 15 access copy
+    // presented as complete. Paged on `id` (api_keys' UUID PK). Mirrors the
+    // identical fix in /api/user/export/route.ts's 2d. block.
+    const { rows: credRows, error: credError } = await pagedRows<{ id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id',
+      { eqColumn: 'owner_user_id', eqValue: userId }
+    )
     if (credError) {
-      data.stoa_agent_entries = { error: credError.message }
+      data.stoa_agent_entries = { error: credError }
     } else {
-      const refs = ((credRows ?? []) as { id: string }[]).map((r) => `api_key:${r.id}`)
+      const refs = (credRows ?? []).map((r) => `api_key:${r.id}`)
       const agentStoa = await getStoaDataForCredentials(refs)
       data.stoa_agent_entries = agentStoa.ok ? agentStoa.value : { error: agentStoa.error }
     }
@@ -158,10 +178,20 @@ export async function gatherUserPersonalData(
   //    fetch it once and reuse its id(s).
   let profileIds: string[] = []
   {
-    const { data: rows, error } = await supabaseAdmin
-      .from('mentor_profiles')
-      .select('*')
-      .eq('user_id', userId)
+    // row-cap sweep 2026-09-02/-03: was an unbounded .select('*') — silently
+    // truncated at PostgREST's confirmed 1,000-row cap with no error. Paged
+    // on the confirmed UUID 'id' primary key (supabase-mentor-profiles-
+    // migration.sql). Mirrors listAppendixRounds' identical fix below and in
+    // mentor-appendix-store.ts.
+    const { rows: pagedData, error: pagedError } = await pagedRows<Record<string, unknown>>(
+      supabaseAdmin,
+      'mentor_profiles',
+      'id',
+      '*',
+      { eqColumn: 'user_id', eqValue: userId }
+    )
+    const rows = pagedData
+    const error = pagedError ? { message: pagedError } : null
 
     if (error && !error.message.includes('does not exist')) {
       data.mentor_profile = { error: error.message }
@@ -189,10 +219,18 @@ export async function gatherUserPersonalData(
 
   // mentor_baseline_appendix — user_id-scoped, encrypted_payload
   {
-    const { data: rows, error } = await supabaseAdmin
-      .from('mentor_baseline_appendix')
-      .select('*')
-      .eq('user_id', userId)
+    // row-cap sweep 2026-09-02/-03: was an unbounded .select('*'). Paged on
+    // the confirmed UUID 'id' primary key, mirroring mentor-appendix-store.ts's
+    // listAppendixRounds fix for the identical table.
+    const { rows: pagedData, error: pagedError } = await pagedRows<Record<string, unknown>>(
+      supabaseAdmin,
+      'mentor_baseline_appendix',
+      'id',
+      '*',
+      { eqColumn: 'user_id', eqValue: userId }
+    )
+    const rows = pagedData
+    const error = pagedError ? { message: pagedError } : null
 
     if (error && !error.message.includes('does not exist')) {
       data.mentor_baseline_appendix = { error: error.message }
@@ -218,10 +256,17 @@ export async function gatherUserPersonalData(
   // realtime_journal_entries — R17b encrypted at rest; decrypt for the subject.
   // Falls back to legacy plaintext columns for any pre-encryption row.
   {
-    const { data: rows, error } = await supabaseAdmin
-      .from('realtime_journal_entries')
-      .select('*')
-      .eq('user_id', userId)
+    // row-cap sweep 2026-09-02/-03: was an unbounded .select('*'). Paged on
+    // the confirmed UUID 'id' primary key (supabase-mentor-gaps-migration.sql).
+    const { rows: pagedData, error: pagedError } = await pagedRows<Record<string, unknown>>(
+      supabaseAdmin,
+      'realtime_journal_entries',
+      'id',
+      '*',
+      { eqColumn: 'user_id', eqValue: userId }
+    )
+    const rows = pagedData
+    const error = pagedError ? { message: pagedError } : null
 
     if (error && !error.message.includes('does not exist')) {
       data.realtime_journal_entries = { error: error.message }
@@ -270,18 +315,24 @@ export async function gatherUserPersonalData(
     'mentor_virtue_profile',
   ]
 
+  // M5, row-cap sweep 2026-09-02/-03: same fix as the user_id loop above,
+  // applied to the profile_id-scoped tables. Mirrors the identical fix in
+  // /api/user/export/route.ts's 4. loop.
   for (const table of profileScopedTables) {
     if (profileIds.length === 0) {
       data[table] = []
       continue
     }
-    const { data: rows, error } = await supabaseAdmin
-      .from(table)
-      .select('*')
-      .in('profile_id', profileIds)
+    const { rows, error, incomplete } = await pagedRangeSelect(
+      supabaseAdmin,
+      table,
+      (q) => q.in('profile_id', profileIds)
+    )
 
-    if (error && !error.message.includes('does not exist')) {
-      data[table] = { error: error.message }
+    if (error && !error.includes('does not exist')) {
+      data[table] = { error }
+    } else if (incomplete) {
+      data[table] = { rows: rows || [], incomplete: true }
     } else {
       data[table] = rows || []
     }

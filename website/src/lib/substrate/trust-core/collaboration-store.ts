@@ -22,6 +22,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { StoreResult } from './trust-core-store'
 import { canonicalAuthorityBoundary } from './collaboration-record'
+import { pagedRows } from '../../db/paged-select'
 import type {
   AuthorityBoundary,
   CollaborationRecord,
@@ -336,20 +337,30 @@ async function deleteBy(
   }
 }
 
-/** Export (R17i) an operator's collaboration records. Called by /api/user/export. */
+/** Export (R17i) an operator's collaboration records. Called by /api/user/export.
+ *
+ *  M5, row-cap sweep 2026-09-02/-03: was an unbounded per-owner read — a
+ *  truncated result here means an incomplete Art 20 export presented as
+ *  complete. Paged on `id` (collaboration_records' UUID PK). */
 export async function getCollaborationDataForOwner(
   ownerUserId: string,
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<unknown[]>> {
   try {
-    const { data, error } = await client.from(TABLE).select('*').eq('owner_user_id', ownerUserId)
+    const { rows, error } = await pagedRows<Record<string, unknown>>(
+      client,
+      TABLE,
+      'id',
+      '*',
+      { eqColumn: 'owner_user_id', eqValue: ownerUserId },
+    )
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${TABLE} by owner: ${error.message}` }
+      return { ok: false, error: `select ${TABLE} by owner: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    return { ok: true, value: (rows ?? []) as unknown[] }
   } catch (e) {
     return { ok: false, error: `select ${TABLE} threw: ${(e as Error).message}` }
   }

@@ -36,6 +36,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { StoreResult } from './trust-core/trust-core-store'
+import { pagedRows } from '@/lib/db/paged-select'
 
 // ============================================================================
 // SHARED PLUMBING (mirrors collaboration-store.ts)
@@ -365,17 +366,30 @@ export async function getWatchingDataForOwner(
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<unknown[]>> {
   try {
-    const { data, error } = await client
-      .from(CYCLES_TABLE)
-      .select(`*, ${CANDIDATES_EMBED}`)
-      .eq('owner_user_id', ownerUserId)
+    // Row-cap sweep 2026-09-02/-03: this was an unbounded per-owner read, so a
+    // practitioner with more than the server's ~1,000-row cap worth of cycles
+    // would have their Article 15/20 export silently truncated to the oldest
+    // (no `.order()` was set, so PostgREST's default cut is undefined but
+    // observed to drop the newest — see the sweep report §0). `pagedRows`
+    // walks the table exhaustively via a keyset cursor on `id`, the confirmed
+    // UUID primary key, so the export is always the TRUE full set. The embed
+    // string is passed through unchanged — it is a `.select()` argument, not a
+    // filter, and `pagedRows` forwards `selectColumns` verbatim to every page's
+    // `.select()` call.
+    const { rows: data, error } = await pagedRows<unknown>(
+      client,
+      CYCLES_TABLE,
+      'id',
+      `*, ${CANDIDATES_EMBED}`,
+      { eqColumn: 'owner_user_id', eqValue: ownerUserId },
+    )
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${CYCLES_TABLE} by owner: ${error.message}` }
+      return { ok: false, error: `select ${CYCLES_TABLE} by owner: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    return { ok: true, value: data ?? [] }
   } catch (e) {
     return { ok: false, error: `select ${CYCLES_TABLE} threw: ${(e as Error).message}` }
   }
@@ -553,17 +567,23 @@ export async function getCompletionSignalsForOwner(
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<unknown[]>> {
   try {
-    const { data, error } = await client
-      .from(COMPLETION_SIGNALS_TABLE)
-      .select('*')
-      .eq('owner_user_id', ownerUserId)
+    // Row-cap sweep 2026-09-02/-03: same fix as getWatchingDataForOwner above
+    // — an unbounded per-owner read silently truncated at the server cap.
+    // `id` is this table's confirmed UUID primary key.
+    const { rows: data, error } = await pagedRows<unknown>(
+      client,
+      COMPLETION_SIGNALS_TABLE,
+      'id',
+      '*',
+      { eqColumn: 'owner_user_id', eqValue: ownerUserId },
+    )
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${COMPLETION_SIGNALS_TABLE} by owner: ${error.message}` }
+      return { ok: false, error: `select ${COMPLETION_SIGNALS_TABLE} by owner: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    return { ok: true, value: data ?? [] }
   } catch (e) {
     return { ok: false, error: `select ${COMPLETION_SIGNALS_TABLE} threw: ${(e as Error).message}` }
   }

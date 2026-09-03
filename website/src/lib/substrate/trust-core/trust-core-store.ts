@@ -27,6 +27,7 @@ import { computeTrustProfile } from './trust-aggregate'
 import type { VirtueTrustDomain } from './types'
 import { PROXIMITY_RANK } from './constants'
 import type { SessionDomainObservation } from './intervention-engine'
+import { pagedRows } from '@/lib/db/paged-select'
 
 // ============================================================================
 // SHARED PLUMBING (mirrors agent-assessment-history-store.ts)
@@ -946,6 +947,14 @@ export async function getTrustDataForOwner(
   return { ok: true, value: { events: events.value, state: state.value } }
 }
 
+// Row-cap sweep 2026-09-02/-03: this was an unbounded `.select('*').eq(...)`
+// read — the M7/S10-2 finding — which PostgREST silently truncates at its
+// confirmed 1,000-row server cap with no error. getTrustDataForOwner (this
+// function's only two callers) feeds /api/user/export's Art 20 copy; a
+// truncated read here means an incomplete GDPR export silently presented as
+// complete once either trust table crosses the cap for one operator. Both
+// tables have a confirmed UUID `id` primary key (used elsewhere in this file
+// as the insert/delete `.select('id')` projection), so paged on `id`.
 async function selectBy(
   table: string,
   column: string,
@@ -953,14 +962,17 @@ async function selectBy(
   client: SupabaseClient,
 ): Promise<StoreResult<unknown[]>> {
   try {
-    const { data, error } = await client.from(table).select('*').eq(column, value)
+    const { rows, error } = await pagedRows<Record<string, unknown>>(client, table, 'id', '*', {
+      eqColumn: column,
+      eqValue: value,
+    })
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (isMissingTableError({ message: error })) {
         return { ok: true, value: [] }
       }
-      return { ok: false, error: `select ${table} by ${column}: ${error.message}` }
+      return { ok: false, error: `select ${table} by ${column}: ${error}` }
     }
-    return { ok: true, value: (data ?? []) as unknown[] }
+    return { ok: true, value: (rows ?? []) as unknown[] }
   } catch (e) {
     return { ok: false, error: `select ${table} threw: ${(e as Error).message}` }
   }
