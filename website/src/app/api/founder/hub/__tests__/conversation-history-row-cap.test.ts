@@ -468,6 +468,47 @@ async function main(): Promise<void> {
     }
   }
 
+  // ── §14 loadConversationPage rejects a cursor that bypassed the boundary
+  //      validator (found by the 2026-09-03 retroactive PR19 review, dimension
+  //      fake-fidelity-and-test-adequacy, finding #2: the function had no
+  //      defensive check of its own, only a comment noting the sole caller
+  //      validates first — a future direct caller with a client-influenced
+  //      cursor could reopen the filter-injection class parseConversationPageParams
+  //      exists to close). Bypasses the route entirely, calling
+  //      loadConversationPage directly, exactly as a future non-route caller
+  //      would.
+  {
+    const rows = makeRows(5)
+    const { client } = makeFakeClient({ [MESSAGES_TABLE]: rows })
+
+    let threw = false
+    try {
+      await loadConversationPage(client, CONV, {
+        before: { created_at: 'not-a-timestamp', id: uuid(1) } as PageCursor,
+      })
+    } catch {
+      threw = true
+    }
+    assert(threw, '§14-1 a malformed before.created_at throws rather than reaching the .or() filter string')
+
+    let threw2 = false
+    try {
+      await loadConversationPage(client, CONV, {
+        before: { created_at: ts(1), id: 'not-a-uuid' } as PageCursor,
+      })
+    } catch {
+      threw2 = true
+    }
+    assert(threw2, '§14-2 a malformed before.id throws rather than reaching the .or() filter string')
+
+    // A genuinely well-formed cursor from a direct caller still works (the
+    // guard must not reject valid input).
+    const ok = await loadConversationPage(client, CONV, {
+      before: { created_at: ts(3), id: uuid(3) },
+    })
+    assert(ok.messages !== undefined, '§14-3 a well-formed direct-caller cursor is accepted, not rejected by the new guard')
+  }
+
   console.log(`\n${passed} passed, ${failed} failed`)
   if (failed > 0) {
     console.log('Failures:')

@@ -31574,3 +31574,92 @@ PR20, PR22, PR23 (memory `postgrest-row-cap-silent-truncation` written this sess
 first-hand-found defect fixed; sweep complete and recorded (remediation not started); the governance
 question raised, not answered; independent review incomplete on all three launches, disclosed as a
 required carried follow-up rather than papered over. **Nothing bears on the 0h call.**
+
+## D-FOUNDER-HUB-POSTGREST-ROW-CAP-FIX-LIVE-2026-09-03
+
+**Tier:** `code-critical`. **AC7:** engaged and discharged — every production step (push, un-archive
+UPDATE, both acceptance smokes) was the founder's; the AI observed none of it and this entry rests on
+the founder's report against the expectations fixed in advance by
+`operations/founder-hub-2026-09/2026-09-02-founder-hub-row-cap-FOUNDER-WALK.md`.
+
+**What happened:** commit `a70c467` is on `origin/main`, Vercel green. The founder ran the walk and
+reported both acceptance criteria passed: criterion 1 — the private-mentor thread now shows through
+the newest message (the 2026-09-02 exchange visible at the bottom) with a working "Load earlier
+messages" button; criterion 2 — a new message drew a reply engaging with what was actually sent, not
+a stale ruling. The founder elected **option (b)** for the interim conversation created during the
+archive period: the old 1,013-message thread was un-archived and the interim conversation was also
+archived, leaving exactly one active private-mentor thread. The interim messages remain in the
+database, reversible by the same UPDATE mechanism documented in the walk's §4.
+
+**Honest limit:** the AI did not observe the push, the un-archive, or either smoke directly. This
+entry is grounded in the founder's report against a specification (the walk document) written and
+frozen before the observation happened, per the 2026-09-02 score/save precedent — not in first-hand
+verification of production state.
+
+**Rollback:** unchanged from the predecessor close — `git revert a70c467` + push (code); re-archive
+SQL in the walk's §4 (data), independently.
+
+**Rules served:** PR6, PR17 (founder-performed live ops), PR18, PR20.
+
+**Status:** LIVE and founder-confirmed working. Nothing bears on the 0h call.
+
+## D-FOUNDER-HUB-ROW-CAP-RETROACTIVE-PR19-REVIEW-COMPLETE-2026-09-03
+
+**Tier:** `code-elevated` (review + two small fixes; no production change, no deploy this entry).
+**Predecessor:** `D-FOUNDER-HUB-POSTGREST-ROW-CAP-FIX-LIVE-2026-09-03`.
+
+**What happened:** the required retroactive PR19 independent review (three dimensions that never
+ran before, plus a sweep-report adjudication) was run as four separate small launches (≤1 agent
+each, no refuters), per the successor prompt's §2 session-limit lesson. **No launch died. Zero
+UNREVIEWED** — a first for this fix's review history (three prior launches all died on the account
+session limit before this session opened).
+
+**Findings, confirmed/refuted/unreviewed:**
+- `fake-fidelity-and-test-adequacy`: 1 HIGH (disclosed/carried, not fixed — the cap-modelling fake's
+  `.or()`/`.eq()` combination semantics are never checked against the real postgrest-js builder),
+  1 MEDIUM (FIXED — `loadConversationPage` lacked its own defensive cursor validation), 2 LOW + 1
+  NIT (named, not fixed), 3 sub-areas confirmed clean. 0 refuted, 0 unreviewed.
+- `sweep-tool-correctness`: 1 real false negative (FIXED — the sweep never walked `website/`'s own
+  top level; `hub_id_check.mjs` had two genuine unbounded reads it missed), 4 theoretical-only gaps
+  (disclosed, no live instance). 0 refuted, 0 unreviewed.
+- `claims-vs-code`: 1 LOW (FIXED — the sweep report's milestones "NONE" row conflated a DB UNIQUE
+  constraint with an app-level vocabulary bound). All other checked claims VERIFIED. 0 refuted, 0
+  unreviewed. 1 claim UNVERIFIABLE (a process-step description, not a re-derivable code property).
+- `sweep-report-adjudication`: all 9 HIGH rows (H1-H9) CONFIRMED, no downgrades. The `journal_entries`
+  NONE row CONFIRMED genuinely impossible; the `milestones` NONE row produced the same bypass
+  finding independently (corroborating `claims-vs-code`'s finding).
+
+**Fixed, this entry, each with an executed mutation-verified regression pin:**
+1. `website/src/app/api/founder/hub/conversation-history.ts` — `loadConversationPage` now
+   defensively re-validates `before.created_at`/`before.id` against `ISO_TS_RE`/`UUID_RE` before
+   constructing the `.or()` filter string, rather than relying solely on its caller. New test §14
+   (3 assertions), mutation-verified (reverting the guard fails exactly §14-1/§14-2, nothing else).
+2. `website/scripts/unbounded-select-sweep.ts` — new non-recursive `walkTopLevel()` scans
+   `website/`'s own root (previously entirely unswept, distinct from `website/src`/`website/scripts`
+   which were already walked). Candidate count 85→87, exactly the two `hub_id_check.mjs` sites.
+3. `operations/founder-hub-2026-09/2026-09-02-unbounded-select-sweep-REPORT.md` — the milestones
+   NONE row's wording corrected to name the DB-constraint-vs-app-vocabulary distinction.
+
+**Disclosed, carried, not fixed this entry:** the fake-fidelity HIGH (real, but closing it fully
+means integration-testing against the actual `@supabase/supabase-js` builder — out of scope for a
+row-cap bug fix; mitigated by the founder-walk's live production smoke, §5.3, already having passed
+against real production). The 4 theoretical sweep-tool gaps (no live instance found). The 2 LOW + 1
+NIT fake-fidelity findings (fragility/coverage notes, not defects).
+
+**Verified after fixes:** `conversation-history-row-cap.test.ts` **77/0** (was 74/0);
+`message-persistence.test.ts` 13/0 unaffected; `tsc --noEmit` exit 0; sweep re-run **87 candidates**
+(was 85).
+
+**Rollback:** `git revert` this commit — independently revertable from the row-cap fix itself (no
+schema, no flag, no production deploy in this entry; these are repo-only additive fixes that ship
+on the next push).
+
+**Rules served:** PR6, PR18, PR19 (§4 fallback discipline honored explicitly — no finding marked
+refuted for want of a surviving refuter; this run had no dead launches at all), PR23 (memory
+`postgrest-row-cap-silent-truncation` already covers the root class; no new memory needed).
+
+**Status:** retroactive review COMPLETE. The row-cap fix and the sweep report may now be treated as
+verified for downstream activation per PR19 §4, with one disclosed HIGH carried as a named residual.
+Full record in the close addendum:
+`operations/founder-hub-2026-09/2026-09-02-postgrest-row-cap-fix-CLOSE.md`. Nothing bears on the 0h
+call.

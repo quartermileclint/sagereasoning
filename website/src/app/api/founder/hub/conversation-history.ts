@@ -245,6 +245,16 @@ export async function loadConversationPage(
   const limit = clampPageLimit(opts.limit)
   const before = opts.before ?? null
 
+  if (before && (!ISO_TS_RE.test(before.created_at) || !UUID_RE.test(before.id))) {
+    // Defence in depth: the sole caller today (route.ts) already validates via
+    // parseConversationPageParams before constructing `before`, but this function
+    // is a public export a future caller could call directly with an unsanitized
+    // cursor. Without this re-check, a malformed created_at/id would be
+    // interpolated verbatim into the .or() filter string below, reopening the
+    // filter-injection class parseConversationPageParams exists to close.
+    throw new Error('loadConversationPage: invalid before cursor (fails ISO_TS_RE/UUID_RE)')
+  }
+
   let query = client
     .from(MESSAGES_TABLE)
     .select('*', { count: 'exact' })
@@ -252,8 +262,7 @@ export async function loadConversationPage(
 
   if (before) {
     // Keyset: rows strictly before the cursor under (created_at DESC, id DESC).
-    // The values are validated by parseConversationPageParams (or constructed
-    // server-side) so they contain none of PostgREST's reserved characters.
+    // Re-validated above; contains none of PostgREST's reserved characters.
     query = query.or(
       `created_at.lt.${before.created_at},and(created_at.eq.${before.created_at},id.lt.${before.id})`,
     )

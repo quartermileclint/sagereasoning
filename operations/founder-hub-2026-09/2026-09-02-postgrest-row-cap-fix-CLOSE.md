@@ -173,3 +173,102 @@ draws on).
 defects fixed; sweep complete and recorded; governance question raised, not answered; independent
 review incomplete, disclosed as a required follow-up, not papered over. **Nothing bears on the 0h
 call.** Weights BLOCKED unchanged.
+
+---
+
+## Addendum — retroactive PR19 independent review (2026-09-03), the required carried follow-up
+
+Per §5's disclosed requirement, the three dead review dimensions plus a sweep-report adjudication
+were re-run independently as four SEPARATE small launches (≤1 agent each, no refuters — the
+session-limit lesson at §2 of the successor handoff prompt), against the pushed diff (`git show
+a70c467`). **No launch died this time. Zero UNREVIEWED.**
+
+### `fake-fidelity-and-test-adequacy` (never ran before)
+**1 HIGH, 1 MEDIUM, 2 LOW, 1 NIT confirmed; 3 sub-areas confirmed clean.**
+- **HIGH (disclosed, not fixed this session):** the cap-modelling fake reimplements `.eq()`/`.or()`
+  filter-combination semantics from scratch and is never checked against the real
+  `@supabase/supabase-js` builder's actual URL/query-param construction. The specific property the
+  fix depends on — that `.eq('conversation_id', id).or(cursorExpr)` combines with AND, never OR, so
+  a cursor page can't leak another conversation's rows — rests entirely on the fake matching the
+  real library's combination behavior, unverified against the real library. Mitigation already in
+  the record: the founder-walk's §5.3 live smoke exercised this against real production and passed
+  (founder-reported, see the LIVE decision-log entry above). **Fully closing this would mean
+  integration-testing against the real postgrest-js builder — out of scope for this fix session;
+  named as a carried follow-up, not silently dropped.**
+- **MEDIUM (fixed):** `loadConversationPage` had no defensive validation of its own `before`
+  parameter — the injection guard lived entirely in the sole caller (`parseConversationPageParams`),
+  with only a comment noting the assumption. A future direct caller with a client-influenced cursor
+  would reopen the filter-injection class. Fixed: `loadConversationPage` now re-validates
+  `before.created_at`/`before.id` against the existing `ISO_TS_RE`/`UUID_RE` and throws before
+  constructing the `.or()` string. New test §14 (3 assertions: malformed created_at throws,
+  malformed id throws, a well-formed direct-caller cursor is still accepted), mutation-verified
+  (reverting the guard fails exactly §14-1/§14-2 and nothing else).
+- 2 LOW + 1 NIT: timestamp comparison is lexical in the fake (not a live risk, a coverage-fragility
+  note for future fixture reuse); the §11 wiring pins are literal regex matches against route.ts
+  source text, disclosed and intentional but brittle to a semantically-identical refactor. Not fixed
+  (both named, not blocking).
+- Confirmed clean: `.or()` value quoting matches PostgREST's grammar; `count`+`.limit()` combination
+  correctly modeled; the cap boundary (`min(explicit limit, maxRows)`) correctly modeled and
+  non-trivially exercised at §8.
+
+### `sweep-tool-correctness` (never ran before)
+**1 real false negative found and fixed; 4 theoretical-only gaps (no live instance), disclosed.**
+- **Real (fixed):** the sweep's root list (`src`, `scripts`, `../sage-mentor`, `../sdk`) never walked
+  `website/`'s own top level. `website/hub_id_check.mjs`, a tracked founder-scratch diagnostic
+  script, contains two genuine unbounded reads (`mentor_profiles`, `mentor_interactions`) — exactly
+  the "verified arithmetic on an unverified set" class this tool exists to catch. Fixed: a new
+  non-recursive `walkTopLevel()` scans `website/`'s root only (no double-count of `src`/`scripts`,
+  which are already walked recursively). Sweep re-run: candidate count 85→87, exactly the two new
+  sites from `hub_id_check.mjs`, confirming the fix and nothing else moved.
+- 4 theoretical gaps with no live instance (template-literal dynamic table names captured as false
+  literals — misleading but not a missed-chain risk; `.range()` above the server cap trusted as
+  bounded — no live site exceeds it; single-branch conditional bounds — none exist in the codebase;
+  the 4,000-char continuation window — all 3 real bounded-continuation sites land well under it).
+  Named, not built (no live risk today).
+- 3 spot-checked classifications (M4's `get_event_counts` fallback, `reflections/route.ts:53`, M6's
+  `user/delete` reads) all confirmed correct against source.
+- **Verdict on the 85-candidate count:** trusted as a near-floor, not exact — every gap found (real
+  or theoretical) pushes the true number UP, never down. Now 87 post-fix.
+
+### `claims-vs-code` (never ran before)
+**1 LOW confirmed and fixed; all checked present-tense claims otherwise VERIFIED.**
+- The REPORT's §2.4 "NONE — structurally impossible" row for `milestones` cited a UNIQUE constraint
+  as the bound, but the UNIQUE index only prevents duplicate `(user_id, milestone_id)` pairs — it
+  does not bound the number of DISTINCT `milestone_id` values, which is enforced purely by
+  application code (`milestones.ts`'s fixed 24-entry registry), not the schema. A future
+  admin/backfill path minting programmatic milestone ids would defeat the "structural" framing with
+  no DB signal. Not a current risk (today's registry is static and small) but conflated with a
+  strictly stronger DB-CHECK-constrained row (`journal_entries`) in the same severity tier. Fixed:
+  report wording corrected in place to name the distinction.
+- All other checked claims (the 74/77-assertion count, the exact-count-independent-of-limit
+  behavior, the `has_earlier` derivation never defaulting from `returned === limit` alone, the
+  journal_entries/milestones/trust_core_store/baseline structural bounds) VERIFIED against source.
+- "Mutation-verified four ways" — UNVERIFIABLE by this reviewer (describes a process step performed
+  during the original session, not a present-tense code property re-derivable from source alone);
+  not contradicted by anything found.
+
+### `sweep-report-adjudication` (never ran before)
+**All 9 HIGH rows (H1–H9) CONFIRMED — no downgrades, no unsound fixes.** All cardinality/order/filter
+claims verified verbatim against the cited source; the proposed SQL-aggregate/RPC fixes are sound in
+shape (no existing RPC does this today, but the report never claimed one does — it correctly
+proposes new work). **§2.4 "NONE" rows:** `journal_entries` CONFIRMED genuinely impossible (swept
+every later migration touching the table; none widens the CHECK/UNIQUE). `milestones` — same
+bypass-scenario finding as `claims-vs-code` above (independently reached by a separate reviewer,
+corroborating it): the UNIQUE constraint bounds duplicates, not distinct-value count. No other §2.4
+row re-derived from source given this launch's scope.
+
+### Net effect on the fix + sweep artifacts
+Two code fixes landed (the `loadConversationPage` defensive guard + the sweep tool's `website/` root
+gap), each with an executed, mutation-verified regression pin (test count 74→77; sweep candidate
+count 85→87). One documentation fix (the report's milestones row). One finding (test-fidelity against
+real postgrest-js) is disclosed and carried, not built — closing it fully is out of scope for a
+row-cap bug fix and is mitigated by the founder-walk's live production smoke already having passed.
+
+**Verified after this addendum's fixes:** `conversation-history-row-cap.test.ts` 77/0 (was 74/0);
+`message-persistence.test.ts` 13/0 unaffected; `tsc --noEmit` exit 0; sweep re-run 87 candidates
+(was 85, +2 from the newly-swept `hub_id_check.mjs`).
+
+**PR19 disposition:** all four dimensions ran independently this time, zero deaths, zero
+UNREVIEWED. This retroactive review is now COMPLETE — the fix and sweep report may be treated as
+verified for downstream activation, with the one disclosed HIGH (test-fidelity against real
+postgrest-js) carried as a named, not-fully-closed residual, mitigated by the live production smoke.

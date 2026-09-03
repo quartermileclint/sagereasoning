@@ -126,6 +126,17 @@ function walk(dir: string, out: string[]): void {
   }
 }
 
+// Non-recursive: files directly at `dir`'s top level (never descends into
+// subdirectories). Used for `website/`'s own root, whose subdirectories
+// (src/, scripts/) are already walked separately by `sweep()` — a recursive
+// walk here would double-count them.
+function walkTopLevel(dir: string, out: string[]): void {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) continue
+    if (/\.(ts|tsx|mjs|js)$/.test(entry.name)) out.push(path.join(dir, entry.name))
+  }
+}
+
 function isTestPath(p: string): boolean {
   return /__tests__\//.test(p) || /\.test\.(ts|tsx|mjs|js)$/.test(p) || /\/fake-[a-z-]*supabase[a-z-]*\.ts$/.test(p)
 }
@@ -399,6 +410,12 @@ export function sweep(root: string, opts: { includeTests: boolean }): { chains: 
     const d = path.join(root, sub)
     if (fs.existsSync(d)) walk(d, files)
   }
+  // `website/`'s own top level (as opposed to website/src or website/scripts)
+  // was previously unswept entirely — a real gap found on the 2026-09-03
+  // retroactive review: website/hub_id_check.mjs is a founder-scratch
+  // diagnostic script with a genuine unbounded `.from('mentor_interactions')`
+  // read. Non-recursive so it doesn't double-count src/scripts.
+  walkTopLevel(root, files)
   const chains: ChainSite[] = []
   const rpcs: RpcSite[] = []
   // literal table OR identifier table (`.from(table)`, `.from(TABLE_CONST)`)

@@ -87,7 +87,7 @@ Legend — **can_exceed**: `now` (evidence the set already exceeds or nearly exc
 | site | reason |
 |---|---|
 | `journal/route.ts:182`, `milestones/route.ts:124`, `practice-calendar/route.ts:101` (+ export/access loops) | `journal_entries` is UNIQUE(user_id, day_number) over a 56-day curriculum |
-| `milestones/route.ts:56`, `:101` | UNIQUE(user_id, milestone_id) over a vocabulary < 50 |
+| `milestones/route.ts:56`, `:101` | UNIQUE(user_id, milestone_id) — but the vocabulary bound (<50) is application-code only (`milestones.ts`'s fixed 24-entry registry), not DB-enforced; the UNIQUE index prevents duplicate rows per pair, not a cap on distinct milestone_id values. Weaker guarantee than the CHECK-constrained journal_entries row above it; correction applied 2026-09-03 (retroactive PR19 review) |
 | `milestones/route.ts:103/:107`, `practice-calendar/route.ts:77/:86` | per user (and per month for the calendar); practice cadence is daily at most — see M5 for the export form |
 | `mentor/gap4/route.ts:391`, `mentor/oikeiosis/route.ts:169`, `mentor/premeditatio/route.ts:431` | per user, monthly/quarterly cadence; two are views grouped per month/quarter |
 | `admin/api-keys/route.ts:193`, `export:91`, `user-data-gathering.ts:70` | `profiles` by id / by unique email |
