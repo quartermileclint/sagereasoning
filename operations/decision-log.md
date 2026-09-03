@@ -32344,3 +32344,45 @@ read from source (PR25) rather than assert a repo-side claim as settled fact.
 
 **Status:** Adopted. Comment-only — no behaviour, schema, flag, or public-contract change; production
 byte-equivalent; AC7 not engaged; nothing bears on the 0h call.
+
+## D-ROUTE-I-WHAT-IS-L1-SUPPLY-FOR-SCOPED-2026-09-03
+
+**Tier:** `governance`, documents only. No code, migration, flag, credential, or public-surface edit.
+AC7 not engaged. Weights BLOCKED. Discharges standing-queue item 7, licensed on election since
+2026-08-25 (the `l1_supply` population-query precondition was already satisfied — zero live
+exposure).
+
+**Decision:** Ran the scoping session `2026-08-25-mentor-ruling-extraction-provenance-fix-choice-verbatim.md`'s
+Q3 explicitly ordered — "what is caller-supplied extraction for?" as its own question, with the
+disagreement policy, plugin-path consequences, and Arm-B relationship as named inputs — none of
+which the prior scoping (`2026-08-25-extraction-provenance-and-independent-extractor-SCOPE.md`)
+resolved, by that ruling's own design.
+
+**New synthesis this session adds, not present in the prior scoping:**
+1. **`l1_supply`'s one documented purpose, verified at source** (`route.ts:20-21`): the plugin path's
+   local-extraction cost/latency optimization. The `ecosystem` preset's grant of the same capability
+   has no stated reason anywhere in the codebase.
+2. **Given zero current exposure (item 2a) + the already-immune ENFORCE surface + weights blocked
+   regardless by the separate A2 residual, Arm B's actual reach narrows to the `/api/reason` response
+   and the public trust-record surface** — a materially smaller threat than "closes the whole Arm-B
+   problem" reads as in isolation.
+3. **The disagreement policy worked in full** (four options: reject-on-disagreement, take-the-stricter,
+   take-the-server's, and a fourth this document names — flag-and-proceed), each scored against
+   whether it re-opens the closed over-strictness class or defeats the plugin path's own purpose.
+4. **Item 2b (narrow `l1_supply` out of the `ecosystem` preset) compared directly against route (i) for
+   the first time as an alternative mitigation for the SAME threat** — after 2b, the remaining
+   `l1_supply` population is `plugin_install`-only, a narrower and structurally more accountable
+   caller class, which the recommendation argues makes route (i)'s marginal benefit lower than the
+   2026-08-25 document's own analysis found (that analysis ran against the full population).
+
+**Recommendation offered, nothing elected:** elect 2b now (cheap, reversible, already carried);
+defer route (i) (its cost — permanently taxing or eliminating the plugin path's own purpose under
+three of four disagreement policies — is unchanged by 2b, while its marginal benefit shrinks); if
+route (i) is ever built, flag-and-proceed is the recommended starting disagreement policy.
+
+**Deliverables:** `operations/agent-circles-2026-08/2026-09-03-route-i-what-is-l1-supply-for-SCOPE.md`
+(the full scoping); `operations/agent-circles-2026-08/2026-09-03-MENTOR-QUESTION-route-i-what-is-l1-supply-for.md`
+(the ruling-ready question, PR20-compliant mechanism statement).
+
+**Status:** Scoped. Awaiting the founder's/mentor's ruling — nothing here decides Q1/Q2/Q3. Nothing
+bears on the 0h call.
