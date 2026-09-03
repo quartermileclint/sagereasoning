@@ -32443,3 +32443,59 @@ deploy in this entry (ships on the next push).
 **Status:** Diagnosed and closed going forward. The historical 63-event breakdown remains
 unrecoverable without founder-run Vercel log access, named honestly rather than guessed at. Nothing
 bears on the 0h call.
+
+## 2026-09-03 — D-AE3-SCOPING-DEFERRED-LOOP-ID-CLAIM-CORRECTED
+
+**Decision:** Executed the 2026-08-17 AE-3 scoping prompt in full (`governance`/scope, documents +
+read-only source reads only; no code, flag, schema, migration, or credential touched; production
+untouched; AC7 not engaged). **Recommendation: defer, unchanged. Do not build. No build prompt
+authored** (per the prompt's own instruction on a defer finding).
+
+**Both ADR-014 §3.4 preconditions remain unmet, and one candidate mechanism is now known to be worse
+than "undesigned."** Structural cadence-provenance: no per-channel credential split has occurred
+since the 2026-08-16 deferral (`sagereasoning:s9-loop@v1` still runs one consult credential); and the
+prompt's own claim that `agent_assessment_history` carries `loop_id` (offered as the lighter "derived
+per-task/per-loop measure" alternative) is **factually wrong, verified against the actual
+`trajectorySelectCols()` builder and every `.sql` migration mentioning `loop_id`** — that column
+exists on `agent_accreditation` (the A10 migration) and `idea_loop_completion_signals`, never on the
+trajectory table. So candidate 2 is not a lighter path than per-channel credentials; it needs its own
+new schema addition too, making per-channel credentialing (or an equivalent) the only viable
+mechanism if AE-3 is ever built — sharpening, not just repeating, the 2026-08-16 finding.
+
+**The structural-zero question re-confirmed:** with one mandated consult credential per identity,
+every observed consult on the harness's populated identity is either the Gate-1 task-adoption consult
+or the S1 at-action floor consult — both mandated, so "excess consults" is still structurally zero.
+Nothing built since S11a (AE-1, AE-2, the B5 session-decline signal, the IDEA-loop family, the C1-C4
+provenance-ledger arc) changed the harness's consult-mandate design.
+
+**The empirical monoculture question was not independently re-measured** (no prod credentials in a
+repo session, per the prompt's own instruction; no founder-run grouped aggregate was ever supplied —
+confirmed absent by a decision-log search). The most recent available data point (the 2026-08-30
+provenance-gaps activation smoke's sample record) still read `aggregate.level: deliberate`, consistent
+with, not contradicting, the S11a-era `deliberate` 125/125 finding — treated as corroborating, not
+dispositive.
+
+**A third, independent reason to defer, absent from the original election:** R20b's own activation
+gate is "post-launch by standing decision" (ADR-014 §3.4's own closing line) and the 0h launch call
+has not been exited — every decision-log entry through today touching it still reads "nothing bears
+on the 0h call." AE-3 inherits that gate regardless of the other two preconditions.
+
+**Reasoning:** followed the prompt's own instruction to read the actual code rather than trust its
+summary (Part B.2's "read the actual select list rather than this summary") — doing so is what
+surfaced the `loop_id` error, which the prompt itself would have propagated forward unchecked. The
+founder question from the 2026-08-17 prompt (is per-channel credentialing wanted at all?) is restated,
+not decided, per the prompt's own Part C scoping (a founder-only question). Weights unaffected;
+nothing in R20b's live perimeter status changed.
+
+**Risk classification:** `governance`/scope, documents + read-only source reads only. Nothing bears
+on the 0h call.
+
+**Rollback:** `git revert` the records commit — documents only; nothing live was touched.
+
+**Rules served:** PR6, PR15, PR18, PR20 (the `loop_id` claim caught by re-checking source rather than
+propagating a three-week-old prompt's summary), Q1.
+
+**Status:** Adopted. Cross-references: `operations/agent-circles-2026-08/2026-09-03-AE3-scoping-
+SCOPE.md`, `adopted/adr/2026-07-18-agent-practice-trajectory.md` §3.4/§4/§7, `operations/handoffs/
+founder/2026-08-17-AE3-scoping-NEXT-SESSION-PROMPT.md`, `operations/trust-layer-2026-07/2026-07-18-
+S11a-extraction-gate-diagnosis.md`.
