@@ -7,7 +7,7 @@
 migration, no credential, no live operation, no commit unless the founder elects one at the end.
 **Critical Change Protocol NOT engaged. AC7 NOT engaged.**
 
-**Expected HEAD at authoring:** `26d474a`. **One untracked file expected**, belonging to another
+**Expected HEAD at authoring:** `50ce187` (the prompt was first drafted at `767f3ee` and updated at the Gate-3 ruling). **One untracked file expected**, belonging to another
 session and not to be touched:
 `operations/handoffs/founder/2026-09-01-score-save-perimeter-activation-NEXT-SESSION-PROMPT.md`.
 
@@ -118,9 +118,21 @@ Read the primary records, not the summaries of them:
   treated as settled in any design or build work before that confirmation.
 - **Three Ruling-Set-E items are routed to this track**, which is *"not to be opened early"* per its
   own gating condition.
-- **A fourth may now belong here** — the O-C Gate-3 design document (`26d474a`) asks, as its **first**
-  question, whether Gate 3 and Ruling Set E's A4 are the same question routed twice. **If the mentor
-  answers that they are, the O-C design's substance joins this track.** Note it; do not pre-empt it.
+- **Four further named inputs arrived 2026-09-03 and now belong here** — **RULED, after this prompt's
+  first draft was written.** The O-C Gate-3 rulings
+  (`operations/agent-circles-2026-08/2026-09-03-mentor-rulings-oc-gate3-verbatim.md`;
+  `D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03`) settled the boundary: **Gate 3 owns the
+  rendering surface and the floor constraint; this track owns Layer 3 injection and the Stage-2
+  relational-context reframing.** Q1 requires anything Gate 3 produced that bears on those items to be
+  **named in the handoff, not resolved** — and it is, at **§11 of the design document**: (i) the
+  bounded (e) design's two rendering-surface decisions; (ii) the finding that **role material already
+  exists** (a validated `role` on `CandidateProfile`, an A2A-card mapper, an `incompatible-role`
+  exclusion, the calling gate's declared purpose — on the discernment path, not on `/api/reason`'s
+  request), which corrects a premise this track might otherwise inherit; (iii) A4's routing premise
+  being **false today**, which Q1 rules **does not dissolve the routing**; (iv) the
+  `relationship_type` distinctness hazard. **Read §11; do not pre-empt the examination** — per Q1 and
+  the 2026-08-19 carry-forward precedent, A4's content is examined **when this session opens, not
+  before.**
 
 ---
 
@@ -137,8 +149,9 @@ A short written report **in the session, not as a new file** unless the founder 
 4. **The standing queue behind it** — one line each, no elaboration: the founder-walked live steps
    (R4 activation batch; Class-B view-grants remediation; `triggered_rules` encryption migration; the
    close-hook case-2 decision; provenance-ledger slice 3), route (i)'s pending founder/mentor
-   recommendation, AE-3 (deferred, preconditions unmet), the O-C Gate-3 ruling, and the **0h call**,
-   which remains the founder's and which nothing in this session touches.
+   recommendation, AE-3 (deferred, preconditions unmet), and the **0h call**, which remains the
+   founder's and which nothing in this session touches. **The O-C Gate-3 ruling is no longer
+   outstanding — it was ruled and executed 2026-09-03; that track is CLOSED.**
 5. **The statement this session exists to make:** grounded, and **standing by for the founder to relay
    new mentor instructions relating to the standing-runner design track.**
 
@@ -150,7 +163,11 @@ Then **stop and wait.** Do not propose next steps beyond the report. Do not open
 
 - **Do not open the standing-runner design session**, or any session it gates. It is explicitly *"not
   to be opened early."*
-- **Do not act on the O-C Gate-3 design.** It is FOR RULING and licenses nothing, including itself.
+- **Do not act on the O-C Gate-3 design.** It is now **RULED** (2026-09-03) and still licenses
+  nothing — the ruling's own exclusion list is explicitly unchanged: no activation, no code edit, no
+  ENV-1 change, **no publication of any string, re-sited ones included.** Two of the design's
+  proposals were **ruled against** (the delivery sentence's re-siting; the trust-record pointer) — do
+  not resurrect either.
 - **Do not build, flag, migrate, mint, deploy, or run any live operation.**
 - **Do not fix the stale claims you find** unless the founder elects it — surfacing is the deliverable.
 - **Do not restate `/CLAUDE.md` as if it were verification.** A grounding report whose claims are
