@@ -1,6 +1,40 @@
 # Mentor question — may the standing-runner design session proceed, and what would actually satisfy the Option S gate?
 
-**Authored 2026-09-04.** `governance`, documents only. **Nothing here is a build, an activation, or a
+> **⚖ RULED 2026-09-04 — ANSWERED, all three questions. THE SESSION MAY OPEN. These annotations are
+> BINDING and win over the body wherever they differ; the verbatim record wins over them in turn**
+> (`agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-gate-item-level-session-may-open-verbatim.md`; relayed same day):
+>
+> - **Q1 — THE GATE IS ITEM-LEVEL. Statement 1 governs.** The same interpretive principle as the
+>   close-gate ruling applies: *"when two statements conflict and one carries reasoning and the other
+>   does not, the one with reasoning governs."* A1 is *"a restatement, not an independent ruling"* and
+>   *"a correct answer to a question that was framed too broadly"* — **the correction is to this
+>   session's question framing, not to A1's answer**, exactly as Part 1 conceded. The data condition
+>   binds **two items only** (the M/W/S election; R8-D7's sampling policy), **deferred explicitly and
+>   in writing**; everything else in the load is ungated. **"The standing-runner design session may
+>   open."**
+> - **Q2 — the existing measurement is informative but NOT sufficient**; **Path C is not adopted**,
+>   and *"the document is right not to recommend"* it, since adopting it *"would mean ruling on a rate
+>   the instrument's own authors marked as asserted, not established."* The 2026-08-30 framing treats
+>   the data as *"a necessary condition for honest ruling, not merely a useful input."*
+> - **Q3 — PATH A is acceptable and RECOMMENDED.** The circularity Part 2 named is *"real but
+>   dissolves under the item-level reading of Q1."* The cost estimate is *"credible"* and the approach
+>   *"sound."* **One precision the ruling ADDS that this document did not name:** Path A measures a
+>   **closed run's** candidate population, not a live loop — *"the ruling should carry that limit
+>   explicitly when the M/W/S election is made."* It does not disqualify Path A; it is *"the honest
+>   disclosure that rides the data when it is used."*
+> - **⚠ NOT LICENSED: opening the session before the founder confirms.** *"The founder opens the
+>   session."* Also not licensed: Path C; and any build, activation, schema change, or publication.
+>   Weights-BLOCKED, GS-CYB-1's two conditions, and the Q1 hard constraint are untouched.
+> - **On Part 6's counter-case, answered directly rather than acknowledged:** the design/verdict
+>   coupling is *"real"* and is *"a reason to carry the deferral explicitly and in writing throughout
+>   the session, not a reason to block the session's opening"* — *"Design decisions made with an
+>   explicit open question named and deferred are revisable. Design decisions made without knowing the
+>   question exists are not."* On the same-day re-approach: *"Re-approaching a gate with new mechanism
+>   facts is not the same as re-litigating a settled ruling. The document was right to bring it."*
+>
+> **The questions below are left exactly as put, beside their answers.**
+
+**Authored 2026-09-04. ⚖ RULED 2026-09-04 — see the banner above.** `governance`, documents only. **Nothing here is a build, an activation, or a
 schema change**, and nothing here opens the standing-runner design session — its gate stands until
 ruled otherwise. No code, migration, flag, credential, or public surface was touched. Weights
 BLOCKED. The Q1 hard constraint is untouched.
@@ -219,19 +253,19 @@ act that nobody has scheduled, and neither of which the record currently names.
 
 ## PART 7 — The question
 
-**Q1 — Is the gate item-level or session-level?** Does the 2026-08-30 ruling's *"the session rules
+**Q1 — Is the gate item-level or session-level?** — **⚖ RULED: ITEM-LEVEL (Path B). The session may open.** Does the 2026-08-30 ruling's *"the session rules
 M-vs-W with that data in hand"* condition only the M/W/S election and R8-D7's sampling policy
 (**Path B**), or the session's opening as a whole (**Path D**, as A1 states)? If the latter is what
 was meant all along, the question stands answered and the session waits — and we would ask only that
 Q3 be answered so the wait has an end.
 
-**Q2 — Does the existing measurement bear on the doctrine ruling at all?** D6a's n=100 (CI 7.0–19.8%)
+**Q2 — Does the existing measurement bear on the doctrine ruling at all?** — **⚖ RULED: partially; NOT sufficient. Path C not adopted.** D6a's n=100 (CI 7.0–19.8%)
 and c11's n=10 exist; the locked 10%→2.8%/→27% basis derives from the latter. Is the doctrine
 question answerable on that basis (**Path C**), answerable only on a live decision-bearing rate, or
 answerable on neither because it is doctrinal rather than empirical and the data was wanted for a
 different purpose than we have assumed?
 
-**Q3 — What would actually satisfy the gate?** Given M2–M4, is **Path A** — building Option S and
+**Q3 — What would actually satisfy the gate?** — **⚖ RULED: Path A, accepted and recommended, with the closed-run population limit riding the data.** Given M2–M4, is **Path A** — building Option S and
 exercising it against the closed run's persisted candidates — an acceptable way to produce the
 disagreement-rate data? If not, what is? **This is the question we most need answered**, because on
 the current record the gate has no scheduled path to being met, and a gate with no path to
@@ -257,5 +291,7 @@ invoke, because these are two documents rather than two passages of one) ·
 `operations/agent-circles-2026-08/d6a/` (`d6a-probes.json` metadata quoted at M6; committed runs) ·
 `2026-08-29-nine-candidate-remediation-shape-classification.md` (the 120/9 population at M8).
 
-*End of question. Documents only; nothing built, activated, or published. The standing-runner design
-session remains unopened and its gate unchanged unless and until this is ruled.*
+*End of question. **Status: RULED 2026-09-04** — all three answered; the verbatim record governs.
+Documents only; nothing built, activated, or published. **The gate is now item-level and the session
+MAY open — but it remains unopened here: the opening is the founder's act, by the ruling's own
+words.***

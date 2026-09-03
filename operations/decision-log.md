@@ -32917,3 +32917,93 @@ rather than following it. Recorded rather than smoothed over.
 record), `2026-08-16-idea-loop-S6-report.md`,
 `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (the Option S gate; Q1a/Q1c),
 `2026-08-30-standing-runner-design-R8.md` §4.3.
+
+## 2026-09-04 — D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-MAY-OPEN-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — documents only. **Verbatim record:**
+`operations/agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-gate-item-level-session-may-open-verbatim.md`
+— **binding on the founder's relay; the verbatim wins over every summary, including this entry.**
+
+**Decision:** The mentor's ruling on the founder-requested permission question
+(`2026-09-04-MENTOR-QUESTION-standing-runner-gate-permission-to-proceed.md`, `340b9e7`) is **adopted
+as binding**, captured verbatim, and executed documents-only. **All three questions answered.**
+
+**The ruling.** **Q1 — the Option S gate is ITEM-LEVEL.** The 2026-08-30 source ruling governs; A1's
+session-level restatement is *"a correct answer to a question that was framed too broadly"* — **the
+correction is to this project's own question wording, not to A1's answer.** The data condition binds
+**two items only** (the M/W/S floor-semantics election; R8-D7's verdict-confidence sampling policy),
+**deferred explicitly and in writing**; every other named input is ungated. **The standing-runner
+design session MAY OPEN.** **Q2 — the existing measurement (D6a n=100; c11 n=10) is informative but
+NOT sufficient** for those two items; **Path C is not adopted** — adopting it *"would mean ruling on
+a rate the instrument's own authors marked as asserted, not established."* **Q3 — PATH A is
+acceptable and RECOMMENDED**: build Option S, exercise it against the closed run's 29 decision-bearing
+candidates (20 winners + 9 rejections; ≈87 calls at K=3, ≈$1.24), producing a per-input disagreement
+rate on the real candidate population. The circularity the question named is *"real but dissolves
+under the item-level reading of Q1."*
+
+**A precision the ruling ADDS that the question did not name, and which now binds:** Path A's output
+is the rate on a **closed run's** candidate population, not a live loop — *"the ruling should carry
+that limit explicitly when the M/W/S election is made."* It does not disqualify Path A; it is *"the
+honest disclosure that rides the data when it is used."*
+
+**On the counter-case, answered rather than acknowledged:** the generation/verdict-confidence coupling
+is *"real"* and is *"a reason to carry the deferral explicitly and in writing throughout the session,
+not a reason to block the session's opening"* — *"Design decisions made with an explicit open question
+named and deferred are revisable. Design decisions made without knowing the question exists are not."*
+
+**Executed, documents only:** the verbatim capture (NEW); a dated **RULED** banner on the permission
+question with all three answers and the questions left legible beside them; the named-input register's
+head-note **gate sentence corrected from session-level to item-level, the superseded reading struck
+but preserved**, plus the table-head receiving-session sentence corrected the same way; the
+`/CLAUDE.md` 2026-09-04 addendum's gate clause corrected likewise.
+
+**⚠ THE SESSION WAS NOT OPENED.** The ruling is explicit — *"Not licensed: Activating the
+standing-runner design session before the founder confirms the session-opening decision … **The
+founder opens the session.**"* No design element was evaluated, Option S was not built, no candidate
+was re-submitted, and no code, schema, flag, or credential was touched.
+
+**Two elections now before the founder, neither pre-elected nor scheduled here:** (1) **open the
+standing-runner design session**, carrying M/W/S and R8-D7's sampling policy as explicitly deferred
+in writing throughout — no session prompt is authored yet; (2) **Path A** — a founder-elected `code-*`
+build of Option S plus a founder-walked run, independent of (1) and able to precede, follow, or
+parallel it, carrying the closed-run-population limit on its output.
+
+**A reading taken and disclosed rather than raised as a third question.** The ruling licenses Path A
+as *"a code-build plus a founder-walked run"* and, four lines later, states *"Not licensed: Any build,
+activation, schema change, or publication."* Read as: **the mentor rules on approach and doctrine, not
+on this project's execution gating** — Path A is approved as the route; performing it remains a
+founder-elected session under 0d-ii/PR6. Deliberately **not** escalated to a mentor question, because
+unlike the two genuine discrepancies raised earlier this week nothing turns on the reading: under
+either, nothing is built here and the founder's election is required. Recorded at the capture's head.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Production untouched; `git diff -- website/` clean. Weights **BLOCKED** and GS-CYB-1's two conditions
+untouched; the Q1 hard constraint untouched; the P0 0h hold stands; nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this session's commit — the capture, the banner, the two corrections
+and this entry are one path-scoped commit.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "ITEM-LEVEL" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+git diff --stat HEAD~1 -- website/
+```
+Expected: at least `1`; no output from the second.
+
+**Session honesty note.** The at-action guardrail returned CAUTION on the edit carrying these
+corrections — this time reading the action as **appropriate** (kathekon quality `moderate`, role
+obligation engaged, justification offered) while the ruling faculty read **Unsettled**, floored to
+`reflexive` by dikaiosyne. The elicitation fired and was answered in-conversation. **The answer to
+the third sub-question was "the resolution preceded the examination" for the third consecutive time
+today** — recorded as a pattern rather than three isolated answers: on this session's evidence the
+capture-and-execute convention is doing the deciding and the examination is arriving after it. Named
+because the instrument exists to surface exactly this, and smoothing it over would defeat the record.
+
+**Status:** Adopted. Cross-references:
+`2026-09-04-MENTOR-QUESTION-standing-runner-gate-permission-to-proceed.md` (the ruled question),
+`2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (Q3 — Statement 1, confirmed
+governing), `D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04` (A1),
+`D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04` (the interpretive principle
+applied a second time), `2026-08-30-standing-runner-design-R8.md` §5.3/§11/§12.3,
+`2026-08-16-idea-loop-S6-report.md`, `operations/agent-circles-2026-08/d6a/`.

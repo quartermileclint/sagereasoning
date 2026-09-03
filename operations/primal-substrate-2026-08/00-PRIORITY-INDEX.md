@@ -508,8 +508,9 @@ design session (R8) HAS NOW RUN** — the "Standing-runner design" rows below ar
 to a not-yet-opened session, and each carries its R8 disposition inline (a dated **[R8:…]**
 tag at the row's head) rather than being silently left pointing at a completed session. The
 receiving session for what survives is **the standing-runner track's next design-capable
-session** (the session named by the 2026-08-30 mentor ruling's M-vs-W deferral — it opens with
-Option S's disagreement-rate data in hand). Rows whose content R8 consumed entirely are marked
+session** (the session named by the 2026-08-30 mentor ruling's M-vs-W deferral — **which, per the
+2026-09-04 gate ruling, MAY OPEN without Option S's data; only the M/W/S election and R8-D7's
+sampling policy wait on it**). Rows whose content R8 consumed entirely are marked
 consumed and kept as pointers; rows R8 deliberately did not resolve are redirected, not voided,
 per the 2026-08-19 template. Full detail: the R8 design's ruling-annotations block and §9.
 
@@ -519,12 +520,28 @@ the mentor's consolidated input brief for the standing-runner track, the eightee
 questions the grounding session put to it, and the eighteen rulings + **corrected governing brief**
 are captured verbatim. The mentor names the corrected brief *"the single authoritative input document
 for that session"* — this table's rows below remain the findable per-item register, and where they
-and the brief differ the verbatim brief wins. **What the rulings change in this table:** the gate is
+and the brief differ the verbatim brief wins. **What the rulings change in this table:** ~~the gate is
 **unchanged** (A1 — the next design-capable session does not open until Option S is built and its
-disagreement-rate data is in hand; S is unbuilt); the load is **additive** (A2); **§5d is REMOVED
+disagreement-rate data is in hand; S is unbuilt)~~ **— SUPERSEDED SAME DAY, see the gate correction
+immediately below**; the load is **additive** (A2); **§5d is REMOVED
 from this track's load** (A3 — its R8 §9 redirect to a doctrinal session of its own stands); the
 nine-candidate close gate is **discharged** by the 2026-08-29 record (A4). The two 2026-09-01 rows
 below are now received-and-ruled (B1–B4), and three rows are added for the brief's other inputs.
+
+**⚖ THE GATE IS ITEM-LEVEL — CORRECTED 2026-09-04, same day**
+(`D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-MAY-OPEN-2026-09-04`; verbatim: `agent-circles-2026-08/2026-09-04-mentor-ruling-standing-runner-gate-item-level-session-may-open-verbatim.md`):
+the sentence struck above restated the gate as session-level. **It is not.** The 2026-08-30 source
+ruling conditions one act — *"the session rules M-vs-W with that data in hand"* — and the mentor has
+confirmed that reading governs, A1 being *"a correct answer to a question that was framed too
+broadly"* (the word "opening" came from the asking session's own wording, not from the source
+ruling). **Option S's disagreement-rate data binds exactly TWO items — the M/W/S floor-semantics
+election and R8-D7's verdict-confidence sampling policy — which are deferred explicitly and in
+writing. Every other row in this table is UNGATED, and the standing-runner design session MAY OPEN**
+— the opening itself being the founder's act, not a session's. **Path A is the ruled route to
+satisfying the gate for the two deferred items:** build Option S and exercise it against the closed
+run's 29 decision-bearing candidates (≈87 calls at K=3, ≈$1.24), **carrying the closed-run-population
+limit explicitly whenever that data is used**. Path C (treating D6a's n=100 as sufficient) is **not
+adopted**.
 
 | Receiving session | Named input | Held in | Routed |
 | --- | --- | --- | --- |
