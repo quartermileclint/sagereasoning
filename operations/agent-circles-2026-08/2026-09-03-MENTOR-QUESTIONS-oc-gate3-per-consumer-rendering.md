@@ -7,6 +7,28 @@ differ. **Gate 3.** `SUBSTRATE_LAYER3_ENABLED` unset; nothing licensed.
 **This document and the design were substantially rewritten after three independent blind adversarial
 reviews. The design's original central proposition was withdrawn as refuted** — see Q2.
 
+> ## ✅ ANSWERED 2026-09-03 — ALL SEVEN RULED
+>
+> Verbatim record, which wins over this document and every summary:
+> `2026-09-03-mentor-rulings-oc-gate3-verbatim.md`
+> (`D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03`).
+>
+> **Q1** Gate 3 was properly before the session; the boundary is **the rendering surface and the floor
+> constraint**, with Layer 3 injection and the Stage-2 reframing belonging to the standing-runner
+> track's next design-capable session — anything bearing on them is **named in the handoff, not
+> resolved**. **Q2** the floor is correct, and **applies to the verdict's conditions of production,
+> not its content** — a condition on honesty, not form. **Q3** re-siting requires **its own
+> surface-scoped vetting**; the "five need no new wording" claim is superseded. **Q4** the ruled
+> delivery sentence **does not survive** the change of surface and referent — **new wording per
+> surface**, and the **proxy basis must be disclosed**. **Q5** emit-and-annotate stands; the
+> annotation **must disclose the proxy basis and its uncertainty**. **Q6** the pointer is **dropped**
+> and the element's scope **conceded**; the ENV-1 extension is **not licensed**. **Q7** use the
+> evidence **at the level it supports** — Reading B present *in this population*, not dominant,
+> Reading A not excluded.
+>
+> **Nothing is licensed beyond the design work itself.** The exclusion list is unchanged: no
+> activation, no code edit, no ENV-1 change, **no publication of any string, re-sited ones included**.
+
 ---
 
 ## PR20 — the mechanism facts a ruling will land on

@@ -32627,3 +32627,104 @@ Concurrency: `git status` run twice; commit path-scoped; appended at the physica
 `D-NINE-CANDIDATE-CLASSIFICATION-PR19-REVIEW-RUN-BASE-RATE-CORRECTED-2026-08-29`,
 `D-STANDING-RUNNER-DESIGN-R8-COMPLETE-C11-EXPERIMENT-RUN-PR19-FOLDED-2026-08-30`,
 `operations/handoffs/founder/2026-09-03-OC-Gate3-per-consumer-rendering-DESIGN-NEXT-SESSION-PROMPT.md`.
+
+---
+
+## 2026-09-03 — D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03
+
+**Date:** 2026-09-03. **Tier:** `governance` — documents only. **Verbatim record:**
+`operations/agent-circles-2026-08/2026-09-03-mentor-rulings-oc-gate3-verbatim.md` — **binding on the
+founder's relay; the verbatim wins over every summary, including this entry and the annotations
+applied to the design.**
+
+**Decision:** The mentor's rulings on the O-C Gate-3 design document (relayed 2026-09-03, after the
+design was pushed at `26d474a` and Vercel went green) are **adopted as binding**, recorded verbatim,
+and executed documents-only. **All seven questions ruled.**
+
+**The rulings.** **Q1** — Gate 3 and Ruling Set E's A4 are **not the same question**; they share a
+subject *"at different architectural layers."* **Gate 3 owns the rendering surface and the floor
+constraint; A4's next design-capable session owns Layer 3 injection and the Stage-2 relational-context
+reframing.** Gate 3 *"is properly before this session"* and *"proceeded correctly on Gate 2's explicit
+naming"* — **the session's own judgement call is vindicated, and the boundary it could not derive is
+now set.** A4's false premise *"does not dissolve A4's routing… it means A4's routing was premised on
+a state that does not yet exist."* **Binding consequence:** anything Gate 3 produces bearing on A4's
+items is **named in the handoff, not resolved**. **Q2** — the disclosure floor is correct, **with an
+implication the document did not name and which now binds: the floor applies to the verdict's
+conditions of production, not to its content** — *"a condition on the rendering's honesty, not a
+condition on its form."* The ground is doctrinal: withholding a bearing limit is *"a false impression
+by omission"* and the resulting assent *"is not free"*; the corollary applied throughout is that **the
+confidence of a claim must not exceed its evidential basis.** **Q3** — **re-siting ruled text requires
+its own surface-scoped vetting**; the authoring ruling *"did not establish its fitness for every
+surface the text might subsequently appear on."* **Q4** — the ruled delivery sentence **does not
+survive** the change of surface and referent, on three independently sufficient grounds (the relay
+constraint; R20d in the relay sibling; the proxy exceeding its evidential basis); *"the ruled text is
+a content anchor, not a portable string"*; **new wording per surface, proxy basis disclosed.** **Q5**
+— emit-and-annotate stands and the refusal class stays with the floor-semantics track; **new
+requirement: the annotation must disclose the proxy basis and its uncertainty**, the hedged form being
+the honest one. **Q6** — **the pointer is DROPPED** for orientation-only agents and **the element's
+scope conceded**; the ENV-1 gate extension is **not licensed** and would need its own scoping session
+*"justified on its own terms — not as a remedy for the pointer's failure"*; the residual reach is *"a
+disclosed limit, not a design failure."* **Q7** — use the completed classification and demonstrated
+Reading B **at the level the evidence supports**: present *in this population*, **not** dominant,
+**Reading A not excluded**.
+
+**Two of the design's own proposals were ruled against, and both are recorded as such rather than
+softened:** the delivery sentence's re-siting (Q4 — the element the design called its cheapest and
+least contestable) and the trust-record pointer (Q6 — its sole remedy for the circularity the 86%
+correction made dominant). **The design's "five of nine elements need no new wording" claim is
+superseded by Q3** and is struck through in place, not deleted.
+
+**Executed this session (documents only):** the verbatim capture (NEW); a **binding dated-annotations
+block** at the head of the design document with all seven rulings and their consequences; **status
+flipped FOR RULING → RULED** at both the head and the close; §5.1's "New wording?" column
+**re-labelled as superseded** with each row struck through and re-marked; §2.3(c-1) **pointer
+dropped** per Q6; §5.0 gains **Q2's unnamed implication** and the evidential-basis corollary; §3.2's
+Reading B claim **scoped** per Q7; §5.3's `delivery` row rewritten to carry Q4's three grounds and
+Q5's disclosure requirement; §8 marked **ALL SEVEN RULED** with the questions left legible beside the
+answers; a **new §11 — "Named to the standing-runner handoff"** discharging Q1's binding consequence;
+and an **ANSWERED banner** on the companion. Originals preserved in place (struck through, not
+deleted) so the reasoning that was ruled on remains legible.
+
+**Named to the standing-runner track's next design-capable session (§11), not resolved:** the bounded
+(e) design's two rendering-surface decisions (role-silence at field level; carrying A2's published
+role-blindness sentence); the finding that **role material already exists** (a validated `role` on
+`CandidateProfile`, an A2A-card mapper, an `incompatible-role` exclusion, the calling gate's declared
+purpose — on the discernment path, not on `/api/reason`'s request), correcting a premise a later
+session might otherwise inherit; the falsity of A4's routing premise; and the `relationship_type`
+distinctness hazard. **Per Q1 and the 2026-08-19 carry-forward precedent, A4's content is examined
+when that session opens, not before.**
+
+**Risk classification:** Standard under 0d-ii (`governance` — documents only). AC7 not engaged. PR6
+not engaged. Production untouched; `git diff -- website/` clean.
+
+**Rollback path:** `git revert` this session's commit; the verbatim record, the annotations, and the
+log entry are each independently revertible.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "Status: RULED 2026-09-03" operations/agent-circles-2026-08/2026-09-03-DESIGN-DOCUMENT-oc-per-consumer-rendering-FOR-RULING.md
+git diff --stat -- website/
+```
+Expected: `2` (head and close); no output from the second.
+
+**Open questions:** **none on this track.** Gate 3 is closed. What remains is the standing-runner
+track's next design-capable session, which now opens with four named inputs from §11 in addition to
+its existing load (the deferred M-vs-W floor-semantics ruling with its framing locked; Option S ruled
+buildable and unbuilt; the three Ruling-Set-E items; the nine `[R8:…]` register rows).
+
+**Rules served:** PR18, PR20, PR23. Weights **BLOCKED**; the Q1 hard constraint untouched; the P0 0h
+hold stands; nothing bears on the 0h call.
+
+**Status:** Adopted. **Not licensed by this ruling or its execution:** activation of
+`SUBSTRATE_LAYER3_ENABLED`; any edit to the Layer-3 files, `parallel-run.ts`, `/api/reason/route.ts`,
+or `orientation-reading.ts`; any new delivery-class computation on the human path; any change to the
+trust record's ENV-1 gate; any schema change for the four relational-context fields; any change to
+`question-bank.ts`; **publication of any string, including the re-sited ones**; any change to the R18
+surfaces; any movement of R8's gates or the A2/A4 routings. The byte-identity guard's end condition
+remains a gate on any eventual build. Cross-references:
+`D-OC-GATE3-DESIGN-DOCUMENT-AUTHORED-PR19-REWRITTEN` (the ruled document),
+`D-MENTOR-RULINGS-OC-GATE2-ADOPTED-GATE3-LICENSED-2026-08-23`,
+`D-MENTOR-RULING-SET-D-LAYER3-SCOPE-DOCUMENT-RECORDED-2026-08-15`,
+`2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md`,
+`2026-08-19-mentor-ruling-late-arriving-carry-forward-ruled-session-verbatim.md`.

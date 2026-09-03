@@ -6,7 +6,55 @@
 is licensed at this gate."* **Agenda:** Gate 2's ruling
 (`2026-08-23-mentor-rulings-oc-gate2-verbatim.md`), in the ruled order (c) → (d) → (a)/(b)/(e).
 
-**Status: FOR RULING.** **Tier:** `governance` — documents only.
+**Status: RULED 2026-09-03.** **Tier:** `governance` — documents only.
+
+> ## ⚖ BINDING RULING ANNOTATIONS — applied 2026-09-03
+>
+> **All seven questions RULED.** Verbatim record, which **wins over this document and every summary
+> of it**: `operations/agent-circles-2026-08/2026-09-03-mentor-rulings-oc-gate3-verbatim.md`
+> (`D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03`). Where an annotation below conflicts with
+> the body text underneath it, **the annotation governs and the body is superseded in that respect**;
+> the body is left standing rather than rewritten, so the reasoning that was ruled on remains legible.
+>
+> - **Q1 — RULED. Gate 3 was properly before the session.** *"Gate 3 owns the rendering surface and
+>   the floor constraint. A4's next design-capable session owns Layer 3 injection and the
+>   relational-context reframing."* Not the same question — the same subject at **different
+>   architectural layers**. **A4's premise being false does not dissolve its routing**; it means the
+>   routing was premised on a state that does not yet exist. **Binding consequence:** anything here
+>   bearing on A4's items is **named in the handoff to the standing-runner track, not resolved** —
+>   see §11.
+> - **Q2 — RULED, with an implication this document did not name.** The disclosure floor is correct.
+>   **The floor applies to the verdict's *conditions of production*, not to its *content*** — *"a
+>   condition on the rendering's honesty, not a condition on its form."* Two audiences may receive
+>   different wording, channel and next steps; neither may have a bearing limit withheld. The ground
+>   is doctrinal: withholding such a limit is *"a false impression by omission"*, and the assent that
+>   follows *"is not free."*
+> - **Q3 — RULED, and it supersedes this document's cheapness claim.** Re-siting ruled text requires
+>   **its own surface-scoped vetting**; the authoring ruling *"did not establish its fitness for every
+>   surface the text might subsequently appear on."* **§5.1's "No — re-sited" entries and the claim
+>   that five of nine elements need no new wording are SUPERSEDED** — each element is vetted against
+>   its surface, audience and channel.
+> - **Q4 — RULED against the design's flagship element.** The ruled delivery sentence **does not
+>   survive** the change of surface and referent, on three independently sufficient grounds (the relay
+>   constraint; R20d in the relay sibling; **the transport-level proxy exceeding its evidential
+>   basis**). *"The ruled text is a content anchor, not a portable string."* **New wording is required
+>   per surface, and the proxy basis must be disclosed.**
+> - **Q5 — RULED as designed.** Emit-and-annotate stands; the refusal class belongs to the
+>   floor-semantics track. **New requirement:** the annotation **must disclose the proxy basis and its
+>   uncertainty** — *"'The reasoning may not have been examined in time' is more honest than 'the
+>   reasoning was not examined in time'"*.
+> - **Q6 — RULED against the proposed remedy. The pointer is DROPPED** for orientation-only agents and
+>   **the element's scope is conceded.** The ENV-1 gate extension is **not licensed** and would need
+>   its own scoping session *"justified on its own terms — not as a remedy for the pointer's failure."*
+>   The 14% reach is *"a disclosed limit, not a design failure."*
+> - **Q7 — RULED.** Use the completed classification and demonstrated Reading B **at the level the
+>   evidence supports**: present *in this population*, **not** dominant, and **Reading A not
+>   excluded**.
+>
+> **Licensed by the ruling:** proceeding on Q1's boundary; applying Q2's floor; Q3's vetting
+> discipline; Q4's new wording; Q5's emit-and-annotate; Q6's dropped pointer; Q7's evidential level.
+> **Not licensed — §7's exclusion list is explicitly unchanged**, including activation, any code edit,
+> any ENV-1 change, and **publication of any string, re-sited ones included**.
 
 > **⚠ `SUBSTRATE_LAYER3_ENABLED` remains UNSET (re-verified §0). This document licenses nothing —
 > not activation, not a code edit, not a string. §7 states the boundary exhaustively.**
@@ -281,10 +329,16 @@ Three constraints ride with it, the second and third of which the first draft go
   gets a 404**, verified behaviourally at the C2/C1c activation. The pointer 404s for precisely the
   population it was meant to serve.
 
-  **Two honest options, put to the mentor (§8 Q6) rather than chosen:** (a) propose that orientation
-  readings participate in the ENV-1 gate — a real, scoped change with its own honesty cost (a 200
-  carrying no domain evidence, for which slice 3's `provenance_gaps` is precedent); or (b) drop the
-  pointer and confine the element to the minority who received it in time and to later replayers.
+  **Two honest options were put to the mentor (§8 Q6) rather than chosen. ⚖ RULED: option (b).**
+  **The pointer is DROPPED for orientation-only agents and the element's scope is conceded.** The
+  ENV-1 gate extension is **not licensed** — the gate's condition *"is not arbitrary"*, orientation
+  readings *"are not"* a form of evidence about reasoning history the way provenance gaps are, and a
+  record carrying only orientation data *"would present as a trust record… If the record's content
+  does not warrant the name, the name is misleading. That is a floor violation under Q2."* If the
+  extension is ever pursued it needs **its own scoping session justified on its own terms — not as a
+  remedy for the pointer's failure.** The residual reach is *"a disclosed limit, not a design
+  failure"*: the floor requires **disclosing** it, not remedying it at the cost of a misleading
+  record.
 
 **(c-2) Reading stability — one draw, no rate.** The live `llms.txt` sentence — *"treat one call as
 one draw — re-submitting is a legitimate way to see whether the reading is stable"* — sits in a static
@@ -372,8 +426,11 @@ verified instance, not a survey of agent practitioners in general.*
 
 ### 3.2 Reading A vs B — reported, and the design made sensitive to it
 
-**The experiment ran, so this document reports rather than assumes.** Reading B (occasion-variable
-probabilistic extraction) is **demonstrated present and localised**. Reading A is **not excluded**:
+**The experiment ran, so this document reports rather than assumes. ⚖ Q7 RULED: use this evidence, at
+the level it supports — and the wording below is constrained accordingly.** Reading B
+(occasion-variable probabilistic extraction) is **demonstrated present in this population, and
+localised** — **not** shown to be the dominant reading, and **Reading A is not excluded**. The basis
+is a single credentialed loop identity's 20-cycle consult history. Reading A is **not excluded**:
 per the record, *"run 8's reading is not obviously wrong"* — publishing to a public registry is
 near-irreversible and a conservative floor on it is defensible. The phenomenon is inconsistency about
 a defensible caution.
@@ -519,24 +576,39 @@ how it should treat the verdict.** Under this constraint `developer_note` and `s
 properly agent-only (operator plumbing, not limits on the verdict), while the delivery gap, the
 one-draw fact, the corroboration status and the attribution bound may not be withheld from anyone they
 apply to. **This does real work: it forbids the failure the withdrawn claim was reaching for, without
-forbidding the differentiation a ruling already requires.** §8 Q2 asks the mentor to rule on it.
+forbidding the differentiation a ruling already requires.**
+
+**⚖ RULED CORRECT, with one implication this document did not name and which now binds:** *"the floor
+applies to the verdict's conditions of production, not to the verdict's content… The floor is a
+condition on the rendering's honesty, not a condition on its form."* Two audiences may receive
+different wording, channel and actionable next steps; **neither may have withheld from it a limit
+bearing on how the verdict should be treated.** The ground is doctrinal, not procedural: withholding
+such a limit is *"a false impression by omission — the practitioner assents to the verdict without
+knowing the conditions under which it was produced. That assent is not free."* **A corollary applied
+throughout below: the confidence of a claim must not exceed its evidential basis** (the ground on
+which Q4 struck down the delivery sentence's proxy-derived assertion).
 
 ### 5.1 The block
 
 **Name (indicative):** `rendering` — additive, **beside `meta.trajectory`** (§1.2's precedent),
 **outside** the signed assessment, absent entirely when the flag is off.
 
-| Element | Carries | New wording? | Applies to |
+**⚖ The "New wording?" column is SUPERSEDED by Q3 and Q4.** Every element now requires
+surface-scoped vetting against its surface, audience and channel; `delivery` additionally requires
+**new wording per surface** plus disclosure of its proxy basis. The column is retained as the
+pre-ruling reasoning and re-labelled below.
+
+| Element | Carries | Pre-ruling column — SUPERSEDED (Q3/Q4) | Applies to |
 |---|---|---|---|
-| **delivery** | class + the ruled sentence; `basis: elapsed_time_proxy` | No — re-sited (but see §4.1's referent problem, Q4) | Agent path only today (§5.2) |
-| **corroboration** | `corroborated \| uncorroborated \| contradicted` per claim | No — ruled vocabulary, live | Both |
-| **floor provenance** | flooring domain + `proximity_floors.basis` | No — re-sited | Both, floor-class only |
-| **known_absences** | `layer1_source: supplied`, `fallback_reason` | No | Both |
+| **delivery** | class + a **surface-scoped rewording** (Q4); `basis: elapsed_time_proxy` **disclosed** (Q4/Q5); **no trust-record pointer** (Q6) | ~~No — re-sited~~ → **new wording required per surface** | Agent path only today (§5.2); **scope conceded** (Q6) |
+| **corroboration** | `corroborated \| uncorroborated \| contradicted` per claim | ~~No — ruled vocabulary~~ → **vetting required** | Both |
+| **floor provenance** | flooring domain + `proximity_floors.basis` | ~~No — re-sited~~ → **vetting required** | Both, floor-class only |
+| **known_absences** | `layer1_source: supplied`, `fallback_reason` | ~~No~~ → **vetting required** | Both |
 | **reading_stability** | one-draw; `rate_measured: false`; endpoint | Yes | Both |
 | **cross_endpoint** | not-guaranteed-to-match; `comparison_performed: false` | Yes | Both |
 | **attribution** | reads-the-text-not-the-actor; evidence-conditional re-examination (d-3) | Yes | Both, floor-class only |
 | **affordances** | per L-2: agent — re-examination path, endpoint, operator escalation; human — what to do, whom to ask | Yes | **Differs by audience, per L-2** |
-| **limits** | §2.4's three-part statement; A2's role-blindness sentence | No — re-sited | Both |
+| **limits** | §2.4's three-part statement; A2's role-blindness sentence | ~~No — re-sited~~ → **vetting required**; **A2's sentence is named to the standing-runner handoff** (§11) | Both |
 
 ### 5.2 A field that is not audience-invariant, and what that means
 
@@ -566,11 +638,18 @@ Per field:
   `reading_stability`, `cross_endpoint`, `attribution`.
 - **Claim about the server's standing architecture:** `limits` (A2's sentence is an endpoint-level
   claim, not an occasion-level one).
-- **Claim that reaches the practitioner's state:** `delivery`. **Q3's constraint is literally scoped to
-  *rendering of divergence*, so `delivery` may sit outside its strict reach — but the question is put
-  rather than assumed** (§8 Q4). On the trust record the pair is framed as a *not-attestable* clause,
-  an epistemic refusal; `ORIENTATION_OBSERVED_ENTRY_TEXT` is a positive assertion, and the change of
-  surface changes what it does.
+- **Claim that reaches the practitioner's state:** `delivery`. **⚖ RULED (Q4): it does not survive
+  the change of surface and referent, on three independently sufficient grounds** — the relay
+  constraint (on a response addressed to the agent, the agent *is* the reader, and *"the harness does
+  not address the agent as the one whose reasoning is being assessed"*); **R20d** in the relay sibling
+  (a human end-user's rendering *"may name the delivery gap as a limit on the verdict's conditions of
+  production… but it may not describe the agent's examination state as such"*); and **the evidential
+  basis** — a proxy-derived claim presented as a fact about the practitioner's state *"exceeds the
+  evidential basis."* **Consequences that bind:** the sentence is *"a content anchor, not a portable
+  string"*; new wording is required **per surface**, scoped to that surface's audience and referent;
+  the **proxy basis and its uncertainty must be disclosed** (Q5); and the hedged form is the honest
+  one — *"'The reasoning may not have been examined in time' is more honest than 'the reasoning was
+  not examined in time'"* when the basis is a proxy with a known error class.
 
 **Does not claim** in any case: factual correctness (D3); harms omitted from the text (A2's omission
 class); role-relative appropriateness; that its disclosure of known failures covers unknown ones.
@@ -644,7 +723,17 @@ buildable.
 
 ---
 
-## 8. Questions for the Gate-3 ruling
+## 8. Questions for the Gate-3 ruling — ⚖ ALL SEVEN RULED 2026-09-03
+
+**Each question below was answered.** The rulings are summarised in the annotations block at the head
+and are binding in the verbatim record; the questions are left as written so what was asked remains
+legible beside what was answered. **Outcomes in brief:** Q1 Gate 3 properly before the session, the
+boundary set at the rendering surface and the floor constraint · Q2 the floor is correct, and applies
+to conditions of production, not content · Q3 re-siting requires surface-scoped vetting · Q4 the
+delivery sentence does not survive; new wording per surface, proxy basis disclosed · Q5 the division
+is correct; the annotation must disclose the proxy basis and its uncertainty · Q6 the pointer is
+dropped and the scope conceded; the ENV-1 extension is not licensed · Q7 use the evidence at the level
+it supports — present in this population, not dominant, Reading A not excluded.
 
 **Q1 — the boundary, asked first because it conditions the rest.** Ruling Set E's A4 routes the
 per-consumer rendering question to the standing-runner design session, one week after Gate 2 licensed
@@ -729,4 +818,37 @@ mentor's own Q3 prose over the recording session's headline summary.
 **Not verifiable from this repository, disclosed rather than asserted:** that the audience-rendering
 flag has been on since 2026-05-31 (production env state, sourced from `CLAUDE.md`).
 
-*End of design document. Status: FOR RULING. It self-starts nothing.*
+---
+
+## 11. Named to the standing-runner handoff (Q1's binding consequence)
+
+Q1 sets the boundary: **Gate 3 owns the rendering surface and the floor constraint; A4's next
+design-capable session owns Layer 3 injection and the Stage-2 relational-context reframing.** It adds
+a precision that binds this document: *"If Gate 3's ruling produces text or design decisions that bear
+on A4's items, those are named in the handoff to the standing-runner track, not resolved here."*
+
+**Named, not resolved:**
+
+1. **§4.3's bounded (e) design.** Two decisions were taken on the rendering surface — the block is
+   **role-silent at the field level**, and it **carries A2's published role-blindness sentence**. Both
+   are rendering-surface decisions and so within Gate 3's boundary, but both bear on A2/A4's
+   role-relative and relational-context items. **Named for that session's examination; not resolved.**
+2. **The §4.3 finding that role material already exists** — a validated `role` on `CandidateProfile`,
+   an A2A-card mapper, an `incompatible-role` exclusion, and the calling gate's declared purpose —
+   living on the discernment/collaboration path, not on `/api/reason`'s request. This corrects a
+   premise ("no input channel exists") that a later session might otherwise inherit.
+3. **The observation that A4's routing premise is false today** (Layer 3 is wired but flag-gated, so
+   nothing is injected). Q1 rules this **does not dissolve the routing** — it means the routing was
+   premised on a state that does not yet exist. The next design-capable session should know that
+   before it examines A4's items.
+4. **The `relationship_type` distinctness hazard** as it bears on adding any role input to the
+   consult request surface — the ground §4.3 kept, and the one that survives.
+
+**Nothing here pre-empts that session's examination.** Per Q1 and the 2026-08-19 carry-forward
+precedent, A4's content is examined **when that session opens, not before**.
+
+---
+
+*End of design document. **Status: RULED 2026-09-03** — all seven questions answered; the verbatim
+record governs. It still self-starts nothing: no build, flag, activation, schema change, code edit, or
+publication is licensed, and §7's exclusion list is explicitly unchanged by the ruling.*
