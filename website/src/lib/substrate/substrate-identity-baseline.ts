@@ -22,6 +22,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { pagedRows } from '@/lib/db/paged-select'
 
 export interface IdentityCostBaseline {
   agent_id: string
@@ -66,14 +67,20 @@ export async function getIdentityCostBaseline(
 
   try {
     const admin = getAdminClient()
-    const { data, error } = await admin
-      .from('loop_billing_events')
-      .select('total_cents, anthropic_cost_cents')
-      .eq('agent_id', agentId)
+    // H4, row-cap sweep 2026-09-02/-03: was an unbounded per-agent read —
+    // silently truncated this baseline for the dominant identity once its
+    // history crossed 1,000 rows. Paged on `id` (the table's UUID PK).
+    const { rows: data, error } = await pagedRows<{ id: string; total_cents: number | null; anthropic_cost_cents: number | null }>(
+      admin,
+      'loop_billing_events',
+      'id',
+      'id, total_cents, anthropic_cost_cents',
+      { eqColumn: 'agent_id', eqValue: agentId }
+    )
 
     if (error) {
       console.warn(
-        '[substrate-identity-baseline] query failed (non-fatal): ' + error.message
+        '[substrate-identity-baseline] query failed (non-fatal): ' + error
       )
       return null
     }

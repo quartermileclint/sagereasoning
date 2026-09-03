@@ -31805,3 +31805,107 @@ carried forward from the original report unchecked).
 with a corrected overclaim (H8/M2), two confirmed and promoted to urgent (H10, H11). The founder's
 next call: whether to open the C1 session (H10/H11's SQL-aggregate fix) given the confirmed live
 truncation, or sequence it behind something else. Nothing bears on the 0h call.
+
+## D-ROW-CAP-SWEEP-C1-BUILT-2026-09-03
+
+**Tier:** `code-elevated`. No production migration, no schema, no flag — de-scoped from the sweep
+report's original C1 recommendation (SQL aggregate RPCs/views needing a founder-walked TEST-then-
+production migration) to a client-side exhaustive-pagination fix that needs neither.
+**Predecessor:** `D-ROW-CAP-SWEEP-PART-B-COUNTS-FOLDED-2026-09-03` (founder: "Yes, scope and build C1
+now").
+
+**Scoping decision, made before writing any code:** every C1 site's underlying computation is
+count/sum/max/distinct/group-by over a bounded set of columns — the exact shape a SQL aggregate
+would compute, but also exactly reproducible by reading every matching row via keyset pagination and
+aggregating client-side, since PostgREST's row cap applies per-request, not per aggregate. Choosing
+paginate-and-aggregate over new SQL functions avoided the migration entirely (no new RPC, no view,
+no founder-walked TEST-then-production step), while giving the identical correctness guarantee (the
+true full set, never an arbitrary 1,000-row subset). This is a stronger fix than the report's own
+named fallback ("at minimum a time-windowed read with an explicit limit and a disclosed `capped`
+flag") — exhaustive rather than merely windowed-and-capped.
+
+**Built:**
+
+1. **`website/src/lib/db/paged-select.ts`** — a new shared `pagedRows()` helper: keyset-paged,
+   ordered ascending on a caller-supplied cursor column, strict `.gt()` cursor advance, optional
+   `eq`/`notNull`/`gte` filters, fail-honest (a read error on any page aborts the whole walk — never
+   presents a partial result as complete). 500-row pages, comfortably under the confirmed 1,000-row
+   server cap. Executed test `paged-select.test.ts` (16 assertions: multi-page exhaustive walk, a
+   negative control proving a bare read WOULD have truncated at 1,000 where `pagedRows` returns all
+   1,300, filter correctness across page boundaries for `eq`/`gte`/`notNull`, empty-table
+   termination, fail-honest error propagation). **Mutation-verified twice**: removing the `.limit()`
+   call did NOT break the tests (a genuine finding — the fake's own cap already bounds each request,
+   so `.limit()` is a performance choice, not a correctness dependency, disclosed rather than hidden);
+   removing the cursor-advance `.gt()` filter DID break the tests (a `RangeError: Invalid array
+   length` from the resulting infinite-fetch loop) — confirming the cursor logic is the genuinely
+   load-bearing element.
+2. **Applied at all nine identified C1 sites**, each replacing an unbounded `.from().select()` with
+   a `pagedRows()` call:
+   - **H2** (`cost-alerts/evaluate/route.ts`, the global D4 per-call-spike read on
+     `loop_billing_events`, paged on `id`).
+   - **H3** (same file, identity enumeration, `notNullColumn: 'agent_id'`).
+   - **H4** (same file, per-agent cost read, `eqColumn: 'agent_id'`) — **and its second call site**,
+     `substrate-identity-baseline.ts`'s `getIdentityCostBaseline`.
+   - **H5** (`abuse/evaluate/route.ts`, identity enumeration on `substrate_audit_events`, paged on
+     `event_id`).
+   - **H6** (same file, the per-agent velocity/structural-detector read) — this one also received a
+     **new, disclosed, deliberate narrowing**: `REQUEST_VELOCITY_LOOKBACK_HOURS: 24` in
+     `abuse-thresholds.ts`. The prior read had NO time bound at all (an identity's entire lifetime).
+     A burst detector inherently cares about recent activity; 24h at the 60-second bucket width gives
+     up to 1,440 possible windows, far more than `REQUEST_VELOCITY_MIN_PRIOR_WINDOWS` (5) needs.
+     Pagination remains as defense-in-depth even within the 24h window.
+   - **H7** (`admin/slo-health/route.ts`, the latency read on `substrate_audit_events`) — paged
+     WITHOUT a lookback narrowing, unlike H6: `buildSloHealth`'s own `all_time` window statistic
+     needs the true full history (a narrowed lookback would make that label dishonest), so this stays
+     a full exhaustive page.
+   - **H10** and **H11** (`admin/metrics/route.ts` — the confirmed-live all-time fallback and the
+     week/today windows) — all three paged on `created_at` (the table's PK column name could not be
+     confirmed from source; `analytics_events` has no `CREATE TABLE` anywhere in the repo). This is a
+     documented, disclosed residual (see `paged-select.ts`'s header): at the confirmed low write rate
+     on this table (~1/13min), a tie at a page boundary is vanishingly unlikely, and the failure mode
+     if it occurred is one row skipped at one boundary, never a systemic truncation.
+3. **Wiring regression test** `website/src/lib/db/__tests__/paged-select-wiring.test.ts` (29
+   assertions) — source-pins every one of the nine call sites against the actual route/lib files
+   (table name, cursor column, filter arguments), on the theory that the shared helper's own
+   correctness is already proven and the remaining risk is a wrong table/column/filter at each site.
+   **Non-vacuity confirmed by two independent mutations**: reverting H10's fallback to the old bare
+   pattern failed exactly 3 of 29 assertions (the ones naming H10); removing H6's lookback filter
+   failed exactly 1 of 29 (the one naming it). Both restored and re-verified green.
+
+**Verified:** `paged-select.test.ts` 16/0; `paged-select-wiring.test.ts` 29/0; `tsc --noEmit` clean
+across the whole tree; `npm run build` exit 0, all routes compile; the four pre-existing pure-
+detector test suites this touches indirectly (`abuse-detector.test.ts` 17/0,
+`abuse-detector-structural.test.ts` 22/0, `cost-alert-detector.test.ts` 42/0, `slo-stats.test.ts`
+20/0) all unaffected, confirming the fix changed only the data-fetching layer, not the pure detection
+maths. Every other regression test written earlier this session (`conversation-history-row-cap.test.ts`
+77/0, `profile-store-rolling-window.test.ts` 10/0, `provenance-c2-discharge-tally-paging.test.ts`
+8/0) re-confirmed green.
+
+**Sweep re-run:** candidate count **87 → 75** (a net drop of 12 across the whole tree, from
+converting 10 distinct route-level unbounded `.from()` chains into `pagedRows()` calls, which the
+sweep tool no longer sees as literal unbounded chains at the call site — the arithmetic doesn't map
+1:1 to a "sites fixed" count because the sweep tool's own chain/continuation classification shifts
+when a block of code is restructured, not because any site was missed). Zero unbounded reads remain
+in any of the four touched files (`cost-alerts/evaluate/route.ts`, `abuse/evaluate/route.ts`,
+`admin/slo-health/route.ts`, `admin/metrics/route.ts`) — confirmed by direct query of the sweep's
+JSON output. The three remaining unbounded hits in `cost-alerts/evaluate/route.ts` are the
+already-disclosed, already-downgraded `payment_events`/`translation_sandwich_comparisons` sites
+(dormant, per the Part B fold), correctly out of C1's scope.
+
+**Sweep report updated** (`operations/founder-hub-2026-09/2026-09-02-unbounded-select-sweep-REPORT.md`):
+H2, H3, H4, H5, H6, H7, H10, H11's fix columns all marked DONE with the actual fix description; §6's
+remediation order updated to reflect items 1–2 closed, item 3 (M5/M6, the data-rights class) named as
+the natural next session with a note that `pagedRows()` may be directly reusable there.
+
+**Rollback:** `git revert` this commit — independently revertable; no schema, no flag, no production
+deploy in this entry (ships on the next push, same as every other fix this session).
+
+**Rules served:** PR6, PR15 (bespoke election: no existing generic paged-aggregation helper existed;
+the founder-hub keyset pattern from earlier this session was the closest precedent and this session's
+helper generalises it rather than duplicating it ad hoc per site), PR18, PR23 (memory
+`postgrest-row-cap-silent-truncation` covers the root class every fix this session descends from).
+
+**Status:** C1 CLOSED — all nine identified sites fixed, including the two confirmed-live-truncating
+findings (H10, H11) from the same session's Part B fold. C4 (the data-rights paging class, M5/M6) is
+the next unbuilt item, its own PR19-REQUIRED session. C5 (Stripe invoice aggregation) remains
+deferred until Stripe activation. Nothing bears on the 0h call.

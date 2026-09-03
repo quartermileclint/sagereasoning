@@ -34,6 +34,21 @@ export const ABUSE_DETECTION = {
    *  a near-zero-noise guard so we never fire on e.g. 6 vs 2 requests/window. */
   REQUEST_VELOCITY_ABSOLUTE_FLOOR_REQUESTS: 5,
 
+  /** Lookback bound for the per-identity `substrate_audit_events` read (added
+   *  2026-09-03, row-cap sweep finding H6). The prior read had NO time bound
+   *  at all — an identity's ENTIRE lifetime of events, ordered arbitrarily,
+   *  silently truncated to PostgREST's 1,000-row cap once it crossed the
+   *  table's server limit. A burst/velocity detector inherently cares about
+   *  RECENT activity, so bounding to the trailing 24 hours is a deliberate,
+   *  disclosed narrowing, not merely a workaround: 24h at the 60-second
+   *  bucket width gives up to 1,440 possible windows, far more than
+   *  REQUEST_VELOCITY_MIN_PRIOR_WINDOWS (5) needs to form a baseline, and an
+   *  identity's traffic pattern from a week or a month ago has no bearing on
+   *  whether it is bursting NOW. Combined with `pagedRows` pagination as
+   *  defense-in-depth (in case even 24h exceeds 1,000 events for one
+   *  identity). */
+  REQUEST_VELOCITY_LOOKBACK_HOURS: 24,
+
   // ──────────────────────────────────────────────────────────────────────
   // Structural detectors (PR1 surface rollout — gated behind the rollout
   // sub-flag SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED; UNSET in production).

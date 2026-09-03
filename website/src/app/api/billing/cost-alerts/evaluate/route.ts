@@ -30,6 +30,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { corsHeaders, corsPreflightResponse, RATE_LIMITS, checkRateLimit } from '@/lib/security'
 import { COST_HEALTH } from '@/lib/stripe'
 import { getIdentityCostBaseline } from '@/lib/substrate/substrate-identity-baseline'
+import { pagedRows } from '@/lib/db/paged-select'
 import {
   detectPerIdentityAnomaly,
   detectPerCallSpike,
@@ -127,19 +128,26 @@ export async function GET(request: NextRequest) {
   if (requestedAgentId) {
     agentIds = [requestedAgentId]
   } else {
-    const { data: idRows, error: idErr } = await supabaseAdmin
-      .from('loop_billing_events')
-      .select('agent_id')
-      .not('agent_id', 'is', null)
+    // H3, row-cap sweep 2026-09-02/-03: was an unbounded whole-table read —
+    // silently dropped identities beyond the first 1,000 rows. `pagedRows`
+    // walks the table to completion via keyset pagination on `id` (the
+    // table's UUID primary key — a genuinely unique cursor, no tie risk).
+    const { rows: idRows, error: idErr } = await pagedRows<{ agent_id: string | null }>(
+      supabaseAdmin,
+      'loop_billing_events',
+      'id',
+      'id,agent_id',
+      { notNullColumn: 'agent_id' }
+    )
     if (idErr) {
       return NextResponse.json(
-        { error: `Failed to enumerate identities: ${idErr.message}` },
+        { error: `Failed to enumerate identities: ${idErr}` },
         { status: 500, headers: corsHeaders() }
       )
     }
     agentIds = [
       ...new Set(
-        ((idRows || []) as Array<{ agent_id: string | null }>)
+        (idRows || [])
           .map((r) => r.agent_id)
           .filter((x): x is string => typeof x === 'string' && x.length > 0)
       ),
@@ -169,18 +177,22 @@ export async function GET(request: NextRequest) {
     // (anthropic_cost_cents) is the faithful signal, so D5 triggers on that.
     // The bill-based baseline is carried in details for context. A follow-on
     // could align the helper's naming or add a cost-based variant.
-    const { data: costRows, error: costErr } = await supabaseAdmin
-      .from('loop_billing_events')
-      .select('anthropic_cost_cents')
-      .eq('agent_id', agentId)
+    // H4, row-cap sweep 2026-09-02/-03: was an unbounded per-agent read —
+    // silently truncated the count/sum/max for the dominant identity once its
+    // history crossed 1,000 rows. Paged on `id` (the table's UUID PK).
+    const { rows: costRows, error: costErr } = await pagedRows<{ anthropic_cost_cents: number | null }>(
+      supabaseAdmin,
+      'loop_billing_events',
+      'id',
+      'id,anthropic_cost_cents',
+      { eqColumn: 'agent_id', eqValue: agentId }
+    )
     if (costErr || !costRows || costRows.length === 0) {
-      skipped.push({ agent_id: agentId, reason: costErr ? costErr.message : 'no cost rows' })
+      skipped.push({ agent_id: agentId, reason: costErr ? costErr : 'no cost rows' })
       continue
     }
 
-    const costs = (costRows as Array<{ anthropic_cost_cents: number | null }>).map(
-      (r) => Number(r.anthropic_cost_cents) || 0
-    )
+    const costs = costRows.map((r) => Number(r.anthropic_cost_cents) || 0)
     const loopCount = costs.length
     const totalCostCents = costs.reduce((s, c) => s + c, 0)
     const maxLoopCostCents = costs.reduce((m, c) => (c > m ? c : m), 0)
@@ -242,15 +254,19 @@ export async function GET(request: NextRequest) {
     const globalAlerts: CostAlert[] = []
 
     // ── D4 — per-call (global) spike over all loops' anthropic_cost_cents ──
-    const { data: allCostRows, error: allCostErr } = await supabaseAdmin
-      .from('loop_billing_events')
-      .select('anthropic_cost_cents')
+    // H2, row-cap sweep 2026-09-02/-03: was an unbounded whole-table read —
+    // silently computed count/sum/max over an arbitrary 1,000-row subset
+    // once the table crossed the cap. Paged on `id` (the table's UUID PK).
+    const { rows: allCostRows, error: allCostErr } = await pagedRows<{ anthropic_cost_cents: number | null }>(
+      supabaseAdmin,
+      'loop_billing_events',
+      'id',
+      'id,anthropic_cost_cents'
+    )
     if (allCostErr) {
-      skipped.push({ agent_id: 'global', reason: `per_call_spike query failed: ${allCostErr.message}` })
+      skipped.push({ agent_id: 'global', reason: `per_call_spike query failed: ${allCostErr}` })
     } else if (allCostRows && allCostRows.length > 0) {
-      const allCosts = (allCostRows as Array<{ anthropic_cost_cents: number | null }>).map(
-        (r) => Number(r.anthropic_cost_cents) || 0
-      )
+      const allCosts = allCostRows.map((r) => Number(r.anthropic_cost_cents) || 0)
       const spike = detectPerCallSpike({
         loopCount: allCosts.length,
         totalCostCents: allCosts.reduce((s, c) => s + c, 0),

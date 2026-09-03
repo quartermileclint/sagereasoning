@@ -36,6 +36,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { corsHeaders, corsPreflightResponse, RATE_LIMITS, checkRateLimit } from '@/lib/security'
 import { ABUSE_DETECTION } from '@/lib/abuse-detection/abuse-thresholds'
+import { pagedRows } from '@/lib/db/paged-select'
 import {
   detectRequestVelocityAnomaly,
   detectSystematicEnumeration,
@@ -130,19 +131,25 @@ export async function GET(request: NextRequest) {
   if (requestedAgentId) {
     agentIds = [requestedAgentId]
   } else {
-    const { data: idRows, error: idErr } = await supabaseAdmin
-      .from('substrate_audit_events')
-      .select('agent_id')
-      .not('agent_id', 'is', null)
+    // H5, row-cap sweep 2026-09-02/-03: was an unbounded whole-table read —
+    // silently dropped identities beyond the first 1,000 rows. Paged on
+    // `event_id` (the table's UUID primary key).
+    const { rows: idRows, error: idErr } = await pagedRows<{ agent_id: string | null }>(
+      supabaseAdmin,
+      'substrate_audit_events',
+      'event_id',
+      'event_id,agent_id',
+      { notNullColumn: 'agent_id' }
+    )
     if (idErr) {
       return NextResponse.json(
-        { error: `Failed to enumerate identities: ${idErr.message}` },
+        { error: `Failed to enumerate identities: ${idErr}` },
         { status: 500, headers: corsHeaders() }
       )
     }
     agentIds = [
       ...new Set(
-        ((idRows || []) as Array<{ agent_id: string | null }>)
+        (idRows || [])
           .map((r) => r.agent_id)
           .filter((x): x is string => typeof x === 'string' && x.length > 0)
       ),
@@ -182,13 +189,26 @@ export async function GET(request: NextRequest) {
     // velocity proof. With the rollout sub-flag on, also read the structural
     // masked_context (input_char_count ONLY — never raw text; R3 / R17) for the
     // two structural detectors.
-    const selectCols = rolloutEnabled ? 'occurred_at, masked_context' : 'occurred_at'
-    const { data: eventRows, error: evErr } = await supabaseAdmin
-      .from('substrate_audit_events')
-      .select(selectCols)
-      .eq('agent_id', agentId)
+    // H6, row-cap sweep 2026-09-02/-03: was an unbounded per-agent, all-time
+    // read — silently ran the burst/structural detectors over an arbitrary
+    // 1,000-event subset once an identity's lifetime history crossed the
+    // cap, and a real burst could be invisible if it fell outside that
+    // subset. Bounded to the trailing REQUEST_VELOCITY_LOOKBACK_HOURS (a
+    // deliberate, disclosed narrowing — see the constant's own comment) AND
+    // paged on `event_id` as defense-in-depth.
+    const selectCols = rolloutEnabled ? 'event_id, occurred_at, masked_context' : 'event_id, occurred_at'
+    const lookbackCutoff = new Date(
+      Date.now() - ABUSE_DETECTION.REQUEST_VELOCITY_LOOKBACK_HOURS * 60 * 60 * 1000
+    ).toISOString()
+    const { rows: eventRows, error: evErr } = await pagedRows<{ event_id: string; occurred_at: string; masked_context?: { input_char_count?: unknown } }>(
+      supabaseAdmin,
+      'substrate_audit_events',
+      'event_id',
+      selectCols,
+      { eqColumn: 'agent_id', eqValue: agentId, gteColumn: 'occurred_at', gteValue: lookbackCutoff }
+    )
     if (evErr) {
-      skipped.push({ agent_id: agentId, reason: evErr.message })
+      skipped.push({ agent_id: agentId, reason: evErr })
       continue
     }
     if (!eventRows || eventRows.length === 0) {

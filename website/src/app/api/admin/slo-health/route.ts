@@ -30,6 +30,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAdmin } from '@/lib/security'
 import { buildSloHealth, type LatencyRow } from '@/lib/slo/slo-stats'
+import { pagedRows } from '@/lib/db/paged-select'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,13 +51,23 @@ export async function GET(request: NextRequest) {
 
   const surface = request.nextUrl.searchParams.get('surface')?.trim() || 'api_reason'
 
-  const { data, error } = await supabaseAdmin
-    .from('substrate_audit_events')
-    .select('layer1_latency_ms, layer2_latency_ms, layer3_latency_ms, occurred_at')
-    .eq('surface', surface)
+  // H7, row-cap sweep 2026-09-02/-03: was an unbounded whole-table read —
+  // silently computed percentile latencies over an arbitrary 1,000-row
+  // subset once the table crossed the cap. `buildSloHealth`'s own `all_time`
+  // window statistic needs the TRUE full history (a narrowed lookback would
+  // make the `all_time` label dishonest — its `last_7d` window already
+  // filters in-memory from the same rows), so this is fully paged on
+  // `event_id` rather than time-windowed.
+  const { rows: data, error } = await pagedRows<LatencyRow & { event_id: string }>(
+    supabaseAdmin,
+    'substrate_audit_events',
+    'event_id',
+    'event_id, layer1_latency_ms, layer2_latency_ms, layer3_latency_ms, occurred_at',
+    { eqColumn: 'surface', eqValue: surface }
+  )
   if (error) {
     return NextResponse.json(
-      { error: `Failed to read latency rows: ${error.message}` },
+      { error: `Failed to read latency rows: ${error}` },
       { status: 500 }
     )
   }
