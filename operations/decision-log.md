@@ -31663,3 +31663,86 @@ verified for downstream activation per PR19 §4, with one disclosed HIGH carried
 Full record in the close addendum:
 `operations/founder-hub-2026-09/2026-09-02-postgrest-row-cap-fix-CLOSE.md`. Nothing bears on the 0h
 call.
+
+## D-ROW-CAP-SWEEP-REMEDIATION-PARTIAL-C3-D-2026-09-03
+
+**Tier:** `code-elevated` for C3, `code-elevated` for Part D (per its own header — a minimal scoped
+fix, not the tally script's Critical migration surface). No production deploy; no schema; no flag.
+**Predecessor:** `D-FOUNDER-HUB-ROW-CAP-RETROACTIVE-PR19-REVIEW-COMPLETE-2026-09-03`.
+
+**Founder elections at open (given verbatim in this session):** Part D — option **(ii)**, a minimal
+scoped fix to the tally script's whole-table reads, as a disclosed exception to the provenance-ledger
+observation watch. Part B's three SQL counts (translation_sandwich_comparisons month-to-date,
+analytics_events 7-day, get_event_counts RPC existence, agent_provenance_ledger count,
+mentor_interactions count) were handed to the founder to run — **not run by this session** (no DB
+access tool); their results are a carried follow-up to fold into H8/M2/M3/M4's `plausible`→`now`
+reclassification once returned.
+
+**Built, this entry — C3 (the governing surface) and Part D (the provenance tally), both with
+executed, mutation-verified regression pins:**
+
+1. **C3 — `sage-mentor/profile-store.ts`, `computeRollingWindow`.** The sweep's H9 finding: the
+   function read the ENTIRE `mentor_interactions` table (every user, every profile) with no filter
+   at all, then filtered to the target profile and recency window in JavaScript. Fixed:
+   `.eq('profile_id', profileId).gte('created_at', cutoff).order('created_at', {ascending:false})
+   .limit(HUMAN_ROLLING_WINDOW.max_interactions)` — the query is now scoped, windowed, ordered, and
+   capped AT THE DATABASE. The module's local minimal `SupabaseClient` type (kept intentionally
+   dependency-free of `@supabase/supabase-js`) was widened to declare `.gte`/`.order`/`.limit`,
+   which it did not previously expose. First test file `sage-mentor/` has ever had:
+   `sage-mentor/__tests__/profile-store-rolling-window.test.ts` (10 assertions: DB-level profile
+   scoping, DB-level recency windowing, DB-level ordering+limiting, honest null on no match).
+   Mutation-verified (reverting to the bare `select('*')` fails 7 of 10 assertions).
+2. **Part D — `website/scripts/provenance-c2-discharge-tally.ts`.** New `pagedLedgerRead()`
+   (keyset-paged on `(recorded_at, id)`, 500-row pages, id as a deterministic tie-break) replaces
+   the single unbounded `agent_provenance_ledger` read at the former line 170 (the sweep's H1
+   finding — the sharpest in the whole report, since this script's tally gates the
+   provenance-ledger's C2 readiness switch-on and the ledger was projected to cross 1,000 rows
+   around 2026-09-17, inside the two-week window it measures). **A correction to the sweep report
+   itself, found while implementing this fix:** the report's §2.3 row claimed all three of
+   `:123/:132/:141` were whole-table reads on `agent_trust_events`/`agent_accreditation`; reading
+   the actual source shows only the ledger read (then :170, now inside `pagedLedgerRead`) was
+   genuinely whole-table — the other two already carry `.gte(..., windowStart...)`. Not fixed
+   (they were never broken); the report's wording was not corrected this entry (a smaller
+   discrepancy than the milestones one already fixed in the retroactive-review addendum; named here
+   for the record). The script's `main()` invocation was also changed from unconditional to
+   `if (require.main === module) main()` (mirroring the existing guard in
+   `unbounded-select-sweep.ts`) — otherwise the new `pagedLedgerRead`/`LedgerRow` exports could not
+   be imported for testing without triggering the live DB run. Neither change alters the ruled
+   one-time/non-recurring SCOPE this file's header states. New test:
+   `website/scripts/__tests__/provenance-c2-discharge-tally-paging.test.ts` (8 assertions: multi-page
+   walk with no loss/duplication, the negative control proving the newest row would have been
+   dropped by the old single-cap read, a tie straddling a page boundary handled correctly, an empty
+   table terminating in one request). Mutation-verified (reverting to a single unbounded read fails
+   5 of 8 assertions).
+
+**Not built this entry (require a founder-walked production migration and are their own sessions,
+per the predecessor prompt's own §Part C guidance):**
+- **C1** (cost-health/abuse/SLO aggregate-in-SQL fixes, H2–H7) — needs NEW SQL functions/views;
+  none of the required RPCs exist today (confirmed by the retroactive review's
+  `sweep-report-adjudication` dimension). Its own `code-elevated` founder-walked TEST-then-production
+  migration session.
+- **C2** (conditional on Part B's SQL counts) — genuinely blocked on those counts.
+- **C4** (the data-rights paging helper across ~30 export/access/delete-driving reads) — its own
+  `code-critical`, PR19-REQUIRED session per the predecessor prompt's explicit instruction.
+- **C5** (Stripe invoice aggregation) — explicitly deferred until before Stripe activation, per the
+  report's own §6 ordering.
+
+**Verified:** `sage-mentor/__tests__/profile-store-rolling-window.test.ts` 10/0 (new);
+`website/scripts/__tests__/provenance-c2-discharge-tally-paging.test.ts` 8/0 (new); `tsc --noEmit`
+exit 0 across the whole tree after all three fixes this session (founder-hub, sage-mentor,
+provenance-tally).
+
+**Rollback:** `git revert` this commit — independently revertable; no schema, no flag, no production
+deploy. `computeRollingWindow`'s behavior on a real (unbroken) DB is unchanged in RESULT, only in
+where the filtering happens (DB vs JS) — no downstream caller (`updateProfileFromReflection`) reads
+anything this doesn't still provide.
+
+**Rules served:** PR6, PR15 (no existing paging/keyset helper to reuse — checked; the founder-hub
+keyset pattern from this same session's Part A fix was the closest precedent and was followed, not
+duplicated as a generic library, since the two call sites differ in their fake-client test harness
+needs), PR18, PR23 (memory `postgrest-row-cap-silent-truncation` covers the root class this entire
+session's work descends from).
+
+**Status:** C3 and Part D CLOSED with executed regression pins. C1/C2/C4/C5 carried, each requiring
+its own founder-walked session (migration or PR19-required review) per the report's own remediation
+order. Part B's SQL counts are the founder's to run and report back. Nothing bears on the 0h call.

@@ -85,6 +85,61 @@ async function must<T>(label: string, p: PromiseLike<{ data: T | null; error: un
   return (data ?? []) as unknown as T
 }
 
+/**
+ * A keyset-paged read of the WHOLE `agent_provenance_ledger` table, ordered
+ * ascending by `recorded_at`. Fixed at 2026-09-03 (Part D of the row-cap
+ * sweep's remediation, founder-elected option (ii)): the single `.order(...)`
+ * with no `.limit()` this replaced would silently truncate at PostgREST's
+ * 1,000-row cap, dropping the NEWEST rows — the exact class the sweep found
+ * at H1, and the sharpest finding in the whole sweep, because this script's
+ * own tally gates the provenance-ledger's C2 readiness switch-on and the
+ * ledger was projected to cross 1,000 rows around 2026-09-17, inside the
+ * two-week window the tally measures. This is a MINIMAL, scoped fix to the
+ * script's whole-table reads only — it does not change the ruled one-time,
+ * non-recurring SCOPE stated in this file's header, and it changes nothing
+ * about `agent_trust_events`/`agent_accreditation` (already windowed by
+ * `windowStart`, not whole-table reads — a correction to the 2026-09-02
+ * sweep report's §2.3 row, which claimed all three of :123/:132/:141 were
+ * whole-table; only the ledger read genuinely was).
+ */
+export type LedgerRow = {
+  id: string
+  identity_kind: string
+  layer1_source: string
+  credential_ref: string | null
+  agent_id: string | null
+  owner_user_id: string | null
+  recorded_at: string
+}
+
+export async function pagedLedgerRead(db: SupabaseClient): Promise<LedgerRow[]> {
+  const PAGE_SIZE = 500
+  const out: LedgerRow[] = []
+  // Keyset on (recorded_at, id) — id is the table's UUID primary key, used
+  // purely as a deterministic tie-break so rows sharing an exact recorded_at
+  // timestamp at a page boundary are neither skipped nor duplicated (the
+  // same reasoning the founder-hub keyset fix in conversation-history.ts
+  // applies to created_at/id, this session, on the same day).
+  let cursor: { recorded_at: string; id: string } | null = null
+  for (;;) {
+    let q = db
+      .from('agent_provenance_ledger')
+      .select('id,identity_kind,layer1_source,credential_ref,agent_id,owner_user_id,recorded_at')
+      .order('recorded_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(PAGE_SIZE)
+    if (cursor) {
+      q = q.or(`recorded_at.gt.${cursor.recorded_at},and(recorded_at.eq.${cursor.recorded_at},id.gt.${cursor.id})`)
+    }
+    const page = await must<LedgerRow[]>('ledger read (paged)', q)
+    if (page.length === 0) break
+    out.push(...page)
+    if (page.length < PAGE_SIZE) break
+    cursor = { recorded_at: page[page.length - 1].recorded_at, id: page[page.length - 1].id }
+  }
+  return out
+}
+
 async function main() {
   const db = client()
   const now = new Date()
@@ -155,22 +210,7 @@ async function main() {
     .filter((a) => !population.has(a))
 
   // ── (2) THE LEDGER BASELINE ──────────────────────────────────────────────
-  const ledger = await must<
-    {
-      identity_kind: string
-      layer1_source: string
-      credential_ref: string | null
-      agent_id: string | null
-      owner_user_id: string | null
-      recorded_at: string
-    }[]
-  >(
-    'ledger read',
-    db
-      .from('agent_provenance_ledger')
-      .select('identity_kind,layer1_source,credential_ref,agent_id,owner_user_id,recorded_at')
-      .order('recorded_at', { ascending: true }),
-  )
+  const ledger = await pagedLedgerRead(db)
   const gaps = await must<{ id: string }[]>(
     'gaps read',
     db.from('agent_provenance_gaps').select('id'),
@@ -384,7 +424,14 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error('FATAL:', e)
-  process.exit(2)
-})
+// Guarded so a test can import pagedLedgerRead (or must, or the LedgerRow
+// type) without triggering the full run — main() needs live DB env vars and
+// process.exit()s on failure, which would make this module unimportable for
+// testing otherwise. Added 2026-09-03 alongside pagedLedgerRead, mirroring
+// the existing guard in scripts/unbounded-select-sweep.ts.
+if (require.main === module) {
+  main().catch((e) => {
+    console.error('FATAL:', e)
+    process.exit(2)
+  })
+}

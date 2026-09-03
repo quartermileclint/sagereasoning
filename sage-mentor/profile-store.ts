@@ -398,6 +398,9 @@ CREATE TRIGGER mentor_virtue_profile_updated_at
  */
 type SupabaseQueryBuilder = Promise<{ data: any[]; error: any }> & {
   eq: (col: string, val: any) => SupabaseQueryBuilder
+  gte: (col: string, val: any) => SupabaseQueryBuilder
+  order: (col: string, opts?: { ascending?: boolean }) => SupabaseQueryBuilder
+  limit: (n: number) => SupabaseQueryBuilder
   single: () => Promise<{ data: any; error: any }>
 }
 
@@ -868,22 +871,30 @@ export async function computeRollingWindow(
   supabase: SupabaseClient,
   profileId: string
 ): Promise<RollingWindowSummary | null> {
-  // Fetch recent interactions (within window limits)
+  // Fetch recent interactions (within window limits). Filtered, windowed, and
+  // limited AT THE DATABASE so the read can never silently truncate against
+  // PostgREST's row cap by reading every user's rows to find one — the
+  // previous `select('*')` with no filter read the ENTIRE table (found by the
+  // 2026-09-02 sweep, `H9`; fixed 2026-09-03). `.order` + `.limit` here mirror
+  // the exact recency-and-cap the old in-memory `.sort().slice()` computed,
+  // so the sort/slice below is now redundant but kept for clarity and as a
+  // defensive re-sort in case the DB ever returns out-of-order rows.
   const cutoffDate = new Date()
   cutoffDate.setDate(cutoffDate.getDate() - HUMAN_ROLLING_WINDOW.max_age_days)
 
   const { data: interactions } = await supabase
     .from('mentor_interactions')
     .select('*')
+    .eq('profile_id', profileId)
+    .gte('created_at', cutoffDate.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(HUMAN_ROLLING_WINDOW.max_interactions)
 
   if (!interactions || interactions.length === 0) return null
 
-  // Filter to this profile and within the window
-  const windowInteractions = interactions
-    .filter((i: any) =>
-      i.profile_id === profileId &&
-      new Date(i.created_at) >= cutoffDate
-    )
+  // The DB read is already filtered/windowed/capped; this is a defensive
+  // re-sort only (the .order() above should already deliver this order).
+  const windowInteractions = [...interactions]
     .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, HUMAN_ROLLING_WINDOW.max_interactions)
 
