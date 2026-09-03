@@ -33007,3 +33007,112 @@ governing), `D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026
 `D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04` (the interpretive principle
 applied a second time), `2026-08-30-standing-runner-design-R8.md` §5.3/§11/§12.3,
 `2026-08-16-idea-loop-S6-report.md`, `operations/agent-circles-2026-08/d6a/`.
+
+## 2026-09-04 — D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — a design session; documents only. **Deliverable:**
+`operations/agent-circles-2026-08/2026-09-04-standing-runner-design-R9.md`. **Close:**
+`operations/handoffs/founder/2026-09-04-standing-runner-design-R9-CLOSE.md`.
+
+**Decision:** The standing-runner track's second design sitting (R9) **ran**, opened by the founder
+in-conversation (*"pushed, open the session here"*) after the same-day gate ruling made the Option S
+gate item-level and reserved the opening to the founder. It examined every item in the corrected
+governing brief's load except the two deferred ones, and produced a design **for the founder's
+elections and the mentor's reception**. **Nothing was built, flagged, migrated, activated, or
+published.** The M/W/S floor-semantics election and R8-D7's verdict-confidence sampling policy were
+**deferred in writing throughout** and are neither elected nor designed toward.
+
+**What was designed (R9-D1…D12):** the pre-generate stage (v1 environment attribution as a
+deterministic function of the heuristic; dwelling as a server-supplied parameter with `time` the only
+enforceable termination in v1); the reverse algorithm on the ground that actually exists (a required
+`target_agent_id` ≠ runner; the target's public trust record as anchor; three finger kinds with honest
+provenance — domain fingers server-enumerable, the circle finger runner-supplied, a `task_list_friction`
+finger exempt by construction; four booleans per move as a local gate; `accepted_move_count` as
+runner-attested disclosure consulted by nothing; finger exhaustion pinned examined-at-all); the
+`generative_environment` column (nullable, never backfilled) and its relation to GS-ATRF-4 (a
+dependency recommended, not owned — D1); the runner's history as a derived dashboard view plus an
+examined-action history on the runner's cycle-open read (the single backward edge made persistent —
+h6's first substrate); the blast-radius basis enriched as disclosure with the indicator computed from
+the ruled inputs alone; the proposal shape's third disclosed classification (design-only, D5); A2's
+`role_context` as a recorded, unconsumed declaration on the watching `POST` with the engine change a
+gated follow-on; A3's melete surface (`runner_melete_entries`, three fixed prompts, refuse-to-attest,
+founder-eye-only); A4's relational block on the corrected premise that the context-injection layer is
+LIVE and the runner never consults it; item D's deprecation branch DECLINED with restoration
+recommended; R8-D7's single-backward-edge evaluation CONFIRMED with one precision; a second runner
+read behind its own flag removing a circular activation dependency; and the voluntary nine-candidate
+finding under its distinct name, true by construction.
+
+**PR19 — engaged as required (the R8 follow-on prompt §D), run as three parallel blind read-only
+agents because the Workflow gate was unmet, and it changed the document materially.** Claims-vs-source
+0/1/4/4; constraint compliance 0/4/5/4; design soundness **7 HIGH**/9/4/2 — **44 findings, 0
+refuted, all folded**, every source-dependent one re-verified first-hand. **The first draft's three
+structural over-claims are withdrawn at the design's head, not absorbed:** (1) *"selection honoured
+in v1 by which heuristics run"* — false by construction, all six run every cycle by ruling; v1 performs
+no environment selection and the brief's selection function is entirely deferred; (2) *"fingers
+enumerable from the anchor so the runner cannot invent branch points"* — true of domain fingers only;
+the circle finger is the runner's declaration, the declared purpose is unreachable server-side, and
+the founder-personally case has no identity, so **for the v1 producer as ruled the reverse algorithm
+has no harness-held core** — now a named prerequisite; (3) two named data flows (h6's unlock; finger
+exhaustion) had no designed carrier, and a universal derivation rule would have killed the ruled
+friction fallback. A fourth error conflated the live injection layer with the dark prose service
+(`getProjectContext('condensed')` runs unconditionally on every `/api/reason` consult — `route.ts:1418`,
+`layer1-extractor.ts:2084`). Also withdrawn: an exposure-distribution "drift/hexis" flag, vacuous in v1
+and in character vocabulary R8 §6.2 strikes.
+
+**Two sequencing decisions this session makes, named as such:** the A2 engine change (§7b) and any
+edit to the live injection path (§9) are **gated on item D's end condition** — both touch guarded
+files. The session **declined** item D's deprecation branch (D6a measures a different quantity on a
+different surface) and recommends the founder satisfy the first condition (restore
+`GATE1_FALSE_HOLD_CAPTURE` locally; ≥20 records).
+
+**Prerequisites named so they are not discovered at build:** a harness identity with an examined
+trust record for the v1 executing actor (§3.1, §16.10); a server-side derivation of the target's
+current circle (does not exist; §3.3).
+
+**Register:** every standing-runner row tagged `[R9 2026-09-04: …]`; the GS-ATRF-3 row's contested
+production apply status corrected to RESOLVED per `D-ATRF-EE-WAVE-STEP0-…` (TEST undetermined).
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Production untouched; `git diff -- website/` carries only a concurrent peer session's in-progress
+trust-core edits, which this session did not touch and did not stage. Weights **BLOCKED** and
+GS-CYB-1's two conditions untouched; the Q1 hard constraint untouched; §5d not examined; the
+vocabulary-direction ownership not assigned; no manifest ATRF amendment; the P0 0h hold stands;
+nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this session's commit — the design, the register tags, the CLAUDE.md
+pointer, the close, and this entry are one path-scoped commit.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "\[R9 2026-09-04:" operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md
+grep -c "WITHDRAWN\|withdrawn" operations/agent-circles-2026-08/2026-09-04-standing-runner-design-R9.md
+```
+Expected: `9`; a non-zero count on the second (the head-of-document withdrawals are present).
+
+**Open questions:** none this session decides. **Founder elections now standing (design §16):** Path A;
+the build brief's second increment; the A2 engine change (gated); item D's restoration; the ATRF
+item-3 amendment draft; the two unoccupied-room heuristics; the v2 chooser; the environment-sensitive
+indicator (a mentor question if ever wanted); the v1 executing actor's harness identity.
+
+**Rules served:** PR15 (the existing `OikeiosisGap`, trust-record payload, watching `POST`, and
+R8-D1b read reused rather than re-invented), PR18, PR19 (engaged and folded; the review changed the
+design), PR20 (thirteen design-ground facts verified at source and re-verified by review), PR23,
+Q5b (held; mentor quotations excepted). Concurrency: `ListAgents` at open (three live peers); `git
+status` twice; path-scoped commit; the shared decision-log staged by this session's hunk only.
+
+**Session honesty note.** Gate-1 pre-decision and most Gate-2 at-action examinations returned
+UNAVAILABLE (28s timeout) across this sitting. Two at-action guardrail CAUTIONs fired earlier in the
+session on documents-only commits — one reading `reflexive` floored by dikaiosyne with a role obligation
+engaged — and were answered in-conversation; the elicitation's third sub-question was answered *"the
+resolution preceded the examination"* three times running, recorded then as a pattern. **For this
+design the review's own answer is the relevant one: the first draft's over-claims were exactly the
+resolution-before-examination shape, and the independent review — not this session's self-review —
+found them.**
+
+**Status:** Adopted (the design as a deliverable for election and reception; nothing designed here is
+licensed). Cross-references: `D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-MAY-OPEN-2026-09-04`
+(the opening), `D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04` (the load),
+`D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04` (the naming constraint; §13),
+`D-STANDING-RUNNER-DESIGN-R8-COMPLETE-C11-EXPERIMENT-RUN-PR19-FOLDED-2026-08-30` (the predecessor),
+`2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md`, `2026-09-03-mentor-rulings-oc-gate3-verbatim.md` (Q1, §11).
