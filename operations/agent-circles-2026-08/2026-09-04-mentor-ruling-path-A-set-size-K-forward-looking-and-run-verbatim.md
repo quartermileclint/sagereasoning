@@ -23,6 +23,40 @@ ruling **explicitly declines to discount it for having been proposed by the sess
 would change the M/W/S ruling"*; localising the mechanism *"does not tell you how often that variance
 fires across the decision-bearing population."*
 
+> **⚖ SET-SIZE CORRECTION — EXECUTED 2026-09-05 AGAINST PRODUCTION. THE RULING'S FIGURE IS WRONG
+> AND IS CORRECTED HERE, NOT OVERWRITTEN, exactly as Q-S1 required.**
+>
+> **This ruling states 29 decision-bearing candidates — "20 cycle winners plus the 9 guardrail
+> rejections". Production says 24.** Founder-run against production 2026-09-05, scoped to
+> `loop_id = 'sagereasoning:idea-loop@v1#001'` (the closed run: 20 cycles, 2026-08-10 → 2026-08-16,
+> the only run in the table):
+>
+> | measure | value |
+> |---|---|
+> | `total_candidates` | **120** |
+> | `winners` | **15** |
+> | `rejections` | **9** |
+> | `decision_bearing_union` | **24** |
+> | `cycles` | **20** |
+>
+> `15 + 9 = 24` exactly — **no row satisfies both predicates**, so the union is unambiguous and the
+> overlap the first extraction SQL could have hidden does not exist here.
+>
+> **THE MECHANISM OF THE ERROR, named because Q-S1 and F2 both require the note to explain it rather
+> than only state it:** the figure *"appears to have been a reconstruction that did not account for
+> the five no-winner cycles"* — **cycles 3, 5 and 6 ended `dependency_unavailable`; cycles 15 and 16
+> ended `null_cycle`**. Twenty cycles minus five that produced no winner is fifteen winners, not
+> twenty. The reconstruction assumed one winner per cycle; the run did not deliver one in every
+> cycle. **The S6 report (`2026-08-16-idea-loop-S6-report.md` §2) recorded `winner` = 15 all along
+> and is the primary record**, which is what the ruling itself said should govern.
+>
+> **The authoritative set is 24.** Consequences that follow and are applied: at the ruled **K=10**
+> the run is **240 calls ≈ $3.41** and **480 quota units** (calls × 2), not the 290/$4.12 that 29
+> would have implied — and not the ruling's own "approximately 87 calls at approximately $1.24",
+> which was 29 × 3 at the superseded K. **No alternative definition of *decision-bearing* is
+> adopted** — the ruling's language was *"winners, not candidates"*, and the five no-winner cycles'
+> best candidates and any `not_selected` rows stay out absent their own ruling.
+
 > **⚖ CORRECTED 2026-09-05 BY BINDING RULING — the owed-list now has ONE precondition.**
 > (`2026-09-05-mentor-ruling-guard-availability-and-lean-mode-doctrine-verbatim.md`, Q-X1.) The
 > **v3/v4 lift check is DROPPED** from this ruling's "owed before the run" list: *"The v3/v4 lift

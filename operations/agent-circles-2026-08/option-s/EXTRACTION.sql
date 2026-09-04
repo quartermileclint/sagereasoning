@@ -130,11 +130,18 @@ FROM (
 -- §7(5) records that ONE of the nine (cycle 6, analogous_transfer) has no
 -- session id -- hence eight, not nine.
 --
--- ALSO WORTH RECONCILING: guardrail/route.ts:99-101 records that "the
--- 2026-08-29 c11 re-submission experiment wrote 10 loop_billing_events rows
--- through this route" -- i.e. a K-repeat on the c11 text may ALREADY have been
--- run. If so, that data bears directly on both L2 and this instrument's purpose
--- and should be found before spending 144+ quota units re-deriving it.
+-- ✅ RESOLVED 2026-09-04 -- DO NOT CHASE THIS. The earlier note here said a
+-- K-repeat on the c11 text "may ALREADY have been run" and should be found
+-- before spending quota. IT WAS FOUND, in this repository, before any quota was
+-- spent: 2026-08-30-c11-rerun-experiment-record.md -- K=10 on the byte-exact c11
+-- text, minimal payload, 9/10 deliberate / 1/10 reflexive, p_hat_floor 0.10.
+-- Carry that datum; do not re-run c11 at a lower K.
+--
+-- §4 ITSELF IS NOW OPTIONAL. Its trace served LIMIT 2 (the submitted-payload
+-- assumption), which the forward-looking election DISSOLVED -- no resampled
+-- verdict is compared against a recorded one, so what August sent no longer
+-- bears on any published quantity. Run it only if the historical question is
+-- wanted for its own sake.
 -- ---------------------------------------------------------------------------
 SELECT cy.cycle_number, c.heuristic, c.guardrail_session_id
 FROM idea_loop_candidates c
