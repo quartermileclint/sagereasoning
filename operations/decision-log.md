@@ -33800,3 +33800,106 @@ precedent), `2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (bind
 `2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
 `2026-08-15-false-hold-new-window-scoping-note.md` (P6; the contamination rule),
 `S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §C.
+
+---
+
+## 2026-09-05 — D-S11-P6-WINDOW-RECOMMENDATION-SCOPED-FOR-RULING-DEADLINE-PREMISE-WITHDRAWN-2026-09-05
+
+**Category:** `governance` — documents only. **AC7:** not engaged. **PR6:** not engaged. **PR19:** not
+triggered (no trust-core, predicate, fold, engine, auth, perimeter or deletion code changed; nothing
+executed but read-only verification). **PR20:** engaged and the reason this entry exists — see below.
+**Production:** no schema, flag, credential, migration, deploy, live op, or public-doc change.
+**Session model:** `claude-opus-5`.
+
+**Decision:** Option D of `2026-09-05-post-P1-followon-NEXT-SESSION-PROMPT.md`, founder-elected at open.
+Authored `operations/trust-layer-2026-07/2026-09-05-P6-window-recommendation-SCOPE-FOR-RULING.md` —
+whether the new observation window should measure the decision table's *recommendation* (the rule's
+output) and not only hold *classification* (its input). Routed as a **mentor ruling**, mirroring
+`2026-09-04-P1-decision-table-input-SCOPE-FOR-RULING.md`.
+
+### The result, stated against the interest of the work
+
+**The sequencing deadline that made this the urgent option does not survive checking.** Option C §6
+concluded that if the seam is ever to serve the window it must land in R2, because a capture-layer edit
+cannot happen mid-window under P6's contamination rule. That reasoning is sound; **its premise — that
+measuring the recommendation requires a capture-layer edit — is not established.** The recommendation
+is derivable at **report time** from records as they already stand: this session's own verification run
+(`p1-frozen-buffer-reclassification.ts`, green) lifts stored `signals` into an `AtActionAssessment`,
+calls `interventionInputFromAtAction` and `recommendIntervention`, entirely offline, with the lift
+asserted non-vacuously 130/130. So the choice is between a stored field and a derived column, and the
+derived route carries no R2 deadline, no contamination exposure, and no `recordHash` risk.
+
+The substantive gap (§3 of the scope) is real and unchanged: part (3) names a false-**hold** rate, a
+hold is a table output, and the window as scoped measures a proxy for it.
+
+### PR20 — two present-tense mechanism facts were stale, from one cause
+
+**Guard-path capture (P8a) is BUILT.** `buildGuardHoldRecord` — schema v4, `path: "guard"`,
+`guardHold`, `guardOutcome`, `captureBasis` — is wired at three call sites in `at-action-hook.mjs`
+behind the same `GATE1_FALSE_HOLD_CAPTURE` flag, landed **commit `3e8f231`, 2026-08-17 ("R2b item 8")**,
+with its own PR19 fold. Consequently:
+
+- **Register P5 is stale.** Its row still states in the present tense that *"`runGuard` writes
+  nothing"* — true when written 2026-08-15, false since 2026-08-17. The register carries **no changelog
+  entry for the P8a build at all**. P5's *status* (`OPEN`) is still correct: activation is open, and a
+  built-dark denominator is not a measured one.
+- **Option C's Finding C inherited the same claim** on 2026-09-04 and repeats it.
+
+**Deliberately not corrected here.** Editing a register row on AI judgement is what the prior session
+declined to do when the register and the prompt disagreed about D5; the same restraint applies. The
+correction is named and owed, and it is a record correction, not a status change.
+
+### One residual, binding both options equally
+
+`habitualReExaminationCount` (the A8 two-then-escalate bound) is not stored and not derivable — no
+re-examination counter exists anywhere in the harness (grep over `harness/**/*.mjs`; every `habitual`
+hit is a proximity level). Both a capture-time and a report-time derivation pass `undefined`, floored
+to 0 at `intervention-engine.ts:392`, so the A8 row can never fire in either. It is a bound on the
+measurement, to be printed on the rate alongside the mention-conversion and self-circle bounds — not a
+discriminator between the options.
+
+### Recommendation put to the mentor (disclosed as a recommendation, not a decision)
+
+Widen the window's stated purpose to cover the recommendation; satisfy it by **report-time derivation**,
+not a capture-layer change, and therefore **not in R2**; do not store it (a stored recommendation
+freezes a table reading that P1 moved mid-arc); report consult and guard populations separately;
+surface it to no agent, response, or public surface. Three arguments against the recommendation are
+disclosed in §7, the strongest being that report-time derivation is a statement about today's table
+rather than about what the instrument did at the time.
+
+### Incidental finding, recorded rather than chased
+
+**The frozen evidence buffer is a prefix of the live one, and the cut is undisclosed.**
+`runs/2026-07-17/false-hold-record-FROZEN-2026-07-17.jsonl` holds 130 records; the live buffer
+`~/.sage-gate1/false-hold-record.jsonl` holds **138**, all `v1`, and the frozen file is an exact
+**prefix** — the extra 8 were captured on 2026-07-17 from 12:15 onward, after the snapshot was taken
+and before the flag was unset that evening. No note in `runs/2026-07-17/` records this. **Every figure
+published "over the frozen 130" is therefore over a prefix of the first window's capture.** No
+conclusion changes (the buffer is explicitly unusable for part (3); the 8 are the same `Edit`/`reopened`
+class, so they repair no representativeness), but a record and its description disagree. **Not fixed
+here** — touching a frozen evidence file is not a documents-only act, and the register's reproduction
+check is calibrated against the 130.
+
+**Verified at open (all expected values met):** frozen-buffer script — `✓ all 130 records round-trip
+exactly`, `✓ reproduced (129)`, `Q2 floor … HOLDS`; `at-action-seam.test.ts` **59/0**;
+`negative-battery.mjs` **251/0**, `RELEASE GATE: PASS ✓`. Each load-bearing claim in the scope document
+was re-verified at source rather than cited from a code comment (`recordHash`'s `JSON.stringify(r.signals)`;
+the `habitualCount` floor; the zero-hit grep re-run without `head`).
+
+**Unpushed at open:** `git fetch origin` showed `main` **ahead 1** — `529d778` (the prior session's
+close + successor prompt) is local-only. Documents only, so nothing live is affected; noted because the
+prior two sessions each found an unlanded push by fetching rather than trusting a prompt.
+
+**Standing state unchanged:** the S11 flip remains **REFUSED**; **P4 / P5 / P6 unmoved**; readiness NOT
+met; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's. Nothing here licenses R2's
+contents, the flip, or any activation.
+
+**Rollback:** `git revert` this session's commit — one new document and this entry.
+
+**Status:** Adopted (as a scope for ruling). Cross-references:
+`D-S11-OPTION-C-AT-ACTION-SEAM-CALLER-SCOPED-2026-09-04` (Finding E, the origin),
+`D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04` (binding; the filter),
+`D-S11-P1-FROZEN-BUFFER-RECLASSIFIED-UNDER-FILTERED-READING-2026-09-04` (the script §4 rests on),
+`2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
+`2026-08-15-false-hold-new-window-scoping-note.md` (P6; the contamination rule),
+`S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §D D4.
