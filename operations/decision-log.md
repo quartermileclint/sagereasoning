@@ -34655,3 +34655,110 @@ blocked two writes and was correct both times.
 `D-COMMUNITY-MAP-42703-DIAGNOSED-ALREADY-FIXED-CARRIED-CAUSE-WRONG-2026-09-05`,
 `D-S11-D4-REDUCER-NARROWING-ACTIVATION-LIVE-F3PRIME-LANDED-2026-09-05`,
 `D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
+
+---
+
+## 2026-09-06 — D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06
+
+**Decision:** Adopt the mentor's ruling on where a length guard belongs relative to the R20a distress
+perimeter, **as binding**. **`governance`** — no code, route, flag, schema or credential change.
+**The one immediate action the ruling permits was NOT taken: it is reserved to the founder by the
+ruling's own terms.**
+
+**Ruled, verbatim canonical at**
+`operations/count-discipline-2026-09/2026-09-06-mentor-ruling-r20a-length-guard-ordering-verbatim.md`
+(that text governs any summary, including this one):
+
+> **Purpose (b) governs for human-facing members of the perimeter. The distress check runs before the
+> length guard on any route where the human crisis form is rendered. The follow-on is a properly
+> scoped perimeter-wide audit — its own session — to identify all human-facing members and confirm
+> their execution order. The audit uses execution-order analysis, not textual position.**
+
+**Reasoning.** The mentor grounds the ruling in what the perimeter *is*: *"not a content filter in the
+ordinary sense … a moral architecture."* Purpose (a) — stopping distressed content reaching the engine
+— is *"a consequence of that recognition, not its ground."* The ground is (b): *"the system owes the
+distressed person a response, and that response is the crisis resource, not a 400."* A guard placed
+before the check *"makes the system's self-protection prior to its duty to the person"*, and reaches
+*"precisely the person most likely to need the crisis resource."* The bounded classifier cost of the
+correct ordering is accepted explicitly; the alternative *"is not a cost in the engineering sense. It
+is a harm."* In Stoic terms — dikaiosyne, *"distributing to each their due"* — the duty *"is not
+discharged by refusing to process their words. It is discharged only by answering them."*
+
+**Scope sub-question ruled: NO for agent-facing members.** They are governed by (a) alone; a length
+guard before the check there is *"unobjectionable"*, an engineering decision *"without the moral
+dimension"*. **They must not be "fixed".** The audit classifies on two axes — audience, and which
+form is rendered — with the mentor's explicit precision that classification is *"not always obvious
+from the route's name or location … not on the basis of which directory the route lives in."*
+
+**Two things the mentor commended, recorded because they shape future sessions.** (i) The PR20
+`[SOURCE]`/`[GIT]`/`[RECORDED]` markers were *"accepted as stated"*, and disclosing the perimeter
+sweep as **unsound rather than publishing its numbers** was named *"the same class of finding as M1,
+M8, and the misdating discovery"* — *"check the thing, name what you find, do not publish an unsound
+result."* (ii) The ordering's accretive provenance is *"the same mechanism that produced the stale
+perimeter count in RA-2"*, and **"inherited properties are not examined properties"** is set as the
+audit's framing: it is *"not a search for deliberate design failures."*
+
+**Files touched:**
+- `operations/count-discipline-2026-09/2026-09-06-mentor-ruling-…-verbatim.md` — the ruling; canonical.
+- `operations/handoffs/founder/2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md` — the
+  ruled follow-on, authored not run. Carries the execution-order requirement, the two-axis
+  classification, the classify-by-caller-not-directory precision, and an explicit instruction not to
+  resurrect the discarded 20/10/13 textual split.
+- `operations/count-discipline-2026-09/2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`
+  — a separate question (below).
+
+**Not done, and why.** The `format` guard at `score-conversation/route.ts:162` is the single case the
+ruling says may be corrected now without the audit (`git revert 4c1cd94` + redeploy). **The ruling
+reserves it: *"Whether to make that change now or wait for the audit is the founder's call."*** It is
+also `code-critical` under 0d-ii (R20a perimeter, PR6 + AC5). Put to the founder; **not taken.**
+
+**Risk classification:** Standard under 0d-ii. **AC7 not engaged; PR6 not engaged** — nothing live
+changed. PR18, PR20, PR22 engaged.
+
+**Rollback path:** `git revert` this commit. Documents only; the ruling record itself stands as record.
+
+**Rules served:** R20a, AC5, PR6, PR18, PR20, PR22.
+
+**Status:** Adopted. Cross-references:
+`D-POST-SWEEP-CARRIED-ITEMS-4A-4D-CLOSED-3A-PUT-TO-MENTOR-2026-09-06`,
+`D-SCORE-CONVERSATION-FORMAT-VALIDATION-LANDED-PR19-FOLDED-2026-09-05`,
+`D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
+
+---
+
+## 2026-09-06 — D-OPTION-S-DIRECTIONAL-DECOMPOSITION-PUT-TO-MENTOR-2026-09-06
+
+**Decision:** Put Option S's Q1 and Q2 to the mentor **as one question**, since they converge:
+should the directional decomposition exist at all? **`governance`** — Option S not run, no blocker
+fixed, `option-s-runner.py` not edited.
+
+**Reasoning.** Both premises were re-read at their cited paths rather than relayed on the PR19
+reviewers' report. **[SOURCE]** `option-s-runner.py:45` asserts *"DIRECTIONAL DECOMPOSITION IS
+REQUIRED, NOT OPTIONAL"*, citing the 2026-08-30 rate-presentation ruling. **[SOURCE]**
+`2026-08-30-mentor-ruling-pooled-sweep-n100-verbatim.md`, **the same date**, is titled *"per-probe
+distributions replace the split"* and answers its own Q3 with *"The per-probe distributions replace
+it."* The instrument's stated requirement and the later ruling point opposite ways. Independently,
+Q2 reports the split is **forced by the candidate set's composition** (all 9 rejections `reflexive`;
+strata selected *on* the re-measured variable), the same class as D6a's round-5 finding whose ruled
+remedy was removal.
+
+**Why not decided here.** The two lines converge on "remove", and treating that convergence as
+settling it would be the error. Line 1 is an **inference about a ruling's reach** — the pooled-sweep
+ruling does not mention Option S — and line 2's remedy is a **publication decision**, which the D6a
+arc established is the founder's and the mentor's. The question also asks the general form: whether
+that ruling's reasoning transfers to instruments beyond D6a, since Option S will not be the last.
+
+**Consequence if removed:** pre-run blocker **B1** (a swapped direction classifier) is **moot** — the
+output it corrects would not be published. This is why the question precedes the spend: Option S has
+**never made a call**, and fixing B1 then running only to be told the output should not exist wastes
+it.
+
+**Risk classification:** Standard under 0d-ii. AC7 not engaged. No spend.
+
+**Rollback path:** `git revert` this commit (documents only).
+
+**Rules served:** PR19, PR20, PR22.
+
+**Status:** Adopted (as a question put, not an answer). Cross-references:
+`D-OPTION-S-PR19-FOUR-PRE-RUN-BLOCKERS-DO-NOT-RUN-2026-09-05`,
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`.
