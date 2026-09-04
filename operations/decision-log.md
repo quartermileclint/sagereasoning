@@ -34293,3 +34293,94 @@ field counts (5 + 2 = 7 against `evaluation.ts`), the D6a figures (a frozen meas
 "refreshed"), and the agent-card extension count (derives to 26, correctly stated nowhere in prose).
 
 **Rollback:** `git revert` either commit independently (`1ecff99` tests, `3d4c075` documents).
+
+---
+
+## D-SCORE-CONVERSATION-FORMAT-VALIDATION-LANDED-PR19-FOLDED-2026-09-05
+
+**Decision:** Close item B — `/api/score-conversation` now length-validates `format` on the same
+footing as `conversation` and `context`. **`code-elevated`**, repo-only. **No migration, flag,
+credential, schema, production read or spend.** Named at the 2026-07-07 eleventh-route activation
+and carried unbuilt since.
+
+**The item was scoped to this session as "input validation, not safety". It is not.**
+`composeConversationDistressSubject` **truncates** each field at `DISTRESS_SUBJECT_FIELD_CAP`
+(`value.slice(0, CAP)`), while the route appended the **full** `format` to `domainContext`, which
+`sage-reason-engine` forwards to the model untruncated. Text past the cap **reached the engine having
+never reached the classifier** — human-authored free text inside the R20a perimeter, unscreened. The
+conditions are now stated in-code rather than left unconditional (PR19 fold): flag ON, `format`
+≥ 15,001 chars, and the screened prefix returning benign — an acute/moderate hit returns before
+`domainContext` is built. The gap was named in the cap's own docstring on 2026-07-07 and deferred
+because closing it changes **always-on** behaviour.
+
+**Test-first, as required:** FV-1/FV-2/FV-5 failed before the fix (59/62) and pass after.
+
+**PR19 (mandatory — R20a perimeter code). Three independent blind reviewers. They found the fix sound
+and MY TESTS defective — two HIGH, each confirmed by the reviewer running it with the battery at
+62/62 while the defect was fully restored:** commenting the check out satisfied every FV assertion
+(they were source greps; nothing stripped comments — a "temporarily disabled" line during debugging
+would have shipped green); and FV-2 parsed the composer's **inline array literal**, so a field
+screened by any other construct read as unscreened-but-unvalidated and still passed — *precisely the
+class FV-2's own comment claimed to prevent.* **Folded:** a comment-stripped `codeOnly` view
+(additive — `source`/`bodyOnly` keep their meaning, so the 57 pre-existing assertions are untouched;
+they share the weakness, disclosed rather than silently changed); **`SCREENED_FIELDS` exported from
+the composer and ITERATED by it, with the battery IMPORTING it** — converting a text heuristic into a
+structural invariant; and **FV-6, ordering** (a reviewer moved the check after the engine call and
+the battery still said 62/62 — presence was never the guarantee, position is). **All three defeating
+mutations re-run and now caught** (59/63, 62/63, 62/63; restored **63/63**).
+
+**Two false claims I had left, one load-bearing, corrected:** the flag block and the module both
+stated flag-off was *"byte-identical to pre-wiring"* and that *"rollback = unset the flag +
+redeploy"*. The new check is always-on, so that is **false** for an oversized `format` — a false
+statement about the documented rollback path of a Critical activation, sitting where a future session
+reads first.
+
+**Disclosed, and deliberately NOT decided here.** Placing the check before the R20a block (matching
+its siblings) means an oversized `format` carrying distress in its first 15,000 chars now receives a
+bare 400 **instead of the crisis redirect it would previously have triggered**. After-block placement
+is strictly stronger on that axis but lets oversized requests reach the classifier — a bounded but
+real cost-amplification vector, since `escalateMildDistress` can call Haiku. Both siblings share the
+property, so this follows the route's existing posture rather than inventing one. **Changing it is a
+perimeter-ordering decision for the whole route and is named for the founder.** Breaking change
+characterised: a string `format` over `TEXT_LIMITS.long` now 400s in either flag state; no in-repo
+caller affected, external consumers are.
+
+**Verified:** score-conversation **63/63** · r20a-invocation-guard 720/0 · configuration-flows 61/0 ·
+audience-rendering 66/0 · gap-closure 64/0 · route-wiring 936/0 · `tsc` 0 · `npm run build` 0
+(`/api/score-conversation` registered).
+
+**Rollback:** `git revert 4c1cd94`. Note the flag does **not** roll this back — that is the point of
+the corrected claim above.
+
+---
+
+## D-COMMUNITY-MAP-42703-DIAGNOSED-ALREADY-FIXED-CARRIED-CAUSE-WRONG-2026-09-05
+
+**Decision:** Close item C by diagnosis. **`governance`** — no code, schema or migration authored.
+**No production read this session**; every production fact is quoted from the founder-walked
+2026-08-03 record and labelled as such.
+
+**The defect has been fixed and live since 2026-08-03** (`f198736`, Stoa ST1). No migration was
+authored because none is needed: the fix was **deleting one line of route code**.
+
+**Its carried cause was wrong.** `/CLAUDE.md` describes it as *"`community_map_pins.show_on_map`
+missing"*, which reads as a missing column — and **the founder's own production diagnosis
+disconfirms that**, having found all five location columns present. The route was filtering
+`.eq('show_on_map', true)` against the **view**, which deliberately does not expose that column
+because the opt-in gate lives *inside* the view definition. Postgres raised 42703; it stayed latent
+because the error was being swallowed. The session prompt's own hypothesis (a view predating the
+column or the degrade migration) was close but not what happened — the view was correct for its
+purpose throughout; the mismatch was between the route's **query** and the view's **contract**.
+
+**One CLAUDE.md annotation remains owed, drafted and deliberately not applied** — CLAUDE.md
+corrections belong with item E, which the prompt orders last, and scattering them is how a half-done
+refresh happens. The note states where the annotation goes **if item E does not run**, because a
+deferral recorded only inside the artifact being deferred is the same failure this project keeps
+hitting.
+
+**Worth carrying:** this sat across four sessions as an open defect with a wrong cause attached, and
+the wrong cause is likely why. *"A column is missing"* implies a migration and a founder-walked schema
+step — heavier than the one-line change it actually needed — so it kept being deferred as bigger than
+it was. **A carried item's stated cause is worth re-deriving before its priority is trusted.**
+
+**Rollback:** `git revert 1513ffb` (documents only).
