@@ -34574,3 +34574,84 @@ editing twenty minutes earlier, would be the wrong call. **The finding is the de
 
 **Rollback:** `git revert 81de407` (documents only). Findings:
 `operations/count-discipline-2026-09/2026-09-05-option-s-PR19-REVIEW-FINDINGS.md`.
+
+---
+
+## 2026-09-06 — D-POST-SWEEP-CARRIED-ITEMS-4A-4D-CLOSED-3A-PUT-TO-MENTOR-2026-09-06
+
+**Decision:** Close carried items **§4A–§4D** and put **§3A** to the mentor as a question of
+principle rather than deciding it. **`governance`** + **`code-elevated`** (one test file).
+**No production read, migration, flag, credential, activation, deploy or spend.**
+
+**Reasoning:** the founder elected §4A–§4D plus a mentor question on §3A. §3B/§3C were left
+unapplied — they change public R18 surfaces and need sign-off.
+
+**Three opening assumptions were resolved rather than carried.** `GATE1_TIMEOUT_MS` is **`55000`**,
+so F1's raise **has** been applied and the predecessor's 55,000ms timeout was the configured value —
+a hypothesis becomes a finding. An unauthenticated fetch confirms production **genuinely serves** the
+stale assessment contract (`11 assessments`, `37 assessments`, phantom `SO-01`), upgrading §3B from
+inference to observation and closing a gap a PR19 reviewer raised; the live figures were
+independently re-derived from `agent-assessment.ts` as **14 / 55 / 8**, with no `SO-*` prefix in
+existence. Counts re-derived, never quoted: perimeter **43 + 2 = 45**, agent-card extensions **26**.
+
+**§3A changed shape under examination.** The prompt framed reachability as narrow — a >15,000-char
+*format* field. Source and git say otherwise: the reachable field is **`conversation`**, and the
+guard-before-perimeter order was **inherited on 2026-07-07 (`3de9572`) from guards landed
+2026-03-26 (`aeadbd1`), never chosen**. The `format` check did not create the property; it made it
+visible. The brief therefore asks the question of principle — when the perimeter's duty to stop
+distressed content reaching the engine conflicts with its duty to answer the person, which governs? —
+with per-fact `[SOURCE]`/`[GIT]`/`[RECORDED]` provenance markers.
+
+**§4B was mutation-proven in both directions.** The five per-route **import** assertions read raw
+file text while their sibling **call** assertions had always stripped comments, so a commented-out
+safety import satisfied the guard. Commenting out `api/journal/route.ts`'s `detectDistressTwoStage`
+import left the suite at **720/0** raw and **719/1** stripped. Fixing the five instances alone would
+repeat the lesson this file already records twice, so a **self-scan now arrests the class**, with a
+non-vacuity floor; both asserts mutation-verified. **720 → 722.**
+
+**§4D's finding is that there is no producer.** Six crons are scheduled and **none** is the weekly
+environmental scan; no route writes `environmental_context`. Two live perimeter routes read it and
+append it to the LLM user message. The loader is fail-safe (`if (!env.last_scanned) return null`), so
+severity turns on one founder-run query. **No disposition recommended** — an earlier draft proposed
+removing the call sites, which was prescribe-before-grounding (KG-EX1); the archive suggests they may
+be deliberate P7 scaffolding.
+
+**Files touched:**
+- `CLAUDE.md` — item E refresh + two appended annotations (community-map cause; the AC5 claim).
+- `website/src/lib/__tests__/r20a-invocation-guard.test.ts` — five reads stripped + class self-scan.
+- `operations/count-discipline-2026-09/2026-09-06-mentor-question-…-FOR-RULING.md` — new.
+- `operations/2026-09-06-environmental-scan-staleness-SCOPE.md` — new.
+
+**Risk classification:** Standard/Elevated under 0d-ii. **AC7 not engaged; PR6 not engaged.** PR18,
+PR19, PR20, PR22, PR23, PR25 engaged. One route file was temporarily mutated for the guard proof and
+**restored and verified pristine**.
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts | tail -1
+npx tsc --noEmit; echo "tsc exit: $?"
+```
+Expected: `722 passed, 0 failed`; tsc exit 0.
+
+**Open questions:** `manifest.md` §AC5 bolds *"This section does not hand-enumerate route-level
+membership"* and then names all 43 members. Counts are currently **correct**, so nothing is stale;
+the defect is the contradiction. Annotated in CLAUDE.md, **not patched** — AC5 is a governing
+surface. The same claim sits in `D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
+
+**Honest note.** Six checks written this session were miscalibrated and all six were caught by the
+author: a regex returning 31 substrate-gate routes; an `SO-01` absence test whose pattern matched
+nothing; an ordering sweep that read a `/** */` block comment as a call site and missed
+local-constant bounds; a field scan calibrated to invented field names; a quote matcher assuming one
+cited record; and a battery path cited without being opened. **The pattern is consistent — checks
+calibrated to expectation rather than to specification.** The unsound 20/10/13 perimeter split was
+**discarded rather than reported**, and is named as unsound in the mentor brief. The at-action guard
+blocked two writes and was correct both times.
+
+**Rollback path:** `git revert` any commit independently; none touches a production surface.
+
+**Rules served:** PR18, PR19, PR20, PR22, PR23, PR25, AC5, KG-EX1, R20a.
+
+**Status:** Adopted. Cross-references: `D-SCORE-CONVERSATION-FORMAT-VALIDATION-LANDED-PR19-FOLDED-2026-09-05`,
+`D-COMMUNITY-MAP-42703-DIAGNOSED-ALREADY-FIXED-CARRIED-CAUSE-WRONG-2026-09-05`,
+`D-S11-D4-REDUCER-NARROWING-ACTIVATION-LIVE-F3PRIME-LANDED-2026-09-05`,
+`D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
