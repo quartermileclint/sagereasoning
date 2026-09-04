@@ -91,7 +91,8 @@
  *
  * Rules served: R20a (vulnerable user detection); R19c (formalised wording
  * — placeholders retired); AC4 (invocation testing); AC5 (perimeter
- * unchanged at 10 routes); PR1 (single-endpoint proof on /api/reason); PR3
+ * unchanged -- membership is the registry in r20a-invocation-guard.test.ts,
+ * never a count written here); PR1 (single-endpoint proof on /api/reason); PR3
  * (synchronous safety — helper is pure-sync); PR6 (Critical); PR15 (mirrors
  * S2 + S3 test patterns).
  */

@@ -3,7 +3,7 @@
  * route that consumes the shared R20a gap-closure module (mechanical item 2,
  * 2026-08-22 — the per-route invocation-test gap, built as ONE parameterised
  * battery rather than 25 copy-pasted files; the judgement call the session
- * prompt left open, taken because all 25 perimeter blocks landed through
+ * prompt left open, taken because the perimeter blocks landed through
  * shared commits and a single config table cannot drift 25 ways).
  *
  * WHAT THIS ADDS over the central guard battery (r20a-invocation-guard.test.ts,

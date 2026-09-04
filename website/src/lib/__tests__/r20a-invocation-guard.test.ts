@@ -581,8 +581,12 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 42 route-level + 2 substrate-gate = 44 routes in the R20a
-  // perimeter overall.
+  // NO COUNT IS WRITTEN HERE ON PURPOSE. Derive it from
+  // HUMAN_FACING_POST_ROUTES.length + SUBSTRATE_GATE_ROUTES.length.
+  // (This line previously carried a hand-maintained total. It went stale again
+  // on 2026-09-02, when /api/score/save joined the perimeter and the floors
+  // beneath were bumped but the sentence was not -- the exact
+  // sentence-disagrees-with-its-own-assertion failure recorded below.)
   //
   // ⚠ THE PROSE BELOW WAS STALE AND IS CORRECTED HERE. It read "20 route-level
   // ... = 22 routes overall" while the assertion beneath it already required
@@ -642,8 +646,9 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   assert(HUMAN_FACING_POST_ROUTES.length >= 43, `${label} (>=43 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
   // FLAG_GATED_ROUTE_LEVEL_ROUTES had no count assertion at all until 2026-08-12,
-  // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12
-  // distinct routes (draft-reflect carries two flags, one entry each).
+  // so a flag-gated entry could be deleted silently. The entry count exceeds the
+  // distinct-route count because draft-reflect carries two flags, one entry
+  // each. Both numbers are derived from the array, never written here.
   assert(FLAG_GATED_ROUTE_LEVEL_ROUTES.length >= 31, `${label} (>=31 flag-gated route-level flag-pairs)`)
 }
 
@@ -1500,31 +1505,81 @@ assert(
 {
   const selfPath = path.join(process.cwd(), 'src/lib/__tests__/r20a-invocation-guard.test.ts')
   const selfSrc = fs.readFileSync(selfPath, 'utf8')
-  const header = selfSrc.slice(0, selfSrc.indexOf('*/') + 2)
 
-  // Digits immediately qualifying a perimeter noun, or an "= N" total. The
-  // historical-recurrence narrative above deliberately quotes the stale figures,
-  // so the check ignores any line that is part of that record (marked by the
-  // words "stale", "wrong", "read", or "corrected").
-  const OFFENDING = /(\b\d+\s+route-level|\b\d+\s+substrate-gate|=\s*\d+\s*(routes)?\s*$)/i
-  const offenders = header
-    .split('\n')
-    .filter((l) => !/stale|wrong|was corrected|it read|true figure|being \d/i.test(l))
-    .filter((l) => OFFENDING.test(l))
+  // WIDENED 2026-09-05 (fifth recurrence). This scan used to cover only the
+  // leading block comment -- selfSrc.slice(0, indexOf('*/')). Two hand-maintained
+  // counts were sitting in the FILE BODY, outside that slice, and both had gone
+  // stale: the perimeter total (42 + 2 = 44, against a live 43 + 2) and the
+  // flag-pair tally (13 across 12, against a live 31 across 30). Both sat
+  // directly beside assertions carrying the CORRECT figure -- the same
+  // sentence-disagrees-with-its-own-assertion failure this file already records.
+  // Scoping the guard to the header is what let them drift, so it now scans the
+  // whole file.
+  const OFFENDING =
+    /(\b\d+\s+route-level|\b\d+\s+substrate-gate|\b\d+\s+flag-pairs?|\b\d+\s+distinct routes?|=\s*\d+\s*(routes)?\s*$)/i
+
+  // A count is legitimate ONLY inside a dated historical record. One of these
+  // markers opens such a record; it runs to the next blank comment line ("//"
+  // alone) or the next non-comment line.
+  const HISTORICAL_OPEN =
+    /stale|wrong|was corrected|it read|true figure|being \d|BUMPED|The arc:|Historical detail|previously carried/i
+
+  const scanForCounts = (src: string): string[] => {
+    const found: string[] = []
+    let inHistorical = false
+    for (const l of src.split('\n')) {
+      // COMMENT LINES ONLY. Code is the authority and legitimately carries the
+      // number -- `assert(HUMAN_FACING_POST_ROUTES.length >= 43, ...)` is the
+      // registry speaking, not prose drifting. Scanning code lines made this
+      // guard fire on its own assertions and on `let passed = 0`.
+      const isComment = /^\s*(\/\/|\*|\/\*)/.test(l)
+      if (!isComment) { inHistorical = false; continue }
+      if (/^\s*(\/\/|\*)\s*$/.test(l)) { inHistorical = false; continue }
+      if (HISTORICAL_OPEN.test(l)) { inHistorical = true; continue }
+      if (inHistorical) continue
+      if (l.includes('OFFENDING.test(')) continue
+      if (OFFENDING.test(l)) found.push(l.trim())
+    }
+    return found
+  }
+
+  const offenders = scanForCounts(selfSrc)
 
   assert(
     offenders.length === 0,
-    `docstring carries no hand-maintained perimeter count — found: ${JSON.stringify(offenders)}. ` +
-      `This number has gone stale three times. Do not write it here; derive it from ` +
-      `HUMAN_FACING_POST_ROUTES.length + SUBSTRATE_GATE_ROUTES.length.`
+    `no hand-maintained perimeter count anywhere in this file -- found: ${JSON.stringify(offenders)}. ` +
+      `This number has now gone stale five times. Do not write it; derive it from ` +
+      `HUMAN_FACING_POST_ROUTES.length + SUBSTRATE_GATE_ROUTES.length + FLAG_GATED_ROUTE_LEVEL_ROUTES.length.`
   )
 
-  // Non-vacuity: the matcher must actually fire on the exact shape that went
-  // stale, or this case is a comment with a green tick.
+  // Non-vacuity 1: the matcher fires on each real stale line this guard exists
+  // to have caught -- the 2026-08-18 header line and the 2026-09-05 body line.
   assert(
-    OFFENDING.test(' * testing); AC5 (perimeter — 42 route-level + 2 substrate-gate = 44 as of'),
+    OFFENDING.test(' * testing); AC5 (perimeter - 42 route-level + 2 substrate-gate = 44 as of'),
     'docstring count matcher is non-vacuous (fires on the real 2026-08-18 stale line)'
   )
+  assert(
+    OFFENDING.test('  // so a flag-gated entry could be deleted silently. 13 flag-pairs across 12'),
+    'docstring count matcher is non-vacuous (fires on the real 2026-09-05 stale flag-pair line)'
+  )
+
+  // Non-vacuity 2: the SCAN (not merely the regex) must reach past the header.
+  // A guard that only ever read the header would return 0 here and look green.
+  {
+    const synthetic = ['/**', ' * header, clean', ' */', '', 'const x = 1', '// Current count: 42 route-level'].join('\n')
+    assert(
+      scanForCounts(synthetic).length === 1,
+      'count scan reaches the file BODY, not just the leading block comment'
+    )
+  }
+
+  // Non-vacuity 3: the historical-record skip must actually skip, and must not
+  // swallow the line after the record closes.
+  {
+    const hist = ['// It read "20 route-level" and was stale', '// >= 22 route-level disagreed', '//', '// Current count: 42 route-level'].join('\n')
+    const r = scanForCounts(hist)
+    assert(r.length === 1 && r[0].includes('Current count'), 'historical-record skip covers the record and stops at its end')
+  }
 }
 
 {

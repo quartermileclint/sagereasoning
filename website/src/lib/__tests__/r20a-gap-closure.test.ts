@@ -1,6 +1,6 @@
 /**
  * r20a-gap-closure.test.ts — RUNTIME battery for the shared R20a gap-closure
- * module (src/lib/r20a-gap-closure.ts), which 25 perimeter routes consume and
+ * module (src/lib/r20a-gap-closure.ts), which the perimeter routes consume and
  * which had NO dedicated test of its own until this file (mechanical item 2,
  * 2026-08-22 — the per-route runtime invocation test gap).
  *

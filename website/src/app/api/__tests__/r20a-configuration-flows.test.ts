@@ -45,7 +45,8 @@
  * catch wired and therefore no propagation to exercise today.
  *
  * SCOPE DISCIPLINE: additive test only. No safety code, route handler, or
- * builder is modified. AC5 perimeter unchanged at 10 routes. PR6 NOT engaged
+ * builder is modified. AC5 perimeter unchanged (membership is the registry in
+ * r20a-invocation-guard.test.ts; no count is written here). PR6 NOT engaged
  * (no safety-function change). Rollback = git rm.
  *
  * Rules served: R20a (vulnerable user detection); R19c (formalised wording);
