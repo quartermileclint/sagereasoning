@@ -33324,3 +33324,94 @@ licensed). Cross-references: `D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-M
 `D-MENTOR-RULING-CLOSE-GATE-DISCREPANCY-ADOPTED-EXECUTED-2026-09-04` (the naming constraint; §13),
 `D-STANDING-RUNNER-DESIGN-R8-COMPLETE-C11-EXPERIMENT-RUN-PR19-FOLDED-2026-08-30` (the predecessor),
 `2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md`, `2026-09-03-mentor-rulings-oc-gate3-verbatim.md` (Q1, §11).
+
+---
+
+## D-S11-P1-FROZEN-BUFFER-RECLASSIFIED-UNDER-FILTERED-READING-2026-09-04
+
+**Decision:** Re-run the frozen 130-record false-hold buffer through the decision table under the
+P1-ruled **filtered** reading, as the ruling's first named consequence. **Evidence for the record —
+explicitly NOT a readiness claim.** P4, P5 and P6 are unmoved; the S11 flip remains **REFUSED**.
+
+**Category:** `code-elevated`, repo-only. No schema, flag, credential, migration, deploy, live op, or
+public-doc change. One new script + one run artifact; nothing existing was modified.
+
+**Deliverables:** `website/scripts/p1-frozen-buffer-reclassification.ts` (read-only, dry, no DB) and
+`operations/trust-layer-2026-07/runs/2026-09-04/P1-frozen-buffer-reclassification-filtered-reading.txt`.
+Input: `runs/2026-07-17/false-hold-record-FROZEN-2026-07-17.jsonl`, md5 `a4e2465f3897fddeea1a189c95af39a5`
+(recorded so a future session can prove the input did not move). Comparable to
+`2026-07-17-F2-mentor-briefing.md` §9, whose method §9 states.
+
+### The headline, stated against the interest of the work that produced it
+
+**The restoration of Q2's floor was already delivered by the S11b reducer narrowing (2026-07-18), not
+by the P1 filter.** Over all 130 records: the pre-S11b reducer yields **129 `do-not-proceed` / 1
+pause**; today's reducer, unfiltered, yields **129 `proceed` / 1 pause** — 129 do-not-proceed to
+**zero**, with the P1 filter playing no part. The filter then changes **exactly one record of 130**
+(the single `indeterminate`, pause → proceed strictly), and that one record is precisely the one the
+legacy bracket flips back. The ruled seam is correct and its effect on this buffer is one record.
+
+| population | col 1 — pre-S11b reducer | col 2 — reducer today | col 3 — FILTERED (ruled) | col 3b — legacy bracket |
+|---|---|---|---|---|
+| all 130 | **129 do-not-proceed**, 1 pause | 129 proceed, 1 pause | **130 proceed** | 129 proceed, 1 pause |
+| holds only (129) | 128 do-not-proceed, 1 pause | 128 proceed, 1 pause | **129 proceed** | 128 proceed, 1 pause |
+
+**Q2's structural false-positive floor on kathekon-free actions: HOLDS — zero `do-not-proceed` under
+the filtered reading, on both readings of the unknowable legacy circle identity.** Consistent with the
+ruling; the ruling is not the sole cause.
+
+### Why column 1 exists, and what it proves
+
+The F2 §9 reconstruction ran 2026-07-17, one day BEFORE the S11b narrowing added `circles.length >= 1`
+to the reducer's `unevaluated` branch. A naive re-run would have compared against a reducer that no
+longer exists and mis-attributed the whole collapse to the P1 filter. Column 1 therefore
+re-implements **that one retired branch only**, labelled as such in the script, used for nothing but
+reproducing the recorded figure. **It reproduces 129 / 1 exactly** — a non-vacuity check on the entire
+reconstruction, which the script aborts on if it fails.
+
+### Two self-corrections, both caught by running the code
+
+1. **A vacuous headline, published mid-session before it was caught.** The first run's summary compared
+   `r.action === 'do_not_proceed'`; the vocabulary is `'do-not-proceed'`. It printed "the floor HOLDS"
+   with a count of 0 against a column that showed 128 of them. Fixed by annotating a typed constant
+   (`const DO_NOT_PROCEED: InterventionAction`) so a mistyped literal is a compile error, with the
+   defect written into the script's own comment rather than quietly removed. This is the
+   `guard-needs-a-non-vacuity-floor` class, recurring.
+2. **The recorded figure is over 130, not over the 129 holds.** The register's "129 / 1" sums to 130,
+   so it included the one `closed` record. The script now reports **both** populations — all records
+   (reproduction) and holds only (the population a G6(a) bound would actually bind on).
+
+The reconstruction itself is checked, not assumed: the buffer stores flattened signals while the seam
+takes an assessment, so each record is lifted back and
+`kathekonSignalsFromAssessment(lift(s)) === normalizeSignals(s)` is asserted per record — **130 of 130
+round-trip exactly**, and the run aborts otherwise.
+
+### Composition bounds — why this generalises to nothing
+
+All 130 records are `false-hold-record-v1`, proximity `deliberate`, depth `standard`, one action class
+(Write/Edit); 129 carry zero obligation statuses, 1 carries a single `indeterminate`; none carries a
+sub-species passion; no record carries circle identity. The single `indeterminate` record is the only
+one on which any column disagrees with any other. **This is the P4 defect, unchanged** — the three
+`NARROWED_ARM_BOUNDS` clauses ride the output verbatim.
+
+**Verified:** `tsc --noEmit` 0 · at-action-seam 59/0 · the run's own per-record round-trip 130/130 ·
+column-1 reproduction ✓.
+
+### Session findings not produced by the re-run
+
+- **The prior session's push did not land.** After a real `git fetch origin`, `main` is **ahead 2** —
+  `50c0c0f` (P1) and `d8dfc80` (R9) are local-only; `origin/main` is `58dad7b`. Nothing from either
+  session is deployed, which means **register D5's live defect is still live in production**
+  (`harness-integration.ts` ships via Vercel).
+- **Register §D row D5 still reads `OPEN`**, and the register changelog carries no entry for the P1
+  build session at all — only the ruling. The follow-on prompt asserts D5 is closed. The code fix is
+  in-repo and verified; the register was not updated. The two documents disagree and one should be
+  corrected — deliberately left to the founder rather than resolved unilaterally, since "OPEN" is
+  defensible as describing the undeployed live surface.
+
+**Status:** Adopted (evidence recorded). Cross-references:
+`D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04` (the ruling),
+`D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the seam this exercises),
+`2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (binding),
+`2026-07-17-F2-mentor-briefing.md` §9 (the reconstruction this is comparable to),
+`S11-FLIP-PREREQUISITES-REGISTER.md` §A P1 / P4 / P5 / P6.
