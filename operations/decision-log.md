@@ -33712,3 +33712,91 @@ candidate, not a settled design decision. No heuristic was elected.
 `D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04`,
 `D-AUTONOMOUS-LOOP-DESIGN-BRIEF-RULED-2026-08-09` (Q1 and its 2026-08-12 amendment, whose reach Q-B
 extends to any scale at which assent occurs).
+
+---
+
+## D-S11-OPTION-C-AT-ACTION-SEAM-CALLER-SCOPED-2026-09-04
+
+**Decision:** Scope Option C — where `interventionInputFromAtAction`'s first caller should live —
+as its own document before any code, per the follow-on prompt's instruction to mirror how P1 itself was
+scoped. **`governance`; scope only.** Nothing built, wired, activated, or licensed. No schema, flag,
+credential, migration, deploy, live op, or public-doc change. The S11 flip remains **REFUSED**;
+P4/P5/P6 unmoved.
+
+**Deliverable:** `operations/trust-layer-2026-07/2026-09-04-C-at-action-seam-caller-SCOPE.md`.
+
+### The finding that overturns the prompt's own framing
+
+The prompt calls wiring the seam "the FIRST piece of the S11 **write-boundary** G6(a) qualification",
+which invites siting the caller in `api/accreditation/[agent_id]/loop-closure-gate.ts`. **Those are two
+different bindings.** The loop-closure gate (live, DETECT mode) asks *did the loop close?* and its
+enforcement act is **refusing a credential** (422) — retrospective, every action already taken. G6(a) is
+a rule about **proceeding**: an unclosed correction loop holds an action, qualified so a
+"contrary; no kathekon factors detected" verdict is log-and-continue, never do-not-proceed. A caller in
+the gate could make the credential conditional; it could not hold anything. **The obvious site
+structurally cannot perform the act it would be sited there to perform** — the first thing a build
+session would get wrong, which is why the scope exists before code.
+
+### What was verified at source
+
+- `loop-fold.ts:608` already runs the Q3 predicate on **each element of the re-verified chain**, already
+  extracts the examination markers, already isolates **each loop's opening verdict**.
+- `/api/reason/route.ts:193` → `practice-suggestion.ts:717` already runs the **same predicate per action
+  on the live consult path** (behind the live `SUBSTRATE_PRACTICE_SUGGESTION_ENABLED`).
+
+So the seam's inputs exist at two live sites and the "one shared reading" discipline is already
+satisfied at both. Recorded as a reason for **more** care, not less: cheap wiring is how a MEASURE
+mechanism acquires consumers it was never scoped for.
+
+### The trap in "what does it do with the output"
+
+The obvious answer — surface it on `loop_fold` or the consult response — **re-creates at a new surface
+what Option B removed hours earlier**, and worse: `loop_fold` is publicly documented
+(`loop-fold/v2`, `llms.txt`), so it would publish decision-table verdicts the project has refused to
+enforce, an R18 act needing founder-signed wording. The distinction that keeps the sequence coherent
+and which any build must state plainly: Option B removed a **wrongly scoped** recommendation (the
+standing aggregate, which P1 rules is not the per-action input); the seam's output is **correctly
+scoped**. Adding the correct one is not a reversal of removing the incorrect one — but it will read as
+churn in the log unless said, and "it looks like churn" is not a reason to skip saying it.
+
+### An unexamined gap found in the P6 window design, with a real deadline
+
+`2026-08-15-false-hold-new-window-scoping-note.md` specifies what the new window captures and **never
+mentions the decision table or the recommendation** — it measures hold *classification*, not what the
+table *would have recommended*. Since part (3) of the readiness standard is about false **holds**, and
+under G6(a) a hold is what a `do-not-proceed` produces, the window as scoped measures the rule's input
+and not its output. **P6's own contamination rule then binds hard:** the window must open on a stable
+instrument and must not span edits, so if the seam is ever to serve the window it must land in **R2**
+(dark, with P8a) — not after the window opens. **This decision has a sequencing deadline.**
+
+### Recommended resolution (a recommendation, not an election)
+
+Site the first caller in the **capture layer as MEASURE instrumentation for the P6 window** — not the
+loop-closure gate, not the consult response, not `loop_fold`. It receives the at-action verdict (the
+loop's *opening* verdict in any write-boundary variant); it **uses the `engagement` injection param**
+so the seam and the eventual loop bound key on one reading rather than two that can drift (recomputing
+would open, at a third site, the divergence class P1 exists to close); and it **records the
+recommendation in the capture record and surfaces it nowhere**. P8a is named as the precondition —
+a consult-only caller would compute recommendations for exactly the population already
+over-represented, and none for the guard path the rule exists to govern (register P5, restated at this
+seam).
+
+Framed as instrumentation rather than "the first piece of G6(a)" deliberately: a recommendation
+computed, recorded and read by nothing **is** instrumentation, and calling it enforcement groundwork
+invites the next session to treat siting as settled and move to binding.
+
+### Left open, deliberately not decided by AI judgement
+
+Whether the P6 window's purpose should widen to measure the recommendation at all is a **founder
+election and plausibly a mentor question** — it changes what the window is for, and P6's design has
+been ruled on once already. Whether a retrospective write-boundary MEASURE variant should also exist is
+a separate, smaller question. R2's contents remain the founder's; the document argues only that R2 is
+the deadline *if* this is done.
+
+**Status:** Adopted (as a scope for election). Cross-references:
+`D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the seam),
+`D-S11-H3-ADVISORY-RECOMMENDATION-REMOVED-FROM-INJECTION-2026-09-04` (Option B, the surfacing
+precedent), `2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (binding),
+`2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
+`2026-08-15-false-hold-new-window-scoping-note.md` (P6; the contamination rule),
+`S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §C.
