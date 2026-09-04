@@ -104,29 +104,66 @@ is given.
   where the ruling's figure comes from); **24×10 ≈ $3.41; 29×10 ≈ $4.12.** The cost argument for
   K=3 is weak at these magnitudes.
 
-## Two limits this discovery added or changed
+## The design, as elected: FORWARD-LOOKING (founder, 2026-09-04)
 
-**L2 is REFINED, not deleted — and the first version had it backwards.** The experiment *postdates*
-the §11.4 statement I cited. It **discharges** the assumption for the **forward-looking** question:
-divergence reproduces on the bare stored text with no wrapper, so a wrapper is not *needed* to
-produce it. The record's own words: what the runner actually sent *"no longer matters to the
-finding's standing — it matters only to historical attribution of specific run-time rejections."*
-**But historical attribution is exactly what Path A does** — it compares a resampled verdict against
-a *recorded* one. The rate stands as a forward-looking measurement; the comparison to the recorded
-verdict does not.
+**The instrument measures today's gate on real candidate texts. It compares no resampled verdict
+against any recorded historical verdict.** `recorded_proximity` is retained in the records as inert
+sampling-frame provenance and is compared against nothing; the code says so at the field.
 
-**L6 is NEW, and is arguably sharper than L2. The instrument has drifted.** The run closed
-2026-08-16; **`f7619d9` (2026-08-24) replaced `ruling_faculty_state`'s deliberation proxy inside
-`layer2-mechanisms.ts`** — the deterministic Layer 2 itself, verified at source. Resampling today
-measures a **different engine** than produced the August verdicts. Every `operative` vs
-`recorded_proximity` comparison crosses that change. The c11 record names this in its own §5(a):
-it *"speaks for the instrument the standing runner would live on, and only approximately for August
-10–16."* That is the right reading for Path A as well — **the rate is about the future runner's
-gate, not a reconstruction of the past one.**
+**This is compatible with the ruling, not a departure from it.** Path A asks for *"the per-input
+disagreement rate"* on the closed run's **candidates**; it never required comparing to their
+recorded verdicts.
 
-**L7, also from the record's §5(b):** its divergent run floored through **andreia**, while the
-run-time c11 rejection recorded `phronesis`+`dikaiosyne`. Variance is not single-channel; a floor
-count does not identify *which* floor fired. Read `proximity_floors`, don't assume one mechanism.
+**It also sharpens the fit, which I did not expect when I proposed it.** The ruling's own Q2 says
+what the existing measurement lacks is *"the live decision-bearing rate — the rate on real candidate
+texts produced by the loop in operation, not on frozen synthetic probes or a single repeated
+candidate."* Real candidate texts, examined on the engine **any M or W policy would actually
+operate**, is exactly that object — and it is precisely the marginal value over D6a, which measured
+12% on *synthetic* probes. The historical comparison was never what the gate asked for.
+
+### What this dissolves
+
+- **L2 (submitted-payload fidelity) — dissolved.** It bit only on the comparison: if August's call
+  was wrapped, a resampled-vs-recorded comparison crossed different inputs. No such comparison is
+  made. What was sent in August is now irrelevant to every published quantity.
+- **L6 (instrument drift) — dissolved.** `f7619d9` changed the deterministic Layer 2 after the run
+  closed, so the comparison crossed an engine change. None is made. Measuring *today's* engine is
+  the point, not a compromise.
+
+### What it does NOT dissolve — stated because I proposed this change and have a stake in it
+
+- **L4 — the 24-vs-29 set size is still open** and still needs production to settle it.
+- **L5 — no counterfactual re-election is attempted.** `would_option_M/W_record` are intra-series
+  (against *this* run's first verdict), never against history.
+- **L7 — variance is multi-channel;** a floor count doesn't identify which floor fired.
+- **L3's surviving half — the sample is not representative** of a future candidate stream, so no
+  population-level claim follows. The rejection stratum is *enriched* for floor-prone texts: the
+  right population for the floor-borderline question, the wrong one for a general rate.
+- **The residual frame note:** these texts were produced by a loop running under the *older* engine,
+  so they are that loop's candidate shapes even though they are examined by today's.
+
+## What the c11 discovery added or changed
+
+*(Superseded in part by the forward-looking election above — retained because the reasoning that
+led to the election is what makes it legible. L2 and L6 below are the limits the election dissolved;
+L7 and the cost/K findings stand.)*
+
+**L2 was backwards in the first version.** The c11 experiment *postdates* the §11.4 statement that
+version cited, and discharges the payload assumption for the forward-looking question. Under the
+elected design the question no longer arises at all.
+
+**L6 — instrument drift — was the sharper finding, and is what motivated the election.** The run
+closed 2026-08-16; `f7619d9` (2026-08-24) replaced `ruling_faculty_state`'s deliberation proxy
+inside `layer2-mechanisms.ts`, verified at source. Rather than caveat a comparison across an engine
+change, the election removes the comparison.
+
+**L7 stands:** the c11 record's divergent run floored through **andreia**, while the run-time
+rejection recorded `phronesis`+`dikaiosyne`. Variance is not single-channel.
+
+**Cost and K stand.** $0.014222/call measured. 24×3 ≈ $1.02; 29×3 ≈ $1.24; **24×10 ≈ $3.41;
+29×10 ≈ $4.12.** K=3 is R8's *policy* parameter and was never ruled as the measurement K; the c11
+record calls its own n=10 *"a rate demonstration, not a rate measurement."* The cost case for K=3 is
+weak at these magnitudes.
 
 ## Files
 

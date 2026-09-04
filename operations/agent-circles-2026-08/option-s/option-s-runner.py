@@ -90,26 +90,38 @@ FLOOR_PROXIMITY = "reflexive"
 # proximity, so only they enter a disagreement identity (PR19 DS-HIGH).
 COUNTED = ("verdict", "tier1_pause", "engine_unavailable")
 
-L1 = ("CLOSED-RUN POPULATION (binding, the ruling's own words): this rate is on "
-      "the closed run's candidate population, not on a live running loop. It "
-      "rides the data whenever it is used for the M/W/S election.")
-L2 = ("SUBMITTED-PAYLOAD FIDELITY (OPEN): whether the original gate call received "
-      "the stored proposed_action or a per-cycle wrapper is not verified from "
-      "this repo (2026-08-29 classification sec 7(1); sec 11.4 confirms it "
-      "unresolved by a second party and calls it 'still the first thing R8 "
-      "should close'). If it was wrapped, this measures a DIFFERENT INPUT than "
-      "the one that produced the recorded verdict.")
-L3 = ("SELECTION ON THE DEPENDENT VARIABLE (PR19 DS-MEDIUM): these inputs are "
-      "selected BY their guardrail verdict -- winners cleared, rejections "
-      "floored. Regression to the mean is therefore guaranteed and will present "
-      "as variance: an input selected for having floored resamples non-floor "
-      "more often than a random input would, and vice versa. This is a sharper "
-      "and distinct bias from L1, which names the run but not the conditioning.")
-L6 = ("INSTRUMENT DRIFT: today's engine is NOT the run-window engine. The run "
-      "closed 2026-08-16; f7619d9 (2026-08-24) replaced ruling_faculty_state's "
-      "deliberation proxy in layer2-mechanisms.ts. Any operative-vs-recorded "
-      "comparison crosses that change. The rate is about the FUTURE runner's "
-      "gate, not a reconstruction of the past one.")
+L1 = ("SAMPLING FRAME (the ruling's population clause, read forward). The ruling "
+      "states: 'Path A's output is the disagreement rate on the closed run's "
+      "candidate population, not on a live running loop.' That clause is "
+      "retained and rides the data. Forward-looking it is a statement of WHICH "
+      "texts were measured, not a caveat on a comparison -- the measurement is "
+      "of today's gate on real candidate texts; the frame says whose texts.")
+L2 = ("DISSOLVED 2026-09-04 by the forward-looking election, recorded rather than "
+      "deleted so the reasoning stays legible. The submitted-payload assumption "
+      "(2026-08-29 classification §7(1)) bit ONLY when a resampled verdict was "
+      "compared against a RECORDED one -- if August's call was wrapped, that "
+      "comparison crossed different inputs. This instrument no longer makes that "
+      "comparison. What was sent in August is irrelevant to every quantity "
+      "published here. The 2026-08-30 c11 experiment had already discharged the "
+      "forward-looking half on the bare stored text.")
+L3 = ("SAMPLING FRAME, NOT A BIAS (reframed 2026-09-04). These texts were selected "
+      "by their verdict in a past run. Under the earlier comparative design that "
+      "was selection on the dependent variable, and regression to the mean would "
+      "have presented as variance. Forward-looking it is not a bias in the "
+      "measurement -- it states WHICH texts were measured. Two consequences "
+      "survive: the sample is NOT representative of a future runner's candidate "
+      "stream, so no population-level claim follows; and the rejection stratum is "
+      "ENRICHED for floor-prone texts, which makes it the right population for "
+      "the floor-borderline question M and W turn on, and the wrong one for a "
+      "general rate. Read strata, never the pooled figure alone.")
+L6 = ("DISSOLVED 2026-09-04 by the forward-looking election, recorded not deleted. "
+      "f7619d9 (2026-08-24) changed layer2-mechanisms.ts after the run closed "
+      "(2026-08-16), so a resampled-vs-recorded comparison crossed an engine "
+      "change. No such comparison is made now: this measures TODAY'S engine -- "
+      "the engine a standing runner would live on, and the engine any M or W "
+      "policy would actually operate. One residual, a frame note not a confound: "
+      "the texts were produced by a loop running under the OLDER engine, so they "
+      "are that loop's candidate shapes.")
 L7 = ("VARIANCE IS MULTI-CHANNEL: the c11 record's divergent run floored through "
       "andreia while the run-time rejection recorded phronesis+dikaiosyne. A "
       "floor count does not identify WHICH floor fired -- read proximity_floors.")
@@ -314,7 +326,12 @@ def summary(runs_dir: str) -> None:
         per_input.append({
             "candidate_id": f.stem,
             "decision_role": recs[0].get("decision_role") if recs else None,
-            "recorded_proximity": recs[0].get("recorded_proximity") if recs else None,
+            # Retained as inert sampling-frame provenance ONLY. It is NOT
+            # compared against anything here, by founder election 2026-09-04:
+            # the comparison crossed an engine change (f7619d9) and an
+            # unverified historical payload. Do not reintroduce a comparison
+            # without reopening L2 and L6.
+            "recorded_proximity_PROVENANCE_ONLY": recs[0].get("recorded_proximity") if recs else None,
             "intended_k": intended,
             "n_counted": len(counted),
             "n_verdicts": n_v,
@@ -356,6 +373,8 @@ def summary(runs_dir: str) -> None:
                 "wilson_95": {"low": lo, "high": hi},
                 "verdicts": tot_v, "floors": tot_f,
                 "pooled_p_hat_floor": (tot_f / tot_v) if tot_v else None,
+                # Intra-series only: `operative` is THIS run's first verdict,
+                # never a historical one. This survives the forward-looking change.
                 "M_differs_from_operative": sum(
                     1 for r in rows if r["would_option_M_record"]
                     and r["would_option_M_record"] != r["operative"]),
@@ -373,9 +392,15 @@ def summary(runs_dir: str) -> None:
         "instrument": "option-s",
         "generated_at": D6A.utc_now(),
         "measured_path": "/api/guardrail",
-        "headline_quantity": "pooled_p_hat_floor -- the per-sample floor rate. "
-                             "The binary disagreement rate is secondary; M and W "
-                             "are functions of p, not of the flag.",
+        "measures": "TODAY'S gate, on real candidate texts. FORWARD-LOOKING by "
+                    "founder election 2026-09-04: no resampled verdict is compared "
+                    "against any recorded historical verdict. This is compatible "
+                    "with the ruling, which asks for the per-input disagreement "
+                    "rate on the closed run's CANDIDATES and never required a "
+                    "comparison to their recorded verdicts.",
+        "headline_quantity": "pooled_p_hat_floor -- the per-sample floor rate on "
+                             "today's engine. The binary disagreement rate is "
+                             "secondary; M and W are functions of p, not of the flag.",
         "strata": strata,
         "per_input": per_input,
         "LIMIT_1_closed_run_population": L1,
