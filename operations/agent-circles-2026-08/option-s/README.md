@@ -77,6 +77,57 @@ risk the criterion guards against would arise if the rate were published bare �
 implying an examined gate — which is why the five limits ride every output and why the stratified
 figure, not the pooled one, is the headline.
 
+## The prior data exists — found 2026-09-04, before any quota was spent
+
+`2026-08-30-c11-rerun-experiment-record.md` (with its run script) records **K=10 on the byte-exact
+c11 text**, run 2026-08-29 against production on a **minimal payload** — `{"action": <the stored
+proposed_action>}`, no wrapper, no `agent_id`, server default band.
+
+**Result: 9/10 `deliberate`/proceed, 1/10 `reflexive`/blocked.** p̂_floor = **0.10**, Wilson 95%
+≈ 2–40%. The record's own framing, which should be carried forward: *n=10 is "a rate demonstration,
+not a rate measurement."*
+
+**The mechanism is already localized, and it is not the deterministic layer.** On identical text the
+Layer-1 extractor assigned the same grave-act indicator to **four different states** — absent ×4,
+`phantasia` ×2, `synkatathesis` ×3, `praxis` ×1 — and **only the `praxis` reading fires** the
+ADR-010 §4 andreia floor. Layer 2 computes faithfully from what it is given; what varies is what it
+is given.
+
+**What this changes for Path A:**
+
+- **The mechanism question is answered.** Path A measures **prevalence across the decision-bearing
+  population**, not mechanism. That is still worth having — c11 is one input — but the marginal
+  value is narrower than "find out why the gate varies."
+- **c11 must not be re-run at a lower K.** Carry the existing K=10 datum and mark it as a different
+  K from the rest.
+- **Cost is now measured, not estimated:** $0.014222/call. 24×3 ≈ $1.02; 29×3 ≈ $1.24 (which is
+  where the ruling's figure comes from); **24×10 ≈ $3.41; 29×10 ≈ $4.12.** The cost argument for
+  K=3 is weak at these magnitudes.
+
+## Two limits this discovery added or changed
+
+**L2 is REFINED, not deleted — and the first version had it backwards.** The experiment *postdates*
+the §11.4 statement I cited. It **discharges** the assumption for the **forward-looking** question:
+divergence reproduces on the bare stored text with no wrapper, so a wrapper is not *needed* to
+produce it. The record's own words: what the runner actually sent *"no longer matters to the
+finding's standing — it matters only to historical attribution of specific run-time rejections."*
+**But historical attribution is exactly what Path A does** — it compares a resampled verdict against
+a *recorded* one. The rate stands as a forward-looking measurement; the comparison to the recorded
+verdict does not.
+
+**L6 is NEW, and is arguably sharper than L2. The instrument has drifted.** The run closed
+2026-08-16; **`f7619d9` (2026-08-24) replaced `ruling_faculty_state`'s deliberation proxy inside
+`layer2-mechanisms.ts`** — the deterministic Layer 2 itself, verified at source. Resampling today
+measures a **different engine** than produced the August verdicts. Every `operative` vs
+`recorded_proximity` comparison crosses that change. The c11 record names this in its own §5(a):
+it *"speaks for the instrument the standing runner would live on, and only approximately for August
+10–16."* That is the right reading for Path A as well — **the rate is about the future runner's
+gate, not a reconstruction of the past one.**
+
+**L7, also from the record's §5(b):** its divergent run floored through **andreia**, while the
+run-time c11 rejection recorded `phronesis`+`dikaiosyne`. Variance is not single-channel; a floor
+count does not identify *which* floor fired. Read `proximity_floors`, don't assume one mechanism.
+
 ## Files
 
 | File | What it is |
@@ -88,9 +139,8 @@ figure, not the pooled one, is the headline.
 
 ## The walk (founder-performed — none of it done here)
 
-1. **Look for existing data first.** `guardrail/route.ts:99-101` records that the 2026-08-29 c11
-   re-submission experiment wrote 10 metered rows — a K-repeat may already exist. Find it before
-   spending quota re-deriving it.
+1. ~~Look for existing data first.~~ **DONE 2026-09-04 — it exists**; see the section above.
+   K=10 on c11, p̂_floor = 0.10, mechanism localized. Carry that datum; do not re-derive it.
 2. **Resolve or accept L2** against the §4 trace and the runner's `RUN-LOG.md`.
 3. **Run §0, then §PRE.** Settle 24 vs 29. If production gives neither, stop.
 4. **Run §2, eyeball, then §3.** Paste into `candidates`, set `populated: true`.

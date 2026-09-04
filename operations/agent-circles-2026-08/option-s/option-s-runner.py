@@ -105,6 +105,20 @@ L3 = ("SELECTION ON THE DEPENDENT VARIABLE (PR19 DS-MEDIUM): these inputs are "
       "as variance: an input selected for having floored resamples non-floor "
       "more often than a random input would, and vice versa. This is a sharper "
       "and distinct bias from L1, which names the run but not the conditioning.")
+L6 = ("INSTRUMENT DRIFT: today's engine is NOT the run-window engine. The run "
+      "closed 2026-08-16; f7619d9 (2026-08-24) replaced ruling_faculty_state's "
+      "deliberation proxy in layer2-mechanisms.ts. Any operative-vs-recorded "
+      "comparison crosses that change. The rate is about the FUTURE runner's "
+      "gate, not a reconstruction of the past one.")
+L7 = ("VARIANCE IS MULTI-CHANNEL: the c11 record's divergent run floored through "
+      "andreia while the run-time rejection recorded phronesis+dikaiosyne. A "
+      "floor count does not identify WHICH floor fired -- read proximity_floors.")
+PRIOR = ("c11 already has K=10 from 2026-08-29 (9/10 deliberate, 1/10 reflexive; "
+         "p_hat_floor 0.10; Wilson ~2-40%) on a MINIMAL payload -- see "
+         "2026-08-30-c11-rerun-experiment-record.md. The mechanism is already "
+         "localized to the Layer-1 grave-indicator stage assignment (four states "
+         "on identical text; only praxis floors). Path A measures PREVALENCE, "
+         "not mechanism. Do not re-run c11 at a lower K.")
 L4 = ("SET-SIZE DISCREPANCY (OPEN, surfaced at build): the ruling says 29 "
       "decision-bearing candidates (20 winners + 9 rejections). The S6 report's "
       "own outcome table says winner = 15 (cycles 1,2,4,7-14,17-20), which gives "
@@ -368,6 +382,9 @@ def summary(runs_dir: str) -> None:
         "LIMIT_2_submitted_payload_fidelity": L2,
         "LIMIT_3_selection_on_dependent_variable": L3,
         "LIMIT_4_set_size_discrepancy": L4,
+        "LIMIT_6_instrument_drift": L6,
+        "LIMIT_7_variance_multi_channel": L7,
+        "PRIOR_DATA_c11": PRIOR,
         "K_note": "K is the POLICY parameter R8 ruled for median-of-3. It is NOT "
                   "ruled as the measurement K. D6a chose K=10 with a stated power "
                   "rationale. At K=3 a per-input p-hat takes values in "
