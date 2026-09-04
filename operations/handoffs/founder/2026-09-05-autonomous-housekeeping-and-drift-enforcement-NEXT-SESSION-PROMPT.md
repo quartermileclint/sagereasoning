@@ -95,6 +95,22 @@ start this before A–D**; a half-done refresh is worse than a stale one.
 
 ## 3. Questions holding things up — with recommendations
 
+> **⚖ FOUNDER ELECTION 2026-09-04 — ALL FIVE RECOMMENDATIONS ADOPTED AS RECOMMENDED.** Consequences,
+> so a later session does not re-litigate them:
+> - **Q1, Q2, Q3 → put to the mentor.** Done same day:
+>   `agent-circles-2026-08/2026-09-04-MENTOR-QUESTION-path-A-set-size-K-and-whether-to-run.md`,
+>   which asks four questions (the set size; the measurement K, recommending 10; whether the
+>   founder-elected forward-looking design is within Path A's terms; and whether the run is worth its
+>   purpose given the mechanism is now localized). **Path A does not proceed pending that ruling** —
+>   no extraction, no credential, no spend.
+> - **Q4 → `agent_hold_observations` sweep NOT activated.** The flag stays unset until the
+>   false-hold-window / P6 work confirms the frozen buffer is not evidence a 90-day sweep would
+>   purge. **Do not flip it in this session.**
+> - **Q5 → the `stoic-brain` citation defects stay unfixed** (Meditations **7.9** cited as 4.26; the
+>   entry's `DL 7.38` also off). Blocked by the byte-identity guard; the window's status is the
+>   peer's P6 decision. Re-raise after that lands. **Do not edit `stoic-brain.json`.**
+
+
 **None of these blocks §2.** They block *other* tracks, and each needs a founder decision.
 
 ### Q1 — Path A: the decision-bearing set is 24 or 29, and the record disagrees with the ruling
