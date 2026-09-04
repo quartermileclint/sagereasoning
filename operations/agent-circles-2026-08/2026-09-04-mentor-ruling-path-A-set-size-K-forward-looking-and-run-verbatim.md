@@ -23,7 +23,22 @@ ruling **explicitly declines to discount it for having been proposed by the sess
 would change the M/W/S ruling"*; localising the mechanism *"does not tell you how often that variance
 fires across the decision-bearing population."*
 
-**⚠ ONE OWED ITEM IS NOT ADOPTED AND IS PUT BACK AS A QUESTION — see the executing notes.** The
+> **⚖ CORRECTED 2026-09-05 BY BINDING RULING — the owed-list now has ONE precondition.**
+> (`2026-09-05-mentor-ruling-guard-availability-and-lean-mode-doctrine-verbatim.md`, Q-X1.) The
+> **v3/v4 lift check is DROPPED** from this ruling's "owed before the run" list: *"The v3/v4 lift
+> check is a P6 condition, not an Option S condition. The Path A ruling's 'owed before the run' list
+> is corrected to a single precondition: the production extraction via EXTRACTION.sql."* The A8 bound
+> *"was correctly accepted."*
+>
+> **SOURCE OF THE ITEM, named as the ruling requires so a future reader understands why it appeared
+> and why it went:** it belongs to the **P6 window ruling issued the same day**
+> (`operations/trust-layer-2026-07/2026-09-05-mentor-ruling-P6-window-recommendation-verbatim.md`),
+> whose own text reads *"A v3/v4 lift check must run before any figure is published **from the
+> window**"* and which likewise originates the A8 bound. **Two rulings issued to two tracks on the
+> same day shared a condition that belonged to only one of them** — recorded as a mechanism fact
+> worth carrying, not merely a correction.
+
+**⚠ ONE OWED ITEM IS NOT ADOPTED AND IS PUT BACK AS A QUESTION — see the executing notes. (RESOLVED 2026-09-05: see the banner above.)** The
 ruling's "owed before the run" list includes *"The v3/v4 lift check must run before any figure is
 published — the round-trip is proven on 130 v1 records, not v3/v4 records."* Verified at source, that
 condition belongs to the **false-hold capture track**, not to Option S. It is **named, not absorbed.**

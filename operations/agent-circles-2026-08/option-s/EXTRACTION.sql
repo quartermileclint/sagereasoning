@@ -73,6 +73,14 @@ WHERE cy.loop_id = :RUN;
 -- explicitly "not quietly overwritten". Do NOT adopt an alternative definition of
 -- decision-bearing (no-winner cycles' best candidates; not_selected rows) without
 -- its own ruling: the ruling's language was "winners, not candidates".
+--
+-- THE NOTE MUST NAME THE MECHANISM, NOT ONLY THE CORRECTION (ruled 2026-09-05,
+-- F2's addition): "the ruling's figure appears to have been a reconstruction that
+-- did not account for the five no-winner cycles" -- three dependency_unavailable
+-- (cycles 3, 5, 6) and two null_cycle (15, 16). Record that, so a future reader
+-- understands the mechanism and not just the number.
+--
+-- The obligation is to be EXECUTED REGARDLESS of which number production returns.
 -- The ruling expects 29. If production gives neither, STOP and reconcile.
 
 -- ---------------------------------------------------------------------------

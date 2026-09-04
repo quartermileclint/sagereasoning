@@ -8,6 +8,27 @@ of its own actions and said so in every commit. That is worth diagnosing rather 
 
 ---
 
+> **⚖ RULED 2026-09-05 — this diagnosis was put to the mentor and its bearing is now binding**
+> (`agent-circles-2026-08/2026-09-05-mentor-ruling-guard-availability-and-lean-mode-doctrine-verbatim.md`):
+>
+> - **The presence rate and the false-hold rate are ORTHOGONAL, and P4's four-part readiness standard
+>   measures only the second.** A channel absent this often *"is not failing its examination. It is
+>   not conducting one."* In the Stoic framing the guard enacts **eulabeia** at the action boundary,
+>   and caution structurally absent 20–60% of the time is *"intermittent caution, which is a different
+>   thing."*
+> - **NOT a new gate; the four-part standard is NOT reopened.** The incompleteness *"should be named
+>   explicitly before any flip is considered"* — recorded as **bound B4** in
+>   `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` §B, not as a §A prerequisite.
+> - **Lean mode is DOCTRINAL, not an engineering preference.** *"A shorter impression is a different
+>   impression."* It trades **examination completeness against examination frequency**, and a lean
+>   examination that misses what would trigger a hold *"is failing to see what it would need to see to
+>   hold — a different failure mode from a false hold, and not measured by the false-hold rate."*
+>   **Lean mode is NOT to be adopted as the remedy.**
+> - **The remedy is §3(b): raise the budget, both values together.** Confirmed correct.
+> - **§4's covariate is not optional:** *"Any rate published from the window without an availability
+>   covariate is a rate over a selected sample"*, and the selection mechanism correlates with the
+>   examination conditions. Routed to P6.
+
 ## 1. The finding: the ENFORCE channel is chronically absent, and today it was mostly absent
 
 Counted from `~/.sage-gate1/gate1.log`, all `GUARD-*` events per day:
