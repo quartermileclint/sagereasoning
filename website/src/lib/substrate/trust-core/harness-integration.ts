@@ -490,6 +490,30 @@ export interface TrustVerdict {
  * S1 trust profile (lazy A3 decay + justice cap), folded through the S3 weighted
  * aggregate and the S4 intervention engine — all MEASURE (advisory; never binds).
  *
+ * ─── WHAT THIS VERDICT RANGES OVER (register P1, RULED 2026-09-04) ──────────
+ * The recommendation here is computed over the AGGREGATE trust state — the
+ * agent's accumulated per-domain evidence across sessions. Per the P1 ruling
+ * (operations/trust-layer-2026-07/2026-09-04-mentor-ruling-P1-decision-table-
+ * input-verbatim.md) the aggregate is NOT the decision table's per-action
+ * input; its ruled consumer is Q7 depth calibration + the public trust record.
+ * The per-action input is the at-action verdict through `at-action-seam.ts`.
+ * The recommendation carried on this verdict is therefore a standing,
+ * task-agnostic reading and is re-labelled as such in `basis`; it must not be
+ * read as "the table's answer for this action".
+ *
+ * ─── `taskHasJusticeSurface` is REQUIRED (register D5, 2026-09-04) ───────────
+ * It was optional-defaulting-false and NO caller supplied it, so the S3 seam's
+ * justice branch was unconditionally skipped and every verdict read 'none' by
+ * omission — the live advisory answered a question it never asked (the mentor:
+ * "a honesty defect in the MEASURE-mode sense"). Every caller now states it.
+ * The two live callers (the discernment GET; the public trust-record GET) are
+ * genuinely task-agnostic and state `false` WITH that reason. NOTE for any
+ * future caller: `true` without obligation routing routes to 'unevaluated' ⇒
+ * do-not-proceed (the S3 seam's owed-but-unevaluated rule) — pass `true` only
+ * when a task with a justice surface is actually in scope AND the obligation
+ * verdict is being supplied through the S3 path; otherwise you are not asking
+ * the question, you are asserting an answer.
+ *
  * S2 evidence dims for the self-read are STRUCTURAL + CONSERVATIVE (disclosed):
  * every folded trust event is R18f-verified (signature 'signed' is structurally
  * true — the derivers re-verify); depth 'standard' (the emitting surfaces'
@@ -502,8 +526,9 @@ export interface TrustVerdict {
  */
 export async function readTrustVerdict(
   agentId: string,
-  opts?: {
-    taskHasJusticeSurface?: boolean
+  opts: {
+    /** REQUIRED — see the header (register D5). State it; never default it. */
+    taskHasJusticeSurface: boolean
     now?: Date
     client?: SupabaseClient
     /** S10 fold (2026-07-12, S10-ABUSE-1): the PUBLIC read surface sets this so a
@@ -527,8 +552,8 @@ export async function readTrustVerdict(
     return { ...base, dark: true, basis: DARK_BASIS }
   }
   try {
-    const profileRes = await readTrustProfile(agentId, opts?.now ?? new Date(), opts?.client, {
-      strictMissingTable: opts?.strictStore === true,
+    const profileRes = await readTrustProfile(agentId, opts.now ?? new Date(), opts.client, {
+      strictMissingTable: opts.strictStore === true,
     })
     if (!profileRes.ok) {
       return { ...base, basis: `trust profile read failed (fail-honest): ${profileRes.error}` }
@@ -563,7 +588,7 @@ export async function readTrustVerdict(
     const recommendation = recommendIntervention(
       interventionInputFromS3({
         aggregate,
-        taskHasJusticeSurface: opts?.taskHasJusticeSurface ?? false,
+        taskHasJusticeSurface: opts.taskHasJusticeSurface,
       }),
     )
     return {
@@ -572,9 +597,12 @@ export async function readTrustVerdict(
       aggregate,
       recommendation,
       basis:
-        aggregate.level === null
+        (aggregate.level === null
           ? `no evaluated cardinal-domain evidence — ${recommendation.tableRow} (never a silent proceed)`
-          : `aggregate ${aggregate.level} (limiting: ${aggregate.limitingDomain}); S4 → ${recommendation.action}/${recommendation.followUp}`,
+          : `aggregate ${aggregate.level} (limiting: ${aggregate.limitingDomain}); S4 → ${recommendation.action}/${recommendation.followUp}`) +
+        // P1 (2026-09-04): the ruled re-label. This recommendation ranges over the
+        // aggregate; the per-action table input is the at-action seam.
+        `; ranges over the AGGREGATE trust state (task-agnostic; taskHasJusticeSurface=${opts.taskHasJusticeSurface}) — not the per-action decision-table input (P1 ruling 2026-09-04)`,
     }
   } catch (e) {
     return { ...base, basis: `readTrustVerdict failed honestly: ${(e as Error).message}` }

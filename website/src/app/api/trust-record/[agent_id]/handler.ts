@@ -149,7 +149,12 @@ const REAL_DEPS: TrustRecordDeps = {
   // strictStore (S10-ABUSE-1 fold): on THIS public surface a missing-table-shaped
   // store error must surface as a 503 (no-store), never read as a benign empty
   // profile that a cacheable 404 would misreport as "no record exists".
-  readVerdict: (agentId, opts) => readTrustVerdict(agentId, { ...opts, strictStore: true }),
+  // Register D5 (2026-09-04): `taskHasJusticeSurface` is REQUIRED and stated. The
+  // public record read is task-agnostic (no task in scope; the S4 recommendation is
+  // deliberately never served on this surface anyway), so `false` is the honest
+  // value, not a default.
+  readVerdict: (agentId, opts) =>
+    readTrustVerdict(agentId, { ...opts, taskHasJusticeSurface: false, strictStore: true }),
   readReflectSummary: (agentId) => readHonestReflectSummary(agentId),
   isOrientationEnabled: isOrientationReadingEnabled,
   readOrientationReadings: (agentId) => readOrientationReadings(agentId),

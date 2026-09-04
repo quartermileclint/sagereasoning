@@ -355,7 +355,7 @@ async function ingest(rows: Classified[]) {
 async function trustState(client: any) {
   try {
     const { readTrustVerdict } = await import('../src/lib/substrate/trust-core/harness-integration')
-    const verdict = await readTrustVerdict(agentId, { client })
+    const verdict = await readTrustVerdict(agentId, { /* D5: task-agnostic report read */ taskHasJusticeSurface: false, client })
     if (verdict.dark) {
       console.log('  (trust core dark — SUBSTRATE_TRUST_CORE_ENABLED not set for this read; part 2 unavailable.)')
       return

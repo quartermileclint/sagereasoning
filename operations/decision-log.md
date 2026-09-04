@@ -33008,6 +33008,214 @@ governing), `D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026
 applied a second time), `2026-08-30-standing-runner-design-R8.md` §5.3/§11/§12.3,
 `2026-08-16-idea-loop-S6-report.md`, `operations/agent-circles-2026-08/d6a/`.
 
+---
+
+## 2026-09-04 — D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04
+
+**Decision:** S11 register hard prerequisite **P1** — *"what does the decision table actually read when it
+fires?"* — is **scoped, ruled, and discharged**. The scope document
+(`operations/trust-layer-2026-07/2026-09-04-P1-decision-table-input-SCOPE-FOR-RULING.md`) was authored,
+routed to the mentor as a ruling question rather than a founder election, and answered the same day; the
+ruling is captured verbatim
+(`operations/trust-layer-2026-07/2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md`, **BINDING;
+the verbatim text wins over every summary including this entry**) and the S11 register is updated. **Ruled:
+the AT-ACTION verdict, FILTERED by Q3's kathekon-engagement threshold before any justice surface is
+reported, is the decision table's input for the per-action rows.** A verdict meeting no kathekon condition
+reports `justiceSurface: 'none'`, **not** `'unevaluated'` — so **Q2's zero-false-positive floor is restored
+and its staging premise stands**, and the 129-of-130 figure is identified as the *unfiltered* composition Q3
+exists to forbid. The aggregate trust state is **not** the per-action input; its consumer is Q7 depth
+calibration, undisturbed.
+
+**Tier:** `governance` — documents only. No code, schema, flag, credential, migration, deploy or
+public-surface change; `git diff -- website/` clean. AC7/PR6/PR17 not engaged. **Nothing built, activated or
+published, and the ruling explicitly licenses none of those.**
+
+**Reasoning:** Two findings, both verified first-hand against HEAD, changed the question's shape before any
+ruling was sought. **Finding A:** `recommendIntervention` has exactly **one** live caller in the codebase —
+`readTrustVerdict` (`harness-integration.ts:563`) via `interventionInputFromS3`, whose own docstring states
+*"S4 consumes S3, never re-derives."* The register's "three readings" were therefore **one wired path and two
+reconstructions**, as the F2 briefing's own §9 disclosed at the time (*"a reconstruction, not an observation
+of the live path"*). **Finding B:** `readTrustVerdict` declares `taskHasJusticeSurface?: boolean`, defaults it
+`false`, and **no caller anywhere supplies it** — grep across `website/src` + `harness/` returns only the
+parameter definitions and non-supplying call sites *(first written as "three"; `tsc` at the build found a
+fourth in `website/scripts/false-hold-observation-report.ts:358`, outside the grep's path — count corrected,
+conclusion unchanged; PR10)*. `interventionInputFromS3` gates the entire justice
+branch on that flag, so the wired path reports `'none'` **unconditionally, by omission**: reading 3 was
+reading 2 arrived at accidentally. **Finding C** (the surviving content of P1): the engine's seam consumes the
+*aggregate* while Q3 binds on *"the verdict that opened the loop"* — different objects, and the table's rows
+mix both idioms because it was authored before anything forced the distinction. **Finding D:** the stakes are
+retroactive — Q2's already-adopted staging premise is true under one reading and false under the other. The
+resolution recommended, and ruled correct, was that **Q3 had already answered it**: its *"consistent with the
+deliberate-proximity-without-justice-surface row of the decision table"* clause maps the false-positive class
+onto the `'none'` row by name, so readings 1 and 2 are not rivals — reading 2 is what reading 1 becomes once
+Q3's filter is applied. The scope document disclosed against its own recommendation that this extends Q3
+beyond its stated G6(a) scope; **the mentor ruled the extension explicitly**, on the ground that the narrower
+reading would make one table row mean different things to different consumers.
+
+**Register changes (three, all recorded not deleted, per the register's own convention):** P1's status cell
+rewritten OPEN → **RULED + DISCHARGED**; the **"three readings" framing marked superseded in the row itself**
+with the single-caller fact cited so it is not rediscovered; **new standing item D5** carrying Finding B with
+the mentor's own words that the P1 ruling *"does not license deferring"* it. A dated change-log entry was
+prepended.
+
+**D5 is owed independently and is the one thing here that must not sit behind a gate.** The mentor: *"a
+honesty defect in the MEASURE-mode sense — the instrument reports a result without having performed the
+relevant test... a standing defect that the P1 ruling does not license deferring."* It is ruled to land in the
+same build pass as P1's consequences, but is **gated only on that build being licensed** — so if the build
+stays unlicensed, D5 remains owed on its own account.
+
+**What this does NOT move:** **P4** fails independently (one evaluated cardinal domain at 0.42 confidence;
+the window was one action class, one depth, one proximity). **P5's** denominator is still unsourced — the
+capture is consult-path only and `runGuard` writes nothing. **P6's** new window has not started. **The S11
+flip remains REFUSED.** Discharging P1 is not movement toward it, and the register now says so in the row
+itself so a later session cannot read it as such. MEASURE throughout; ENFORCE is S11; weights **BLOCKED**;
+the 0h call remains the founder's.
+
+**Build consequences — designed, NOT built, NOT licensed here:** a sibling seam
+`interventionInputFromAtAction` (pure, dark, `code-elevated`) mapping an at-action assessment + its kathekon
+engagement into `InterventionInput`; the threshold predicate **already exists** (`assessKathekonEngagement`)
+and no new predicate is required; `interventionInputFromS3` keeps serving the trust-record surface;
+`readTrustVerdict`'s role narrows to depth calibration + the public record, with its intervention
+recommendation removed or re-labelled to say what it ranges over; D5's fix; and a re-run of the 130-record
+reclassification under the filtered reading **as evidence, not readiness**. **D5's fix has two directions with
+different tiers** — removing the unreachable parameter is behaviour-preserving, while *supplying* it changes
+live behaviour on the public trust-record surface and the discernment route and is its own founder-walked
+0c-ii.
+
+**Rules served:** PR15 (the ruling question grounded in first-hand code reads before framing — Findings A and
+B are the reason the question was answerable at all); PR18 (written at the point of verification); PR20 (the
+register's own "three readings" characterisation checked against source and found inaccurate, then corrected
+rather than propagated); PR6 (scope held — the ruling's four "not licensed" clauses are restated here rather
+than quietly widened); the mentor-verdict convention (verbatim captured before any summary was written, and
+marked as winning over this entry).
+
+**Rollback path:** `git revert` this session's commit — the scope document, the verbatim record, the three
+register changes and this entry are one path-scoped commit. Nothing in `website/` is touched, so there is no
+deploy, flag or schema component to reverse.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "RULED + DISCHARGED 2026-09-04" operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md
+grep -c "^| \*\*D5\*\*" operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md
+git diff --stat HEAD~1 -- website/
+```
+Expected: `1`; `1`; no output from the third.
+
+**Session honesty note.** The at-action guardrail fired twice on this session's writes: once **UNAVAILABLE**
+(28s timeout — the S11b latency class already on record, fail-open-honest) and once **CAUTION** with the
+structured elicitation. The elicitation was answered in-conversation and its third answer was again *"the
+resolution preceded the examination"* — **the fourth consecutive such answer across two sessions**, the prior
+three being recorded in `D-MENTOR-RULING-...-2026-09-04` immediately above. Recorded as a continuing pattern,
+not a fresh isolated instance: the capture-and-execute convention is doing the deciding and the examination is
+arriving after it. **The elicitation changed this session's conduct on its second firing** — the answer named
+a stake in "not appearing hesitant" as the reason the decision-log entry was about to be written without the
+founder's word, having been explicitly placed in their hands one turn earlier; the entry was **held** on that
+basis and written only on the founder's subsequent instruction. Named because that is the one instance today
+where surfacing changed the action rather than merely being logged.
+
+**Open questions:** whether the build implementing P1's consequences + D5 is licensed, and at what tier
+(D5's two directions differ — see above); whether `readTrustVerdict`'s intervention recommendation is removed
+or re-labelled; whether the 130-record reclassification re-runs now (as evidence) or waits for P6's window.
+
+**Status:** Adopted. Cross-references:
+`2026-09-04-P1-decision-table-input-SCOPE-FOR-RULING.md` (the scoped question),
+`2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (**the binding record; verbatim wins**),
+`S11-FLIP-PREREQUISITES-REGISTER.md` §A P1 + §D D5 + change log,
+`2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q2 staging, Q3 G6(a), Q7 depth),
+`2026-07-17-F2-mentor-briefing.md` §9 (the reconstruction and its disclosed bounds),
+`D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED` (the deferral this does not disturb),
+`D-TRUST-LAYER-S4-INTERVENTION-ENGINE-MEASURE-BUILT-REVIEW-FOLDED` (the engine and its S3 seam).
+
+---
+
+## 2026-09-04 — D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04
+
+**Decision:** The P1 ruling's build consequences are **BUILT** (founder-licensed by election this session:
+"Seam + D5 supply fix"), together with the register **D5** fix the ruling said must not be deferred. Two
+things landed. **(1) `interventionInputFromAtAction`** — the sibling of `interventionInputFromS3`, in a NEW
+file `website/src/lib/substrate/trust-core/at-action-seam.ts` (exported via `index.ts`): maps an at-action
+Layer-2 assessment into `InterventionInput`, with the justice surface **filtered by the canonical
+`assessKathekonEngagement` predicate** (reused, never re-implemented) so a verdict engaging no justice arm
+reports `justiceSurface: 'none'`, never `'unevaluated'`. The output also carries the predicate result, the
+UNFILTERED reducer read, and a `justiceFiltered` flag — the evidence the ruling asks the record to keep for
+the 130-record reclassification. **Not wired to any live caller**; its first consumer is the S11 write-boundary
+G6(a), when licensed. **(2) D5:** `readTrustVerdict`'s `taskHasJusticeSurface` is now **REQUIRED** (no
+default) and every caller states it — the two live routes (discernment GET; public trust-record GET) plus the
+report script and two batteries pass `false` **with the reason written at each site** (genuinely
+task-agnostic reads; `true` without S3 obligation routing would assert do-not-proceed for every agent). The
+standing verdict's `basis` is **re-labelled** per the ruling's third consequence — it now states it ranges over
+the aggregate, is not the per-action table input, and discloses the flag value it was read with.
+
+**Tier:** `code-elevated`. No schema, flag, credential, migration, deploy, or public-doc change; nothing
+activated. The seam is dark/additive. The D5 change touches two live route handlers but is
+**behaviour-preserving at both**: each was already reading with `false` by omission, and now reads with
+`false` by statement. The only wire-visible delta is additive prose inside the existing free-text `basis`
+field on the discernment GET (a surface documented on no R18 page; the harness reads `aggregate` and
+`recommendation.action/followUp`, not `basis` — verified). AC7/PR6/PR17 not engaged.
+
+**Design decision, disclosed for review:** the ruling says "filtered by Q3's kathekon-engagement threshold";
+Q3's threshold is the four-arm OR. The seam gates the JUSTICE SURFACE on the two JUSTICE arms (1: beyond-self
+surface; 2: violated) rather than on `engaged`, because Arms 3 (habitual proximity) and 4 (sub-species
+passion) are not justice findings — a habitual verdict with a self-only dikaiosyne tag is precisely the class
+R11 says is not a justice surface, and reporting `'unevaluated'` there because Arm 3 fired would
+re-manufacture the do-not-proceed the ruling removes. Arm 3 reaches the table through `proximity`
+(habitual-pause row); Arm 4 has no table row and is carried on the output. Under this reading `engaged ===
+false` always reports `'none'` (the ruled case, pinned). Written in the file header and pinned in §4 of the
+battery so a reviewer can press it.
+
+**Two corrections made in-session, both mine (PR10):** (a) the scope document, the register D5 row, and the
+prior decision-log entry all said "three call sites" — `tsc` at the build found a **fourth** non-supplying
+caller in `website/scripts/false-hold-observation-report.ts:358`, outside my grep's path; all three records
+corrected the same hour, conclusion unchanged. (b) the seam battery's first run failed its own pin 1.7 — I had
+assumed the reducer reads `'unevaluated'` on a ZERO-circle dikaiosyne tag; it returns `null` there (its
+`unevaluated` branch needs ≥1 circle), so the zero-circle class was already `'none'` before any filter. The
+129/130 class is the SELF-circle case (Layer-1 attaches `self_preservation` to nearly everything — the AE-2
+finding), which is the battery's headline fixture and passed. The pin was corrected to what the code does and
+the reason recorded in the test. Also: the first `npm run build` was launched from the repo root, where there
+is no `build` script — the wrapper reported exit 0 while npm reported exit 1; caught on reading the log, re-run
+from `website/`.
+
+**Verified (all first-hand, this session, post-fix):** at-action-seam **59/0** (NEW — the ruled case with the
+filter proven non-vacuous; per-status faithfulness; Arm 2 on self; Arms 3/4 disclosed behaviour; injection;
+A8 reachable through the seam; MEASURE invariants) · s8-harness-integration **155/0** (146 + 9 new pins: D5
+live-wired — the same seeded profile flips `'none'`→`'unevaluated'`→do-not-proceed on the flag, proving the
+question is now asked; the P1 re-label present on both basis branches) · s10-trust-record-surface **198/0** ·
+s4-intervention-engine **417/0** (untouched) · kathekon-engagement **113/0** (untouched) ·
+false-hold-observation-report **13/0** · discernment-observability-wiring **15/0** · logos
+human-practitioner-boundary **248/0** (the byte-identity guard correctly DORMANT — window-conditional on
+`GATE1_FALSE_HOLD_CAPTURE`, unset; it named the five measured-set files and permitted them) · `tsc --noEmit`
+**0** · `npm run build` ✓ (`/api/practice/discernment` + `/api/trust-record/[agent_id]` registered).
+
+**Rollback path:** `git revert` the build commit. Reverting restores the optional-defaulting flag (the D5
+defect returns) and removes the seam (nothing consumes it). No schema/flag/deploy component.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/substrate/trust-core/__tests__/at-action-seam.test.ts
+grep -rn "readTrustVerdict(" src scripts | grep -v "taskHasJusticeSurface" | grep -v "export async function"
+```
+Expected: `59 passed, 0 failed`; the grep prints nothing (every call states the flag).
+
+**Not done, deliberately:** the 130-record reclassification re-run (the ruling: "as evidence, not
+readiness" — a separate step against the frozen buffer, not folded into a code build); removing the
+recommendation from the H3 advisory (re-labelled instead — the ruling offered either; removal changes the
+harness's advisory text and is a founder call); PR19 independent review (offered at close — not launched
+unprompted). **P4/P5/P6 unmoved; the S11 flip remains REFUSED; MEASURE throughout; weights BLOCKED; the 0h
+call remains the founder's.**
+
+**Session honesty note.** The elicitation fired on every write and every verification run this session —
+fourteen firings. The third answer was "resolution before examination" on all but one: the seam's Arm-1/2
+gating was genuinely reasoned before being resolved (started from `engaged`, worked the habitual case, changed
+course), and is disclosed above as the reviewable decision. Recorded so the one examination-first instance is
+distinguishable from the thirteen habit-first ones, not averaged into them.
+
+**Status:** Built + Verified (dark; not Live — nothing here is activated). Cross-references:
+`D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04` (the ruling this executes),
+`2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (binding), `S11-FLIP-PREREQUISITES-REGISTER.md`
+§A P1 + §D D5, `website/src/lib/substrate/trust-core/at-action-seam.ts` (header = the design record).
+
 ## 2026-09-04 — D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04
 
 **Date:** 2026-09-04. **Tier:** `governance` — a design session; documents only. **Deliverable:**

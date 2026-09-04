@@ -188,7 +188,13 @@ const DEFAULT_DEPS: DiscernmentRouteDeps = {
   makeExtractors: liveExtractorSet,
   spawn: runSpawnDiscernment,
   handBack: closeDelegation,
-  trustVerdict: (agentId) => readTrustVerdict(agentId),
+  // Register D5 (2026-09-04): the flag is now REQUIRED and stated, not defaulted.
+  // This GET is the STANDING, task-agnostic trust read (S9b G5 depth calibration +
+  // the H3 advisory) — no task is in scope, so there is no justice surface to
+  // ask about: `false` is the honest value here, not an omission. Do NOT pass
+  // `true` from this site: without S3 obligation routing that asserts
+  // 'unevaluated' ⇒ do-not-proceed for every agent.
+  trustVerdict: (agentId) => readTrustVerdict(agentId, { taskHasJusticeSurface: false }),
 }
 
 // ════════════════════════════════════════════════════════════════════════════

@@ -26,6 +26,8 @@ export * from './combiner'
 // S4 — the intervention policy engine (mentor spec 7 + A8) + the A4 transparency
 // ledger (pure lib, MEASURE mode — log-and-continue only; ENFORCE is S11).
 export * from './intervention-engine'
+// P1 (2026-09-04): the at-action → S4 seam, sibling of interventionInputFromS3.
+export * from './at-action-seam'
 export * from './transparency-ledger'
 // S5 — the four-layer discernment protocol: the three pure-lib profile schemas +
 // the collaboration record (pure composition lib; MEASURE mode). The collaboration

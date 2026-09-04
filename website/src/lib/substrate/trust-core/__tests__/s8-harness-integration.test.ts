@@ -654,14 +654,14 @@ async function section5(): Promise<void> {
 
   // Flag-OFF → dark (no DB read).
   delete process.env[TRUST_CORE_ENV_VAR]
-  const offVerdict = await readTrustVerdict('ns:orch@v1', { now: NOW, client: makeFakeSupabase().client })
+  const offVerdict = await readTrustVerdict('ns:orch@v1', { taskHasJusticeSurface: false, now: NOW, client: makeFakeSupabase().client })
   eq(offVerdict.dark, true, '5.1 flag-off → dark')
   eq(offVerdict.recommendation, null, '5.2 flag-off → no recommendation')
 
   process.env[TRUST_CORE_ENV_VAR] = 'true'
 
   // No evidence → aggregate null → S4 pause + escalate (never a silent proceed).
-  const empty = await readTrustVerdict('ns:nobody@v1', { now: NOW, client: makeFakeSupabase().client })
+  const empty = await readTrustVerdict('ns:nobody@v1', { taskHasJusticeSurface: false, now: NOW, client: makeFakeSupabase().client })
   eq(empty.aggregate?.level ?? null, null, '5.3 no evidence → aggregate null')
   eq(empty.recommendation?.action, 'pause', '5.4 null aggregate → pause')
   eq(empty.recommendation?.followUp, 'escalate', '5.5 null aggregate → escalate (insufficient evidence)')
@@ -671,7 +671,7 @@ async function section5(): Promise<void> {
   const fake = makeFakeSupabase()
   seedTrustState(fake, 'ns:orch@v1', 'phronesis', 'principled')
   seedTrustState(fake, 'ns:orch@v1', 'dikaiosyne', 'deliberate')
-  const verdict = await readTrustVerdict('ns:orch@v1', { now: NOW, client: fake.client })
+  const verdict = await readTrustVerdict('ns:orch@v1', { taskHasJusticeSurface: false, now: NOW, client: fake.client })
   eq(verdict.aggregate?.level, 'deliberate', '5.7 minimum-domain aggregate (weakest wins)')
   eq(verdict.aggregate?.limitingDomain, 'dikaiosyne', '5.8 limiting domain surfaced')
   eq(verdict.recommendation?.action, 'proceed', '5.9 deliberate + no justice surface → log + continue (proceed)')
@@ -680,14 +680,39 @@ async function section5(): Promise<void> {
   // A worse profile yields a worse recommendation (worse-scores-worse fidelity).
   const fakeBad = makeFakeSupabase()
   seedTrustState(fakeBad, 'ns:bad@v1', 'phronesis', 'reflexive')
-  const bad = await readTrustVerdict('ns:bad@v1', { now: NOW, client: fakeBad.client })
+  const bad = await readTrustVerdict('ns:bad@v1', { taskHasJusticeSurface: false, now: NOW, client: fakeBad.client })
   eq(bad.recommendation?.action, 'do-not-proceed', '5.11 reflexive aggregate → do-not-proceed (worse scores worse)')
 
   // The oversight domain is excluded from the CARDINAL action aggregate.
   const fakeOv = makeFakeSupabase()
   seedTrustState(fakeOv, 'ns:ov@v1', 'oversight', 'principled')
-  const ov = await readTrustVerdict('ns:ov@v1', { now: NOW, client: fakeOv.client })
+  const ov = await readTrustVerdict('ns:ov@v1', { taskHasJusticeSurface: false, now: NOW, client: fakeOv.client })
   eq(ov.aggregate?.level ?? null, null, '5.12 oversight-only evidence → cardinal aggregate stays null')
+
+  // ── P1 / D5 (2026-09-04) ──────────────────────────────────────────────────
+  // D5: the flag is now live-wired, not silently defaulted. The SAME seeded
+  // profile, read with taskHasJusticeSurface=true and no S3 obligation routing,
+  // must route to 'unevaluated' ⇒ do-not-proceed. Before D5 this call was
+  // unreachable (the flag was never supplied) — this pin proves the question is
+  // now actually asked, and documents why the two live callers state `false`.
+  const fakeD5 = makeFakeSupabase()
+  seedTrustState(fakeD5, 'ns:d5@v1', 'phronesis', 'principled')
+  seedTrustState(fakeD5, 'ns:d5@v1', 'dikaiosyne', 'deliberate')
+  const d5off = await readTrustVerdict('ns:d5@v1', { taskHasJusticeSurface: false, now: NOW, client: fakeD5.client })
+  const d5on = await readTrustVerdict('ns:d5@v1', { taskHasJusticeSurface: true, now: NOW, client: fakeD5.client })
+  eq(d5off.recommendation?.justiceSurface, 'none', "5.13 D5: false ⇒ 'none' (the question is not asked, and says so)")
+  eq(d5on.recommendation?.justiceSurface, 'unevaluated', "5.14 D5: true without routing ⇒ 'unevaluated' — the flag REACHES the seam")
+  eq(d5on.recommendation?.action, 'do-not-proceed', '5.15 D5: … and the table responds (why live task-agnostic callers must state false)')
+  assert(d5off.recommendation?.action !== d5on.recommendation?.action, '5.16 D5 non-vacuity: the flag changes the outcome')
+
+  // P1: the standing verdict is RE-LABELLED as ranging over the aggregate, and
+  // discloses the flag value it was read with — it must never be mistaken for
+  // the per-action decision-table input.
+  assert(d5off.basis.includes('ranges over the AGGREGATE trust state'), '5.17 P1 re-label present in basis')
+  assert(d5off.basis.includes('not the per-action decision-table input'), '5.18 P1 re-label names what it is NOT')
+  assert(d5off.basis.includes('taskHasJusticeSurface=false'), '5.19 basis discloses the flag value (false)')
+  assert(d5on.basis.includes('taskHasJusticeSurface=true'), '5.20 basis discloses the flag value (true)')
+  assert(empty.basis.includes('ranges over the AGGREGATE'), '5.21 re-label also on the null-aggregate branch')
 
   if (prior === undefined) delete process.env[TRUST_CORE_ENV_VAR]
   else process.env[TRUST_CORE_ENV_VAR] = prior

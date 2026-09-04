@@ -191,7 +191,7 @@ async function main(): Promise<void> {
     },
   )
 
-  const verdict = await readTrustVerdict(AGENT, { now: NOW, client: fake.client })
+  const verdict = await readTrustVerdict(AGENT, { taskHasJusticeSurface: false, now: NOW, client: fake.client })
   assert(!verdict.dark, 'S2-0 verdict not dark (flag pinned on)')
   assert(verdict.profile !== null, 'S2-0b profile read through the fake store')
   const reflectRes = await readHonestReflectSummary(AGENT, fake.client)
@@ -475,7 +475,7 @@ async function main(): Promise<void> {
   fake.tables.agent_trust_state.push(
     stateRow({ agent_id: AGENT_B, virtue_domain: 'dikaiosyne', earned_level: 'deliberate' }),
   )
-  const verdictB = await readTrustVerdict(AGENT_B, { now: NOW, client: fake.client })
+  const verdictB = await readTrustVerdict(AGENT_B, { taskHasJusticeSurface: false, now: NOW, client: fake.client })
   const payloadB = composeTrustRecordPayload({ verdict: verdictB, reflectSummary: null, generatedAt: NOW })
   eq(payloadB.record.unevaluated_cardinal_domains.length, 3, 'S3-1 three unevaluated cardinals named')
   assert(
@@ -520,7 +520,7 @@ async function main(): Promise<void> {
     isSurfaceEnabled: () => true,
     isCoreEnabled: () => true,
     // Mirrors the REAL_DEPS binding: strictStore on (the S10-ABUSE-1 fold).
-    readVerdict: (id, opts) => readTrustVerdict(id, { ...opts, client: fake.client, strictStore: true }),
+    readVerdict: (id, opts) => readTrustVerdict(id, { ...opts, taskHasJusticeSurface: false, client: fake.client, strictStore: true }),
     readReflectSummary: (id) => readHonestReflectSummary(id, fake.client),
     now: () => NOW,
   }
