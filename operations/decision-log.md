@@ -33462,3 +33462,109 @@ site.
 `D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the fix),
 `D-S11-P1-FROZEN-BUFFER-RECLASSIFIED-UNDER-FILTERED-READING-2026-09-04` (which flagged the
 discrepancy), `S11-FLIP-PREREQUISITES-REGISTER.md` §D row D5.
+
+---
+
+## D-MENTOR-AMENDMENT-TWELVE-ENVIRONMENT-ARCHITECTURE-ADOPTED-R10-RUN-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — documents only. **AC7:** not engaged. **PR6:** not
+engaged. **Production:** untouched. **Session model:** `claude-fable-5-1` (draft) → `claude-sonnet-5`
+(review fold).
+
+**What happened.** The founder relayed a mentor amendment to the standing-runner design session's
+governing brief, adding one research input — a **twelve-environment *agent* architecture** (twelve
+task-agnostic agents, one per cognitive environment, composing into pipelines for any reasoning job)
+— and four design questions (Q-ENV-1…Q-ENV-4). The amendment was **adopted as binding on relay** per
+project convention and captured verbatim. The founder then directed that the standing-runner design
+be updated to suit, with mentor questions raised where clarification was needed. **R10 — the track's
+third sitting — ran and folded it.** Nothing was built, flagged, migrated, activated, or published.
+
+**Adopted / recorded.**
+`operations/agent-circles-2026-08/2026-09-04-mentor-amendment-twelve-environment-agent-architecture-verbatim.md`
+(the verbatim record; wins over every summary). Two premises in the amendment were **named rather than
+absorbed**: (a) it states three times that the session is *"unopened"* and its gate unmet — the
+session is **open** (the same-day item-level gate ruling reserved the opening to the founder; the
+founder opened it; R9 ran, was PR19-reviewed, closed, and is committed `d8dfc80` on `origin/main`),
+though the Option S gate **is** genuinely unmet and does bind the M/W/S election and R8-D7's sampling
+policy; (b) the architectural assessment it characterises is **not in this repository**, so R10
+examines the relay's characterisation, not the source.
+
+**The design.**
+`operations/agent-circles-2026-08/2026-09-04-standing-runner-design-R10-twelve-environment-amendment.md`
+— extends R9, **changes no R9 design element**. **Q-ENV-1:** the environment agent produces a
+candidate; the harness examines it deterministically; the agent never participates in examination —
+but the contract is **disclosed as not yet meeting the amendment's own bar** ("precisely enough that a
+build brief could be written from it"), with the room-framing context, per-cycle cardinality, refusal
+semantics, and invocation direction named as gaps. **Q-ENV-2:** the standing runner's sequence is
+already **brief-fixed by the mentor**, none of the three offered options; for a client pipeline,
+runner-declared is unavailable (C1 governs an attestation about the past, not authority over the
+future) and harness-computed **is** R9 §16.8's deferred selection function under a new name;
+founder-specified is the only one available. **Q-ENV-3, the explicit examination the amendment
+required:** the two are **not alternatives and neither subsumes the other** — two systems sharing one
+substrate. **REVISED, not confirmed:** the *room*, not the agent, is the unit; **at most seven rooms
+could host a generative agent and only three host a live production heuristic today**; the identity
+architecture is left **genuinely open**. Sequenced behind the unmet single-identity prerequisite; the
+standing runner remains the v1 vehicle. **Q-ENV-4:** confirmed a harness function, not cross-agent
+memory — **B4 governs** what is served (the target's examined state, re-read per cycle, held nowhere
+independently); the genuinely open residual is narrowed to whether an environment agent's *own*
+reasoning accumulates a trust state, and per-agent or shared.
+
+**PR19 — three blind reviewers (claims-vs-source, constraint compliance, design soundness), 45
+findings, none refuted, all folded (§10b), two independently duplicated.** The fold was substantive,
+not cosmetic, and one finding **reversed the framing of the sitting's central open question**:
+
+1. **The first draft asserted a source claim that is FALSE.** It said Q1's extension beyond the IDEA
+   loop is *"not stated anywhere in the record"*, citing the loop-scoped **proposal** text. A binding
+   **2026-08-12 mentor amendment** (`2026-08-08-autonomous-loop-design-brief.md:178-212`) addresses it
+   directly and **agent-generally**: *"the election of a candidate by **the human or agent** who will
+   act"*; *"Q1 is a doctrinal necessity, not a policy choice"*; *"Q1 forbids architecturally what Q4.3
+   detects per-trace. **One constraint, two scales.**"* Corrected; Q-B narrowed to the genuine
+   residual — whether the doctrine reaches a **third, unnamed scale** (a composed multi-agent
+   pipeline).
+2. **Over-stated live-room count** — five "occupied … live" rooms, when R9 §1.11 already records that
+   h5 (`fifth_circle_weighting`) is *"not a generator"* and h6 (`anomaly_detection`) is *"inert by
+   construction without runner history"*, a read this document's own §5.2 confirms unbuilt. **Three,
+   not five.** The revised cardinality — the sitting's headline output — had rested on the wrong count.
+3. **Room-exclusion arithmetic wrong** — Archive (generative) wrongly excluded; Threshold (ruled
+   non-generative) wrongly omitted. Corrected set: Cloister, Laboratory, Threshold, Arena, Library.
+4. **§4.3's headline "structural blindness" gain self-contradicted** by the same document's
+   forward-compatibility constraint, which requires the verdict-carrying history block to generalise
+   per identity. **Withdrawn.**
+5. **A false negative against source** — the first draft said nothing rejects a candidate for
+   ungroundedness; the kathekon floor (`guardrail-sandwich.ts:336`) forces `proceed:false` on
+   `is_kathekon:false` **regardless of proximity**. Corrected to the three-valued reading.
+6. **A fabricated quotation attributed to B4** (*"never held by it"* is R9 §3.1's gloss, not the
+   ruling's words) — corrected, and the apparent §5.1/§5.3 fork dissolved by applying B4 as governing.
+7. **The interface contract inverted the pipeline's own order** — the watching `POST` shape it cited
+   as the generator's output is the **post-examination record step's** shape.
+8. **D4 — named by the amendment as bearing on this input — was examined nowhere**, and the question
+   document cited a section (§9.3) that did not exist. Examined at §9; disposition: D4 is not
+   modified, governs the single-runner case correctly, and by its own terms does not settle whose
+   longitudinal sequence a multi-agent pipeline's is.
+
+**The questions.**
+`operations/agent-circles-2026-08/2026-09-04-MENTOR-QUESTION-twelve-environment-architecture-clarifications.md`
+— **Q-A** the session-state premise; **Q-B** whether Q1's doctrinal scope reaches a composed
+multi-agent client pipeline; **Q-C** whether C1 transfers under structural environment identity, and
+whether *practice-exercised* is attestable at all (this survived review intact and one reviewer called
+it *"the sharpest observation in the document"*); **Q-D** whether R10's D4 disposition is adequate;
+**Q-E** the narrowed accumulation question; **Q-F** whether the Cellar heuristic should be elected —
+the amendment's own sharpest interface example depends on a room that has **no heuristic**.
+
+**Standing constraints, all held.** The loop proposes, it never executes. Weights **BLOCKED** — and
+§3.3 identifies a **new route by which a weighting function could have arrived** (an outcome-adaptive
+router) and narrows the prohibition to *same-cycle* derivation specifically, so it does not forbid the
+brief's own ruled standing-trust-record selection input. Examination engine deterministic and
+doctrine-grounded. No cross-agent memory; no profile storage in the runner or any environment agent.
+Q1c distinct identities. **The M/W/S election and R8-D7's sampling policy remain DEFERRED; the Option
+S gate is untouched and unmet; Path A remains the ruled route.** No ruling A1–A4, B1–B4, C1–C5, D1–D5
+modified. The nine-candidate close gate is not reopened. `SUBSTRATE_LAYER3_ENABLED` stays unset.
+
+**Rollback:** `git revert` the records commit — documents only; nothing live.
+
+**Status:** Adopted; R10 run and PR19-folded. **The design goes to the founder for election and to the
+mentor at the founder's cadence; it self-starts nothing.** Cross-references:
+`D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04`,
+`D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-MAY-OPEN-2026-09-04`,
+`D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04`,
+`D-AUTONOMOUS-LOOP-DESIGN-BRIEF-RULED-2026-08-09` (Q1 and its 2026-08-12 amendment).
