@@ -34238,3 +34238,58 @@ bullets were each accurate when written and rewriting them would falsify the rec
 NOT a drift:** the sage-* skills (7 skills + 2 described deprecation stubs = 9 dirs).
 
 **Rollback:** `git revert`.
+
+---
+
+## D-COUNT-DISCIPLINE-SWEEP-PUBLIC-CONTRACT-DRIFT-FOUND-R18-DRAFTED-2026-09-05
+
+**Decision:** Complete the count-discipline sweep (item A of the post-ruling autonomous prompt).
+**`code-elevated`** (test files only) + `governance`. **No production read, migration, flag,
+credential or spend; no public surface written.**
+
+**The prompt directed the public R18 surfaces first, and that is where the sweep paid.** Three
+served surfaces — `public/llms.txt`, `public/.well-known/agent-card.json`, and `src/lib/skill-registry.ts`
+(served via `/api/skills`, `/api/marketplace`, `/api/compose`, `/api/execute`) — document an
+assessment contract that **returns HTTP 400**. Derived from source: **14** free assessments (not 11),
+**55** paid (not 37), **8** phases (not 7); both routes hard-reject on `responses.length !== 14` and
+`!== 55`; the published example id **`SO-01` exists nowhere in the assessment bank** (the free ids are
+`FD-01`–`FD-07`, `AM-01`–`AM-07`); and the documented phase names were never the phase names.
+**Dateable:** `224ba44` (2026-03-29) wrote the docs, `fe902f3` (2026-04-01) moved the code three days
+later, the docs never followed — **~5 months**. Exposure **nil** (pre-0h, no external users); the
+severity is that R18 exists precisely to keep public claims honest, and **a count that drifts
+misinforms while a contract that drifts fails closed on the first honest attempt to use it.**
+
+**Drafted, not applied** — eleven wording edits staged for R18 sign-off. **Verified, not asserted:**
+the accompanying assertion ran against the live stale surfaces (**6 passed / 7 failed**), then against
+scratch **copies** carrying the drafted edits (**13 passed / 0 failed**) — proving every anchor matches
+byte-for-byte, no residual superseded count survives, and the guard goes green afterwards. It ships as
+a `.draft` so it cannot run red in the suite; wording and assertion are **one change**, because
+applying the wording alone would repeat the 2026-03-29 failure exactly.
+
+**The second finding is about the previous remedy.** `D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`
+removed the stale count from the guard file's **header** and asserted against its return. But the
+assertion read `selfSrc.slice(0, indexOf('*/'))` — the header only — and **two hand-maintained counts
+were sitting in the file body**: *"42 route-level + 2 substrate-gate = 44 routes"* and *"13 flag-pairs
+across 12 distinct routes"* (live: 43 + 2, and 31 across 30). Both sat **directly beside assertions
+carrying the correct figure**, bumped on 2026-09-02 while the sentences were not. **Fifth recurrence,
+in the file written to stop it — and the 2026-09-04 entry states the true figure 43 + 2 = 45 in its own
+text, so the correct number was known when the header was fixed and the body copies were left.**
+
+**The new lesson, distinct from the one already learned:** an instruction inside the drifting artifact
+does not arrest the drift (known); **a guard scoped to where the last instance happened does not arrest
+the class** — and is more expensive, because a narrow guard *looks* like coverage. The scan now covers
+the whole file, **comment lines only** (code is the authority and legitimately carries the number; the
+first draft fired on its own assertions and on `let passed = 0`), with dated historical records allowed
+to quote stale figures. **Mutation-verified**, including that it rejects a body-position count **even
+when numerically correct** — correct-today is what goes stale tomorrow. Four sibling docstrings fixed
+the same way (numbers dropped, claims kept). Batteries: guard **720/0** (717 + 3 non-vacuity),
+configuration-flows 61/0, audience-rendering 66/0, gap-closure 64/0, route-wiring 936/0, `tsc` 0.
+
+**Scoped, not fixed, deliberately:** `api-docs/page.tsx` documents a request shape neither assessment
+route ever accepted (`scenario` is read by neither). That is a rewrite of two endpoint entries, named
+as its own R18 item rather than hidden inside a typo correction. **Checked and clean:**
+`component-registry.json` (304 = 304, `statusSummary` sums, no per-status mismatch), the pass-through
+field counts (5 + 2 = 7 against `evaluation.ts`), the D6a figures (a frozen measurement — must not be
+"refreshed"), and the agent-card extension count (derives to 26, correctly stated nowhere in prose).
+
+**Rollback:** `git revert` either commit independently (`1ecff99` tests, `3d4c075` documents).
