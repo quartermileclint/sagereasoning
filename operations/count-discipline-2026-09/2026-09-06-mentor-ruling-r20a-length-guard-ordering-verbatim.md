@@ -111,3 +111,43 @@ as the document states.
 Whether to make that change now or wait for the audit is the founder's call. The ruling does not
 require it to wait — the principle is settled, and applying it to a single known case is within the
 ruling's terms. The audit covers the rest.
+
+---
+
+## ADDENDUM — second relay, 2026-09-06. Restatement, NOT a second ruling.
+
+**The same question was relayed to the mentor a second time and drew the same ruling.** The mentor
+opens by naming why: *"The ruling from the prior session stands and is restated here for the record,
+since this document arrives as a fresh relay without the prior ruling attached."* The question went
+back **without its answer attached**; the mentor did not know it had already ruled.
+
+**This addendum is deliberately not a separate `-verbatim-2.md` file.** Two files for one question
+would create exactly the artifact shape that produced Option S's Q1 — two same-day rulings, an
+instrument citing the superseded one, and a later session left to reconcile them. There is one
+ruling on this question. It is the text above.
+
+**Checked, not assumed: the two relays do not diverge.** All six load-bearing claims appear in both:
+the ruling sentence itself; *"It is discharged only by answering them"*; *"only purpose (a) is in
+play"* for agent-facing members; *"execution-order analysis, not textual position"*; the immediate
+action being *"the founder's call"*; and *"It is a failure of the perimeter's primary purpose."*
+
+**What the second relay omits** (omission, not contradiction — the text above remains canonical):
+the dikaiosyne framing (*"distributing to each their due"*); the commendation of the PR20 provenance
+discipline; and the audit-framing section, including *"inherited properties are not examined
+properties."* Anything relying on those must cite the text above, not the second relay.
+
+**What the second relay sharpens,** stated more explicitly than in the first:
+
+> "The reasoning is not primarily about cost. It is about what the perimeter is for."
+
+**One transcription note:** the second relay's closing sentence ends mid-thought — *"The ruling does
+not require it to wait"* — where the first completes it: *"— the principle is settled, and applying
+it to a single known case is within the ruling's terms. The audit covers the rest."* Read the first.
+
+**Process observation, recorded because a sibling instance is live in this same arc.** Re-relaying a
+settled question without its prior ruling attached risks a second, divergent ruling on one matter —
+and that is not hypothetical here: `2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`
+exists **because** two rulings issued the same day left `option-s-runner.py:45` citing the superseded
+one. This time the restatement was consistent and nothing was lost. The cheap mitigation is to attach
+the prior ruling when re-relaying a question that has already been answered. Recorded as an
+observation for the founder, **not proposed as a numbered process rule.**

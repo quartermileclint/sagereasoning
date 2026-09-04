@@ -34762,3 +34762,53 @@ it.
 **Status:** Adopted (as a question put, not an answer). Cross-references:
 `D-OPTION-S-PR19-FOUR-PRE-RUN-BLOCKERS-DO-NOT-RUN-2026-09-05`,
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`.
+
+---
+
+## 2026-09-06 — D-R20A-ORDERING-RULING-RESTATED-SECOND-RELAY-NO-DIVERGENCE-2026-09-06
+
+**Decision:** Record the mentor's **second relay** of the perimeter-ordering ruling as an **addendum
+to the single existing verbatim record**, not as a second ruling file. **`governance`** — no code,
+route, flag or schema change; **no artifact required amendment.**
+
+**What happened.** The same question was relayed again and drew the same ruling. The mentor names the
+cause in its opening line: *"The ruling from the prior session stands and is restated here for the
+record, since this document arrives as a fresh relay without the prior ruling attached."* The
+question went back **without its answer attached**.
+
+**Checked, not assumed — the relays do not diverge.** All six load-bearing claims appear in both: the
+ruling sentence; *"It is discharged only by answering them"*; *"only purpose (a) is in play"* for
+agent-facing members; *"execution-order analysis, not textual position"*; the immediate action as
+*"the founder's call"*; and *"It is a failure of the perimeter's primary purpose."* The second is a
+**condensed restatement**. It omits (does not contradict) the dikaiosyne framing, the PR20
+provenance commendation, and *"inherited properties are not examined properties"* — so anything
+relying on those must cite the first text, which remains canonical. It sharpens one thing: *"The
+reasoning is not primarily about cost. It is about what the perimeter is for."* Its closing sentence
+is truncated mid-thought; the first completes it.
+
+**Why one file and not two.** Two records for one question would create precisely the artifact shape
+that produced **Option S's Q1** — two same-day rulings leaving `option-s-runner.py:45` citing the
+superseded one, which this same session put to the mentor. Recording a "second ruling" here would
+manufacture that failure rather than avoid it. There is one ruling; the addendum sits beneath it.
+
+**Verified, so that "no change needed" is a finding rather than an assumption:** the second relay's
+explicit *"not on directory location or route name"* is already carried by the audit prompt at lines
+76 and 80 (*"not always obvious from the route's name or location"*; *"do not classify by path"* with
+counter-examples). **No amendment to the audit prompt, the adoption entry, or any other artifact.**
+
+**Process observation, not a proposed rule.** Re-relaying a settled question without its prior ruling
+attached risks a second, divergent ruling on one matter. That is not hypothetical in this arc — it is
+the documented cause of Option S's Q1. Here the restatement was consistent and nothing was lost. The
+cheap mitigation is to attach the prior ruling when re-relaying an answered question. **Recorded for
+the founder; deliberately not proposed as a numbered process rule** — one observed near-miss with a
+consistent outcome does not warrant one, and the project's standing caution is against manufacturing
+rules where readings converge.
+
+**Risk classification:** Standard under 0d-ii. AC7 not engaged; PR6 not engaged.
+
+**Rollback path:** `git revert` this commit (documents only).
+
+**Rules served:** R20a, AC5, PR18, PR20, PR22.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
+`D-OPTION-S-DIRECTIONAL-DECOMPOSITION-PUT-TO-MENTOR-2026-09-06`.
