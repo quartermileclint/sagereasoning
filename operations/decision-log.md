@@ -34899,3 +34899,149 @@ reverting `0126645` if the intent is to undo the move itself).
 **Status:** Adopted. Cross-references: `0126645`,
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
 `D-SCORE-CONVERSATION-FORMAT-VALIDATION-LANDED-PR19-FOLDED-2026-09-05`.
+
+---
+
+## 2026-09-05 — D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05
+
+**Decision:** Discharge the D4 took-effect proof the predecessor close carried as owed (its §5);
+settle D1's re-latch watch as **genuinely OPEN**; **hold** the credential-lookup retry activation on a
+measurement rather than flip it. **`code-critical`** — a throwaway credential minted, one live
+accreditation write, full teardown in-session. **AC7 engaged and discharged; PR6 + PR17 engaged; every
+live operation was founder-performed — the AI performed no Supabase, Vercel, git-push or mint op.**
+**No schema, flag, deploy or perimeter change. Production is byte-equivalent to session open.**
+
+### 1. D4 took effect — proven, where the predecessor could only state it negatively
+
+The D4 activation was verified by a **non-regression** check that "reads identically flag-on and
+flag-off *by design*", so it could not fail; the close labelled it accordingly and carried the real
+proof. **That proof is now run.**
+
+**The method, and the part that makes it a proof rather than an observation of absence.** A live
+absence of `justice-surface-*` is also what a silently-failed write looks like, and "flag-off would
+have emitted" would otherwise rest on *reading* the reducer. So the proof has three legs, and no leg
+alone is sufficient:
+
+1. **A local differential on the real signed artifact.** `deriveWorstJusticeOutcome` was run over the
+   production consult's own signed assessment twice — `requireBeyondSelfCircle: false` returned
+   `justice-surface-indeterminate`; `true` returned `null`. **The two branches provably differ on this
+   exact input.** The harness refuses fixtures that would prove nothing and was validated against two
+   negative controls first: a two-circle fixture (flag-on **still emits** — not gated) and a
+   status-less self-only fixture (flag-off **also silent** — no differential). **Both are plausible
+   outcomes of a real consult, and either would have been written to production and read as success.**
+2. **A positive control in the ledger.** The write emitted **three `credential-completed` rows**
+   (dikaiosyne, phronesis, sophrosyne), so the emission path demonstrably ran.
+3. **The finding.** **No `justice-surface-*` row of any kind**, and `agent_trust_state` shows
+   `dikaiosyne.justice_floor_active = false` — the exact cell D4 changes.
+
+**Independent corroboration the session did not design for.** The write's `loop_fold` block classified
+the assessment as a **self-regarding prudential loop** (`self_regarding.loops.redirections: 1`) with
+`n_dikaiosyne_level_excluded: 1` and dikaiosyne absent from `character.domains`. **This is production's
+own predicate agreeing the input is self-only** — but it is *not* confirmation that the flag took
+effect, and is recorded as corroborating the **premise** only: `loop_fold` runs on
+`assessKathekonEngagement`, which **deliberately does not receive the D4 flag** (the coupling guard
+pinned at §8.1c/§8.9b/§8.11). The conclusion rests on leg 3 alone.
+
+**Honest scope.** This proves the flag gates the **`indeterminate`** path. `violated` and `met` are
+un-exercised. Artifacts: agent `sagereasoning:d4-proof@v1`, credential `734c28a2-…` (revoked), all
+rows deleted, verified `0 | 0 | 0` across `agent_trust_events` / `agent_trust_state` /
+`agent_accreditation`.
+
+### 2. D1 — the watch is OPEN, and the query that says so nearly wasn't run
+
+**No qualifying accreditation close-write has occurred on `sagereasoning:s9-loop@v1` since
+2026-07-18.** A grouped, unlimited scan of `agent_trust_events` since that date returns **exactly four
+event types, all `virtue_domain: null`** — `orientation-reading-toward` (1356),
+`orientation-reading-indeterminate` (786), `reflect-screened-honest` (165),
+`reflect-completed-honest` (107). **No `credential-completed`. No `justice-surface-*`.**
+
+So the D4 session's `justice_capped: false` observation is **consistent with the correction holding and
+proves nothing about it** — there was nothing for the latch to fire on. **D1 is discharged in neither
+sense; the watch stands.**
+
+**A method note worth carrying.** The carried query was `order by occurred_at desc limit 50`. Those
+four types total **2,414 rows**, so it would have returned 50 orientation readings from 2026-09-04 and
+nothing else — and "no accreditation writes appear" would have been the *right conclusion by an
+unsound route*, indistinguishable from the limit hiding them. It was replaced with a `group by`
+before running.
+
+**A second observation, outside D1's scope and not chased.** Consults fire and reflects fire on this
+credential through 2026-09-04, so credential and harness both work — **but no accreditation write has
+landed in seven weeks.** The H4 close-hook write is either not firing or failing silently. Named, not
+diagnosed.
+
+### 3. The credential-lookup retry — HELD on the measurement its own item demanded
+
+The item's standing instruction is to check the live 401 profile *before* flipping, "if the class has
+gone quiet, the activation buys nothing." **It has gone quiet.** Last genuine `http 401` in
+`~/.sage-gate1/gate1.log`: **2026-08-08T12:36:34Z**. **Zero across 26 traffic days since**, on days
+running 500–1,460 lines. The 48 strings matching `401` in that window were checked rather than
+assumed — all are `.401Z` millisecond timestamps and UUID fragments.
+
+**It has not changed shape either:** the `http 503` class is sporadic across the whole log *including
+before* 2026-08-08 and is not a steady replacement for something that ran 26–281/day. No commit touched
+`practice-credential.ts` in that window, so **the stop is unexplained** — which is a reason to keep the
+retry built, not a reason to activate it blind.
+
+**The deciding argument was verifiability.** The retry fires only on a genuine transient DB error,
+which cannot be induced — so flipping it would have added a **second unverifiable activation** to the
+record, in the very session convened to close the first one. **Founder-elected: hold and record.**
+`SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED` remains unset; the code remains built-dark and byte-identical.
+
+### 4. D2 sharpened — the same mis-attribution still credits dikaiosyne, now upward
+
+**Observed, not inferred.** `credential-completed` is emitted **one per engaged domain, straight from
+`virtue_domains_engaged`, with no circle test at all** (`derive-trust-events.ts:86-99`), and its effect
+is **`'increase'`** (`trust-transition.ts:41`). On the self-only fixture, `agent_trust_state` read
+**`dikaiosyne: earned_level 'deliberate', profile_prior 'habitual', justice_floor_active false`.**
+
+**M-1's correction was applied to the justice-surface *emission* but not to the domain *tagging* that
+feeds `credential-completed`.** `computeVirtueDomains` still tags dikaiosyne engaged on a self-only
+action, so the mis-attribution M-1 identified still produces a dikaiosyne trust event — **now an
+increase rather than a cap.**
+
+**At this single event the level is identical either way** (the rise stops at `deliberate`; the pre-D4
+cap also sat at `deliberate`). The difference is the **latch**, which governs *future* rises. The
+precedent is this project's own: `s9-loop` took a permanent `deliberate` cap from one such event — the
+mentor's *"permanent cap on an agent whose actions had no identified affected parties."* D4 correctly
+ends that class; what remains is that **dikaiosyne can now rise past `deliberate` on evidence from
+actions with no other party at any circle.**
+
+**Confidence, marked:** the single-event state is **observed**; the multi-event rise is **reasoned from
+`trust-transition.ts`, not measured.** **This is not a case against D4** — M-1's ruling is right and the
+remedy is D2, not restoring a mis-attributed cap. But **D4's activation raised D2's priority**, and
+neither the register nor the D4 close says so. Recorded in register D4.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry.
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — D1 row (watch settled OPEN);
+  D4 row (took-effect proof discharged; the D2 coupling recorded).
+- `operations/handoffs/founder/2026-09-05-post-D4-live-op-cluster-CLOSE.md` — session close.
+
+**Risk classification:** **Critical** under 0d-ii (credential mint + live trust-ledger write).
+**AC7 engaged and discharged.** PR6 + PR17 engaged. No schema, flag, deploy, or perimeter change;
+production byte-equivalent at close.
+
+**Rollback path:** Nothing to roll back — all test artifacts were removed in-session and verified
+`0 | 0 | 0`; the credential is revoked. `git revert` this commit removes the records only.
+
+**Verification step (founder-performable):**
+```sql
+select count(*) from agent_trust_events where agent_id = 'sagereasoning:d4-proof@v1';
+```
+Expected: `0`. And `GET /api/accreditation/sagereasoning:d4-proof@v1` → **404**.
+
+**Open questions:**
+- **D1's watch stays open** — revisit after the next genuine gen-2 accreditation close-write. Blocked
+  in practice by the observation in §2: no such write has occurred in seven weeks.
+- **Why has no accreditation write landed on `s9-loop` since 2026-07-18?** Named, not diagnosed.
+- **D2's priority is raised by §4** and the register now says so; the fix is not scoped here.
+- **The retry stays built-dark**; revisit if the 401 class returns.
+
+**Rules served:** AC7, PR6, PR17, PR18, PR20, PR21, PR23, KG7, R18f, D1, D2, D4.
+
+**Status:** Adopted. Cross-references:
+`D-S11-D4-REDUCER-NARROWING-ACTIVATION-LIVE-F3PRIME-LANDED-2026-09-05`,
+`2026-09-05-D4-activation-and-F3prime-CLOSE.md` §5/§6,
+`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` **M-1**,
+`S11-FLIP-PREREQUISITES-REGISTER.md` §D D1/D2/D4.
