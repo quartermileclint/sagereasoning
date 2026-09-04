@@ -112,10 +112,32 @@ anyone's error** — and check provenance with `git log -L` before characterisin
 
 ## 7. Already known, do not re-derive
 
-`/api/score-conversation` — **human-facing** (`route.ts:230` renders `audience: 'human_user'`;
-cookie/JWT auth, developer form unreachable). Three length guards at lines **111** / **117** / **162**
-precede the R20a block at **223**. **Non-conformant under the ruling.** Its `format` guard is
-separately actionable — see §8.
+**UPDATED 2026-09-06 — the `format` guard action in §8 has been TAKEN.** The founder elected to act
+immediately rather than wait for this audit. Line numbers below are POST-move; re-derive before
+trusting them regardless, per §3's own instruction — this file is exactly the kind of artifact that
+goes stale.
+
+`/api/score-conversation` — **human-facing** (`route.ts:190` renders `audience: 'human_user'` at the
+actual call site inside `renderR20aRedirectResponse`, not merely in a comment; cookie/JWT auth via
+`requireAuth`, developer form structurally unreachable).
+
+**Three length guards remain before the R20a block** (was described as the `format` guard's own
+scope note as only two before a 2026-09-06 PR19 review found the omission):
+- `conversation` MAX-length, ~line 111
+- `context` MAX-length, ~line 117
+- `conversation` MIN-length (`<20` chars), ~line 129 — **the sharper residual, not previously named
+  here**: a short genuine cry for help ("I want to die." is 14 characters) still 400s before the
+  R20a block runs (~line 181). This is the ruling's paradigm harm, on the ruled route, still
+  reachable. Prioritise it.
+
+All three share the same provenance (`aeadbd1`, 2026-03-26, a general security pass predating any
+perimeter on this route) and are **non-conformant under the ruling** — still open for this audit.
+
+**The `format` guard is NO LONGER open.** It was moved to ~line 261 (after the R20a block, before
+`domainContext` construction), pinned by `FV-6a`/`FV-6b` in the route's own battery (mutation-verified
+by three independent PR19 reviewers against the exact bypasses they demonstrated). Do not re-open it
+as a finding; do verify its ordering still holds as part of this audit's execution-order sweep, since
+that is the ruling's own instruction and a fresh check costs nothing.
 
 ---
 

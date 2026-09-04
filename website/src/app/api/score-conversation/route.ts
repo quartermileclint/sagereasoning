@@ -149,7 +149,8 @@ export async function POST(request: NextRequest) {
     // CORRECTED 2026-09-05 (PR19 fold): this previously said flag-off made the
     // ROUTE "byte-identical to pre-wiring behaviour". That is a claim about
     // this BLOCK, and it is no longer true of the route — the always-on
-    // `format` length check above sits outside this flag, so unsetting the flag
+    // `format` length check sits outside this flag (BELOW, since the
+    // 2026-09-06 move — see that guard's own comment), so unsetting the flag
     // does NOT restore pre-wiring behaviour for a >15,000-char `format`.
     // Reverting that requires reverting the code. The distinction matters
     // because it is the documented rollback path of a Critical activation.
@@ -229,31 +230,71 @@ export async function POST(request: NextRequest) {
     // domainContext construction below, so that direction remains closed.
     //
     // WHAT THE MOVE COSTS, and why the ruling accepts it. An oversized `format`
-    // now reaches the classifier rather than being rejected first. That cost is
-    // BOUNDED, not open-ended: the composer slices every screened field to
-    // DISTRESS_SUBJECT_FIELD_CAP before the classifier sees it, so the Haiku
-    // call's input is capped regardless of submitted size. The ruling accepted
-    // the cost in any case -- a bare 400 to a distressed person "is not a cost
-    // in the engineering sense. It is a harm."
+    // now reaches the classifier rather than being rejected first. PER-REQUEST
+    // INPUT SIZE is bounded, not open-ended: the composer slices every
+    // screened field to DISTRESS_SUBJECT_FIELD_CAP before the classifier sees
+    // it, so the Haiku call's input is capped regardless of submitted size.
+    // CALL FREQUENCY does rise, disclosed rather than folded into "bounded"
+    // (2026-09-06 PR19 fold, review 2 F4): a request class that previously
+    // 400'd at zero model cost now always reaches stage 1, and on a
+    // non-hit unconditionally reaches stage 2 (Haiku) -- one call for a
+    // class that was previously free. Governed by the existing per-route
+    // rate limit (RATE_LIMITS.scoring), not by this guard. The ruling
+    // accepted the cost in any case -- a bare 400 to a distressed person
+    // "is not a cost in the engineering sense. It is a harm."
     //
     // WHAT IT BUYS. An oversized `format` carrying distress in its first 15,000
     // characters now receives the crisis redirect instead of a bare 400.
     //
-    // SCOPE, deliberately narrow. Only this guard moved. The `conversation` and
-    // `context` guards above still precede the block: they landed 2026-03-26
-    // (aeadbd1) in a general security pass, before any perimeter existed here,
-    // and the ruling routes inherited orderings to a perimeter-wide audit using
-    // execution-order analysis. This guard was movable now because its
-    // provenance is clean -- it landed 2026-09-05 (4c1cd94) and merely followed
-    // the route's existing posture rather than choosing it.
+    // WHAT IT DOES NOT BUY, disclosed rather than omitted (2026-09-06 PR19
+    // fold, review 1 F4). The composer still slices `format` at
+    // DISTRESS_SUBJECT_FIELD_CAP before the classifier sees it (below the
+    // guard's own 400 threshold, so this is now a REAL truncation, not the
+    // no-op it was pre-move -- see the corrected DISTRESS_SUBJECT_FIELD_CAP
+    // docstring in score-conversation-r20a.ts). Distress appearing ONLY past
+    // character 15,000 of `format` still reaches neither the classifier nor
+    // the engine: the ruled harm, relocated to a narrower input class rather
+    // than eliminated. Named for the perimeter-wide audit, not fixed here --
+    // fixing it would mean not rejecting an oversized `format` at all, which
+    // is the engine-leak this guard exists to prevent.
     //
-    // ORDERING IS PINNED, not merely commented: the route battery asserts this
-    // guard appears after the enforceDistressCheck call. An unpinned ordering is
-    // exactly how the pre-ruling one arrived and persisted unexamined.
+    // SCOPE, deliberately narrow. Only this guard moved. THREE other guards
+    // still precede the block, named exhaustively rather than partially (a
+    // 2026-09-06 PR19 review found the prior wording named only two):
+    //   - `conversation` MAX-length (~line 111) and `context` MAX-length
+    //     (~line 117) — both landed 2026-03-26 (aeadbd1) in a general
+    //     security pass, before any perimeter existed here.
+    //   - `conversation` MIN-length (<20 chars, the check immediately above
+    //     this comment block) — SAME provenance (aeadbd1), and the sharper
+    //     residual: a short, genuine cry for help ("I want to die." is 14
+    //     characters) still 400s before the R20a block runs. This is the
+    //     ruling's paradigm harm, on the ruled route, still reachable.
+    // All three are routed to the perimeter-wide audit per the ruling
+    // (execution-order analysis, not textual position) rather than fixed
+    // here. This guard was movable now because its provenance is clean -- it
+    // landed 2026-09-05 (4c1cd94) and merely followed the route's existing
+    // posture rather than choosing it; the three above did not arrive that
+    // way and the ruling does not license moving them on that basis.
     //
-    // BREAKING CHANGE, unchanged by the move: a STRING `format` longer than
-    // TEXT_LIMITS.long 400s in either flag state. No in-repo caller is affected
-    // (mentor-hub sends `conversation` alone); an external API consumer is.
+    // ORDERING IS PINNED, not merely commented -- and the pin itself was
+    // WRONG on first cut, found independently by all three PR19 reviewers of
+    // this move (HIGH, folded 2026-09-06): it anchored on the block's OPENING
+    // (`isScoreConversationR20aEnabled()`), so a guard placed INSIDE the flag
+    // block, before enforceDistressCheck itself, passed the battery green --
+    // the exact harm this move exists to prevent. Fixed by anchoring on the
+    // block's own closing brace (matched from its opening, not from any one
+    // call inside it) in FV-6a. An unpinned -- or wrongly-pinned -- ordering
+    // is exactly how the pre-ruling one arrived and persisted unexamined.
+    //
+    // BREAKING CHANGE, status/shape unchanged by the move, MESSAGE not
+    // (2026-09-06 PR19 fold, review 2 F3): a STRING `format` longer than
+    // TEXT_LIMITS.long still 400s in either flag state, with the same
+    // `{error: string}` shape. But a request with BOTH a short `conversation`
+    // (<20 chars) AND an oversized `format` now 400s on the conversation
+    // guard first (it precedes this one), not the format guard -- the error
+    // MESSAGE differs from before the move on that input class, though the
+    // status code does not. No in-repo caller is affected (mentor-hub sends
+    // `conversation` alone); an external API consumer is.
     //
     // FV-2 in the battery IMPORTS the composer's SCREENED_FIELDS rather than
     // parsing it: every field the composer screens must be length-bounded here.

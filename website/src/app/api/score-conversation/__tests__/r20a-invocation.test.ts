@@ -134,9 +134,41 @@ function loadRouteSource(): { source: string; bodyOnly: string; codeOnly: string
   // meaning, so the pre-existing INV-*/SRC-* cases are untouched by this.
   // (Those cases share the same weakness; that is disclosed as a named
   // follow-up rather than silently changed under 57 passing assertions.)
+  //
+  // WIDENED 2026-09-06 (PR19 fold, F5): the whole-line-only regex above left
+  // a TRAILING line comment (`code // comment`) in codeOnly, because it
+  // requires only whitespace before `//`. Confirmed reachable in this very
+  // file (`applyMirrorPrinciple: true, // R19d ...`). A trailing comment
+  // containing an ordering anchor would satisfy that anchor without the code
+  // it names being present -- the same defeat class the block comment above
+  // already describes, in a form the whole-line strip did not close.
+  //
+  // Fixed with a per-line scan that tracks quote state and cuts at the first
+  // `//` NOT inside a `'...'`, `"..."` or `` `...` `` span on that line. This
+  // repo has no `//` inside a string literal in this route (checked at this
+  // edit — a URL would be the failure case); a future one would need this
+  // widened further, not silently worked around.
+  const stripLineComment = (line: string): string => {
+    let inSingle = false
+    let inDouble = false
+    let inTemplate = false
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i]
+      const next = line[i + 1]
+      if (c === "'" && !inDouble && !inTemplate) inSingle = !inSingle
+      else if (c === '"' && !inSingle && !inTemplate) inDouble = !inDouble
+      else if (c === '`' && !inSingle && !inDouble) inTemplate = !inTemplate
+      else if (c === '/' && next === '/' && !inSingle && !inDouble && !inTemplate) {
+        return line.slice(0, i)
+      }
+    }
+    return line
+  }
   const codeOnly = source
     .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
+    .split('\n')
+    .map(stripLineComment)
+    .join('\n')
   return { source, bodyOnly, codeOnly }
 }
 
@@ -648,7 +680,9 @@ function runFieldValidationTests(): void {
   )
 
   // FV-6 ORDERING. Presence is not enough; position is the guarantee. This
-  // case has been INVERTED on one axis and kept on the other.
+  // case has been INVERTED on one axis and kept on the other -- and, as of
+  // this fold, the FIRST anchor was itself defeatable, DEMONSTRATED
+  // independently by all three PR19 reviewers of the 2026-09-06 move.
   //
   // ITS HISTORY, because it explains the shape. A reviewer once moved the check
   // verbatim to after the engine call and the battery still reported 62/62 --
@@ -662,41 +696,101 @@ function runFieldValidationTests(): void {
   // crisis form is rendered." This route renders the human form, so the guard
   // must now FOLLOW the R20a block -- the opposite of what FV-6 asserted.
   //
-  // The two clauses are therefore opposite in direction and both load-bearing:
-  //   fmtIdx > flagIdx  -- the RULING. A distressed submitter of an oversized
-  //                        field must reach the crisis redirect, not a bare 400.
-  //   fmtIdx < engine/domainContext -- the ENGINE-LEAK guarantee, unchanged.
-  //                        The guard must still fire before the full field is
-  //                        appended to domainContext and forwarded untruncated.
+  // FOLDED 2026-09-06 (PR19, HIGH, found independently by all three blind
+  // reviewers). The first cut anchored "follows the block" on
+  // `isScoreConversationR20aEnabled()` -- the block's OPENING, not its end.
+  // A guard placed INSIDE the flag block, before enforceDistressCheck itself,
+  // satisfied `fmtIdx > flagIdx` and the battery reported 65/65 -- the exact
+  // harm the ruling forbids, with every case green. Anchoring on
+  // `enforceDistressCheck(` alone was shown insufficient too: a guard placed
+  // between that call and the redirect-return check still 400s before the
+  // crisis message is reached.
   //
-  // Deleting the guard would satisfy the first and silently lose the second,
-  // which is why the guard was moved rather than reverted. Asserting both ends
-  // makes that non-optional: a future revert fails here, and so does a drift
-  // back to the pre-ruling order.
+  // FIXED by anchoring on the block's own closing brace, found by matching
+  // braces from its opening rather than any one literal inside it. "After
+  // the block" then means after enforceDistressCheck, after the redirect
+  // return, AND after the mild fold, however the interior is reordered --
+  // not merely after wherever one named call happens to sit today.
+  //
+  // ALSO FOLDED (MEDIUM, F3): the previous cases shared one `found` flag
+  // across FOUR unrelated anchors, so a harmless rename of `domainContext` or
+  // splitting `await runSageReason(...)` failed FV-6a/6b/6c together with a
+  // message naming the mentor ruling -- misleading a maintainer into
+  // thinking they had reintroduced the pre-ruling ordering. Anchors are now
+  // scoped to the case that actually uses them.
+  //
+  // DISCLOSED LIMIT, not fixed here (F6): this remains TEXTUAL position, a
+  // proxy for execution order. It is sound for this handler because it is
+  // straight-line with no helper indirection; a future refactor into a
+  // named helper, or a call reached via a variable rather than the literal
+  // name, would defeat any of these anchors silently. That is exactly why
+  // the mentor's ruling requires the FOLLOW-ON AUDIT to use execution-order
+  // analysis rather than textual position -- this case is not a substitute
+  // for that audit; it is a regression lock on this one route.
   {
     const fmtIdx = codeOnly.indexOf('format.length')
-    const flagIdx = codeOnly.indexOf('isScoreConversationR20aEnabled()')
-    const engineIdx = codeOnly.indexOf('await runSageReason(')
-    const domainIdx = codeOnly.indexOf('let domainContext')
-    const found = fmtIdx > -1 && flagIdx > -1 && engineIdx > -1 && domainIdx > -1
+    const fmtCount = (codeOnly.match(/format\.length/g) ?? []).length
 
+    // The block's structural end -- matched from its own opening brace, not
+    // from any call inside it. Safe here because no string literal in this
+    // block contains a brace character (checked at this edit); FV-6c's
+    // non-degeneracy check catches an UNMATCHED count, not a wrong one caused
+    // by a future brace-in-string.
+    const ifOpen = codeOnly.match(/if\s*\(\s*isScoreConversationR20aEnabled\s*\(\s*\)\s*\)\s*\{/)
+    const blockOpenIdx = ifOpen ? codeOnly.indexOf(ifOpen[0]) + ifOpen[0].length - 1 : -1
+    let blockEndIdx = -1
+    if (blockOpenIdx > -1) {
+      let depth = 0
+      for (let i = blockOpenIdx; i < codeOnly.length; i++) {
+        if (codeOnly[i] === '{') depth++
+        else if (codeOnly[i] === '}') {
+          depth--
+          if (depth === 0) {
+            blockEndIdx = i
+            break
+          }
+        }
+      }
+    }
+
+    const domainIdx = codeOnly.search(/(?:let|const)\s+domainContext\b/)
+    const engineIdx = codeOnly.search(/runSageReason\s*\(/)
+
+    // FV-6a — decoupled: depends ONLY on fmtIdx and blockEndIdx. A rename
+    // inside the block (domainContext, runSageReason) cannot perturb this.
     expectTrue(
-      'FV-6a the format length check FOLLOWS the R20a block (2026-09-06 ruling: the ' +
-        'distress check runs before the length guard on human-facing members)',
-      found && fmtIdx > flagIdx,
+      "FV-6a the format length check textually follows the ENTIRE R20a block, " +
+        "not merely its opening (2026-09-06 ruling: the distress check AND its " +
+        "redirect return run before the length guard on human-facing members; " +
+        "anchored on the block's own closing brace so drift to ANYWHERE inside " +
+        'it is caught, not just drift before the flag check)',
+      fmtIdx > -1 && blockEndIdx > -1 && fmtIdx > blockEndIdx,
     )
 
+    // FV-6b — decoupled: depends ONLY on fmtIdx, domainIdx, engineIdx.
     expectTrue(
-      'FV-6b the format length check still precedes domainContext construction and the ' +
-        'engine call (the engine-leak guarantee the guard exists for)',
-      found && fmtIdx < domainIdx && fmtIdx < engineIdx,
+      'FV-6b the format length check still precedes domainContext construction ' +
+        'and the engine call (the engine-leak guarantee the guard exists for, ' +
+        'unaffected by the ruling)',
+      fmtIdx > -1 && domainIdx > -1 && engineIdx > -1 &&
+        fmtIdx < domainIdx && fmtIdx < engineIdx,
     )
 
-    // Non-vacuity: if any anchor stopped matching, both cases above would be
-    // deciding on -1 and could pass or fail for reasons unrelated to ordering.
+    // FV-6c — non-vacuity for 6a's anchors ONLY (a failing 6a should not be
+    // read alongside a passing 6c that claims everything was found when only
+    // the unrelated 6b anchors were).
     expectTrue(
-      'FV-6c all four ordering anchors were found (the ordering cases are not deciding on -1)',
-      found,
+      'FV-6c the block-end anchor was found and is non-degenerate (open != end), ' +
+        'and format.length appears exactly once (an indexOf on a duplicate would ' +
+        'silently measure the wrong occurrence)',
+      blockOpenIdx > -1 && blockEndIdx > blockOpenIdx && fmtCount === 1,
+    )
+
+    // FV-6d — non-vacuity for 6b's anchors ONLY.
+    expectTrue(
+      'FV-6d domainContext and engine-call anchors were found (FV-6b is not ' +
+        'deciding on -1)',
+      domainIdx > -1 && engineIdx > -1,
     )
   }
 }

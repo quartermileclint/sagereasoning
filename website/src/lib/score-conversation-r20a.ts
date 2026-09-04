@@ -126,9 +126,18 @@ export function isScoreConversationR20aEnabled(): boolean {
 /**
  * DISTRESS_SUBJECT_FIELD_CAP — per-field ceiling on what each submission
  * field contributes to the distress-check subject. Mirrors TEXT_LIMITS.long
- * (security.ts), which the route enforces on `conversation`, `context` AND
- * `format` at the 400 boundary — so the cap is now a no-op for every field
- * that survives validation, and screening is provably complete.
+ * (security.ts).
+ *
+ * CORRECTED 2026-09-06 (PR19 fold, review 1 F3): this previously claimed the
+ * cap is "a no-op for every field that survives validation, and screening is
+ * provably complete" — TRUE of `conversation` and `context`, which still
+ * 400 at the route's boundary BEFORE this function runs, but FALSE of
+ * `format` since the 2026-09-06 perimeter-ordering ruling moved that guard
+ * to AFTER the distress check. `format` now reaches this function's slice
+ * BEFORE its own 400 boundary, so the cap performs a REAL truncation for
+ * `format` — screening `format` past character 15,000 no longer happens.
+ * Named as a residual for the perimeter-wide audit at the route's own
+ * "WHAT IT DOES NOT BUY" comment; not fixed here.
  *
  * CORRECTED 2026-09-05: this previously read that `format` was "the one field
  * the route does not length-validate (a pre-existing gap)". That gap is

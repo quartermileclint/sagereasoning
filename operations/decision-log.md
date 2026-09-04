@@ -34812,3 +34812,90 @@ rules where readings converge.
 
 **Status:** Adopted. Cross-references: `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
 `D-OPTION-S-DIRECTIONAL-DECOMPOSITION-PUT-TO-MENTOR-2026-09-06`.
+
+---
+
+## 2026-09-06 — D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06
+
+**Decision:** Fold three independent PR19 reviews of `D-` (the format-guard move, `0126645`).
+**`code-elevated`** — one HIGH, six MEDIUM, plus LOW/nit, all folded; no schema/flag/deploy.
+
+**Reasoning.** PR19 mandates independent adversarial review for R20a perimeter code before it is
+treated as verified. Three reviewers ran the same scope on separate dimensions (ruling fidelity;
+safety and leak; test adequacy) and **converged, independently, on the same HIGH**: `FV-6a` anchored
+"follows the R20a block" on `isScoreConversationR20aEnabled()` — the block's **opening**, not its
+end. A guard placed **inside** the flag block, before `enforceDistressCheck` itself, satisfied
+`fmtIdx > flagIdx` and the battery reported **65/65 pass**. That is the ruled harm — a distressed
+submitter of an oversized field 400s before the check ever runs — reproduced inside the fix built to
+prevent it. One reviewer additionally demonstrated a second bypass: a guard placed between
+`enforceDistressCheck` and the redirect return also passed green.
+
+**Fixed at the root, not patched at the symptom.** The anchor is now the block's own **structural
+end**, found by matching braces from its opening rather than trusting any single literal inside it —
+so a guard anywhere inside the block, however the interior is reordered, fails FV-6a. **Mutation-proven
+against the exact bypasses all three reviewers demonstrated:** both now fail on FV-6a alone; the
+pre-ruling-order sanity check and the plain-delete sanity check both still fail as before (no
+regression). FV-6 also split from one four-anchor `found` bundle into decoupled 6a/6b/6c/6d (a
+reviewer showed a harmless `domainContext` rename or an `await`-split refactor previously failed
+6a/6b/6c together with a message wrongly naming a ruling violation).
+
+**Six further findings folded**, converging from the three reports:
+- **A genuinely false docstring** in `score-conversation-r20a.ts` claiming `format` screening is
+  "provably complete" — false since the move, because the composer's slice now runs *before* the
+  guard's 400 boundary and performs a real truncation. Corrected.
+- **A false claim in the route's own comment**: "the route battery asserts this guard appears after
+  the `enforceDistressCheck` call" — it did not; corrected to describe the actual (fixed) anchor.
+- **An honest gap in the SCOPE disclosure**: it named two guards still preceding the block
+  (`conversation`/`context` max-length) and silently omitted a third — the `conversation`
+  **minimum**-length guard (`<20` chars), which is the ruling's sharper case: a 14-character genuine
+  cry for help still 400s before the block runs. Named exhaustively now, not fixed (it is the
+  audit's, per the ruling's own scoping).
+- **An undisclosed residual**: distress appearing only past character 15,000 of `format` still
+  reaches neither classifier nor engine — the ruled harm relocated to a narrower class, not
+  eliminated. Named in the guard's own comment.
+- **Two overclaims softened to their true scope**: "cost is bounded" now distinguishes per-request
+  size (genuinely capped) from call frequency (genuinely rises, governed by the existing rate limit);
+  "breaking change unchanged by the move" now names the one input class where the 400's *message*
+  changed even though its status/shape did not.
+- **`codeOnly`'s comment-stripper widened** to cut trailing `// comment` text, not only whole-line
+  comments — a trailing comment could otherwise satisfy an ordering anchor without the code it names
+  being present, the same defeat class this file already guards against for whole-line comments.
+- **The audit prompt's `§7` corrected** — it described three-guards/format-still-open in
+  pre-move terms; now records that the format action was taken, gives post-move line numbers, and
+  names the min-length gap as the audit's sharpest open item.
+
+**Files touched:**
+- `website/src/app/api/score-conversation/route.ts` — comments corrected (6 sites); no logic change
+  beyond what `0126645` already made.
+- `website/src/app/api/score-conversation/__tests__/r20a-invocation.test.ts` — FV-6 rewritten
+  (block-end brace-matched anchor, decoupled 6a/6b/6c/6d); `codeOnly` widened for trailing comments.
+- `website/src/lib/score-conversation-r20a.ts` — `DISTRESS_SUBJECT_FIELD_CAP` docstring corrected.
+- `operations/handoffs/founder/2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md` —
+  §7 corrected.
+
+**Risk classification:** Elevated under 0d-ii — R20a perimeter test/comment corrections, no new
+schema/flag/deploy. **AC7 not engaged; PR6 not engaged** (nothing live changed by this commit; the
+underlying `0126645` change is still awaiting the founder's push). PR19 engaged and discharged.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsx src/app/api/score-conversation/__tests__/r20a-invocation.test.ts | tail -1
+npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts | tail -1
+npx tsc --noEmit; echo "tsc exit: $?"
+npm run build
+```
+Expected: `66/66 pass | 0/66 fail`; `722 passed, 0 failed`; tsc exit 0; build succeeds.
+
+**Open questions:** none new. The `conversation` min-length gap and the two max-length guards remain
+carried to the perimeter-wide audit, as the ruling requires.
+
+**Rollback path:** `git revert` this commit independently of `0126645` (test/comment-only; reverting
+this alone restores the pre-fold FV-6, which is the defective pin — do not revert this without also
+reverting `0126645` if the intent is to undo the move itself).
+
+**Rules served:** PR19, PR20, R20a, AC5.
+
+**Status:** Adopted. Cross-references: `0126645`,
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
+`D-SCORE-CONVERSATION-FORMAT-VALIDATION-LANDED-PR19-FOLDED-2026-09-05`.
