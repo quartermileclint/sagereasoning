@@ -34073,3 +34073,168 @@ weights BLOCKED; the 0h call remains the founder's.** Cross-references:
 `D-S11-P6-WINDOW-RECOMMENDATION-RULED-ADOPTED-PARTLY-EXECUTED-2026-09-05`,
 `D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04`,
 `2026-07-17-RA1-F2-s11-observation-instrument-vacuity-finding.md`, commit `dc100b4`.
+
+---
+
+## D-OPTION-S-PATH-A-INSTRUMENT-BUILT-PR19-REBUILT-2026-09-04
+
+**Decision:** Build the Option S instrument for Path A, have it independently reviewed, and rebuild it
+on the findings. **`code-elevated`; repo-only.** No production read, migration, credential, flag,
+activation or spend. `runs/` is empty; **no live call has ever been made.**
+
+**Deliverable:** `operations/agent-circles-2026-08/option-s/` — runner, input set, founder-run
+`EXTRACTION.sql`, README.
+
+**Reasoning.** Path A was the mentor-recommended route to satisfying the Option S gate for its two
+dependent items. The instrument reuses the D6a runner's five-round-PR19-hardened primitives and
+**aborts rather than reimplementing them** — round 4 of that review found two HIGH defects in exactly
+this collection path. Reuse was verified empirically by reproducing D6a's own published interval
+(`wilson_interval(12,100)` → 0.070–0.198 = the live 7.0–19.8%).
+
+**PR19: three blind reviewers, 6 HIGH, none refuted, all folded at the root.** The first version was
+a well-disciplined shell around a metric that did not answer the question it gated — it published an
+undirected binary disagreement flag where M/W/S turns on the per-sample floor rate; it counted an
+engine outage as the gate disagreeing with itself (a D6a defect its own review had already fixed);
+its "imports, never reimplements" claim was false of the code; it had **no writer at all**; and its
+SQL filtered `cycle_outcome = 'selected'`, **not a legal value** — it would have returned zero winners
+without erroring.
+
+**Consequences.** The rebuilt instrument measures the floor rate with directional decomposition and
+stratification, separates outages from verdicts, and carries seven named limits. **The Prerequisite
+Criterion was applied to the rebuilt artifact rather than inherited from R8's verdict on a different
+object.**
+
+**Rollback:** `git revert`. Nothing is live; the instrument has never run.
+
+---
+
+## D-C11-DATA-FOUND-AND-FOLDED-FORWARD-LOOKING-ELECTED-2026-09-04
+
+**Decision:** Before spending any quota, search for the c11 re-submission data — **it exists in this
+repository** — and fold it. Then, on the founder's election, make the instrument **forward-looking**.
+
+**The data:** `2026-08-30-c11-rerun-experiment-record.md` — K=10, minimal payload, **9/10
+`deliberate` / 1/10 `reflexive`**, p̂_floor 0.10, Wilson ≈ 2–40%. Its own framing: *"a rate
+demonstration, not a rate measurement."* **The mechanism was already localized and it is not the
+deterministic layer:** on identical text Layer 1 assigned the same grave-act indicator to **four
+states** — absent ×4, `phantasia` ×2, `synkatathesis` ×3, `praxis` ×1 — and only `praxis` floors.
+
+**Two findings it produced.** L2 (submitted-payload) was **backwards** in the first version — the
+experiment postdates the §11.4 statement cited and discharges the forward-looking half. **L6 is new
+and sharper: the instrument has drifted** — `f7619d9` (2026-08-24) replaced `ruling_faculty_state`'s
+deliberation proxy inside `layer2-mechanisms.ts` **after the run closed 2026-08-16**, verified at
+source. Cost became measured, not estimated: **$0.014222/call**.
+
+**The election.** Dropping the resampled-vs-recorded comparison dissolves both L2 and L6, which bit
+only on the comparison. **Stated against interest: the change was proposed by the session whose
+earlier design it repairs.** It is compatible with the ruling (which asks for the rate on the closed
+run's *candidates*, never a comparison) and independently supported by the ruling's own Q2 language.
+
+**Rollback:** `git revert`.
+
+---
+
+## D-MENTOR-RULING-PATH-A-SET-SIZE-K-FORWARD-LOOKING-RUN-2026-09-04
+
+**Decision:** Adopt and execute the mentor's ruling on the four Path A questions. **`governance`.**
+
+**Ruled.** **Q-S1 — the production count governs**; the ruling's own "20 cycle winners" *"was not
+derived from the S6 report; it appears to have been a reconstruction that did not account for the
+five no-winner cycles"* (S6 records 15 winners → 24, not 29). If production returns 24 the figure is
+**corrected with a note**, not overwritten; an alternative definition of *decision-bearing* is **not
+adopted**. **Q-S2 — K=10**, a measurement design parameter and the session's to elect; the three
+candidate rates *"are not distinguishable at K=3 resolution."* **Q-S3 — the forward-looking change is
+within Path A's terms**, and the ruling **declined to discount it for having been proposed by the
+session it repairs**. **Q-S4 — the run is worth its purpose and precedes the election**, which needs
+*"a per-input floor rate across the decision-bearing population… at K=10."*
+
+**Two unrequested items, checked at source, dispositioned differently.** The **A8 bound** was
+**accepted** — verified true (`habitualReExaminationCount` defaults to 0; no live caller supplies it;
+the escalation row cannot fire). The **v3/v4 lift check** was **named, not absorbed** — v3/v4 are
+false-hold capture schemas and the 130 records the frozen false-hold buffer; Option S has no
+versioned record schema. **Confirmed correct at Q-X1 the next day.**
+
+**Verification:** the folded instrument reproduces c11's own p̂ 0.1 at K=10, with M/W diverging
+correctly. **Rollback:** `git revert`.
+
+---
+
+## D-GATE2-GUARD-OUTAGE-DIAGNOSED-2026-09-04
+
+**Decision:** Diagnose the Gate-2 guard outages this session kept recording. **`governance`;
+read-only.** No harness config changed; `.claude/settings.local.json` untouched.
+
+**Finding.** From the live `gate1.log`: the guard — the only mechanism that can **deny** an
+irreversible action — is unavailable on **11–32% of attempts** on ordinary days and was absent on
+**60% of 65** attempts on 2026-09-04. **Concurrency does not explain it** (2026-08-30: 17 sessions,
+32%; 2026-09-04: 9 sessions, 60%) — the session's own first hypothesis, killed by its own data.
+
+**Mechanism.** Every outage reads `timeout after 28000ms`; **no 429s** — latency, not throttling. The
+28,000 ms budget (`framing-core.mjs:100`) sits under 2× headroom over `/api/guardrail`'s **measured
+14.5–19.1 s**. It fails **open** with an honest log (correct, KG1) — but that describes the failure
+*mode*, not its *frequency*, which was recorded nowhere until now.
+
+**Two levers, neither set, both the founder's:** `GATE1_ACTION_TEXT_MODE=lean` (the already-named,
+still-open latency lever — this diagnosis is the missing evidence for that call) and raising the
+budget (the 30 s hook timeout is **not** a platform ceiling; another `PreToolUse` hook runs at 120).
+**Both budget values must move together** — raising only the inner one converts a logged fail-open
+into a *killed hook*, losing the honest log line.
+
+**Routed, not acted on:** any new false-hold window should size against this rate. **Rollback:**
+`git revert` (documents only).
+
+---
+
+## D-MENTOR-RULING-GUARD-AVAILABILITY-AND-LEAN-MODE-DOCTRINE-2026-09-05
+
+**Decision:** Adopt and execute the mentor's ruling on guard availability, lean-mode doctrine, and
+Q-X1. **`governance`.** No harness config changed; F1's remedy remains the founder's.
+
+**Ruled.** **Q-X1 confirmed** — the v3/v4 item is dropped, leaving **the production extraction as
+Path A's single precondition**; the correction **names its source** (the P6 ruling, same day), since
+*"two rulings issued to two tracks on the same day shared a condition that belonged to only one of
+them."* **Q-G1(a) — the presence rate and the false-hold rate are orthogonal**, and P4's four-part
+standard measures only the second; a channel absent that often *"is not failing its examination. It
+is not conducting one"* — *"intermittent caution"*, not eulabeia. **Not a new gate; the standard is
+not reopened** — hence **bound B4 in §B** of the S11 register, not a §A prerequisite. **Q-G1(b) —
+lean mode is doctrinal:** *"A shorter impression is a different impression"*; it trades **examination
+completeness against examination frequency**, and a lean examination that misses what would trigger a
+hold *"is failing to see what it would need to see to hold."* **Q-G1(c) — the availability covariate
+is "not optional for honest reporting"**; routed to P6, **not written into that peer-owned row**.
+
+**One internal discrepancy, NAMED and deliberately not escalated.** Q-G1(b) is answered in the same
+ruling, yet F1 says *"until Q-G1(b) is ruled, lean mode should not be adopted."* Both readings are
+recorded; the careful one is that Q-G1(b) answered the meta-question put (*is this doctrinal*) and
+not the substantive one (*should it be adopted*). **No question raised: under both readings the
+action is identical** — raise the budget, hold lean — and manufacturing a third same-week discrepancy
+question where readings converge would be pattern-following, per the gate-permission precedent.
+
+**Rollback:** `git revert`.
+
+---
+
+## D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04
+
+**Decision:** Close RA-2 (named 2026-07-17, never done) by **enforcing** the R20a perimeter count
+rather than warning about it, and correct three CLAUDE.md drifts. **`code-elevated`** (one test
+file) + `governance`.
+
+**The finding.** `r20a-invocation-guard.test.ts`'s header carried a perimeter count that went stale
+**three times** — *"eight + one = nine"*, then "20 + 2 = 22", then "42 + 2 = 44" (wrong once
+`/api/score/save` joined; true figure 43 + 2 = 45). **The third recurrence happened despite the
+header already carrying an emphatic "⚠ THIS LINE HAS NOW BEEN STALE TWICE — DO NOT MAINTAIN THIS
+NUMBER BY HAND."** An instruction inside the drifting artifact does not arrest the drift — the same
+lesson `manifest.md` §AC5 recorded when it stopped hand-enumerating membership.
+
+**Consequence.** The count is removed and a new assertion, `docstring carries no hand-maintained
+perimeter count`, fails if one is reintroduced — **including a correct one**, since the point is that
+it must not be hand-maintained at all. Mutation-verified: **717/0 clean → fails on reintroduction →
+restores 717/0**, with its own non-vacuity assertion against the real stale line.
+
+**CLAUDE.md drifts corrected:** the **Prerequisite Criterion** missing from the session-open reading
+list since its 2026-08-29 adoption (a binding governance rule a new session was not pointed at); the
+PR range (PR1–PR25); and the extension count (live 26) — via a **standing note**, since ~20 dated
+bullets were each accurate when written and rewriting them would falsify the record. **Checked and
+NOT a drift:** the sage-* skills (7 skills + 2 described deprecation stubs = 9 dirs).
+
+**Rollback:** `git revert`.
