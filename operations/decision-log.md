@@ -33999,3 +33999,77 @@ BLOCKED; MEASURE throughout; the 0h call remains the founder's.
 `D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04` (the filter this makes visible),
 `2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
 `S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §D D4/D5.
+
+---
+
+## 2026-09-06 — D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-06
+
+**Decision:** §7 of the false-hold new-window scoping note is implemented in
+`website/scripts/false-hold-observation-report.ts` — the report now prints, per record, BOTH the hold
+classification and the decision table's recommendation, derived at report time and stored nowhere —
+and the two authorised `S11-FLIP-PREREQUISITES-REGISTER.md` changelog entries are applied.
+
+**Reasoning:** executes the binding 2026-09-05 ruling
+(`2026-09-05-mentor-ruling-P6-window-recommendation-verbatim.md`; verbatim wins), under the founder's
+Q-B licence of 2026-09-05. Part (3) names a false-hold rate and *"under G6(a), a hold is what a
+do-not-proceed produces"*, so classification alone measures a proxy; both columns make the P1 filter's
+effect visible. Report-time derivation is ruled, not preferred — *"a stored recommendation would
+freeze the table's reading at capture time"*.
+
+**Files touched:**
+- `website/scripts/false-hold-observation-report.ts` — the recommendation column, the four printed
+  bounds, the v3/v4 lift check with self-test + vocabulary arm, the population split, the bracket.
+- `website/scripts/__tests__/false-hold-observation-report.test.ts` — battery 13 → **74**.
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — two changelog entries (+2 lines).
+
+**Risk classification:** Elevated (`code-elevated`) under 0d-ii — repo-only script + battery + a
+documents edit. **No schema, flag, credential, migration, deploy, live op, or public-doc change.**
+AC7 not engaged. PR6 not engaged. **PR19 engaged and discharged** (below). PR15, PR20, PR25 engaged.
+
+**PR19 — five independent reviewers; every load-bearing finding re-verified first-hand before folding:**
+- **HIGH, confirmed by two reviewers independently and by a third enumeration of my own** (2,560 /
+  46,080 / 335,160 inputs; zero counterexamples): under the P1 filter `do-not-proceed ⟹ engaged`, so
+  the kathekon-free cell is **structurally zero** and the draft's `target (false ≤ correct): MET` was
+  an arithmetic identity — the mirror image of **RA-1-F2 (2026-07-17)**, a HIGH finding on this same
+  script whose headline reads *"an artifact, not a measurement"*, and against the **D6a ruling
+  (2026-08-30)** that a forced split be REMOVED from publication rather than footnoted. **The target
+  verdict is removed from this column**; the structural zero is stated in terms; the classification
+  column keeps its own target, to which this column defers.
+- **MEDIUM ×5, folded:** the legacy bracket is carried rather than silently resolved to its strict end
+  (1 of 130 flips — measured, not asserted); non-totality reported in **both** directions; a
+  vocabulary arm catches corrupt values a round-trip structurally cannot (a homoglyph is a fixed
+  point); the lift check now runs on raw records **before** anything is derived, reports denominators,
+  and prints no green tick over an empty set; the empty-guard message no longer asserts a live
+  activation status the script cannot check (**PR25**).
+- **LOW/NIT, folded:** v4-without-`path` rejected; the undisclosed
+  `SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED` call-time dependency printed as a fourth bound;
+  the "PR15 reuse" comment corrected to "duplicated verbatim from" **and pinned**; depth bound
+  reworded (no table row is depth-keyed); self-test labels corrected to shapes, not schemas.
+- **Battery adequacy — the most valuable dimension.** An independent review ran **29 mutations against
+  the first draft and SIX left it fully green**, all one family: pins asserting that a LABEL printed
+  rather than that the CLAIM under it was true, and population regexes not scoped to a population (the
+  right number read off the wrong block). Rebuilt scoped and claim-bearing. **23/23 mutants across both
+  sweeps now die, including all six survivors.** My own 8-mutation sweep had missed every one of them.
+
+**Verification:** `tsc` 0 · report battery **74/0** · at-action-seam 59/0 · kathekon 113/0 ·
+s4-intervention-engine 417/0 · harness negative-battery **251/0 RELEASE GATE PASS**. Frozen-buffer
+smoke reproduces the P1 re-run **exactly** (130 `proceed + log`; the filter moving exactly 1 record).
+
+**Rollback path:** `git revert dc100b4` — a script, a battery, and two documents lines; nothing
+deploys, no flag, no schema.
+
+**Open questions:**
+- The lift check is **UNEXERCISED on real v3/v4 data** (the only buffer that exists is v1). The report
+  says so in terms. A re-run on real window data is what will discharge it.
+- One reviewer reported a single unreproducible battery run (38/2, an abort on the publication path)
+  that did not recur in 29 further runs. Recorded, not explained.
+
+**Rules served:** PR15, PR19, PR20, PR25, R13, KG1.
+
+**Status:** Adopted. **P4/P5/P6 unmoved; the window has not started; the S11 flip remains REFUSED;
+weights BLOCKED; the 0h call remains the founder's.** Cross-references:
+`2026-09-05-mentor-ruling-P6-window-recommendation-verbatim.md` (binding),
+`2026-08-15-false-hold-new-window-scoping-note.md` §7,
+`D-S11-P6-WINDOW-RECOMMENDATION-RULED-ADOPTED-PARTLY-EXECUTED-2026-09-05`,
+`D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04`,
+`2026-07-17-RA1-F2-s11-observation-instrument-vacuity-finding.md`, commit `dc100b4`.
