@@ -8,12 +8,12 @@
  *
  * Two registries (per AC5 + Option A build arc 2026-05-28 spec §5):
  *
- *   HUMAN_FACING_POST_ROUTES (the original eight per manifest §AC5):
+ *   HUMAN_FACING_POST_ROUTES (route-level members; see the array itself):
  *     route-level pattern → `await enforceDistressCheck(detectDistressTwoStage(...))`
  *
  *   SUBSTRATE_GATE_ROUTES (added under D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28):
  *     substrate-gate pattern → `await enforceLayer2R20aGate({ text, ... })`
- *     Calling is the first member (ninth route in the R20a perimeter overall).
+ *     Calling is the first member of this registry.
  *     The substrate-gate path reuses A7 which internally invokes
  *     detectDistressTwoStage via SafetyCriticalCallParams — same Haiku
  *     classifier, different surface call. AC5's intent (the safety function
@@ -30,15 +30,24 @@
  * Run: npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC4 (invocation
- * testing); AC5 (perimeter — 42 route-level + 2 substrate-gate = 44 as of
- * 2026-08-18, the perimeter completion).
+ * testing); AC5 (the perimeter).
  *
- * ⚠ THIS LINE HAS NOW BEEN STALE TWICE. It read "eight + one = nine" for
- * months, was corrected to "20 + 2 = 22" on 2026-08-12, and that was itself
- * wrong by two within days. DO NOT MAINTAIN THIS NUMBER BY HAND — derive it
- * from HUMAN_FACING_POST_ROUTES.length and SUBSTRATE_GATE_ROUTES.length, which
- * the floor assertions below hold to a minimum. The same instruction is now
- * recorded in CLAUDE.md against the same figure, for the same reason.
+ * ⚠ NO PERIMETER COUNT IS WRITTEN IN THIS DOCSTRING, DELIBERATELY, AND ONE MUST
+ * NOT BE ADDED. The count lived here and went stale THREE times: it read
+ * "eight + one = nine" for months; was corrected to "20 + 2 = 22" on 2026-08-12
+ * and was wrong within days; was corrected to "42 + 2 = 44" on 2026-08-18 and
+ * was wrong again once /api/score/save joined on 2026-09-02 (the true figure at
+ * that point being 43 + 2 = 45). The third staleness was found on 2026-09-04 by
+ * a session that happened to read this file, not by any scheduled process.
+ *
+ * A WARNING NOT TO HAND-MAINTAIN THE NUMBER WAS ALREADY PRESENT AND DID NOT
+ * PREVENT THE THIRD RECURRENCE — an instruction embedded in the drifting
+ * artifact does not arrest the drift, which is the same lesson manifest.md §AC5
+ * recorded when it stopped hand-enumerating route membership for the same
+ * reason. So this is now ENFORCED rather than requested: the
+ * `docstring carries no hand-maintained perimeter count` case below fails if a
+ * count is reintroduced into this header. Derive it from
+ * HUMAN_FACING_POST_ROUTES.length and SUBSTRATE_GATE_ROUTES.length.
  * Knowledge gaps addressed: KG3, KG7 (build-to-wire gap pattern).
  */
 
@@ -1475,6 +1484,49 @@ assert(
 // SEMANTICALLY by RULED_PERIMETER_MEMBERS above, which fails on the
 // reclassification itself regardless of any count. The two are a pair; neither
 // alone is sufficient, and reading this floor as H8 cover would be a mistake.
+// ---------------------------------------------------------------------------
+// Docstring carries NO hand-maintained perimeter count (added 2026-09-04).
+//
+// WHY THIS IS A TEST AND NOT A COMMENT. The count lived in this file's header
+// and went stale three times (nine -> 22 -> 44, each wrong within days or
+// months). A written warning not to hand-maintain it was already present at the
+// third recurrence and did not prevent it. manifest.md §AC5 learned the same
+// lesson and stopped hand-enumerating membership. An instruction inside the
+// drifting artifact does not arrest the drift; an assertion does.
+//
+// This scans THIS FILE'S OWN leading block comment for the shape
+// "<n> route-level" / "<n> substrate-gate" / "= <n>" and fails if one appears.
+// Derive the number from the arrays instead — they are the registry.
+{
+  const selfPath = path.join(process.cwd(), 'src/lib/__tests__/r20a-invocation-guard.test.ts')
+  const selfSrc = fs.readFileSync(selfPath, 'utf8')
+  const header = selfSrc.slice(0, selfSrc.indexOf('*/') + 2)
+
+  // Digits immediately qualifying a perimeter noun, or an "= N" total. The
+  // historical-recurrence narrative above deliberately quotes the stale figures,
+  // so the check ignores any line that is part of that record (marked by the
+  // words "stale", "wrong", "read", or "corrected").
+  const OFFENDING = /(\b\d+\s+route-level|\b\d+\s+substrate-gate|=\s*\d+\s*(routes)?\s*$)/i
+  const offenders = header
+    .split('\n')
+    .filter((l) => !/stale|wrong|was corrected|it read|true figure|being \d/i.test(l))
+    .filter((l) => OFFENDING.test(l))
+
+  assert(
+    offenders.length === 0,
+    `docstring carries no hand-maintained perimeter count — found: ${JSON.stringify(offenders)}. ` +
+      `This number has gone stale three times. Do not write it here; derive it from ` +
+      `HUMAN_FACING_POST_ROUTES.length + SUBSTRATE_GATE_ROUTES.length.`
+  )
+
+  // Non-vacuity: the matcher must actually fire on the exact shape that went
+  // stale, or this case is a comment with a green tick.
+  assert(
+    OFFENDING.test(' * testing); AC5 (perimeter — 42 route-level + 2 substrate-gate = 44 as of'),
+    'docstring count matcher is non-vacuous (fires on the real 2026-08-18 stale line)'
+  )
+}
+
 {
   const observed = passed + failed
   assert(
