@@ -15,7 +15,34 @@ autonomously, which is why the 2026-09-05 founder decision gave it its own sessi
 `operations/handoffs/founder/2026-09-04-P6-recommendation-column-CLOSE.md` **including §7** (PR21) →
 `S11-FLIP-PREREQUISITES-REGISTER.md` **§D rows D1, D3, D4 in full** →
 `2026-07-19-mentor-consultation-dikaiosyne-self-circle-verbatim.md` (the ruling being completed) →
-the **2026-08-16 mentor ruling M-1**, which OVERTURNED this build's original asymmetry → then this file.
+`trust-layer-2026-07/2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` — **ruling M-1, which
+OVERTURNED this build's original asymmetry** →
+`trust-layer-2026-07/2026-09-05-mentor-ruling-part3-structural-unfailability-verbatim.md` **(BINDING —
+Q3 is F-3′'s whole ground; Q2 is why D4-before-the-window is a preference and not a requirement)** →
+`agent-circles-2026-08/2026-09-05-mentor-ruling-guard-availability-and-lean-mode-doctrine-verbatim.md`
+**(BINDING — Q-G1, the ruling that created B4 and routed its (c) to this track)** → then this file.
+
+## State at hand-off (2026-09-05 04:26 AEST)
+
+**Everything from the predecessor session is pushed and Vercel is green.** `origin/main` carried
+`dc100b4` (the P6 recommendation column), `064285d` (its records), `595af8d` + `2646879` (F-5, the date
+correction), `6547285` (F-1, the ruling record) and `e6a2618` (this prompt's F-3′ amendment).
+
+**Concurrency is high and continuous.** A peer session has been landing commits into the same register
+throughout — B4, the count-discipline sweep, Option S — and at hand-off was mid-edit on
+`website/src/app/api/score-conversation/route.ts`, a live R20a perimeter route. **Commit path-scoped,
+run `git status` twice, and leave other sessions' files alone**, including any that appear modified.
+
+**Three things carried but NOT tasks for this session** (they need no action unless you choose):
+1. **The v3/v4 lift check is unexercised on real v3/v4 data** — the only buffer that exists is v1, and
+   the report says so in its own output. Only a real window discharges it.
+2. **One unreproducible battery run** (38/2, an abort on the publication path, not seen again in 30+
+   runs). Recorded, deliberately not chased; revisit only on recurrence.
+3. **A misdated file belonging to another session, flagged and deliberately not renamed:**
+   `2026-09-06-P6-recommendation-column-BUILD-NEXT-SESSION-PROMPT.md`, authored by the 2026-09-05
+   session against a convention where a prompt carries the date of the close that ships it. The same
+   context-date error was corrected in this track's own artifacts by F-5. **Founder's call whether to
+   rename it** — it is another session's artifact.
 
 ## First move: verify, don't trust this file
 
@@ -40,7 +67,13 @@ grep -c "2026-08-17 (P8a guard-path capture BUILT" operations/trust-layer-2026-0
 
 Expected: `59 passed`; `74 passed`; `251 passed, 0 failed` + `RELEASE GATE: PASS ✓`; then `0`, `0`, `1`.
 **Run the real `fetch`** — four consecutive sessions have found unlanded commits this way, and on
-2026-09-04 a peer's push published six of them mid-session.
+2026-09-04 a peer's push published six of them mid-session. Being *behind* `origin/main` is the normal
+state here, not a problem; being ahead means something is unpushed.
+
+**Date your artifacts from the machine, not from your context.** Run `date` and `git log`. A context
+`currentDate` running ahead of the machine clock misdated an entire session's output on 2026-09-04 and
+inverted its apparent sequence against a concurrent session; F-5 corrected it, and the failure will
+recur in any session that trusts the context date.
 
 ## What D4 is, in one paragraph
 
@@ -54,8 +87,9 @@ battery-asserted). **This session is the activation, not the build.**
 
 ## Three things to carry in, none of which are optional
 
-1. **The narrowing is SYMMETRIC across all four outcomes, by mentor ruling M-1 (2026-08-16), which
-   OVERTURNED the original build's asymmetry.** The first build gated `unevaluated`/`indeterminate`/`met`
+1. **The narrowing is SYMMETRIC across all four outcomes, by mentor ruling M-1
+   (`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`), which OVERTURNED the original build's
+   asymmetry.** The first build gated `unevaluated`/`indeterminate`/`met`
    but left `violated` ungated, reasoning that dropping adverse evidence makes trust read higher. The
    mentor rejected that. **Read M-1 before you touch the flag** — if the code has drifted back toward the
    asymmetry, that is a stop condition, not a footnote.
