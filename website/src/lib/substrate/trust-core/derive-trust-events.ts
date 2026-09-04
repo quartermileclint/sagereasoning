@@ -151,8 +151,26 @@ export function deriveCredentialAndJusticeEvents(
 /** Register D4 opt-in. Absent/false ⇒ pre-D4 behaviour, byte-identical. */
 export type DeriveJusticeOptions = {
   /** Require >=1 IDENTIFIED circle beyond `self_preservation` before a self-only
-   *  assessment may derive an unevaluated / indeterminate / met justice outcome.
-   *  A VIOLATED obligation is never gated by this. */
+   *  assessment may derive a justice outcome. ALL FOUR outcomes are gated
+   *  SYMMETRICALLY — `unevaluated`, `indeterminate`, `met` AND `violated`.
+   *
+   *  CORRECTED 2026-09-05, at the D4 activation walk. This docstring previously
+   *  read "A VIOLATED obligation is never gated by this." That was the pre-M-1
+   *  rule and has been FALSE of the code since the 2026-08-16 correction — the
+   *  `violated` branch reads `!selfOnly && statuses.includes('violated')`, and
+   *  the symmetry is pinned by battery D4-8 (mutation-verified at the activation
+   *  walk: un-gating `violated` fails that pin and only that pin).
+   *
+   *  Mentor ruling M-1 OVERTURNED the asymmetry: dikaiosyne is other-directed
+   *  whether the obligation was met or violated, and preserving the violated case
+   *  "is not conservative — it is preserving a category error in the direction
+   *  that hard-floors the wrong domain." The body comment at the gates carries the
+   *  full reasoning and the interim WITHHOLD posture.
+   *
+   *  Why this line mattered enough to fix at the walk rather than carry: it stated
+   *  the OVERTURNED rule on the very type a caller reads to learn what this flag
+   *  does, and would invite a future reader to "restore" the asymmetry as though
+   *  correcting a drift. */
   requireBeyondSelfCircle?: boolean
 }
 
