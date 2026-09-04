@@ -62,6 +62,17 @@ WHERE cy.loop_id = :RUN;
 -- exceeds it, some row satisfies both predicates -- that overlap is the arithmetic
 -- the first version got wrong. Carry `decision_bearing_union` as the true set size.
 -- EXPECTED from S6: total ~120, cycles 20, winners 15, rejections 9, union 24.
+--
+-- ⚖ RULED 2026-09-04: THE PRODUCTION COUNT GOVERNS. The S6 report is the primary
+-- record; the ruling's "20 cycle winners" "was not derived from the S6 report; it
+-- appears to have been a reconstruction that did not account for the five
+-- no-winner cycles." Carry whatever this query returns as the authoritative set.
+--
+-- ⚠ OBLIGATION IF THIS RETURNS 24: the ruling's "20 cycle winners" figure is to be
+-- CORRECTED IN THE RECORD WITH A NOTE naming the discrepancy and its source --
+-- explicitly "not quietly overwritten". Do NOT adopt an alternative definition of
+-- decision-bearing (no-winner cycles' best candidates; not_selected rows) without
+-- its own ruling: the ruling's language was "winners, not candidates".
 -- The ruling expects 29. If production gives neither, STOP and reconcile.
 
 -- ---------------------------------------------------------------------------

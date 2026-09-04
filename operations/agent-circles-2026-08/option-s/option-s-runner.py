@@ -57,7 +57,7 @@ change K).
 
 USAGE
     python3 option-s-runner.py run <candidate_id> <K>
-    python3 option-s-runner.py sweep <K>
+    python3 option-s-runner.py sweep 10   # K=10, ruled
     python3 option-s-runner.py summary <runs_dir>
 """
 
@@ -136,6 +136,18 @@ L4 = ("SET-SIZE DISCREPANCY (OPEN, surfaced at build): the ruling says 29 "
       "own outcome table says winner = 15 (cycles 1,2,4,7-14,17-20), which gives "
       "24. This instrument does not resolve the conflict; EXTRACTION.sql sec PRE "
       "settles it against production and the founder carries the answer.")
+A8_BOUND = ("A8 BOUND (ruled 2026-09-04, verified at source): no re-examination "
+            "counter exists on any live path -- intervention-engine.ts's "
+            "habitualReExaminationCount defaults to 0 and no live caller supplies "
+            "it -- so the A8 escalation row (habitualStable / reflectReferral) "
+            "CANNOT FIRE. Any policy this rate informs inherits that inertness.")
+ELECTION_NEEDS = ("What the M/W/S election needs from this data, ruled 2026-09-04 so "
+                  "the run is specified by its consumer: 'a per-input floor rate "
+                  "across the decision-bearing population on real candidate texts, "
+                  "at K=10, with the limits named in Q-S3 carried explicitly, and "
+                  "with the A8 bound printed on the rate.' The run PRECEDES the "
+                  "election and serves it.")
+
 NOT_A_DECISION = ("Option S decides nothing. The FIRST verdict is operative. This "
                   "output is measurement, not an election between M, W and S.")
 
@@ -409,6 +421,8 @@ def summary(runs_dir: str) -> None:
         "LIMIT_4_set_size_discrepancy": L4,
         "LIMIT_6_instrument_drift": L6,
         "LIMIT_7_variance_multi_channel": L7,
+        "A8_BOUND": A8_BOUND,
+        "WHAT_THE_ELECTION_NEEDS": ELECTION_NEEDS,
         "PRIOR_DATA_c11": PRIOR,
         "K_note": "K is the POLICY parameter R8 ruled for median-of-3. It is NOT "
                   "ruled as the measurement K. D6a chose K=10 with a stated power "

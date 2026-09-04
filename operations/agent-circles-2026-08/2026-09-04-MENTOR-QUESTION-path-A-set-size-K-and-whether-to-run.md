@@ -1,5 +1,32 @@
 # Mentor question — Path A: a set-size conflict with the record, the measurement K, a design change already made, and whether the run is still worth its purpose
 
+> **⚖ RULED 2026-09-04 — ALL FOUR ANSWERED. Binding; wins over the body below; the verbatim record
+> wins over this banner in turn** (`2026-09-04-mentor-ruling-path-A-set-size-K-forward-looking-and-run-verbatim.md`):
+>
+> - **Q-S1 → THE PRODUCTION COUNT GOVERNS.** The S6 report is the primary record; the ruling's "20
+>   cycle winners" *"was not derived from the S6 report; it appears to have been a reconstruction that
+>   did not account for the five no-winner cycles."* If production returns 24, **correct the figure in
+>   the record with a note naming the discrepancy and its source** — not a quiet overwrite. An
+>   alternative definition of decision-bearing is **NOT adopted** and needs its own ruling: the
+>   ruling's language was *"winners, not candidates."*
+> - **Q-S2 → K=10**, and it is **the session's to elect as measurement design**, not a floor-semantics
+>   election. The reason: the election turns on 2.8% / ~10% / ~27%, and *"those three values are not
+>   distinguishable at K=3 resolution."*
+> - **Q-S3 → WITHIN Path A's terms.** The comparison *"was never required by the ruling — it was an
+>   assumption the prior design carried."* The ruling **explicitly declines to discount the
+>   recommendation for having been proposed by the session it repairs**, and names the disclosure
+>   itself as the right posture. Q-S3's limits ride the data.
+> - **Q-S4 → THE RUN IS WORTH ITS PURPOSE and PRECEDES the election.** *"A rate of 4% versus 15% ...
+>   would change the M/W/S ruling."* Localising the mechanism *"does not tell you how often that
+>   variance fires across the decision-bearing population."*
+> - **⚠ ONE OWED ITEM NOT ADOPTED — the "v3/v4 lift check".** Verified at source, v3/v4 are
+>   **false-hold capture record schemas** and the 130 records are the **frozen false-hold buffer**.
+>   Option S has no versioned record schema and no round-trip. **Named, not absorbed; the run is not
+>   treated as gated on it; put back as Q-V1.**
+> - **Not licensed:** any build, spend, activation or publication. The run is a founder-walked act.
+>   M/W/S and R8-D7's sampling policy remain deferred; weights remain BLOCKED.
+
+
 **Authored 2026-09-04.** `governance`, documents only. **Nothing here is a build, an activation, a
 production read, or a spend.** Option S is built and unpopulated; **no live call has been made**;
 `runs/` is empty; no credential exists for it. Weights remain BLOCKED, GS-CYB-1's two conditions are
