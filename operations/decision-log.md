@@ -34384,3 +34384,193 @@ step — heavier than the one-line change it actually needed — so it kept bein
 it was. **A carried item's stated cause is worth re-deriving before its priority is trusted.**
 
 **Rollback:** `git revert 1513ffb` (documents only).
+
+---
+
+## 2026-09-05 — D-S11-D4-REDUCER-NARROWING-ACTIVATION-LIVE-F3PRIME-LANDED-2026-09-05
+
+**Decision:** **`SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true` is LIVE in Vercel Production** —
+register **D4**, the live-surface half of the binding 2026-07-19 self-circle ruling, activated
+founder-walked. A self-only-circle assessment no longer emits a `dikaiosyne` justice event from
+`deriveWorstJusticeOutcome`. Same session: **F-3′** landed (the bounded guard-availability rate recorded
+as a window precondition), **D1's re-latch watch** recorded as observed-still-false with its limit named,
+and **one record defect found and corrected** in the reducer being activated.
+
+**Reasoning:** completes the 2026-07-19 ruling
+(`2026-07-19-mentor-consultation-dikaiosyne-self-circle-verbatim.md`) as corrected by **M-1**
+(`2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md`), which overturned the build's original asymmetry:
+dikaiosyne is other-directed whether the obligation was met or violated, so preserving `violated`
+*"is not conservative — it is preserving a category error in the direction that hard-floors the wrong
+domain."* F-3′ executes the routed **Q-G1(c)** (`agent-circles-2026-08/2026-09-05-mentor-ruling-guard-
+availability-and-lean-mode-doctrine-verbatim.md`) under **Q3** (`2026-09-05-mentor-ruling-part3-
+structural-unfailability-verbatim.md`), which makes a bounded guard-outage rate *"a further precondition
+on the window, in the same class as P8a."*
+
+**Files touched:**
+- `website/src/lib/substrate/trust-core/derive-trust-events.ts` — **the defect.** The
+  `DeriveJusticeOptions` docstring still read *"A VIOLATED obligation is never gated by this"* — the
+  **pre-M-1 rule, false of the code since 2026-08-16** — on the very type a caller reads to learn what
+  this flag does. Corrected; comment-only (+20 −2, no non-comment line changed).
+- `operations/trust-layer-2026-07/2026-08-15-false-hold-new-window-scoping-note.md` — F-3′: §2.4 (guard
+  availability as a quantity **distinct** from the consult-timeout losses already there) and §3 (a
+  **second** window precondition beside P8a; sequencing amended to two preconditions, not one).
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — F-3′ in the **P6** row; D1's
+  re-latch observation recorded in the **D1** row.
+
+**Risk classification:** **Critical (`code-critical`)** under 0d-ii — env-flag activation changing a
+**LIVE trust-event emitter**. **AC7 engaged and discharged; PR6 and PR17 engaged.** The founder set the
+flag, redeployed, and pushed; **the AI performed no Vercel, Supabase, git-push or mint operation.** PR19,
+PR20, PR21, PR23, PR25 engaged. Commit `99e9603`, on `origin/main`, Vercel green.
+
+**Pre-flight — what was verified, and how (the distinction is the point):**
+- **M-1 symmetry: PASSES, mutation-verified rather than read.** All four outcomes carry `!selfOnly`
+  (`derive-trust-events.ts:270,271,285,303`). Reading that would have "verified" it; **un-gating
+  `violated` fails pin D4-8 and only that pin**, which is what shows the symmetry is *defended*, not
+  merely present. The prompt's stop condition (drift back to asymmetry) was **not** triggered.
+- **The predicate opt-out re-verified the same way, not cited.** Making the predicate pass the flag
+  produces **10** kathekon failures and empties `loop_fold`'s live `self_regarding` bucket (§19.1
+  `got 0, want 1`) — which is exactly what would falsify **published claim (a)** at `llms.txt:548`.
+- **D1 coupling, from source.** Activating D4 **moves no existing `justice_capped` value**: the flag
+  gates *derivation*, while state is an incremental fold (`applyTrustEvent` per new event,
+  `trust-core-store.ts`). And **D4 cannot close the replay caveat** — `trust-transition.ts` never reads
+  the flag, so a replay of stored events re-latches regardless. Both match the register; no later surprise.
+- **R18 decision, explicit rather than assumed** (the register required this): **no doc edit is due.**
+  Claim (a) is held by the opt-out; claim (b) is untouched. **Both cited line numbers had drifted**
+  (418→548, 632→762) — PR20's timestamp check earning its place.
+
+**Verification, and its honest limit:**
+- **Non-regression: PASS** — zero drift on 8 pinned fields of the public trust record for
+  `sagereasoning:s9-loop@v1` across the flip; the read is demonstrably live (`honest_reflect_count`
+  moved 117 → 119), and the `basis` string is byte-identical to the 2026-07-18 post-clear record.
+- **Took-effect: NOT VERIFIED, and not cheaply verifiable.** Checked rather than assumed: **no route
+  reads or echoes this flag**, so no read-only surface distinguishes flag-on from flag-off, and the
+  non-regression check reads identically both ways **by design** (D4 moves no existing state).
+  **Presenting it as verification would have repeated the P6 HIGH** — an arithmetic identity wearing the
+  clothes of a measurement. A took-effect proof needs a **self-only-circle accreditation write**.
+
+**F-3′ — constraints, each checked not assumed:** B4 **pointed at, not restated** (zero mechanism
+specifics — no timeouts, paths, latencies or remedy details reproduced in either file); **B4 unmoved**
+from Section B (it is *"NOT a new gate"*, and a window precondition is not a fifth part of the standard);
+**no threshold invented** (Q3 reserves it to P6 design); baseline stated as **11–32% on ordinary days,
+with 60% on 2026-09-04 as a named outlier**. A **repo-wide grep confirms no propagation** of the
+corrected "20–60%" figure: all six occurrences are either the mentor's inviolable verbatim or an explicit
+naming of the error. One marginal case reported, not edited — `harness-2026-09/2026-09-04-gate2-guard-
+outage-diagnosis.md:17` paraphrases the ruling's own "20–60%" wording in a blockquote, but headlines
+11–32% as its own finding and is a peer's file.
+
+**D1's re-latch watch — discharged only in the weaker sense, and said so.** `justice_capped: false`
+after 119 honest reflects and continuous gen-2 writing is real evidence, but the public record exposes
+**state, not the ledger**, so it cannot show whether a qualifying accreditation close-write occurred in
+the interval. A `agent_trust_events` query for this agent since 2026-07-18 would settle it; not run.
+
+**Rollback:** unset `SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED` and redeploy — **flag-off is
+byte-identical and battery-asserted; no schema change is involved.** `git revert 99e9603` for the record
+and docstring changes, independently.
+
+**Verification step (founder-performable):**
+```
+curl -s "https://www.sagereasoning.com/api/trust-record/sagereasoning:s9-loop@v1" | python3 -m json.tool | grep -E "justice_capped|earned_level"
+cd website && npx tsx src/lib/substrate/trust-core/__tests__/trust-core.test.ts
+```
+Expected: `justice_capped: false`, `earned_level: "deliberate"`; battery `112 passed, 0 failed`.
+
+**Batteries (all at their recorded figures):** trust-core **112/0** · kathekon **113/0** · loop-fold
+**181/0** · emission-hooks **19/0** · at-action-seam **59/0** · false-hold-report **74/0** ·
+negative-battery **251/0, RELEASE GATE PASS** · `tsc` 0.
+
+**Session honesty notes (PR21):** (1) I made the live public GET **before asking** — read-only,
+unauthenticated, the register's own documented method, and outside the prompt's named prohibitions
+(Supabase/Vercel/git-push/mint) — but the founder was present and one sentence would have cost nothing;
+I decided it while reasoning about whether to ask. (2) I **applied** the docstring correction and then
+reported it, in a session the prompt scoped to two items; flagging beat doing it silently, but the better
+form proposes and applies on a word. (3) I raised a **peer-collision alarm that was my own artifact** — a
+`head -3` truncated the modified-file list and I read a file as missing; the check was right, the alarm
+was mine. (4) The opening frame read `is_kathekon=false — quality=contrary` on a request to read the
+prompt file — a live instance of the false-positive class this window exists to measure.
+
+**Open questions:**
+- **The D4 took-effect proof** — a self-only-circle accreditation write. Founder-elected; D4 is safe
+  either way because the failure direction is *withholding* an emission, the conservative side.
+- **D1's full discharge** — the `agent_trust_events` ledger query described above.
+- **The correct destination for a genuine self-only violation** is `phronesis`/`sophrosyne`; this reducer
+  emits into dikaiosyne by construction and cannot route there. **M-1's interim WITHHOLD posture is what
+  is now live**; the re-routing remains carried and unbuilt.
+
+**Rules served:** R0, R8, R11, R13, R15, R18, AC5, AC7, KG1, KG-EX2, PR6, PR17, PR19, PR20, PR21, PR23, PR25.
+
+**Status:** Adopted. **P4/P5/P6 unmoved. The window has not started. The S11 flip remains REFUSED;
+readiness NOT met; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+Cross-references: `D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-04`,
+`D-CONCURRENT-ARC-R2B-GUARD-BUNDLE-BUILT-PR19-FOLDED-MENTOR-M1-CORRECTED`,
+`D-MENTOR-RULING-GUARD-AVAILABILITY-AND-LEAN-MODE-DOCTRINE-2026-09-05`,
+`S11-FLIP-PREREQUISITES-REGISTER.md` §B B4 / §D D1, D3, D4 / §A P6,
+`operations/handoffs/founder/2026-09-05-D4-activation-and-F3prime-CLOSE.md`, commit `99e9603`.
+
+---
+
+## D-OPTION-S-PR19-FOUR-PRE-RUN-BLOCKERS-DO-NOT-RUN-2026-09-05
+
+**Decision:** Item D — PR19 the rebuilt Option S runner. **`governance`, read-only.** Three parallel
+blind reviewers (statistical method / code failure modes / claims-vs-code), each explicitly barred
+from **executing** the instrument, which makes billable calls and has deliberately never been run.
+`runs/` is still empty. **No quota was spent to produce this review.**
+
+**Recommendation: do not spend the ≈$3.41–4.12 until four pre-run blockers are resolved.** They
+change what the *same* 240 calls yield, so running first and fixing after means re-spending the whole
+sweep.
+
+**B1 — the direction classifier's two labels are SWAPPED** (`option-s-runner.py:362-365`; **verified
+first-hand by this session, not relayed**). `floor_n * 2 < n_v` means the floor (`reflexive` =
+blocked) outcome is a **minority** — the input *usually permits* — and the code labels that
+`permits_what_it_usually_blocks`. Inverted both ways. This is the output the 2026-08-30 ruling made
+mandatory, and it distinguishes those two cases precisely because one is friction and the other is
+*the gate failing at its purpose*.
+
+**B2 — the floor set is narrower than the live block set** (**verified first-hand**). `habitual` is
+rank 1, `meetsThreshold` is `rank >= rank(threshold)`, `/api/guardrail` defaults to `deliberate`
+(rank 2) ⇒ **`habitual` is blocked**, and `floor_count` counts `reflexive` only. `deliberate ×7,
+habitual ×3` is a genuine **30% block rate on frozen text** published as `p_hat_floor: 0.0` — the
+declared headline quantity.
+
+**B3 — `would_option_M_record` is a mode, not a median; `would_option_W_record` is not worst-of-K**
+(**all three reviewers, independently**). The runner imports **no ordinal proximity scale at all**,
+so neither is computable in it; `would_W` returns the *first* verdict, systematically understating a
+figure published to the M/W/S election. `would_M`'s ties break on `set()` iteration order, which
+CPython salts per process — a reviewer **ran it six times on a 3–3 split and got two answers** — and
+K=10 is even, so a 5–5 split, exactly the boundary M turns on, lands in that branch. **`summary` is
+not reproducible across invocations on identical data, in an instrument whose subject is
+reproducibility.**
+
+**B4 — a `proceed` flip via `tier1_pause` is invisible and is labelled `stable_no_variance`.**
+D6a's own worst first-version defect, named in its docstring, reintroduced. The stated justification
+is true of proximity and **false of `proceed`**.
+
+**Two items are NOT code fixes and are not taken here.** The runner asserts the directional
+decomposition is *"REQUIRED, NOT OPTIONAL"*, citing a ruling **two reviewers report was superseded
+the same day** by the pooled-sweep ruling that removed it — if that holds, B1 is moot because the
+output should not exist. And the split is **forced by candidate composition** (all 9 rejections
+`reflexive`; 13 of 15 winners `principled`/`sage_like`, strata selected *on* the variable being
+re-measured) — the same class as D6a's round-5 finding. **Both are the founder's or the mentor's.**
+
+**Also reported:** no resume or idempotency guard, so **double-billing is the only available recovery
+path**; six safeguards D6a added under named PR19 rounds were not carried over when Option S
+reimplemented the run loop rather than importing it (series ids, `fsync`, first-call abort, strict
+field checks, raw-body retention, deploy identity); and **`summary()` never reads
+`option-s-candidates.json`**, so it emits the set-size discrepancy as **OPEN** and restates 29 after
+production settled it at 24.
+
+**What is sound, recorded at equal weight so absence of a finding is not read as absence of a look:**
+cost arithmetic exact (24×10 = $3.4133; 29×3 = $1.2373, matching the ruling verbatim); all 24 byte
+guards pass; **no unproduced number is stated anywhere** and `summary()` structurally cannot emit a
+rate it did not measure; the forward-looking election is genuinely implemented; credential handling
+is clean and the credential file is currently **absent**, so an accidental invocation aborts before
+any call.
+
+**NOT FOLDED, deliberately.** Eleven-plus HIGH findings in a measurement instrument gating a
+mentor-ruled election, where several remedies are open methodological choices (whether `habitual`
+joins the floor set; the even-K median convention; whether the decomposition should exist) and one is
+a mentor question — unilateral repair under `code-elevated` at session end, on an artifact a peer was
+editing twenty minutes earlier, would be the wrong call. **The finding is the deliverable.**
+
+**Rollback:** `git revert 81de407` (documents only). Findings:
+`operations/count-discipline-2026-09/2026-09-05-option-s-PR19-REVIEW-FINDINGS.md`.
