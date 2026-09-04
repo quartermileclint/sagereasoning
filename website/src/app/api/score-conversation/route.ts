@@ -120,51 +120,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    // `format` is length-validated on the same footing as its siblings.
-    //
-    // WHY THIS IS NOT MERELY INPUT VALIDATION. composeConversationDistressSubject
-    // TRUNCATES each field at DISTRESS_SUBJECT_FIELD_CAP, while the route below
-    // appends the FULL `format` to domainContext, which sage-reason-engine
-    // forwards to the model untruncated. Without this check, text past the cap
-    // reached the ENGINE having never reached the CLASSIFIER. The gap was named
-    // in DISTRESS_SUBJECT_FIELD_CAP's own docstring on 2026-07-07 ("the one
-    // field the route does not length-validate") and deferred because closing
-    // it changes always-on behaviour: a new 400 path, not flag-off safe.
-    //
-    // THE PRECISE CONDITIONS, since the sentence above is unconditional and the
-    // behaviour is not (PR19 fold): it required the R20a flag ON, a `format` of
-    // >=15,001 chars, AND the screened first 15,000 chars coming back benign --
-    // an acute/moderate hit returns before domainContext is built, so nothing
-    // reached the engine in that case anyway.
-    //
-    // WHAT THIS CHECK COSTS, disclosed rather than glossed (PR19 fold). It sits
-    // BEFORE the R20a block, matching its siblings. So an oversized `format`
-    // that DOES carry distress in its first 15,000 chars now receives a bare
-    // 400 instead of the crisis redirect it would previously have triggered.
-    // The engine-leak direction is closed either way, but the perimeter's other
-    // purpose -- surfacing crisis resources to a distressed human -- is lost for
-    // that input class. Placing this after the R20a block would be strictly
-    // stronger on that axis, at the cost of letting oversized requests reach the
-    // classifier (a bounded but real cost-amplification vector, since
-    // escalateMildDistress can call Haiku). BOTH sibling checks have the same
-    // property, so this follows the route's existing posture rather than
-    // inventing one. Changing it is a perimeter-ordering decision for the whole
-    // route, not for this field alone -- named for the founder, NOT taken here.
-    //
-    // BREAKING CHANGE, characterised exactly: requests with a STRING `format`
-    // longer than TEXT_LIMITS.long now 400 where they previously succeeded,
-    // in either flag state. No in-repo caller is affected (mentor-hub sends
-    // `conversation` alone); any external API consumer is.
-    //
-    // The invariant is enforced by FV-2 in the route's battery, which IMPORTS
-    // the composer's SCREENED_FIELDS rather than parsing it: every field the
-    // composer actually iterates must be length-bounded here.
-    if (format && typeof format === 'string' && format.length > TEXT_LIMITS.long) {
-      return NextResponse.json(
-        { error: `format exceeds maximum length of ${TEXT_LIMITS.long} characters` },
-        { status: 400 }
-      )
-    }
+    // `format` is length-validated too — but AFTER the R20a block, not here.
+    // See the ruled ordering note at that guard's new site below.
+    // (`conversation` and `context` above still precede the block; that is the
+    // inherited posture the 2026-09-06 ruling routes to a perimeter-wide audit,
+    // NOT an endorsement of it.)
 
     if (!conversation || typeof conversation !== 'string' || conversation.trim().length < 20) {
       return NextResponse.json(
@@ -238,6 +198,71 @@ export async function POST(request: NextRequest) {
       if (effectiveDistress.severity === 'mild') {
         mildSupportResources = buildMildSupportResources()
       }
+    }
+
+    // ------------------------------------------------------------------------
+    // `format` length validation — DELIBERATELY PLACED AFTER THE R20a BLOCK.
+    //
+    // MOVED 2026-09-06 under the mentor ruling recorded at
+    // operations/count-discipline-2026-09/2026-09-06-mentor-ruling-r20a-length-
+    // guard-ordering-verbatim.md, adopted as
+    // D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06:
+    //
+    //   "Purpose (b) governs for human-facing members of the perimeter. The
+    //    distress check runs before the length guard on any route where the
+    //    human crisis form is rendered."
+    //
+    // This route renders the HUMAN crisis form (audience: 'human_user', above),
+    // so it is a human-facing member and the ruling binds it.
+    //
+    // WHY NOT SIMPLY DELETE THE GUARD. The ruling is about ORDER, not existence
+    // -- "the distress check runs BEFORE the length guard" presupposes a guard.
+    // Reverting the guard entirely would satisfy the ruling's crisis-redirect
+    // purpose while reopening the defect it was added to close (below), so the
+    // guard is MOVED, not removed.
+    //
+    // WHY THE GUARD EXISTS AT ALL. composeConversationDistressSubject TRUNCATES
+    // each field at DISTRESS_SUBJECT_FIELD_CAP, while this route appends the
+    // FULL `format` to domainContext, which sage-reason-engine forwards to the
+    // model untruncated. Without this check, text past the cap reached the
+    // ENGINE having never reached the CLASSIFIER. This guard still precedes
+    // domainContext construction below, so that direction remains closed.
+    //
+    // WHAT THE MOVE COSTS, and why the ruling accepts it. An oversized `format`
+    // now reaches the classifier rather than being rejected first. That cost is
+    // BOUNDED, not open-ended: the composer slices every screened field to
+    // DISTRESS_SUBJECT_FIELD_CAP before the classifier sees it, so the Haiku
+    // call's input is capped regardless of submitted size. The ruling accepted
+    // the cost in any case -- a bare 400 to a distressed person "is not a cost
+    // in the engineering sense. It is a harm."
+    //
+    // WHAT IT BUYS. An oversized `format` carrying distress in its first 15,000
+    // characters now receives the crisis redirect instead of a bare 400.
+    //
+    // SCOPE, deliberately narrow. Only this guard moved. The `conversation` and
+    // `context` guards above still precede the block: they landed 2026-03-26
+    // (aeadbd1) in a general security pass, before any perimeter existed here,
+    // and the ruling routes inherited orderings to a perimeter-wide audit using
+    // execution-order analysis. This guard was movable now because its
+    // provenance is clean -- it landed 2026-09-05 (4c1cd94) and merely followed
+    // the route's existing posture rather than choosing it.
+    //
+    // ORDERING IS PINNED, not merely commented: the route battery asserts this
+    // guard appears after the enforceDistressCheck call. An unpinned ordering is
+    // exactly how the pre-ruling one arrived and persisted unexamined.
+    //
+    // BREAKING CHANGE, unchanged by the move: a STRING `format` longer than
+    // TEXT_LIMITS.long 400s in either flag state. No in-repo caller is affected
+    // (mentor-hub sends `conversation` alone); an external API consumer is.
+    //
+    // FV-2 in the battery IMPORTS the composer's SCREENED_FIELDS rather than
+    // parsing it: every field the composer screens must be length-bounded here.
+    // ------------------------------------------------------------------------
+    if (format && typeof format === 'string' && format.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `format exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
     }
 
     // Truncate long conversations

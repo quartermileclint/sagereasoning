@@ -647,18 +647,56 @@ function runFieldValidationTests(): void {
     /format exceeds maximum length of \$\{TEXT_LIMITS\.long\} characters/.test(codeOnly),
   )
 
-  // FV-6 ORDERING. A reviewer moved the check verbatim to after the engine
-  // call and the battery still reported 62/62 -- the route would then 400 on
-  // an oversized `format` only after the engine had already consumed it,
-  // which is the precise harm the check exists to prevent. Presence is not
-  // enough; position is the guarantee.
+  // FV-6 ORDERING. Presence is not enough; position is the guarantee. This
+  // case has been INVERTED on one axis and kept on the other.
+  //
+  // ITS HISTORY, because it explains the shape. A reviewer once moved the check
+  // verbatim to after the engine call and the battery still reported 62/62 --
+  // the route would then 400 on an oversized `format` only after the engine had
+  // consumed it, the precise harm the check exists to prevent. FV-6 was added
+  // to pin that. It pinned TWO things at once, and only one of them was right.
+  //
+  // REWRITTEN 2026-09-06 under the mentor ruling (adopted as
+  // D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06): "the
+  // distress check runs before the length guard on any route where the human
+  // crisis form is rendered." This route renders the human form, so the guard
+  // must now FOLLOW the R20a block -- the opposite of what FV-6 asserted.
+  //
+  // The two clauses are therefore opposite in direction and both load-bearing:
+  //   fmtIdx > flagIdx  -- the RULING. A distressed submitter of an oversized
+  //                        field must reach the crisis redirect, not a bare 400.
+  //   fmtIdx < engine/domainContext -- the ENGINE-LEAK guarantee, unchanged.
+  //                        The guard must still fire before the full field is
+  //                        appended to domainContext and forwarded untruncated.
+  //
+  // Deleting the guard would satisfy the first and silently lose the second,
+  // which is why the guard was moved rather than reverted. Asserting both ends
+  // makes that non-optional: a future revert fails here, and so does a drift
+  // back to the pre-ruling order.
   {
     const fmtIdx = codeOnly.indexOf('format.length')
     const flagIdx = codeOnly.indexOf('isScoreConversationR20aEnabled()')
     const engineIdx = codeOnly.indexOf('await runSageReason(')
+    const domainIdx = codeOnly.indexOf('let domainContext')
+    const found = fmtIdx > -1 && flagIdx > -1 && engineIdx > -1 && domainIdx > -1
+
     expectTrue(
-      'FV-6 the format length check precedes both the R20a block and the engine call',
-      fmtIdx > -1 && flagIdx > -1 && engineIdx > -1 && fmtIdx < flagIdx && fmtIdx < engineIdx,
+      'FV-6a the format length check FOLLOWS the R20a block (2026-09-06 ruling: the ' +
+        'distress check runs before the length guard on human-facing members)',
+      found && fmtIdx > flagIdx,
+    )
+
+    expectTrue(
+      'FV-6b the format length check still precedes domainContext construction and the ' +
+        'engine call (the engine-leak guarantee the guard exists for)',
+      found && fmtIdx < domainIdx && fmtIdx < engineIdx,
+    )
+
+    // Non-vacuity: if any anchor stopped matching, both cases above would be
+    // deciding on -1 and could pass or fail for reasons unrelated to ordering.
+    expectTrue(
+      'FV-6c all four ordering anchors were found (the ordering cases are not deciding on -1)',
+      found,
     )
   }
 }
