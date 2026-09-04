@@ -5,7 +5,7 @@ emitter**. AC7 engages; PR6 and PR17 engage; every live op is yours, not the AI'
 autonomously, which is why the 2026-09-05 founder decision gave it its own session.
 
 **Read first, in this order:** `/adopted/standing-protocol-cache.md` →
-`operations/handoffs/founder/2026-09-06-P6-recommendation-column-CLOSE.md` **including §7** (PR21) →
+`operations/handoffs/founder/2026-09-04-P6-recommendation-column-CLOSE.md` **including §7** (PR21) →
 `S11-FLIP-PREREQUISITES-REGISTER.md` **§D rows D1, D3, D4 in full** →
 `2026-07-19-mentor-consultation-dikaiosyne-self-circle-verbatim.md` (the ruling being completed) →
 the **2026-08-16 mentor ruling M-1**, which OVERTURNED this build's original asymmetry → then this file.
@@ -23,7 +23,7 @@ cd .. && node harness/gate1-pre-decision/test/negative-battery.mjs | tail -2
 
 Expected: `59 passed`; `74 passed`; `251 passed, 0 failed` + `RELEASE GATE: PASS ✓`.
 **Run the real `fetch`** — four consecutive sessions have found unlanded commits this way, and on
-2026-09-06 a peer's push published six of them mid-session.
+2026-09-04 a peer's push published six of them mid-session.
 
 ## What D4 is, in one paragraph
 
@@ -48,7 +48,7 @@ battery-asserted). **This session is the activation, not the build.**
    existing agent — and whether the append-only historical event would re-latch on a future replay (the
    disclosed 2026-07-18 caveat). If it would, that belongs in the walk, not in a later surprise.
 
-3. **This flag is now also read by the P6 recommendation column** (built 2026-09-06, `dc100b4`).
+3. **This flag is now also read by the P6 recommendation column** (built 2026-09-04, `dc100b4`).
    `derive-trust-events.ts:125` reads it **at call time**, so the false-hold report's recommendation
    column depends on it. Verified byte-identical both ways on the v1 frozen buffer (no circle names for
    the narrowing to read); **on v3/v4 window data the two settings can diverge.** The report prints this
@@ -67,10 +67,10 @@ battery-asserted). **This session is the activation, not the build.**
 
 ## Standing constraints
 
-- **Verify against source, not against this file or the decision log's prose.** On 2026-09-06 the
+- **Verify against source, not against this file or the decision log's prose.** On 2026-09-04 the
   session's own build shipped a figure that was an arithmetic identity, and it took an independent
   review to find it; the register was right and a prompt was wrong on an earlier occasion.
-- **PR19 applies** to any code change here. An independent adversarial review of the 2026-09-06 build
+- **PR19 applies** to any code change here. An independent adversarial review of the 2026-09-04 build
   ran 29 mutations against its author's battery and found six survivors the author's own 8-mutation
   sweep had missed. **Assume your own sweep is weaker than you think it is.**
 - **Timestamp-check every present-tense mechanism fact you write (PR20).**

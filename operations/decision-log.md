@@ -34002,7 +34002,7 @@ BLOCKED; MEASURE throughout; the 0h call remains the founder's.
 
 ---
 
-## 2026-09-06 — D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-06
+## 2026-09-04 — D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-04
 
 **Decision:** §7 of the false-hold new-window scoping note is implemented in
 `website/scripts/false-hold-observation-report.ts` — the report now prints, per record, BOTH the hold

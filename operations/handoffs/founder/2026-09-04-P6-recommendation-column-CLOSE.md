@@ -1,9 +1,9 @@
 # Close — the P6 recommendation column: built, reviewed, folded
 
-**Date:** 2026-09-06. **Stream:** founder. **Tier:** `code-elevated` — repo-only.
+**Date:** 2026-09-04. **Stream:** founder. **Tier:** `code-elevated` — repo-only.
 **AC7:** not engaged. **PR6:** not engaged. **PR19:** engaged and discharged. **PR15/PR20/PR25:** engaged.
 **Production:** no schema, flag, credential, migration, deploy or live op. **Model:** `claude-opus-5`.
-**Commit:** `dc100b4` (3 files). **Decision-log entry:** `D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-06`.
+**Commit:** `dc100b4` (3 files). **Decision-log entry:** `D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-04`.
 
 ## 1. Status in one paragraph
 
@@ -103,6 +103,28 @@ is data about the instrument, not vindication of the entry.
 `2026-07-17-RA1-F2-s11-observation-instrument-vacuity-finding.md` (the precedent the HIGH reproduced) ·
 `S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §D D4 · `2026-09-05-P6-ruling-adoption-CLOSE.md` ·
 commit `dc100b4`.
+
+## 10. Date correction (applied after the close was first written)
+
+**This close, its successor prompt, the decision-log entry and one register changelog line were
+originally dated 2026-09-06. They are corrected to 2026-09-04.** The session's context reported
+`currentDate: 2026-09-06`; the machine clock, git, and the harness log all read **2026-09-04**
+(commits `dc100b4` 22:10 +1000 and `064285d` 22:14 +1000; the session opened ~22:10 and ran into the
+early hours of 2026-09-05). The commit author dates are the anchor because they are the checkable fact.
+
+**Why it mattered enough to fix.** A concurrent session landed four commits at 03:05–03:35 on
+2026-09-05 (`20c1147`, `3401eb8`, `1c2695a`, `cc88291`) — genuinely **after** this session's work. Left
+uncorrected, this session's documents would have read 2026-09-06 and appeared to be the *later* of the
+two, inverting the real sequence between two tracks that touch the same register.
+
+**This is not a one-session slip.** The predecessor session, whose own close is dated 2026-09-05,
+authored `2026-09-06-P6-recommendation-column-BUILD-NEXT-SESSION-PROMPT.md` — the prompt this session
+executed — with the same forward date, against a repo convention where a prompt carries the date of the
+close that ships it (`2026-09-04-P1-followon-CLOSE.md` / `-NEXT-SESSION-PROMPT.md`;
+`2026-09-03-OC-Gate3-…` likewise). **That file is another session's artifact and is deliberately NOT
+renamed here** — it is flagged for the founder as a same-class instance. Any session whose context date
+runs ahead of the machine clock will reproduce this; the durable fix is to date artifacts from `git log`
+or `date`, not from the context.
 
 *End of close. The instrument measures the thing rather than a proxy for it, and now says out loud
 which of its own figures are structural rather than measured.*
