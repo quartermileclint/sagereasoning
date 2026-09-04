@@ -78,6 +78,7 @@ import {
   buildMildSupportResources,
   DISTRESS_SUBJECT_FIELD_CAP,
   DISTRESS_SUBJECT_SEPARATOR,
+  SCREENED_FIELDS,
 } from '@/lib/score-conversation-r20a'
 
 // ============================================================================
@@ -119,13 +120,24 @@ function expectTrue(name: string, condition: boolean, hint?: string): void {
 
 const ROUTE_PATH = path.resolve(__dirname, '..', 'route.ts')
 
-function loadRouteSource(): { source: string; bodyOnly: string } {
+function loadRouteSource(): { source: string; bodyOnly: string; codeOnly: string } {
   const source = fs.readFileSync(ROUTE_PATH, 'utf-8')
   const bodyOnly = source
     .split('\n')
     .filter((line) => !line.trim().startsWith('import '))
     .join('\n')
-  return { source, bodyOnly }
+  // codeOnly — comments stripped. A PR19 reviewer defeated FV-1/FV-2/FV-5 by
+  // COMMENTING OUT the format check: every character the regexes matched was
+  // still in the file, so the battery reported 62/62 with the vulnerability
+  // fully restored. Source-text assertions about CODE must run on code.
+  // Deliberately additive: `source` and `bodyOnly` keep their exact prior
+  // meaning, so the pre-existing INV-*/SRC-* cases are untouched by this.
+  // (Those cases share the same weakness; that is disclosed as a named
+  // follow-up rather than silently changed under 57 passing assertions.)
+  const codeOnly = source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
+  return { source, bodyOnly, codeOnly }
 }
 
 // ============================================================================
@@ -543,6 +555,115 @@ function runHumanRenderingTests(): void {
 }
 
 // ============================================================================
+// FIELD-VALIDATION TESTS — FV-1..FV-5
+//
+// THE SCREENING-COMPLETENESS INVARIANT. composeConversationDistressSubject
+// TRUNCATES each field at DISTRESS_SUBJECT_FIELD_CAP (`value.slice(0, CAP)`),
+// but the route appends the FULL `format` to domainContext. So any field the
+// composer screens but the route does not length-validate has a window past
+// the cap that reaches the ENGINE while never reaching the CLASSIFIER.
+//
+// For `conversation` and `context` the route's own 400 boundary holds them
+// under the cap, so the slice is a no-op and screening is complete. `format`
+// was the exception -- named as "a pre-existing gap" in
+// DISTRESS_SUBJECT_FIELD_CAP's own docstring on 2026-07-07 and deferred
+// because closing it changes always-on behaviour (a new 400 path).
+//
+// FV-2 is the general form and the one worth keeping: it derives BOTH sets
+// from source and fails if a future field is added to the composer without a
+// matching length check. A grep for `format` alone would not have done that.
+// ============================================================================
+
+const SECURITY_PATH = path.resolve(__dirname, '..', '..', '..', '..', 'lib', 'security.ts')
+
+/** TEXT_LIMITS.long, read from source. NOT imported: importing security.ts
+ *  into a tsx test leaves a setInterval keepalive and the process never
+ *  exits (known harness behaviour). */
+function readTextLimitLong(): number | null {
+  const src = fs.readFileSync(SECURITY_PATH, 'utf-8')
+  const m = src.match(/export const TEXT_LIMITS[\s\S]{0,400}?\blong:\s*(\d+)/)
+  return m ? Number(m[1]) : null
+}
+
+/** Fields the route length-validates against TEXT_LIMITS.long. */
+function routeValidatedFields(code: string): Set<string> {
+  return new Set([...code.matchAll(/(\w+)\.length\s*>\s*TEXT_LIMITS\.long/g)].map((m) => m[1]))
+}
+
+/** Fields composeConversationDistressSubject screens — IMPORTED, not parsed.
+ *
+ *  This was a regex over the composer's inline array literal. A PR19 reviewer
+ *  defeated it by screening a fourth field immediately after the loop: the
+ *  composer screened it, the route bounded it nowhere, the parse still
+ *  returned the original three, and the battery stayed green. The composer now
+ *  ITERATES the exported SCREENED_FIELDS, so this set is the one actually
+ *  used at runtime rather than a text approximation of it. */
+function composerScreenedFields(): Set<string> {
+  return new Set<string>(SCREENED_FIELDS)
+}
+
+function runFieldValidationTests(): void {
+  const { codeOnly } = loadRouteSource()
+  const limitLong = readTextLimitLong()
+  const validated = routeValidatedFields(codeOnly)
+  const screened = composerScreenedFields()
+
+  expectTrue(
+    'FV-1 route length-validates `format` against TEXT_LIMITS.long',
+    validated.has('format'),
+  )
+
+  const unbounded = [...screened].filter((f) => !validated.has(f))
+  expectEq(
+    'FV-2 every field the distress composer screens is length-bounded by the route ' +
+      '(an unbounded one reaches the engine past the cap without being screened)',
+    unbounded.join(',') || '(none)',
+    '(none)',
+  )
+
+  expectTrue(
+    'FV-3 TEXT_LIMITS.long <= DISTRESS_SUBJECT_FIELD_CAP (no route-valid field is truncated before screening)',
+    limitLong !== null && limitLong <= DISTRESS_SUBJECT_FIELD_CAP,
+  )
+
+  // Non-vacuity: the route-side extractor must actually find fields. If it
+  // returned an empty set, FV-2 would pass by finding nothing -- a green tick
+  // on a check that examined nothing. (The composer side is now imported, so
+  // it cannot silently collapse; before that change a PR19 reviewer confirmed
+  // renaming the loop variable emptied it and only this case objected.)
+  //
+  // ITS LIMIT, stated because it matters: this detects TOTAL extractor
+  // failure, not partial under-counting.
+  expectTrue(
+    'FV-4 field extractors are non-vacuous (route validates >=2 fields; composer screens >=3)',
+    validated.size >= 2 && screened.size >= 3,
+  )
+
+  // FV-5 is a CONSISTENCY check, not a safety one -- it survives a wrong-limit
+  // mutation and is satisfied by commented-out text unless read from codeOnly.
+  // Do not count it toward coverage; FV-1/FV-2 carry the guarantee.
+  expectTrue(
+    'FV-5 the format 400 names the field and the limit, as its siblings do (consistency, not safety)',
+    /format exceeds maximum length of \$\{TEXT_LIMITS\.long\} characters/.test(codeOnly),
+  )
+
+  // FV-6 ORDERING. A reviewer moved the check verbatim to after the engine
+  // call and the battery still reported 62/62 -- the route would then 400 on
+  // an oversized `format` only after the engine had already consumed it,
+  // which is the precise harm the check exists to prevent. Presence is not
+  // enough; position is the guarantee.
+  {
+    const fmtIdx = codeOnly.indexOf('format.length')
+    const flagIdx = codeOnly.indexOf('isScoreConversationR20aEnabled()')
+    const engineIdx = codeOnly.indexOf('await runSageReason(')
+    expectTrue(
+      'FV-6 the format length check precedes both the R20a block and the engine call',
+      fmtIdx > -1 && flagIdx > -1 && engineIdx > -1 && fmtIdx < flagIdx && fmtIdx < engineIdx,
+    )
+  }
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 
@@ -553,6 +674,7 @@ async function main(): Promise<void> {
   runStructuralTests()
   runFlagTests()
   runSubjectCompositionTests()
+  runFieldValidationTests()
   await runMildEscalationTests()
   runMildFoldTests()
   runHumanRenderingTests()

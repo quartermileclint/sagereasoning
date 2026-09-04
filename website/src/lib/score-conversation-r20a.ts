@@ -16,9 +16,12 @@
  *   1. isScoreConversationR20aEnabled() — the feature flag check. Mirrors
  *      the posture of isCallingR20aEnabled / isReflectR20aEnabled in
  *      substrate/r20a-gate.ts: defaults OFF; only the literal string 'true'
- *      enables. Flag UNSET ⇒ the route is byte-identical to pre-wiring
- *      behaviour (no classifier call, no added latency, no wire-shape
- *      change). The flag lives with its mechanism (the same convention as
+ *      enables. Flag UNSET ⇒ the R20a BLOCK is skipped entirely (no
+ *      classifier call, no added latency, no wire-shape change). NOTE
+ *      (2026-09-05): this is no longer the same as "byte-identical to
+ *      pre-wiring" for the route as a whole — the always-on `format` length
+ *      check added that day sits OUTSIDE this flag, so a >15,000-char
+ *      `format` now 400s in either flag state. The flag lives with its mechanism (the same convention as
  *      the audience-renderer flag living in r20a-audience-renderer.ts).
  *
  *   2. composeConversationDistressSubject() — decides WHAT text the
@@ -75,7 +78,10 @@
  * evaluation proceeded WITH `result.support_resources {severity:'mild'}`
  * riding additively. This closed the S8b 0h-exit supporting blocker (c) —
  * the S8a "inside-perimeter exception" no longer exists.
- * Rollback = unset the flag + redeploy (byte-identical flag-off, test-asserted).
+ * Rollback = unset the flag + redeploy. CORRECTED 2026-09-05: this reverts the
+ * R20a block only. It does NOT restore pre-wiring behaviour for a
+ * >15,000-char `format`, because that check is always-on by design. Reverting
+ * that too requires reverting the code, not unsetting the flag.
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC2
  * (~500ms borderline-classifier latency accepted); AC4 (invocation-tested —
@@ -99,9 +105,10 @@ import { evaluateBorderlineDistress } from '@/lib/r20a-classifier'
 
 /**
  * Defaults to OFF. Gates the entire R20a block on /api/score-conversation.
- * When OFF (the steady-state production behaviour at build close), the route
- * is byte-identical to pre-wiring behaviour: no classifier call, no added
- * latency, no wire-shape change, no `support_resources` field.
+ * When OFF, this BLOCK contributes nothing: no classifier call, no added
+ * latency, no wire-shape change, no `support_resources` field. CORRECTED
+ * 2026-09-05: that is a claim about the block, not about the whole route —
+ * the always-on `format` length check is outside this flag.
  *
  * Independence: this flag is independent of SUBSTRATE_R20A_GATE_ENABLED (A7),
  * SUBSTRATE_CALLING_R20A_ENABLED, SUBSTRATE_REFLECT_R20A_ENABLED, and
@@ -119,9 +126,13 @@ export function isScoreConversationR20aEnabled(): boolean {
 /**
  * DISTRESS_SUBJECT_FIELD_CAP — per-field ceiling on what each submission
  * field contributes to the distress-check subject. Mirrors TEXT_LIMITS.long
- * (security.ts), which the route already enforces on `conversation` and
- * `context` at the 400 boundary — so the cap only truly bites on `format`,
- * the one field the route does not length-validate (a pre-existing gap).
+ * (security.ts), which the route enforces on `conversation`, `context` AND
+ * `format` at the 400 boundary — so the cap is now a no-op for every field
+ * that survives validation, and screening is provably complete.
+ *
+ * CORRECTED 2026-09-05: this previously read that `format` was "the one field
+ * the route does not length-validate (a pre-existing gap)". That gap is
+ * closed; the route now validates all three on the same footing.
  *
  * Adversarial-review fold (2026-07-07, findings F2/F6/F7): without the cap,
  * an oversized `format` (the route accepts multi-MB bodies) blows the
@@ -132,9 +143,9 @@ export function isScoreConversationR20aEnabled(): boolean {
  * stages always run. Disclosed residual: distress text past the first
  * 15,000 chars of a single field does not reach the classifier — the same
  * TEXT_LIMITS posture every sibling perimeter route already has. (The
- * always-on `format` length validation at the 400 boundary is a named
- * follow-up: it changes flag-off behaviour, so it cannot ride this
- * flag-gated build.)
+ * always-on `format` length validation was landed 2026-09-05; because it is
+ * always-on rather than flag-gated, it makes the flag-off byte-identity claim
+ * below narrower than it was — see the corrected note there.)
  */
 export const DISTRESS_SUBJECT_FIELD_CAP = 15000
 
@@ -166,13 +177,35 @@ export const DISTRESS_SUBJECT_SEPARATOR = '\n\n---\n\n'
  * that word cut must still reach the check — the subject is composed from
  * the raw fields, not the engine-truncated text.
  */
+/**
+ * SCREENED_FIELDS — the submission fields the distress check runs over, in
+ * submission order.
+ *
+ * EXPORTED AND ITERATED, not merely documented. The route's battery imports
+ * this constant and asserts every member is length-bounded at the route's 400
+ * boundary (FV-2). That pairing is load-bearing: the composer TRUNCATES each
+ * field at DISTRESS_SUBJECT_FIELD_CAP, so a field screened here but unbounded
+ * there is cut before screening while still reaching the engine in full.
+ *
+ * This was previously an inline array literal, and FV-2 parsed it out of the
+ * source text. A PR19 reviewer defeated that by screening a fourth field
+ * immediately after the loop: the composer screened it, the route bounded it
+ * nowhere, and the battery still reported 62/62. Iterating an exported
+ * constant converts the check from a text heuristic into a structural one --
+ * a field added outside this constant is not screened at all (which the
+ * composer's own CS-* tests catch), and a field added to it without a route
+ * length check trips FV-2.
+ */
+export const SCREENED_FIELDS = ['conversation', 'context', 'format'] as const
+
 export function composeConversationDistressSubject(fields: {
   conversation?: unknown
   context?: unknown
   format?: unknown
 }): string {
   const parts: string[] = []
-  for (const value of [fields.conversation, fields.context, fields.format]) {
+  for (const key of SCREENED_FIELDS) {
+    const value = fields[key]
     if (typeof value === 'string' && value.trim().length > 0) {
       parts.push(value.slice(0, DISTRESS_SUBJECT_FIELD_CAP))
     }

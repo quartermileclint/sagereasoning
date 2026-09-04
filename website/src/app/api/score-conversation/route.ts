@@ -120,6 +120,51 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    // `format` is length-validated on the same footing as its siblings.
+    //
+    // WHY THIS IS NOT MERELY INPUT VALIDATION. composeConversationDistressSubject
+    // TRUNCATES each field at DISTRESS_SUBJECT_FIELD_CAP, while the route below
+    // appends the FULL `format` to domainContext, which sage-reason-engine
+    // forwards to the model untruncated. Without this check, text past the cap
+    // reached the ENGINE having never reached the CLASSIFIER. The gap was named
+    // in DISTRESS_SUBJECT_FIELD_CAP's own docstring on 2026-07-07 ("the one
+    // field the route does not length-validate") and deferred because closing
+    // it changes always-on behaviour: a new 400 path, not flag-off safe.
+    //
+    // THE PRECISE CONDITIONS, since the sentence above is unconditional and the
+    // behaviour is not (PR19 fold): it required the R20a flag ON, a `format` of
+    // >=15,001 chars, AND the screened first 15,000 chars coming back benign --
+    // an acute/moderate hit returns before domainContext is built, so nothing
+    // reached the engine in that case anyway.
+    //
+    // WHAT THIS CHECK COSTS, disclosed rather than glossed (PR19 fold). It sits
+    // BEFORE the R20a block, matching its siblings. So an oversized `format`
+    // that DOES carry distress in its first 15,000 chars now receives a bare
+    // 400 instead of the crisis redirect it would previously have triggered.
+    // The engine-leak direction is closed either way, but the perimeter's other
+    // purpose -- surfacing crisis resources to a distressed human -- is lost for
+    // that input class. Placing this after the R20a block would be strictly
+    // stronger on that axis, at the cost of letting oversized requests reach the
+    // classifier (a bounded but real cost-amplification vector, since
+    // escalateMildDistress can call Haiku). BOTH sibling checks have the same
+    // property, so this follows the route's existing posture rather than
+    // inventing one. Changing it is a perimeter-ordering decision for the whole
+    // route, not for this field alone -- named for the founder, NOT taken here.
+    //
+    // BREAKING CHANGE, characterised exactly: requests with a STRING `format`
+    // longer than TEXT_LIMITS.long now 400 where they previously succeeded,
+    // in either flag state. No in-repo caller is affected (mentor-hub sends
+    // `conversation` alone); any external API consumer is.
+    //
+    // The invariant is enforced by FV-2 in the route's battery, which IMPORTS
+    // the composer's SCREENED_FIELDS rather than parsing it: every field the
+    // composer actually iterates must be length-bounded here.
+    if (format && typeof format === 'string' && format.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `format exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
+    }
 
     if (!conversation || typeof conversation !== 'string' || conversation.trim().length < 20) {
       return NextResponse.json(
@@ -137,10 +182,17 @@ export async function POST(request: NextRequest) {
     // D-S8A-OPEN-DECISIONS-2026-06-10 decision 2).
     //
     // FLAG-GATED behind SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED (default
-    // OFF). When UNSET, this entire block is skipped and the route is
-    // byte-identical to pre-wiring behaviour — no classifier call, no added
-    // latency, no wire-shape change. Activation is a founder-walked Critical
-    // step (flag + redeploy + live smoke); rollback = unset the flag.
+    // OFF). When UNSET, this entire block is skipped — no classifier call, no
+    // added latency, no wire-shape change. Activation is a founder-walked
+    // Critical step (flag + redeploy + live smoke); rollback = unset the flag.
+    //
+    // CORRECTED 2026-09-05 (PR19 fold): this previously said flag-off made the
+    // ROUTE "byte-identical to pre-wiring behaviour". That is a claim about
+    // this BLOCK, and it is no longer true of the route — the always-on
+    // `format` length check above sits outside this flag, so unsetting the flag
+    // does NOT restore pre-wiring behaviour for a >15,000-char `format`.
+    // Reverting that requires reverting the code. The distinction matters
+    // because it is the documented rollback path of a Critical activation.
     //
     // The check subject is the submitted free text (conversation + context +
     // format), each field capped at 15,000 chars (TEXT_LIMITS.long posture)
