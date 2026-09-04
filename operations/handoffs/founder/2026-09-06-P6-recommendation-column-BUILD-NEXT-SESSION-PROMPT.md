@@ -2,8 +2,8 @@
 
 **Designed to run start-to-finish without you.** Every step is repo-only: no schema, flag, credential,
 migration, deploy, live op, or public-doc change, and nothing in it can start the observation window.
-The only thing needing you is **question Q-A below**, and if you leave it unanswered the session still
-completes — it just skips one housekeeping item.
+**All four open questions were answered by the founder on 2026-09-05** (see "Founder decisions" below);
+the build task is licensed and needs nothing further. One housekeeping item is carried and blocks nothing.
 
 **Read first, in this order:** `/adopted/standing-protocol-cache.md` →
 `operations/handoffs/founder/2026-09-05-P6-ruling-adoption-CLOSE.md` **including its §7** (PR21) →
@@ -80,60 +80,42 @@ treating it as verified; the spend-limit first-hand fallback is codified if the 
 
 ---
 
-## Questions holding things up — with recommendations
+## Founder decisions — all four answered 2026-09-05, nothing here is open
 
-### Q-A (the only one that blocks anything) — the register changelog write
+- **Q-B — the report-script build is LICENSED.** Founder: *"yes"*. The task above proceeds; no further
+  permission is needed for it.
+- **Q-C — register D4's activation walk gets its own session.** Founder: *"its own session"*. Do **not**
+  fold it into this one. It is founder-walked `code-critical`, AC7 engages, and it cannot be autonomous.
+- **Q-D — the 2026-09-01 score-save prompt is committed as-is.** Founder: *"commit as-is"*. Done
+  2026-09-05; it should no longer appear in `git status`.
+- **Q-A — the register changelog write is AUTHORISED but still UNAPPLIED.** Founder: *"proceed with
+  changelog write"*. **See the section immediately below — this is the one carried item.**
 
-Two changelog entries for `S11-FLIP-PREREQUISITES-REGISTER.md` are **prepared and unapplied**: the
-2026-09-05 ruling, and a retroactive entry for the 2026-08-17 P8a build whose absence let P5's row
-assert a falsified fact for 19 days. **The at-action guardrail denied the write twice**
-(`do_not_proceed`, proximity `reflexive`; ground: a non-consented cost). The deny was honored — not
-trimmed past, not re-routed through another tool.
+## The one carried item — the register changelog (authorised, guard-denied four times)
 
-Re-examination found the stated cost does not obtain (the register diff carried only that session's own
-edits; the concurrent peer was in a different directory; a backup was taken). The likely cause is the
-documented corroboration over-strictness class — protective text dense with the harm vocabulary it
-describes preventing.
+Two entries for `S11-FLIP-PREREQUISITES-REGISTER.md` remain unapplied: the 2026-09-05 ruling, and a
+retroactive entry for the 2026-08-17 P8a build. **The founder has explicitly authorised the write.**
 
-**Recommendation: apply them yourself from `scratchpad/chg.py`** (exact text, ready; backup at
-`scratchpad/register.bak`), **or** reply "proceed with the changelog write" and the next session does it
-with your instruction as the ground. **Either way the build task above is unblocked** — this is
-housekeeping, not a dependency. *Recommended: you apply it, since it costs you one paste and needs no
-judgement.*
+**The at-action guardrail denied it four times** — `do_not_proceed`, proximity `reflexive`, ground each
+time: *"the action text shows a non-consented cost no extracted circle carries as violated."* The 2026-09-05
+session honored every deny. Two genuine adjustments were made and neither cleared it: concurrency was
+verified (the register diff carried only that session's edits; the peer worked elsewhere; a backup was
+taken), and the entry's blame-shaped framing about a late record was removed. The session then stopped
+rather than keep rewording until something passed, on the ground that searching for a phrasing that
+clears a detector is worse than the entry being late.
 
-### Q-B — is the report-script build licensed?
+**Prepared text:** `scratchpad/chg.py` (a small Python script that asserts a single anchor match before
+writing). **Backup:** `scratchpad/register.bak`.
 
-The ruling licenses no build; **R2's contents remain yours.** But the ruling also removed this work from
-R2 entirely: report-time derivation touches no capture-layer file, so it carries **no contamination
-exposure and no R2 deadline**, and can land at any time without affecting when the window opens.
+**How to handle it, in preference order:**
 
-**Recommendation: yes, license it, and it is the task above.** It is pure report-script work, dark by
-construction (the report reads a buffer that is not being written), fully verifiable offline, and it is
-the single largest thing an unattended session can complete on this track. *If you say nothing, treat
-Q-B as licensed* — this prompt is written on that assumption, and the "must not do" list is what keeps
-it safe.
+1. **Founder pastes it.** One paste, no judgement needed, and it ends the matter.
+2. **Attempt it once, early in the session, before anything else.** A fresh session composes different
+   action text, so it may simply clear. **If it denies, do not retry more than once and do not reword to
+   get past it** — record the deny and move on to the build task, which does not depend on it.
+3. **Never** route around a deny by switching tools to write the same content.
 
-### Q-C — register D4's activation walk (Option F, still open)
-
-Founder-walked `code-critical`; **AC7 engages and you run every live step**, so it cannot be autonomous.
-Its ordering is fixed by its own register row: re-read D1's `justice_floor_active` for
-`sagereasoning:s9-loop@v1`/dikaiosyne first (the harness is live and writing — it may have re-latched
-since the 2026-07-18 clear), then deploy and verify the narrowed reducer on `origin/main`, then the
-flag, with any SQL correction's rollback pre-written. Carries its own R18 decision.
-
-**Recommendation: schedule it as its own attended session, not folded into this one.** It is the last
-genuinely-blocked item on this track.
-
-### Q-D — the untracked score-save prompt
-
-`operations/handoffs/founder/2026-09-01-score-save-perimeter-activation-NEXT-SESSION-PROMPT.md` has sat
-untracked for four days across several sessions, each declaring it out of scope.
-
-**Recommendation: commit it as-is** (it is a handoff document; leaving it untracked risks losing it),
-**or** say it is superseded and it gets deleted. *One word either way.* Low stakes, but it will keep
-appearing in every `git status` until it is settled.
-
----
+**This is housekeeping and blocks nothing.** The build task above is independent of it.
 
 ## Standing constraints
 
