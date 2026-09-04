@@ -543,7 +543,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   const fullPath = path.join(websiteRoot, routePath)
   assert(fs.existsSync(fullPath) === true, `${label} (file exists)`)
 
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   // Check import statement
   const hasImport =
@@ -677,7 +677,7 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   const fullPath = path.join(websiteRoot, routePath)
   assert(fs.existsSync(fullPath) === true, `${label} (file exists)`)
 
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   // Check import of the safety gate wrapper
   const hasGateImport =
@@ -724,7 +724,7 @@ for (const { route } of SUBSTRATE_GATE_ROUTES) {
   const fullPath = path.join(websiteRoot, route)
   assert(fs.existsSync(fullPath) === true, `${label} (file exists)`)
 
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   const hasImport =
     source.includes('import') &&
@@ -738,7 +738,7 @@ for (const { route } of SUBSTRATE_GATE_ROUTES) {
 for (const { route, flag } of SUBSTRATE_GATE_ROUTES) {
   const label = `R20a Safety Invocation Guard: ${route} imports its substrate-gate feature flag ${flag} from substrate/r20a-gate (Option A — feature-gated catch)`
   const fullPath = path.join(websiteRoot, route)
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   // Each substrate-gate route names its own feature flag check (mirroring
   // isSubstrateR20aGateEnabled for A7). The check MUST be imported from
@@ -808,7 +808,7 @@ for (const { route, flag, flagSource } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
   const fullPath = path.join(websiteRoot, route)
   assert(fs.existsSync(fullPath) === true, `${label} (file exists)`)
 
-  const source = fs.readFileSync(fullPath, 'utf-8')
+  const source = stripComments(fs.readFileSync(fullPath, 'utf-8'))
 
   const hasFlagImport =
     source.includes('import') &&
@@ -1580,6 +1580,56 @@ assert(
     const r = scanForCounts(hist)
     assert(r.length === 1 && r[0].includes('Current count'), 'historical-record skip covers the record and stops at its end')
   }
+}
+
+// ---------------------------------------------------------------------------
+// SELF-SCAN — every per-route source read must be COMMENT-STRIPPED
+//
+// ADDED 2026-09-06. The five per-route IMPORT assertions read raw file text
+// while their sibling CALL assertions had always stripped comments. A route
+// whose safety import was COMMENTED OUT therefore satisfied the import guard:
+// the commented-out line still contains "import", the function name and the
+// module path, so `.includes()` found all three.
+//
+// MUTATION-PROVEN in both directions before this pin was written. Commenting
+// out the detectDistressTwoStage import in api/journal/route.ts left the suite
+// at 720 passed / 0 failed under the raw read, and produced 719/1 once the read
+// was stripped. The hole was real; it is now closed.
+//
+// This pin arrests the CLASS, not those five instances. Scoping a guard to
+// where the last instance happened is the failure this file already records
+// twice (the perimeter count; the flag-pair tally) — a narrow guard is worse
+// than none, because it looks like coverage. Any newly added per-route read
+// bound to `source` must pass through stripComments() or this fails.
+//
+// NOT covered, deliberately: `selfSrc` scans (they read comments BY DESIGN),
+// and `routeSrc`/`handlerSrc` (fed to stripCommentsAndStringLiterals
+// separately). Those bind different names, so this scan does not reach them.
+{
+  const selfPath = path.join(process.cwd(), 'src/lib/__tests__/r20a-invocation-guard.test.ts')
+  const selfSrc = fs.readFileSync(selfPath, 'utf8')
+  const perRouteReads = selfSrc
+    .split('\n')
+    .map((l, i) => ({ l, n: i + 1 }))
+    .filter(({ l }) => /const\s+source\s*=/.test(l) && l.includes('readFileSync'))
+
+  const rawReads = perRouteReads
+    .filter(({ l }) => !l.includes('stripComments('))
+    .map(({ n, l }) => `line ${n}: ${l.trim()}`)
+
+  assert(
+    rawReads.length === 0,
+    `R20a guard self-scan: every per-route source read must be comment-stripped, or a ` +
+      `commented-out safety import/call satisfies its assertion. Raw read(s) — ` +
+      rawReads.join(' | ')
+  )
+
+  // Non-vacuity: a scan that stops finding the reads it guards passes silently.
+  assert(
+    perRouteReads.length >= 11,
+    `R20a guard self-scan non-vacuity: expected at least 11 per-route reads to scan, ` +
+      `saw ${perRouteReads.length} — the scan has stopped reaching them`
+  )
 }
 
 {
