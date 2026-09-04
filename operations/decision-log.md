@@ -35045,3 +35045,51 @@ Expected: `0`. And `GET /api/accreditation/sagereasoning:d4-proof@v1` → **404*
 `2026-09-05-D4-activation-and-F3prime-CLOSE.md` §5/§6,
 `2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` **M-1**,
 `S11-FLIP-PREREQUISITES-REGISTER.md` §D D1/D2/D4.
+
+---
+
+## 2026-09-06 — D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06
+
+**Decision:** Record the founder-performed push + deploy of `0126645` (the format-guard move) and
+`97db750` (its PR19 fold) as **LIVE**. **`governance`** — documents only; the AI performed no push or
+deploy operation.
+
+**Verified, not merely reported.** The founder stated the push landed and Vercel is green. Confirmed
+independently, read-only: `git fetch origin main` shows both `0126645` and `97db750` as ancestors of
+`origin/main` (`git merge-base --is-ancestor`, both true); a live unauthenticated POST to
+`/api/score-conversation` returns **401** (cookie/JWT auth, no session — expected, no write occurs
+before auth). This does not exercise the new ordering itself (that needs an authenticated smoke,
+owed and not run this session — no credential was minted, per the standing instruction against doing
+so unilaterally).
+
+**Production is NOT byte-equivalent** to the state the 2026-09-06 item-E block otherwise describes.
+`/CLAUDE.md`'s "not decided here, and the guard was deliberately not moved" sentence is now false;
+annotated in place (not rewritten) per the file's own established convention, since it was accurate
+when written.
+
+**Files touched:**
+- `CLAUDE.md` — one sentence annotated with the ruling's outcome, the move, the PR19 fold, and the
+  push confirmation.
+
+**Risk classification:** Standard under 0d-ii — documentation only. AC7 not engaged (the founder
+performed the push/deploy; this entry records it, does not perform it). PR18 engaged.
+
+**Verification step (founder-performable):**
+```
+git log --oneline -1 origin/main
+git merge-base --is-ancestor 97db750 origin/main && echo "confirmed live"
+```
+
+**Open questions:** the authenticated live smoke of the new ordering (an oversized `format` on a
+distressed conversation should now return the crisis redirect, not a 400) has not been run. Also
+owed: the perimeter-wide audit itself, and the `conversation` minimum-length guard the ruling's
+sharper case names.
+
+**Rollback path:** `git revert` `0126645` and `97db750` together + redeploy (reverting only one would
+either restore the defective pin or restore the pre-ruling behaviour with the fixed pin still
+claiming to guard a guard that no longer exists at the old site).
+
+**Rules served:** PR18.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
+`D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06`.
