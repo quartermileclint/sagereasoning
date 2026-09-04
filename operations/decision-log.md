@@ -33415,3 +33415,50 @@ column-1 reproduction ✓.
 `2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md` (binding),
 `2026-07-17-F2-mentor-briefing.md` §9 (the reconstruction this is comparable to),
 `S11-FLIP-PREREQUISITES-REGISTER.md` §A P1 / P4 / P5 / P6.
+
+---
+
+## D-S11-REGISTER-D5-ROW-CLOSED-2026-09-04
+
+**Decision:** Close register §D row **D5** on founder instruction, the fix now being pushed and Vercel
+green. Documents only — `governance`. No code, schema, flag, credential, or public-doc change.
+
+**What was verified before writing the closure** (source, not the prompt's prose or the prior entry):
+`readTrustVerdict`'s `taskHasJusticeSurface` is **REQUIRED** — `harness-integration.ts:531`, no `?`, so
+tsc refuses an omitting caller — and all three call sites state it with a reason
+(`api/practice/discernment/handler.ts:197`, `api/trust-record/[agent_id]/handler.ts:157`,
+`scripts/false-hold-observation-report.ts:358`); the `basis` string is re-labelled per the ruling's
+third consequence at `harness-integration.ts:605`. `origin/main` = `d74aea0`, in sync.
+
+**The closure claim, stated precisely: NO LIVE OUTPUT CHANGED.** `false` yields the same
+`justiceSurface: 'none'` the default yielded, so no production behaviour moved. What changed is the
+**warrant** — the instrument no longer reports a result without having performed the relevant test; it
+now states the test is inapplicable at these call sites. That is exactly the MEASURE-mode honesty
+defect the mentor named, so this is what closure means here, and it is not a behaviour fix. Recorded
+this way so no future reader takes D5's closure as evidence that the advisory's output improved.
+
+**Two things done beyond the instruction, both to stop a failure class this project keeps repeating:**
+
+1. **The D5 Item cell is marked AS FOUND.** It describes the defect in the present tense and cites
+   pre-fix line numbers; per this file's own "do not delete it" discipline it was preserved rather than
+   rewritten, so it now carries an explicit warning that every present-tense claim in it is false of
+   current code. A stale present-tense mechanism fact read as current is the class behind the R20a
+   perimeter-count drift and PR20's own strengthening.
+2. **A changelog entry for the P1 build session, which had none** — the register carried the ruling but
+   not the build, the D5 closure, or the re-run. Added newest-first to match the existing ordering.
+
+**A clarification carried into that entry:** the §A P1 row's "129 do-not-proceed / 1 pause over the
+frozen 130" is **correct as written** and was read wrongly at first — it spans all 130 records
+including the one `closed` one. The re-run's first pass restricted to the 129 holds, got 128 / 1, and
+that looked like a failed reproduction until the population difference was found. Both populations are
+now reported. The register was not corrected, because it was not wrong.
+
+**The standing hazard is recorded on the row** rather than left implicit: passing `true` without S3
+obligation routing routes to `'unevaluated'` ⇒ do-not-proceed for every agent. The two live `false`
+call sites are load-bearing and must not be flipped; a genuine task-scoped read is a different call
+site.
+
+**Status:** Adopted. P4/P5/P6 unmoved; the S11 flip remains **REFUSED**. Cross-references:
+`D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the fix),
+`D-S11-P1-FROZEN-BUFFER-RECLASSIFIED-UNDER-FILTERED-READING-2026-09-04` (which flagged the
+discrepancy), `S11-FLIP-PREREQUISITES-REGISTER.md` §D row D5.
