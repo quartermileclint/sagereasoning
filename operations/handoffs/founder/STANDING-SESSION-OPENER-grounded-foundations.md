@@ -1,87 +1,119 @@
 # Standing Session Opener — Grounded Foundations
 
-**Version 2026-08-29** (amends the 2026-08-15 version, archived at
-`archive/2026-08-15_STANDING-SESSION-OPENER-grounded-foundations.md`; predecessors at
-`archive/2026-08-12_…`, `archive/2026-08-01_…`).
+**Version 2026-09-05** (amends the 2026-08-29 version, archived at
+`archive/2026-08-29_STANDING-SESSION-OPENER-grounded-foundations.md`; predecessors at
+`archive/2026-08-15_…`, `archive/2026-08-12_…`, `archive/2026-08-01_…`).
 
-> **How this version was grounded.** Written by a Fable 5 session on 2026-08-29 that re-derived the
-> whole 2026-08-15 → 2026-08-26 window from primary sources: every decision-log heading in the window
-> (~115 entries, read in full via twelve parallel segment-readers whose outputs were then synthesised
-> and spot-verified first-hand), the four most recent closes, the concurrent-arc plan, the
-> outstanding-open-questions register, the primal-substrate priority index (incl. its gates table and
-> named-input register), the prompt↔close discharge audit across every handoff file dated 08-15→08-26,
-> and direct first-hand checks of git state, the R20a registry arrays, flag names in source, and the
-> founder's dogfood `settings.local.json`. Load-bearing production claims were verified where a repo
-> session can verify them (one — the EE-C1 wire wording — was observed live in this session's own
-> Gate-1 frame); claims a repo session cannot verify are marked **unverified**. The record's last
-> activity is **2026-08-26** (three quiet days before this writing); `git log origin/main..HEAD` was
-> **empty** at writing — everything is pushed. Re-derive both facts at your own open.
+> **How this version was grounded.** Written by a Fable 5.1 session on 2026-09-05 (Sat, AEST) that
+> re-derived the whole 2026-08-29 → 2026-09-05 window from primary sources, **first-hand and without
+> subagents**: every decision-log entry from `D-STANDING-OPENER-2026-08-29-UPDATE` to the physical
+> tail (`D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06`, ~75 entries, read in full); the
+> fourteen session closes dated 2026-09-03 → 2026-09-06-labelled; every open or recently-spent
+> next-session prompt; the S11 register in full; the priority index's head and named-input register;
+> the 2026-08-24 outstanding-questions register and its 08-30 addendum; the count-discipline
+> directory; the standing protocol cache; and direct first-hand checks of git state, the R20a registry
+> arrays, the agent-card extension count, the PR range by enumeration, `vercel.json`, the founder's
+> dogfood `settings.local.json` (keys only — no token read), the live `gate1.log`, the false-hold
+> buffer, and one unauthenticated public GET (`llms.txt`). Claims a repo session cannot verify —
+> Vercel environment values, Supabase state, whether the founder has pushed — are marked
+> **unverified** rather than restated. **The record's last activity is 2026-09-05 09:15 AEST**
+> (`099b218`); at writing `git log origin/main..HEAD` showed **one unpushed records commit**
+> (`099b218` — the founder pushes). Re-derive both facts at your own open.
 
 **For the founder. Paste this as the FIRST message of a new session, then state your task beneath it
 (or in your next message).** This opener grounds the session in the project's current state and the
 trust-layer harness *before* any work begins, under the standard protocol. It is **reusable across
-any task** — a preamble, **not a task**: read, confirm, then wait for the task.
+any task** — a preamble, **not a task**: read, confirm, then wait for the task. **The prioritised
+session plan is the "Standing queue" section below; the first-priority session has its own
+paste-ready prompt** (`2026-09-05-SESSION-1-r20a-perimeter-ordering-audit-SESSION-PASTE.md`).
 
 ---
 
 ## ⚠️ The facts every session in this window must know before anything else
 
-1. **The IDEA-loop bounded validation run is OVER.** The 08-15 opener's top box (a live run in a
-   scratch project, parallel-window fences, Mode 1/2/3 pre-flights) is **retired**. The mentor ruled
-   **stop at 20 cycles** (2026-08-16; option "one more cycle" explicitly rejected; "the founder ends
-   the run; the runner does not"), the **§6 report was compiled from live production data and
-   accepted by the mentor IN FULL** ("the epistemic standard the project has been building toward")
-   — `operations/agent-circles-2026-08/2026-08-16-idea-loop-S6-report.md`. Final figures: 20 cycles,
-   15 winner / 3 dependency_unavailable / 2 null_cycle; $6.82 total; h7 wins split three ways (4
-   contested tie-break / 1 uncontested / **0 contested out-scoring**); h5 zero wins
-   (reach/competitiveness decoupled); h6 zero candidates (session-boundary flattening — a standing
-   hard infrastructure requirement). The parallel-window fences are moot. Post-run gates opened and
-   were then largely traversed (see Part B).
+1. **Production has changed six times since the 08-29 opener, all founder-walked or founder-pushed,
+   all recorded, none reverted.** In order: the **verdict-variance disclosure** on the public R18
+   surfaces + `TRUST_RECORD_ENVELOPE` (08-30/31 — n=100, 12%, Wilson 7.0–19.8%, per-probe leads, no
+   directional split, the borderline class split, live-verified at all seven places); **provenance
+   ledger slice 3** + the **404-contract alignment** (08-30/31 — served `provenance_gaps`, the ENV-1
+   gate relaxed, live under the already-`true` `SUBSTRATE_PROVENANCE_LEDGER_ENABLED`; **unsetting
+   that flag is NOT a rollback path**); **`/api/score/save` joined the R20a perimeter** (09-02,
+   `SUBSTRATE_SCORE_SAVE_R20A_ENABLED=true`, 422 refusal, ten fields screened); the **PostgREST
+   row-cap fixes** — founder-hub thread + C1 + C4, 24+ sites now exhaustive-read (09-03, code-only);
+   **register D4 activated** (09-05, `SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true` — a
+   self-only-circle assessment emits no `dikaiosyne` justice event; **took-effect proven the same
+   day** on a torn-down throwaway); and the **`/api/score-conversation` `format` length guard**
+   landed (09-05, always-on, `4c1cd94`) **then MOVED behind the distress check** under a mentor
+   ruling the same day (`0126645` + PR19 fold `97db750`; both on `origin/main`, Vercel green).
+   **Three guards still precede that route's R20a block** (`conversation` max, `context` max, and the
+   `conversation` **minimum** `<20` — the ruling's sharpest case: a 14-character cry for help still
+   400s before the check runs). Rollback for the guard work is `git revert` of those three commits
+   together, never a flag.
 
-2. **A live record-only observation window is running instead: the provenance ledger.**
-   `SUBSTRATE_PROVENANCE_LEDGER_ENABLED=true` in Vercel (all environments) since **2026-08-26**
-   (`D-PROVENANCE-LEDGER-SLICE2-ACTIVATION-LIVE-2026-08-26`). Every credential-bearing,
-   successfully-signed `/api/reason` consult writes one `agent_provenance_ledger` row
-   (`sha256(signature) → layer1_source`), and every accreditation write runs the classification
-   **record-only** (`classifyProvenanceArtifact` → permit / no_ledger_entry / out_of_window /
-   identity_mismatch / caller_supplied_extraction; logs, never refuses, never writes
-   `agent_provenance_gaps`). **The founder-run readiness watch for slice 5 (ENFORCE) started at
-   activation**: SCOPE §9's C2 threshold needs two consecutive weeks of 100% ledger-eligible-artifact
-   resolution in the Vercel function logs (`[trust-core][provenance-ledger] classify …`) — nominally
-   reaching eligibility ~2026-09-09. Slice 5 additionally waits on slice 3 (the served
-   `provenance_gaps` sibling field + the §10 attestation amendment, wording already founder-signed)
-   and the other switch-on conditions. The harness (`sagereasoning:s9-loop@v1`) is **excluded by
-   name** from C1's denominator by mentor ruling (its consult credential is owner-less by design, so
-   its identities never cohere; deferral ruled single-agent, not policy).
+2. **A cluster of records is labelled one day ahead of reality — read past it, do not fix it.**
+   Everything labelled "2026-09-06" or "2026-09-07" (the CLAUDE.md item-E block; the post-sweep
+   close + prompt; the R20a ordering ruling verbatim; the environmental-scan scope; the audit prompt;
+   the five decision-log entries headed 2026-09-06; the P6 BUILD prompt) was **authored on
+   2026-09-05 AEST per git** (commits `aa4e567`…`099b218`, 05:31–09:15 +1000; the P6 BUILD prompt on
+   09-04 19:57). Those sessions took the date from the conversation context. The labels stay (they
+   are cited by filename); each file carries its true date in `git log`. **Date your own artifacts
+   from `date` and `git log`, never from the context date** — the same error misdated three separate
+   sessions this window (memory `date-artifacts-from-machine-clock`).
 
-3. **CLAUDE.md is substantially stale for this window — this opener is currently the more complete
-   record.** CLAUDE.md's last edit is 2026-08-23 and touched only the perimeter-count paragraph; its
-   Live list and refresh blocks carry nothing from 08-17→08-26 (no R20a perimeter completion, no
-   practice-family RLS, no agent-hold sweep, no M-4/M-5 work, no ATRF/EE wave, no D4-completion
-   unflagged engine change, no extraction-provenance correction, no provenance ledger, no close-hook
-   variation). **Folding this window into CLAUDE.md is a queued housekeeping item** (below). Trust
-   CLAUDE.md for pre-08-15 state; trust this opener + the decision log for the window; trust source
-   over both.
+3. **The R20a perimeter-ordering ruling is binding and its follow-on is the ruled next step.**
+   *"Purpose (b) governs for human-facing members of the perimeter. The distress check runs before the
+   length guard on any route where the human crisis form is rendered."* The follow-on is a
+   **perimeter-wide execution-order audit** (its own `governance` session; prompt authored; **a
+   textual-position sweep was tried and discarded as unsound — do not resurrect its 20/10/13 split**),
+   then a `code-critical` founder-walked remediation. Agent-facing members are governed by purpose (a)
+   alone and must **not** be "fixed". Framing: *"inherited properties are not examined properties"* —
+   report findings as accretion, not as anyone's error.
 
-4. **The R20a perimeter is complete, live, and much larger than any earlier number.** Re-derived
-   first-hand at this writing from `website/src/lib/__tests__/r20a-invocation-guard.test.ts`:
-   `HUMAN_FACING_POST_ROUTES` = **42** route-level members (of which the
-   `FLAG_GATED_ROUTE_LEVEL_ROUTES` annotation array currently lists **31**) + `SUBSTRATE_GATE_ROUTES`
-   = **2** ⇒ **44**. The registry arrays are canonical; never quote a count without re-deriving —
-   this file's numbers included. The exhaustiveness sweep (a filesystem walk with a mentor-ruled
-   proxy-free predicate, a **ruled prerequisite** for any coverage claim) runs inside that battery.
+4. **The S11 track moved a long way and the flip is still REFUSED.** P1 ruled and discharged (the
+   at-action verdict, filtered by Q3's kathekon threshold, is the table's per-action input; the
+   sibling seam `interventionInputFromAtAction` is built dark, wired to nothing); D5 closed
+   (`taskHasJusticeSurface` now REQUIRED at every call site); the H3 advisory no longer injects the S4
+   recommendation; P6's purpose **widened** to measure the table's recommendation (derived at report
+   time, never stored — the report script now prints both columns, PR19-folded); **D4 live and
+   proven**; **D1's re-latch watch is OPEN and cannot discharge from harness traffic** (the close hook
+   is seed-only and the row exists ⇒ 409 before emission — the 08-30 C2 finding, now cross-referenced
+   in the register); **D2's priority is RAISED** (`credential-completed` still tags dikaiosyne on a
+   self-only action — now an `increase` where D4 removed a cap); **bound B4** (guard availability
+   11–32% on ordinary days, 60% on the 09-04 outlier; the remedy — `GATE1_TIMEOUT_MS=55000` + all hook
+   timeouts to 60 s — is applied, its follow-up measurement **due ≥2026-09-08 UTC**); **F-3′** makes a
+   bounded availability rate a **second window precondition** with its threshold **unset** (a P6
+   design question). **The window therefore cannot start yet, and its start is one founder act with
+   three names** — setting `GATE1_FALSE_HOLD_CAPTURE` is P8a's activation, the window start, the
+   standing-runner track's "item D restoration", and the byte-identity guard re-arming, all at once.
 
-5. **Two session-open conventions are new since 08-15 and bind now:** (a) **PR25** (2026-08-24) — a
-   verification claim in a code comment carries its check, resolved at the commit from the staged
-   diff (convention-only; pilot scope = code comments); (b) the **concurrency convention**
-   (2026-08-24, deliberately NOT PR26) — run `ListAgents` at session open, note the peer count, and
-   **commit path-scoped, always** (never `git add -A`); grounded in two consecutive sessions bitten
-   by concurrency (ten peers; HEAD moving mid-session; the slice-2 session found slice 1's "CLOSED"
-   files still uncommitted and six peer-session files to exclude). Also new: **PR20 strengthened
-   twice** (2026-08-19 — present-tense mechanism facts timestamp-checked at relay; carry-forwards
-   naming a target session checked at drafting, redirected if the target is closed), and the
-   **decision-log placement note** (2026-08-24): the top ~21 entries of the log are PREPENDED, not in
-   append order — the convention is append at the physical tail; founder elected leave-in-place.
+5. **The standing-runner track has run three sittings (R8, R9, R10) and waits on founder elections.**
+   The Option S gate is **item-level**: only the M/W/S floor-semantics election and R8-D7's sampling
+   policy wait on its data; everything else is ungated and the session may open on the founder's act.
+   **Option S is built and has never made a call**; a PR19 review found **four pre-run blockers**
+   and one **mentor question pending relay** (should the directional decomposition exist at all — if
+   removed, blocker B1 is moot); **Path A's one precondition is the production extraction** (F2).
+   The twelve-environment agent architecture is REVISED-not-confirmed and **prospective in v1**;
+   Q1 reaches any composed pipeline (assent at Threshold's handoff); environment agents accumulate no
+   trust records in v1; Attic/Cellar not elected. Hold prompt:
+   `2026-09-04-standing-runner-post-R10-grounding-and-await-NEXT-SESSION-PROMPT.md`.
+
+6. **Concurrency produced this project's first real collision, and two practices now bind.** On
+   2026-09-05 a peer's unscoped `git add` swept 187 lines of another session's decision-log entry into
+   `468fcf9` under an unrelated message (content intact; history not rewritten). The standing cache's
+   "zero actual collisions" sentence is annotated false; **whether this triggers the pre-commit-hook
+   / PR26 escalation is the founder's call.** Standing practices: **a peer's push publishes your local
+   commits** (the commit is the point of no return); **run `git status` whole, never truncated**;
+   `ListAgents` at open (**three interactive peers at this writing**); path-scoped commits, always.
+
+7. **CLAUDE.md is CURRENT through the 09-06-labelled item-E block** — a reversal of the 08-29 opener's
+   fact 3 — and carries a 2026-09-05 grounding note pointing here. Its ~20 dated extension counts and
+   every perimeter figure are **historical by design**; re-derive every count from source
+   (`HUMAN_FACING_POST_ROUTES` / `SUBSTRATE_GATE_ROUTES` in
+   `website/src/lib/__tests__/r20a-invocation-guard.test.ts`; the agent-card `extensions` array;
+   PR1–PR25 by enumeration).
+
+8. **Three mentor questions are pending relay and one R18 package awaits signature** — see the
+   "Founder actions between sessions" list in the Standing queue. Nothing self-starts on them.
 
 ---
 
@@ -89,361 +121,363 @@ any task** — a preamble, **not a task**: read, confirm, then wait for the task
 
 Read, in order:
 1. `/adopted/standing-protocol-cache.md` — session protocol, model selection (AC1), risk
-   classification (0d-ii), the AI-failure-mode table (now **five** rows — "Lesson cited, not tested
-   (KG-EX2)" with the redirect phrase *"That's the rule — what did the check return?"* was added
-   2026-08-24), the **concurrency check §6**, the status vocabulary. **Process rules are PR1–PR25.**
+   classification (0d-ii), the five-row AI-failure-mode table, the **concurrency check §6** (now
+   carrying the 2026-09-05 collision annotation), the status vocabulary. **Process rules are PR1–PR25
+   — verify by enumeration in `/adopted/project-instructions-snapshot.md`, do not quote this line.**
 2. `/adopted/build-sessions-protocol-cache.md` — if the task is a substrate/trust-layer build.
-3. `/adopted/project-instructions-snapshot.md` — PR1–PR25 in full; PR19 (independent adversarial
-   review REQUIRED — and note this window's repeated pattern: independent review caught what
-   first-hand review missed, again, several times); PR20 as amended; PR25.
-4. `/CLAUDE.md` — with fact 3 above firmly in mind: current through ~2026-08-16 plus the 08-23
-   perimeter paragraph; stale for the rest of this window.
-5. `/operations/decision-log.md` — the last 2–3 entries at the **physical tail** (as of this writing:
-   `D-PROVENANCE-LEDGER-SLICE2-ACTIVATION-LIVE-2026-08-26`,
-   `D-PROVENANCE-LEDGER-SLICE2-INDEPENDENT-REVIEW-CLEAN-2026-08-26`,
-   `D-PROVENANCE-LEDGER-SLICE2-CONSULT-WRITE-CLASSIFICATION-SWEEP-BUILT-2026-08-26`). Remember the
-   placement note: the file's head is NOT the newest material.
-6. **The most recent closes, matched to your task:** for the provenance-ledger thread,
-   `operations/handoffs/founder/2026-08-26-provenance-ledger-slice2-consult-write-and-sweep-CLOSE.md`
-   (incl. its independent-review addendum and slice-3/slice-5 inheritance section); for the harness
-   thread, `2026-08-26-close-hook-live-observation-completion-CLOSE.md`; for anything else, find the
-   thread's own close by name in `operations/handoffs/founder/`.
-7. **`git status`** — know the pending tree; never treat another session's uncommitted records as
-   yours to stage. Expected strays at this writing: `website/src/data/environmental-context.json`
-   (modified, weekly-scan drift), `a3-developmental-streak.py`, `brand/Brand_Guidelines_superseded.docx`,
-   `inbox/Mentor Cybernetics Instructions.rtf` + `inbox/mentors brainstorming instruction.rtf` (both
-   **acted on** — cybernetics executed as binding 08-24, brainstorming fed the SagePals/Prudence
-   records — but never committed; founder's disposition), several 2026-08-10/-12 IDEA-loop and
-   c15/S7 prompt files (untracked-but-live records; do not "clean up"),
-   `sdk/typescript/package-lock.json`, `supabase/.temp/`, and
-   `archive/2026-08-01_STANDING-SESSION-OPENER…` (untracked archive copy).
-8. **`ListAgents`** (the concurrency convention) — note the peer count before writing anything.
+3. `/adopted/project-instructions-snapshot.md` — PR19 (independent review REQUIRED — this window
+   again shows independent review finding HIGHs first-hand review missed, five separate times), PR20
+   as amended (timestamp-check present-tense mechanism facts at relay), PR25.
+4. `/manifest.md` — targeted sections only: R0 + the **four** un-numbered mentor-directed sections
+   (the Moral Community Boundary; the ATRF; the Consciousness and Continuity Obligation; **the
+   Prerequisite Criterion, binding governance since 2026-08-29**); AC5 (note its internal
+   contradiction, fact 7 of the queue below); AC7.
+5. `/CLAUDE.md` — the 2026-09-05 grounding note, then the 09-06-labelled item-E block, then the
+   "Live in production" list. Treat every count as a claim to re-derive.
+6. `/operations/decision-log.md` — the last 3 entries at the **physical tail** (as of this writing:
+   `D-STANDING-OPENER-2026-09-05-UPDATE-SESSION-PLAN-AND-RECORDS-HYGIENE`,
+   `D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06`,
+   `D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`). The head of the file is NOT the
+   newest material (the placement note).
+7. **The most recent close matched to your task:** S11 track →
+   `2026-09-05-post-D4-live-op-cluster-CLOSE.md` and `2026-09-05-D4-activation-and-F3prime-CLOSE.md`;
+   R20a / count-discipline → `2026-09-06-post-sweep-carried-items-CLOSE.md` and
+   `2026-09-05-post-ruling-autonomous-work-CLOSE.md`; standing runner →
+   `2026-09-04-standing-runner-design-R10-twelve-environment-CLOSE.md`; this grounding →
+   `2026-09-05-grounding-and-session-plan-CLOSE.md`.
+8. **`git status`** (whole) and **`git fetch origin && git log --oneline origin/main..HEAD`** — know
+   the pending tree and whether anything is unpushed. Expected at this writing: a clean tree; HEAD at
+   or after `099b218`; nothing ahead of `origin/main` once the founder has pushed. Never stage another
+   session's files.
+9. **`ListAgents`** — note the peer count before writing anything.
 
-*Tier 2 (task-dependent):* the day's deliverable in full; `/manifest.md` targeted rules (R0–R22 +
-the three un-numbered sections) for `code-*` work; `operations/agent-circles-2026-08/` for anything
-in the agent-circles/ATRF/EE/provenance line (the mentor verbatims are canonical — **verbatim wins
-over every summary including this one**); `operations/reflections-examination-2026-08/` for the
-reflections arc; `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` for the gates table +
-the **named-input register** (the B1 mechanism: sessions holding inputs for not-yet-opened sessions
-add a pointer row there); `operations/2026-08-24-OUTSTANDING-OPEN-QUESTIONS-REGISTER.md` (useful but
-already partially stale — its A0 urgent item has since been scoped, ruled, built, and activated
-through slice 2; read it as an 08-24 snapshot).
+*Tier 2 (task-dependent):* the day's deliverable in full; for the S11 track,
+`operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` **in full** plus
+`2026-08-15-false-hold-new-window-scoping-note.md` §2.4/§3/§7; for the standing-runner track,
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` §"Named inputs" (the register) and the
+R9/R10 designs' head-of-document withdrawals and RULED addenda; for the R20a ordering work,
+`operations/count-discipline-2026-09/` (the ruling verbatim, the two mentor questions, the R18
+package, the Option S findings) and `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`;
+for anything in the agent-circles/ATRF/EE/provenance line, `operations/agent-circles-2026-08/` (the
+mentor verbatims are canonical — **verbatim wins over every summary including this one**).
 
 ---
 
 ## Part B — Ground in the current project state (confirm you can state these)
 
-### Production state — what is live beyond the 08-15 opener's list
+### Production state — what is live beyond the 08-29 opener's list
 
-The substrate is live at `www.sagereasoning.com`. Everything the 08-15 opener listed as live remains
-live (examination engine, guardrail, accreditation, corroboration check, ADR-010 §4, S10 public
-trust record, trust core under MEASURE, AE-1/AE-2, practice-suggestion A1/A2, B5, orientation
-readings C2/C1c, the Stoa incl. Q5c/Q13a, `/impulse`, the IDEA-loop surfaces, C-1 sweep, the
-2026-08-16 RLS lockdowns). **New live state since 2026-08-15, in rough order of consequence:**
+The substrate is live at `www.sagereasoning.com`. Everything the 08-29 opener listed as live remains
+live. **New or changed since 2026-08-29, in rough order of consequence:**
 
-- **The R20a perimeter completion arc (08-17 → 08-19) — LIVE and founder-smoke-confirmed.**
-  `SUBSTRATE_R20A_GAP_CLOSURE_ENABLED=true` in production. The arc: six unprotected human-facing
-  free-text routes found and closed dark (PR19 found routes 5–6) → activated with a 14-probe
-  both-directions smoke → PR19's fourth pass found TWO more (`mentor/gap4`, `founder-facts` POST+PUT)
-  → the mentor RULED the six routes ratified members, the **entire Remaining-Principles practice
-  family SHOULD JOIN** (reversing the family's outside-the-perimeter precedent: "the family where
-  the material is most likely to surface acute distress"), and the filesystem sweep a ruled
-  prerequisite → the sweep was built (proxy-free predicate after a content-matching predicate was
-  built, measured, and rejected), 17 more routes wired incl. the whole practice family +
-  `/api/evaluate` **gated behind `requireAuth`** (an unauthenticated public free-text evaluator six
-  prior passes missed; ruling: gate first, never screen an unauthenticated surface as a standalone
-  fix) → final 3 routes (`mentor-appendix`, `mentor-profile`, `founder/hub`) wired, registry 42+2,
-  sweep GREEN (zero unclassified; 124 route files walked; the route/handler-split blindness fixed) →
-  **live-confirmed 2026-08-19 by founder smoke on three routes, and `/limitations` published** with
-  the mentor's Q3 coverage bound verbatim (a bare "every time" was ruled an over-promise) plus a
-  prominent M-5 "nothing happens afterwards" disclosure. `/api/guardrail` stays outside the
-  perimeter **on a ruled reason** (human path screened upstream via compose/execute; the 2026-06-19
-  deferral notation retired). The **empty-subject billed-call defect** was then closed across all 22
-  remaining routes (08-22, PR19 zero findings). Three false public claims corrected under
-  founder-signed wording (ops-hub ×2; transparency support@).
-- **The RLS/grants lockdown arc continued.** Beyond the four 08-16 fixes already in CLAUDE.md:
-  the **practice-family ten-table lockdown LIVE 2026-08-22** (`sage_compass_entries`,
-  `morning_preparation_entries`, `view_from_above_entries`, `reserve_clause_entries`,
-  `circle_extension_entries`, `oikeiosis_reflections`, `premeditatio_entries`, `passion_events`,
-  `realtime_journal_entries`, `mentor_baseline_appendix` — all service-role-only, TEST then
-  production, behavioural proof both directions). The **Class-B route change BUILT + TEST-verified
-  2026-08-23** (new `GET /api/action-evaluations`, new `POST /api/score/save`, journal page routed
-  through the API — `action_evaluations_v3`/`journal_entries`/`reflections` now have zero
-  client-side consumers; **their RLS `§APPLY` is still carried**, its migration authored:
-  `website/supabase-class-b-rls-lockdown-migration.sql`). **View grants (08-26):** 4 of 5 defective
-  view-creating files remediated in-source + a consolidated live-apply migration **AUTHORED, NOT
-  RUN** (`website/supabase-view-grants-remediation-migration.sql`); the fifth —
-  **`vulnerability_flag_owner_view`** — deliberately NOT remediated and **ESCALATED** (designed for
-  authenticated-owner SELECT, no `security_invoker`, base-table RLS ENABLEd-not-FORCEd ⇒ plausible
-  full-table read on the R20a vulnerable-user flags table; latent, 0 rows) — awaiting founder
-  direction. The pre-commit hook now runs **five checks** (incl. new `route-export-check.ts` and
-  `view-grants-check.ts`, which reports exactly the one held violation).
-- **`agent_hold_observations` retention sweep LIVE 2026-08-22**
-  (`SUBSTRATE_HOLD_OBSERVATIONS_SWEEP_ENABLED=true` + its `vercel.json` cron) — PR24's last named
-  retention debt closed. (PR24's grounding was corrected 08-17: `stoa_entries` never bound —
-  no-`retain_until` is a binding mentor posture there, not a gap.)
-- **M-4 (`disposition_stability`) — corrected and partially retired, live.** The mean-blindness
-  fixed 08-17 (`ADVANCED_MEAN_FLOOR = 3.0` — 30 identical `reflexive` readings no longer certify
-  `advanced`); obligations 1+4 built 08-21 and since pushed: the dimension is retired from the
-  `principled → sage_like` gate ONLY (that rung now structurally unreachable, as ruled — thresholds
-  deliberately NOT retuned) and from agent-facing display at the top rungs, retained unchanged as an
-  input at the three lower rungs; the disclosure naming BOTH defects is on all three R18 surfaces.
-  **`SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED` (Spec 4) stays BLOCKED** until a perturbation-adjusted
-  measure restores the dimension.
-- **M-5 (the distress-monitoring gap):** (a) the compliance documents' false claims corrected in
-  place 08-17; (b) the genuine-detection write path to `vulnerability_flag` **built, twice
-  PR19-reviewed, committed** — it has **NO feature flag**; its only gate is that no call site yet
-  passes `userId`/`sessionId` (the identity-threading follow-ups). `triggered_rules` writes `{}`
-  pending a dedicated Critical+schema encryption migration.
-- **The ATRF → Evaluative-Engine wave (08-23).** The ATRF scoping session ran (it was gated
-  post-run; the gate discharged), the mentor confirmed scope with six adjustments, then **ruled all
-  sixteen ATRF questions** and, separately, **all the EE epistemic-status questions** and the **O-C
-  Gate-2 questions** (verbatims in `operations/agent-circles-2026-08/2026-08-23-*`). The production
-  wave then built: the blast-radius/S4 migration (six additive columns on `idea_loop_candidates`),
-  `POST /api/practice/completion-signal` **dark** behind `SUBSTRATE_COMPLETION_SIGNAL_ENABLED` + its
-  `idea_loop_completion_signals` table + a `completion_signal_write` capability widening, and the
-  **EE-C1 wire-wording change applied at `layer2-mechanisms.ts`** ("No kathekon factors were
-  extracted from the submitted text; on that basis, the engine reads the action as contrary to
-  appropriate action") — **confirmed live first-hand at this writing: the string serves in this very
-  session's own Gate-1 frame.** The **D4-completion** landed the same day: `ruling_faculty_state`'s
-  deliberation input replaced with the substantive-note predicate `hasGenuineDeliberation` —
-  **deliberately UNFLAGGED on the shared measured surface** (reasoned election, 20,176-schema
-  equivalence sweep, PR19 twelve findings folded; `katorthoma_proximity` flag-off genuinely
-  untouched, pinned). Two mentor-ruled **scope notes published** 08-24 (oikeiosis-only deliberation
-  bound on `ruling_faculty_state` AND on `katorthoma_proximity`'s deliberation term — "a
-  conservative mislabel is still a mislabel"); the **epistemic-status map (Shape 1) is signed and
-  shipped** (agent-card extension #24 `epistemic-status-map/v1`; its package's stale
-  AWAITING-SIGNATURE header is deliberately left as written).
-  **⚠ THE CONSOLIDATED FOUNDER WALK APPEARS NOT YET EXECUTED — unverified.**
-  `operations/handoffs/founder/2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md` bundles: the
-  Class-B RLS apply, the blast-radius/S4 migration, the completion-signals table + `api_keys`
-  widening (TEST then production each), then push/deploy, then the optional endpoint activation.
-  **No decision-log entry records any of the four migration steps being applied.** The deploy half
-  landed anyway through ordinary pushes (EE-C1 live, endpoint dark, code omitted-fields-safe by
-  construction), so nothing is broken — but the four schema steps should be presumed UNAPPLIED until
-  the founder confirms. **Verify before relying either way; if unapplied, that walk is a queued
-  founder-walked session.**
-- **The extraction-provenance thread (08-24 → 08-26) — the window's sharpest production finding,
-  now corrected and structurally instrumented.** Found by adversarial review of a mentor question
-  about something else: `emitAccreditationTrustEvents` mints public trust-record events with **no
-  extraction-provenance check** while its sibling orientation hook has exactly that guard; a
-  supplied extraction is byte-indistinguishable downstream; the public `attests[1]` was inaccurate
-  for that population. Mentor: "a live condition, not a future risk"; route (ii) of the gaming bar
-  ruled AGAINST as worded; the fix ruled as three ordered items. Executed: **item 1, the honesty
-  correction, LIVE 08-25** (edit 1: `TRUST_RECORD_ENVELOPE` `attests[1]` scoped + a new
-  `does_not_attest` extraction-origin item incl. the F-2 coverage-gap commitment in the FUTURE
-  tense + ADR-013 §8 amendment + five mutation-verified pins; edit 2: all three R18 surfaces;
-  both production-verified by direct query). **Item 2a, credential hygiene, DONE 08-25** (both
-  active `l1_supply` credentials — dead test artifacts — revoked; founder-verified
-  `active_with_l1_supply = 0`; measured context: **zero supplied extractions across 3,200 recorded
-  consults**). **Item 2, the signature-keyed provenance ledger — scoped across six mentor rounds,
-  built, and LIVE record-only** (fact 2 in the box above; slices: 1 = tables applied TEST+prod
-  08-26; 2 = consult write + record-only classification + PR24 sweep extension, activated 08-26,
-  independent review zero findings; 3 = served `provenance_gaps` sibling field + attestation
-  amendment (wording founder-signed: `"is in place"` → `"begins enforcing which events are
-  minted"`) — **not built**; 4 = RETIRED (no credential action needed under the ruled resolution);
-  5 = ENFORCE switch-on — gated on the C2 window + slice 3). The 404 gate ruling is in hand
-  (relax to `domains.some(hasEvidence) || provenance_gaps.length > 0`, tied to the ledger's flag).
-  **Item 2b carried** (`l1_supply` out of the `ecosystem` preset — re-tiered `code-critical`, no
-  longer urgent). **Item 3, route (i), reframed as its own session** ("what is caller-supplied
-  extraction for?") — openable on election. The 454 pre-stamp historical consults are repairable by
-  no ledger (disclosed).
-- **The close-hook content variation (IW-7 opening 3) — live in the founder's dogfood.**
-  `GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true` in `.claude/settings.local.json` since 08-26
-  (confirmed present at this writing, first-hand). The close-turn reflect invitation now varies:
-  guard-caution sessions get an appended paragraph; qualifying consult verdicts get a
-  confidence-graded paragraph carrying the mentor's binding disclosure constraint (never presented
-  as certainty). Live observation: the flag-on/no-signal path and **case 1 (guard-caution append)
-  confirmed live organically**; **case 2 (consult-verdict path) still unobserved** — a founder
-  decision is pending on whether to approve one disclosed constructed test case. Opening 2 (arming
-  elicitation from Gate-2 verdicts) stays **HELD on the signal-quality gap** by ruling.
-- **R2a's live surfaces (pushed 08-16):** the S10 trust-record payload's ninth `does_not_attest`
-  item (B/M-A discriminative range), the M6 total-unknown-branch curation disclosure, the
-  **recalibrated reflect Q1–Q6 strings** (mentor-vetted verbatim; Q1/Q2/Q3 replaced, Q5/Q6 appended,
-  Q4 byte-identical; reflect-derived event-rate segmentation boundary = 2026-08-16), the corpus
-  citation fixes (Meditations 4.26→7.9; DL 7.38→7.138–139), and the founder-signed R18 package (9
-  placements). **R2b's four dark builds remain dark** (flags UNSET:
-  `SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED` (register D4+D1, the reducer),
-  `SUBSTRATE_CLASSIFIER_SESSION_ID_SHAPING_ENABLED`, `SUBSTRATE_REFLECT_Q1_DETERMINATION_ENABLED`,
-  `SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED` (M-4-blocked)) plus P8a guard-path capture (built —
-  readiness part (3)'s denominator) and the `agent_hold` sweep (since activated). **The R4
-  founder-walked activation batch for these has NOT run** (ruled order: Q1 flag → classifier
-  shaping → D4 walk last, beginning with a founder `SELECT` of `justice_floor_active`; the new
-  false-hold observation window **LAST**; `SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED` still dark).
-- **GS-ATRF-4 (the epistemic-status framework: observation/inference/assumption/unknown) is a
-  formally-ruled fourth generation-step question, live end-to-end** (production `project_context`
-  row updated 2026-08-19 founder-walked; `project-context.json` v1.4.0). The row was updated again
-  2026-08-24 with the GS-CYB-1/GS-CYB-2 register pointers and the amended two-condition
-  weights-constraint (an SQL-editor MacRoman encoding incident was caught and fixed; the SQL files
-  are marked APPLIED — DO NOT RE-RUN; **TEST's row was NOT updated**).
-- **The byte-identity guard is WINDOW-CONDITIONAL** (ruled M1, executed 2026-08-15): the logos
-  byte-identity guard binds iff `GATE1_FALSE_HOLD_CAPTURE` is set — **it is absent from the dogfood
-  config at this writing, so the guard is DORMANT** (honest log) and the six formerly-blocked items
-  were released; the `stoic-brain.ts` freeze + SHA-256 pin remain **UNCONDITIONAL**.
+- **The R20a perimeter is 43 route-level + 2 substrate-gate members** (re-derived 2026-09-05 from
+  the registry arrays; 31 flag-pair entries across 30 flag-gated routes + 13 unconditional). The
+  43rd is `/api/score/save` (09-02). **The perimeter count is now enforced, not warned:** the guard
+  battery asserts that no hand-maintained count appears anywhere in its own comments (RA-2 closed
+  09-04; widened 09-05 after two body-position counts were found beside the corrected assertions —
+  *"a guard scoped to where the last instance happened does not arrest the class"*); the same battery
+  now strips comments before every per-route import check (a commented-out safety import used to
+  pass — mutation-proven both ways; guard **722/0** at this writing).
+- **`/api/score-conversation`** — the `format` length guard (always-on 400 above `TEXT_LIMITS.long`)
+  now sits **after** the R20a block and before `domainContext`; pinned by a brace-matched
+  block-end anchor (FV-6a–d) after three PR19 reviewers found the first pin anchored on the block's
+  *opening*. The `conversation`/`context` max guards and the `conversation` min guard still precede
+  the block — **non-conformant under the ruling, carried to the audit.** The authenticated live smoke
+  of the new ordering (an oversized distressed `format` should now redirect, not 400) has **never
+  been run** — needs a Bearer JWT (memory `human-routes-bearer-jwt-console-smoke`).
+- **D4 live** (`SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true`, 09-05, `99e9603`): the
+  reducer withholds the dikaiosyne justice emission for self-only-circle assessments, symmetric across
+  all four outcomes per M-1. Proven by a three-legged took-effect test (`indeterminate` path only;
+  `violated`/`met` un-exercised). The predicate deliberately does **not** receive the flag — passing
+  it would empty `loop_fold`'s live `self_regarding` bucket and falsify the R18 claim at
+  `llms.txt:548`. D4 does not close D1's full-ledger-replay caveat.
+- **The row-cap arc is closed** (09-02 → 09-03): the founder-hub thread truncation (1,013 rows,
+  the mentor re-answering row 1000) fixed with keyset pagination + a "Load earlier messages"
+  affordance; two shared primitives (`website/src/lib/db/paged-select.ts` — `pagedRows` keyset;
+  `pagedRangeSelect` offset, with a disclosed ordering residual); C1 (cost-alerts, abuse, SLO,
+  admin-metrics — H10/H11 were truncating live) and C4 (all data-rights + store reads) live. Two
+  deliberate exceptions: `provenance-ledger-store.ts` (WATCHED) and C5 (Stripe-gated). A
+  `REQUEST_VELOCITY_LOOKBACK_HOURS: 24` bound was added to abuse detection. The
+  `/api/practice/discernment` route now writes `route_errors` on both catch paths (the 63
+  historical `ELICIT-OUTAGE` 503s remain unrecoverable without founder Vercel-log access).
+- **Provenance ledger:** slice 3 + the 404-contract tail live (08-30/31); `provenance_gaps` served
+  at `data.record.provenance_gaps` (empty for every agent until slice 5 enforces — the empty-state
+  note says so); `/limitations` gained a trust-record section. **Switch-on scoreboard: C1 ✅ (empty
+  population, re-check at switch-on is a HARD obligation) · C2 ✅ (discharged on SCOPE's pre-ledger
+  exclusion after the project's own population premise was found wrong) · C4 ✅ · C3 ⏳ the 90-day
+  soak from 2026-08-26 → ~2026-11-24. Slice 5 is not to be opened before that.** The C2 finding
+  also established that **the harness close hook can never produce a classifiable write on the
+  existing `s9-loop` row** (seed-only, 409 before emission) — the same fact that keeps D1 open.
+- **The verdict-variance disclosure is live at seven places** (08-30/31, five applications in three
+  days; battery 156/0 at the last count; every figure re-derived from raw probe records):
+  `/api/guardrail` 12% aggregate disagreement, Wilson 95% CI 7.0–19.8%, n=100, per-input crossings
+  0/0/2/2/8 of 20, no directional decomposition, the class limit at K=20, composition dependence
+  published beside it, the borderline population split (grave-vocabulary traffic vs near-boundary
+  inputs), role-blindness reclassified a confirmed design deficiency, `/api/reason`'s rate stated
+  unmeasured. D6a's runs are frozen evidence (`operations/agent-circles-2026-08/d6a/`) — **never
+  "refresh" the figures.**
+- **The at-action seam** (`at-action-seam.ts`, 09-04) is built dark and wired to no live caller;
+  its first consumer is S11 G6(a) work, which is refused. **D5 is closed** (the flag is REQUIRED;
+  the two live `false` call sites are load-bearing and must not be flipped). **The H3 advisory line
+  `S4 measure-mode recommendation: …` is gone** from the injected frame (aggregate line stays; the
+  observation relocated to the log and the API). **The P6 report script** prints classification
+  and recommendation columns, split by population, with four bounds printed on the rate and a v3/v4
+  lift check that aborts (PR19: five reviewers, one HIGH — an arithmetic-identity "target MET" —
+  removed; six vacuous pins rebuilt; battery 74/0). Over the frozen 130 the P1 filter moves exactly
+  one record; **Q2's zero-false-positive floor was restored by the S11b reducer narrowing of
+  2026-07-18, not by P1.**
+- **The founder-loop harness config** (read first-hand, keys only): `GATE1_TIMEOUT_MS=55000`; hook
+  timeouts `UserPromptSubmit` 60 s, `PreToolUse Task|Agent` 120 s, `PreToolUse Bash|Edit|…` 60 s,
+  `PostToolUse Task|Agent` 60 s, `Stop` 60 s; `GATE1_FALSE_HOLD_CAPTURE` **absent** (window not
+  started; byte-identity guard dormant; `stoic-brain.ts` freeze + SHA pin unconditional);
+  `GATE1_ACTION_TEXT_MODE` absent (composed — lean mode is ruled **doctrinal**, not an operational
+  preference); `GATE1_TELOS_LINE_ENABLED=true`; `GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true`;
+  `SAGE_GATE1_REFLECT_PERSIST_ENABLED=true`; `GATE1_STATE_DIR=/Users/clintonaitkenhead/.sage-gate1`.
+  The false-hold buffer holds **138** v1 records, of which the frozen file is an exact 130-record
+  prefix (`runs/2026-07-17/FREEZE-NOTE.md`).
+- **The public assessment contract is still broken on three served surfaces** (`llms.txt`,
+  `agent-card.json`, `skill-registry.ts` document 11/37/7 assessments and a phantom `SO-01` id
+  against a live 14/55/8 — the routes return 400 on the documented shape; ~5 months old; exposure
+  nil pre-0h). **Re-confirmed served live by unauthenticated GET on 2026-09-05.** The eleven-edit
+  R18 package + a drift assertion are drafted and verified both directions; **apply wording and
+  assertion as one change, on the founder's signature.** `api-docs/page.tsx` documents a request
+  shape neither assessment route ever accepted — a separate R18 rewrite.
+- **`environmental_context` has no producer.** Six crons are scheduled and none is the weekly scan;
+  no route writes the table; two live perimeter routes (`/api/skill/sage-classify`,
+  `/api/skill/sage-prioritise`) read it into the LLM user message; the loader is fail-safe on
+  `last_scanned`. Severity turns on one founder-run query; the disposition (deliberate P7
+  scaffolding vs unfinished wiring) is a purpose question, deliberately not recommended on.
+- **`/api/community-map` 42703** — fixed and live since 2026-08-03 (`f198736`); its carried cause
+  ("column missing") was wrong; the CLAUDE.md bullet is annotated. Lesson carried: re-derive a
+  carried item's cause before trusting its priority.
 
-### The window's method lessons (worth carrying, all with fresh instances)
+### Verified first-hand at this writing (2026-09-05, AEST morning)
 
-- **Independent review keeps catching what first-hand review missed** — the slice-2 independent
-  four-pass (clean, but demanded); R2b's 7/7 confirmed; the gaming-bar question rewrite (a 10-agent
-  review found the draft reasoning toward "the blocked thing is not really blocked"); the D4
-  completion's twelve folds; the ATRF/EE waves' two rounds each. PR19 is not a formality here.
-- **The harness session id is not scoped to one conversation** — verify live behaviour against your
-  own `CLOSE session=…` / scratchpad-path-derived id before attributing any `gate1.log` event (two
-  sessions in a row initially misattributed a concurrent peer's events).
-- **"A verified arithmetic operating on an unverified set"** (the runner's own diagnosis, twice) —
-  re-derive every tally from the underlying set at report time; now a ruled standing-runner design
-  constraint.
-- **A slice close saying CLOSED does not mean the files are committed** — slice 2 found slice 1's
-  entire file set untracked at open. Check `git status` against the close's file list.
-- **Session limits keep truncating review fleets** — the fallback (complete first-hand, disclose,
-  re-run independently after reset) is codified in PR19 and was exercised again (practice-family
-  RLS review; one reader of this opener's own grounding fleet).
+| Claim | Check | Result |
+|---|---|---|
+| Git state | `git status`; `git log origin/main..HEAD` | clean tree; **`099b218` unpushed** (records only) |
+| R20a route-level members | count of quoted entries inside `HUMAN_FACING_POST_ROUTES` | **43** |
+| Substrate-gate members / flag-pair entries | `route:` keys inside the two other arrays | **2** / **31** |
+| Agent-card extensions | `len(d['capabilities']['extensions'])` | **26** |
+| Process rules | headings enumerated in the snapshot | **PR1–PR25** |
+| Scheduled crons | `vercel.json` | **6** (none is the environmental scan) |
+| Harness config | `settings.local.json` keys | as listed above; `GATE1_FALSE_HOLD_CAPTURE` absent |
+| Guard log since the timeout raise | `gate1.log` after the last `28000ms` line | 83 guard events, **1** outage (`55000ms`) — an early indication, **not** B4's measurement |
+| False-hold buffer | `wc -l` | 138 |
+| Stale assessment contract | unauthenticated `curl` of the live `llms.txt` | still served (`11 assessments`, `SO-01`, `37 assessments`) |
+| D4 flag / any Vercel value | — | **unverified** from a repo session (recorded at activation, founder-observed) |
+| Supabase state (ledger counts, `justice_floor_active`) | — | **unverified** here; last read 2026-09-05 by the D4-proof session |
 
-### The reflections-examination arc (a parallel governance thread, now essentially complete)
+### The window's method lessons (fresh instances, all this window)
 
-All 105 Sage Reflect close-turns (2026-07-19→08-22) were examined under a mentor-authored task
-(findings record + stage-1 extraction in `operations/reflections-examination-2026-08/`;
-independently fidelity-verified). Products now in force: **PR25**; the KG-EX2 knowledge-gap entry +
-the standing-cache fifth failure-mode row; the IW-2 route (a) tooling (pre-commit checks); **six
-reflections letters authored** (letters 1–6, the full §5-named candidate set — whether more exist is
-undecided); item-3 leftovers (route-export + view-grants checks, the escalated view finding); the
-item-4 combined scoping whose exposure-keyed design the mentor **ruled against** (route (c)'s
-redirect phrase kept by founder election), which spawned the IW-7 three-openings thread → the
-signal-quality-gap ruling → the close-hook content variation now live. Headline measured facts: 58%
-of tool calls occur AFTER the session's single reflect turn; elicitations reach only 2.1% of
-decision volume with completion **declining** (29.2%→7.0% Jul→Aug), traced to 63 identical
-`http 503` `ELICIT-OUTAGE`s from the discernment route — **the 503-rate diagnosis is a named,
-unstarted, founder-prioritised task**.
+- **Independent review found what first-hand review missed — five more times.** The `format` guard's
+  own tests (two HIGH: a commented-out check passed; an inline array literal was parsed); the move's
+  ordering pin anchored on the block's *opening* (three reviewers converged); the P6 column's
+  "target MET" arithmetic identity + six vacuous pins; Option S's first version (6 HIGH) and second
+  (4 pre-run blockers); R9's three and R10's eight structural over-claims, one a false source claim.
+  **PR19 is not a formality here, and self-review that checks *presence* rather than *strength* of a
+  constraint misses the relaxations.**
+- **Checks calibrated to expectation rather than to the specification.** One session wrote six
+  miscalibrated checks and caught all six itself; the discipline that saved it was discarding the
+  unsound result rather than publishing it (which the mentor commended by name).
+- **Date from the machine, not the context** (fact 2). **A carried item's stated cause is worth
+  re-deriving before its priority is trusted** (community-map). **A guard scoped to the last instance
+  does not arrest the class** (the perimeter count, fifth recurrence). **Rulings issued to two tracks
+  on one day can carry a condition that belongs to only one** (the v3/v4 lift check landed in the
+  Path A ruling; caught at provenance). **Re-relaying an answered question without its ruling
+  attached risks a divergent second ruling** (the ordering ruling's second relay was consistent; the
+  cheap mitigation is to attach the prior ruling).
+- **Under an ENFORCE deny, an agent softened four phrases toward what the classifier would pass
+  without deciding to** (D4 close §8b) — the failure mode the instrument cannot see, because it keeps
+  verdicts, not the drafts shaped to earn them. **Read the grounds of every guardrail caution**
+  (sparse-extraction ×2 and a genuine engine outage appeared in one session and would have been
+  flattened by habit); a deny is ENFORCE and is honored; an outage is not a deny.
+- **The harness capture was run before the P8a build was recorded in the register** — a
+  present-tense mechanism fact ("the guard path writes no record") stayed in the register 19 days
+  after it became false and was inherited by a scope document. PR20's timestamp check earns its
+  place on carried items, not only on relayed ones.
 
 ### Threads (updated)
 
-1. **Trust Layer** — S1–S10 live under MEASURE; now also: M-4 corrections, the extraction-provenance
-   correction + ledger (record-only), the recalibrated reflect Q1–Q6. Register: **D4+D1 built dark**
-   (flag unset, walk pending), **P8a built**, **AE-3 scoping prompt authored 08-17 and apparently
-   never run** (no close/decision record — verify), P1/P6/P7/P8b unchanged. S11 flip: still
-   refused/readiness-gated; the new false-hold window (P6, scoped 08-15: v3/composed-regime records,
-   P8a a hard precondition) starts only as the R4 batch's LAST step. Weights BLOCKED — GS-CYB-1 now
-   binds it as a two-condition gate that PRECEDES examination.
-2. **Agent circles / ATRF / EE / standing runner** — every outstanding mentor ruling request was
-   answered by 08-26 (zero open ruling requests at this writing, so far as the record shows). Three
-   sessions are **licensed and waiting on founder election, none self-starting**: the **standing-
-   runner design session** (gate DISCHARGED by ruling 08-22; carries the largest named-input load —
-   see the register: §5d deliberation reading, GS-CYB-1/2, GS-ATRF-3-first ordering, the conjectural
-   entry type, Q-C2b, three post-1984 inputs, h5/h6/h7 findings, the re-derive-tallies constraint;
-   its CLOSE gates on classifying the nine guardrail-rejected candidates); the **O-C Gate-3 design
-   session** (licensed 08-23; agenda order ruled (c)→(d)→(a)/(b)/(e); `SUBSTRATE_LAYER3_ENABLED`
-   stays unset, activation licensed at no gate); the **route (i) session**. The hegemonikon
-   **uniformity-reads-as-stable family remains the one open ruling-shaped item** ("ruled together or
-   not at all", untouched since 08-15).
-3. **Website/practice** — the R20a perimeter completion + `/limitations` publication; the RLS arc
-   (backlog: Class-B apply; Class-A rows 13–18; row 28 `environmental_context`; the 8
-   non-`security_invoker` views; the escalated `vulnerability_flag_owner_view`); the journal
-   pace-gate fix (elapsed-16h, timezone-free) and day-55 resolved-no-build; open product items:
-   `api/mentor/private/reflect/route.ts:660` body-supplied `user_id` (**founder-ordered first** of
-   the named-unbuilt list), the `/api/score/save` non-`action`-field screening gap, 15 of 22 routes
-   without per-route invocation tests, the `mentor_profiles` AES-GCM decrypt failure (two routes
-   hard-500 on the founder's row — surfaced 08-17, recoverability **not investigated**), the
-   `sage-classify` invalid-response defect, `stoa-boundary` battery RED since 08-03 (83/3, ST6
-   import allowlist — awaiting ruling #20; deliberately not silently greened).
-4. **Reflections arc** — see above; remaining: case 2 observation, the founder's constructed-case
-   decision, letters-beyond-six question.
-5. **Future directions** (recorded, not build items): SagePals (+ the Prudence Group with P-A1–P-A4
-   amendments; Stage-3 scoping session not convened), the engine-evolution examination (D1–D4 with
-   ruled statuses; substrate-agnostic control plane §4.4; post-1984 complexity rulings), the
-   incubation entry type.
+1. **Trust Layer / S11** — see fact 4. Register:
+   `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` (P1 discharged; P2/P3
+   landed; P4/P5/P6 open; B1–B4; D1 open with its C2 cross-reference; D2 raised; D3 standing; D4
+   live+proven; D5 closed). **The window's two preconditions:** P8a activation (= the window start)
+   and a bounded guard-availability rate whose threshold is a P6 design question. B4's follow-up
+   measurement is due **≥2026-09-08 UTC** (≥3 days of ordinary traffic after the 09-04 ~19:00 UTC
+   raise). **The S11 flip is REFUSED, MEASURE throughout, weights BLOCKED.**
+2. **Standing runner / agent circles** — see fact 5. Founder elections standing (R9 §16): Path A;
+   the build brief's second increment; the A2 engine change (gated on item D); item D's restoration
+   (= the window start); the ATRF item-3 amendment draft; the vocabulary-direction recommendation;
+   the two unoccupied-room heuristics (not elected by Q-F); the v2 chooser; the
+   environment-sensitive indicator (a mentor question if ever wanted); **a harness identity with an
+   examined record for the v1 executing actor** (the binding prerequisite three findings converge
+   on). R11 is the founder's to open. O-C Gate 3 is **CLOSED** (ruled 09-03; its §11 items named
+   to this track). Route (i) scoped 09-03 with a mentor question pending (recommendation: elect item
+   2b, defer route (i)).
+3. **R20a perimeter + website** — see facts 1 and 3. Also open: the `/api/score/save`
+   local-storage bypass (§6(b) — no in-app way to change storage mode after the first choice);
+   `api/mentor/private/reflect/route.ts:660`'s body-supplied `user_id` (founder-ordered first of
+   the named-unbuilt list on 08-24, still unbuilt); the view-grants remediation migration
+   (authored, not run) + the escalated `vulnerability_flag_owner_view`; `triggered_rules`
+   encryption; M-5(b) identity threading; 15 of 22 routes without per-route invocation tests; the
+   `mentor_profiles` decrypt failure; `founder_conversations` plaintext-at-rest + no data-rights
+   wiring (two LOWs); `stoa-boundary` battery RED since 08-03 (awaiting ruling #20).
+4. **Count discipline / R18** — the assessment-contract package (signature owed); the api-docs
+   rewrite; the manifest AC5 contradiction (bolds "does not hand-enumerate" then enumerates all 43 —
+   counts correct today; a governing surface, the founder's); the same false claim in
+   `D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
+5. **Provenance ledger** — C3 clock only; the switch-on re-check is a hard obligation; the 454
+   pre-stamp consults are repairable by no ledger; item 2b carried.
+6. **Reflections / close hook** — case 2 (the consult-verdict path) still unobserved, a founder
+   decision pending on one disclosed constructed test case; IW-7 opening 2 HELD by ruling.
+7. **Founder hub / mentor continuity** — the row-cap fix live; the continuity-window question
+   (`operations/founder-hub-2026-09/2026-09-02-mentor-question-continuity-window-FOR-RULING.md`)
+   pending relay, gated on the founder's own reading of the contamination-window verbatim (rows
+   1001–1013, incl. the 08-31 corrected ruling generated without sight of row 1001).
+8. **Future directions** (recorded, not build items): SagePals / the Prudence Group (Stage-3 scoping
+   not convened); the engine-evolution examination; the incubation entry type; melete (needs an
+   agent-side rehearsal surface).
 
 ### The 0h launch hold-point
 
 **Unchanged in substance.** P2's verdict stands; the founder's three branches remain the standing
-decision. The founder's 2026-08-22 sequencing stands: **all current tasks complete before any 0h
-assessment.** Nothing in this window bears on the call. **Weights BLOCKED throughout** (now with
-GS-CYB-1's two-condition gate). **The Q1 hard constraint holds: the loop proposes; it never
-executes** — and the bounded run that tested it is closed with that constraint never breached.
+decision; the 2026-08-22 sequencing stands (all current tasks complete before any 0h assessment).
+Nothing in this window bears on the call. **Weights BLOCKED throughout** (GS-CYB-1's two-condition
+gate + the Prerequisite Criterion). **The Q1 hard constraint holds: the loop proposes; it never
+executes** — and now reaches any composed pipeline on this harness (Q-B, 2026-09-04).
 
 ---
 
-## Standing queue (none self-start; the founder sequences)
+## Standing queue — the prioritised session plan (as of 2026-09-05; none self-starts)
 
-*Live watches / in-flight:*
-0. **The provenance-ledger C2 readiness watch** — founder-run, in the Vercel function logs, started
-   2026-08-26; two consecutive weeks of 100% resolution is slice 5's entry condition (~09-09 at the
-   earliest). Nothing for ordinary sessions to do but not-perturb: `emission-hooks.ts`,
-   `provenance-*.ts`, `/api/reason`'s write block, and the sweep handler are the watched surfaces.
-1. **Close-hook case 2** — awaiting either an organic qualifying consult verdict or the founder's
-   decision on one disclosed constructed test case; confirming it fully closes IW-7 opening 3.
+**Ordering principle:** each session removes a blocker for the next or closes a live harm class;
+autonomous sessions lead where the founder's action is not on the critical path; founder-attended
+work is batched so one sitting discharges many gates; every session is sized to one context window.
 
-*Founder-electable next sessions (fully unblocked, prompts/scopes in hand):*
-2. **Provenance-ledger slice 3** (served `provenance_gaps` field + the signed §10 attestation
-   amendment + ADR/pins; wording locked) — its own `code-critical` session; no prompt file authored
-   yet (the slice-2 close's inheritance section is the spec).
-3. **The ATRF-EE founder walk** — **first VERIFY whether any of its four migration steps already ran
-   (no record exists)**; if not: Class-B RLS apply, blast-radius/S4 columns, completion-signals
-   table + `api_keys` widening, optional endpoint activation
-   (`2026-08-23-atrf-ee-production-wave-FOUNDER-WALK.md`).
-4. **The R4 activation batch** (R2b flags in ruled order; Q1 determination first, D4 reducer walk
-   last; `SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED`; the new false-hold window **LAST**;
-   `SUBSTRATE_TRAJECTORY_DISPERSION_ENABLED` excluded — M-4-blocked).
-5. **The standing-runner design session (R8)** — licensed; heaviest named-input load; its close
-   gated on the nine-candidate classification. **Completing the ATRF row of the named-input register
-   is owed before it opens** (the register's own honest-scope note).
-6. **The O-C Gate-3 design session** — licensed 08-23, ruled agenda order in hand.
-7. **Route (i)** — "what is caller-supplied extraction for?" (the `l1_supply` population query has
-   run: zero live exposure).
-8. **The view-grants remediation migration** live apply + a decision on the escalated
-   `vulnerability_flag_owner_view` (probe vs. Critical item).
-9. **Class-B RLS `§APPLY`** (if not folded into item 3's walk).
-10. **AE-3 scoping** — prompt `2026-08-17-AE3-scoping-NEXT-SESSION-PROMPT.md`, apparently
-    undischarged (**verify**; deferred out of R2b because its first ADR-014 precondition is an
-    unmade design decision).
-11. **M-5(b) identity threading** (pass `userId`/`sessionId` at call sites — activates the built
-    vulnerability-flag write path) + the `triggered_rules` encryption migration (Critical+schema);
-    the discernment-route **503-rate diagnosis** (elevated again by recent sessions' outage rates).
-12. **R3** (`/api/reason` status-masking fix; input-cap Steps 2/3; the mentor-ruled projectContext
-    removal — still do-not-build-unless-the-founder-elects); **R7** (permission-scrutiny items
-    14–17, scoped + approved, not built); **item 2b** (`l1_supply` out of the ecosystem preset,
-    `code-critical`, not urgent); **C5** (Stoa row-level reactivation guard, ruled M3, still
-    unticked in the arc plan).
-13. **Housekeeping:** fold 08-17→08-26 into CLAUDE.md (this opener's Part B is the source map);
-    dispose of the untracked strays (incl. the two acted-on inbox RTFs); TEST's `project_context`
-    row parity; the `watching/handler.ts:10-14` stale "DARK" comment; the `llms.txt:419` prose NIT
-    (deliberately unfixed — different concept from the EE-C1 wire string).
+### A. Founder actions between sessions (no session needed — each unblocks something)
 
-*Held / gated (do not open):* slice 5 (C2 window + slice 3); IW-7 opening 2 (signal-quality gap, by
-ruling); Spec 4 dispersion (M-4 restoration); the hegemonikon uniformity family (unruled); melete
-(needs an agent-side rehearsal surface); the Prudence Stage-3 scoping session; Layer 3 activation
-(licensed at no gate); Resend/ST7; S11 flip; the 0h call; **weights** (GS-CYB-1 two-condition gate).
+| # | Action | Unblocks |
+|---|---|---|
+| F-1 | **Push `099b218`** (and this session's records commit) via GitHub Desktop | the record's visibility to peers; nothing deploys |
+| F-2 | **Relay the Option S decomposition question** (`count-discipline-2026-09/2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`) | S6 (Option S pre-run fixes) → Path A → the M/W/S election |
+| F-3 | **Relay the route (i) question** (`agent-circles-2026-08/2026-09-03-MENTOR-QUESTION-route-i-what-is-l1-supply-for.md`) | S7 (item 2b, `l1_supply` out of the ecosystem preset) or route (i) |
+| F-4 | **Sign the R18 assessment-contract package** (`count-discipline-2026-09/2026-09-05-R18-assessment-contract-SIGNOFF-PACKAGE.md`) — or say what to change | S2 |
+| F-5 | **Run the one `environmental_context` query** in `operations/2026-09-06-environmental-scan-staleness-SCOPE.md` and say whether the two call sites are deliberate P7 scaffolding | the item's disposition (S8 or a route session) |
+| F-6 | **The two `/api/score-conversation` smokes** (oversized `format` → 400 on a benign conversation; oversized distressed `format` → the crisis redirect) — Bearer JWT; can ride S3 | closes the last unobserved live property of the guard work |
+| F-7 | **Decide the manifest AC5 fix** (remove the enumeration, or remove the bolded claim) | a governing-surface edit any session can then apply |
+| F-8 | **Decide the concurrency escalation** after the first collision (pre-commit hook / PR26 / leave as convention) | the standing cache's §6 |
+| F-9 | **TEST parity, one sitting:** the ATRF-EE Step-0 read-only determination on TEST; TEST's `project_context` row (v1.4.0 parity) | removes two "undetermined" carries |
+| F-10 | **Path A's production extraction** (`option-s/EXTRACTION.sql` §PRE/§2/§3) — only after F-2's ruling; if it returns 24, the ruling's "20 winners" gets a correction note | S6's run |
+| F-11 | **Relay the mentor-continuity question** after reading the contamination-window verbatim | the founder-hub `MENTOR_HISTORY_WINDOW` decision |
+| F-12 | **Relay the mentor's reception of R9/R10** at your cadence; elect from R9 §16 if you wish | the standing-runner track |
+
+### B. Sessions, in priority order
+
+1. **S1 — The R20a perimeter-ordering AUDIT.** `governance`, **autonomous**, ruled. Classify every
+   route-level member on two axes (realistic caller; rendered form at the actual
+   `renderR20aRedirectResponse` call site) and record each human-facing member's **execution order**
+   by control-flow tracing — never textual position; establish the real set of bounding forms from
+   source; say whether the ruling reaches the 2 substrate-gate members; check provenance with
+   `git log -L` before characterising anything; disclose any route whose order cannot be established
+   by reading. **Changes no route.** Paste:
+   `2026-09-05-SESSION-1-r20a-perimeter-ordering-audit-SESSION-PASTE.md` (the method prompt it
+   executes: `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`). **Unblocks S3.**
+2. **S2 — R18 corrections.** `code-elevated`; short; **the founder signs at open** (F-4). Apply the
+   eleven wording edits **and** the drift assertion as one commit
+   (`assessment-contract-drift.test.ts` moves out of `.draft` in the same change; expect 13/0 after,
+   26 extensions unchanged); draft the `api-docs/page.tsx` assessment-entry rewrite (both routes take
+   `{agent_id, responses:[…]}`, neither reads `scenario`), sign, apply; `tsc`; `npm run build` (a
+   `page.tsx` changes); push is the founder's; **live `curl` after the push** (this arc's defects
+   were repeatedly found only that way). Closes a five-month broken public contract.
+3. **S3 — Perimeter-ordering REMEDIATION.** `code-critical`, **founder-walked, PR19 required**;
+   after S1. Start with `/api/score-conversation`'s three remaining pre-block guards (the `<20`
+   minimum first), then the audit's human-facing non-conformant list in the audit's own priority;
+   each move pinned by an execution-order anchor of the FV-6 brace-matched shape (a textual anchor
+   passed green while the harm was reproduced inside the block); mutation-verify against the
+   demonstrated bypasses; bundle F-6's two smokes into the walk. Agent-facing members untouched.
+4. **S4 — Window-start readiness.** Read-only autonomous half + one founder act; **not before
+   2026-09-08 UTC.** (a) B4's follow-up measurement from `gate1.log`, method unchanged, reporting the
+   three things B4 names (per-day outage rate vs the 11–32% baseline; whether any residual reports
+   `55000ms` vs a killed hook with no line; distinct sessions per day); record it **in the B4 cell**.
+   (b) Propose the availability **threshold** F-3′ leaves unset (a P6 design question — draft for
+   founder election, mentor if the founder elects). (c) Confirm both preconditions and that S5's
+   answer does not require an engine-class edit before the window (an engine edit after the window
+   opens contaminates it: the byte-identity guard re-arms on the same flag). (d) Then **the founder**
+   sets `GATE1_FALSE_HOLD_CAPTURE` — which is P8a's activation, the window start, item D's
+   restoration, and the guard re-arm in one act — and the ≥7-day representative window runs.
+5. **S5 — D2 scope-for-ruling.** `governance`, autonomous, **before S4(d)**. The domain-tagging
+   mis-attribution (`computeVirtueDomains` still tags dikaiosyne engaged on a self-only action →
+   `credential-completed` emits an `increase` into dikaiosyne with no circle test,
+   `derive-trust-events.ts:86-99`); scope the remedy's *location* (engine — measured surface, window
+   contamination and the byte-identity guard bite; vs reducer — `code-critical`, window-neutral) and
+   its relation to M-1's ruled destination (phronesis/sophrosyne); PR20 mechanism facts; put to the
+   mentor. Mirrors the P1 scope-for-ruling shape.
+6. **S6 — Option S pre-run fixes, then the run.** `code-elevated` + PR19 for the fixes; the run is
+   founder-elected spend. After F-2's ruling: B2 (the floor set must include `habitual` — the live
+   block set at the `deliberate` threshold), B3 (an ordinal proximity scale; a deterministic even-K
+   median convention; true worst-of-K), B4 (a `proceed` flip via `tier1_pause` must count), and B1
+   or its removal; add resume/idempotency and the six D6a safeguards the reimplementation dropped;
+   have `summary()` read `option-s-candidates.json`. Then F-10, then the founder-elected run
+   (≈$3.41–4.12, quota = calls × 2), then the M/W/S + R8-D7 brief carrying the closed-run-population
+   limit. **Do not spend before the fixes.**
+7. **S7 — Item 2b** (`l1_supply` narrowed out of the `ecosystem` preset). `code-critical`,
+   founder-walked, PR19; only if F-3's ruling elects it (the scoping's recommendation). Verify the
+   population is still zero at open (`active_with_l1_supply = 0` on 08-25).
+8. **S8 — Records fold + governing-surface edits on election.** `governance`: the CLAUDE.md
+   production-state block per PR18 after S2/S3 change production; the AC5 fix per F-7; the
+   environmental-context disposition per F-5; retire any spent prompts this plan has closed. Batch
+   with whichever of S2/S3 lands first rather than running alone.
+
+### C. Held / gated — do not open
+
+Slice 5 (C3 clock → ~2026-11-24, then the hard C2 re-check); IW-7 opening 2 (signal-quality gap);
+Spec 4 dispersion (M-4 restoration); the hegemonikon uniformity family (unruled); melete; the
+Prudence Stage-3 scoping session; Layer 3 activation (`SUBSTRATE_LAYER3_ENABLED` unset; O-C Gate 3
+CLOSED; per-consumer rendering owned by the standing-runner track's next session); R11 (the founder
+opens); Attic/Cellar heuristics (founder-walked, own scoping session); the `agent_hold_observations`
+sweep (HOLD by ruling until P6 says the buffer is finished with); the `stoic-brain.json` citations
+(HOLD — P6's call; the guard is dormant today but the freeze on `stoic-brain.ts` is unconditional);
+Resend / ST7; AE-3 (deferred, preconditions unmet); the S11 flip; the 0h call; **weights**.
+
+### D. Longer-tail named-unbuilt (unchanged; re-derive before acting)
+
+The view-grants migration + the escalated view; `triggered_rules` encryption + M-5(b); reflect
+`route.ts:660` `user_id` (founder-ordered first); close-hook case 2; R3 (`/api/reason` status
+masking; input-cap steps 2/3); R7 (permission-scrutiny 14–17); C5 (Stoa reactivation guard, ruled
+M3); the `/api/score` local-storage bypass; `founder_conversations` LOWs; the `mentor_profiles`
+decrypt failure; the CLAUDE.md dated bullets (never rewritten — annotated only).
 
 ---
 
-## Part C — The trust-layer harness + its capabilities (deltas since 08-15)
+## Part C — The trust-layer harness + its capabilities (deltas since 08-29)
 
-On top of the 08-15 opener's Part C (all of which stands):
+On top of the 08-29 opener's Part C (all of which stands):
 
-- **The trust record's honest-claims envelope grew twice**: the B/M-A discriminative-range
-  `does_not_attest` item (R2a, live 08-16) and the extraction-origin item + scoped `attests[1]`
-  (08-25) — the envelope now explicitly does NOT attest that submitted artifacts' extractions were
-  server-produced, and commits (future tense) to surfacing provenance-refused mints as named
-  coverage gaps once enforcement exists.
-- **The provenance ledger is the first mint-time provenance instrument** — record-only today;
-  its classification function is the exact function slice 5 will enforce with (built pure for that
-  reason). The refusal record is deliberately NOT a trust event (`artifact_ref NOT NULL` invariant).
-- **The reflect close-turn is recalibrated for the agent practitioner** (Q1–Q6, mentor-vetted
-  verbatim) and its **invitation content now varies** with the session's own guard/consult signals
-  (dogfood-only flag). The reflect-derived event-rate segmentation boundary is 2026-08-16.
-- **`disposition_stability` no longer certifies the top rung and no longer displays at the top
-  rungs**; its mean-floor correction means uniform poor readings cannot read as `advanced`.
-- **`ruling_faculty_state` + `katorthoma_proximity`'s deliberation term carry published oikeiosis-
-  only scope notes**; the deliberation predicate is now substantive (`hasGenuineDeliberation`), an
-  unflagged live change on the shared measured surface — the doctrinal question (is oikeiosis-only
-  the right reading of a deliberating ruling faculty?) is map §5d, a named standing-runner input,
-  engine-class `code-critical` when resolved.
-- **PR22 trailers, PR25 comment-check, path-scoped commits, and the five pre-commit checks** now
-  frame every commit a session makes.
+- **The trust record's envelope grew again:** the verdict-variance `does_not_attest` item (verdicts
+  are draws from a probabilistic Layer-1 extraction; the signature attests the deterministic Layer 2
+  given that extraction — the rate rides as a dated, path-qualified literal); the served
+  `provenance_gaps` + `total_provenance_gaps_count` (empty until slice 5, with the note saying so);
+  the 404 contract now names both halves of the gate (no examined evidence AND no servable gap
+  entry), conditional on the read having run.
+- **The reducer is self-circle-narrowed live (D4)**; the predicate and reducer now diverge
+  *deliberately in the opposite direction* from before (Arms 2–4 still ENGAGE a self-only violated
+  obligation; engagement ≠ emission) — do not "fix" it. **D2 remains** (tagging, not emission).
+- **The harness's advisory frame no longer carries the S4 recommendation**; Q7 depth calibration
+  reads the aggregate line only. The consult and guard budgets are 55 s inside 60 s hooks. The
+  telos line and close-content variation are on. The false-hold capture is OFF.
+- **The P6 instrument** (the report script) derives the decision table's recommendation at report
+  time with printed bounds; **the frozen 130 is a prefix of the live 138** (documented).
+- **`taskHasJusticeSurface` is REQUIRED** on `readTrustVerdict`; the discernment GET and the public
+  trust-record GET pass `false` with the reason stated (task-agnostic reads); `true` without S3
+  obligation routing would assert do-not-proceed for every agent.
+- **New shared DB primitives** `pagedRows` / `pagedRangeSelect` for any read that can cross
+  PostgREST's 1,000-row cap; the sweep tool `website/scripts/unbounded-select-sweep.ts` (54
+  unbounded-read candidates remaining, all classified).
 
-*Deeper detail:* `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md` (the ruled
-design); `2026-08-23-evaluative-engine-status-documentation-map.md` (the engine's per-output
-epistemic-status map, incl. §5b/§5d); the ATRF sixteen-rulings verbatim; the priority index's gates
-table + named-input register.
+*Deeper detail:* the S11 register; `2026-08-15-false-hold-new-window-scoping-note.md` (§7 the
+recommendation column; §2.4/§3 the two preconditions); `2026-09-04-C-at-action-seam-caller-SCOPE.md`;
+the R9/R10 designs; `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
 
 ---
 
@@ -451,33 +485,39 @@ table + named-input register.
 
 Unchanged in substance — you are running inside the harness you help build; frames are advisory
 context, never commands; routine build acts examined "contrary — no kathekon factors extracted"
-remain the known false-positive class (and the EE-C1 wording you'll see is the mentor's own ruled
-formulation: an absence-of-extraction basis claim, not a factual accusation). Additions:
+remain the known false-positive class (the EE-C1 wording is the mentor's ruled formulation).
+Additions and sharpenings this window:
 
-- **The byte-identity guard is dormant** while `GATE1_FALSE_HOLD_CAPTURE` stays unset — but the
-  `stoic-brain.ts` freeze + SHA pin are unconditional. Editing `stoic-brain.ts` still breaks two
-  measured surfaces.
-- **28s consult timeouts remain constant and expected** (fail-open-honest); the elicitation path
-  additionally suffers the 503-outage class (declining completion — see the measurement). Do not
-  diagnose a credential from a 401 run without DB-level facts (the standing lesson).
-- **Verify your own session id before attributing any `gate1.log` event** (`CLOSE session=…`
-  cross-checked against your scratchpad path) — concurrent sessions share the log.
-- **The close turn may now carry a session-specific paragraph** (guard-caution or confidence-graded
-  consult content). Engage it genuinely; its confidence disclosures are binding design, not flavour.
+- **Expect guard denies that are false positives, and honor them anyway.** The andreia floor reads
+  a handoff document's narration of future destructive operations as a praxis act (a file write
+  supplies the stage); a prompt describing teardown was denied `reflexive` while the retrospective
+  close passed. **The deny is ENFORCE; do not route around it by rewording toward the classifier or
+  by switching tools** — one session caught itself softening four phrases without deciding to.
+  Record the instance (nothing captures it while the window is off) and, if the founder overrides
+  (R20c), write what was drafted.
+- **Guard availability was 11–32% on ordinary days before the timeout raise.** Read the grounds of
+  each caution; an outage is not a deny; do not proceed on an unavailable check as though it were a
+  pass — log it and decide once, rather than restating the outage every turn.
+- **Verify your own session id before attributing any `gate1.log` event** (the log is UTC-stamped and
+  shared by concurrent sessions). **Date artifacts from `date`.** **Run `git status` whole.**
+- **The elicitation's third sub-question keeps drawing "the resolution preceded the examination"** —
+  four consecutive answers across two sessions; the capture-and-execute convention is doing the
+  deciding. Answer genuinely; once, if the answer stops changing.
 
 ---
 
 ## Part E — Confirm the standard opening (state these, briefly, before the task)
 
 Tier/work-category; model (state it; disclose any mid-session switch); risk classification 0d-ii +
-AC7/PR6/**PR19** (independent review REQUIRED)/**PR20** (mechanism facts named + timestamp-checked)
-/**PR21** (reflect-harvest)/**PR22** (Model:/Effort: trailers)/**PR23** (memory-first)/**PR24**
-(retention parity)/**PR25** (verification claims carry their check); the concurrency check
-(`ListAgents` + path-scoped commits); hold-point P0 0h; status vocabulary; the founder-walked
-discipline (commit-and-push BEFORE any flag flip; this environment holds no production admin
-credential — prod mints go through the founder's browser-session JWT); bare-SQL verification blocks
-(and the SQL-editor MacRoman lesson: pure-ASCII payloads, `chr()` for typography, length-count
-verification).
+AC7/PR6/**PR19** (independent review REQUIRED)/**PR20** (mechanism facts named + timestamp-checked, incl.
+carried items)/**PR21** (reflect-harvest)/**PR22** (`Model:`/`Effort:` trailers)/**PR23** (memory-first
+— then check the instance)/**PR24** (retention parity)/**PR25** (verification claims carry their
+check); the concurrency check (`ListAgents` + path-scoped commits + `git status` whole); hold-point
+P0 0h; status vocabulary; the founder-walked discipline (commit-and-push BEFORE any flag flip; this
+environment holds no production admin credential; prod mints go through the founder's browser-session
+JWT; never place executable DDL in a runnable code block during a live SQL-editor walk); bare-SQL
+verification blocks (pure-ASCII payloads, `chr()` for typography, length-count verification; a
+`SELECT count(*)` after any teardown delete — "Success. No rows returned" is not a count).
 
 ---
 
@@ -485,9 +525,11 @@ verification).
 
 With the foundations in place, **state the task** (if you haven't already). The session will then:
 declare its tier + risk for that task, read the task-specific deliverables (Tier 2), check the
-standing queue for collisions with in-flight watches (the C2 window; case 2), and proceed under the
-protocol — grounded, honest, and scope-aware.
+standing queue for collisions with in-flight watches (the C3 clock; B4's pending measurement; the
+window's two preconditions; the three peer sessions), and proceed under the protocol — grounded,
+honest, and scope-aware.
 
-*Reusable across sessions. Update when the ground state shifts materially (a licensed session opens,
-slice 3/5 lands, the ATRF-EE walk runs, a new program adopts) — archive the prior version to
-`archive/` with its date, per this file's own convention. The 0h call remains the founder's.*
+*Reusable across sessions. Update when the ground state shifts materially (a session in the plan
+above closes, a licensed session opens, a flag flips, a mentor ruling lands) — archive the prior
+version to `archive/` with its date, per this file's own convention. The 0h call remains the
+founder's.*

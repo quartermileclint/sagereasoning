@@ -35093,3 +35093,121 @@ claiming to guard a guard that no longer exists at the old site).
 
 **Status:** Adopted. Cross-references: `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`,
 `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06`.
+
+---
+
+## 2026-09-05 — D-STANDING-OPENER-2026-09-05-UPDATE-SESSION-PLAN-AND-RECORDS-HYGIENE
+
+**Decision:** The standing session opener is updated to **Version 2026-09-05**, superseding the
+2026-08-29 version (archived per convention at
+`archive/2026-08-29_STANDING-SESSION-OPENER-grounded-foundations.md`); a prioritised session plan is
+written into its Standing queue; the first-priority session's paste-ready prompt is authored
+(`operations/handoffs/founder/2026-09-05-SESSION-1-r20a-perimeter-ordering-audit-SESSION-PASTE.md`);
+and seven records-hygiene items that needed no founder election are executed. **`governance` —
+documents only. No code, schema, flag, credential, migration, deploy, live operation or spend.
+Production untouched. AC7 not engaged; PR6 not engaged.** Session model `claude-fable-5-1`, effort max.
+
+**Reasoning:** The 08-29 opener's record stopped at 2026-08-26 and its top box carried claims now
+reversed (CLAUDE.md "substantially stale"; the ATRF-EE walk "presumed unapplied"; the perimeter at 42+2).
+Ten sessions' worth of dense work landed 08-29 → 09-05 (D6a and the verdict-variance arc; slice 3 +
+the 404 alignment; the score-save perimeter member; the row-cap sweep; R8/R9/R10; P1/D5/D4; the
+`format` guard and its ruled move) with the grounding surface unfolded — the drift class the 08-12
+reconciliation showed produces defects in real build work. Re-derived first-hand, no subagents:
+every decision-log entry from `D-STANDING-OPENER-2026-08-29-UPDATE` to the tail (~75, read in full),
+fourteen closes, every open/spent prompt, the S11 register, the priority index head + named-input
+register, the outstanding-questions register, the count-discipline directory, the standing cache;
+plus direct checks — git (HEAD `099b218`, `origin/main` `bc4c66c`: one unpushed records commit), the
+R20a registry arrays (43 route-level + 2 substrate-gate; 31 flag-pair entries), agent-card extensions
+(26), PR1–PR25 by enumeration, `vercel.json` (6 crons), the dogfood `settings.local.json` keys
+(`GATE1_TIMEOUT_MS=55000`; hooks 60/120/60/60/60; `GATE1_FALSE_HOLD_CAPTURE` absent), the live
+`gate1.log` (83 guard events since the last `28000ms` line, one outage at `55000ms` — an early
+indication, not B4's measurement), the false-hold buffer (138), and one unauthenticated GET of the
+live `llms.txt` (the stale assessment contract is still served). Unverifiable-from-repo claims are
+marked as such.
+
+**Records-hygiene executed (each an annotation or pointer; nothing rewritten, nothing deleted):**
+1. **S11 register** — two owed changelog lines added retroactively (the D4 activation + F-3′; the
+   took-effect proof + D1 settled open + the retry held), and a dated pointer on the D1 row: the
+   "not diagnosed" observation that no accreditation write has landed on `s9-loop` since 2026-07-18
+   is the 2026-08-30 C2 finding's mechanism (`close-hook.mjs:168` sends `kind: "seed"` only,
+   re-verified; the row exists ⇒ 409 before emission; option (c) ruled out for C2), so **the re-latch
+   watch cannot discharge from harness traffic** — only a deliberate `update`-kind write can.
+2. **`2026-09-04-C-at-action-seam-caller-SCOPE.md` §4** — the inherited stale sentence
+   (*"`runGuard` writes no record"*) annotated as false since `3e8f231` (2026-08-17), body preserved;
+   the finding's conclusion still holds.
+3. **`adopted/standing-protocol-cache.md` §6** — the *"zero actual collisions"* sentence annotated as
+   false after `468fcf9` (2026-09-05); the escalation (pre-commit hook / PR26) named as the founder's
+   call, not taken; the peer-push and whole-`git status` practices recorded beside it.
+4. **`CLAUDE.md`** — a dated grounding note under the production-state heading pointing at the new
+   opener and explaining the date-label discrepancy (the "2026-09-06"/"2026-09-07" records were all
+   authored 2026-09-05 AEST per git); the labels deliberately left in place.
+5. **Fourteen executed next-session prompts marked SPENT/SUPERSEDED** with their close and entry
+   named (the runner track's hold prompt and the audit prompt are left live).
+6. **The 08-29 opener archived; the new opener written; the session paste authored.**
+7. **Memory** `date-artifacts-from-machine-clock` saved (the same misdating hit three sessions).
+
+**The plan (opener §Standing queue):** founder actions between sessions F-1…F-12 (push; relay the
+Option S decomposition, route (i) and mentor-continuity questions; sign the R18 package; the
+`environmental_context` query; the two Bearer-JWT smokes; the AC5 and concurrency-escalation
+decisions; TEST parity; Path A's extraction after its ruling; R9/R10 reception). Sessions: **S1 the
+R20a perimeter-ordering AUDIT** (`governance`, autonomous, ruled — paste authored) → **S2 R18
+corrections** (`code-elevated`, founder signs at open) → **S3 perimeter-ordering REMEDIATION**
+(`code-critical`, founder-walked, PR19; carries the smokes) → **S4 window-start readiness** (B4's
+measurement ≥2026-09-08 UTC; the availability threshold; then the founder's one act that is P8a +
+the window + item D + the guard re-arm) → **S5 D2 scope-for-ruling** (before the window, to settle
+whether the remedy is engine-class) → **S6 Option S pre-run fixes then the run** (after F-2) →
+**S7 item 2b** (if F-3 elects it) → **S8 records fold**. Held/gated and longer-tail lists carried
+unchanged.
+
+**Files touched:** `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`
+(rewritten, Version 2026-09-05); `archive/2026-08-29_STANDING-SESSION-OPENER-grounded-foundations.md`
+(NEW, the verbatim prior version); `…/2026-09-05-SESSION-1-r20a-perimeter-ordering-audit-SESSION-PASTE.md`
+(NEW); `…/2026-09-05-grounding-and-session-plan-CLOSE.md` (NEW); `CLAUDE.md` (+1 note);
+`adopted/standing-protocol-cache.md` (+1 annotation); `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md`
+(D1 pointer + 2 changelog lines); `operations/trust-layer-2026-07/2026-09-04-C-at-action-seam-caller-SCOPE.md`
+(+1 annotation); fourteen prompt files (+1 marker line each); this entry.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+`git diff -- website/` empty. Weights **BLOCKED**; the Q1 hard constraint untouched; the P0 0h hold
+stands; nothing bears on the 0h call.
+
+**Rollback path:** `git revert` this session's two path-scoped commits (records hygiene; the opener +
+plan + paste + this entry + the close). The archive copy is a verbatim copy and can be deleted with
+the revert. Nothing live is touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "Version 2026-09-05" operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md
+grep -c "^- \*\*2026-09-05 (RETROACTIVE" operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md
+grep -l "^> \*\*SPENT\|^> \*\*SUPERSEDED" operations/handoffs/founder/2026-09-0*-NEXT-SESSION-PROMPT.md | wc -l
+git diff --stat HEAD~2 -- website/
+```
+Expected: at least `1`; `1`; at least `13`; no output from the last line.
+
+**Open questions:** the founder actions F-1…F-12 above, none pre-answered here; whether the first
+collision triggers the concurrency escalation; the AC5 fix's shape. **Not decided by this session:**
+anything on the S11 flip, the window, Option S, the standing-runner elections, or the 0h call.
+
+**Rules served:** PR18 (the grounding surface rewritten from the record at close), PR20 (every
+present-tense mechanism fact re-checked at source; unverifiable ones marked), PR21 (the reflect
+turn's findings go to the close's honesty notes), PR22, PR23 (memory written for the recurring date
+class), PR25 (no verification claim without its check). Concurrency: `ListAgents` at open (three
+interactive peers); `git status` whole, at open and before staging; commits path-scoped; this entry
+appended at the physical tail.
+
+**Session honesty note.** The Gate-1 frame at open read `is_kathekon=true`, `deliberate`, cosmopolis
+— on a request to read the record, not the sparse-extraction class. The at-action guard returned
+cautions and one open-loop redirection across the session's writes and was never denied; several
+frames carried "a redirection was issued … not yet re-examined", which is the CI-4 loop-closure
+affordance observing this session's own sequence of documents, and is recorded rather than smoothed.
+One judgement call disclosed: the grounding treated the standing opener as "the most recent grounding
+document" (the artifact this repo actually calls a grounding surface), not the 09-04 track-specific
+grounding prompt or the CLAUDE.md item-E block — stated so it can be corrected.
+
+**Status:** Adopted. Cross-references: `D-STANDING-OPENER-2026-08-29-UPDATE` (predecessor);
+`D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06` (the newest production state folded);
+`D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`;
+`D-PROVENANCE-LEDGER-C2-OBSERVATION-INPUT-UNREACHABLE-FOUND-2026-08-30` (the D1 pointer's source);
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06` (S1's authority);
+`operations/handoffs/founder/2026-09-05-grounding-and-session-plan-CLOSE.md`.
