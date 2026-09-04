@@ -33645,3 +33645,70 @@ reading is not a step toward the flip.
 (binding), `D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the re-label this supersedes at
 the ADVISE surface), `D-S11-REGISTER-D5-ROW-CLOSED-2026-09-04`,
 `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (Amendment 2026-09-04).
+
+---
+
+## D-MENTOR-RULING-TWELVE-ENVIRONMENT-SIX-QUESTIONS-ADOPTED-EXECUTED-2026-09-04
+
+**Date:** 2026-09-04. **Tier:** `governance` — documents only. **AC7:** not engaged. **Production:**
+untouched. **Session model:** `claude-fable-5-1`.
+
+**What happened.** The mentor ruled on all six questions R10 raised
+(`2026-09-04-MENTOR-QUESTION-twelve-environment-architecture-clarifications.md`, committed `0f44ca9`).
+**Adopted as binding on relay** and captured verbatim:
+`operations/agent-circles-2026-08/2026-09-04-mentor-ruling-twelve-environment-architecture-six-questions-verbatim.md`
+(wins over every summary, this entry included).
+
+**The rulings.**
+- **Q-A — R10 stands as a sitting, not a draft.** The amendment's "unopened" premise is behind the
+  record; its sequencing note and the Option S gate are not in conflict.
+- **Q-B — reading (a) governs; Q1 reaches a composed multi-agent client pipeline.** *"The doctrine
+  reaches any scale at which assent occurs, because assent is the object of the constraint, not the
+  scale."* **The pipeline's execution boundary sits at Threshold's handoff — exactly as R9 designed
+  it.** Internal room-to-room handoffs are phantasia and need no assent point each; the final output to
+  the adopter must be one. **No additional ruling is needed** — the governance hole R10 §11.4 named is
+  closed by this ruling rather than filled by a new one.
+- **Q-C — C1 does not transfer to per-room identities.** That architecture requires its own attestation
+  ruling naming the changed risk profile. **Practice-exercised is not attestable in v1** by any
+  mechanism consistent with the ruling set (self-report carries C1's distrust; outcome measures are
+  excluded by C4 and the weights constraint) — *"a disclosed limit, not a disqualification."*
+- **Q-D — R10's disposition on D4 is adequate.** D4 governs the single-runner case only; the
+  multi-agent longitudinal history is a genuine extension needing its own design session once a
+  pipeline identity exists; *"a pipeline identity is a third kind of identity that neither [D4 nor Q1c]
+  addresses."*
+- **Q-E — environment agents do not accumulate their own trust records in v1.** The harness is the
+  accumulation point; independent accumulation would leave the harness's cycle-start read incomplete —
+  *"an honesty defect in the same class as Finding B in the P1 ruling."* Per-agent vs. shared is a
+  named input for a future session; both routes' costs (flattened per-room signal; credentialing +
+  the `UNIQUE` write-side question) are carried, neither pre-answered.
+- **Q-F — Attic/Cellar heuristics are not elected.** A founder-walked act requiring its own scoping
+  session under the 2026-08-19 forward-reservation principle. **One implication the mentor named that
+  R10 had not:** with those rooms empty, **the twelve-environment architecture is prospective in v1,
+  not immediately operational** — the session carries that gap explicitly rather than presenting the
+  architecture as operational.
+
+**Executed on relay, documents only:** the verbatim record; a RULED banner on the question document
+(questions left legible); a RULED addendum at R10's head mapping each ruling to the section it bears
+on — **R10's PR19-reviewed body is not rewritten**; the register's R10 block and twelve-environment
+row folded to the ruled state; this entry; one clause in `/CLAUDE.md`.
+
+**What the track now carries, binding:** (1) Q1's envelope is settled for any composed pipeline on this
+harness — assent at Threshold's handoff; (2) three items reserved to their own future sessions if the
+multi-agent form is ever built — the per-room attestation ruling, the pipeline-identity longitudinal
+design, the accumulation question; (3) a v1 pin for any multi-agent build brief — **no independent
+write to the trust state by an environment agent**; (4) a v1 disclosed limit — practice-exercised is
+not attestable; (5) every description of the architecture carries that it is **prospective, not
+operational**.
+
+**Not licensed, unchanged:** any build, schema change, activation, or publication. The Option S gate
+is unchanged and unmet. The M/W/S election and R8-D7's sampling policy remain deferred. Weights
+remain BLOCKED. The Q1 hard constraint holds. The twelve-environment architecture remains a named
+candidate, not a settled design decision. No heuristic was elected.
+
+**Rollback:** `git revert` the records commit — documents only; nothing live.
+
+**Status:** Adopted and executed. Cross-references:
+`D-MENTOR-AMENDMENT-TWELVE-ENVIRONMENT-ARCHITECTURE-ADOPTED-R10-RUN-2026-09-04`,
+`D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04`,
+`D-AUTONOMOUS-LOOP-DESIGN-BRIEF-RULED-2026-08-09` (Q1 and its 2026-08-12 amendment, whose reach Q-B
+extends to any scale at which assent occurs).

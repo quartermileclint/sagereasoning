@@ -7,6 +7,22 @@ own three-reviewer PR19 fold** (45 findings, all folded — see R10 §10b).
 untouched and unmet; the M/W/S election and R8-D7's sampling policy remain deferred; weights remain
 BLOCKED; the Q1 hard constraint holds.
 
+> **⚖ RULED 2026-09-04 — all six questions, adopted as binding on relay.** Verbatim record (wins):
+> `2026-09-04-mentor-ruling-twelve-environment-architecture-six-questions-verbatim.md`.
+> **Q-A:** R10 is the right vehicle, received as a sitting not a draft; the "unopened" premise is
+> behind the record. **Q-B:** reading (a) governs — Q1 reaches a composed multi-agent pipeline by the
+> same logic that reaches the per-trace scale; **the execution boundary is Threshold's handoff, as R9
+> designed it**; the two named scales are illustrations, not an exhaustive list; no further ruling
+> needed. **Q-C:** C1 does **not** transfer to per-room identities; that architecture needs its own
+> attestation ruling; **practice-exercised is not attestable in v1** — a disclosed limit, not a
+> disqualification. **Q-D:** R10's disposition adequate; D4 governs the single-runner case only;
+> pipeline longitudinal history needs its own design session; neither D4 nor Q1c settles it.
+> **Q-E:** **environment agents do not accumulate their own trust records in v1**; the harness is the
+> accumulation point; per-agent vs. shared is a future-session input. **Q-F:** Attic/Cellar **not
+> elected** — a founder-walked act needing its own scoping session; **the architecture is prospective
+> in v1, not operational, and that gap is carried explicitly.** The questions below are left legible
+> beside the rulings.
+
 **Read alongside:** `2026-09-04-standing-runner-design-R10-twelve-environment-amendment.md`. **This
 document's first draft was wrong on one load-bearing point** — its original Q-B asked whether Q1's
 scope was "not stated anywhere in the record." It is stated. The question below is corrected to the

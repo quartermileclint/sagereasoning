@@ -74,6 +74,39 @@ says so and states whether it **changes** the design or adds a **forward-compati
 > D4/§9.3 dangler (constraint-compliance #2, claims-vs-source #6). §10b records all 45 by finding
 > number and disposition.
 
+> **⚖ RULED 2026-09-04 — the six questions this sitting raised (§8) are ruled; adopted as binding on
+> relay; verbatim wins:** `2026-09-04-mentor-ruling-twelve-environment-architecture-six-questions-verbatim.md`.
+> **This document's PR19-reviewed body is not rewritten**; where a ruling changes a disposition, the
+> change is stated here and the body's text stays legible as reviewed.
+>
+> - **Q-A → R10 stands as a sitting.** The head's session-state note is confirmed correct; the sequencing
+>   note and the Option S gate are not in conflict.
+> - **Q-B → §1 G4, §4.2 ("Q1 posture" row), §7, §11.4 — RESOLVED.** Reading (a) governs: Q1 reaches a
+>   composed multi-agent client pipeline; **the pipeline's execution boundary is Threshold's handoff,
+>   exactly as R9 designed it.** The "third, unnamed scale" residual is closed — the two named scales
+>   were *"illustrations of the doctrine's reach, not an exhaustive enumeration."* §11.4's named
+>   governance hole is **closed by this ruling, not filled by a new one.** §4.2's "undetermined" row
+>   now reads: the same posture, settled.
+> - **Q-C → §4.4 — CONFIRMED and sharpened.** C1 does not transfer; a per-room identity architecture
+>   requires its own attestation ruling; **practice-exercised is not attestable in v1** by any
+>   mechanism consistent with the ruling set — a disclosed limit any future public claim must carry.
+> - **Q-D → §9 — ADEQUATE.** D4 is not modified; the pipeline's longitudinal history is a genuine
+>   extension needing its own design session once a pipeline identity is designed; *"a pipeline
+>   identity is a third kind of identity that neither ruling addresses."*
+> - **Q-E → §5.3, §11.3 — RESOLVED for v1.** Environment agents **do not accumulate their own trust
+>   records in v1**; independent accumulation would be an honesty defect in the class of P1's Finding
+>   B (the harness answering a question it did not fully put). Per-agent vs. shared is a named input
+>   for a future session. **Any build brief for the multi-agent form must pin the absence of any
+>   independent write to the trust state.**
+> - **Q-F → §2.2 Case B, §2.3, §9 item 12 — NOT ELECTED**, a founder-walked act needing its own
+>   scoping session. **The one implication this document did not name, now carried:** with Attic and
+>   Cellar empty, **the twelve-environment architecture is prospective in v1, not immediately
+>   operational** — at most seven rooms can host a live production heuristic, fewer today; every
+>   output describing the architecture must carry that gap rather than present it as operational.
+>
+> The Option S gate remains unmet; the M/W/S election and R8-D7's sampling policy remain deferred;
+> weights remain BLOCKED; nothing is built or licensed.
+
 **Naming discipline held throughout (Q5b):** the bare two-word layer term is not used in this
 document's own prose.
 
