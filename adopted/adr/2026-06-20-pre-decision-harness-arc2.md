@@ -234,3 +234,50 @@ Live-fire is the founder-walked test loop (`claude-code/SLICE5C-LIVE-VERIFY-WALK
 - Primary external sources (cited in the design draft): `code.claude.com/docs/en/hooks`, `code.claude.com/docs/en/plugins`, `code.claude.com/docs/en/settings`, `platform.claude.com/docs/en/agent-sdk/hooks` + `/permissions`, `anthropic.com/engineering/building-effective-agents`, IFScale (NeurIPS 2025), AgentEvals trajectory evals.
 
 *End of ADR-011. Design adopted; build slices follow under the Critical Change Protocol, Slice 1 first (PR1).*
+
+---
+
+## Amendment 2026-09-04 — the H3 advisory no longer injects the S4 recommendation (register P1, Option B)
+
+**Status:** Adopted (founder election, 2026-09-04; `D-S11-H3-ADVISORY-RECOMMENDATION-REMOVED-FROM-INJECTION-2026-09-04`).
+
+The 2026-07-10 S8 amendment above describes H3 as appending "S1 profile → S3 weighted aggregate → **S4
+measure-mode recommendation**". **The recommendation half is no longer injected.** That bullet stands as
+the record of what S8 built; this amendment states what is true now.
+
+**Why.** The P1 ruling (2026-09-04, binding) holds that the **at-action verdict**, filtered by Q3's
+kathekon-engagement threshold, is the decision table's per-action input, and that the **standing
+aggregate trust state is not** — its consumer is Q7 depth calibration. `readTrustVerdict`'s
+recommendation ranges over that aggregate. Injected beside an action, next to that action's own
+verdict, a named decision-table row (`deliberate-no-justice-log-continue`) reads as *this action's*
+answer. That is the conflation P1 resolved, reproduced at the ADVISE surface.
+
+The P1 build re-labelled the recommendation's `basis` to disclose its scope — but `basis` was never
+rendered by `renderTrustAdvisory`, so **at this surface the re-label disclosed nothing**; the agent saw
+the bare recommendation exactly as before. Given that, the founder elected removal over adding
+disclosure text to every injected frame.
+
+**What changed, precisely:** `renderTrustAdvisory` (`lib/discernment.mjs`) no longer emits the
+`S4 measure-mode recommendation: …` line. Nothing else.
+
+**What is preserved, and why removal costs the instrument nothing:**
+- **Q7 depth calibration is untouched** — `calibratedDepthFloor` (`lib/loop-closure.mjs`) reads
+  `aggregateLevel` / `justiceCapped` / `depthFloorBump` only, never the recommendation. The aggregate
+  line H3 still injects carries everything it consumes.
+- **The MEASURE record is unchanged.** `at-action-hook.mjs` still logs
+  `TRUST-READ … rec=<action>/<followUp> mode=measure` on every trust read, and the API response still
+  carries the recommendation with its re-labelled basis. **The observation was relocated, not deleted**
+  — and that is pinned end-to-end (`negative-battery` leg `s8-discernment`: one check asserts the line
+  is absent from the injected context, a paired check asserts `rec=` is still in the log; both
+  mutation-verified).
+
+**Not an S11 movement.** If a *per-action* recommendation is ever surfaced at this hook it must come
+from the at-action seam (`interventionInputFromAtAction`), not from this verdict — and that is S11
+G6(a) work, which remains **REFUSED**. P4/P5/P6 unmoved.
+
+**R18:** no public surface documents this advisory's recommendation line (verified by grep across
+`llms.txt`, `agent-card.json`, `api-docs`), so no public-doc change is due. The `pre_decision_harness`
+claim never asserted that an S4 recommendation is shown.
+
+Release gates after this change: `logic-harness` **173/0**; `negative-battery` **251/0** (the
+`s8-discernment` leg **65/0**).

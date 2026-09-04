@@ -435,7 +435,19 @@ mode = "ok";
     aggregate: { level: "deliberate", limitingDomain: "dikaiosyne", anyJusticeCapped: false },
     recommendation: { action: "proceed", followUp: "log", tableRow: "deliberate-no-justice" },
   });
-  check("16 advisory: names MEASURE + binds nothing", adv.includes("MEASURE") && adv.includes("binds nothing") && adv.includes("not enforced"));
+  check("16 advisory: names MEASURE + binds nothing", adv.includes("MEASURE") && adv.includes("binds nothing"));
+  // P1 Option B (founder-elected 2026-09-04): the S4 recommendation is NOT
+  // rendered at this surface. It ranges over the STANDING AGGREGATE, which the
+  // P1 ruling holds is not the per-action decision-table input; injected beside
+  // an action, a named table row reads as that action's answer. NON-VACUOUS —
+  // the fixture above supplies a recommendation with action/followUp/tableRow
+  // all populated, so every assertion below fails if the line comes back.
+  check("16 advisory: the S4 recommendation is NOT injected (P1 Option B)",
+    !adv.includes("recommendation") && !adv.includes("deliberate-no-justice") &&
+    !adv.includes("proceed/log") && !adv.includes("not enforced"));
+  // What removal must NOT cost: the aggregate line Q7 depth calibration reads.
+  check("16 advisory: the aggregate line survives removal (Q7 depth calibration)",
+    adv.includes("deliberate") && adv.includes("dikaiosyne"));
   const advSparse = renderTrustAdvisory({ dark: false, aggregate: { level: null }, recommendation: null });
   check("16 advisory: sparse record stated honestly", advSparse.includes("no evaluated cardinal-domain evidence"));
 

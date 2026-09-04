@@ -1109,7 +1109,19 @@ const obsRecords = (sessionId) => {
   const ctx = ctxOf(r.out);
   check("8e trust-read: GET fired", discernReqs("GET").length === 1);
   check("8e trust-read: advisory appended to the consult context", ctx.includes("Standing trust record (MEASURE"));
-  check("8e trust-read: the S4 recommendation surfaced as log-and-continue", ctx.includes("proceed/log") && ctx.includes("not enforced"));
+  // P1 Option B (founder-elected 2026-09-04) — INVERTED from "the S4
+  // recommendation surfaced". It ranges over the STANDING AGGREGATE, which the
+  // P1 ruling holds is not the per-action decision-table input; injected beside
+  // an action it read as that action's answer. END-TO-END through the real hook,
+  // so this is the assertion that actually protects the surface.
+  check("8e trust-read: the S4 recommendation is NOT injected (P1 Option B)",
+    !ctx.includes("proceed/log") && !ctx.includes("not enforced") && !ctx.includes("S4 measure-mode"));
+  // The paired half of the election, and the one that makes removal safe: the
+  // MEASURE RECORD IS UNCHANGED. If this ever fails while the check above
+  // passes, the recommendation was not relocated to the log — it was DELETED,
+  // and the instrument lost an observation instead of moving it.
+  check("8e trust-read: the recommendation IS still recorded in the log (record preserved)",
+    !!lastLogMatching("TRUST-READ ") && lastLogMatching("TRUST-READ ").includes("rec=proceed/log"));
   check("8e trust-read: honest TRUST-READ log", !!lastLogMatching("TRUST-READ ") && lastLogMatching("TRUST-READ ").includes("mode=measure"));
   // once per session: a second decision does not re-read.
   captured = [];

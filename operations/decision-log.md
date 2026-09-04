@@ -33568,3 +33568,80 @@ mentor at the founder's cadence; it self-starts nothing.** Cross-references:
 `D-MENTOR-RULING-OPTION-S-GATE-ITEM-LEVEL-SESSION-MAY-OPEN-2026-09-04`,
 `D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04`,
 `D-AUTONOMOUS-LOOP-DESIGN-BRIEF-RULED-2026-08-09` (Q1 and its 2026-08-12 amendment).
+
+---
+
+## D-S11-H3-ADVISORY-RECOMMENDATION-REMOVED-FROM-INJECTION-2026-09-04
+
+**Decision:** Option B of the P1 follow-on, **founder-elected**: the H3 standing trust advisory no
+longer injects the S4 recommendation into the at-action frame. The aggregate line stays; the
+recommendation stays in the honest log and in the API response. **Repo-only, `code-elevated`.** No
+schema, flag, credential, migration, deploy, live op, or public-doc change. The S11 flip remains
+**REFUSED**; P4/P5/P6 unmoved.
+
+### The finding that shaped the election, surfaced before the question was put
+
+The prior session chose "keep, re-labelled" and put the re-label in `readTrustVerdict`'s `basis`
+(`harness-integration.ts:605`). **`basis` is never rendered by the harness.** `renderTrustAdvisory`
+(`lib/discernment.mjs:349`) emitted `rec.action` / `rec.followUp` / `rec.tableRow` only, and `basis`
+appears nowhere in either harness file (grep-verified). So at the ADVISE surface **"keep re-labelled"
+was indistinguishable from "keep as-is"** — the agent saw the bare line:
+
+> `S4 measure-mode recommendation: proceed/log (deliberate-no-justice-log-continue) — log-and-continue; not enforced.`
+
+The same is true of the log line the follow-on prompt asked to check against the new basis text
+(`at-action-hook.mjs:167` prints `rec=proceed/log mode=measure`, no basis). The founder was given the
+three real options — remove / keep-and-actually-disclose / keep-as-is — rather than the two the prompt
+named, and elected removal.
+
+### Why removal is coherent with the ruling
+
+The recommendation ranges over the **standing aggregate**, which P1 holds is **not** the per-action
+decision-table input. Injected beside an action, next to that action's own verdict, a named table row
+reads as *this action's* answer — the conflation P1 resolved, reproduced at the ADVISE surface. The
+table-row name `deliberate-no-justice-log-continue` makes it worse: it names a justice surface, about
+an action whose justice surface it never evaluated.
+
+### Verified before the edit, not assumed
+
+`calibratedDepthFloor` (`lib/loop-closure.mjs:189`) reads `aggregateLevel` / `justiceCapped` /
+`depthFloorBump` **only — never the recommendation**. So **Q7 depth calibration is untouched**, and the
+aggregate line still carries everything it consumes. The MEASURE record is likewise unchanged: the
+observation was **relocated, not deleted**.
+
+### Batteries — and a vacuous assertion found and replaced
+
+The existing unit check (`logic-harness` "16 advisory: names MEASURE + binds nothing") asserted on
+`"not enforced"`, a substring of the removed line, so it would have gone **vacuously green** against
+output that no longer contains it. Replaced with two non-vacuous pins (the fixture supplies a fully
+populated recommendation, so both fail if the line returns) plus one asserting the aggregate line
+survives. The `negative-battery` carried a genuine **end-to-end** assertion through the real hook
+(`8e trust-read: the S4 recommendation surfaced as log-and-continue`) — **inverted**, and paired with a
+new check that `rec=proceed/log` is **still in the log**, so a future regression that silently deletes
+the observation rather than relocating it fails loudly.
+
+**Mutation-verified both directions:** restoring the removed line fails exactly the two "NOT injected"
+checks and nothing else; removing it again returns green. Gates: `logic-harness` **173/0** ·
+`negative-battery` **251/0** (`s8-discernment` leg **65/0**) · `node --check` clean on all three edited
+files.
+
+**R18:** no public surface documents this advisory's recommendation line (grep-verified across
+`llms.txt`, `agent-card.json`, `api-docs`); the `pre_decision_harness` claim never asserted one is
+shown. No public-doc change due.
+
+**ADR:** `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` gains a dated **Amendment 2026-09-04**;
+the 2026-07-10 S8 bullet describing H3 as appending the S4 recommendation is left standing as the
+record of what S8 built, with the amendment stating what is true now.
+
+**Live effect, stated honestly:** the founder-loop hooks hot-load from the working tree, so this takes
+effect on the next trust read in the founder's own loop without any deploy. The read is
+once-per-session, so this session's advisory had already fired before the change.
+
+**Not an S11 movement.** A *per-action* recommendation at this hook would have to come from
+`interventionInputFromAtAction`, which is S11 G6(a) work and refused. Removing a mis-scoped aggregate
+reading is not a step toward the flip.
+
+**Status:** Adopted. Cross-references: `2026-09-04-mentor-ruling-P1-decision-table-input-verbatim.md`
+(binding), `D-S11-P1-AT-ACTION-SEAM-BUILT-D5-FLAG-SUPPLIED-2026-09-04` (the re-label this supersedes at
+the ADVISE surface), `D-S11-REGISTER-D5-ROW-CLOSED-2026-09-04`,
+`adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (Amendment 2026-09-04).

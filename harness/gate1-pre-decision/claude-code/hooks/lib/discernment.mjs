@@ -358,10 +358,30 @@ export function renderTrustAdvisory(verdict) {
   } else {
     lines.push("  no evaluated cardinal-domain evidence yet (sparse record — honestly stated)");
   }
-  const rec = verdict.recommendation;
-  if (rec && rec.action) {
-    lines.push(`  S4 measure-mode recommendation: ${rec.action}/${rec.followUp} (${rec.tableRow || "n/a"}) — log-and-continue; not enforced.`);
-  }
+  // THE S4 RECOMMENDATION IS DELIBERATELY NOT RENDERED (register P1 Option B,
+  // founder-elected 2026-09-04). It used to print
+  //   "S4 measure-mode recommendation: <action>/<followUp> (<tableRow>) — …"
+  // and that line was mis-scoped at this surface in a way the P1 ruling makes
+  // precise: `readTrustVerdict`'s recommendation ranges over the STANDING
+  // AGGREGATE trust state, which the ruling holds is NOT the per-action
+  // decision-table input. Injected at an action, next to that action's own
+  // verdict, a named decision-table row reads as this action's answer — the
+  // exact conflation P1 resolved. The re-label the P1 build added went into
+  // `basis` (harness-integration.ts), and `basis` was never rendered here, so
+  // at this surface "keep re-labelled" disclosed nothing.
+  //
+  // WHAT IS PRESERVED, and why removal costs the instrument nothing:
+  //  • Q7 depth calibration reads `aggregate.level` / `anyJusticeCapped` only
+  //    (calibratedDepthFloor, lib/loop-closure.mjs) — never the recommendation.
+  //    The aggregate line above still carries everything it consumes.
+  //  • The MEASURE RECORD IS UNCHANGED: at-action-hook.mjs still logs
+  //    `rec=<action>/<followUp> mode=measure` on every trust read, and the API
+  //    response still carries the recommendation with its re-labelled basis.
+  //    Only the AGENT-FACING INJECTION changed.
+  //
+  // If a per-action recommendation is ever surfaced here, it must come from the
+  // at-action seam (`interventionInputFromAtAction`), not from this verdict —
+  // and that is S11 G6(a) work, which is REFUSED.
   return lines.join("\n");
 }
 
