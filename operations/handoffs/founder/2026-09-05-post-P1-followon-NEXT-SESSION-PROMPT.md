@@ -1,3 +1,5 @@
+> **SPENT 2026-09-05** — Option D executed (`2026-09-05-P6-window-recommendation-scope-CLOSE.md` → ruled and adopted, `2026-09-05-P6-ruling-adoption-CLOSE.md`); Option E DISSOLVED by that ruling (the recommendation is derived at report time — no capture-layer change, no R2 deadline; the report column was then built, `2026-09-04-P6-recommendation-column-CLOSE.md`); Option F executed as D4's activation (`2026-09-05-D4-activation-and-F3prime-CLOSE.md`).
+
 # Next session — after the P1 follow-on (choose one; nothing here pre-decides the choice)
 
 **Read first, in this order:** `/adopted/standing-protocol-cache.md` →

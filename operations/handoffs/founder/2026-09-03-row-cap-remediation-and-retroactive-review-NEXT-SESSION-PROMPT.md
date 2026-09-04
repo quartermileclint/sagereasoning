@@ -1,3 +1,5 @@
+> **SPENT 2026-09-03** — the retroactive PR19 review completed; C3 + Part D, then C1 and C4 built and LIVE (`D-ROW-CAP-SWEEP-C4-COMPLETE-LIVE-2026-09-03`). The sweep arc is closed bar the two disclosed exceptions (`provenance-ledger-store.ts`, WATCHED; C5, Stripe-gated).
+
 # Next-session prompt — record the row-cap fix LIVE, retroactive PR19 review, then the sweep's remediation
 
 **Founder: paste this file as the first message of a new session.**

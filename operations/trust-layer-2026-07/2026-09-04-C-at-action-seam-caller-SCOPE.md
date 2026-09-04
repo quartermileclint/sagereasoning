@@ -77,6 +77,8 @@ The genuinely dangerous actions are on the **guard** path. `runGuard` writes no 
 only inside `runConsult`. That is register **P5**, and it is why part (3) of the readiness standard was
 unmeasurable on the first window.
 
+> **⚠ STALE AS WRITTEN — annotated 2026-09-05 (grounding session); the body above is preserved unedited.** *"`runGuard` writes no record"* was inherited from register P5's then-current prose and was already false when this scope was drafted: the guard-path capture (P8a — `buildGuardHoldRecord`, schema `false-hold-record-v4`, `path: "guard"`) landed on 2026-08-17 (commit `3e8f231`, "R2b item 8") behind the same `GATE1_FALSE_HOLD_CAPTURE` flag. The register's P5 row was corrected in place on 2026-09-05 under the binding P6 ruling (`2026-09-05-mentor-ruling-P6-window-recommendation-verbatim.md`), which names this document's §4 as having inherited the stale text. **P5's STATUS is unchanged (OPEN) — activation is open, the flag is unset, and no guard record has ever been written — so this finding's conclusion (a consult-only caller covers the wrong population) still holds; only the mechanism sentence is stale.**
+
 The same gap applies to the seam. A caller sited on the consult path would compute a per-action
 recommendation for exactly the population that is **already** over-represented — ordinary file writes —
 and none for the population the rule exists to govern. **Any siting decision that does not name P8a

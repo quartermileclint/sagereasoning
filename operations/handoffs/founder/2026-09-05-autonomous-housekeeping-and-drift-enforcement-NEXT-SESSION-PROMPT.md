@@ -1,3 +1,5 @@
+> **SUPERSEDED 2026-09-05** by `2026-09-05-post-ruling-autonomous-work-NEXT-SESSION-PROMPT.md` (its items survive there, re-ordered), which is itself now SPENT — every §2 item here has since been executed.
+
 # NEXT SESSION PROMPT — autonomous housekeeping, drift enforcement, and two small builds
 
 **Paste into a fresh session. Tier: `code-elevated`** (one item touches an always-on 400 boundary;

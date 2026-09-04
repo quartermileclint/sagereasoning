@@ -1,3 +1,5 @@
+> **SPENT 2026-09-04** — Options A, B and C all closed out (`2026-09-04-P1-followon-CLOSE.md`; four decision-log entries, `D-S11-P1-FROZEN-BUFFER-RECLASSIFIED-…` through `D-S11-OPTION-C-AT-ACTION-SEAM-CALLER-SCOPED-2026-09-04`).
+
 # Next session — P1 follow-on (choose one; nothing here pre-decides the choice)
 
 **Read first, in this order:** `/adopted/standing-protocol-cache.md` → the most recent close in

@@ -1,3 +1,5 @@
+> **SPENT 2026-09-04** — the grounding ran; the mentor's brief was relayed into it, questioned (eighteen questions), corrected and adopted (`D-MENTOR-BRIEF-STANDING-RUNNER-DESIGN-SESSION-ADOPTED-RECORDED-2026-09-04`). The standing-runner track's current hold prompt is `2026-09-04-standing-runner-post-R10-grounding-and-await-NEXT-SESSION-PROMPT.md`; the current project-wide grounding is the standing opener, Version 2026-09-05.
+
 # Next-Session Prompt — Grounding session: re-ground, report, and hold for the runner-design mentor instructions
 
 **Paste this as the first message of a new session, in the `sagereasoning` repo root.**

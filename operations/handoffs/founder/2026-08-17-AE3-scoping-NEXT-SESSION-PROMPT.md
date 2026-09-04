@@ -1,3 +1,5 @@
+> **SPENT 2026-09-03** — executed in full; recommendation DEFER unchanged, no build prompt authored; the prompt's own `loop_id` claim corrected (`D-AE3-SCOPING-DEFERRED-LOOP-ID-CLAIM-CORRECTED`, 2026-09-03; scope: `operations/agent-circles-2026-08/2026-09-03-AE3-scoping-SCOPE.md`).
+
 # Next session — AE-3 scoping (NOT a build session)
 
 **Paste this as the first message of a new session, in the `sagereasoning` repo root.**

@@ -1,3 +1,5 @@
+> **SPENT 2026-09-02** — activation LIVE, founder-walked, three probes green (`2026-09-02-score-save-activation-CLOSE.md`; `D-R20A-SCORE-SAVE-PERIMETER-ACTIVATION-LIVE-2026-09-02`). §6(b), the local-storage bypass, remains open and is carried in the standing opener's queue.
+
 # Next-session prompt — activate `/api/score/save`, verify the private-mentor fix, continue from here
 
 **Founder: paste this file as the first message of a new session.**

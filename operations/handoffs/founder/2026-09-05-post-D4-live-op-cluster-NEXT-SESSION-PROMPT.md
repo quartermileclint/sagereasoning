@@ -1,3 +1,5 @@
+> **SPENT 2026-09-05** — items 1–3 resolved (`2026-09-05-post-D4-live-op-cluster-CLOSE.md`): the D4 took-effect proof discharged; D1's watch settled OPEN; the credential-lookup retry HELD on its own required check (`D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`).
+
 # Next session — the post-D4 live-op cluster: two honesty gaps, and one activation
 
 **Three items, all founder-walked live ops, all bounded.** Items 1 and 2 close gaps the D4 activation

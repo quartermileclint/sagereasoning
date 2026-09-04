@@ -1,3 +1,5 @@
+> **SPENT 2026-09-04** (this file's "2026-09-06" label is a context-date error; git author date 2026-09-04 19:57 +1000 — flagged by two later sessions, deliberately not renamed) — executed by `2026-09-04-P6-recommendation-column-CLOSE.md` (commit `dc100b4`; `D-S11-P6-RECOMMENDATION-COLUMN-BUILT-REVIEW-FOLDED-2026-09-04`); the carried Q-A register-changelog write cleared in that session.
+
 # Next session — build the P6 recommendation column (autonomous; one founder gate at the end)
 
 **Designed to run start-to-finish without you.** Every step is repo-only: no schema, flag, credential,

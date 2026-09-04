@@ -1,3 +1,5 @@
+> **SPENT 2026-09-05** — D4 activated (`SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true`, founder-walked) and F-3′ landed (`2026-09-05-D4-activation-and-F3prime-CLOSE.md`; `D-S11-D4-REDUCER-NARROWING-ACTIVATION-LIVE-F3PRIME-LANDED-2026-09-05`).
+
 # Next session — TWO items: register D4's activation, and F-3′ (guard availability as a window precondition)
 
 **Item 1 — D4's activation walk** is `code-critical` and attended (below).

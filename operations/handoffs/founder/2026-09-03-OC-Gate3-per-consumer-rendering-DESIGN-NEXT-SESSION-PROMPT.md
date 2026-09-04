@@ -1,3 +1,5 @@
+> **SPENT 2026-09-03** — Gate 3 ran and all seven questions were RULED the same day (`2026-09-03-OC-Gate3-per-consumer-rendering-design-CLOSE.md`; `D-MENTOR-RULINGS-OC-GATE3-ADOPTED-EXECUTED-2026-09-03`). The O-C Gate-3 track is CLOSED; its §11 items are named to the standing-runner track's next design-capable session.
+
 # Next session — O-C Gate 3: the per-consumer rendering design session
 
 **Paste this as the first message of a new session, in the `sagereasoning` repo root.**

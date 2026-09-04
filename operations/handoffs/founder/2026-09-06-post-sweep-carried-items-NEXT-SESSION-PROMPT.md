@@ -1,3 +1,5 @@
+> **SPENT 2026-09-05** (this file's "2026-09-06" label is a context-date error; git author date 2026-09-05 04:59 +1000) — §4A–§4D executed and §3A put to the mentor and RULED (`2026-09-06-post-sweep-carried-items-CLOSE.md`; `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`). §2 (the post-deploy smoke), §3B, §3C and §3D remain founder-gated and are carried in the standing opener's queue (Version 2026-09-05).
+
 # NEXT SESSION PROMPT — carried items after the count-discipline sweep
 
 **Paste into a fresh session. Tier: `governance`** unless §3B or §4B is elected (`code-elevated`).

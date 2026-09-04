@@ -1,3 +1,5 @@
+> **SPENT 2026-09-03** — the fix built, executed-tested, pushed and founder-confirmed LIVE (`operations/founder-hub-2026-09/2026-09-02-postgrest-row-cap-fix-CLOSE.md`; `D-FOUNDER-HUB-POSTGREST-ROW-CAP-FIX-LIVE-2026-09-03`); the codebase-wide sweep recorded and since remediated.
+
 # Next-session prompt — the silent 1,000-row cap on `/api/founder/hub` (and the codebase-wide sweep)
 
 **Founder: paste this file as the first message of a new session.**

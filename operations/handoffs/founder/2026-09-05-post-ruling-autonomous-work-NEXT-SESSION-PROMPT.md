@@ -1,3 +1,5 @@
+> **SPENT 2026-09-05** — items A–D executed (`2026-09-05-post-ruling-autonomous-work-CLOSE.md`); item E executed by the successor session (`2026-09-06-post-sweep-carried-items-CLOSE.md`, authored 2026-09-05 AEST). Founder-gated §4 items are carried in the standing opener's queue (Version 2026-09-05).
+
 # NEXT SESSION PROMPT — post-ruling autonomous work, ordered by what needs no founder step
 
 **Paste into a fresh session. Tier: `code-elevated`** (items B and D touch code; the rest is
