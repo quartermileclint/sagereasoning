@@ -44,7 +44,14 @@ Derived from source, not from any document:
 
 ### What the public surfaces claim
 
-| Surface | Quoted opening text | Claim | Live |
+**Scope of the "Live at HEAD" column (PR19 fold).** Every value in it is derived from files at
+**HEAD in this repository**. No production fetch was performed this session — not of
+`www.sagereasoning.com/llms.txt`, not of either endpoint. Two gaps are therefore unclosed by this
+evidence: HEAD is not necessarily the deployed build, and the repo's `public/llms.txt` is not
+necessarily what production serves. The conclusion is very likely correct (the code has been in
+place since 2026-04-01), but it is an inference from source, not an observation of production.
+
+| Surface | Quoted opening text | Claim | Live at HEAD |
 |---|---|---|---|
 | `public/llms.txt` | "**Free Tier — Foundational Alignment Check (11 assessments** …" | 11 | **14** |
 | `public/llms.txt` | "**Returns 11 free-tier assessment prompts (Self-Observation + Classification)**" | 11; those phase names | **14**; Foundations + Architecture of Mind |
@@ -66,11 +73,16 @@ published contract, not an internal comment.
 
 An agent that follows the published documentation **cannot complete either endpoint**:
 
-* POST 11 responses to `/api/assessment/foundational` → `400` (needs exactly 14)
-* POST any response with `assessment_id: "SO-01"` → `400 Invalid assessment_id`
-* POST 37 responses to `/api/assessment/full` → `400 Exactly 55 responses required`
+* POST 11 responses to `/api/assessment/foundational` → **400**, `Exactly 14 responses required…`
+* POST 37 responses to `/api/assessment/full` → **400**, `Exactly 55 responses required…`
+* `assessment_id: "SO-01"` → **400**, `Invalid assessment_id: "SO-01". Valid IDs: …` — **but only
+  once the count is right.** The length gate precedes the id loop, so the documented 11-response
+  `SO-01` body fails on **count** first; the id error surfaces only inside an otherwise-correct
+  14- or 55-element array. Correcting the count alone therefore uncovers a second 400 rather than
+  reaching a 200 — which is why A3 and C must ship together with A1/A4.
 
-This is not a cosmetic count. It is a documented contract that cannot be executed.
+This is not a cosmetic count. It is a documented contract that cannot be executed, and it fails
+twice over.
 
 ### Provenance — the drift is dateable
 
@@ -119,9 +131,12 @@ what goes stale tomorrow.
 ## Finding 3 — four sibling docstrings
 
 **Fixed (`1ecff99`).** `"AC5 perimeter unchanged at 10 routes"` (×2, live 43),
-`"25 perimeter routes/blocks"` (×2, ~28 importing files — the route/helper/test boundary is genuinely
-ambiguous, which is itself a reason not to write the number). In each the load-bearing claim was
-"unchanged" / "all"; the number added nothing and was wrong. Numbers removed, claims kept.
+two distinct strings — `"which 25 perimeter routes consume"` and `"all 25 perimeter blocks landed
+through"`. The real figure depends on what is counted: **32** files import `r20a-gap-closure`
+repo-wide, **28** under `src/app/api`, of which some are helpers and tests rather than routes. That
+the number cannot be stated without first settling three boundary questions is itself the argument
+for not writing it. In each the load-bearing claim was "unchanged" / "all"; the number added nothing
+and was wrong under every reading. Numbers removed, claims kept.
 
 **Not extended** to make the guard scan sibling files — that couples batteries across directories.
 Named as an option, not built.
@@ -144,9 +159,15 @@ Recorded so a later session does not re-derive it:
 * **`public/component-registry.json`** — `totalComponents` 304 = `len(components)` 304;
   `statusSummary` sums to 304 with **no per-status mismatch** (wired 129, verified 54, live 113,
   designed 5, scaffolded 3). The registry maintains its counts correctly.
-* **Pass-through fields** — llms.txt's "Five fields" / "Two fields" / "All seven fields" verified
-  against `trust-layer/types/evaluation.ts`: 5 on `EvaluatedAction`, 2 on `CarriedProfile`. Accurate,
-  and each is followed by its own bullet list, so it is locally self-verifying.
+* **Pass-through fields** — llms.txt's "Five fields" / "Two fields" / "All seven fields": the count
+  5 + 2 = 7 is accurate, and each is followed by its own bullet list, so it is locally
+  self-verifying. **Citation corrected (PR19 fold):** the five on `EvaluatedAction` are in
+  **`website/src/lib/substrate/trust-layer/types/evaluation.ts`**, and the two `CarriedProfile`
+  fields in **`website/src/lib/substrate/trust-layer/validation/pass-through-fields.ts`**. This
+  first read `trust-layer/types/evaluation.ts`, which resolves to the **repo-root port mirror** —
+  a file containing none of the seven names and no `CarriedProfile` at all. The count was right and
+  the pointer was unfollowable. In a repo with a known port-mirror pair, an unqualified
+  `trust-layer/...` path is not a citation.
 * **D6a measurement counts** — "five grave-vocabulary probes", "twenty examinations", "four
   members", "two routes", `0/0/2/2/8`, 12%, Wilson 7.0–19.8%, n=100. These describe a **frozen
   measurement**, not a live set. They do not drift and must not be "refreshed".
