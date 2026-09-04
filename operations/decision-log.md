@@ -33903,3 +33903,99 @@ contents, the flip, or any activation.
 `2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
 `2026-08-15-false-hold-new-window-scoping-note.md` (P6; the contamination rule),
 `S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §D D4.
+
+---
+
+## 2026-09-05 — D-S11-P6-WINDOW-RECOMMENDATION-RULED-ADOPTED-PARTLY-EXECUTED-2026-09-05
+
+**Category:** `governance` — documents only. **AC7:** not engaged. **PR6:** not engaged. **PR19:** not
+triggered. **Production:** no schema, flag, credential, migration, deploy or live op. **Session model:**
+`claude-opus-5`.
+
+**Binding source:** `operations/trust-layer-2026-07/2026-09-05-mentor-ruling-P6-window-recommendation-verbatim.md`
+(captured verbatim this session; **verbatim wins over this entry and over every amendment it licenses**).
+Ruling on `2026-09-05-P6-window-recommendation-SCOPE-FOR-RULING.md`
+(`D-S11-P6-WINDOW-RECOMMENDATION-SCOPED-FOR-RULING-DEADLINE-PREMISE-WITHDRAWN-2026-09-05`).
+
+### What was ruled
+
+**Q1 — the window's stated purpose WIDENS to cover the decision table's recommendation**, not only hold
+classification. Part (3) names a false-hold rate; under G6(a) a hold is what a `do-not-proceed`
+produces; so the table's output is what part (3) names. Reporting classification alone leaves the
+mapping to holds looking total when the P1 ruling establishes it is not. The mentor: *"the gap between
+measuring a proxy and measuring the thing"*, and the widening *"is not an expansion of scope beyond what
+part (3) requires. It is a correction of the original scoping to what part (3) actually names."*
+
+**Q2 — DERIVED AT REPORT TIME, never stored in the capture record.** The scope's strongest
+counter-argument (audit-trail fidelity) is accepted as real and outweighed, with a reason the scope did
+not give: *"the table is under active ruling. P1 moved its input on 2026-09-04, mid-arc. A stored
+recommendation would freeze the table's reading at capture time and become stale evidence that looks
+authoritative."* An as-of-table disclosure rides the figure.
+
+**Q3 — consult and guard populations reported SEPARATELY** (*"the separation is not optional"* — the two
+denominators are not commensurable), with the **A8** bound and the guard-record **`depth: ""`** bound
+**printed on the rate, not footnoted**. A **v3/v4 lift check** runs before any figure is published — *"a
+precondition of publication, not a precondition of the ruling."*
+
+**All four findings and the §9 incidental accepted as stated.** Named specifically: *"the document
+argues against its own urgency claim at Finding B — which is the most important piece of intellectual
+honesty in the document."* **The R2 sequencing deadline is withdrawn.**
+
+### Executed this session (documents only)
+
+1. **Ruling captured verbatim.**
+2. **`2026-08-15-false-hold-new-window-scoping-note.md` amended** — header amendment marker; new **§7**
+   (the recommendation column: both columns, report-time derivation, population separation, three
+   printed bounds, the lift-check precondition); and §2.3's stale present-tense claim that `runGuard`
+   writes nothing marked **CORRECTED** in place. §2's capture list deliberately unchanged — the ruling
+   directs report-time derivation, so there is **no capture-layer change**.
+3. **Register `S11-FLIP-PREREQUISITES-REGISTER.md`** — **P5's row prose corrected** (the guard path has
+   written records since commit `3e8f231`, 2026-08-17; **status stays OPEN**, activation is open, a
+   built-dark denominator is not a measured one) and **P6's row amended** with the ruling.
+4. **`runs/2026-07-17/FREEZE-NOTE.md` written** — documents the cut: the frozen 130 is an exact
+   **prefix** of the live 138, the extra 8 captured 2026-07-17 from 12:15:21Z, same `Edit`/`reopened`
+   class. The freeze file is **not** re-taken (ruled; and re-taking would invalidate the reproduction
+   check calibrated against the 130).
+
+### Not executed — the register changelog, and why
+
+The two changelog entries (the 2026-09-05 ruling; a retroactive entry for the 2026-08-17 P8a build)
+**were blocked twice by the at-action guardrail** — `do_not_proceed`, proximity `reflexive`, ground:
+*"the action text shows a non-consented cost no extracted circle carries as violated."*
+
+The deny was **honored, not routed around.** The first re-examination found something real — a
+concurrent peer session was mid-write in the same working tree — and checked against it: the register's
+diff carried only this session's own P5/P6 edits, the peer was working in a different directory, and a
+backup was taken before retrying. The second deny was **not** overridden. My judgement is that this is
+the documented corroboration over-strictness class (protective text dense with the harm vocabulary it
+describes preventing — memory `corroboration-tripwire-protective-context-guards`), but that is recorded
+as a judgement, not as a fact, and no action was taken on it: the text was not trimmed to slip past the
+detector, and no alternative tool was used to write the same bytes. **The entries are prepared** at
+`scratchpad/chg.py`; a backup of the register sits at `scratchpad/register.bak`. **Carried to the
+founder.**
+
+### One ruling item was ALREADY DISCHARGED, verified rather than re-executed
+
+The ruling's fourth "owed" item — Finding B's fix, *"supply `taskHasJusticeSurface` or remove the
+parameter as unreachable"* — **was done on 2026-09-04**. Register D5 is CLOSED: the parameter is
+**REQUIRED** (`taskHasJusticeSurface: boolean`, `harness-integration.ts:531`), all four call sites
+supply it explicitly, and the value is disclosed in the verdict `basis` and pinned by two assertions.
+Verified first-hand at HEAD. The ruling names it because it reads from the P1 scope's build-consequence
+list, which predates the fix. Recorded as discharged; a reader's note to that effect is placed at the
+head of the verbatim record, outside the mentor's reproduced text.
+
+### Standing state — unchanged
+
+**P4 / P5 / P6 open and unmoved. The S11 flip remains REFUSED.** P6 is **not** discharged, not scoped
+further, and the window has not started. P8a's build does not discharge P5. Nothing here licenses any
+build, schema change, activation, or publication; **R2's contents remain the founder's**; weights
+BLOCKED; MEASURE throughout; the 0h call remains the founder's.
+
+**Rollback:** `git revert` this session's commits — four documents and two entries; no code, no schema.
+
+**Status:** Adopted and partly executed (the register changelog carried). Cross-references:
+`D-S11-P6-WINDOW-RECOMMENDATION-SCOPED-FOR-RULING-DEADLINE-PREMISE-WITHDRAWN-2026-09-05` (the scope),
+`D-S11-OPTION-C-AT-ACTION-SEAM-CALLER-SCOPED-2026-09-04` (Finding E, the origin),
+`D-S11-P1-DECISION-TABLE-INPUT-RULED-DISCHARGED-2026-09-04` (the filter this makes visible),
+`2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (Q3/G6(a); the refusal),
+`S11-FLIP-PREREQUISITES-REGISTER.md` §A P4/P5/P6, §D D4/D5.
