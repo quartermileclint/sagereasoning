@@ -35652,3 +35652,62 @@ findings and recommendations stand). Cross-references: `D-A11B…` (the injectio
 adoption — A11b, live since 2026-06-08); `D-DISCERNMENT-503-RATE-DIAGNOSED-AND-CLOSED-2026-09-03`
 (the `logRouteError` wiring that made this diagnosis possible — its historical 63 identical events
 are very probably this same class, now explicable); the S11 register B4 cell.
+
+## 2026-09-05 — D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05
+
+**Decision:** The mentor's answers to the five relays of 2026-09-05 are **ADOPTED AS BINDING**,
+captured verbatim at `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`
+(canonical — verbatim wins over every summary including this one). `governance` — documents only;
+nothing built; every consequence routed to its own session with its own tier. Session model
+`claude-sonnet-5`.
+
+**The rulings, one line each (the verbatim governs):**
+1. **Option S** — the directional decomposition is **REMOVED**; per-probe distributions replace it;
+   B1 moot; `option-s-runner.py:45` corrected before any spend; the run is unblocked on this
+   question, the other three pre-run blockers still govern. → **S6.**
+2. **Route (i)** — **elect 2b now** (narrow `l1_supply` out of the `ecosystem` preset), independent of
+   route (i); **do not build route (i)**; its revisit trigger is an empirical Arm-B threat from the
+   post-2b `plugin_install` population; flag-and-proceed if ever elected. → **S7 (elected).**
+3. **Mentor continuity** — the raw window is a conversational-context channel, not a memory channel
+   for binding rulings (the verbatim record is); bound it by **session**, token-budgeted with a hard
+   cap; the `MENTOR_HISTORY_WINDOW === 20` pin changes only by a diff citing a ruling; **the mentor
+   must be told what it cannot see** (a system-prompt line, wording given); **Q4 is the founder's**
+   — read rows 1001–1011, decide whether the 08-31 corrected ruling stands, recover any uncaptured
+   ruling ("the highest-priority recovery item from this episode"). → **S10 (new), preconditioned on
+   the founder's reading.**
+4. **A11b vs the harness** — **remedy (a) governs**: harness-side redaction of the full
+   `schema_field_injection` token list to a category placeholder, count logged per call, rule
+   disclosed in the harness docs; a mechanically redacted tail is still out-of-band under the channel
+   law because a rule, not the agent, shapes it; (b) **not elected** ("the exact shape a defence
+   should not have"); (c) acceptable only as a temporary posture; **the masked-200 `route_errors`
+   row on `/api/reason` is confirmed and built alongside.** `code-elevated`, harness only (+ the
+   one-line route fold inside the measured surface). → **S9 (new); land before S4(d) or after the
+   window.**
+5. **Non-length pre-check rejections** — the length ruling's principle **extends to P′** (three
+   sites, Group-1 shape) **and to O where the screened text is present** (case by case); **J, A, F
+   are outside**; the boundary is ruled: route open + caller the intended human user + screened text
+   present and readable, jointly. → **S3 Group 2b** (added to the remediation prompt).
+
+**Records updated in this commit:** the verbatim file (NEW); RULED markers on all five question
+documents; the standing opener (F-2/F-3 ruled, F-11 partly — Q4 still the founder's; S6 unblocked on
+B1; S7 elected; S9 and S10 added; S3 gains Group 2b); the remediation prompt's ruled addition;
+memory `harness-blind-on-substrate-sessions-a11b-schema-tokens` marked ruled.
+
+**Concurrency note:** a peer interactive session (`sagereasoning-a9`, Session 3B — Group 2) was
+live on this checkout and mid-edit on `website/src/app/api/reflect/route.ts` at this writing. This
+commit is path-scoped to documents; no `website/` file staged. **The founder should tell that
+session about Part 5** (its list grew by Group 2b) and Part 4 (do not touch `injection-defence.ts`;
+expect the blindness; it is being remedied harness-side in S9).
+
+**Rollback path:** `git revert` this commit — documents only; the rulings themselves stand in the
+mentor's record regardless. **Rules served:** PR20 (each question relayed with its mechanism facts
+cited to file:line; the verbatim captured whole, in one file — the 2026-09-06 addendum's lesson on
+two files for one question applied in reverse: five questions, one relay, one file), PR23 (memory
+updated), PR21 (elicitations answered genuinely throughout). Concurrency: `ListAgents` + whole
+`git status` before staging; path-scoped.
+
+**Status:** Adopted. Cross-references: the five question documents; `D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-CLOSED-2026-09-05`;
+`D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05` (§4.4);
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06` (the ruling Part 5 extends);
+`D-OPTION-S-PR19-FOUR-PRE-RUN-BLOCKERS-DO-NOT-RUN-2026-09-05` (B1 now moot);
+`D-ROUTE-I-WHAT-IS-L1-SUPPLY-FOR-SCOPED-2026-09-03`.

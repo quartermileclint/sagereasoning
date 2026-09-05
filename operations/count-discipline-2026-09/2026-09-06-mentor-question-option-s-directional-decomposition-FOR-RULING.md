@@ -1,3 +1,5 @@
+> **RULED 2026-09-05** — Part 1 — the decomposition is REMOVED; per-probe distributions replace it; B1 moot; `option-s-runner.py:45` corrected before any spend. Verbatim (canonical): `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`; adopted `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05`.
+
 # Mentor question — should Option S's directional decomposition exist at all?
 
 **Prepared 2026-09-06 for founder relay.** One question, arrived at from two directions.

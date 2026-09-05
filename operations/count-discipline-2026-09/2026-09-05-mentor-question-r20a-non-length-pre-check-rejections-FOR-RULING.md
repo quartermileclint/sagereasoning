@@ -1,3 +1,5 @@
+> **RULED 2026-09-05** — Part 5 — the principle extends to P′ and to O where the screened text is present; J/A/F outside; three-condition boundary ruled. Verbatim (canonical): `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`; adopted `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05`.
+
 # Mentor question — does the length-guard ruling's principle extend to the other ways a human-facing route can refuse a person before the distress check runs?
 
 **Prepared 2026-09-05 (22:58 AEST) for founder relay.** `governance`, documents only. Raised by the

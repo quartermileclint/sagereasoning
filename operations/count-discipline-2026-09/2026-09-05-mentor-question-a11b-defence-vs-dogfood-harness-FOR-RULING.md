@@ -1,3 +1,5 @@
+> **RULED 2026-09-05** — Part 4 — remedy (a) harness-side redaction with disclosure + logging; (b) not elected; the masked-200 `route_errors` row built alongside. Verbatim (canonical): `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`; adopted `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05`.
+
 # Mentor question — the injection defence blinds the harness on exactly the sessions that maintain the substrate. Which duty governs, and where should the remedy live?
 
 **Prepared 2026-09-05 (22:55 AEST) for founder relay.** `governance`, documents only. One question

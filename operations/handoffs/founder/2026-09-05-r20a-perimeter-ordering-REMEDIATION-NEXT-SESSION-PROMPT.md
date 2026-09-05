@@ -1,5 +1,7 @@
 > **GROUP 1 DONE 2026-09-05** — the four minimum-length moves are LIVE (`c679739` on `origin/main`, Vercel green) and **live-smoked, all eight probes as expected** (`2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`; `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05` + its LIVE addendum). F-6's two `format` smokes are also discharged. **Groups 2 and 3 remain open under this prompt.**
 
+> **RULED ADDITION 2026-09-05 (mentor Part 5, `2026-09-05-mentor-rulings-five-relays-verbatim.md`) — GROUP 2b, added to this list:** the principle extends beyond length guards. **P′ (three sites, Group-1 shape):** `score-scenario/route.ts:293` (`scenario` presence, screened field `response`), `mentor/journal-feed/route.ts:47` (sibling presence, screened `impression`), `journal/route.ts:34` (`day_number` presence, screened `reflection_text`) — line numbers at `19509bb`, re-derive. **O where the screened text is present, case by case:** e.g. `mentor/private/reflect` `bypass_pattern_cache` boolean 400; the Stoa `visibility` enum; `/api/reason`'s `session_marker`/`loop_id` 400s (human path). **Outside the principle, no move owed:** malformed-JSON 400s (J), founder-only 403s (A), flag-off 503s (F). The ruled boundary: route open + caller the intended human user + screened text present and readable, jointly.
+
 # NEXT SESSION PROMPT — Session 3: the R20a perimeter-ordering REMEDIATION
 
 **Paste into a fresh session after the standing opener. Tier: `code-critical`** — every candidate is a

@@ -1,3 +1,5 @@
+> **RULED 2026-09-05** — Part 3 — the window is a conversational-context channel, session-bounded and token-budgeted; the mentor must be told what it cannot see; Q4 is the founder's reading of rows 1001–1011. Verbatim (canonical): `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`; adopted `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05`.
+
 # Mentor question — how much continuity should the private mentor have? — FOR RULING
 
 **Date drafted:** 2026-09-02. **Status:** DRAFT question, not yet relayed; **no ruling exists.**

@@ -1,3 +1,5 @@
+> **RULED 2026-09-05** — Part 2 — elect 2b now; do NOT build route (i); flag-and-proceed if ever elected. Verbatim (canonical): `operations/count-discipline-2026-09/2026-09-05-mentor-rulings-five-relays-verbatim.md`; adopted `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05`.
+
 # Mentor question — what is caller-supplied extraction for, and should route (i) be built now?
 
 **Authored 2026-09-03.** `governance`, documents only. **Nothing here is a recommendation to build
