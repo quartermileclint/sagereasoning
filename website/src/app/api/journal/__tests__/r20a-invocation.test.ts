@@ -43,6 +43,20 @@ import * as path from 'path'
 import { createSafetyGate } from '@/lib/constraints'
 import { detectDistress } from '@/lib/guardrails'
 import type { DistressDetectionResult } from '@/lib/guardrails'
+// Group 2 (2026-09-05, Session 3B): the shared brace-matched structural-end
+// helpers for the execution-order pins (memory guard-scope-must-cover-the-class).
+import {
+  loadCodeOnly,
+  structuralBlock,
+  codeIndex,
+  codeIndexAfter,
+  codeCount,
+  readTextLimitsFromSource,
+  QUOTED,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+  POST_HANDLER_RE,
+} from '@/lib/__tests__/r20a-ordering-pin-helpers'
 
 // ============================================================================
 // TEST HARNESS
@@ -180,6 +194,91 @@ function runVerdictTests(): void {
 }
 
 // ============================================================================
+// EXECUTION-ORDER PINS (Group 2, 2026-09-05, Session 3B, audit §6 item 6)
+// ============================================================================
+//
+// The `reflection_text` MAXIMUM guard (TEXT_LIMITS.medium) was MOVED after
+// the distress check under the 2026-09-06 ruling. On this route the check
+// lives INSIDE `if (reflection_text !== '__local__') { … }` (the local-storage
+// sentinel skip), so the structural anchor is THAT enclosing block's
+// brace-matched END — the block the check lives in, per the remediation
+// prompt's constraint 8 — not merely the inner redirect `if`.
+//
+// MUTATION RECORD (2026-09-05, real file, hash-verified restore): the maximum
+// placed BEFORE the sentinel block → MAX-1 fails; placed INSIDE it between
+// the check and the redirect return → MAX-1 fails; deleted → MAX-3 fails; the
+// cap removed (`detectDistressTwoStage(reflection_text)`) → CAP-1 fails.
+
+function runOrderingPins(): void {
+  const code = loadCodeOnly(ROUTE_PATH)
+  const LIMITS = readTextLimitsFromSource()
+
+  const CHECK_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/
+  const SENTINEL_BLOCK_RE = new RegExp(`if\\s*\\(\\s*reflection_text\\s*!==\\s*${QUOTED}\\s*\\)\\s*\\{`)
+  const REDIRECT_OPEN_RE = /if\s*\(\s*gate\.shouldRedirect\s*\)\s*\{/
+  const MAX_RE = new RegExp(`validateTextLength\\(\\s*reflection_text\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
+  // PR19 fold 2026-09-06: String() coercion BEFORE the slice so an array
+  // cannot bypass the bound (a typeof-ternary first cut let it through).
+  const CAP_RE = /const\s+screenedReflectionText\s*=\s*String\(\s*reflection_text\s*\)\.slice\(\s*0\s*,\s*TEXT_LIMITS\.medium\s*\)/
+  const SUBJECT_RE = /detectDistressTwoStage\s*\(\s*screenedReflectionText\s*\)/
+  const RAW_SUBJECT_RE = /detectDistressTwoStage\s*\(\s*reflection_text\s*\)/
+  const STORE_RE = /createClient\s*\(\s*supabaseUrl\s*,\s*supabaseServiceKey\s*\)/
+
+  const checkIdx = codeIndex(code, CHECK_RE)
+  const sentinelBlock = structuralBlock(code, SENTINEL_BLOCK_RE)
+  const redirectBlock = structuralBlock(code, REDIRECT_OPEN_RE)
+  const maxIdx = codeIndex(code, MAX_RE)
+  const capIdx = codeIndex(code, CAP_RE)
+  const storeIdx = codeIndexAfter(code, STORE_RE, checkIdx)
+
+  expectTrue(
+    'MAX-1 the reflection_text MAXIMUM guard follows the structural END of the enclosing sentinel block ' +
+      '(which contains the check AND its redirect return; anchored on that block\'s own closing brace, so ' +
+      'drift to anywhere inside it — before OR after the check — is caught)',
+    maxIdx > -1 && sentinelBlock.endIdx > -1 && maxIdx > sentinelBlock.endIdx,
+    `max=${maxIdx} sentinelEnd=${sentinelBlock.endIdx}`,
+  )
+  expectTrue(
+    'MAX-2 the maximum still precedes the first store touch (order, not existence)',
+    maxIdx > -1 && storeIdx > -1 && maxIdx < storeIdx,
+    `max=${maxIdx} store=${storeIdx}`,
+  )
+  expectTrue(
+    'MAX-3 non-vacuity: the maximum appears exactly once; the sentinel block and the redirect block were each found exactly once, are non-degenerate, and nest correctly around the check',
+    codeCount(code, MAX_RE) === 1 && sentinelBlock.matches === 1 && redirectBlock.matches === 1 &&
+      sentinelBlock.openIdx > -1 && sentinelBlock.endIdx > sentinelBlock.openIdx &&
+      checkIdx > sentinelBlock.openIdx && checkIdx < sentinelBlock.endIdx &&
+      redirectBlock.openIdx > checkIdx && redirectBlock.endIdx < sentinelBlock.endIdx,
+    `maxCount=${codeCount(code, MAX_RE)} sentinel=${sentinelBlock.openIdx}..${sentinelBlock.endIdx} (${sentinelBlock.matches}) redirect=${redirectBlock.openIdx}..${redirectBlock.endIdx} (${redirectBlock.matches}) check=${checkIdx}`,
+  )
+  expectTrue(
+    'CAP-1 the classifier receives the screened local (String(reflection_text) sliced at TEXT_LIMITS.medium — coercion before the slice, so every value is bounded) — defined inside the sentinel block, before the check — and never the raw field',
+    codeCount(code, CAP_RE) === 1 && capIdx > sentinelBlock.openIdx && capIdx < checkIdx &&
+      codeCount(code, SUBJECT_RE) === 1 && codeCount(code, RAW_SUBJECT_RE) === 0,
+    `cap=${capIdx} sentinelOpen=${sentinelBlock.openIdx} check=${checkIdx} subject=${codeCount(code, SUBJECT_RE)} raw=${codeCount(code, RAW_SUBJECT_RE)}`,
+  )
+  expectTrue(
+    'CAP-2 the cap key (TEXT_LIMITS.medium) is the SAME key the moved guard enforces (the cap equals the bound)',
+    MAX_RE.test(code) && CAP_RE.test(code),
+  )
+  {
+    const postIdx = codeIndex(code, POST_HANDLER_RE)
+    const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+    expectTrue(
+      'NEG-1 no length guard of ANY form (validateTextLength( or a .length </>/<=/>= comparison) exists between the handler start and the distress check (PR19 fold 2026-09-06 — the class fence)',
+      postIdx > -1 && checkIdx > postIdx &&
+        codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preSpan, BARE_LENGTH_GUARD_RE) === 0,
+      `post=${postIdx} check=${checkIdx} vtl=${codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preSpan, BARE_LENGTH_GUARD_RE)}`,
+    )
+  }
+  expectTrue(
+    'CAP-3 TEXT_LIMITS.medium is the audit\'s M bound (5,000) as read from security.ts source',
+    LIMITS.medium === 5000,
+    `medium=${LIMITS.medium}`,
+  )
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 
@@ -188,6 +287,7 @@ function main(): void {
 
   runInvocationTests()
   runVerdictTests()
+  runOrderingPins()
 
   const total = passCount + failCount
   console.log('---')

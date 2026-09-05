@@ -35768,3 +35768,110 @@ item D and B4 cells.
 > correction. The lesson is recorded once, plainly: **read the anchor from the file before writing a
 > sentence that says the edit happened** (memory `primary-data-beats-secondary-characterisation`,
 > applied to one's own pending edits).
+
+## 2026-09-06 — D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-BUILT-2026-09-06
+
+**Decision:** Group 2 of the audit's §6 (items 5–8) plus item 10 (`/api/reason`, human path) and the
+R3 masked-fallback observability fix are **BUILT, pinned, mutation-verified and PR19-reviewed —
+NOT pushed, NOT live.** `code-critical` (R20a perimeter, PR6 + AC5); founder-walked (PR17): the
+founder pushes and runs the smokes; AC7 engages at the push. Session 3B of the 2026-09-05 plan,
+opened 2026-09-05 22:52 AEST, records written 2026-09-06 (machine date). Model `claude-fable-5-1`
+throughout (no switch). Election A: items 5–8 (11 routes). Election B: item 10 + the R3 log folded
+in (the false-hold window has not started — `GATE1_FALSE_HOLD_CAPTURE` absent, keys only). **Group
+2b (mentor Part 5, adopted by the peer at `260f467` mid-session) was put to the founder and elected
+for its own sitting** — not folded; the peer's relay also lists the Branch-2 `route_errors` row
+under S9, so S9 must NOT repeat it.
+
+**What moved (values, messages, status codes, and relative guard order byte-identical to HEAD):**
+the MAXIMUM-length guards on `/api/reflect` + `/api/mentor/private/reflect` (`what_happened`,
+`how_i_responded`, M), `/api/journal` (`reflection_text`, M), `/api/mentor/journal-feed`
+(`impression`/`assent`/`action`, M), `/api/score-conversation` (`conversation`/`context`, L — NO
+length guard now precedes its R20a block), `/api/score` (`action` S, `context` M),
+`/api/score-decision` (`decision` S, `context` M), `/api/score-social` (`text` M),
+`/api/score-document` (`text` D — 30,000), `/api/score-scenario` (`scenario`/`response` M), and on
+`/api/reason` the four guards (`input`/`context`/`domain_context` M + the flag-on
+`clarification_response` M) on the **human path only** — one closure `textLengthGuardError` called
+at the original site on the agent path (byte-identical order and bodies, reviewer-verified) and after
+the redirect block on the human path, keyed on `r20aAudience`. Each now sits after the check and its
+crisis-redirect return, before any context/RAG/engine/store call.
+
+**The screening cap (audit §3 constraint 2):** each screened field reaches the classifier as
+`String(field).slice(0, TEXT_LIMITS.<route bound>)` via a named local defined before the check
+(`screenedX`); joins unchanged; an in-bound request is screened byte-identically to HEAD
+(reviewer-proven); score-conversation's composer cap is pinned equal to `TEXT_LIMITS.long`. The
+named-local shape was chosen mid-build because an inline slice on the check line made the audit's
+rev-2 sweep report 5 check→redirect-window bound lines; the sweep was left untouched and the code
+made conformant (window 0 on all 54 handlers; every moved guard gone from its handler's pre-check
+list; `/api/reason` still lists the closure's guards pre-check via the agent-path call — the sweep is
+per-handler, the pins are per-path, disclosed in the route comment).
+
+**PR19.** The first three-reviewer fleet died whole on the account session limit (the Group 1
+pattern); a fresh fleet ran after the reset and **all three completed** — the independent run §4
+requires. **A (execution order): SOUND WITH FIXES** — one MEDIUM (the `/api/reason` human-path
+disclosure named one message-precedence delta; there are three — `session_marker`/`loop_id` 400s sit
+between the old and new sites), one LOW-MEDIUM (arrays on the three untyped fields), one LOW (the
+score-conversation maxima did not restate the mild residual), two INFO (an oversized human `input`
+that redirects is now served billable-flagged — no session metering exists, no charge moves; no new
+500 class). **B (classifier input + cap): SOUND WITH FIXES** — F1 = A's array finding (HEAD's guard
+400'd a >5,000-element array by element count BEFORE the check; the first cut sliced strings only,
+so such an array reached the classifier unbounded — a widening of a pre-existing class); F2 LOW
+(stage-2 exposure: a previously-free oversized 400 now always reaches Haiku at cap size, up to two
+calls on score-conversation, governed by `RATE_LIMITS.scoring`); F3 LOW (CAP-2 pins key sameness by
+hard-coding the key in both regexes; a route-local shadow of `TEXT_LIMITS` is not caught). **C
+(byte-identity + test adequacy): SOUND WITH FIXES** — **two HIGH on the batteries, not the routes:**
+a decoy guard in any other form (`if (f.length > TEXT_LIMITS.k) return …`) placed before the check
+stayed GREEN on all eleven batteries, and a `validateTextLength` before score-conversation's flag
+block stayed green (the pins fenced the moved guard's position, not the class — memory
+`guard-scope-must-cover-the-class`); one MEDIUM (swapping both `/api/reason` audience literals to
+`'agent_developer'` inverted both paths and stayed green — `QUOTED` blanks the literal); three LOW
+(the Branch-2 PII comment over-claimed "never input text" — two `layer1_throw` sub-paths carry ≤100
+chars of LLM OUTPUT; the route's own `layer3_throw` reassignment never set `error_cause`; the review
+diff was stale). Byte-identity of the agent path, every guard value/message/status, and
+`error_cause`'s containment (never a wire byte, audit row, or comparison row) all HOLD.
+
+**Folds, all at the root, all mutation-verified RED then GREEN:** `String(x).slice(...)` on the
+three untyped fields (coercion before the slice — the first-cut typeof form is now itself a failing
+mutation, CAP-1); a per-route **NEG-1** class fence (no `validateTextLength(` or `.length <|>|<=|>=`
+between the handler start and the check; score-conversation FV-8e over the pre-block span;
+`/api/reason` ORD-7 excluding the closure body) — the reviewers' decoys now fail on every route; an
+unblanked literal pin **ORD-6** on the two `/api/reason` call sites; the three-delta disclosure; the
+mild/stage-2 restatements on score-conversation and score-document; the PII comment corrected to
+name the bound; a descriptive `error_cause` at the route's own `layer3_throw` (outage classification
+unavailable there — disclosed). Two shared primitives added to the helper module
+(`BARE_LENGTH_GUARD_RE`, `VALIDATE_TEXT_LENGTH_CALL_RE`, `POST_HANDLER_RE`; `readTextLimitsFromSource`
+reads the bounds from source because importing `security.ts` hangs the process on its keep-alive
+interval). Mutation record (real files, hash-verified restore; the Python harness, since macOS bash 3
+has no associative arrays): per route — before-check, between-check-and-return, deleted, cap-removed,
+decoy-bare-guard → each RED on the named pin; `/api/reason` additionally agent-call-after-check
+(ORD-2), bare-guard-readded (ORD-1+ORD-5), audience-literal-swap (ORD-6); score-conversation
+additionally validateTextLength-decoy (FV-8e) and composer-cap-changed (FV-3+FV-8c). Post-restore
+green everywhere. **Verified:** tsc 0; `next build` ✓ (all eleven routes registered); guard battery
+722/0; batteries reflect 17/17 · private/reflect 17/17 · journal 18/18 · journal-feed 18/18 ·
+score-conversation 75/75 · score/decision/social/document 12/12 · score-scenario 17/17 · reason
+14/14 + audience-rendering 66/66; sweep window 0, output refreshed and committed.
+
+**Disclosed residuals (not fixed here):** distress past each route's cap is unscreened (the audit's
+§4.3 residual, relocated, on every route — before the move it was unread entirely); the stage-2 cost
+class above; the three `/api/reason` human-path message-precedence deltas; score-conversation's
+mild-then-400 path for the maxima; CAP-2's key-sameness (not value-computed) pin; the R3 status
+masking itself remains open (only the row is new).
+
+**A11b self-inflicted harness events, for B4 (memory
+`harness-blind-on-substrate-sessions-a11b-schema-tokens`):** from session open to records, `gate1.log`
+shows 16 `CONSULT-OUTAGE "no assessment in response"`, 9 `ELICIT-OUTAGE http 503`, 2 `UNFRAMED`
+(the reviewer launches) against 42 successful consults and 15 guard cautions — every outage is the
+schema-token reject on this session's own edit text, not availability. One caution was a genuine
+irreversible-class read: the mutation harness rewriting live route files (examined; hash-verified
+restore).
+
+**Rollback path:** `git revert` this commit + redeploy; never a flag (the guards are unconditional).
+**Rules served:** PR6, PR17, PR19 (independent fleet completed; first fleet's death disclosed), PR20
+(every line cited from source this session), PR22, PR23, AC5. **Status:** BUILT — awaiting the
+founder's push, Vercel green, and the smokes (per moved maximum: oversized distressed → 200
+`distress_detected`; oversized benign → 400 `exceeds maximum length`; the two reflect routes write
+one `analytics_events` distress row each, nothing else writes). Close:
+`operations/handoffs/founder/2026-09-06-r20a-perimeter-ordering-remediation-session3B-group2-CLOSE.md`.
+Cross-references: `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-{BUILT,LIVE}-2026-09-05`;
+`D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5 → Group 2b, deferred; Part 4 → S9);
+`D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-CLOSED-2026-09-05` (finding 4,
+the R3 row, executed here).

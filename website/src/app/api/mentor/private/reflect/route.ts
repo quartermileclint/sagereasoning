@@ -159,17 +159,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { what_happened, how_i_responded, user_id } = body
 
-    const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
-    if (textLengthError) {
-      return NextResponse.json({ error: textLengthError }, { status: 400 })
-    }
-
-    if (how_i_responded) {
-      const responseError = validateTextLength(how_i_responded, 'how_i_responded', TEXT_LIMITS.medium)
-      if (responseError) {
-        return NextResponse.json({ error: responseError }, { status: 400 })
-      }
-    }
+    // The MAXIMUM-length guards on `what_happened` and `how_i_responded`
+    // (provenance 9fe99f0 2026-04-11, file creation) used to sit HERE, before
+    // the distress check. MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3B, Group 2 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 5 — same shape as
+    // /api/reflect, moved together) under the same binding ruling the minimum
+    // moved under. See the guards' new site below.
 
     // PRESENCE/TYPE only. The MINIMUM-length half of this check
     // (`.trim().length < 10`, provenance 9fe99f0 2026-04-11, file creation) was
@@ -230,7 +226,24 @@ export async function POST(request: NextRequest) {
     // This MUST run at pipeline entry. Distress detection takes priority over all evaluation logic.
     // The graceful degradation path (JSON parse failure) must NOT suppress a distress flag —
     // distress is caught here before the LLM is ever called.
-    const combinedInput = `${what_happened} ${how_i_responded || ''}`
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // now that the maximum-length guards run AFTER this check, the raw fields
+    // are unbounded here, so each is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guards below enforce) before
+    // the classifier sees it. The join is unchanged; an in-bound request is
+    // screened byte-identically to before. DISCLOSED RESIDUAL (audit §4.3):
+    // distress appearing only past character 5,000 of a field is not
+    // screened — before this move it was not read at all (a bare 400). A
+    // NON-STRING `how_i_responded` is coerced with String() (the template
+    // literal's own ToString) and THEN sliced, so the bound holds for every
+    // value (PR19 fold, 2026-09-06 — see /api/reflect's note). COST,
+    // disclosed: an oversized regex-silent field now reaches stage 2 (Haiku)
+    // at cap size where it was previously a free 400; RATE_LIMITS.scoring
+    // governs.
+    const screenedWhatHappened = what_happened.slice(0, TEXT_LIMITS.medium)
+    const screenedHowIResponded = String(how_i_responded || '').slice(0, TEXT_LIMITS.medium)
+    const combinedInput = `${screenedWhatHappened} ${screenedHowIResponded}`
     const gate = await enforceDistressCheck(detectDistressTwoStage(combinedInput))
     if (gate.shouldRedirect) {
       // Log the distress detection for safety monitoring (no reflection data stored)
@@ -258,6 +271,29 @@ export async function POST(request: NextRequest) {
         },
         { status: 200, headers: corsHeaders() }
       )
+    }
+
+    // `what_happened` / `how_i_responded` MAXIMUM length — MOVED here
+    // 2026-09-05 (Session 3B, Group 2 of the perimeter-ordering audit, §6
+    // item 5) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A long
+    // distressed write-up now reaches the check above (capped at this same
+    // bound) and receives the crisis resources instead of this 400. ORDER,
+    // NOT EXISTENCE: values, messages and status are unchanged, and both
+    // guards still precede the minimum below, every context load and the LLM
+    // call. Pinned by MAX-1..4 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses and the cap's removal.
+    const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
+    if (textLengthError) {
+      return NextResponse.json({ error: textLengthError }, { status: 400 })
+    }
+
+    if (how_i_responded) {
+      const responseError = validateTextLength(how_i_responded, 'how_i_responded', TEXT_LIMITS.medium)
+      if (responseError) {
+        return NextResponse.json({ error: responseError }, { status: 400 })
+      }
     }
 
     // `what_happened` MINIMUM length — MOVED here 2026-09-05 (Session 3, Group 1

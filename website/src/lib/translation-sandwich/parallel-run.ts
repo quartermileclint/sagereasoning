@@ -377,6 +377,15 @@ type FailureCategory =
 interface SandwichRunResult {
   output: unknown // The composed { extraction, assessment, prose, ... } shape OR a Tier 1 force-clarification shape (per ADR-008 §2). null on failure.
   error: FailureCategory | null
+  // Added 2026-09-05 (Session 3B, Election B — the R3 observability fix named
+  // in D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-
+  // CLOSED-2026-09-05 finding 4): the THROWN VALUE behind a `layer1_throw` /
+  // `validation_throw` / `layer3_throw`, so the route's Branch-2 masked-200
+  // fallback can write a route_errors row naming the real cause (an A11b
+  // injection REJECT was previously invisible in the DB). null when `error`
+  // is null or is a non-throw category. NEVER placed on any response, never
+  // serialised into the audit/comparison row — an in-process diagnostic only.
+  error_cause: unknown
   layer1_latency_ms: number | null
   layer2_latency_ms: number | null
   layer3_latency_ms: number | null
@@ -628,6 +637,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   const result: SandwichRunResult = {
     output: null,
     error: null,
+    error_cause: null,
     layer1_latency_ms: null,
     layer2_latency_ms: null,
     layer3_latency_ms: null,
@@ -676,6 +686,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     } catch (err) {
       result.layer1_latency_ms = Date.now() - layer1Start
       result.error = 'layer1_throw'
+      result.error_cause = err
       console.warn('[parallel-run] Layer 1 threw:', err instanceof Error ? err.message : err)
       return result
     }
@@ -777,6 +788,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     // validateLayer1Schema should have caught upstream). Treat as a programming
     // error and fail closed.
     result.error = 'validation_throw'
+    result.error_cause = err
     console.warn(
       '[parallel-run] detectTier1Trigger threw (cross-field invariant; likely upstream validator gap):',
       err instanceof Error ? err.message : err
@@ -834,6 +846,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   } catch (err) {
     result.layer2_latency_ms = Date.now() - layer2Start
     result.error = 'validation_throw'
+    result.error_cause = err
     console.warn('[parallel-run] Layer 2 threw (programming error):', err instanceof Error ? err.message : err)
     return result
   }
@@ -991,6 +1004,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     } catch (fallbackErr) {
       // Both LLM + fallback failed. Catastrophic — log and short-circuit.
       result.error = 'layer3_throw'
+      result.error_cause = fallbackErr
       console.warn('[parallel-run] Layer 3 fallback ALSO threw:', fallbackErr instanceof Error ? fallbackErr.message : fallbackErr)
       return result
     }
@@ -1235,6 +1249,7 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
       sandwichResult = {
         output: null,
         error: 'cost_cap_reached',
+        error_cause: null,
         layer1_latency_ms: null,
         layer2_latency_ms: null,
         layer3_latency_ms: null,

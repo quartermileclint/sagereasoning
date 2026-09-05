@@ -73,7 +73,16 @@ import type { DistressDetectionResult } from '@/lib/guardrails'
 import { renderR20aRedirectResponse } from '@/lib/substrate/r20a-audience-renderer'
 // FV-7 (2026-09-05): the shared brace-matched structural-end helper — one
 // matcher for every per-route ordering pin (memory guard-scope-must-cover-the-class).
-import { structuralBlock, codeIndex, codeCount, QUOTED } from '@/lib/__tests__/r20a-ordering-pin-helpers'
+import {
+  structuralBlock,
+  codeIndex,
+  codeCount,
+  readTextLimitsFromSource,
+  QUOTED,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+  POST_HANDLER_RE,
+} from '@/lib/__tests__/r20a-ordering-pin-helpers'
 import {
   isScoreConversationR20aEnabled,
   composeConversationDistressSubject,
@@ -847,6 +856,79 @@ function runFieldValidationTests(): void {
         presenceIdx < flagBlock.openIdx,
       `presence=${presenceIdx} open=${flagBlock.openIdx}`,
     )
+  }
+
+  // FV-8 — the `conversation` and `context` MAXIMUM-length guards, MOVED
+  // 2026-09-05 by Session 3B (Group 2, item 7) of the perimeter-ordering
+  // audit under the same ruling. With these two moved, NO length guard
+  // precedes the R20a block on this route. What reaches the classifier is
+  // bounded by the COMPOSER's per-field cap (DISTRESS_SUBJECT_FIELD_CAP),
+  // which FV-8c pins equal to TEXT_LIMITS.long — the guards' own bound — so
+  // the cap equals the guard here exactly as the slice does on the siblings.
+  //
+  // MUTATION RECORD (2026-09-05, real file, hash-verified restore): the
+  // `conversation` maximum placed BEFORE the block → FV-8a fails; placed
+  // INSIDE the block between the check and the redirect return → FV-8a
+  // fails; deleted → FV-8d fails (and FV-2 fails: a screened field with no
+  // route bound); the composer cap changed to 14999 → FV-8c fails.
+  {
+    const flagBlock = structuralBlock(codeOnly, /if\s*\(\s*isScoreConversationR20aEnabled\s*\(\s*\)\s*\)\s*\{/)
+    const convMaxRe = /conversation\.length\s*>\s*TEXT_LIMITS\.long/
+    const ctxMaxRe = /context\.length\s*>\s*TEXT_LIMITS\.long/
+    const minRe8 = /conversation\.trim\(\)\.length\s*<\s*20/
+    const fmtRe8 = /format\.length\s*>\s*TEXT_LIMITS\.long/
+    const truncatedRe8 = /const\s+truncated\s*=\s*conversation\.trim\(\)/
+    const convMaxIdx = codeIndex(codeOnly, convMaxRe)
+    const ctxMaxIdx = codeIndex(codeOnly, ctxMaxRe)
+    const minIdx8 = codeIndex(codeOnly, minRe8)
+    const fmtIdx8 = codeIndex(codeOnly, fmtRe8)
+    const truncatedIdx8 = codeIndex(codeOnly, truncatedRe8)
+    const LIMITS = readTextLimitsFromSource()
+
+    expectTrue(
+      'FV-8a BOTH the conversation and context MAXIMUM guards textually follow the ENTIRE R20a block ' +
+        '(2026-09-06 ruling; anchored on the block\'s brace-matched END so a guard placed inside it — ' +
+        'before OR after enforceDistressCheck — is caught)',
+      convMaxIdx > -1 && ctxMaxIdx > -1 && flagBlock.endIdx > -1 &&
+        convMaxIdx > flagBlock.endIdx && ctxMaxIdx > flagBlock.endIdx,
+      `conv=${convMaxIdx} ctx=${ctxMaxIdx} blockEnd=${flagBlock.endIdx}`,
+    )
+    expectTrue(
+      'FV-8b the maxima keep their relative order (conversation, then context), precede the minimum (the ' +
+        'pre-Group-1 max-before-min message precedence), the format guard, and the engine truncation',
+      convMaxIdx > -1 && ctxMaxIdx > convMaxIdx && minIdx8 > ctxMaxIdx && fmtIdx8 > minIdx8 &&
+        truncatedIdx8 > fmtIdx8,
+      `conv=${convMaxIdx} ctx=${ctxMaxIdx} min=${minIdx8} fmt=${fmtIdx8} truncated=${truncatedIdx8}`,
+    )
+    expectTrue(
+      'FV-8c the composer\'s per-field cap IS the route\'s bound: DISTRESS_SUBJECT_FIELD_CAP === TEXT_LIMITS.long ' +
+        '(15,000, read from security.ts source) — so the classifier\'s input is bounded at exactly the guards\' value',
+      DISTRESS_SUBJECT_FIELD_CAP === LIMITS.long && LIMITS.long === 15000,
+      `cap=${DISTRESS_SUBJECT_FIELD_CAP} long=${LIMITS.long}`,
+    )
+    expectTrue(
+      'FV-8d non-vacuity: each maximum appears exactly once; the flag block was found exactly once and is non-degenerate; ' +
+        'the three NAMED guards (conversation-max, context-max, conversation-min, format-max) all sit after its end',
+      codeCount(codeOnly, convMaxRe) === 1 && codeCount(codeOnly, ctxMaxRe) === 1 &&
+        flagBlock.matches === 1 && flagBlock.openIdx > -1 && flagBlock.endIdx > flagBlock.openIdx &&
+        minIdx8 > flagBlock.endIdx && fmtIdx8 > flagBlock.endIdx,
+      `convCount=${codeCount(codeOnly, convMaxRe)} ctxCount=${codeCount(codeOnly, ctxMaxRe)} matches=${flagBlock.matches} open=${flagBlock.openIdx} end=${flagBlock.endIdx}`,
+    )
+    // FV-8e — the CLASS fence (PR19 fold 2026-09-06). FV-8d's first cut was
+    // TITLED "no length guard of any kind precedes the block" while asserting
+    // only the named forms; a reviewer added `validateTextLength(conversation,
+    // …)` and a bare `.length > 15000` before the flag block and the battery
+    // stayed 74/74. This pin sweeps the whole pre-block span for the class.
+    {
+      const postIdx = codeIndex(codeOnly, POST_HANDLER_RE)
+      const preSpan = postIdx > -1 && flagBlock.openIdx > postIdx ? codeOnly.slice(postIdx, flagBlock.openIdx) : ''
+      expectTrue(
+        'FV-8e no length guard of ANY form (validateTextLength( or a .length </>/<=/>= comparison) exists between the handler start and the R20a flag block — the class, not the instance',
+        postIdx > -1 && flagBlock.openIdx > postIdx &&
+          codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preSpan, BARE_LENGTH_GUARD_RE) === 0,
+        `post=${postIdx} blockOpen=${flagBlock.openIdx} vtl=${codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preSpan, BARE_LENGTH_GUARD_RE)}`,
+      )
+    }
   }
 }
 

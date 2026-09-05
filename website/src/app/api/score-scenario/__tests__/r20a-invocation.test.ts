@@ -3,18 +3,22 @@
  * for /api/score-scenario. Created 2026-09-05 by Session 3 (Group 1, item 4)
  * of the perimeter-ordering audit (operations/count-discipline-2026-09/
  * 2026-09-05-r20a-perimeter-ordering-AUDIT.md §6), executing the 2026-09-06
- * mentor ruling.
+ * mentor ruling. EXTENDED 2026-09-05 by Session 3B (Group 2, item 8) with the
+ * MAX-* and CAP-* pins for the two maximum guards.
  *
  * Run: npx tsx src/app/api/score-scenario/__tests__/r20a-invocation.test.ts
  * (redirect to a file, then read it — memory `tsx-tests-setinterval-keepalive-hang`)
  *
  * Same coverage and mutation record as the /api/reflect battery (INV-1..3,
- * PRES-1..2, ORD-1..5), with this route's own anchors: the check screens
- * `response` ONLY (`detectDistressTwoStage(response)`), the moved minimum is
- * `response.trim().length < 5`, and the first post-guard load is the RAG
- * block (`loadLayer1BlockWithFallback`). The `scenario` presence check is a
- * P-class check on a DIFFERENT field from the screened one — audit §4.4, a
- * mentor question — and is deliberately not pinned either way.
+ * PRES-1..2, ORD-1..5, MAX-1..3, CAP-1..3), with this route's own anchors:
+ * the check screens `response` ONLY, the moved minimum is
+ * `response.trim().length < 5`, the moved maxima are `scenario` and
+ * `response` (both TEXT_LIMITS.medium; only `response`'s move changes what
+ * reaches the classifier), and the first post-guard load is the RAG block
+ * (`loadLayer1BlockWithFallback`). The `scenario` presence check is a
+ * P-class check on a DIFFERENT field from the screened one — audit §4.4, now
+ * a ruled Group 2b item (its own sitting) — and is deliberately not pinned
+ * either way.
  */
 
 import * as path from 'path'
@@ -24,7 +28,11 @@ import {
   codeIndex,
   codeIndexAfter,
   codeCount,
+  readTextLimitsFromSource,
   QUOTED,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+  POST_HANDLER_RE,
 } from '@/lib/__tests__/r20a-ordering-pin-helpers'
 
 let passCount = 0
@@ -41,11 +49,20 @@ function expectTrue(name: string, condition: boolean, hint?: string): void {
 
 const ROUTE_PATH = path.resolve(__dirname, '..', 'route.ts')
 const code = loadCodeOnly(ROUTE_PATH)
+const LIMITS = readTextLimitsFromSource()
 
-const CHECK_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(\s*response\s*\)\s*\)/
+// The cap is a NAMED local defined before the check (not inline on the check
+// line) so the audit's rev-2 sweep keeps its check→redirect window at 0 bound
+// lines. 2026-09-05, caught by the sweep in-build.
+const CHECK_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(\s*screenedResponse\s*\)\s*\)/
+const ANY_CHECK_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/
+const CAP_RE = /const\s+screenedResponse\s*=\s*response\.slice\(\s*0\s*,\s*TEXT_LIMITS\.medium\s*\)/
+const RAW_SUBJECT_RE = /detectDistressTwoStage\s*\(\s*response(?:\.slice\([^)]*\))?\s*\)/
 const REDIRECT_OPEN_RE = /if\s*\(\s*gate\.shouldRedirect\s*\)\s*\{/
 const PRESENCE_RE = new RegExp(`if\\s*\\(\\s*!response\\s*\\|\\|\\s*typeof\\s+response\\s*!==\\s*${QUOTED}\\s*\\)`)
 const MIN_GUARD_RE = /response\.trim\(\)\.length\s*<\s*5/
+const MAX_SCENARIO_RE = new RegExp(`validateTextLength\\(\\s*scenario\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
+const MAX_RESPONSE_RE = new RegExp(`validateTextLength\\(\\s*response\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
 const CONTEXT_LOAD_RE = /loadLayer1BlockWithFallback\s*\(/
 const LLM_CALL_RE = /client\.messages\.create\s*\(/
 
@@ -53,6 +70,8 @@ const checkIdx = codeIndex(code, CHECK_RE)
 const block = structuralBlock(code, REDIRECT_OPEN_RE)
 const presenceIdx = codeIndex(code, PRESENCE_RE)
 const minIdx = codeIndex(code, MIN_GUARD_RE)
+const maxScenarioIdx = codeIndex(code, MAX_SCENARIO_RE)
+const maxResponseIdx = codeIndex(code, MAX_RESPONSE_RE)
 // Anchored AFTER the check: the same loader/client may occur earlier on another path.
 const contextIdx = codeIndexAfter(code, CONTEXT_LOAD_RE, checkIdx)
 const llmIdx = codeIndexAfter(code, LLM_CALL_RE, checkIdx)
@@ -62,8 +81,9 @@ expectTrue(
   /from\s+['"]@\/lib\/r20a-classifier['"]/.test(code) && /from\s+['"]@\/lib\/constraints['"]/.test(code),
 )
 expectTrue(
-  'INV-2 exactly ONE awaited enforceDistressCheck(detectDistressTwoStage(response)) call site (AC5 pattern)',
-  codeCount(code, CHECK_RE) === 1 && /await\s+enforceDistressCheck\s*\(/.test(code),
+  'INV-2 exactly ONE awaited enforceDistressCheck(detectDistressTwoStage(...)) call site (AC5 pattern), and it is the capped one',
+  codeCount(code, ANY_CHECK_RE) === 1 && codeCount(code, CHECK_RE) === 1 && /await\s+enforceDistressCheck\s*\(/.test(code),
+  `any=${codeCount(code, ANY_CHECK_RE)} capped=${codeCount(code, CHECK_RE)}`,
 )
 expectTrue(
   'INV-3 the redirect returns the HUMAN wire shape (distress_detected) and never the developer form',
@@ -88,7 +108,7 @@ expectTrue(
   `min=${minIdx} blockEnd=${block.endIdx}`,
 )
 expectTrue(
-  'ORD-2 the minimum still precedes the RAG/context load and the LLM call (order, not existence)',
+  'ORD-2 the minimum still precedes the first RAG/context load and the LLM call (order, not existence)',
   minIdx > -1 && contextIdx > -1 && llmIdx > -1 && minIdx < contextIdx && minIdx < llmIdx,
   `min=${minIdx} context=${contextIdx} llm=${llmIdx}`,
 )
@@ -106,6 +126,49 @@ expectTrue(
   'ORD-5 the context-load and LLM anchors were found (ORD-2 is not deciding on -1)',
   contextIdx > -1 && llmIdx > -1,
 )
+expectTrue(
+  'MAX-1 BOTH maximum guards (scenario, response; TEXT_LIMITS.medium) follow the structural END of the redirect-return block',
+  maxScenarioIdx > -1 && maxResponseIdx > -1 && block.endIdx > -1 &&
+    maxScenarioIdx > block.endIdx && maxResponseIdx > block.endIdx,
+  `scenario=${maxScenarioIdx} response=${maxResponseIdx} blockEnd=${block.endIdx}`,
+)
+expectTrue(
+  'MAX-2 the maxima keep their relative order (scenario, then response), precede the moved minimum, and precede the first RAG/context load and the LLM call',
+  maxScenarioIdx > -1 && maxResponseIdx > maxScenarioIdx && minIdx > maxResponseIdx &&
+    contextIdx > -1 && llmIdx > -1 && maxResponseIdx < contextIdx && maxResponseIdx < llmIdx,
+  `scenario=${maxScenarioIdx} response=${maxResponseIdx} min=${minIdx} context=${contextIdx} llm=${llmIdx}`,
+)
+expectTrue(
+  'MAX-3 non-vacuity: each maximum appears exactly once',
+  codeCount(code, MAX_SCENARIO_RE) === 1 && codeCount(code, MAX_RESPONSE_RE) === 1,
+  `scenarioCount=${codeCount(code, MAX_SCENARIO_RE)} responseCount=${codeCount(code, MAX_RESPONSE_RE)}`,
+)
+expectTrue(
+  'CAP-1 the classifier receives screenedResponse (= response.slice(0, TEXT_LIMITS.medium)), defined exactly once after the presence check and before the check, and never the raw field',
+  codeCount(code, CAP_RE) === 1 && codeIndex(code, CAP_RE) > presenceIdx && codeIndex(code, CAP_RE) < checkIdx &&
+    codeCount(code, CHECK_RE) === 1 && codeCount(code, RAW_SUBJECT_RE) === 0,
+  `capCount=${codeCount(code, CAP_RE)} cap=${codeIndex(code, CAP_RE)} presence=${presenceIdx} check=${checkIdx} raw=${codeCount(code, RAW_SUBJECT_RE)}`,
+)
+expectTrue(
+  'CAP-2 the cap key (TEXT_LIMITS.medium) is the SAME key the moved response guard enforces (the cap equals the bound)',
+  /validateTextLength\(\s*response\s*,[^)]*TEXT_LIMITS\.medium\s*\)/.test(code) && CAP_RE.test(code),
+)
+expectTrue(
+  'CAP-3 TEXT_LIMITS.medium is the audit\'s M bound (5,000) as read from security.ts source',
+  LIMITS.medium === 5000,
+  `medium=${LIMITS.medium}`,
+)
+
+{
+  const postIdx = codeIndex(code, POST_HANDLER_RE)
+  const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+  expectTrue(
+    'NEG-1 no length guard of ANY form (validateTextLength( or a .length </>/<=/>= comparison) exists between the handler start and the distress check (PR19 fold 2026-09-06 — the class fence: a decoy guard in another form passed every positional pin)',
+    postIdx > -1 && checkIdx > postIdx &&
+      codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preSpan, BARE_LENGTH_GUARD_RE) === 0,
+    `post=${postIdx} check=${checkIdx} vtl=${codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preSpan, BARE_LENGTH_GUARD_RE)}`,
+  )
+}
 
 const total = passCount + failCount
 console.log('---')

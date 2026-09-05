@@ -390,7 +390,7 @@ work is batched so one sitting discharges many gates; every session is sized to 
    `{agent_id, responses:[…]}`, neither reads `scenario`), sign, apply; `tsc`; `npm run build` (a
    `page.tsx` changes); push is the founder's; **live `curl` after the push** (this arc's defects
    were repeatedly found only that way). Closes a five-month broken public contract.
-3. **S3 — Perimeter-ordering REMEDIATION. GROUP 1 LIVE 2026-09-05 (`c679739`, eight smokes green incl. F-6 — see `2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`); Groups 2–3 remain.** `code-critical`, **founder-walked, PR19 required**;
+3. **S3 — Perimeter-ordering REMEDIATION. GROUP 1 LIVE 2026-09-05 (`c679739`, eight smokes green incl. F-6 — see `2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`); GROUP 2 BUILT 2026-09-06 (items 5–8 + `/api/reason` item 10 + the R3 Branch-2 `route_errors` row — Election B; `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-BUILT-2026-09-06`, close `2026-09-06-r20a-perimeter-ordering-remediation-session3B-group2-CLOSE.md`), pending the founder's push + smokes; S9 must NOT re-do the R3 row; Group 2b (own sitting) and Group 3 remain.** `code-critical`, **founder-walked, PR19 required**;
    after S1. Start with `/api/score-conversation`'s three remaining pre-block guards (the `<20`
    minimum first), then the audit's human-facing non-conformant list in the audit's own priority;
    each move pinned by an execution-order anchor of the FV-6 brace-matched shape (a textual anchor

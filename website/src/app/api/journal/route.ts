@@ -39,9 +39,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'day_number must be between 1 and 56' }, { status: 400 })
     }
 
-    // Text length validation
-    const textErr = validateTextLength(reflection_text, 'Reflection text', TEXT_LIMITS.medium)
-    if (textErr) return NextResponse.json({ error: textErr }, { status: 400 })
+    // The MAXIMUM-length guard on `reflection_text` (provenance aeadbd1
+    // 2026-03-26, a general security pass) used to sit HERE, before the
+    // distress check. MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3B, Group 2 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 6) under the binding ruling:
+    // "the distress check runs before the length guard on any route where the
+    // human crisis form is rendered." See the guard's new site below.
 
     // R20a — Vulnerable-user detection (PR6 / AC5 tenth-route perimeter member).
     // Screen the reflection text through the two-stage distress classifier
@@ -50,8 +54,27 @@ export async function POST(request: NextRequest) {
     // keep their text on-device, so there is no real server-side text to screen
     // and a Haiku call would be wasted. On moderate/acute distress, redirect to
     // support and do NOT store the entry.
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // now that the maximum-length guard runs AFTER this check, the raw field
+    // is unbounded here, so it is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guard below enforces) before
+    // the classifier sees it. An in-bound request is screened byte-identically
+    // to before. A NON-STRING `reflection_text` (the presence check is not a
+    // type check) is coerced with String() — the same ToString the regex
+    // stage always applied to it — and THEN sliced, so the bound holds for
+    // every value (PR19 fold, 2026-09-06: a first cut sliced strings only, so
+    // an array of >5,000 elements — which HEAD's guard 400'd by element count
+    // before the check — reached the classifier unbounded); its status
+    // afterwards is unchanged (the guard, then `.trim()`). DISCLOSED RESIDUAL
+    // (audit §4.3): distress appearing only past character 5,000 is not
+    // screened — before this move it was not read at all (a bare 400). COST,
+    // disclosed: an oversized regex-silent entry now reaches stage 2 (Haiku)
+    // at cap size where it was previously a free 400; RATE_LIMITS.scoring
+    // governs.
     if (reflection_text !== '__local__') {
-      const gate = await enforceDistressCheck(detectDistressTwoStage(reflection_text))
+      const screenedReflectionText = String(reflection_text).slice(0, TEXT_LIMITS.medium)
+      const gate = await enforceDistressCheck(detectDistressTwoStage(screenedReflectionText))
       if (gate.shouldRedirect) {
         return NextResponse.json(
           {
@@ -63,6 +86,18 @@ export async function POST(request: NextRequest) {
         )
       }
     }
+
+    // `reflection_text` MAXIMUM length — MOVED here 2026-09-05 (Session 3B,
+    // Group 2 of the perimeter-ordering audit, §6 item 6) under the 2026-09-06
+    // ruling (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06).
+    // A long distressed entry now reaches the check above (capped at this same
+    // bound) and receives the crisis resources instead of this 400. ORDER, NOT
+    // EXISTENCE: value, message and status are unchanged, and the guard still
+    // precedes every store touch. Pinned by MAX-1..4 in
+    // __tests__/r20a-invocation.test.ts on the redirect block's brace-matched
+    // END; mutation-verified against both bypasses and the cap's removal.
+    const textErr = validateTextLength(reflection_text, 'Reflection text', TEXT_LIMITS.medium)
+    if (textErr) return NextResponse.json({ error: textErr }, { status: 400 })
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

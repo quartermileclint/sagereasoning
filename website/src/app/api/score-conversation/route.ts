@@ -107,25 +107,16 @@ export async function POST(request: NextRequest) {
     const startTime = Date.now()
     const { conversation, context, format } = await request.json()
 
-    // Validate text length
-    if (conversation && typeof conversation === 'string' && conversation.length > TEXT_LIMITS.long) {
-      return NextResponse.json(
-        { error: `conversation exceeds maximum length of ${TEXT_LIMITS.long} characters` },
-        { status: 400 }
-      )
-    }
-    if (context && typeof context === 'string' && context.length > TEXT_LIMITS.long) {
-      return NextResponse.json(
-        { error: `context exceeds maximum length of ${TEXT_LIMITS.long} characters` },
-        { status: 400 }
-      )
-    }
-    // `format` is length-validated too — but AFTER the R20a block, not here.
-    // See the ruled ordering note at that guard's new site below.
-    // (`conversation` and `context` above still precede the block; that is the
-    // inherited posture the 2026-09-06 ruling routed to the perimeter-wide
-    // audit — operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-
-    // ordering-AUDIT.md §6 Group 2, item 7 — NOT an endorsement of it.)
+    // The `conversation` and `context` MAXIMUM-length guards (provenance
+    // aeadbd1 2026-03-26, a general security pass) used to sit HERE, before
+    // the R20a block. MOVED after it on 2026-09-05 (Session 3B, Group 2 of
+    // operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-
+    // AUDIT.md §6, item 7) under the same binding ruling the `format` guard
+    // (2026-09-06) and the `conversation` minimum (Group 1) moved under. All
+    // three length guards on this route now sit after the block; see their
+    // sites below. The composer's own per-field cap (DISTRESS_SUBJECT_FIELD_CAP
+    // = TEXT_LIMITS.long, pinned by FV-8c) is the bound on what reaches the
+    // classifier for every screened field.
     //
     // PRESENCE/TYPE only. The `conversation` MINIMUM-length check that used to
     // share this `if` (`.trim().length < 20`, provenance 496d832 2026-03-23)
@@ -206,6 +197,50 @@ export async function POST(request: NextRequest) {
       if (effectiveDistress.severity === 'mild') {
         mildSupportResources = buildMildSupportResources()
       }
+    }
+
+    // ------------------------------------------------------------------------
+    // `conversation` / `context` MAXIMUM length — MOVED here 2026-09-05
+    // (Session 3B, Group 2 of the perimeter-ordering audit, §6 item 7) under
+    // the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A long
+    // distressed transcript now reaches the block above and receives the
+    // crisis resources instead of this 400. ORDER, NOT EXISTENCE: values,
+    // messages and status are unchanged; the maxima precede the minimum below
+    // (restoring the pre-Group-1 max-before-min message precedence on an input
+    // that is both short and oversized — impossible for one field, reachable
+    // via an oversized `context` with a short `conversation`), then the
+    // `format` guard, `truncated`, `domainContext` and the engine.
+    // WHAT REACHES THE CLASSIFIER: composeConversationDistressSubject slices
+    // every screened field at DISTRESS_SUBJECT_FIELD_CAP, which the battery
+    // pins equal to TEXT_LIMITS.long (FV-8c) — so the classifier's input is
+    // bounded at exactly this guard's bound, and an in-bound request is
+    // screened byte-identically to before. DISCLOSED RESIDUAL (audit §4.3):
+    // distress appearing only past character 15,000 of `conversation` or
+    // `context` is not screened — before this move it was not read at all (a
+    // bare 400); the same residual the `format` move disclosed, now on all
+    // three fields. TWO MORE, restated here for the maxima (PR19 fold,
+    // 2026-09-06): an oversized field whose capped subject reads MILD now
+    // runs the mild-escalation (a second Haiku call) and then 400s here, so
+    // `support_resources` is not delivered on that path — the Group 1
+    // minimum's own disclosed residual, and mild is not the crisis form; and
+    // the stage-2 exposure is now up to two Haiku calls over a ~45k-char
+    // capped subject for a request class that was previously a free 400 —
+    // bounded by the composer cap, governed by RATE_LIMITS.scoring. Pinned
+    // by FV-8a–d in the route battery on the flag block's brace-matched END;
+    // mutation-verified against both bypasses.
+    // ------------------------------------------------------------------------
+    if (conversation && typeof conversation === 'string' && conversation.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `conversation exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
+    }
+    if (context && typeof context === 'string' && context.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `context exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
     }
 
     // ------------------------------------------------------------------------
@@ -296,11 +331,11 @@ export async function POST(request: NextRequest) {
     // MIN-length check (<20) has now ALSO moved — it sits immediately above
     // this comment block, after the R20a block. Its provenance was 496d832
     // (2026-03-23), NOT aeadbd1 as this comment previously said (corrected at
-    // the audit, §4.7). TWO guards still precede the block:
-    //   - `conversation` MAX-length (~line 111) and `context` MAX-length
-    //     (~line 117) — both landed 2026-03-26 (aeadbd1) in a general
-    //     security pass, before any perimeter existed here. Routed to the
-    //     audit's §6 Group 2 (item 7), where a screening cap rides the move.
+    // the audit, §4.7). UPDATED AGAIN 2026-09-05 (Session 3B, Group 2): the
+    // `conversation` and `context` MAX-length guards (both landed 2026-03-26,
+    // aeadbd1, in a general security pass, before any perimeter existed here)
+    // have now ALSO moved — they sit above the minimum, after the R20a block.
+    // NO length guard precedes the block on this route any more.
     // This guard was movable on 2026-09-06 because its provenance is clean --
     // it landed 2026-09-05 (4c1cd94) and merely followed the route's existing
     // posture rather than choosing it; the others waited for the audit

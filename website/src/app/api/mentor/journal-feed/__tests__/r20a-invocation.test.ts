@@ -47,6 +47,20 @@ import * as path from 'path'
 import { createSafetyGate } from '@/lib/constraints'
 import { detectDistress } from '@/lib/guardrails'
 import type { DistressDetectionResult } from '@/lib/guardrails'
+// Group 2 (2026-09-05, Session 3B): the shared brace-matched structural-end
+// helpers for the execution-order pins (memory guard-scope-must-cover-the-class).
+import {
+  loadCodeOnly,
+  structuralBlock,
+  codeIndex,
+  codeIndexAfter,
+  codeCount,
+  readTextLimitsFromSource,
+  QUOTED,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+  POST_HANDLER_RE,
+} from '@/lib/__tests__/r20a-ordering-pin-helpers'
 
 // ============================================================================
 // TEST HARNESS
@@ -188,6 +202,91 @@ function runVerdictTests(): void {
 }
 
 // ============================================================================
+// EXECUTION-ORDER PINS (Group 2, 2026-09-05, Session 3B, audit §6 item 6)
+// ============================================================================
+//
+// The three MAXIMUM guards (`impression`, `assent`, `action`; all
+// TEXT_LIMITS.medium) were MOVED after the distress check under the
+// 2026-09-06 ruling. The check is unconditional here, so the structural
+// anchor is the redirect-return block's brace-matched END.
+//
+// MUTATION RECORD (2026-09-05, real file, hash-verified restore): the
+// `impression` maximum placed BEFORE the check → MAX-1 fails; placed BETWEEN
+// the check and the redirect return → MAX-1 fails; deleted → MAX-3 fails; the
+// cap removed (`.map((s) => String(s).trim())`) → CAP-1 fails.
+
+function runOrderingPins(): void {
+  const code = loadCodeOnly(ROUTE_PATH)
+  const LIMITS = readTextLimitsFromSource()
+
+  const CHECK_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(\s*distressText\s*\)\s*\)/
+  const REDIRECT_OPEN_RE = /if\s*\(\s*gate\.shouldRedirect\s*\)\s*\{/
+  const MAX_IMPRESSION_RE = new RegExp(`validateTextLength\\(\\s*impression\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
+  const MAX_ASSENT_RE = new RegExp(`validateTextLength\\(\\s*assent\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
+  const MAX_ACTION_RE = new RegExp(`validateTextLength\\(\\s*action\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
+  const CAP_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s\s*\)\.slice\(\s*0\s*,\s*TEXT_LIMITS\.medium\s*\)\.trim\(\)\s*\)/
+  const UNCAPPED_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s\s*\)\.trim\(\)\s*\)/
+  const SUBJECT_DEF_RE = /const\s+distressText\s*=\s*\[\s*impression\s*,\s*assent\s*,\s*action\s*\]/
+  const ENCRYPT_RE = /encryptJournalProse\s*\(/
+  const STORE_RE = /createClient\s*\(\s*supabaseUrl\s*,\s*supabaseServiceKey\s*\)/
+
+  const checkIdx = codeIndex(code, CHECK_RE)
+  const block = structuralBlock(code, REDIRECT_OPEN_RE)
+  const maxImpressionIdx = codeIndex(code, MAX_IMPRESSION_RE)
+  const maxAssentIdx = codeIndex(code, MAX_ASSENT_RE)
+  const maxActionIdx = codeIndex(code, MAX_ACTION_RE)
+  const capIdx = codeIndex(code, CAP_RE)
+  const subjectDefIdx = codeIndex(code, SUBJECT_DEF_RE)
+  const encryptIdx = codeIndexAfter(code, ENCRYPT_RE, checkIdx)
+  const storeIdx = codeIndexAfter(code, STORE_RE, checkIdx)
+
+  expectTrue(
+    'MAX-1 ALL THREE maximum guards (impression, assent, action) follow the structural END of the redirect-return block ' +
+      '(anchored on the block\'s own closing brace, so drift to anywhere inside it — before OR after the check — is caught)',
+    maxImpressionIdx > -1 && maxAssentIdx > -1 && maxActionIdx > -1 && block.endIdx > -1 &&
+      maxImpressionIdx > block.endIdx && maxAssentIdx > block.endIdx && maxActionIdx > block.endIdx,
+    `impression=${maxImpressionIdx} assent=${maxAssentIdx} action=${maxActionIdx} blockEnd=${block.endIdx}`,
+  )
+  expectTrue(
+    'MAX-2 the maxima keep their relative order (impression, assent, action) and still precede the store client and encryption (order, not existence)',
+    maxImpressionIdx > -1 && maxAssentIdx > maxImpressionIdx && maxActionIdx > maxAssentIdx &&
+      storeIdx > -1 && encryptIdx > -1 && maxActionIdx < storeIdx && maxActionIdx < encryptIdx,
+    `impression=${maxImpressionIdx} assent=${maxAssentIdx} action=${maxActionIdx} store=${storeIdx} encrypt=${encryptIdx}`,
+  )
+  expectTrue(
+    'MAX-3 non-vacuity: each maximum appears exactly once; the redirect block was found exactly once, is non-degenerate, and follows the check',
+    codeCount(code, MAX_IMPRESSION_RE) === 1 && codeCount(code, MAX_ASSENT_RE) === 1 && codeCount(code, MAX_ACTION_RE) === 1 &&
+      block.matches === 1 && checkIdx > -1 && block.openIdx > checkIdx && block.endIdx > block.openIdx,
+    `counts=${codeCount(code, MAX_IMPRESSION_RE)}/${codeCount(code, MAX_ASSENT_RE)}/${codeCount(code, MAX_ACTION_RE)} matches=${block.matches} open=${block.openIdx} end=${block.endIdx} check=${checkIdx}`,
+  )
+  expectTrue(
+    'CAP-1 the three-field subject is composed with each field sliced at TEXT_LIMITS.medium before trim (exactly once, before the check) and the uncapped map is gone',
+    codeCount(code, CAP_RE) === 1 && codeCount(code, UNCAPPED_RE) === 0 &&
+      subjectDefIdx > -1 && capIdx > subjectDefIdx && capIdx < checkIdx && codeCount(code, CHECK_RE) === 1,
+    `cap=${capIdx} uncapped=${codeCount(code, UNCAPPED_RE)} subjectDef=${subjectDefIdx} check=${checkIdx}`,
+  )
+  expectTrue(
+    'CAP-2 the cap key (TEXT_LIMITS.medium) is the SAME key all three moved guards enforce (the cap equals the bound)',
+    MAX_IMPRESSION_RE.test(code) && MAX_ASSENT_RE.test(code) && MAX_ACTION_RE.test(code) && CAP_RE.test(code),
+  )
+  {
+    const postIdx = codeIndex(code, POST_HANDLER_RE)
+    const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+    expectTrue(
+      'NEG-1 no length guard of ANY form (validateTextLength( or a .length </>/<=/>= comparison) exists between the handler start and the distress check (PR19 fold 2026-09-06 — the class fence)',
+      postIdx > -1 && checkIdx > postIdx &&
+        codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preSpan, BARE_LENGTH_GUARD_RE) === 0,
+      `post=${postIdx} check=${checkIdx} vtl=${codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preSpan, BARE_LENGTH_GUARD_RE)}`,
+    )
+  }
+  expectTrue(
+    'CAP-3 TEXT_LIMITS.medium is the audit\'s M bound (5,000) as read from security.ts source',
+    LIMITS.medium === 5000,
+    `medium=${LIMITS.medium}`,
+  )
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 
@@ -196,6 +295,7 @@ function main(): void {
 
   runInvocationTests()
   runVerdictTests()
+  runOrderingPins()
 
   const total = passCount + failCount
   console.log('---')

@@ -1034,20 +1034,88 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Validate text lengths
-    const inputErr = validateTextLength(input, 'Input', TEXT_LIMITS.medium)
-    if (inputErr) return await respond({ body: { error: inputErr }, status: 400, headers: {}, isBillable: false })
-    const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
-    if (contextErr) return await respond({ body: { error: contextErr }, status: 400, headers: {}, isBillable: false })
-    const domainErr = validateTextLength(domain_context, 'Domain context', TEXT_LIMITS.medium)
-    if (domainErr) return await respond({ body: { error: domainErr }, status: 400, headers: {}, isBillable: false })
+    // ------------------------------------------------------------------------
+    // Text-length guards — ONE definition, TWO call sites, split by AUDIENCE.
+    //
+    // MOVED on the HUMAN path 2026-09-05 (Session 3B, Group 2 of operations/
+    // count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-AUDIT.md §6,
+    // item 10) under the binding 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06): "the
+    // distress check runs before the length guard on any route where the
+    // human crisis form is rendered." This route is DUAL-AUDIENCE (audit
+    // §4.5): a Supabase session renders the human crisis form; an API key /
+    // plugin / install credential is the agent path, where purpose (a)
+    // governs and NOTHING moves. So the four guards (`input`, `context`,
+    // `domain_context`, and the flag-on `clarification_response` length —
+    // provenance 54064f5 2026-04-02, file creation) live in this closure
+    // exactly once, in their original order and with their original messages,
+    // and are CALLED:
+    //   - on the AGENT path, right here, where they always ran — the agent
+    //     path's execution order and every response byte are unchanged;
+    //   - on the HUMAN path, AFTER the R20a check and its redirect return
+    //     (see the second call site below), before continuation-token
+    //     validation and before the engine.
+    // The determinant is `r20aAudience` (auth.user?.id — the same signal the
+    // redirect branches use). The `clarification_response` TYPE check stays
+    // where it was for both paths: a non-string answer is not screenable text
+    // (the audit's class-P posture on the screened field itself).
+    //
+    // DISCLOSED message-shape deltas on THREE pathological human input
+    // classes (status 400 unchanged; PR19 fold 2026-09-06 — a first cut named
+    // only the first): a session request carrying an oversized `input` (or
+    // `context`/`domain_context`) TOGETHER WITH (a) a non-string
+    // `clarification_response`, (b) a malformed `session_marker` (flag
+    // SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED), or (c) a malformed `loop_id`
+    // (flag SUBSTRATE_LOOP_ID_FIELD_ENABLED) now 400s on THAT field's message
+    // first — those three checks sit between the guards' old site and their
+    // new one — where before it 400'd on the length message. The same class
+    // Group 1 disclosed on score-conversation. Also: an oversized human
+    // `input` that REDIRECTS is served through the redirect branch
+    // (isBillable: true) rather than the unbilled 400 it used to be — a
+    // session caller is not metered by `respond` today, so no charge moves.
+    //
+    // The audit's rev-2 sweep is per-HANDLER, not per-path: it follows this
+    // closure from the agent-path call and will keep listing these guards as
+    // pre-check. That is correct for the agent path. The HUMAN-path ordering
+    // is proven by the per-route pins (ORD-1..6 in
+    // __tests__/r20a-invocation.test.ts), not by the sweep.
+    // ------------------------------------------------------------------------
+    const tier1ContinuationEnabled = isTier1ContinuationEnabled()
+    const textLengthGuardError = (): string | null => {
+      const inputErr = validateTextLength(input, 'Input', TEXT_LIMITS.medium)
+      if (inputErr) return inputErr
+      const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
+      if (contextErr) return contextErr
+      const domainErr = validateTextLength(domain_context, 'Domain context', TEXT_LIMITS.medium)
+      if (domainErr) return domainErr
+      // Mechanism-correction Part A (ADR-008 §A.3 step 1): the flag-on
+      // clarification_response LENGTH guard. Flag off → never read
+      // (byte-identical; an unknown over-long field is ignored exactly as
+      // today). A non-string value is skipped here and refused by the TYPE
+      // check below the agent-path call site.
+      if (tier1ContinuationEnabled && typeof clarification_response === 'string') {
+        const clarificationErr = validateTextLength(
+          clarification_response,
+          'Clarification response',
+          TEXT_LIMITS.medium,
+        )
+        if (clarificationErr) return clarificationErr
+      }
+      return null
+    }
+
+    // AGENT-path call site — the guards' original position. Purpose (a):
+    // nothing moves for a credential-bearing caller.
+    if (r20aAudience !== 'human_user') {
+      const agentLengthErr = textLengthGuardError()
+      if (agentLengthErr) return await respond({ body: { error: agentLengthErr }, status: 400, headers: {}, isBillable: false })
+    }
 
     // Mechanism-correction Part A (ADR-008 §A.3 step 1): when the continuation
-    // flag is on and clarification_response is present, type- + length-validate
-    // it before it reaches the distress classifier (below) or the engine.
-    // Flag off → never read (byte-identical; an unknown over-long field is
-    // ignored exactly as today).
-    const tier1ContinuationEnabled = isTier1ContinuationEnabled()
+    // flag is on and clarification_response is present, TYPE-validate it
+    // before it reaches the distress classifier (below) or the engine. (The
+    // LENGTH half lives in textLengthGuardError above — see that note.)
+    // Flag off → never read (byte-identical).
     if (
       tier1ContinuationEnabled &&
       clarification_response !== undefined &&
@@ -1056,19 +1124,6 @@ export async function POST(request: NextRequest) {
       if (typeof clarification_response !== 'string') {
         return await respond({
           body: { error: 'clarification_response must be a string.' },
-          status: 400,
-          headers: {},
-          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
-        })
-      }
-      const clarificationErr = validateTextLength(
-        clarification_response,
-        'Clarification response',
-        TEXT_LIMITS.medium,
-      )
-      if (clarificationErr) {
-        return await respond({
-          body: { error: clarificationErr },
           status: 400,
           headers: {},
           isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
@@ -1139,12 +1194,28 @@ export async function POST(request: NextRequest) {
     // identical. Token presence is NOT required: any practitioner-authored
     // clarification text runs the perimeter before any engine work or structural
     // rejection.
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // on the HUMAN path the length guards now run AFTER this check, so
+    // `input` (and a string `clarification_response`) are unbounded here.
+    // Each is sliced at the route's own bound (TEXT_LIMITS.medium — the same
+    // value the guards enforce) before the classifier sees it. On the AGENT
+    // path the guards have already run, so the slice is a no-op and the
+    // classifier's input is byte-identical to before. An in-bound human
+    // request is likewise screened byte-identically. DISCLOSED RESIDUAL
+    // (audit §4.3): on the human path, distress appearing only past character
+    // 5,000 of `input` is not screened — before this move it was not read at
+    // all (a bare 400). `context`/`domain_context` are not screened here
+    // (unchanged).
+    const screenedInput = input.slice(0, TEXT_LIMITS.medium)
     const distressSubjectText = tier1ContinuationEnabled
       ? composeContinuationDistressText(
-          input,
-          typeof clarification_response === 'string' ? clarification_response : undefined,
+          screenedInput,
+          typeof clarification_response === 'string'
+            ? clarification_response.slice(0, TEXT_LIMITS.medium)
+            : undefined,
         )
-      : input
+      : screenedInput
     const gate = await enforceDistressCheck(detectDistressTwoStage(distressSubjectText))
     if (gate.shouldRedirect) {
       // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): route the
@@ -1173,6 +1244,23 @@ export async function POST(request: NextRequest) {
         headers: corsHeaders(),
         isBillable: true,  // Substrate engaged via R20a perimeter — billed at base rate per R9.
       })
+    }
+
+    // HUMAN-path call site for the text-length guards — MOVED here 2026-09-05
+    // (Session 3B, Group 2 of the perimeter-ordering audit, §6 item 10) under
+    // the 2026-09-06 ruling. A long distressed submission from a signed-in
+    // practitioner now reaches the check above (capped at this same bound)
+    // and receives the crisis form instead of a bare 400. ORDER, NOT
+    // EXISTENCE: the closure holds the guards verbatim; values, messages,
+    // status and billing posture are unchanged; the guards still precede
+    // continuation-token validation and the engine. The agent path called the
+    // same closure at the original site above and is untouched. Pinned by
+    // ORD-1..6 in __tests__/r20a-invocation.test.ts on the redirect block's
+    // brace-matched END; mutation-verified against both bypasses, the cap's
+    // removal, and the agent-path call moving.
+    if (r20aAudience === 'human_user') {
+      const humanLengthErr = textLengthGuardError()
+      if (humanLengthErr) return await respond({ body: { error: humanLengthErr }, status: 400, headers: {}, isBillable: false })
     }
 
     // M1-CP4e (2026-05-06): Continuation-token validation. Runs AFTER the
@@ -1608,6 +1696,16 @@ export async function POST(request: NextRequest) {
             // surface the same minimal fallback the orchestrator's inline
             // path would (ADR-004 §9.3 semantics preserved).
             sandwichResult.error = 'layer3_throw'
+            // R3 observability (PR19 fold 2026-09-06): this is the route's OWN
+            // layer3_throw site, so the sandwich never set `error_cause` for
+            // it. generateNarrativeForAssessment returns null instead of
+            // throwing, so the underlying cause is not in scope here — the
+            // row names the path honestly and `isLlmOutage` reads false on it
+            // (a disclosed limit: outage classification is unavailable on
+            // this branch until the generator surfaces its cause).
+            sandwichResult.error_cause = new Error(
+              'deferred-prose path: generateNarrativeForAssessment returned null after the pending retention row did not land (both generation paths failed; cause swallowed upstream)'
+            )
           }
         }
       } else {
@@ -2079,6 +2177,37 @@ export async function POST(request: NextRequest) {
       sandwichResult.error === 'validation_throw' ||
       sandwichResult.error === 'layer3_throw'
     ) {
+      // R3 observability (2026-09-05, Session 3B, Election B; the fix named in
+      // D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-
+      // CLOSED-2026-09-05 finding 4). This branch serves a MASKED HTTP 200 —
+      // `assessment: null` with the honest `fallback_reason` — and until now
+      // left NO row anywhere: an A11b injection REJECT against this route
+      // (`Layer1ValidationError … Patterns: schema_field_injection`) was
+      // invisible in the DB, so the 2026-09-05 consult-path degradation could
+      // only be diagnosed from the discernment route's half. Log the thrown
+      // cause with the REAL status served (200 — this is the masked fallback,
+      // not a 500) so an injection attempt, an extractor parse failure, or a
+      // genuine LLM outage is queryable. PII (PR19 fold 2026-09-06 — a first
+      // cut over-claimed "never input text"): recordRouteError stores the
+      // error's name/message/stack only. The A11b injection REJECT message
+      // names pattern ids and carries no text. TWO `layer1_throw` sub-paths
+      // can carry up to 100 chars of LLM OUTPUT (never the request body):
+      // extractJSON's parse failure embeds `Preview: <first 100 chars of the
+      // model's response>`, and a Layer1ValidationError('enum', …) embeds the
+      // model-emitted field value. Both are structural schema text in the
+      // normal case; the bound is named rather than denied. The response
+      // bytes are unchanged (R3's status masking itself is NOT resolved here
+      // — a separate design question).
+      logRouteError({
+        route: '/api/reason',
+        method: 'POST',
+        error:
+          sandwichResult.error_cause ??
+          new Error(`translation-sandwich ${sandwichResult.error} (cause not captured)`),
+        statusCode: 200,
+        isLlmOutage: isLlmOutage(sandwichResult.error_cause),
+        context: { fallback_reason: sandwichResult.error, masked_fallback: true },
+      })
       return await respond({
         body: buildMinimalFallback(sandwichResult.error),
         status: 200,

@@ -51,15 +51,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Text length validation
-    const impressionErr = validateTextLength(impression, 'Impression', TEXT_LIMITS.medium)
-    if (impressionErr) return NextResponse.json({ error: impressionErr }, { status: 400 })
-
-    const assentErr = validateTextLength(assent, 'Assent', TEXT_LIMITS.medium)
-    if (assentErr) return NextResponse.json({ error: assentErr }, { status: 400 })
-
-    const actionErr = validateTextLength(action, 'Action', TEXT_LIMITS.medium)
-    if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
+    // The three MAXIMUM-length guards (`impression`, `assent`, `action`;
+    // provenance 6b52fe8 2026-04-12, file creation) used to sit HERE, before
+    // the distress check. MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3B, Group 2 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 6) under the binding ruling:
+    // "the distress check runs before the length guard on any route where the
+    // human crisis form is rendered." See the guards' new site below. The
+    // event_timestamp 400s that follow are class O in the audit (not length
+    // guards) and are left where they are — audit §4.4, a mentor question.
 
     // Validate event_timestamp if provided
     let parsedEventTimestamp: string | null = null
@@ -81,8 +81,17 @@ export async function POST(request: NextRequest) {
     // fire-and-forget. On moderate/acute distress, redirect to support and do
     // NOT store the entry (this is a store-only route; the right action is to
     // redirect, not persist).
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // now that the maximum-length guards run AFTER this check, the raw fields
+    // are unbounded here, so each is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guards below enforce) before
+    // the classifier sees it. The join is unchanged; an in-bound request is
+    // screened byte-identically to before. DISCLOSED RESIDUAL (audit §4.3):
+    // distress appearing only past character 5,000 of a field is not
+    // screened — before this move it was not read at all (a bare 400).
     const distressText = [impression, assent, action]
-      .map((s) => String(s).trim())
+      .map((s) => String(s).slice(0, TEXT_LIMITS.medium).trim())
       .join('\n\n')
     const gate = await enforceDistressCheck(detectDistressTwoStage(distressText))
     if (gate.shouldRedirect) {
@@ -95,6 +104,26 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       )
     }
+
+    // `impression` / `assent` / `action` MAXIMUM length — MOVED here
+    // 2026-09-05 (Session 3B, Group 2 of the perimeter-ordering audit, §6
+    // item 6) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A long
+    // distressed entry now reaches the check above (each field capped at this
+    // same bound) and receives the crisis resources instead of this 400.
+    // ORDER, NOT EXISTENCE: values, messages, status and the guards' relative
+    // order are unchanged, and all three still precede encryption and the
+    // store. Pinned by MAX-1..4 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses and the cap's removal.
+    const impressionErr = validateTextLength(impression, 'Impression', TEXT_LIMITS.medium)
+    if (impressionErr) return NextResponse.json({ error: impressionErr }, { status: 400 })
+
+    const assentErr = validateTextLength(assent, 'Assent', TEXT_LIMITS.medium)
+    if (assentErr) return NextResponse.json({ error: assentErr }, { status: 400 })
+
+    const actionErr = validateTextLength(action, 'Action', TEXT_LIMITS.medium)
+    if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

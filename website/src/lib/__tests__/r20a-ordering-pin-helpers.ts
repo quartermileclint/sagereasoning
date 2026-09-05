@@ -35,6 +35,7 @@
  */
 
 import * as fs from 'fs'
+import * as path from 'path'
 
 /**
  * Comments removed. Mirrors the per-line quote-aware strip that the
@@ -175,8 +176,50 @@ export function codeIndexAfter(code: string, re: RegExp, from: number): number {
  */
 export const QUOTED = `['"][^'"]*['"]`
 
+/**
+ * The CLASS of length guard the ruling keeps out of the pre-check region —
+ * any `.length <`, `.length >`, `.length <=`, `.length >=` comparison, and
+ * any `validateTextLength(` call. Added 2026-09-06 (Session 3B, Group 2 PR19
+ * fold): every battery's ordering pins anchor on the moved guard's exact
+ * FORM, so a reviewer re-added a guard written any OTHER way
+ * (`if (field.length > TEXT_LIMITS.k) return …`) before the check and all
+ * eleven batteries stayed green — the harm the ruling closed, re-opened by a
+ * one-line decoy the pins could not see (memory
+ * `guard-scope-must-cover-the-class`). A per-route NEGATIVE pin over the
+ * pre-check span (handler start → the block the check lives in) fences the
+ * class, not the instance. Presence forms (`.length === 0`, `!== 0`) are
+ * deliberately NOT matched: they stay before the check by design.
+ */
+export const BARE_LENGTH_GUARD_RE = /\.length\s*[<>]=?\s*/
+export const VALIDATE_TEXT_LENGTH_CALL_RE = /validateTextLength\s*\(/
+export const POST_HANDLER_RE = /export\s+async\s+function\s+POST\s*\(/
+
 /** Number of matches of `re` in the string-blanked view of `code`. */
 export function codeCount(code: string, re: RegExp): number {
   const global = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g')
   return (blankStrings(code).match(global) ?? []).length
+}
+
+/**
+ * The TEXT_LIMITS values, read from `security.ts` SOURCE (comment-stripped)
+ * rather than imported. Added 2026-09-05 (Session 3B, Group 2 — the
+ * screening-cap pins). WHY NOT IMPORT: `security.ts:37` registers a
+ * module-level setInterval (the rate-limit cleanup) that keeps the Node event
+ * loop alive, so any battery importing it prints its summary and then never
+ * exits (memory `tsx-tests-setinterval-keepalive-hang`) — which would hang
+ * the founder's `for t in …` verification loop on the first route. Reading
+ * the literals from source keeps every per-route battery a clean-exit
+ * script while still catching a silent redefinition of a bound (the pins
+ * assert the literal, e.g. `medium === 5000`). Returns -1 for a key not
+ * found, so a caller's `=== 5000` fails loud rather than passing vacuously.
+ */
+export function readTextLimitsFromSource(): Record<'short' | 'medium' | 'long' | 'document', number> {
+  const src = loadCodeOnly(path.resolve(__dirname, '..', 'security.ts'))
+  const block = /export\s+const\s+TEXT_LIMITS\s*=\s*\{([\s\S]*?)\}/.exec(src)
+  const body = block ? block[1] : ''
+  const read = (key: string): number => {
+    const m = new RegExp(`\\b${key}\\s*:\\s*(\\d+)`).exec(body)
+    return m ? Number(m[1]) : -1
+  }
+  return { short: read('short'), medium: read('medium'), long: read('long'), document: read('document') }
 }

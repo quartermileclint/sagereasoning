@@ -317,7 +317,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate text lengths
+    // The MAXIMUM-length guards on `scenario` and `response` (provenance
+    // aeadbd1 2026-03-26, a general security pass) used to sit HERE, before
+    // the distress check. MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3B, Group 2 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 8) under the binding ruling:
+    // "the distress check runs before the length guard on any route where the
+    // human crisis form is rendered." See the guards' new site below.
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    // enforceDistressCheck() returns a SafetyGate — compile-time proof that
+    // the distress classifier has been awaited before any reasoning proceeds.
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // now that the maximum-length guard runs AFTER this check, the raw
+    // `response` is unbounded here, so it is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guard below enforces) before
+    // the classifier sees it. An in-bound request is screened byte-identically
+    // to before. `scenario` is NOT screened on this route (unchanged), so
+    // moving its maximum sends nothing new to the classifier. DISCLOSED
+    // RESIDUAL (audit §4.3): distress appearing only past character 5,000 of
+    // `response` is not screened — before this move it was not read at all
+    // (a bare 400).
+    const screenedResponse = response.slice(0, TEXT_LIMITS.medium)
+    const gate = await enforceDistressCheck(detectDistressTwoStage(screenedResponse))
+    if (gate.shouldRedirect) {
+      return NextResponse.json(
+        { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
+    }
+
+    // `scenario` / `response` MAXIMUM length — MOVED here 2026-09-05 (Session
+    // 3B, Group 2 of the perimeter-ordering audit, §6 item 8) under the
+    // 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A long
+    // distressed response now reaches the check above (capped at this same
+    // bound) and receives the crisis resources instead of this 400. ORDER,
+    // NOT EXISTENCE: values, messages, status and the guards' relative order
+    // (scenario, then response, then the minimum — the pre-Group-1 order) are
+    // unchanged, and both still precede the RAG/context loads and the LLM
+    // call. Pinned by MAX-1..4 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses and the cap's removal.
     const scenarioErr = validateTextLength(scenario, 'scenario', TEXT_LIMITS.medium)
     if (scenarioErr) {
       return NextResponse.json({ error: scenarioErr }, { status: 400 })
@@ -326,17 +368,6 @@ export async function POST(request: NextRequest) {
     const responseErr = validateTextLength(response, 'response', TEXT_LIMITS.medium)
     if (responseErr) {
       return NextResponse.json({ error: responseErr }, { status: 400 })
-    }
-
-    // R20a — Vulnerable user detection (before any LLM call)
-    // enforceDistressCheck() returns a SafetyGate — compile-time proof that
-    // the distress classifier has been awaited before any reasoning proceeds.
-    const gate = await enforceDistressCheck(detectDistressTwoStage(response))
-    if (gate.shouldRedirect) {
-      return NextResponse.json(
-        { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
-        { status: 200, headers: corsHeaders() }
-      )
     }
 
     // `response` MINIMUM length — MOVED here 2026-09-05 (Session 3, Group 1 of

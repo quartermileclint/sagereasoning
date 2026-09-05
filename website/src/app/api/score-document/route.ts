@@ -103,20 +103,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 })
     }
 
-    const textValidationError = validateTextLength(text, 'text', TEXT_LIMITS.document)
-    if (textValidationError) {
-      return NextResponse.json({ error: textValidationError }, { status: 400 })
-    }
+    // The MAXIMUM-length guard on `text` (provenance aeadbd1 2026-03-26, a
+    // general security pass) used to sit HERE, before the distress check.
+    // MOVED after the R20a redirect return on 2026-09-05 (Session 3B, Group 2
+    // of operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-
+    // ordering-AUDIT.md §6, item 8) under the binding ruling: "the distress
+    // check runs before the length guard on any route where the human crisis
+    // form is rendered." See the guard's new site below.
 
     // R20a — Vulnerable user detection (before any LLM call)
     // enforceDistressCheck() returns a SafetyGate — compile-time proof that
     // the distress classifier has been awaited before any reasoning proceeds.
-    const gate = await enforceDistressCheck(detectDistressTwoStage(text))
+    //
+    // SCREENING CAP (2026-09-05, Session 3B Group 2, audit §3 constraint 2):
+    // now that the maximum-length guard runs AFTER this check, the raw field
+    // is unbounded here, so it is sliced at the route's own bound
+    // (TEXT_LIMITS.document, 30,000 — the largest raw input any perimeter
+    // member sends to the classifier, and the same value the guard below
+    // enforces) before the classifier sees it. An in-bound request is
+    // screened byte-identically to before. DISCLOSED RESIDUAL (audit §4.3):
+    // distress appearing only past character 30,000 is not screened — before
+    // this move it was not read at all (a bare 400). COST, disclosed (PR19
+    // fold, 2026-09-06): an oversized regex-silent document now reaches
+    // stage 2 (Haiku) at the full 30,000-char cap where it was previously a
+    // free 400 — the largest stage-2 exposure on the perimeter; governed by
+    // RATE_LIMITS.scoring.
+    const screenedText = text.slice(0, TEXT_LIMITS.document)
+    const gate = await enforceDistressCheck(detectDistressTwoStage(screenedText))
     if (gate.shouldRedirect) {
       return NextResponse.json(
         { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
         { status: 200, headers: corsHeaders() }
       )
+    }
+
+    // `text` MAXIMUM length — MOVED here 2026-09-05 (Session 3B, Group 2 of
+    // the perimeter-ordering audit, §6 item 8) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A long
+    // distressed document now reaches the check above (capped at this same
+    // bound) and receives the crisis resources instead of this 400. ORDER,
+    // NOT EXISTENCE: value, message and status are unchanged, and the guard
+    // still precedes the 20-word minimum below, the 8,000-word engine trim,
+    // every context/RAG load and the LLM call. Pinned by MAX-1..4 in
+    // __tests__/r20a-invocation.test.ts on the redirect block's brace-matched
+    // END; mutation-verified against both bypasses and the cap's removal.
+    const textValidationError = validateTextLength(text, 'text', TEXT_LIMITS.document)
+    if (textValidationError) {
+      return NextResponse.json({ error: textValidationError }, { status: 400 })
     }
 
     const trimmed = text.trim()
