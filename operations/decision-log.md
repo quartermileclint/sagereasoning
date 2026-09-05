@@ -35506,3 +35506,81 @@ PR20 (the "no writes" claim re-checked at source and corrected). Concurrency: `g
 `D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05`;
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`;
 `operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`.
+
+## 2026-09-05 — D-CONSULT-PATH-DEGRADATION-DIAGNOSED-PATTERN-LEVEL-FOUNDER-QUERY-OWED-2026-09-05
+
+**Decision:** The consult-path degradation observed during Session 3 is diagnosed to the limit a
+repo session can reach; **Diagnostic-uncertain — pattern level** (0d signal). `governance` —
+documents only; no code, flag, schema, credential, or live op. The decisive evidence lives in two
+places this environment cannot read (Supabase `route_errors`; Vercel function logs); the founder's
+query is owed and named below.
+
+**What was observed (read-only, `~/.sage-gate1/gate1.log`, all times UTC, 2026-09-05):**
+- **`CONSULT-OUTAGE reason="no assessment in response"`** — 15 events 07:36:49 → 07:40:35, then
+  3 more as `UNFRAMED … PreToolUse` 07:45–07:46 (the subagent-spawn frame). A `CONSULT` succeeded
+  at 07:42:20 in the middle of the window. No recurrence after 07:46.
+- **`ELICIT-OUTAGE reason="http 503 — service error"`** — 5 events 07:41–07:48; a second burst
+  of 9 events 11:56–12:00; one more at 12:36. A successful `ELICIT` at 07:31 before, and at 12:02
+  between the last two bursts; a `CONSULT` succeeded at 12:03.
+- `/api/health` at 12:38Z: `anthropic_api: connected`, `supabase: connected`. Anthropic's status
+  page shows **no incident on 2026-09-05** (most recent: 09-03, resolved).
+
+**Mechanism — Diagnostic-certain at the code level, both symptoms:**
+1. **"no assessment in response" is a masked failure.** The hook (`framing-core.mjs:561–569`)
+   emits it only after `res.ok` is TRUE and the JSON parsed — i.e. `/api/reason` returned **HTTP
+   200 without an `assessment`**. The route's Branch 2 (`reason/route.ts:2077–2089`) serves
+   `buildMinimalFallback(...)` — `{ extraction: null, assessment: null, prose: {…} }` — **with
+   status 200** whenever the sandwich reports `layer1_throw` / `validation_throw` / `layer3_throw`.
+   `layer1_throw` is set when `extractFeatures` (the Sonnet Layer-1 call, `MODEL_DEEP`) throws
+   (`parallel-run.ts:676–680`), logged **only** as `console.warn('[parallel-run] Layer 1 threw:',
+   …)` — Vercel logs, never `route_errors` (the route's sole `logRouteError` is its outer catch,
+   `:2267`, which this branch never reaches). **This is the R3 "status masking" item already on the
+   longer-tail list, with a sharper cost now shown: the masked path is also unobserved.**
+2. **"http 503 — service error" is the discernment route's outer catch** (`discernment/handler.ts:
+   715–733`) — it DOES write `route_errors` (since 2026-09-03) with the real `message`, `error_type`,
+   `is_llm_outage`, and `context.phase`. The elicitation phase runs the **same `extractFeatures`
+   Sonnet call** (`:606–611`) and then a pure `examineElicitation`; the metering 503 has a different
+   body (`billing unavailable`), so `service error` = an exception from one of those two.
+
+**Cause — pattern level, not confirmed:** both symptoms are Sonnet Layer-1 throws in bursts of 4–9
+minutes, and every burst coincides with **this session's own concurrency spikes** on the harness —
+nine route Edits fired in one response at 07:36 (a consult + a guard each), three parallel PR19
+agents spawned at 07:41–07:45, the independent re-run agent working 11:56–12:02 — while single calls
+between bursts succeeded. The shape fits an upstream **per-minute rate limit (429) or overload
+(529) on the project's Anthropic key** under parallel load, not an outage (status page clean,
+health `connected`, recovery without intervention). A deterministic throw in `examineElicitation`
+is the alternative for the discernment half and would NOT be bursty — the query below distinguishes
+them. **This is a hypothesis fitting the log; it is not observed.**
+
+**The owed founder query (Supabase SQL editor, production project — pure ASCII; read-only):**
+```
+SELECT occurred_at, route, error_type, is_llm_outage, context->>'phase' AS phase, left(message, 300) AS message
+FROM public.route_errors
+WHERE occurred_at >= '2026-09-05 07:00:00+00' AND occurred_at < '2026-09-05 13:00:00+00'
+ORDER BY occurred_at;
+```
+Expected: rows for `/api/practice/discernment` at the ELICIT-OUTAGE timestamps; **the `message`
+column names the cause** (an Anthropic `429`/`rate_limit` or `529`/`overloaded` confirms the
+pattern; anything else refutes it). Expected ABSENT: any `/api/reason` row for the 07:36–07:46
+window — that absence is itself the finding in item 1. **Vercel logs** (Functions → `/api/reason`,
+07:36–07:41Z) for the string `[parallel-run] Layer 1 threw:` carry the consult half's message.
+
+**Recommendations, not actions (each its own step):** (a) add `logRouteError` on `/api/reason`'s
+Branch-2 fallback so a masked 200 leaves a row — a small `code-elevated` edit **inside the measured
+`/api/reason` surface**, so it must land before `GATE1_FALSE_HOLD_CAPTURE` is set (window not
+started as of this session) or wait for the window to close; (b) fold this instance into the R3
+status-masking item's scoping, since the 200-with-`assessment:null` shape is exactly what the
+harness's `no assessment in response` branch exists to catch — the masking costs observability,
+not just honesty; (c) B4's availability measurement (≥2026-09-08) should read today's bursts as
+**load-correlated**, not baseline — the log's session id ties every event to this session.
+
+**Rollback path:** n/a — documents only. **Rules served:** PR20 (every mechanism fact cited to
+file:line, read this session; the cause explicitly marked unobserved), PR23 (memory
+`gate1-consult-401-is-transient-fail-secure` consulted — a different class: that was auth-side
+401s, this is a 200-masked Layer-1 throw; noted as distinct). Concurrency: `git status` whole;
+path-scoped commit.
+
+**Status:** Adopted (diagnosis, pattern-level). Cross-references:
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-LIVE-2026-09-05` (the session that observed it);
+`D-DISCERNMENT-503-RATE-DIAGNOSED-AND-CLOSED-2026-09-03` (the `logRouteError` wiring this query
+relies on); the S11 register B4 cell (availability).
