@@ -35760,3 +35760,11 @@ under `website/`; nothing there staged.
 and 4, which E5 and the elections interact with); `D-STANDING-RUNNER-DESIGN-R9-COMPLETE-PR19-FOLDED-2026-09-04`;
 `D-MENTOR-AMENDMENT-TWELVE-ENVIRONMENT-ARCHITECTURE-ADOPTED-R10-RUN-2026-09-04`; the S11 register's
 item D and B4 cells.
+
+> **Correction to the entry above, 2026-09-05 (same session, minutes later):** its "Files" line
+> claimed the opener's S4(c′) and S9 lines were updated in `3c44929`. They were not — for the second
+> time tonight an edit script asserted on an anchor read from memory rather than from the file,
+> stopped, and the entry was appended anyway. The opener is updated in the commit carrying this
+> correction. The lesson is recorded once, plainly: **read the anchor from the file before writing a
+> sentence that says the edit happened** (memory `primary-data-beats-secondary-characterisation`,
+> applied to one's own pending edits).

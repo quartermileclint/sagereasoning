@@ -403,7 +403,10 @@ work is batched so one sitting discharges many gates; every session is sized to 
    (b) Propose the availability **threshold** F-3′ leaves unset (a P6 design question — draft for
    founder election, mentor if the founder elects). (c) Confirm both preconditions and that S5's
    answer does not require an engine-class edit before the window (an engine edit after the window
-   opens contaminates it: the byte-identity guard re-arms on the same flag). (d) Then **the founder**
+   opens contaminates it: the byte-identity guard re-arms on the same flag). **(c′) RULED 2026-09-05
+   (mentor reception of R9/R10, E5): S9's harness-side redaction must LAND BEFORE (d)** — restoring the
+   flag before redaction *"would accumulate records that mix genuine outages with injection-caused
+   blindness, which the B4 measurement cannot distinguish."* (d) Then **the founder**
    sets `GATE1_FALSE_HOLD_CAPTURE` — which is P8a's activation, the window start, item D's
    restoration, and the guard re-arm in one act — and the ≥7-day representative window runs.
 5. **S5 — D2 scope-for-ruling.** `governance`, autonomous, **before S4(d)**. The domain-tagging
@@ -424,7 +427,7 @@ work is batched so one sitting discharges many gates; every session is sized to 
 7. **S7 — Item 2b** (`l1_supply` narrowed out of the `ecosystem` preset). `code-critical`,
    founder-walked, PR19. **ELECTED by the 2026-09-05 ruling (F-3); route (i) NOT built.** Verify the
    population is still zero at open (`active_with_l1_supply = 0` on 08-25).
-8. **S9 (NEW, ruled 2026-09-05 Part 4) — harness-side schema-token redaction + the masked-200 `route_errors` row.** `code-elevated`. The at-action composer and the elicitation capture replace every `schema_field_injection` token with a category placeholder (`⟨schema-field⟩`), log the replacement count per call, and the harness docs name the rule; `/api/reason`'s Branch-2 fallback writes a `route_errors` row. **Inside the measured surface — land BEFORE S4(d), or after the window.** Memory `harness-blind-on-substrate-sessions-a11b-schema-tokens`; verbatim `2026-09-05-mentor-rulings-five-relays-verbatim.md`.
+8. **S9 (NEW, ruled 2026-09-05 Part 4) — harness-side schema-token redaction + the masked-200 `route_errors` row.** `code-elevated`. The at-action composer and the elicitation capture replace every `schema_field_injection` token with a category placeholder (`⟨schema-field⟩`), log the replacement count per call, and the harness docs name the rule; `/api/reason`'s Branch-2 fallback writes a `route_errors` row. **Inside the measured surface, and NOW A PRECONDITION OF THE WINDOW START (mentor reception 2026-09-05, E5: redaction → restoration → accumulation) — land BEFORE S4(d); the "or after the window" branch is closed.** Memory `harness-blind-on-substrate-sessions-a11b-schema-tokens`; verbatim `2026-09-05-mentor-rulings-five-relays-verbatim.md`.
 9. **S10 (NEW, ruled 2026-09-05 Part 3) — founder-hub mentor continuity.** `code-elevated`. A session-bounded, token-budgeted history fetch with a hard cap (the `MENTOR_HISTORY_WINDOW === 20` pin changes only by a diff citing the ruling); a system-prompt line telling the mentor what it cannot see. **Precondition: F-11's Q4.**
 10. **S3 gains Group 2b (ruled 2026-09-05 Part 5)** — the three P′ presence-on-sibling-field sites and the O cases where the screened text is present; see the remediation prompt's ruled addition. J/A/F are outside the principle.
 11. **S8 — Records fold + governing-surface edits on election.** `governance`: the CLAUDE.md
