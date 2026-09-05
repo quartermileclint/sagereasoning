@@ -1,3 +1,5 @@
+> **GROUP 1 DONE 2026-09-05** — the four minimum-length moves are LIVE (`c679739` on `origin/main`, Vercel green) and **live-smoked, all eight probes as expected** (`2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`; `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05` + its LIVE addendum). F-6's two `format` smokes are also discharged. **Groups 2 and 3 remain open under this prompt.**
+
 # NEXT SESSION PROMPT — Session 3: the R20a perimeter-ordering REMEDIATION
 
 **Paste into a fresh session after the standing opener. Tier: `code-critical`** — every candidate is a

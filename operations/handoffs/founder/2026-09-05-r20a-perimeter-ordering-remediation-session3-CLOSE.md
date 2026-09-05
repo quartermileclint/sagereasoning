@@ -6,11 +6,16 @@ the founder pushes and runs the live smokes; AC7 not engaged. Model started `cla
 parallel review agents died on the account's Fable session limit. Decision-log entry:
 `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05`.
 
-## Production state at close
+## Production state at close — UPDATED after the founder's push and smokes
 
-**Unchanged. Nothing has been pushed or deployed.** All work is in the local working tree,
-committed to this checkout's `main` branch, one commit ahead of `origin/main`. No migration, flag,
-credential, or live operation. `.claude/settings.local.json` untouched.
+**LIVE.** `c679739` is on `origin/main`, Vercel green (founder-confirmed). All eight Bearer-JWT
+smokes ran from a signed-in console and returned as expected — recorded probe-by-probe in
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-LIVE-2026-09-05`. Production is deliberately NOT
+byte-equivalent to the audit's HEAD on four human-facing perimeter members. No migration, flag, or
+credential touched. `.claude/settings.local.json` untouched. **Correction to the earlier draft of
+this close:** the reflect routes' redirect path writes one `analytics_events` row each (pre-existing
+safety monitoring, severity + indicators only) — two rows from this walk, on the founder's own id;
+nothing else wrote.
 
 ## What was built
 
@@ -64,11 +69,11 @@ verification, not irreversible action.
 
 | # | Item | Owner |
 |---|---|---|
-| 1 | Push this session's commit | founder |
-| 2 | **Pre-push verify** (the block above) | founder, before pushing |
-| 3 | **Post-deploy smokes**: F-6's two `format` smokes on score-conversation, plus a 14-char distressed-vs-benign pair on each of the four Group 1 routes (8 total probes, none write a row) | founder |
-| 4 | The production consult-path degradation (observed, not diagnosed) | founder |
-| 5 | Groups 2 and 3 of the audit's §6 | a future Session 3 continuation |
+| 1 | ~~Push~~ **DONE** — `c679739` on `origin/main`, Vercel green | — |
+| 2 | ~~Pre-push verify~~ **DONE** — founder-run | — |
+| 3 | ~~Post-deploy smokes~~ **DONE, all eight as expected** (incl. F-6a/F-6b — opener item F-6 discharged) | — |
+| 4 | The production consult-path degradation (observed 17:36–17:46 AEST, not diagnosed; appeared to clear) | founder |
+| 5 | Groups 2 and 3 of the audit's §6 | a future Session 3 continuation, same prompt |
 
 ## Next session should
 

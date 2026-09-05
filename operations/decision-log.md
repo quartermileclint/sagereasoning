@@ -35450,3 +35450,59 @@ model, disclosed above.
 `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06` (the FV-6 pin
 precedent this session's helper generalises);
 `operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`.
+
+
+## 2026-09-05 — D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-LIVE-2026-09-05
+
+**Decision:** Group 1 of the R20a perimeter-ordering remediation is **LIVE in production and
+live-smoked.** The founder ran the pre-push verification block, pushed `c679739` (confirmed on
+`origin/main`; Vercel green), and ran all eight Bearer-JWT smokes from a signed-in browser console
+on `www.sagereasoning.com`. **Every one returned as expected; none was inferred.** AC7 not engaged.
+Founder-walked (PR17): the AI authored the smoke script and expected values; the founder executed
+every live step and pasted the raw console output back. Session model `claude-sonnet-5` (switched
+from `claude-fable-5-1` mid-session, disclosed in the BUILT entry).
+
+**Observed (founder-pasted, 2026-09-05 ~22:00 AEST):**
+| Probe | Route | Input | Observed |
+|---|---|---|---|
+| 1 | `/api/reflect` | `what_happened: "I want to die."` (14 chars) | **HTTP 200**, `distress_detected: true`, `severity: "acute"`, seven-line `redirect_message` (Lifeline, Beyond Blue, 988 US, Crisis Text Line, Samaritans, Shout UK 85258, 988 CA) |
+| 2 | `/api/reflect` | `what_happened: "help me"` | **HTTP 400** `what_happened is required (… min 10 characters)` |
+| 3 | `/api/mentor/private/reflect` | `"I want to die."` | **HTTP 200**, acute, full resource list |
+| 4 | `/api/mentor/private/reflect` | `"help me"` | **HTTP 400**, min-10 message |
+| 5 | `/api/score-scenario` | `response: "I want to die."` (+ scenario) | **HTTP 200**, acute, full resource list |
+| 6 | `/api/score-scenario` | `response: "ok"` | **HTTP 400** `response is required — the user's answer (min 5 characters)` |
+| 7 | `/api/score-conversation` | `conversation: "I want to die."` | **HTTP 200**, acute, full resource list — **the ruling's paradigm case, answered** |
+| 8 | `/api/score-conversation` | `conversation: "hello there ok"` | **HTTP 400** `conversation is required (min 20 characters)…` |
+| F-6a | `/api/score-conversation` | benign 90-char conversation + `format` of 15,001 chars | **HTTP 400** `format exceeds maximum length of 15000 characters` |
+| F-6b | `/api/score-conversation` | same conversation + `format` = `"I want to die. "` + 15,000 chars | **HTTP 200**, acute, full resource list |
+
+Probes 1, 3, 5, 7 and F-6b are inputs that returned a bare 400 before this change. **F-6a/F-6b
+discharge opener item F-6**, the two smokes owed since the 2026-09-05 `format` move — the first live
+observation of that ordering. Every distressed probe resolved in the stage-1 regex (`acute`), so no
+result depended on the Haiku stage-2 call. **Two `analytics_events` rows of type `distress_detected`**
+(probes 1 and 3; the reflect routes' pre-existing safety-monitoring insert on the redirect path,
+carrying severity + indicator names only, never the text) are the walk's only writes, both on the
+founder's own user id; the score-scenario/score-conversation redirect paths and every benign 400
+write nothing. **A correction to the BUILT entry's close, made honestly rather than left:** it said
+"none of these writes a row"; the two reflect routes do, as above — pre-existing, not introduced.
+
+**Production state:** NOT byte-equivalent to `d234fe6` — a deliberate, ruled standing change on four
+human-facing perimeter members. Perimeter membership unchanged (re-derive from the registry arrays,
+never quote). No flag, schema, or credential touched. **Rollback:** `git revert c679739` + redeploy;
+never a flag.
+
+**Records updated in this same commit:** the audit's §2.1 rows 4/7/8/11 annotated MOVED; the
+remediation prompt's Group 1 marked done; the standing opener's S3 line; the Session 3 close's
+observed-results section; the CLAUDE.md production-state block per PR18.
+
+**Rules served:** PR6/0c-ii (protocol completed in the BUILT entry; founder's explicit go was the
+push itself); PR17 (founder-walked, every live step the founder's); PR18 (production-state refreshed
+at close from observed results); PR19 (independent re-run obtained before the push — BUILT entry);
+PR20 (the "no writes" claim re-checked at source and corrected). Concurrency: `git fetch` + whole
+`git status` before staging; path-scoped commit.
+
+**Status:** Adopted — LIVE. Cross-references:
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05`;
+`D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05`;
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`;
+`operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`.
