@@ -35211,3 +35211,119 @@ grounding prompt or the CLAUDE.md item-E block — stated so it can be corrected
 `D-PROVENANCE-LEDGER-C2-OBSERVATION-INPUT-UNREACHABLE-FOUND-2026-08-30` (the D1 pointer's source);
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06` (S1's authority);
 `operations/handoffs/founder/2026-09-05-grounding-and-session-plan-CLOSE.md`.
+
+## 2026-09-05 — D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05
+
+**Decision:** The perimeter-wide execution-order audit the binding ruling required
+(`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`, authored 2026-09-05 AEST) is
+**COMPLETE** and recorded at
+`operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-AUDIT.md`, with its
+mechanical check `2026-09-05-r20a-ordering-sweep.js` (rev 2) and `…-sweep-OUTPUT.txt` beside it.
+**`governance` — documents and reads only. Changes no route.** No migration, flag, credential,
+live operation, deploy, or spend; `git diff -- website/` empty; AC7 not engaged; PR6 not engaged.
+Session model `claude-fable-5-1`, effort max. The session ran across two context windows on
+2026-09-05: the first authored the audit body (§0–§7) and hit its limit; the second ran the review,
+folded it, and recorded. Session 1 of the 2026-09-05 plan (standing opener, Version 2026-09-05).
+
+**Counts — derived, never quoted forward (commands in the audit §1.1; re-derive at every use):**
+43 route-level + 2 substrate-gate = 45 members (30 flag-gated / 13 unconditional; 31 flag-pair
+entries). By control-flow trace of every write handler from first statement through the check to
+the redirect return: **16 route-level members NON-CONFORMANT** — a length guard can return 400
+before the distress check on a human session — carrying **39 guard sites, 9 of them
+MINIMUM-length on 7 routes** (a short genuine cry for help is refused unread); **27 conformant**;
+the boundary between the two is a date — every non-conformant check landed on or before
+2026-08-03, every conformant one on or after 2026-08-12 (`/impulse` was the first to place the
+check deliberately before validation). Every route-level member authenticates a human session and
+renders the human crisis form; `/api/reason` and `/api/execute` are dual-audience (human path
+bound by the ruling; agent path purpose (a) only). Both `/api/skill/*` members are human-facing
+despite the directory. **Substrate-gate disposition:** `/api/calling` and `/api/practice/reflect`
+are agent-facing (write-class credential; `agent_developer` at the builder call sites) — **the
+ruling does not reach them**, and no length guard exists on either in any case.
+
+**The non-conformant set (audit §2.1, provenance [GIT] on every guard):** score, score-decision,
+score-document, score-scenario, score-social, reason (human path), reflect, mentor/private/reflect,
+mentor/journal-feed, journal, score-conversation (its three remaining pre-block guards; the moved
+`format` guard re-verified after the block), mentor/stoa (POST + PATCH, via `parseDeclaration`),
+mentor/stoa/draft-reflect (via `parseDraft`), founder/hub/ring-proof, mentor/ring/proof,
+support/agent/proof. The March security pass `aeadbd1` → the April check `4ce5893` on eight of
+them; same-commit on the Stoa pair and the three proofs. **Inherited, not chosen — reported as
+accretion, not as anyone's error, per the ruling's own framing.**
+
+**Review record (PR19 by analogy — three parallel, blind, read-only reviewers, each briefed to
+break: claims-vs-source; method soundness; known-case non-vacuity with mutation): 0 HIGH.**
+Claims-vs-source verified every cell of the 16 non-conformant rows, both substrate rows, 19
+further rows by bulk grep, and 18 cited commits; 1 MEDIUM (the §1.5 form inventory overstated its
+own completeness) + 6 LOW, all folded. Method soundness: 4 MEDIUM folded — my own first fold's
+"27" `validateTextLength` sites (it is 25; 25+2+9+3 = 39 with no subtraction); the P-class
+rationale (a presence check on a *different* field DOES refuse screened text unread — moved to
+§4.4's open question); `validateLoopId` (an imported 200-char id cap on `/api/reason`, class O)
+omitted from the followed list; "no `middleware.ts`" while Next 16's `proxy.ts` exists (it passes
+`/api/` through — the conclusion held, the check was mis-aimed). Non-vacuity: 3 MEDIUM found in
+the rev-1 sweep and **fixed at the root** — a check name inside a string literal counted as a
+call; helper following was name-gated; the check→redirect window was unscanned. Rev 2 blanks
+string contents, follows every same-file helper, prints imported calls, and scans the window (54
+handlers, 0 bounds); its 55 raw hits reconcile to 39 line-by-line; it was **mutation-verified on a
+scratch copy** against all four demonstrated defects (string decoy, block-comment decoy,
+unmatched-name helper, guard-between-check-and-redirect), the real tree untouched. **The headline
+figures did not move under any review.** Every fold is marked *(corrected at review)* where it sits.
+
+**Named, not decided:** whether the ruling's principle extends to non-length pre-check rejections
+(malformed JSON; founder 403s; enum/id 400s; presence checks on a field other than the screened
+one) — a mentor question (audit §4.4). The screening-truncation residual on conformant members
+(§4.3) — Session 3's design constraint. One error in the code's own comment (score-conversation
+`route.ts:265–268` says the `conversation` minimum shares `aeadbd1`; git says `496d832`,
+2026-03-23) — for Session 3 to correct when it moves the guard.
+
+**Files touched:** the audit + sweep (rev 2) + output (NEW, `operations/count-discipline-2026-09/`);
+`operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-REMEDIATION-NEXT-SESSION-PROMPT.md`
+(NEW — Session 3, `code-critical`, founder-walked, PR19 required, F-6's smokes ride it);
+`…/2026-09-05-r20a-perimeter-ordering-audit-CLOSE.md` (NEW); the standing opener's S1 queue line
+(one line); this entry.
+
+**Risk classification:** Standard under 0d-ii (`governance`). AC7 not engaged. PR6 not engaged.
+Weights **BLOCKED**; the Q1 hard constraint untouched; the P0 0h hold stands; nothing bears on the
+0h call.
+
+**Rollback path:** `git revert` this session's single path-scoped commit — documents only; nothing
+live is touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git log --oneline -3
+grep -c "non-conformant\|NON-CONFORMANT" operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-AUDIT.md
+node operations/count-discipline-2026-09/2026-09-05-r20a-ordering-sweep.js website | diff - operations/count-discipline-2026-09/2026-09-05-r20a-ordering-sweep-OUTPUT.txt && echo IDENTICAL
+git diff --stat HEAD~1 -- website/
+```
+Expected: the audit commit at the top; a non-zero count; `IDENTICAL`; **no output** from the last
+line.
+
+**Open questions:** §4.4 (above) for the mentor; the founder's election of Session 3's scope at
+its open (Group 1 + F-6 is one sitting). **Not decided by this session:** any remediation; the
+S11 flip; the window; Option S; the 0h call.
+
+**Rules served:** PR19 (by analogy — run, three-dimensional, folded at the root; a review found
+what the author missed, again), PR20 (every present-tense mechanism fact re-read at source this
+session; flag values marked [RECORDED]), PR21 (the reflect-harvest is in the close), PR22
+(trailers), PR23 (the four named memories consulted; `guard-scope-must-cover-the-class` applied to
+the sweep rewrite — mutation-verified at the boundary chosen), PR25 (no code comment shipped).
+Concurrency: `ListAgents` at open (eight peers, none interactive on this checkout); `git status`
+whole at open and before staging; the commit path-scoped; this entry at the physical tail.
+
+**Session honesty note.** The at-action guard cautioned on three Bash commands (the sweep re-runs
+and the mutation harness — "no kathekon factors extracted", the known false-positive class on
+build acts) and one examination timed out at 55,000 ms (an outage, not a deny; proceeded
+deliberately). Every elicitation was answered genuinely; on each the resolution preceded the
+examination, which is recorded rather than smoothed. One process error: the first context window's
+successor ended a turn to wait for background reviewers, which the harness read as a close and
+fired the reflect turn mid-session; the reflection given there stands and is harvested in the
+close. A judgement call disclosed: the review's method findings were fixed in the sweep script
+(an operations artifact) rather than only annotated — the script is not a route and the tree under
+`website/` was never modified; the founder can revert the rewrite independently by restoring rev 1
+from this commit's parent if the change is unwanted.
+
+**Status:** Adopted. Cross-references: `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`
+(authority); `D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06` and
+`D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06` (the known case and the
+FV-6 pin shape); `D-STANDING-OPENER-2026-09-05-UPDATE-SESSION-PLAN-AND-RECORDS-HYGIENE` (the plan
+this executes); `operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-audit-CLOSE.md`.

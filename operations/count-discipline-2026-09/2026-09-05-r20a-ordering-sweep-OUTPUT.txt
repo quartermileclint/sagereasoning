@@ -1,0 +1,314 @@
+MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test.ts): route-level=43 substrate-gate=2 flag-pair-entries=31 flag-gated-routes=30 unconditional=13
+### src/app/api/score/route.ts
+  POST @L128 -> enforceDistressCheck @L154; direct pre-check bound lines: 3
+      L141 [length-eq+presence-zero]: if (!action || action.trim().length === 0) {
+      L146 [validateTextLength+TEXT_LIMITS]: const actionErr = validateTextLength(action, '      ', TEXT_LIMITS.short)
+      L148 [validateTextLength+TEXT_LIMITS]: const contextErr = validateTextLength(context, '       ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L154–L157: 0 bound line(s)
+### src/app/api/score-decision/route.ts
+  POST @L87 -> enforceDistressCheck @L110; direct pre-check bound lines: 3
+      L98 [length-eq+presence-zero]: if (!decision || typeof decision !== '      ' || decision.trim().length === 0) {
+      L102 [validateTextLength+TEXT_LIMITS]: const decisionErr = validateTextLength(decision, '        ', TEXT_LIMITS.short)
+      L104 [validateTextLength+TEXT_LIMITS]: const contextErr = validateTextLength(context, '       ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L110–L113: 0 bound line(s)
+### src/app/api/score-document/route.ts
+  POST @L90 -> enforceDistressCheck @L114; direct pre-check bound lines: 2
+      L102 [length-eq+presence-zero]: if (!text || typeof text !== '      ' || text.trim().length === 0) {
+      L106 [validateTextLength+TEXT_LIMITS]: const textValidationError = validateTextLength(text, '    ', TEXT_LIMITS.document)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L114–L117: 0 bound line(s)
+### src/app/api/score-scenario/route.ts
+  POST @L283 -> enforceDistressCheck @L321; direct pre-check bound lines: 3
+      L300 [length-cmp]: if (!response || typeof response !== '      ' || response.trim().length < 5) {
+      L308 [validateTextLength+TEXT_LIMITS]: const scenarioErr = validateTextLength(scenario, '        ', TEXT_LIMITS.medium)
+      L313 [validateTextLength+TEXT_LIMITS]: const responseErr = validateTextLength(response, '        ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L321–L324: 0 bound line(s)
+### src/app/api/score-social/route.ts
+  POST @L94 -> enforceDistressCheck @L118; direct pre-check bound lines: 2
+      L103 [length-eq+presence-zero]: if (!text || typeof text !== '      ' || text.trim().length === 0) {
+      L110 [validateTextLength+TEXT_LIMITS]: const textErr = validateTextLength(text, '    ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L118–L121: 0 bound line(s)
+### src/app/api/reason/route.ts
+  POST @L674 -> enforceDistressCheck @L1148; direct pre-check bound lines: 6
+      L1028 [length-eq+presence-zero]: if (!input || typeof input !== '      ' || input.trim().length === 0) {
+      L1038 [validateTextLength+TEXT_LIMITS]: const inputErr = validateTextLength(input, '     ', TEXT_LIMITS.medium)
+      L1040 [validateTextLength+TEXT_LIMITS]: const contextErr = validateTextLength(context, '       ', TEXT_LIMITS.medium)
+      L1042 [validateTextLength+TEXT_LIMITS]: const domainErr = validateTextLength(domain_context, '              ', TEXT_LIMITS.medium)
+      L1064 [validateTextLength]: const clarificationErr = validateTextLength(
+      L1067 [TEXT_LIMITS]: TEXT_LIMITS.medium,
+      checkPluginAuth@L720 (same-file helper, body followed: 3 bound line(s))
+      via checkPluginAuth(): L413 [length-eq+presence-zero]: if (!headerValue || typeof headerValue !== '      ' || headerValue.length === 0) {
+      via checkPluginAuth(): L428 [length-eq+presence-zero]: if (!secret || typeof secret !== '      ' || secret.length === 0) {
+      via checkPluginAuth(): L447 [length-eq]: if (headerBuf.length !== secretBuf.length) {
+      validatePluginRequest@L886 (same-file helper, body followed: 0 bound line(s))
+      validateSuppliedLayer1Schema@L936 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateApiKey, extractPluginInstallToken, validatePluginInstallToken, corsHeaders, extractLoopId, generateLoopId, createLoopAccumulator, finalizeLoopResponse, l1SupplyRefused, isUpcCapabilityAuthEnabled, isOrientationReadingEnabled, validateTextLength, isTier1ContinuationEnabled, isSessionDeclineSignalEnabled, isLoopIdFieldEnabled, validateLoopId, composeContinuationDistressText
+      check→redirect window L1148–L1165: 0 bound line(s)
+### src/app/api/reflect/route.ts
+  POST @L69 -> enforceDistressCheck @L108; direct pre-check bound lines: 3
+      L84 [validateTextLength+TEXT_LIMITS]: const textLengthError = validateTextLength(what_happened, '             ', TEXT_LIMITS.medium)
+      L90 [validateTextLength+TEXT_LIMITS]: const responseError = validateTextLength(how_i_responded, '               ', TEXT_LIMITS.medium)
+      L96 [length-cmp]: if (!what_happened || typeof what_happened !== '      ' || what_happened.trim().length < 10) {
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L108–L126: 0 bound line(s)
+### src/app/api/mentor/private/reflect/route.ts
+  POST @L139 -> enforceDistressCheck @L223; direct pre-check bound lines: 3
+      L162 [validateTextLength+TEXT_LIMITS]: const textLengthError = validateTextLength(what_happened, '             ', TEXT_LIMITS.medium)
+      L168 [validateTextLength+TEXT_LIMITS]: const responseError = validateTextLength(how_i_responded, '               ', TEXT_LIMITS.medium)
+      L174 [length-cmp]: if (!what_happened || typeof what_happened !== '      ' || what_happened.trim().length < 10) {
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L223–L244: 0 bound line(s)
+### src/app/api/mentor/journal-feed/route.ts
+  POST @L34 -> enforceDistressCheck @L87; direct pre-check bound lines: 3
+      L55 [validateTextLength+TEXT_LIMITS]: const impressionErr = validateTextLength(impression, '          ', TEXT_LIMITS.medium)
+      L58 [validateTextLength+TEXT_LIMITS]: const assentErr = validateTextLength(assent, '      ', TEXT_LIMITS.medium)
+      L61 [validateTextLength+TEXT_LIMITS]: const actionErr = validateTextLength(action, '      ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L87–L91: 0 bound line(s)
+### src/app/api/journal/route.ts
+  POST @L22 -> enforceDistressCheck @L54; direct pre-check bound lines: 1
+      L43 [validateTextLength+TEXT_LIMITS]: const textErr = validateTextLength(reflection_text, '               ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
+      check→redirect window L54–L58: 0 bound line(s)
+### src/app/api/score-conversation/route.ts
+  POST @L100 -> enforceDistressCheck @L184; direct pre-check bound lines: 3
+      L111 [TEXT_LIMITS+length-cmp]: if (conversation && typeof conversation === '      ' && conversation.length > TEXT_LIMITS.long) {
+      L117 [TEXT_LIMITS+length-cmp]: if (context && typeof context === '      ' && context.length > TEXT_LIMITS.long) {
+      L129 [length-cmp]: if (!conversation || typeof conversation !== '      ' || conversation.trim().length < 20) {
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isScoreConversationR20aEnabled, composeConversationDistressSubject
+      check→redirect window L184–L191: 0 bound line(s)
+### src/app/api/mentor/stoa/route.ts
+  POST @L336 -> runStoaDistressGate @L356; direct pre-check bound lines: 0
+      stoaClosed@L337 (same-file helper, body followed: 0 bound line(s))
+      readJsonBody@L345 (same-file helper, body followed: 0 bound line(s))
+      parseDeclaration@L349 (same-file helper, body followed: 3 bound line(s))
+      via parseDeclaration(): L150 [length-cmp+local-const]: } else if (v.length > FIELD_MAX) {
+      via parseDeclaration(): L171 [length-cmp+local-const]: if (body.tags.length > TAGS_MAX_COUNT) {
+      via parseDeclaration(): L176 [length-cmp+local-const]: if (t.trim().length > TAG_MAX) {
+      mergedDeclarationForGate@L355 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): isStoaEnabled, checkRateLimit, requireAuth
+      check→redirect window L356–L357: 0 bound line(s)
+  PATCH @L387 -> runStoaDistressGate @L408; direct pre-check bound lines: 0
+      stoaClosed@L388 (same-file helper, body followed: 0 bound line(s))
+      readJsonBody@L396 (same-file helper, body followed: 0 bound line(s))
+      parseDeclaration@L400 (same-file helper, body followed: 3 bound line(s))
+      via parseDeclaration(): L150 [length-cmp+local-const]: } else if (v.length > FIELD_MAX) {
+      via parseDeclaration(): L171 [length-cmp+local-const]: if (body.tags.length > TAGS_MAX_COUNT) {
+      via parseDeclaration(): L176 [length-cmp+local-const]: if (t.trim().length > TAG_MAX) {
+      mergedDeclarationForGate@L407 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): isStoaEnabled, checkRateLimit, requireAuth
+      check→redirect window L408–L409: 0 bound line(s)
+  DELETE @L438: no check in handler
+### src/app/api/mentor/stoa/draft-reflect/route.ts
+  POST @L124 -> enforceDistressCheck @L155; direct pre-check bound lines: 1
+      L154 [length-cmp]: if (subject.length > 0) {
+      stoaClosed@L127 (same-file helper, body followed: 0 bound line(s))
+      parseDraft@L145 (same-file helper, body followed: 1 bound line(s))
+      via parseDraft(): L114 [validateTextLength+TEXT_LIMITS]: const err = validateTextLength(v, labels[key], TEXT_LIMITS.short)
+      imported calls pre-check (follow by hand): isStoaEnabled, isStoaDraftReflectEnabled, checkRateLimit, requireAuth, composeStoaDistressSubject
+      check→redirect window L155–L162: 0 bound line(s)
+### src/app/api/mentor/impulse/route.ts
+  POST @L399 -> enforceDistressCheck @L447; direct pre-check bound lines: 0
+      readJsonBody@L407 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isImpulseR20aEnabled, composeImpulseDistressSubject
+      check→redirect window L447–L454: 0 bound line(s)
+  PATCH @L524 -> enforceDistressCheck @L554; direct pre-check bound lines: 0
+      readJsonBody@L532 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isImpulseR20aEnabled, composeImpulseDistressSubject
+      check→redirect window L554–L561: 0 bound line(s)
+### src/app/api/mentor/passion-classify/route.ts
+  POST @L38 -> enforceDistressCheck @L66; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L66–L69: 0 bound line(s)
+### src/app/api/mentor/passion-log/route.ts
+  POST @L44 -> enforceDistressCheck @L73; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L73–L76: 0 bound line(s)
+### src/app/api/skill/sage-classify/route.ts
+  POST @L58 -> enforceDistressCheck @L97; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L97–L100: 0 bound line(s)
+### src/app/api/skill/sage-prioritise/route.ts
+  POST @L67 -> enforceDistressCheck @L106; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, collectPrioritiseItemText, hasScreenableSubject
+      check→redirect window L106–L109: 0 bound line(s)
+### src/app/api/mentor-baseline-response/route.ts
+  POST @L102 -> enforceDistressCheck @L133; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, collectBaselineAnswerText, hasScreenableSubject
+      check→redirect window L133–L137: 0 bound line(s)
+### src/app/api/mentor/private/baseline-response/route.ts
+  POST @L104 -> enforceDistressCheck @L143; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, collectBaselineAnswerText, hasScreenableSubject
+      check→redirect window L143–L147: 0 bound line(s)
+### src/app/api/mentor/gap4/route.ts
+  POST @L99 -> enforceDistressCheck @L141; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L141–L145: 0 bound line(s)
+  PATCH @L418: no check in handler
+### src/app/api/mentor/private/founder-facts/route.ts
+  POST @L123 -> enforceDistressCheck @L155; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): requireAuth, corsHeaders, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L155–L159: 0 bound line(s)
+  PUT @L32 -> enforceDistressCheck @L66; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): requireAuth, corsHeaders, isR20aGapClosureEnabled, composeDistressSubject, collectFounderFactsPutText, hasScreenableSubject
+      check→redirect window L66–L70: 0 bound line(s)
+### src/app/api/mentor/premeditatio/route.ts
+  POST @L195 -> enforceDistressCheck @L217; direct pre-check bound lines: 0
+      premeditatioDistressSubject@L211 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L217–L220: 0 bound line(s)
+  PATCH @L285 -> enforceDistressCheck @L320; direct pre-check bound lines: 0
+      premeditatioDistressSubject@L315 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L320–L323: 0 bound line(s)
+### src/app/api/mentor/hupexairesis/route.ts
+  POST @L99 -> enforceDistressCheck @L121; direct pre-check bound lines: 0
+      reserveDistressSubject@L115 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L121–L124: 0 bound line(s)
+  PATCH @L186 -> enforceDistressCheck @L208; direct pre-check bound lines: 0
+      reserveDistressSubject@L202 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L208–L211: 0 bound line(s)
+### src/app/api/mentor/oikeiosis/route.ts
+  POST @L33 -> enforceDistressCheck @L56; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L56–L59: 0 bound line(s)
+### src/app/api/mentor/oikeiosis/extension/route.ts
+  POST @L220 -> enforceDistressCheck @L245; direct pre-check bound lines: 0
+      readJsonBody@L228 (same-file helper, body followed: 0 bound line(s))
+      extensionDistressSubject@L239 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L245–L248: 0 bound line(s)
+  PATCH @L303 -> enforceDistressCheck @L323; direct pre-check bound lines: 0
+      readJsonBody@L311 (same-file helper, body followed: 0 bound line(s))
+      extensionDistressSubject@L317 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L323–L326: 0 bound line(s)
+### src/app/api/mentor/view-from-above/route.ts
+  POST @L151 -> enforceDistressCheck @L179; direct pre-check bound lines: 0
+      viewDistressSubject@L173 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L179–L182: 0 bound line(s)
+  PATCH @L248 -> enforceDistressCheck @L273; direct pre-check bound lines: 0
+      viewDistressSubject@L267 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L273–L276: 0 bound line(s)
+### src/app/api/mentor/morning/route.ts
+  POST @L129 -> enforceDistressCheck @L151; direct pre-check bound lines: 0
+      morningDistressSubject@L145 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L151–L154: 0 bound line(s)
+  PATCH @L215 -> enforceDistressCheck @L237; direct pre-check bound lines: 0
+      morningDistressSubject@L231 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L237–L240: 0 bound line(s)
+### src/app/api/mentor/sage-compass/route.ts
+  POST @L232 -> enforceDistressCheck @L254; direct pre-check bound lines: 0
+      readJsonBody@L240 (same-file helper, body followed: 0 bound line(s))
+      compassDistressSubject@L248 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L254–L257: 0 bound line(s)
+  PATCH @L336 -> enforceDistressCheck @L358; direct pre-check bound lines: 0
+      readJsonBody@L344 (same-file helper, body followed: 0 bound line(s))
+      compassDistressSubject@L352 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, hasScreenableSubject
+      check→redirect window L358–L361: 0 bound line(s)
+### src/app/api/evaluate/route.ts
+  POST @L96 -> enforceDistressCheck @L160; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L160–L163: 0 bound line(s)
+### src/app/api/mentor-journal-week/route.ts
+  POST @L83 -> enforceDistressCheck @L106; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L106–L110: 0 bound line(s)
+### src/app/api/mentor/private/journal-week/route.ts
+  POST @L70 -> enforceDistressCheck @L100; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L100–L104: 0 bound line(s)
+### src/app/api/mentor-baseline/route.ts
+  POST @L74 -> enforceDistressCheck @L97; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L97–L101: 0 bound line(s)
+### src/app/api/mentor/private/baseline/route.ts
+  POST @L70 -> enforceDistressCheck @L100; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L100–L104: 0 bound line(s)
+### src/app/api/mentor-appendix/route.ts
+  POST @L64 -> enforceDistressCheck @L113; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, isServerEncryptionConfigured, isR20aGapClosureEnabled, composeDistressSubject, collectAppendixAnswerText, hasScreenableSubject
+      check→redirect window L113–L117: 0 bound line(s)
+### src/app/api/mentor-profile/route.ts
+  POST @L142 -> enforceDistressCheck @L184; direct pre-check bound lines: 0
+      imported calls pre-check (follow by hand): requireAuth, corsHeaders, isServerEncryptionConfigured, isR20aGapClosureEnabled, composeDistressSubject, collectMentorProfileText, hasScreenableSubject
+      check→redirect window L184–L188: 0 bound line(s)
+### src/app/api/compose/route.ts
+  POST @L72 -> enforceDistressCheck @L92; direct pre-check bound lines: 0
+      collectStepText@L86 (same-file helper, body followed: 1 bound line(s))
+      via collectStepText(): L40 [length-cmp]: if (depth > 4 || acc.length >= 20) return acc
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L92–L95: 0 bound line(s)
+### src/app/api/execute/route.ts
+  POST @L59 -> enforceDistressCheck @L123; direct pre-check bound lines: 0
+      collectExecuteText@L117 (same-file helper, body followed: 1 bound line(s))
+      via collectExecuteText(): L26 [length-cmp]: if (depth > 4 || acc.length >= 20) return acc
+      imported calls pre-check (follow by hand): checkRateLimit, createClient, validateApiKey, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L123–L126: 0 bound line(s)
+### src/app/api/founder/hub/route.ts
+  POST @L1217 -> enforceDistressCheck @L1260; direct pre-check bound lines: 1
+      L1255 [TEXT_LIMITS]: const subject = composeDistressSubject([message], TEXT_LIMITS.long)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
+      check→redirect window L1260–L1264: 0 bound line(s)
+### src/app/api/founder/hub/ring-proof/route.ts
+  POST @L124 -> enforceDistressCheck @L168; direct pre-check bound lines: 2
+      L153 [length-cmp]: if (typeof messageInput !== '      ' || messageInput.trim().length < 5) {
+      L160 [validateTextLength+TEXT_LIMITS]: const lengthErr = validateTextLength(messageInput, '       ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
+      check→redirect window L168–L186: 0 bound line(s)
+### src/app/api/mentor/ring/proof/route.ts
+  POST @L94 -> enforceDistressCheck @L205; direct pre-check bound lines: 2
+      L118 [length-cmp]: if (!taskDescription || typeof taskDescription !== '      ' || taskDescription.trim().length < 5) {
+      L125 [validateTextLength+TEXT_LIMITS]: const lengthError = validateTextLength(taskDescription, '                ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
+      check→redirect window L205–L223: 0 bound line(s)
+### src/app/api/support/agent/proof/route.ts
+  POST @L114 -> enforceDistressCheck @L179; direct pre-check bound lines: 5
+      L141 [length-cmp]: if (typeof subject !== '      ' || subject.trim().length < 3) {
+      L147 [length-cmp]: if (typeof customer !== '      ' || customer.trim().length < 2) {
+      L153 [length-cmp]: if (typeof message !== '      ' || message.trim().length < 5) {
+      L172 [validateTextLength+TEXT_LIMITS]: const subjectErr = validateTextLength(subject, '       ', TEXT_LIMITS.short)
+      L174 [validateTextLength+TEXT_LIMITS]: const messageErr = validateTextLength(message, '       ', TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
+      check→redirect window L179–L196: 0 bound line(s)
+### src/app/api/score/save/route.ts
+  POST @L276 -> enforceDistressCheck @L318; direct pre-check bound lines: 0
+      scoreSaveDistressSubject@L302 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isScoreSaveR20aEnabled, hasScreenableSubject
+      check→redirect window L318–L344: 0 bound line(s)
+### src/app/api/calling/route.ts
+  POST @L306 -> enforceLayer2R20aGate @L462; direct pre-check bound lines: 0
+      verifyCallingToken@L331 (same-file helper, body followed: 0 bound line(s))
+      fetchAndVerifyAgentCard@L344 (same-file helper, body followed: 0 bound line(s))
+      meterStageCall@L365 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, buildCallingFlagDisabledResponse, buildCallingBadRequestResponse, parseCallingBody, buildCallingUnauthorizedResponse, extractLoopId, generateLoopId, getSession, buildCallingServerErrorResponse, createSession, coldOpen, buildQuestionResponse, buildTerminalStatusResponse, holdingPatternState, buildTimedOutResponse, buildHoldingResponse, holdingPatternQuestion, currentStep, buildCallingConflictResponse, buildCallingNotFoundResponse, isCallingR20aEnabled
+      check→redirect window: NO REDIRECT MARKER FOUND in handler — scanned to handler end: 0 bound line(s)
+  PATCH @L591: no check in handler
+  PUT @L585: no check in handler
+  DELETE @L588: no check in handler
+### src/app/api/practice/reflect/route.ts
+  POST @L278 -> enforceLayer2R20aGate @L413; direct pre-check bound lines: 0
+      verifyReflectToken@L300 (same-file helper, body followed: 0 bound line(s))
+      makeMeter@L305 (same-file helper, body followed: 0 bound line(s))
+      respond@L321 (same-file helper, body followed: 0 bound line(s))
+      imported calls pre-check (follow by hand): checkRateLimit, buildReflectFlagDisabledResponse, buildReflectBadRequestResponse, parseReflectBody, buildReflectUnauthorizedResponse, extractLoopId, generateLoopId, getSession, buildReflectServerErrorResponse, openReflection, peekReflection, buildReflectNotFoundResponse, buildReflectConflictResponse, checkZone3Boundary, buildZone3Response, isReflectR20aEnabled
+      check→redirect window: NO REDIRECT MARKER FOUND in handler — scanned to handler end: 0 bound line(s)
+  PATCH @L528: no check in handler
+  PUT @L522: no check in handler
+  DELETE @L525: no check in handler
+
+SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=43 via-same-file-helper=12 raw-total=55 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
+KNOWN-CASE score-conversation: R20a flag block L182-L202; format guard L302 (occurrences: 1); format guard AFTER block end: true (a single boolean on the brace-matched END anchor — it does not distinguish 'before the block' from 'inside it'; the per-handler counts above do)

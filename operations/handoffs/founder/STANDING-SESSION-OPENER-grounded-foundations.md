@@ -374,7 +374,7 @@ work is batched so one sitting discharges many gates; every session is sized to 
 
 ### B. Sessions, in priority order
 
-1. **S1 — The R20a perimeter-ordering AUDIT.** `governance`, **autonomous**, ruled. Classify every
+1. **S1 — The R20a perimeter-ordering AUDIT. RUN 2026-09-05 — see `2026-09-05-r20a-perimeter-ordering-audit-CLOSE.md` (16 non-conformant / 27 conformant / 2 not reached; S3 unblocked, prompt authored).** `governance`, **autonomous**, ruled. Classify every
    route-level member on two axes (realistic caller; rendered form at the actual
    `renderR20aRedirectResponse` call site) and record each human-facing member's **execution order**
    by control-flow tracing — never textual position; establish the real set of bounding forms from
