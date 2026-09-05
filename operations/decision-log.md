@@ -35711,3 +35711,10 @@ updated), PR21 (elicitations answered genuinely throughout). Concurrency: `ListA
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06` (the ruling Part 5 extends);
 `D-OPTION-S-PR19-FOUR-PRE-RUN-BLOCKERS-DO-NOT-RUN-2026-09-05` (B1 now moot);
 `D-ROUTE-I-WHAT-IS-L1-SUPPLY-FOR-SCOPED-2026-09-03`.
+
+> **Correction to the entry above, 2026-09-05 23:20 AEST (same session):** its "Records updated in this
+> commit" sentence claimed the standing opener was updated in `260f467`. It was not — the update
+> script asserted on a stale anchor and stopped before writing, and the entry was appended without
+> re-checking `git status`. The opener is updated in the commit carrying this correction (F-2/F-3
+> ruled, F-11 partly with Q4 owed, S6 unblocked on B1, S7 elected, S9 and S10 added, S3 Group 2b).
+> Everything else the sentence lists was in `260f467` as stated. Left visible rather than rewritten.

@@ -360,8 +360,8 @@ work is batched so one sitting discharges many gates; every session is sized to 
 | # | Action | Unblocks |
 |---|---|---|
 | F-1 | **Push `099b218`** (and this session's records commit) via GitHub Desktop | the record's visibility to peers; nothing deploys |
-| F-2 | **Relay the Option S decomposition question** (`count-discipline-2026-09/2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`) | S6 (Option S pre-run fixes) → Path A → the M/W/S election |
-| F-3 | **Relay the route (i) question** (`agent-circles-2026-08/2026-09-03-MENTOR-QUESTION-route-i-what-is-l1-supply-for.md`) | S7 (item 2b, `l1_supply` out of the ecosystem preset) or route (i) |
+| F-2 | ~~Relay the Option S decomposition question~~ **RULED 2026-09-05 — the decomposition is REMOVED; B1 moot; correct `option-s-runner.py:45` before any spend** (`count-discipline-2026-09/2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`) | S6 (Option S pre-run fixes) → Path A → the M/W/S election |
+| F-3 | ~~Relay the route (i) question~~ **RULED 2026-09-05 — elect 2b now; route (i) NOT built; flag-and-proceed if ever** (`agent-circles-2026-08/2026-09-03-MENTOR-QUESTION-route-i-what-is-l1-supply-for.md`) | S7 (item 2b, `l1_supply` out of the ecosystem preset) or route (i) |
 | F-4 | **Sign the R18 assessment-contract package** (`count-discipline-2026-09/2026-09-05-R18-assessment-contract-SIGNOFF-PACKAGE.md`) — or say what to change | S2 |
 | F-5 | **Run the one `environmental_context` query** in `operations/2026-09-06-environmental-scan-staleness-SCOPE.md` and say whether the two call sites are deliberate P7 scaffolding | the item's disposition (S8 or a route session) |
 | F-6 | **The two `/api/score-conversation` smokes** (oversized `format` → 400 on a benign conversation; oversized distressed `format` → the crisis redirect) — Bearer JWT; can ride S3 | closes the last unobserved live property of the guard work |
@@ -369,7 +369,7 @@ work is batched so one sitting discharges many gates; every session is sized to 
 | F-8 | **Decide the concurrency escalation** after the first collision (pre-commit hook / PR26 / leave as convention) | the standing cache's §6 |
 | F-9 | **TEST parity, one sitting:** the ATRF-EE Step-0 read-only determination on TEST; TEST's `project_context` row (v1.4.0 parity) | removes two "undetermined" carries |
 | F-10 | **Path A's production extraction** (`option-s/EXTRACTION.sql` §PRE/§2/§3) — only after F-2's ruling; if it returns 24, the ruling's "20 winners" gets a correction note | S6's run |
-| F-11 | **Relay the mentor-continuity question** after reading the contamination-window verbatim | the founder-hub `MENTOR_HISTORY_WINDOW` decision |
+| F-11 | ~~Relay the mentor-continuity question~~ **RULED 2026-09-05 on shape (session-bounded context channel; tell the mentor what it cannot see). STILL OWED, the founder's alone: Q4 — read rows 1001–1011, decide whether the 08-31 corrected ruling stands, recover any uncaptured ruling** | the founder-hub `MENTOR_HISTORY_WINDOW` decision |
 | F-12 | **Relay the mentor's reception of R9/R10** at your cadence; elect from R9 §16 if you wish | the standing-runner track |
 
 ### B. Sessions, in priority order
@@ -414,7 +414,7 @@ work is batched so one sitting discharges many gates; every session is sized to 
    its relation to M-1's ruled destination (phronesis/sophrosyne); PR20 mechanism facts; put to the
    mentor. Mirrors the P1 scope-for-ruling shape.
 6. **S6 — Option S pre-run fixes, then the run.** `code-elevated` + PR19 for the fixes; the run is
-   founder-elected spend. After F-2's ruling: B2 (the floor set must include `habitual` — the live
+   founder-elected spend. **F-2 RULED 2026-09-05: B1 is moot; correct `option-s-runner.py:45` before any spend; publish per-probe distributions.** Then B2 (the floor set must include `habitual` — the live
    block set at the `deliberate` threshold), B3 (an ordinal proximity scale; a deterministic even-K
    median convention; true worst-of-K), B4 (a `proceed` flip via `tier1_pause` must count), and B1
    or its removal; add resume/idempotency and the six D6a safeguards the reimplementation dropped;
@@ -422,9 +422,12 @@ work is batched so one sitting discharges many gates; every session is sized to 
    (≈$3.41–4.12, quota = calls × 2), then the M/W/S + R8-D7 brief carrying the closed-run-population
    limit. **Do not spend before the fixes.**
 7. **S7 — Item 2b** (`l1_supply` narrowed out of the `ecosystem` preset). `code-critical`,
-   founder-walked, PR19; only if F-3's ruling elects it (the scoping's recommendation). Verify the
+   founder-walked, PR19. **ELECTED by the 2026-09-05 ruling (F-3); route (i) NOT built.** Verify the
    population is still zero at open (`active_with_l1_supply = 0` on 08-25).
-8. **S8 — Records fold + governing-surface edits on election.** `governance`: the CLAUDE.md
+8. **S9 (NEW, ruled 2026-09-05 Part 4) — harness-side schema-token redaction + the masked-200 `route_errors` row.** `code-elevated`. The at-action composer and the elicitation capture replace every `schema_field_injection` token with a category placeholder (`⟨schema-field⟩`), log the replacement count per call, and the harness docs name the rule; `/api/reason`'s Branch-2 fallback writes a `route_errors` row. **Inside the measured surface — land BEFORE S4(d), or after the window.** Memory `harness-blind-on-substrate-sessions-a11b-schema-tokens`; verbatim `2026-09-05-mentor-rulings-five-relays-verbatim.md`.
+9. **S10 (NEW, ruled 2026-09-05 Part 3) — founder-hub mentor continuity.** `code-elevated`. A session-bounded, token-budgeted history fetch with a hard cap (the `MENTOR_HISTORY_WINDOW === 20` pin changes only by a diff citing the ruling); a system-prompt line telling the mentor what it cannot see. **Precondition: F-11's Q4.**
+10. **S3 gains Group 2b (ruled 2026-09-05 Part 5)** — the three P′ presence-on-sibling-field sites and the O cases where the screened text is present; see the remediation prompt's ruled addition. J/A/F are outside the principle.
+11. **S8 — Records fold + governing-surface edits on election.** `governance`: the CLAUDE.md
    production-state block per PR18 after S2/S3 change production; the AC5 fix per F-7; the
    environmental-context disposition per F-5; retire any spent prompts this plan has closed. Batch
    with whichever of S2/S3 lands first rather than running alone.
