@@ -77,9 +77,9 @@ verification, not irreversible action.
 
 ## Next session should
 
-Re-open under this same remediation prompt for Group 2 (maximum guards + the Stoa restructure) once
-the founder has pushed, deployed, and smoked Group 1 — or continue directly if the founder elects
-to batch groups in one sitting.
+Open under the Group 2 paste — `2026-09-05-SESSION-3B-r20a-remediation-group2-SESSION-PASTE.md`
+(authored at this close; the remediation prompt remains the governing method document). Read the
+A11b finding first: the harness will be blind on the substrate edits again, by design.
 
 ## Founder verification
 
