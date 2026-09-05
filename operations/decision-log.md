@@ -35584,3 +35584,71 @@ path-scoped commit.
 `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-LIVE-2026-09-05` (the session that observed it);
 `D-DISCERNMENT-503-RATE-DIAGNOSED-AND-CLOSED-2026-09-03` (the `logRouteError` wiring this query
 relies on); the S11 register B4 cell (availability).
+
+## 2026-09-05 — D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-CLOSED-2026-09-05
+
+**Decision:** The prior entry's pattern-level hypothesis (upstream rate limit / overload under
+parallel load) is **REFUTED by the founder's `route_errors` query, and the root cause is
+identified — Diagnostic-certain.** Recorded as a falsification result, not a dead end (memory
+`primary-data-beats-secondary-characterisation`). `governance` — documents only; no code, flag,
+schema, credential, or live op.
+
+**Observed (founder-run SQL, production `route_errors`, 07:00–13:00Z, 19 rows, all
+`/api/practice/discernment`, all `phase: elicitation`, all `is_llm_outage: false`):** 18 rows are
+`Layer1ValidationError` — *"extractFeatures: high-confidence prompt-injection override detected in
+input; rejected (fail-closed). Patterns: schema_field_injection"* — at exactly the 18 ELICIT-OUTAGE
+timestamps. 1 row (12:23:31Z) is a different class: *"extractJSON: Could not extract valid JSON
+(15404 chars)"*. **No `/api/reason` row exists for 07:36–07:46Z**, as the prior entry predicted —
+the consult half's failure is unlogged by design (Branch-2 fallback, no `logRouteError`).
+
+**Root cause, from source:** `injection-defence.ts:125–128` — `schema_field_injection` matches
+`distress_detected | distress_signal | shouldRedirect | redirect_message | is_kathekon |
+passions_present | layer1-schema | layer1_schema | severity: none` and is a **reject** (fail-closed)
+on its own (`:142`, `:160`). `extractFeatures` runs `detectInjection` on its input
+(`layer1-extractor.ts:2095`) for every caller — the consult route and the discernment route alike.
+**This session's content was saturated with those exact tokens**: the four route edits inserted and
+moved guards around `distress_detected: true`, `redirect_message`, `gate.shouldRedirect`; the four
+batteries pin those literals; the chat and commands quoted them. The discernment elicitation sends
+the **transcript tail** as `elicitation_text` (`at-action-hook.mjs:222–232`), so every elicitation
+during that work carried the tokens and was rejected; the consult's composed action text carried the
+Edit content for the same reason at 07:36–07:40Z, so Layer 1 threw `Layer1ValidationError` →
+`layer1_throw` → the masked 200 with `assessment: null` → the hook's "no assessment in response".
+**Consult success between bursts** (07:42Z, 12:03Z) = actions whose text did not contain a listed
+token. Concurrency was a coincidence; the timing matched because the tokens and the parallel work
+arrived together. The 12:23Z `extractJSON` row is a second, minor class: a long transcript-tail
+input drove Sonnet's JSON output past `max_tokens: 4000` (`layer1-extractor.ts:2264`) and the
+truncated JSON failed to parse — 1 of 19.
+
+**What this means (findings, no action taken here):**
+1. **The A11b defence is doing what it was built to do** — a real caller typing `distress_detected`
+   is smuggling — and it is correct that the routes fail closed. Nothing is broken in the perimeter.
+2. **But the dogfood harness is structurally blind on exactly the sessions that edit the substrate.**
+   Any session that touches R20a code, the classifier, or the Layer-1 schema vocabulary will be
+   UNFRAMED at the consult and 503'd at the elicitation for every action whose text quotes those
+   identifiers — i.e. at its most consequential moments. The instrument cannot examine its own
+   maintenance. This is a design tension between A11b and the harness, not a defect in either;
+   whether the harness should pre-redact schema tokens from the composed text / transcript tail
+   before sending (a harness-side change, `code-elevated`), or the defence should downgrade
+   `schema_field_injection` to *flag* for the operator dogfood credential (a security-surface change,
+   `code-critical`, and the AI recommends AGAINST weakening the defence), **is a founder/mentor
+   question — put, not answered.**
+3. **B4 must classify today's events as self-inflicted, not availability.** The `gate1.log` line
+   cannot distinguish an injection reject from an outage; `route_errors` can, and only for the
+   discernment half. Today's 18 + 3 events are load-of-tokens, not load-of-traffic.
+4. **The masked 200 on `/api/reason` swallowed a security signal.** An injection REJECT on the
+   consult path is served as a soft fallback with no row anywhere. That sharpens the R3
+   status-masking item and the prior entry's recommendation (a) — the fallback branch should at
+   least `logRouteError` with the `Layer1ValidationError` message, so a genuine injection attempt
+   against `/api/reason` is visible. Still its own step, inside the measured surface.
+
+**Rollback path:** n/a — documents only. **Rules served:** PR20 (mechanism facts cited to file:line;
+the refuted hypothesis kept in the record with its refutation), PR23 (a memory is written for the
+class — `harness-blind-on-substrate-sessions-a11b-schema-tokens`). Concurrency: `git status` whole;
+path-scoped commit.
+
+**Status:** Adopted (root cause identified). Supersedes the cause-hypothesis in
+`D-CONSULT-PATH-DEGRADATION-DIAGNOSED-PATTERN-LEVEL-FOUNDER-QUERY-OWED-2026-09-05` (its mechanism
+findings and recommendations stand). Cross-references: `D-A11B…` (the injection defence's own
+adoption — A11b, live since 2026-06-08); `D-DISCERNMENT-503-RATE-DIAGNOSED-AND-CLOSED-2026-09-03`
+(the `logRouteError` wiring that made this diagnosis possible — its historical 63 identical events
+are very probably this same class, now explicable); the S11 register B4 cell.
