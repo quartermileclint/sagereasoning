@@ -123,10 +123,17 @@ export async function POST(request: NextRequest) {
     // `format` is length-validated too — but AFTER the R20a block, not here.
     // See the ruled ordering note at that guard's new site below.
     // (`conversation` and `context` above still precede the block; that is the
-    // inherited posture the 2026-09-06 ruling routes to a perimeter-wide audit,
-    // NOT an endorsement of it.)
-
-    if (!conversation || typeof conversation !== 'string' || conversation.trim().length < 20) {
+    // inherited posture the 2026-09-06 ruling routed to the perimeter-wide
+    // audit — operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-
+    // ordering-AUDIT.md §6 Group 2, item 7 — NOT an endorsement of it.)
+    //
+    // PRESENCE/TYPE only. The `conversation` MINIMUM-length check that used to
+    // share this `if` (`.trim().length < 20`, provenance 496d832 2026-03-23)
+    // was SPLIT OFF and MOVED after the R20a block on 2026-09-05 (Session 3,
+    // audit §6 Group 1, item 1). This half stays: a missing or non-string field
+    // carries no text of its own to screen, and it keeps a non-string from
+    // reaching `.trim()` below. The message is kept identical on both halves.
+    if (!conversation || typeof conversation !== 'string') {
       return NextResponse.json(
         { error: 'conversation is required (min 20 characters). Paste a chat transcript, email thread, or meeting notes.' },
         { status: 400 }
@@ -202,6 +209,31 @@ export async function POST(request: NextRequest) {
     }
 
     // ------------------------------------------------------------------------
+    // `conversation` MINIMUM length — MOVED here 2026-09-05 (Session 3, Group 1
+    // of operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-
+    // AUDIT.md §6, item 1) under the same ruling as the `format` guard below.
+    // This was the ruling's paradigm harm on the ruled route: "I want to die."
+    // is 14 characters, and until this move it 400'd before the R20a block
+    // ran. ORDER, NOT EXISTENCE: the guard stays, the value stays, and it still
+    // precedes `truncated`, `domainContext` and the engine. Its presence/type
+    // half stayed above (a missing field has no text to screen). Pinned by
+    // FV-7a–d in the route battery on the block's brace-matched END,
+    // mutation-verified against a guard placed inside the block both before
+    // AND after the check. Provenance of the original: 496d832 (2026-03-23) —
+    // NOT aeadbd1, as an earlier comment here said; corrected at the audit
+    // (§4.7). Disclosed residual, not fixed here: a short input the check reads
+    // as MILD proceeds past the block and then 400s here, so the mild support
+    // resources are not delivered on that path (mild is not the crisis form;
+    // the ruling does not reach it) — named in the Session 3 close.
+    // ------------------------------------------------------------------------
+    if (conversation.trim().length < 20) {
+      return NextResponse.json(
+        { error: 'conversation is required (min 20 characters). Paste a chat transcript, email thread, or meeting notes.' },
+        { status: 400 }
+      )
+    }
+
+    // ------------------------------------------------------------------------
     // `format` length validation — DELIBERATELY PLACED AFTER THE R20a BLOCK.
     //
     // MOVED 2026-09-06 under the mentor ruling recorded at
@@ -258,23 +290,21 @@ export async function POST(request: NextRequest) {
     // fixing it would mean not rejecting an oversized `format` at all, which
     // is the engine-leak this guard exists to prevent.
     //
-    // SCOPE, deliberately narrow. Only this guard moved. THREE other guards
-    // still precede the block, named exhaustively rather than partially (a
-    // 2026-09-06 PR19 review found the prior wording named only two):
+    // SCOPE at the 2026-09-06 move: only this guard moved then, and THREE
+    // other guards preceded the block at that time. UPDATED 2026-09-05
+    // (Session 3, Group 1 of the perimeter-ordering audit): the `conversation`
+    // MIN-length check (<20) has now ALSO moved — it sits immediately above
+    // this comment block, after the R20a block. Its provenance was 496d832
+    // (2026-03-23), NOT aeadbd1 as this comment previously said (corrected at
+    // the audit, §4.7). TWO guards still precede the block:
     //   - `conversation` MAX-length (~line 111) and `context` MAX-length
     //     (~line 117) — both landed 2026-03-26 (aeadbd1) in a general
-    //     security pass, before any perimeter existed here.
-    //   - `conversation` MIN-length (<20 chars, the check immediately above
-    //     this comment block) — SAME provenance (aeadbd1), and the sharper
-    //     residual: a short, genuine cry for help ("I want to die." is 14
-    //     characters) still 400s before the R20a block runs. This is the
-    //     ruling's paradigm harm, on the ruled route, still reachable.
-    // All three are routed to the perimeter-wide audit per the ruling
-    // (execution-order analysis, not textual position) rather than fixed
-    // here. This guard was movable now because its provenance is clean -- it
-    // landed 2026-09-05 (4c1cd94) and merely followed the route's existing
-    // posture rather than choosing it; the three above did not arrive that
-    // way and the ruling does not license moving them on that basis.
+    //     security pass, before any perimeter existed here. Routed to the
+    //     audit's §6 Group 2 (item 7), where a screening cap rides the move.
+    // This guard was movable on 2026-09-06 because its provenance is clean --
+    // it landed 2026-09-05 (4c1cd94) and merely followed the route's existing
+    // posture rather than choosing it; the others waited for the audit
+    // (execution-order analysis, not textual position), which has now run.
     //
     // ORDERING IS PINNED, not merely commented -- and the pin itself was
     // WRONG on first cut, found independently by all three PR19 reviewers of

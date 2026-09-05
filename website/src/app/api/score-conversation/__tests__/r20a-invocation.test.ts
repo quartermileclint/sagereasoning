@@ -71,6 +71,9 @@ import * as path from 'path'
 import { getCrisisResources, detectDistress } from '@/lib/guardrails'
 import type { DistressDetectionResult } from '@/lib/guardrails'
 import { renderR20aRedirectResponse } from '@/lib/substrate/r20a-audience-renderer'
+// FV-7 (2026-09-05): the shared brace-matched structural-end helper — one
+// matcher for every per-route ordering pin (memory guard-scope-must-cover-the-class).
+import { structuralBlock, codeIndex, codeCount, QUOTED } from '@/lib/__tests__/r20a-ordering-pin-helpers'
 import {
   isScoreConversationR20aEnabled,
   composeConversationDistressSubject,
@@ -791,6 +794,58 @@ function runFieldValidationTests(): void {
       'FV-6d domainContext and engine-call anchors were found (FV-6b is not ' +
         'deciding on -1)',
       domainIdx > -1 && engineIdx > -1,
+    )
+  }
+
+  // FV-7 — the `conversation` MINIMUM-length guard, MOVED 2026-09-05 by
+  // Session 3 (Group 1, item 1) of the perimeter-ordering audit under the same
+  // ruling FV-6 encodes. The ruling's paradigm harm on this route: "I want to
+  // die." is 14 characters and used to 400 here before the R20a block ran.
+  // The guard was SPLIT: its presence/type half stays BEFORE the block (a
+  // missing field has no text to screen); only `.trim().length < 20` moved.
+  // Anchored, like FV-6a, on the flag block's brace-matched END via the
+  // shared helper (string-blanked, so a brace in an error message cannot fool
+  // it — closing the limit FV-6c's comment disclosed).
+  {
+    const flagBlock = structuralBlock(codeOnly, /if\s*\(\s*isScoreConversationR20aEnabled\s*\(\s*\)\s*\)\s*\{/)
+    const minRe = /conversation\.trim\(\)\.length\s*<\s*20/
+    // String contents are blanked in the helper's view: match the quotes, not the word.
+    const presenceRe = new RegExp(`if\\s*\\(\\s*!conversation\\s*\\|\\|\\s*typeof\\s+conversation\\s*!==\\s*${QUOTED}\\s*\\)`)
+    const minIdx = codeIndex(codeOnly, minRe)
+    const presenceIdx = codeIndex(codeOnly, presenceRe)
+    const fmtIdx7 = codeIndex(codeOnly, /format\.length\s*>\s*TEXT_LIMITS\.long/)
+    const truncatedIdx = codeIndex(codeOnly, /const\s+truncated\s*=\s*conversation\.trim\(\)/)
+    const domainIdx7 = codeIndex(codeOnly, /(?:let|const)\s+domainContext\b/)
+    const engineIdx7 = codeIndex(codeOnly, /runSageReason\s*\(/)
+
+    expectTrue(
+      'FV-7a the conversation MINIMUM (<20) textually follows the ENTIRE R20a block ' +
+        '(2026-09-06 ruling; anchored on the block\'s brace-matched END so a guard placed ' +
+        'inside it — before OR after enforceDistressCheck — is caught)',
+      minIdx > -1 && flagBlock.endIdx > -1 && minIdx > flagBlock.endIdx,
+      `min=${minIdx} blockEnd=${flagBlock.endIdx}`,
+    )
+    expectTrue(
+      'FV-7b the minimum precedes the format guard (so a short conversation + oversized format ' +
+        'still 400s on the conversation message first — the contract the format move documented), ' +
+        'the truncation, domainContext and the engine call',
+      minIdx > -1 && fmtIdx7 > -1 && truncatedIdx > -1 && domainIdx7 > -1 && engineIdx7 > -1 &&
+        minIdx < fmtIdx7 && minIdx < truncatedIdx && minIdx < domainIdx7 && minIdx < engineIdx7,
+      `min=${minIdx} fmt=${fmtIdx7} truncated=${truncatedIdx} domain=${domainIdx7} engine=${engineIdx7}`,
+    )
+    expectTrue(
+      'FV-7c non-vacuity: the minimum appears exactly once; the flag block was found exactly once ' +
+        'and is non-degenerate',
+      codeCount(codeOnly, minRe) === 1 && flagBlock.matches === 1 &&
+        flagBlock.openIdx > -1 && flagBlock.endIdx > flagBlock.openIdx,
+      `minCount=${codeCount(codeOnly, minRe)} matches=${flagBlock.matches} open=${flagBlock.openIdx} end=${flagBlock.endIdx}`,
+    )
+    expectTrue(
+      'FV-7d the presence/type half of the split guard exists exactly once and stays BEFORE the block ' +
+        '(a missing or non-string conversation has no text to screen and must not reach .trim())',
+      codeCount(codeOnly, presenceRe) === 1 && presenceIdx > -1 && flagBlock.openIdx > -1 &&
+        presenceIdx < flagBlock.openIdx,
+      `presence=${presenceIdx} open=${flagBlock.openIdx}`,
     )
   }
 }

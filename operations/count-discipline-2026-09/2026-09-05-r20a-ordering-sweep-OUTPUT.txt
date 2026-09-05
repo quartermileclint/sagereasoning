@@ -20,12 +20,11 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
       check→redirect window L114–L117: 0 bound line(s)
 ### src/app/api/score-scenario/route.ts
-  POST @L283 -> enforceDistressCheck @L321; direct pre-check bound lines: 3
-      L300 [length-cmp]: if (!response || typeof response !== '      ' || response.trim().length < 5) {
-      L308 [validateTextLength+TEXT_LIMITS]: const scenarioErr = validateTextLength(scenario, '        ', TEXT_LIMITS.medium)
-      L313 [validateTextLength+TEXT_LIMITS]: const responseErr = validateTextLength(response, '        ', TEXT_LIMITS.medium)
+  POST @L283 -> enforceDistressCheck @L334; direct pre-check bound lines: 2
+      L321 [validateTextLength+TEXT_LIMITS]: const scenarioErr = validateTextLength(scenario, '        ', TEXT_LIMITS.medium)
+      L326 [validateTextLength+TEXT_LIMITS]: const responseErr = validateTextLength(response, '        ', TEXT_LIMITS.medium)
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
-      check→redirect window L321–L324: 0 bound line(s)
+      check→redirect window L334–L337: 0 bound line(s)
 ### src/app/api/score-social/route.ts
   POST @L94 -> enforceDistressCheck @L118; direct pre-check bound lines: 2
       L103 [length-eq+presence-zero]: if (!text || typeof text !== '      ' || text.trim().length === 0) {
@@ -49,19 +48,17 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateApiKey, extractPluginInstallToken, validatePluginInstallToken, corsHeaders, extractLoopId, generateLoopId, createLoopAccumulator, finalizeLoopResponse, l1SupplyRefused, isUpcCapabilityAuthEnabled, isOrientationReadingEnabled, validateTextLength, isTier1ContinuationEnabled, isSessionDeclineSignalEnabled, isLoopIdFieldEnabled, validateLoopId, composeContinuationDistressText
       check→redirect window L1148–L1165: 0 bound line(s)
 ### src/app/api/reflect/route.ts
-  POST @L69 -> enforceDistressCheck @L108; direct pre-check bound lines: 3
+  POST @L69 -> enforceDistressCheck @L116; direct pre-check bound lines: 2
       L84 [validateTextLength+TEXT_LIMITS]: const textLengthError = validateTextLength(what_happened, '             ', TEXT_LIMITS.medium)
       L90 [validateTextLength+TEXT_LIMITS]: const responseError = validateTextLength(how_i_responded, '               ', TEXT_LIMITS.medium)
-      L96 [length-cmp]: if (!what_happened || typeof what_happened !== '      ' || what_happened.trim().length < 10) {
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
-      check→redirect window L108–L126: 0 bound line(s)
+      check→redirect window L116–L134: 0 bound line(s)
 ### src/app/api/mentor/private/reflect/route.ts
-  POST @L139 -> enforceDistressCheck @L223; direct pre-check bound lines: 3
+  POST @L139 -> enforceDistressCheck @L234; direct pre-check bound lines: 2
       L162 [validateTextLength+TEXT_LIMITS]: const textLengthError = validateTextLength(what_happened, '             ', TEXT_LIMITS.medium)
       L168 [validateTextLength+TEXT_LIMITS]: const responseError = validateTextLength(how_i_responded, '               ', TEXT_LIMITS.medium)
-      L174 [length-cmp]: if (!what_happened || typeof what_happened !== '      ' || what_happened.trim().length < 10) {
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
-      check→redirect window L223–L244: 0 bound line(s)
+      check→redirect window L234–L255: 0 bound line(s)
 ### src/app/api/mentor/journal-feed/route.ts
   POST @L34 -> enforceDistressCheck @L87; direct pre-check bound lines: 3
       L55 [validateTextLength+TEXT_LIMITS]: const impressionErr = validateTextLength(impression, '          ', TEXT_LIMITS.medium)
@@ -75,12 +72,11 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateTextLength
       check→redirect window L54–L58: 0 bound line(s)
 ### src/app/api/score-conversation/route.ts
-  POST @L100 -> enforceDistressCheck @L184; direct pre-check bound lines: 3
+  POST @L100 -> enforceDistressCheck @L191; direct pre-check bound lines: 2
       L111 [TEXT_LIMITS+length-cmp]: if (conversation && typeof conversation === '      ' && conversation.length > TEXT_LIMITS.long) {
       L117 [TEXT_LIMITS+length-cmp]: if (context && typeof context === '      ' && context.length > TEXT_LIMITS.long) {
-      L129 [length-cmp]: if (!conversation || typeof conversation !== '      ' || conversation.trim().length < 20) {
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isScoreConversationR20aEnabled, composeConversationDistressSubject
-      check→redirect window L184–L191: 0 bound line(s)
+      check→redirect window L191–L198: 0 bound line(s)
 ### src/app/api/mentor/stoa/route.ts
   POST @L336 -> runStoaDistressGate @L356; direct pre-check bound lines: 0
       stoaClosed@L337 (same-file helper, body followed: 0 bound line(s))
@@ -310,5 +306,5 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
   PUT @L522: no check in handler
   DELETE @L525: no check in handler
 
-SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=43 via-same-file-helper=12 raw-total=55 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
-KNOWN-CASE score-conversation: R20a flag block L182-L202; format guard L302 (occurrences: 1); format guard AFTER block end: true (a single boolean on the brace-matched END anchor — it does not distinguish 'before the block' from 'inside it'; the per-handler counts above do)
+SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=39 via-same-file-helper=12 raw-total=51 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
+KNOWN-CASE score-conversation: R20a flag block L189-L209; format guard L332 (occurrences: 1); format guard AFTER block end: true (a single boolean on the brace-matched END anchor — it does not distinguish 'before the block' from 'inside it'; the per-handler counts above do)

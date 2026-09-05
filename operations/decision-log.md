@@ -35327,3 +35327,126 @@ from this commit's parent if the change is unwanted.
 `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06` (the known case and the
 FV-6 pin shape); `D-STANDING-OPENER-2026-09-05-UPDATE-SESSION-PLAN-AND-RECORDS-HYGIENE` (the plan
 this executes); `operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-audit-CLOSE.md`.
+
+## 2026-09-05 — D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05
+
+**Decision:** Group 1 of the R20a perimeter-ordering remediation (four minimum-length guard moves)
+is **BUILT and reviewed, not yet pushed.** Session 3 of the 2026-09-05 plan, executing the audit's
+§6 Group 1 under the binding ruling (`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`).
+**`code-critical`** — R20a perimeter, PR6 + AC5. Founder-walked: the AI edited, tested, and reviewed;
+**the founder pushes and runs the live smokes.** AC7 not engaged (no auth/cookie/session/redirect
+surface touched). Session model started `claude-fable-5-1`; **switched mid-session to
+`claude-sonnet-5`** by the founder's `/model` command after the account's Fable session limit was
+hit by three parallel review agents — disclosed per PR22/PR20.
+
+**What changed, on four human-facing routes** (`/api/score-conversation` `<20` on `conversation`,
+`/api/reflect` `<10` on `what_happened`, `/api/mentor/private/reflect` `<10` on `what_happened`,
+`/api/score-scenario` `<5` on `response`): each combined guard
+(`!x || typeof x !== 'string' || x.trim().length < N`) was **split** — the presence/type half stays
+before the distress check (a missing/non-string field carries no text to screen); the minimum-length
+half moved to **after** the check and its crisis-redirect return, before any context load or LLM
+call. **Order, not existence** — every guard value, error message, and status code is byte-identical
+to HEAD; confirmed by full diff review (only the conditional split and the guard relocation changed,
+comments aside). Maximum-length guards were deliberately **not** moved (Group 2, later). One
+pre-existing comment error was corrected in passing (score-conversation's provenance claim for the
+minimum guard, `aeadbd1`→`496d832`, per the audit §4.7).
+
+**New shared helper** `website/src/lib/__tests__/r20a-ordering-pin-helpers.ts` (`stripComments`,
+`blankStrings`, `structuralBlock`, `codeIndex`/`codeIndexAfter`, `codeCount`, `QUOTED`) — one
+brace-matched structural-end matcher reused by all four routes' pins, so a fix to it reaches every
+route (memory `guard-scope-must-cover-the-class`). **Three new per-route batteries**
+(`reflect`, `mentor/private/reflect`, `score-scenario` — 10/10 each) and an **FV-7 extension** to the
+existing `score-conversation` battery (70/70), each pinning: the presence/type half exists once and
+precedes the check; the moved minimum sits after the anchored block's brace-matched structural end
+and before every context/RAG load and the LLM call; non-vacuity on every anchor.
+
+**Mutation-verified on the real files** (hash-verified restore after every mutation — the working
+tree returned byte-identical): all four routes' pins go red under the minimum placed before the
+check, placed between the check and the redirect return, deleted, and under the presence half
+deleted. `tsc` 0; `npm run build` 0 (all four routes registered); the perimeter guard battery
+`r20a-invocation-guard.test.ts` **722/0** unchanged; the rev-2 sweep output byte-identical to
+Session 1's.
+
+**Review (PR19, required — R20a perimeter): three parallel first-attempt reviewers all died on the
+account's Fable session limit mid-run** (execution order; classifier-input/cost; byte-identity +
+test-adequacy). Per PR19's codified spend-limit fallback, completed **first-hand** across all three
+dimensions on the live checkout (confirmed: only the conditional split and guard relocation changed
+per route; the moved guards run unconditionally regardless of score-conversation's flag state;
+classifier input stays bounded by the untouched max guards; the disclosed mild-residual is genuine
+and unchanged from pre-move behaviour), **disclosed as single-perspective**, then **an independent
+re-run was launched and completed after the account limit reset** (under `claude-sonnet-5`) —
+**0 HIGH.** Two LOW findings, both folded: (1) the shared helper's docstring now discloses a
+FALSE-FAIL mode (a semantics-preserving rewrite of a moved guard can make its literal-text pin
+report the guard as missing — safe direction, blocks a legitimate refactor rather than admitting a
+regression); (2) the score-conversation mild-residual was re-confirmed as already-disclosed, not a
+new defect. One informational finding (a short-`conversation`-plus-oversized-`format` request now
+returns the conversation-required 400 instead of the format-exceeds-max 400 — status unchanged,
+message differs, already named in the route's own comment). **The independent reviewer additionally
+mutation-tested a duplicate-block and a brace-in-string case beyond what the first-hand pass tried,
+both handled correctly** (duplicate → non-vacuity catch; brace-in-string → correctly neutralised by
+`blankStrings`, not a false alarm).
+
+**Owed, not done this session (per the ruled scope):** the founder's push, deploy verification, and
+the live Bearer-JWT smokes (F-6's two `format` smokes on score-conversation, plus a 14-character
+distressed-vs-benign smoke on each of the four routes — the remediation prompt §5 lists them
+exactly). Groups 2 and 3 of the audit's §6 (maximum guards; the Stoa restructure; `/api/reason`'s
+human path, gated on the false-hold window's state; the three founder-only proof routes) are **not
+started.**
+
+**Files touched:** the four route files (comment + guard-split edits only); the new shared helper;
+three new per-route battery files; the extended score-conversation battery; the refreshed
+`2026-09-05-r20a-ordering-sweep-OUTPUT.txt`; this entry; the Session 3 close (below).
+
+**Risk classification:** `code-critical` under 0d-ii (R20a perimeter, PR6). Critical Change Protocol
+(0c-ii) steps: **what's changing** — a very short distressed message now gets crisis resources
+instead of a bare 400; a short benign message still gets the same 400, just after the check has run.
+**What could break** — a regression in the pin or the move could put a guard back before the check;
+caught by the block-end anchor and mutation proofs. **Existing sessions** — unaffected; no
+auth/cookie/session surface touched. **Rollback** — `git revert` this session's commit + redeploy;
+never a flag (these guards are unconditional). **Verification** — the smokes named above, owed to
+the founder's walk. AC7 not engaged.
+
+**Rollback path:** `git revert` this session's single commit; redeploy. No schema, flag, or
+credential touched.
+
+**Verification step (founder-performable, pre-push):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git log --oneline -3
+cd website && npx tsc --noEmit; echo "tsc exit: $?"
+npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts > /tmp/g.txt 2>&1; tail -1 /tmp/g.txt
+for t in score-conversation reflect mentor/private/reflect score-scenario; do npx tsx src/app/api/$t/__tests__/r20a-invocation.test.ts | tail -1; done
+```
+Expected: `tsc exit: 0`; `722 passed, 0 failed`; `70/70`, `10/10`, `10/10`, `10/10`. **Post-push,
+founder-performed:** the Bearer-JWT smokes in the Session 3 close.
+
+**Open questions:** none new. §4.4 (does the ruling extend to non-length pre-check rejections)
+remains a mentor question, unaffected by this session.
+
+**Rules served:** PR6 (Critical protocol, above), PR15 (reused the score-conversation FV-6 pattern
+and the audience-renderer/classifier contracts rather than re-implementing), PR19 (independent
+re-run required and obtained; the spend-limit fallback invoked and its own disclosure requirement
+met), PR20 (every mechanism fact re-checked at source; the moved guards' provenance re-verified by
+`git log -S`), PR21 (elicitations answered genuinely throughout; harvested in the close), PR22
+(model switch disclosed), PR23 (`guard-scope-must-cover-the-class`, `nextjs-route-export-validation`,
+`tsx-tests-setinterval-keepalive-hang` consulted and applied). Concurrency: `ListAgents` at open;
+`git status` whole at open and before staging; path-scoped commit.
+
+**Session honesty note.** The at-action guard cautioned repeatedly on Bash commands running tests
+and mutations ("no kathekon factors extracted" — the known false-positive class on build acts); every
+elicitation was answered genuinely, and on each the resolution preceded the examination, consistent
+with routine test/verification work. The harness's production consult path was observed degraded
+during this session (`no assessment in response` from 2026-09-05T07:36:49Z onward, 18 occurrences in
+the log tail; `ELICIT-OUTAGE http 503` ×5 from 07:41:07Z; last successful frame 06:54:06Z) —
+read-only-observed from `gate1.log`, reported to the founder mid-session as relevant to B4's
+availability watch, not investigated further (out of this session's scope). Three review agents
+failed on the account's own session limit mid-run (not a repo or code defect); the founder reset it
+via `/model claude-sonnet-5`, and the independent re-run PR19 requires was completed under the new
+model, disclosed above.
+
+**Status:** Adopted (build); **push and live smokes are the founder's carried step.** Cross-references:
+`D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05` (the audit this executes);
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06` (authority);
+`D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06` (the FV-6 pin
+precedent this session's helper generalises);
+`operations/handoffs/founder/2026-09-05-r20a-perimeter-ordering-remediation-session3-CLOSE.md`.

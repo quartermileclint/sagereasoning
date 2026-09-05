@@ -297,7 +297,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!response || typeof response !== 'string' || response.trim().length < 5) {
+    // PRESENCE/TYPE only. The MINIMUM-length half of this check
+    // (`.trim().length < 5`, provenance b0cecce 2026-03-24, file creation) was
+    // SPLIT OFF and MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3, Group 1 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 4) under the binding ruling:
+    // "the distress check runs before the length guard on any route where the
+    // human crisis form is rendered." This half stays: `response` is the ONLY
+    // field the check below screens, so a missing or non-string `response`
+    // carries no text to screen, and the check's `detectDistressTwoStage(text:
+    // string)` contract needs a string. The message is kept identical on both
+    // halves. (The `scenario` presence check above is a P-class check on a
+    // DIFFERENT field from the screened one — audit §4.4, a mentor question,
+    // deliberately not moved here.)
+    if (!response || typeof response !== 'string') {
       return NextResponse.json(
         { error: 'response is required — the user\'s answer (min 5 characters)' },
         { status: 400 }
@@ -323,6 +336,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
         { status: 200, headers: corsHeaders() }
+      )
+    }
+
+    // `response` MINIMUM length — MOVED here 2026-09-05 (Session 3, Group 1 of
+    // the perimeter-ordering audit, §6 item 4) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A short
+    // genuine cry for help now reaches the check above and receives the crisis
+    // resources instead of this 400. ORDER, NOT EXISTENCE: the value is
+    // unchanged and the guard still precedes the RAG/context loads and the LLM
+    // call. Pinned by ORD-1..4 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses (before the check; between the check and the redirect return).
+    if (response.trim().length < 5) {
+      return NextResponse.json(
+        { error: 'response is required — the user\'s answer (min 5 characters)' },
+        { status: 400 }
       )
     }
 

@@ -171,7 +171,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!what_happened || typeof what_happened !== 'string' || what_happened.trim().length < 10) {
+    // PRESENCE/TYPE only. The MINIMUM-length half of this check
+    // (`.trim().length < 10`, provenance 9fe99f0 2026-04-11, file creation) was
+    // SPLIT OFF and MOVED after the R20a redirect return on 2026-09-05
+    // (Session 3, Group 1 of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md §6, item 3 — same shape as /api/reflect,
+    // moved together) under the binding ruling: "the distress check runs before
+    // the length guard on any route where the human crisis form is rendered."
+    // This half stays: a missing or non-string field carries no text of its own
+    // to screen. The message is kept identical on both halves. The
+    // bypass_pattern_cache boolean 400 below is class O in the audit (not a
+    // length guard) and is left where it is — audit §4.4, a mentor question.
+    if (!what_happened || typeof what_happened !== 'string') {
       return NextResponse.json(
         { error: 'what_happened is required (describe what happened today, min 10 characters)' },
         { status: 400 }
@@ -246,6 +257,22 @@ export async function POST(request: NextRequest) {
           redirect_message: gate.result.redirect_message,
         },
         { status: 200, headers: corsHeaders() }
+      )
+    }
+
+    // `what_happened` MINIMUM length — MOVED here 2026-09-05 (Session 3, Group 1
+    // of the perimeter-ordering audit, §6 item 3) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06). A short
+    // genuine cry for help now reaches the check above and receives the crisis
+    // resources instead of this 400. ORDER, NOT EXISTENCE: the value is
+    // unchanged and the guard still precedes every context load and the LLM
+    // call. Pinned by ORD-1..4 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses (before the check; between the check and the redirect return).
+    if (what_happened.trim().length < 10) {
+      return NextResponse.json(
+        { error: 'what_happened is required (describe what happened today, min 10 characters)' },
+        { status: 400 }
       )
     }
 
