@@ -35921,3 +35921,39 @@ redirect, and the non-distressed rejection behaviour is unchanged.
 **Status: LIVE.** Rollback path unchanged (`git revert cbd93ae` + redeploy; no flag). Carried,
 unaffected by this addendum: Group 2b (its own sitting), Group 3 (the proof routes), S9 (harness-side
 A11b redaction, must not repeat the Branch-2 `route_errors` row built here).
+
+---
+
+### D-SINGLE-SERIAL-ARC-REPLAN-AND-SESSION-3C-PASTE-2026-09-06
+
+**2026-09-06, 05:45 AEST.** `governance`, documents only; no code, flag, schema or live change. On
+the founder's question — can the "perimeter-ordering audit" session's arc and the remediation
+session's arc be combined into one — the answer is **yes, and they were never two plans.** Both
+sessions wrote into the one Standing queue in the standing opener: the audit/governance session
+(`sagereasoning-43`) ran S1, adopted the rulings, relayed the mentor questions and kept the opener;
+this session ran S3 Groups 1–2. The split produced the 2026-09-05 collision (opener fact 6). **From
+this entry the queue runs as ONE serial arc, one session per sitting, each from its own paste.**
+
+**Re-plan (opener Standing queue B rewritten as a table; the 09-05 numbered list superseded, nothing
+dropped):** S3.3 = Group 2b + Group 3 (**NEXT**; paste authored:
+`2026-09-06-SESSION-3C-r20a-remediation-group2b-group3-SESSION-PASTE.md`) → S3.4 the Stoa
+restructure (closes the R20a ordering arc; S2 may ride its sitting on F-4) → S9 harness redaction
+(gates the window per E5; the Branch-2 row is DONE in Group 2) → S5 D2 scope-for-ruling → S2 → S4
+window readiness (≥2026-09-08 UTC; the founder sets the flag) → S7 → S6 → S10 (F-11 Q4) → S8 batched.
+Two hard couplings drove the order: E5 (S9 before S4(d)) and the `/api/reason` freeze (Group 2b's
+human-path `session_marker`/`loop_id` O items must land before S4(d)). Founder rows updated: F-1
+(push `0bc1e56`), F-6 and F-12 struck DONE, **F-13 added — close the second interactive session**
+(its tree is clean; nothing is owed from it). Opener facts 1 and 3 annotated to the live state (no
+length guard precedes `/api/score-conversation`'s block; Groups 1–2 live). The remediation prompt's
+top line records Group 2 LIVE and that **item 9 (the Stoa pair) was outside Election A** and remains.
+
+**The paste re-derives every guard site from source at `0bc1e56`** (the audit's line numbers are two
+sessions stale): the three P′ sites, the O items (`mentor/private/reflect` `bypass_pattern_cache` +
+`hub_id`; `/api/reason` human-path `session_marker`/`loop_id`, dual-site like the Group 2 closure), and
+the three proof routes' minima, maxima and enum 400s, with the Part 5 boundary (J/A/F outside) and
+the Stoa `visibility` case explicitly deferred to S3.4. It adds a non-length class fence to the pin
+requirements (a decoy re-add of a moved 400 must go red) and warns that a benign proof-route probe
+passing every guard spends.
+
+**Rollback:** `git revert` this records commit. **Status:** the plan is re-based; S3.3 is queued on
+the founder's opening it.
