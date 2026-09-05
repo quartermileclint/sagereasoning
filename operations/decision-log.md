@@ -35866,12 +35866,58 @@ restore).
 
 **Rollback path:** `git revert` this commit + redeploy; never a flag (the guards are unconditional).
 **Rules served:** PR6, PR17, PR19 (independent fleet completed; first fleet's death disclosed), PR20
-(every line cited from source this session), PR22, PR23, AC5. **Status:** BUILT — awaiting the
-founder's push, Vercel green, and the smokes (per moved maximum: oversized distressed → 200
-`distress_detected`; oversized benign → 400 `exceeds maximum length`; the two reflect routes write
-one `analytics_events` distress row each, nothing else writes). Close:
+(every line cited from source this session), PR22, PR23, AC5. **Status:** BUILT then LIVE
+2026-09-06 (see `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06` immediately below —
+the founder pushed, Vercel deployed green, and all ten smokeable routes confirmed on both directions
+against production). Close:
 `operations/handoffs/founder/2026-09-06-r20a-perimeter-ordering-remediation-session3B-group2-CLOSE.md`.
 Cross-references: `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-{BUILT,LIVE}-2026-09-05`;
 `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5 → Group 2b, deferred; Part 4 → S9);
 `D-CONSULT-PATH-DEGRADATION-ROOT-CAUSE-A11B-SCHEMA-FIELD-INJECTION-FAIL-CLOSED-2026-09-05` (finding 4,
 the R3 row, executed here).
+
+---
+
+### D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06
+
+**2026-09-06, 05:19 AEST.** Founder-walked live addendum to
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-BUILT-2026-09-06`. The founder pushed `cbd93ae` to
+`origin/main` (confirmed 0-ahead/0-behind), Vercel deployed green, and ran the founder verification
+block plus the full live-smoke script from the close file against production
+(`www.sagereasoning.com`) using a Bearer JWT drawn from their own logged-in session.
+
+**Founder verification reproduced clean:** `tsc` exit 0; guard battery 722/0; every per-route battery
+at its recorded count (reflect 17/17, private/reflect 17/17, journal 18/18, journal-feed 18/18,
+score-conversation 75/75, score/score-decision/score-social/score-document 12/12 each, score-scenario
+17/17, reason 14/14).
+
+**Live smokes — all ten non-founder-only routes observed, both directions, all matching the close
+file's predicted outcomes exactly:** `/api/reflect`, `/api/journal`, `/api/mentor/journal-feed`,
+`/api/score`, `/api/score-decision`, `/api/score-social`, `/api/score-document`,
+`/api/score-scenario`, `/api/score-conversation`, `/api/reason`. The oversized-DISTRESSED body on
+every route returned **HTTP 200** with `distress_detected:true`, `severity:"acute"`, and the full
+seven-resource crisis redirect message (Lifeline AU / Beyond Blue / 988 US / Crisis Text Line US /
+Samaritans UK / Shout UK / 988 CA) — confirming the maximum-length guard on each route no longer
+intercepts a distressed submission before the distress check runs. The oversized-BENIGN body on every
+route returned **HTTP 400** with the route's own exact length-exceeded message (`what_happened
+exceeds maximum length of 5,000 characters (received 6,019)`; `Reflection text exceeds maximum length
+of 5,000 characters (received 6,019)`; `Impression exceeds maximum length of 5,000 characters
+(received 6,019)`; `Action exceeds maximum length of 2,000 characters (received 2,513)`; `Decision
+exceeds maximum length of 2,000 characters (received 2,509)`; `text exceeds maximum length of 5,000
+characters (received 6,019)` ×social; `text exceeds maximum length of 30,000 characters (received
+31,013)` ×document; `response exceeds maximum length of 5,000 characters (received 6,019)` ×scenario;
+`conversation exceeds maximum length of 15000 characters` ×conversation; `Input exceeds maximum length
+of 5,000 characters (received 6,019)` ×reason) — confirming the guard's values, messages, and status
+codes are byte-identical to pre-move, and that the cap correctly bounds what reaches the classifier
+without altering the benign-path rejection. `/api/mentor/private/reflect` was left unsmoked by founder
+election (the founder-only line in the script stayed commented — that route shares the identical code
+path as `/api/reflect`, already observed).
+
+**No unexpected result on any of the twenty observed calls.** Production is now confirmed
+byte-equivalent to the intent of the Group 2 build: on all eleven human-facing perimeter members plus
+`/api/reason`'s human path, a maximum-length violation can no longer suppress a genuine crisis
+redirect, and the non-distressed rejection behaviour is unchanged.
+
+**Status: LIVE.** Rollback path unchanged (`git revert cbd93ae` + redeploy; no flag). Carried,
+unaffected by this addendum: Group 2b (its own sitting), Group 3 (the proof routes), S9 (harness-side
+A11b redaction, must not repeat the Branch-2 `route_errors` row built here).
