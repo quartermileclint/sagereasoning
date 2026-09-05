@@ -1,3 +1,5 @@
+> **RECEIVED 2026-09-05** — reception accepted; the external check (E12) PASSES; no ruling changed; views given on E1 (v1 needs no selection) and E10 (no halt primitive — correct, on the channel law); **E5 yields a binding sequence: redaction (S9) → restoration of `GATE1_FALSE_HOLD_CAPTURE` (S4(d)) → accumulation.** Verbatim: `2026-09-05-mentor-reception-R9-R10-exceptions-verbatim.md`.
+
 # R9 and R10 — reception summary and exceptions report, for the mentor (F-12)
 
 **Prepared 2026-09-05 (23:45 AEST) for founder relay.** A **reception**, not a question: the two
