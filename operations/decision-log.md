@@ -36666,3 +36666,100 @@ to the full specification; the S5 close given a second addendum; the S4 session 
 
 **Status:** Adopted (RULED — specification complete, build owed, still sequenced after the window).
 **S4 remains next. Weights BLOCKED; the S11 flip REFUSED; neither unblocked by either ruling.**
+
+### D-S4-WINDOW-START-READINESS-BLOCKED-DATE-GATE-2026-09-06
+
+**2026-09-06, ~15:40 AEST** (machine date). Session S4 of the serial arc (standing opener Version
+2026-09-05, Standing queue row S4; paste
+`2026-09-06-SESSION-S4-window-start-readiness-SESSION-PASTE.md`). Tier: a read-only autonomous half
+(this entry), founder act NOT taken. Model `claude-opus-5`, adversarial review under `claude-sonnet-5`.
+**No code, schema, flag or credential changed. `git status` clean except one new document.**
+
+**Executes the paste's five legs. Verdict: the window does NOT open this sitting — both
+preconditions fail, one of them for a reason no work available today can fix.**
+
+**(a) B4's follow-up measurement — NOT RUN, correctly.** `date -u` at session open was
+**2026-09-06T04:11:54Z**; the paste's hard gate requires ≥2026-09-08 UTC. Confirmed by direct
+command, not inherited. No post-remedy rate is computed or stated anywhere in this session's
+records — the only post-remedy figures touched are isolated counts (one `GUARD-OUTAGE` line
+reporting `55000ms` after the remedy boundary, against 207 guard attempts counted the same way),
+each explicitly disclaimed as not a rate and not licensed before 09-08.
+
+**(b) F-3′'s threshold — PROPOSED, PR19-reviewed, three findings fixed in place.**
+`operations/trust-layer-2026-07/2026-09-06-F3prime-guard-availability-threshold-PROPOSAL.md`
+proposes: aggregate guard-outage rate ≤5% AND no single ordinary day (≥20 guard attempts) exceeds
+10%, sustained over ≥3 successive ordinary days. Four anchors (the ruling's 11% ceiling; the
+outage-rate-equals-systematic-bound-width arithmetic; a comparison to the D6a published sampling
+interval, ~13 points; the 2026-09-04 outlier plus the observed attempt-volume spread). An
+independent adversarial review (Sonnet 5, full-log re-derivation, no sampling) found the arithmetic
+and the central §6 finding sound but confirmed **1 HIGH and 2 MEDIUM** in load-bearing spots, all
+fixed in place with the correction narrated rather than silently smoothed over: **(HIGH)** an
+earlier draft's Anchor 4 quoted a partial-day 60% outage figure (65 attempts, mid-day) against the
+full day's 202-attempt total, whose actual close was **25.25%** (51/202) — corrected, and the
+dilution argument rebuilt on the structural ground rather than the now-wrong empirical one, since at
+the corrected rate the aggregate rule alone already catches that day under any plausible week
+(verified: 2026-09-02→09-06 aggregates to **14.72%**, 68/462); **(MEDIUM)** the same section
+overstated the lean-mode ruling as "closed" where the decision-log's own record reads "held, pending
+a founder election made with that framing explicit" — corrected; **(MEDIUM)** an unsourced
+"17–18 distinct sessions" concurrency claim was removed after the reviewer traced it to a document
+that uses that same session count to **refute** concurrency as an explanation, the opposite of how
+it was being used here. The review's recommended addition — of the **28** windows of three
+successive ordinary days findable anywhere in the 57-day log, **zero** pass both proposed rules —
+was independently re-derived and folded in as the sharpest available evidence that the threshold
+genuinely binds rather than being fitted to already-observed data. **The proposal also now
+discloses, completely rather than partially, that the known post-remedy figures sit roughly an
+order of magnitude below the proposed 5% — so while the threshold was fixed before B4's measurement
+exists (a real test in that narrow sense), it is not expected to bind.** Founder elects.
+
+**(c) The engine-edit question — DISCHARGED BY RULING, confirmed rather than restated.** Read at
+source in `2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md`: *"the observation window
+opens first, establishing a baseline; the engine correction lands after the baseline is
+established."* S4 gates D2; D2 does not gate S4. No engine edit was made or attempted.
+
+**(c′) S9 landed — CONFIRMED AT SOURCE, not inherited from the opener's claim.**
+`harness/gate1-pre-decision/claude-code/hooks/lib/schema-redaction.mjs` exists, is committed
+(`793e493`), is wired at 6 call sites in `at-action-hook.mjs`, and `redacted=N` is observed **8
+times** in the live `gate1.log` — built and firing, not merely built.
+
+**(d) The founder act — NOT PERFORMED, correctly, because neither precondition is met.**
+Precondition 1 (P8a activation): `grep -c GATE1_FALSE_HOLD_CAPTURE .claude/settings.local.json`
+returns **0** — confirmed directly. Precondition 2 (F-3′'s bounded rate): fails for two independent
+reasons — the threshold remains unelected, and B4's measurement is not due for ~2 more days
+regardless. The AI did not set the flag and did not recommend setting it; this is the founder's act
+alone, per the paste, and today's date and evidence do not support it.
+
+**A finding surfaced in the course of (b), offered to the founder rather than acted on:** the guard
+**deny** population (the only class satisfying `guardHold: true` in `buildGuardHoldRecord`, hence
+the sole source of part (3)'s "correct holds on genuinely problematic actions") is thin — **15**
+genuine denies (confirmed non-fail-closed: `GATE1_GUARD_FAIL_MODE` is absent so outages default to
+`open`, meaning an outage allows rather than blocks) across **57** calendar days, **45 of 50** active
+guard days with zero, all 15 sharing `tool=Bash` and `proximity=reflexive`. Excluding the 09-04
+cluster the rate is **0.089/day ≈ 0.6 per week** — a typical week would capture zero or one guard
+hold. **P8a's activation moves this denominator from *structurally absent* to *present but very
+thin*, not to *populated*, and F-3′ — however set — does nothing for it, since the constraint here
+is volume, not selection.** This bears on whether part (3) is measurable in a 7-day window at all;
+recorded as a scoping question for the founder, not decided here.
+
+**Session self-correction, recorded because it is the discipline this project keeps re-learning:**
+this session's own first-cut Anchor 4 and its 2,160-vs-2,161 attempt count were themselves caught
+only at PR19 review, not by first-hand re-checking before writing — despite this same session
+independently having caught two of its own smaller arithmetic errors (a claimed median of ~45,
+actual 24.5; a claimed 56-day span, actual 57) before the review ran. **Self-catching some errors is
+not a substitute for independent review catching the ones self-checking misses** — the fifth
+recorded instance of this project's own standing lesson (memory
+`independent-rereview-catches-self-review-blind-spots`), now against this session's own work rather
+than a prior one's.
+
+**Records:** this entry; the S11 register's P8a/B4/F-3′ rows to be annotated (append-only,
+immediately following); the standing opener's S4 row to be updated to reflect the blocked-date
+outcome and the F-3′ proposal's existence; a session close.
+
+**Rollback:** `git revert` (documents only; nothing built, no flag set, no schema touched).
+
+**Status:** the window has NOT started. `GATE1_FALSE_HOLD_CAPTURE` remains unset;
+`GATE1_STATE_DIR` remains `/Users/clintonaitkenhead/.sage-gate1` (durable, unchanged, unverified as
+a live requirement since the flag was never set). **The S11 flip remains REFUSED; weights remain
+BLOCKED; the 0h call remains the founder's.** Next: the founder elects F-3′'s threshold and/or
+weighs the §6 guard-deny-volume finding; ≥2026-09-08 UTC, a fresh session runs B4's actual
+follow-up measurement; if both preconditions are then met, the founder performs (d). Until then,
+S7/S6 remain window-neutral and may run.
