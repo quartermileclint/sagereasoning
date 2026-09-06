@@ -37632,3 +37632,125 @@ migration, no production surface, no commit, no push.
 **byte-unchanged**; the window **RUNNING and untouched**; the guard **armed, green, non-vacuous**;
 **baseline 1 of 5**. **S11-D2 remains BLOCKED on the threshold. The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+---
+
+## 2026-09-07 — D-S6B-COMMIT-GATE-WIRED-OPTION-S-PRE-RUN-BLOCKERS-FIXED-2026-09-07
+
+**Session S6b. Tier `code-elevated`. Two commits, NEITHER PUSHED: `af67e4c` (the commit gate),
+`6bdff56` (Option S). NO production, schema, flag, credential, migration or live-op change. No Option
+S call was made. The observation window ran untouched. AC7 not engaged.** Written 2026-09-07 ~06:40
+AEST = **2026-09-06 ~20:40 UTC** — the UTC day matters and is stated wherever a baseline claim is made.
+
+The founder elected **Option A** and authorised further work completable unattended. Option B is
+founder-walked and Option D is owed before publication, so the session ran **A**, then **C**, then the
+always-do window health. **PR19 adversarial reviews ran on `sonnet` / effort `low` under the founder's
+explicit permission.**
+
+### Option A — the D2 pin now bites at commit time (`af67e4c`)
+
+The D2 window-sequencing ruling required the pin be *"genuinely enforceable rather than nominal"*.
+S6a built it; `.husky/pre-commit` — an active gate blocking on five check classes — **never ran the
+battery**, and there is no CI and no npm test script. The battery now runs **first** and **always**.
+
+**Always-on was decided on its merits, not on cost.** A staged-only trigger **cannot enforce the
+byte-identity guard at all** — that guard's subject is files *modified in the working tree*, which need
+not be staged — and a trigger keyed on staging choices rests the gate on the very discipline the pin
+replaces. Cost measured at **0.47 s** inside a 4.7 s hook.
+
+**Verified, not asserted:** battery exit 0/1; a real `git commit` with a broken pin exited 1 and
+**HEAD did not move**; the same held with `GATE1_FALSE_HOLD_CAPTURE` unset (the GitHub Desktop path),
+blocking on the unconditional pin; flag set ⇒ **249/1 FAIL**, unset ⇒ **249/0 + DORMANT**; the hook is
+tracked and the root `package.json` carries `"prepare": "husky"`, so a fresh clone regenerates it.
+
+**PR19: six blind dimensions, 11 agents, 0 errors; 5 raised, 3 refuted, 2 folded.** **HIGH** — the
+failure message asserted *"A measured-set file has changed"*, **false** for a section A/B/D failure
+(an unrelated page rename trips the same battery) and sending the reader after a waiver they do not
+need; the message now names both cases. **Narrowing the gate to the pins alone was rejected**: it
+would put the SHA constants in two places — this project's recurring drift class — and exceeds scope;
+the blast radius is disclosed in the header instead. **LOW** — the guidance was **unreachable dead
+code** under `sh -e`; rewritten as `if ! ( ... )` and **mutation-verified to print**. Every
+pre-existing check shares that latent shape; not changed here.
+
+**Three limits, all stated rather than papered over.** (i) The working-tree guard binds only when
+`GATE1_FALSE_HOLD_CAPTURE` is in the **hook's** environment — present under Claude Code, **absent
+under GitHub Desktop**; the hook **deliberately does not set or fake it**, because forcing it would
+bind the guard while the window is stopped, contradicting M1, and a policy change cannot ride a
+plumbing change. (ii) The battery is one flat script, so the gate blocks on any assertion.
+(iii) **NOT FIXED, for the founder:** the pre-existing `npx not found` branch `exit 0`s the whole
+hook, so on a machine without Node on PATH the pin is **silently skipped and the commit allowed**.
+Making it fail closed would stop such a machine committing at all — a founder call.
+
+### Option C — Option S pre-run blockers fixed, with tests (`6bdff56`)
+
+**Option S has still never made a call; `runs/` is empty and the test asserts that emptiness.** B1 is
+**moot by removal** under the 2026-09-05 ruling, not by correction. **B2 was re-verified at source
+before acting** and fixed by reading the gate's **own `proceed`** rather than re-deriving a decision
+from rank — which collapses B2 and B4 into one quantity and sidesteps the open question of whether
+`habitual` joins the *floor* set; `p_hat_floor` is deliberately unchanged. B3: `PROXIMITY_RANK`
+transcribed from `guardrails.ts`; worst-of-K is the minimum rank; the median is a true ordinal median
+(the old tie-break used `set()` order, which CPython salts per process). **K is ruled 10, which is
+even, so `M_EVEN_K_CONVENTION = "lower_median"` is published as a CONVENTION, not a ruling** — a live
+input to the M/W/S election. Plus series ids, `--resume`, series-aware pooling, the six D6a
+safeguards, a spend gate that prints the dollar figure and **fails closed**, a **refused** 3xx (the
+"No redirect handler" comment was false — `urlopen` uses the default opener, which follows redirects
+and carries `Authorization`), and L4 read from the candidates file (**24**: 15 winner / 9 rejection).
+
+**NEW `option-s-runner-test.py` — 45 assertions, no network, MUTATION-VERIFIED TWELVE WAYS.** The
+battery caught **the author's own vacuous fixture** before any reviewer did (a median-vs-mode case
+where both were the same value); replaced, and the vacuous version kept in a comment.
+
+**PR19: six blind dimensions, 9 agents, 0 errors; 3 raised, 0 refuted, ALL folded.** **MEDIUM** — the
+spend-gate probe was **vacuous**: it accepted `"credential"` in stderr, and since `main()` reads the
+credential before `confirm_spend`, on any machine without the credential file it passed **without
+reaching the tty gate**. **MEDIUM** — no coverage for `--resume`, `complete_series`,
+`deploy_identity` or the redirect refusal; all four now covered, the resume skip proved by replacing
+`call_gate` with a detonator. **LOW** — `run` announced a full-K spend `--resume` would skip; **found
+independently by the reviewer and the author.**
+
+### Window + baseline health — cutoff `2026-09-06T20:37:50Z`
+
+Buffer **213** = 138 `v1` (**EXCLUDED — different regime**) + 75 new-window (incl. probe 139) → **74
+in the rate**. 2026-09-06 UTC: guard **71**, consult **3**. **BASELINE 1 of 5 — unchanged, and it
+could not move today**: the UTC day was already counted and does not roll until 10:00 AEST.
+`GATE1_STATE_DIR` unchanged. Guard: **no evidence of a trip; tree verified clean, battery green at
+open and at both commits** — stated in that form because the guard runs only when a session runs it.
+
+**⚠ THE CARRIED CORROBORATION RECIPE IS NOW STALE.** S6a's `CAUTION + PROCEED + BLOCK` tally was an
+enumeration that was **accidentally complete**. This session produced the window's **first
+`GUARD-OUTAGE`**, after which that recipe read log 69 vs buffer 70 — which I nearly reported as a
+finding. It is neither a disagreement nor a read race (the delta was stable at +1 across three reads).
+The family is **four** tokens: `CAUTION 66 + PROCEED 4 + BLOCK 1 + OUTAGE 1 = 72 = buffer 72` **AGREE**;
+consult `3 = 3` **AGREE**. **Derive the `GUARD-*` family; never quote the list.** Companion fact: a
+guard outage **still writes a buffer record**, but labels itself (`captureBasis: "no_assessment"`,
+`guardOutcome: "outage_open"`) — so it can be excluded **deliberately**, on an existing field. Whether
+it should be is a decision, not a default, and it is asymmetric with the consult side where D6a
+already excludes outages.
+
+### ⚠ CARRIED, NOT RESOLVED — tool-choice validity, now much sharper
+
+**This session contributed 45 of the window's 75 new-window records — 60% — ALL guard, ALL from
+read-only `Bash` verification calls** (S6a's PR19 flagged 4). `AT-ACTION-SKIP-BASH` stands at **455**
+against 72 guard and 3 consult. **And the other half of the question is new:** this session ran under a
+harness directive preferring `Bash`, which is dropped from the consult floor — so **a session's tool
+mode decides whether its work enters the measured population at all**, not merely whether a session
+*chooses* `Edit` to accrue baseline days faster. Both directions distort the representativeness part
+(1) requires. **Tool choice was NOT steered.** For the founder and the mentor.
+
+### Also observed
+
+**Five interactive `sagereasoning` peers** were open against a plan that says one serial arc; commits
+were path-scoped and nothing was closed unilaterally. The guard read the Option C commit as
+`proceed_with_caution` / kathekon **`moderate`**, and the close as **`strong`** with *"no passions
+present"* — better than the usual false-positive "contrary" — while correctly noting that claims about
+the world sit outside prohairesis (the composed-input fidelity question S6a named, seen again).
+
+### Rollback
+
+`git revert af67e4c` and/or `git revert 6bdff56` — independent. No flag, schema, migration or
+production surface; nothing pushed.
+
+**STATE:** the pin **bites at commit time, mutation-proven to block**; `layer2-mechanisms.ts`
+**byte-unchanged** (`60cefedb…`); window **RUNNING, untouched**; guard **armed, green, non-vacuous**;
+**baseline 1 of 5**; Option S **fixed, still never run**. **S11-D2 remains BLOCKED on the threshold.
+The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
