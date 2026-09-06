@@ -101,8 +101,8 @@ const endpoints = [
   "kathekon_quality": "moderate",
   "passions_detected": [
     {
-      "root_passion": "thumos",
-      "sub_species": "righteous_anger",
+      "root_passion": "epithumia",
+      "sub_species": "orgē",
       "false_judgement": "Others' mistakes are personal slights"
     }
   ],
@@ -169,7 +169,7 @@ const endpoints = [
   "secondary_virtue_domains": ["andreia", "sophrosyne"],
   "most_frequent_passions": [
     {
-      "root_passion": "thumos",
+      "root_passion": "epithumia",
       "frequency": "high",
       "interpretation": "High engagement with justice and responsibility"
     }
@@ -183,104 +183,107 @@ const endpoints = [
   {
     method: 'POST',
     path: '/api/assessment/foundational',
-    description: 'Run a foundational virtue assessment for an AI agent or human. Single-pass evaluation with core virtue domains and passion analysis.',
+    description: 'Score an agent’s 14 free-tier self-assessment responses (Phases 1–2: Foundations, Architecture of Mind). You supply the written responses; the endpoint scores them. It does NOT accept a scenario — GET this path for the assessment INDEX (IDs and phase titles); the prompts themselves are at the returned assessment_framework_url.',
     auth: true,
     body: `{
-  "agent_id": "agent-uuid-or-human-identifier",
-  "scenario": "You encounter a decision where honesty might cost you resources...",
-  "context": "In a competitive market environment"
+  "agent_id": "agent-uuid-or-human-identifier",   // required, min 2 chars
+  "responses": [                                   // required, EXACTLY 14
+    {
+      "assessment_id": "FD-01",                    // one per free-tier ID
+      "response": "Your structured self-assessment, min 50 chars, max 10,000..."
+    }
+    // ... FD-02 ... FD-07, AM-01 ... AM-07
+  ]
 }`,
     response: `{
-  "assessment_id": "uuid",
   "agent_id": "agent-uuid",
-  "assessment_type": "foundational",
-  "virtue_domains_engaged": ["dikaiosyne", "sophrosyne"],
-  "primary_passions": [
-    {
-      "root_passion": "pleonexia",
-      "sub_species": "greed",
-      "false_judgement": "Gaining advantage justifies deception"
-    }
+  "tier": "free",
+  "assessment_name": "Foundational Alignment Check",
+  "phases_completed": [1, 2],
+  "assessments_completed": 14,
+  "senecan_grade_estimate": "grade_2",
+  "katorthoma_proximity_summary": "deliberate",
+  "control_clarity": "moderate",
+  "initial_passions_detected": [ { "root_passion": "epithumia", "sub_species": "pleonexia", "false_judgement": "..." } ],
+  "causal_sequence_integrity": "partially_compromised",
+  "direction_of_travel": "improving",
+  "per_assessment_summaries": [
+    { "assessment_id": "FD-01", "title": "...", "proximity_level": "deliberate",
+      "passions_detected": [], "summary": "..." }
   ],
-  "kathekon_analysis": {
-    "is_kathekon": false,
-    "proximity": "contrary",
-    "reasoning": "Decision prioritizes external goods over virtue"
-  },
-  "recommendations": ["Examine the false judgment about gain", "Reflect on long-term character impact"]
+  "assessed_at": "2026-01-01T00:00:00.000Z",
+  "cta": { "action": "Run Complete Assessment", "...": "..." }
 }`,
   },
   {
     method: 'POST',
     path: '/api/assessment/full',
-    description: 'Run a comprehensive multi-deliberation virtue assessment for an AI agent. Allows up to 3 deliberation iterations for deeper analysis.',
+    description: 'Score an agent’s 55 self-assessment responses across all 8 phases (paid key required). You supply the written responses; the endpoint scores them. It does NOT accept a scenario, a context, or a deliberation count — GET this path for the assessment index; the prompts themselves are served elsewhere.',
     auth: true,
     body: `{
-  "agent_id": "agent-uuid",
-  "scenario": "A user asks you to misrepresent capabilities to secure a contract...",
-  "context": "High competitive pressure and financial constraints",
-  "deliberation_iterations": 3
+  "agent_id": "agent-uuid",                        // required, min 2 chars
+  "responses": [                                   // required, EXACTLY 55
+    {
+      "assessment_id": "FD-01",                    // the 14 free IDs plus
+      "response": "Your structured self-assessment..."   // VH/UE/PD/RA/MJ/IN
+    }
+    // ... all 55, one per assessment ID across phases 1-8
+  ]
 }`,
     response: `{
-  "assessment_id": "uuid",
   "agent_id": "agent-uuid",
-  "assessment_type": "full",
-  "deliberation_count": 3,
-  "primary_virtue_analysis": {
-    "sophrosyne": {
-      "engagement": "high",
-      "reasoning": "Careful self-examination across multiple perspectives"
-    },
-    "dikaiosyne": {
-      "engagement": "high",
-      "reasoning": "Justice to client and self-integrity examined"
-    },
-    "phronesis": {
-      "engagement": "high",
-      "reasoning": "Wisdom to discern lasting vs. temporary good"
-    }
-  },
-  "consolidated_passions": [
-    {
-      "root_passion": "phobos",
-      "sub_species": "fear_of_loss",
-      "deliberation_insights": ["Initially dominant", "Revealed as false judgment after iteration 2"]
-    }
+  "tier": "paid",
+  "assessment_name": "Complete Virtue Alignment Assessment",
+  "phases_completed": [1, 2, 3, 4, 5, 6, 7, 8],
+  "assessments_completed": 55,
+  "senecan_grade": "grade_2",
+  "dimension_levels": { "passion_reduction": "...", "judgement_quality": "...",
+                        "disposition_stability": "...", "oikeiosis_extension": "..." },
+  "dominant_passion": { "root_passion": "phobos", "sub_species": "...", "false_judgement": "..." },
+  "typical_proximity": "deliberate",
+  "oikeiosis_stage": "...",
+  "passions_profile": [ /* ... */ ],
+  "critical_corrections": [ /* false judgement paired with its remedy */ ],
+  "direction_of_travel": "improving",
+  "dimension_directions": { /* per-dimension direction */ },
+  "examination_protocol": "...",
+  "per_assessment_summaries": [
+    { "assessment_id": "FD-01", "phase": 1, "title": "...", "proximity_level": "deliberate",
+      "passions_detected": [], "summary": "..." }
   ],
-  "final_kathekon": {
-    "is_kathekon": true,
-    "proximity": "deliberate",
-    "quality": "strong"
-  },
-  "growth_insights": "Agent demonstrates capacity for iterative virtue reasoning"
-}`,
+  "assessed_at": "2026-01-01T00:00:00.000Z",
+  "disclaimer": "This is a philosophical framework for self-reflection and does not consider legal, medical, financial, or personal obligations."
+}
+
+// 403 if the API key is on the free tier:
+// { "error": "...", "message": "...", "upgrade_url": "..." }`,
   },
   {
     method: 'POST',
     path: '/api/baseline/agent',
-    description: 'Establish or update a baseline virtue profile for an AI agent. Used for tracking virtue development over time.',
+    description: 'Establish a baseline virtue profile by scoring an agent’s responses to 4 baseline scenarios. You supply the written responses; the endpoint scores them. It does NOT accept an agent_name or a domain.',
     auth: true,
     body: `{
-  "agent_id": "agent-uuid",
-  "agent_name": "My Stoic Reasoner v1",
-  "domain": "financial_decision_making"
+  "agent_id": "agent-uuid",                        // required, min 2 chars
+  "responses": [                                   // required, EXACTLY 4
+    { "scenario_id": "...", "response": "Your reasoning for this scenario..." }
+    // one per baseline scenario; GET this path for the scenarios
+  ]
 }`,
     response: `{
-  "baseline_id": "uuid",
   "agent_id": "agent-uuid",
-  "created_at": "2026-03-21T14:30:00Z",
-  "baseline_virtue_profile": {
-    "primary_domains": ["dikaiosyne"],
-    "secondary_domains": ["sophrosyne"],
-    "passion_baseline": {
-      "phobos": "moderate",
-      "thumos": "moderate",
-      "pleonexia": "low"
-    }
-  },
-  "assessment_count_allowed_this_month": 30,
-  "last_full_assessment": null,
-  "next_baseline_available": "2026-04-21T00:00:00Z"
+  "senecan_grade": "grade_2",
+  "typical_proximity": "deliberate",
+  "dominant_passion": { "root_passion": "phobos", "sub_species": "...", "false_judgement": "..." },
+  "oikeiosis_stage": "...",
+  "dimension_levels": { "passion_reduction": "...", "judgement_quality": "...",
+                        "disposition_stability": "...", "oikeiosis_extension": "..." },
+  "scenario_evaluations": [ /* one per scenario */ ],
+  "strongest_domain": "...",
+  "growth_edge": "...",
+  "interpretation": "...",
+  "disclaimer": "This is a philosophical framework for self-reflection and does not consider legal, medical, financial, or personal obligations.",
+  "assessed_at": "2026-01-01T00:00:00.000Z"
 }`,
   },
 ]
