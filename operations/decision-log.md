@@ -37088,3 +37088,79 @@ opener's S4 row updated. **Rollback:** `git revert` (documents only).
 this session.** `GATE1_FALSE_HOLD_CAPTURE` unset at this writing; `GATE1_STATE_DIR` confirmed durable
 (`/Users/clintonaitkenhead/.sage-gate1`). **The S11 flip remains REFUSED; weights remain BLOCKED; the
 0h call remains the founder's — the ruling touches none of them.**
+
+### D-FALSE-HOLD-OBSERVATION-WINDOW-STARTED-LIVE-2026-09-06
+
+**2026-09-06, ~19:45 AEST** (machine date). Session S4's leg (d) — **the founder act, licensed by
+the two mentor rulings of the same day and performed at the founder's explicit direction.** Tier
+`code-critical` in consequence. **The window is RUNNING.**
+
+**⚠ THIS IS A CHANGE TO THE FOUNDER'S LOCAL HARNESS LOOP, NOT TO PRODUCTION.** Nothing was deployed;
+no Vercel variable, route, schema, flag-in-production, or credential changed. The distinction is not
+pedantic — see the false start below.
+
+**A FALSE START, CAUGHT BY THE TOOK-EFFECT CHECK, RECORDED BECAUSE IT IS THE WHOLE POINT OF HAVING
+ONE.** The founder first reported *"set and redeploy green."* Three checks said otherwise:
+`GATE1_FALSE_HOLD_CAPTURE` appeared in **zero** settings files; `.claude/settings.local.json` had an
+mtime of **2026-09-05 03:29:59**, untouched that day; and the buffer was unchanged at 138 records,
+all `v1`. The word *"redeploy"* was the tell — the flag had been set in **Vercel**, which is inert
+for this purpose: **no route or lib reads `GATE1_FALSE_HOLD_CAPTURE`** (verified by grep across
+`website/src/app/api/` and `website/src/lib/`, excluding `__tests__`); only
+`harness/gate1-pre-decision/**` and a local report script do. The founder removed it from Vercel.
+**Had the report been accepted at face value, a `-LIVE-` record and a CLAUDE.md block would have been
+written for a window that never started, and the error would have surfaced days later when the report
+found 138 `v1` records and nothing else.** This is the same class as the D4 activation's named
+failure — a check that reads the same whether or not the thing holds.
+
+**THE ACT.** At the founder's explicit direction (the S4 paste reserves this to the founder; the
+founder waived that line for the mechanical step, having made the decision themselves), the AI added
+exactly one key to the `env` block of `.claude/settings.local.json`:
+`"GATE1_FALSE_HOLD_CAPTURE": "true"`. The file holds live credentials, so it was backed up first and
+edited by a surgical single-line insert rather than a JSON rewrite. **Verified after the edit: all
+ten pre-existing values byte-identical by SHA-256 comparison** (credentials untouched), JSON parses,
+`hooks` block intact, `env` 10 → 11 keys. `GATE1_STATE_DIR` unchanged and durable
+(`/Users/clintonaitkenhead/.sage-gate1`) — never `/tmp`, and it must not change for the window's
+duration.
+
+**TOOK-EFFECT PROOF — a new record that cannot exist flag-off.** A first attempt produced none,
+correctly: the hook that fired on the editing call had read its config before the edit landed. The
+guard was then fired deliberately with a harmless scratchpad overwrite-redirect — **the same
+technique the 2026-09-05 B4 remedy verification used** — and the buffer moved **138 → 139**. The new
+record: `schema: false-hold-record-v4` (**the first non-v1 record in the buffer's history**),
+`path: "guard"` (**P8a is live, not built-dark — P5's built-dark denominator is now a measured
+one**), `capturedAt: 2026-09-06T09:44:55.267Z` matching the probe, `captureBasis: "assessment"` (a
+real classifiable verdict, not an outage), `extractionRegime: "at-action-v2-composed"` (the correct
+post-S11b regime), `guardHold: false` (correct — a caution allows the tool and is not a hold).
+
+**WHAT STARTED, IN ONE ACT:** the observation window; P8a's activation; the standing-runner track's
+item-D restoration; and **the logos byte-identity guard re-armed** (it binds if and only if this flag
+is set, per the M1 ruling). The working tree was verified clean at the moment of arming.
+
+**DISCLOSURE FOR THE WINDOW'S ANALYSIS — record 139 is a deliberate took-effect probe, not organic
+traffic, and must be EXCLUDED from the window's rate.** It is retained rather than deleted because
+the buffer is append-only and deleting from it would be worse than disclosing it.
+
+**THE 138 `v1` RECORDS ARE A DIFFERENT REGIME AND MUST NEVER ENTER THE NEW WINDOW'S RATE** (scoping
+note §2.1). The frozen 130-record file remains an exact prefix of them and is untouched evidence.
+**Never "refresh" the buffer.**
+
+**STANDING OBLIGATIONS NOW RUNNING, from the F-3′ ruling:** count consult availability from day one
+(attempted vs framed vs captured, timeouts, transient 401s); report the guard population separately
+with its availability rate disclosed; **set the consult-side bound threshold after the first FIVE
+ordinary post-remedy days of window data**; **publication waits on that assessment** — the window's
+start did not.
+
+**⚠ OPERATIONAL CONSTRAINT NOW ACTIVE.** The armed guard's `GUARD_RE` matches
+`layer2-mechanisms|stoic-brain|api/reason|api/guardrail|trust-core|kathekon-engagement|false-hold|harness/gate1|…`
+against `git status --short`. **No file matching it may sit modified in the working tree.** This
+reaches the scoping note itself (`2026-08-15-false-hold-new-window-scoping-note.md` matches on
+`false-hold`) — edits to it must be committed promptly. **And it is why S11-D2 cannot simply open
+next:** D2 must edit `layer2-mechanisms.ts`, which the regex covers.
+
+**Rollback:** remove the one line from `.claude/settings.local.json`. Nothing to redeploy. A backup
+of the pre-edit file was taken at `/tmp/settings.local.json.bak-20260906-194244`. **The buffer is
+append-only and is never truncated, refreshed, or regenerated on rollback.**
+
+**Status: the window is RUNNING as of 2026-09-06T09:44:55Z.** The S11 flip remains **REFUSED**;
+weights remain **BLOCKED**; the 0h call remains the founder's. **Next: S11-D2 is now unblocked by
+sequencing but gated on resolving the byte-identity-guard collision with the founder first.**

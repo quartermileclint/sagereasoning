@@ -75,6 +75,33 @@ Bespoke election requires justification in the session's decision-log entry unde
 - **Decision log** (last 3 entries at session-open): `/operations/decision-log.md`
 - **Active build-arc cache**: `/adopted/build-sessions-protocol-cache.md`
 
+## Production state
+
+> **2026-09-06 (19:45 AEST, machine date) — THE FALSE-HOLD OBSERVATION WINDOW IS RUNNING. This is a
+> change to the FOUNDER'S LOCAL HARNESS LOOP, NOT to production — nothing was deployed, and no Vercel
+> variable, route, schema, production flag or credential changed.** `GATE1_FALSE_HOLD_CAPTURE=true`
+> was added to the `env` block of the gitignored `.claude/settings.local.json` (founder-directed;
+> ten pre-existing values verified byte-identical by SHA-256, credentials untouched;
+> `GATE1_STATE_DIR` unchanged at the durable `/Users/clintonaitkenhead/.sage-gate1`).
+> **Took-effect PROVEN, not inferred** (`D-FALSE-HOLD-OBSERVATION-WINDOW-STARTED-LIVE-2026-09-06`):
+> the buffer moved **138 → 139** and record 139 is the **first `false-hold-record-v4` in its
+> history** — `path: "guard"` (P8a live, no longer built-dark), `captureBasis: "assessment"`,
+> `extractionRegime: "at-action-v2-composed"`. **A false start was caught first and is on record:**
+> the flag was initially set in **Vercel**, which is inert — **no route or lib reads it**, only
+> `harness/gate1-pre-decision/**`; the buffer and the file mtime both disproved the "set and
+> redeploy green" report before any record was written.
+> **One act started four things:** the window; P8a's activation; the standing-runner item-D
+> restoration; and **the logos byte-identity guard re-armed** (it binds iff this flag is set, per the
+> M1 ruling) — so **no file matching its `GUARD_RE`** (`layer2-mechanisms|stoic-brain|api/reason|
+> api/guardrail|trust-core|kathekon-engagement|false-hold|harness/gate1|…`) **may sit modified in the
+> working tree.** That is why **S11-D2 cannot simply open next** — it must edit `layer2-mechanisms.ts`.
+> **Record 139 is a deliberate took-effect probe and must be EXCLUDED from the window's rate;** the
+> 138 `v1` records are a different regime and must never enter it. **Never "refresh" the buffer.**
+> **Rollback = remove the one line; nothing to redeploy; the buffer is append-only and is never
+> truncated.** Standing obligations now running (F-3′ ruling): count consult availability from day
+> one; report the guard population separately with its rate; set the consult-side bound threshold
+> after five ordinary post-remedy days; **publication waits on it, the start did not.**
+
 ## Production state (**as of 2026-09-06** — the newest dated refresh block is directly below this heading; the 2026-09-03 and 2026-08-12 blocks that follow it are retained as history and NOT current, and the long 2026-06-25 parenthetical after that is older history still. Read the 2026-09-06 block, then the 2026-09-03 block, then the "Live in production" list, first.)
 
 > **2026-09-05 grounding note (a documents-only session; production is unchanged since the annotation at the end of item 2 in the block below).** The standing session opener has been re-grounded as **Version 2026-09-05** — `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md` — and now carries the current state, the verified-at-writing table, the prioritised session plan and the standing queue; **read it before this section.** **A date-label discrepancy to read past, not fix:** the block directly below is labelled "2026-09-06", and a cluster of records carry "2026-09-06"/"2026-09-07" labels (`2026-09-06-post-sweep-carried-items-CLOSE.md`, `2026-09-06-mentor-ruling-r20a-length-guard-ordering-verbatim.md`, `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`, `2026-09-06-environmental-scan-staleness-SCOPE.md`, `2026-09-06-P6-recommendation-column-BUILD-NEXT-SESSION-PROMPT.md`, the five decision-log entries headed 2026-09-06). **Git shows every one of them authored on 2026-09-05 AEST** (commits `aa4e567`…`099b218`, 05:31–09:15 +1000; the P6 BUILD prompt on 2026-09-04 19:57 +1000): those sessions took their date from the conversation context rather than the machine clock, one day ahead. The labels are left as they are — they are cited by filename elsewhere, and renaming would break those citations — and each file is correctly identified by its git author date. **Date artifacts from `date` and `git log`, never from the context date.**
