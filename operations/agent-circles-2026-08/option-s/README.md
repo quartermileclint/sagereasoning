@@ -15,8 +15,11 @@ is withdrawn:
    flag. M and W are functions of the **per-sample floor probability p**, and p is not recoverable
    from a binary flag — the map is non-monotone (p and 1−p are indistinguishable) and each input has
    its own p. A ruling made on that output would have been made on a number that reads like evidence
-   and is not. **Now:** per-input floor count and `p_hat_floor`, the directional split, stratified
-   by `decision_role`, plus `would_option_M_record` / `would_option_W_record`.
+   and is not. **Now:** per-input floor count and `p_hat_floor`, the **per-probe distribution**,
+   the **decision (block) rate** taken from the gate's own `proceed`, stratified by
+   `decision_role`, plus `would_option_M_record` / `would_option_W_record`.
+   *(The directional split this line used to name was **removed** by mentor ruling 2026-09-05 —
+   see the 2026-09-06 changelog at the foot of this file.)*
 2. **It counted engine outages as the gate disagreeing with itself.** One outage in a K=3 series
    flipped the whole input to "disagreeing". D6a's own round-3 correction states outages are
    *"infrastructure, not a gate judgement about the frozen text."* **Now:** non-verdict outcomes are
@@ -132,7 +135,11 @@ operate**, is exactly that object — and it is precisely the marginal value ove
 
 ### What it does NOT dissolve — stated because I proposed this change and have a stake in it
 
-- **L4 — the 24-vs-29 set size is still open** and still needs production to settle it.
+- ~~**L4 — the 24-vs-29 set size is still open**~~ **SETTLED 2026-09-06 against the populated
+  candidate file: 24 candidates carry text (15 winner / 9 `guardrail_rejection`).** The runner's
+  `summary()` now reads that file and reports the figure rather than restating the ruling's 29;
+  before 2026-09-06 it never opened the file at all, so the artifact reaching the M/W/S election
+  would have asserted an open question that population had already closed.
 - **L5 — no counterfactual re-election is attempted.** `would_option_M/W_record` are intra-series
   (against *this* run's first verdict), never against history.
 - **L7 — variance is multi-channel;** a floor count doesn't identify which floor fired.
@@ -193,3 +200,55 @@ weak at these magnitudes.
 
 Invent or approximate a candidate text; report a rate it did not measure; run without an explicit
 credential file; retry a failed call (a retry silently changes K); continue past a quota 429.
+
+
+---
+
+## Changelog — 2026-09-06: the pre-run blockers, fixed
+
+The 2026-09-05 PR19 review (`operations/count-discipline-2026-09/2026-09-05-option-s-PR19-REVIEW-FINDINGS.md`)
+recommended **do not run** until four pre-run blockers were resolved, because they change what the
+*same* 240 calls yield — running first and fixing after would mean re-spending the whole sweep.
+**Option S has still never made a call; `runs/` is still empty.** This changelog records the fixes,
+not a run.
+
+| Blocker | Disposition |
+|---|---|
+| **B1** — the two `direction` labels were inverted | **MOOT by removal.** Mentor ruling 2026-09-05 (Part 1 of `2026-09-05-mentor-rulings-five-relays-verbatim.md`): *"The decomposition is removed. Per-probe distributions replace it."* The field is gone, so it cannot be wrong. `option-s-runner.py`'s docstring assertion — the line the ruling named — is corrected. |
+| **B2** — the floor set was narrower than the live block set | **FIXED, and not by widening the floor.** `/api/guardrail` defaults `threshold='deliberate'` and `meetsThreshold` is `rank >= rank(threshold)`, so `habitual` blocks; a `deliberate ×7 / habitual ×3` input published as `p_hat_floor 0.0`. The runner now also publishes `p_hat_block`, read from the gate's **own `proceed`** rather than re-derived from rank. `p_hat_floor` is retained unchanged — it is the ADR-010 §4 quantity M suppresses and W amplifies, and it is a different question. |
+| **B3** — `would_option_M_record` was a mode, `would_option_W_record` was not worst-of-K | **FIXED.** `PROXIMITY_RANK` is transcribed from `guardrails.ts`; `ordinal_worst` takes the minimum rank and `ordinal_median` a true ordinal median. The mode's tie-break used `set()` iteration order, which CPython salts per process — the same data gave different answers across invocations. Determinism is now asserted across four `PYTHONHASHSEED` values. K is ruled **10**, which is even, so the median convention is **explicit**: `M_EVEN_K_CONVENTION = "lower_median"`, published on the output. **That is a convention, not a ruling** — it is a live input to the M/W/S election and the founder or mentor may set it otherwise. |
+| **B4** — a `proceed` flip via `tier1_pause` was invisible and read as `stable_no_variance` | **FIXED by the same change as B2.** `proceed` is now read across the decision population (`verdict` + `tier1_pause`). `engine_unavailable` is deliberately **excluded**: D6a's round-3 correction holds an outage is *"infrastructure, not a gate judgement about the frozen text"*, so its conservative `proceed=false` would inflate the block rate with transport health. |
+
+**Also fixed, from the same review's "not blockers" section:**
+
+- **Idempotency.** Records carry a `series_id`; `--resume` skips a candidate that already holds a
+  complete series. Before this, a sweep dying at candidate 12 could be recovered only by re-running
+  from scratch and appending — **double-billing was the sole available recovery path.**
+- **Series-aware pooling.** `summary()` groups by `series_id` and admits only a **complete** series;
+  where two are complete the earliest is operative and the other is named. Previously an aborted
+  sweep plus a re-run pooled two partial series into one input of n=15 taken hours apart.
+- **The six D6a safeguards** that were not carried over when this file reimplemented the run loop:
+  series ids, `fsync` after every paid call, first-call abort, per-call strict-field checks (every
+  call, not only the first), raw-body retention, and per-call deploy identity with its caveat.
+- **Spend gate.** A sweep now prints the dollar figure and requires `--yes` or a typed `PROCEED`;
+  with no tty and no `--yes` it **aborts**. `sweep 25` is 600 calls ≈ $8.53 and previously started
+  silently.
+- **Redirect.** The comment claimed "No redirect handler" above a bare `urlopen`, which uses the
+  default opener — and that opener follows redirects, carrying `Authorization` to the new host
+  (CPython strips only `content-length` and `content-type`). This project runs an apex→www redirect.
+  3xx is now **refused** and recorded.
+- **L4** read from the candidates file rather than restated (see above).
+
+**Tests.** `option-s-runner-test.py` — 34 assertions, no network calls, covering each blocker with
+a case written to fail against the pre-fix behaviour. **Mutation-verified:** six reverts (worst-of-K
+to `prox[0]`; median to a mode; `proceed` off verdicts only; outages readmitted; series-awareness
+removed; the unranked-proximity filter removed) each turn the battery red — the last by a hard
+`KeyError`, which is detection, not a miss.
+
+**What is NOT resolved here** — these are the founder's or the mentor's, not the instrument's:
+
+- **Q2 from the review** (the split is forced by the candidate set's composition) is *why* the
+  decomposition was removed; the underlying selection-on-the-dependent-variable property remains and
+  is stated as `LIMIT_3`.
+- **The even-K median convention** is a stated choice, not a ruling.
+- **Whether to run at all, and at what K,** is founder spend. Nothing here starts a sweep.
