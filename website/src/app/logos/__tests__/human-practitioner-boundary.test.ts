@@ -30,8 +30,9 @@
  *
  * Residuals this test does NOT close (named so no one reads more than is proven):
  *   - The git guard sees UNCOMMITTED edits only (status vs HEAD). The stoic-brain.ts
- *     content-hash pin (C2b) closes that for the one file this build's permission hinges
- *     on; the rest of the measured set relies on each session's own gates at commit time.
+ *     content-hash pins close that for TWO files: stoic-brain.ts (C2b, this build's permission)
+ *     and layer2-mechanisms.ts (C2c, the S11-D2 target, added 2026-09-06 by mentor ruling);
+ *     the rest of the measured set relies on each session's own gates at commit time.
  *   - A dynamic import whose specifier is COMPUTED (string concatenation / template)
  *     cannot be resolved by regex scanning; a tripwire below flags any non-literal
  *     dynamic import in the target files, but a determined evasion is out of scope —
@@ -427,7 +428,9 @@ assert(
   // returns. The regex non-vacuity probes below run UNCONDITIONALLY so the
   // guard machinery stays proven while dormant; only the working-tree binding
   // is window-conditional. §C2/§C2b (the stoic-brain.ts freeze + SHA pin) are
-  // INDEPENDENT of this ruling and remain unconditional.
+  // INDEPENDENT of this ruling and remain unconditional — as is §C2c (the
+  // layer2-mechanisms.ts pin, 2026-09-06), deliberately and for the reasons
+  // recorded at that pin.
   const observationWindowRunning = process.env.GATE1_FALSE_HOLD_CAPTURE === 'true'
 
   let statusOutput: string | null = null
@@ -514,6 +517,80 @@ assert(
   assert(
     sbHash === STOIC_BRAIN_SHA256,
     `stoic-brain.ts content hash must match the window-frozen pin (got ${sbHash}) — a committed edit is still an edit; update the pin ONLY as a deliberate post-window decision`
+  )
+  // C2c — the D2 CONTENT PIN on layer2-mechanisms.ts. Ruled owed NOW, before the baseline
+  // threshold is met (mentor ruling 2026-09-06, verbatim record:
+  // operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-window-sequencing-MID-WINDOW-verbatim.md)
+  // "for the same reason §C2b pins stoic-brain.ts" — and, in the ruling's own words, to close
+  // "the committed-edit gap for D2's target file". That gap is named twice in the same ruling:
+  // "The guard detects uncommitted modifications only. A committed-and-deployed change to
+  // layer2-mechanisms.ts would not trip it." Reading the file's BYTES from disk (not from git)
+  // catches BOTH a committed and an uncommitted edit, so this one pin discharges the whole
+  // obligation. It fails loud, never vacuous: a wrong path throws in readFileSync.
+  //
+  // UNCONDITIONAL — deliberately, and decided on the record rather than split silently (S6a):
+  //   * The ruling names §C2b as the model, and the M1 ruling (2026-08-15) drew the line in
+  //     exactly this place: the working-tree binding is window-conditional, the CONTENT PIN
+  //     is not. Making this one conditional would depart from the named model in the very
+  //     dimension M1 ruled on.
+  //   * The decisive reason is a DISARM ASYMMETRY. A window-conditional pin would share its
+  //     off-switch with the thing it polices: unsetting GATE1_FALSE_HOLD_CAPTURE would disarm
+  //     the pin AND stop capture in one move — reopening precisely the route the ruling
+  //     forbids: "What must not happen is a silent commit that evades the check by exploiting
+  //     the committed-edit coverage gap" (ruling, "What Reading A requires", item 2 — quoted
+  //     contiguously; an earlier draft of this line spliced two separate sentences, which PR19
+  //     caught), via a flag flip that also erases the evidence of its own use.
+  //   * Both options behave IDENTICALLY at the moment that matters: the D2 correction lands
+  //     MID-WINDOW under Reading A, so the window is running either way. Conditionality buys
+  //     nothing at the decision point and only weakens the post-window state.
+  //   * The standing cost was MEASURED, not assumed: layer2-mechanisms.ts took 15 commits in
+  //     the 12 months to 2026-09-06 (most recent 2026-08-24; bursty, none in the prior 13
+  //     days), against stoic-brain.ts's 6. More active than the comparator, but the cost is
+  //     ~one deliberate constant update every 3-4 weeks, paid by the PR that edits the file.
+  //     That is the checkpoint working, not a defect.
+  //   * The ruling's own text supports unconditionality more strongly than the reasoning above
+  //     first credited (PR19 found this; the earlier draft understated its own case): the same
+  //     sentence-pair extends the pin's purpose PAST the baseline — "This makes the post-baseline
+  //     rule genuinely enforceable rather than nominal" — and mandates the pin SURVIVING the
+  //     correction: "After the correction is committed, the pin is updated to the corrected
+  //     file's hash." A pin scoped to the baseline period could do neither.
+  //   * Honest counter, recorded rather than buried, and stated ACCURATELY (an earlier draft of
+  //     this line claimed the ruling scopes the pin's purpose to the baseline period, which is an
+  //     incomplete reading of the sentence quoted just above): the ruling is SILENT on post-window
+  //     persistence. Under Reading A the window keeps running after the correction lands, so
+  //     conditional and unconditional are operationally IDENTICAL for every moment the ruling
+  //     governs. Unconditionality is a judgement in that silence, not a departure from the text.
+  //   * Disclosed limit, INHERITED from §C2b and not introduced here, stated precisely because an
+  //     earlier draft of this line understated it: there is no CI (.github/workflows absent) and no
+  //     npm script for this battery — BUT the repo DOES have an active commit-time gate,
+  //     `.husky/pre-commit` (core.hooksPath = .husky/_), which already BLOCKS commits on five check
+  //     classes (tsc, ESLint on the R20a modules, ByteString headers, route-export, view-grants)
+  //     and does NOT run this battery. So against the ruling's own standard — "genuinely
+  //     enforceable rather than nominal" — enforcement today rests on a session choosing to run
+  //     this file. The gap this pin closes is a COMMITTED-edit gap, and commit time is exactly
+  //     where that gate sits. Wiring it in is one line, but it changes the founder's local commit
+  //     behaviour and is therefore a FOUNDER ELECTION, deliberately not taken by the session that
+  //     added this pin (its authorised scope was this pin and nothing else). Named, not done.
+  //   * Residual, one hop out and already disclosed in this file's header: `layer2-mechanisms.ts`
+  //     imports `./corroboration-check`, `./reasoning-integrity` and (type-only) `./layer1-extractor`.
+  //     A COMMITTED edit to those changes what `computeVirtueDomains` receives and trips nothing —
+  //     GUARD_RE matches their paths, but only for UNCOMMITTED modifications. Both D2 rulings bind
+  //     `computeVirtueDomains` in THIS file only, so the ruled correction cannot be executed in a
+  //     sibling without tripping this pin; the residual is scope-awareness, not an open hole.
+  //
+  // UPDATE THIS CONSTANT ONLY as part of the ruled S11-D2 correction — the ruling: "After the
+  // correction is committed, the pin is updated to the corrected file's hash" — or under a
+  // recorded founder waiver. S11-D2 opens only after five ordinary days WITH CONSULT RECORDS.
+  // The ruling permits a SECOND stand-down route, named here so this comment is not misread as
+  // making the waiver the only one: "An explicit allowlist in the guard for the specific D2 files
+  // is also acceptable, provided it is landed as its own reviewed change and removed after the
+  // correction is committed."
+  const LAYER2_MECHANISMS_SHA256 = '60cefedb5f4f78822301b3f9c195813b63b00546431ecde08473b118bea52f73'
+  const l2Bytes = fs.readFileSync(path.join(websiteRoot, 'src/lib/translation-sandwich/layer2-mechanisms.ts'))
+  const l2Hash = createHash('sha256').update(l2Bytes).digest('hex')
+  assert(
+    l2Hash === LAYER2_MECHANISMS_SHA256,
+    `layer2-mechanisms.ts content hash must match the D2 baseline pin (got ${l2Hash}) — a COMMITTED edit is still an edit. This is the deliberate-decision checkpoint for the ruled S11-D2 correction, not an accident: update this pin ONLY as part of that correction (then to the corrected file's hash), or under a recorded founder waiver`
   )
 }
 

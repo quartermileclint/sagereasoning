@@ -37457,3 +37457,178 @@ threshold), does **not** license the correction today, and does **not** touch th
 **STATE:** window **RUNNING** and untouched; guard **armed and green**; **S11-D2 remains BLOCKED —
 now on a measurable threshold rather than an open question.** **The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+---
+
+## 2026-09-06 — D-S6A-LAYER2MECHANISMS-SHA-PIN-BUILT-UNCONDITIONAL-PR19-FOLDED-2026-09-06
+
+**Session S6a. Tier `code-elevated`. ONE authorised code change, made: a SHA-256 content pin on
+`layer2-mechanisms.ts`, added to §C of the logos boundary battery. NO schema, flag, credential,
+migration, production change, or D2 engine correction. `layer2-mechanisms.ts` itself is
+byte-unchanged (hash re-verified at close). Nothing committed, nothing pushed.**
+
+**This discharges the item the D2 window-sequencing ruling marked OWED NOW**
+(`D-MENTOR-RULING-D2-WINDOW-SEQUENCING-MID-WINDOW-ADOPTED-2026-09-06`, item 3), which S5b correctly
+scoped-and-stopped on because its own paste authorised no code change.
+
+### The pin
+
+`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts` gains **§C2c**, built on the
+§C2b pattern the ruling names: read the target's bytes from **disk** (not from git), `sha256`, compare
+to a named constant. The hash was **derived fresh at build time** and independently equals the S5b
+drift anchor `60cefedb5f4f78822301b3f9c195813b63b00546431ecde08473b118bea52f73` — agreement is
+therefore evidence, not circularity. Failure message names the file, prints the actual hash, states
+that a committed edit is still an edit, and states that the pin is updated only as part of the ruled
+D2 correction or under a recorded founder waiver.
+
+**Because the pin reads disk bytes it catches BOTH committed and uncommitted edits — one pin
+discharges the whole obligation.** The §C2 `git status` binding cannot: the ruling says so twice
+(*"The guard detects uncommitted modifications only. A committed-and-deployed change to
+`layer2-mechanisms.ts` would not trip it."*).
+
+### Mutation-verified in FOUR directions, evidence recorded
+
+| Condition | Result |
+|---|---|
+| Uncommitted edit, window running | **248/2** — tree binding **and** pin both fire |
+| **Committed-edit simulated**, window running | **249/1** — **pin fires ALONE**; tree binding passes, proving it cannot see this class |
+| Clean, window dormant | 249/0 green |
+| **Committed-edit simulated**, window dormant | **248/1** — **pin still fires**, proving unconditionality empirically |
+
+The committed-edit condition was simulated with `git update-index --assume-unchanged` (changed bytes,
+clean `git status`) rather than by committing — same discriminating condition, fully reversible. Every
+mutation was reverted, the target hash re-verified byte-exact each time, and `git ls-files -v` confirmed
+**no index flag survived**. Re-verified again AFTER the PR19 fold. Battery **249/0 → 250/0**.
+
+### The design question the ruling does not settle — decided UNCONDITIONAL, on the record
+
+The ruling says the pin is owed *"for the same reason §C2b pins `stoic-brain.ts`"* but does not say
+whether it is unconditional (like §C2b) or window-conditional (like the tree binding).
+
+**Decided: UNCONDITIONAL.** Grounds, in order of weight:
+1. **Disarm asymmetry — decisive.** A window-conditional pin would share its off-switch with the thing
+   it polices: unsetting `GATE1_FALSE_HOLD_CAPTURE` would disarm the pin **and** stop capture in one
+   move, reopening the exact route the ruling forbids (*"What must not happen is a silent commit that
+   evades the check by exploiting the committed-edit coverage gap"*) via a flag flip that also erases
+   the evidence of its own use. **This was not left as an argument — it was tested** (row 4 above).
+2. **M1's own line.** M1 (2026-08-15) made the tree binding window-conditional and the content pin
+   unconditional. Following that shape is the faithful reading of "the same reason".
+3. **Operational identity where the ruling governs.** Under Reading A the window keeps running after
+   the correction lands, so both options behave identically at every moment the ruling reaches; the
+   divergence is post-window only, where the ruling is silent.
+4. **The standing cost was MEASURED, not assumed.** The paste characterised the target as a
+   "heavily-trafficked engine file"; git says **15 commits in 12 months** (most recent 2026-08-24,
+   bursty, none in the prior 13 days) against `stoic-brain.ts`'s **6**. More active than the
+   comparator, but ~one deliberate constant update every 3–4 weeks, paid by the PR that edits the file
+   — which is the checkpoint working, not a defect.
+
+### PR19 — REQUIRED, run as three independent reviewers on separate dimensions; ALL findings folded
+
+Each was forbidden to modify anything (uncommitted work + armed guard; the
+`review-isolation-must-cover-filesystem` lesson) and told not to trust the author's claims. **No HIGH
+on any dimension.** Every finding was **independently re-verified against source before folding.**
+
+- **Ruling fidelity — FAITHFUL.** One **MEDIUM**: a quotation presented as verbatim was a **splice** of
+  ruling:74 and ruling:86 (`grep -c` = 0 for the string as written) — replaced with ruling:74 quoted
+  contiguously. One **LOW that corrected the author's reasoning in the author's own favour**: the
+  "honest counter" claimed the ruling scopes the pin's purpose to the baseline period, which is an
+  **incomplete reading** — the same sentence-pair extends it *past* the baseline (*"This makes the
+  post-baseline rule genuinely enforceable rather than nominal"*) and mandates the pin **surviving**
+  the correction. Corrected, with the missed text now cited. One LOW: the ruling permits a **second**
+  stand-down shape (an explicit scoped allowlist, landed as its own reviewed change and removed
+  after); the comment named only the waiver. Folded.
+- **Blast radius — CLEAN, zero findings.** Verified `GUARD_RE` from source rather than from the brief;
+  0 of 15 alternatives match the edited path; diff purely additive (`grep -c '^-[^-]'` = 0 at that
+  point); the test file is imported by nothing (8 grep hits, all doc-comments); `layer2-mechanisms.ts`
+  agrees across disk/index/HEAD; no index flags; nothing committed. It also **independently confirmed
+  the pin sits outside the window conditional** (250 vs 249 = delta of exactly 1).
+- **Guard adequacy — SOUND, non-vacuous.** Independently recomputed the hash and confirmed the pinned
+  file is the real engine (`computeProximity`/`applyMechanisms` present, not a stub). On the absence of
+  a permanent self-test it argued both ways and reached a verdict worth recording: a mistyped
+  `GUARD_RE` fails **silent-green** (hence section E's probes), whereas a mistyped 64-hex literal fails
+  **immediate-red** — *"there is no typo that widens it"* — so **no self-test is owed here**. It also
+  found the same quotation defect the fidelity reviewer found (independent corroboration).
+
+**Two reviewers converged on the quotation splice from different dimensions** — the kind of agreement
+that makes a finding trustworthy rather than a matter of taste.
+
+### THE ONE FINDING NOT ACTED ON, AND WHY — a founder election, named not taken
+
+Guard-adequacy found, and this session **verified**, that the repo has an **ACTIVE commit-time gate**:
+`core.hooksPath` = `.husky/_`, and `.husky/pre-commit` **blocks commits** on five check classes (tsc;
+ESLint on the R20a modules; ByteString headers; route-export; view-grants). **It does not run this
+battery** (0 references), there is no `.github/workflows`, and `website/package.json` has no test
+script. So against the ruling's own standard — *"genuinely enforceable rather than nominal"* —
+enforcement today rests on a session choosing to run the file, and **the gap this pin closes is a
+committed-edit gap, which is precisely where that gate sits.**
+
+**Not wired in.** The paste authorises *"ONE small, reviewable code change… Nothing else."* Adding a
+blocking check to the founder's pre-commit hook changes their local commit behaviour and could block
+their commits; that is a founder election, not a session's to take. **Remedy is one line; recommended;
+disclosed in the pin's own comment so it is not lost.** (Shortfall is **inherited** from §C2b and the
+whole git guard, not introduced here.)
+
+### Window + baseline health — read-only, re-derived, cutoff `2026-09-06T12:18Z`
+
+- Buffer **162** = **138 `v1`** (frozen prefix, integrity verified — never in the rate) + **1
+  took-effect probe** (record 139, excluded) + **23 organic**.
+- **20 guard** (all `Bash`, depth `""`, `captureBasis: assessment`) + **3 consult** (all `Edit`, depth
+  `standard`, real loop closure: `opened`×1 / `reopened`×2, `carriedPrior` on two). Independently
+  corroborated by `gate1.log`: 17 `GUARD-CAUTION` + 2 `GUARD-PROCEED` + 1 `GUARD-BLOCK` = **20**, and
+  3 `CONSULT` = **3**.
+- **BASELINE: 1 of 5 days with consult records** (2026-09-06 UTC) — unchanged from S5b, and
+  **unchangeable today**, since that UTC day is already counted.
+- `GATE1_STATE_DIR` **unchanged** at `/Users/clintonaitkenhead/.sage-gate1`; a single buffer file; no
+  fragmentation; append-only, never refreshed.
+- **D2 tagging defect, raw:** guard **12/20**, consult **0/3** — the S5b concentration holds at a
+  larger n, still routed to the window, still not a finding.
+- **Schema note:** consult records are `v3` and carry `captureBasis: null`; guard records are `v4` and
+  carry `path: "guard"`. A schema difference, not a defect.
+
+**A CORRECTION TO THIS SESSION'S OWN INTERIM WORDING.** An interim report said the guard "has **not**
+tripped." What was actually established is narrower: **the tree is clean of measured-set files, and
+this session's own deliberate mutations were reverted and verified.** The guard only runs when a
+session runs the battery, so there is no continuous record of trips. The honest form is **"no evidence
+of a trip; tree verified clean."**
+
+### FLAGGED, NOT RESOLVED — the tool-choice measurement-validity question, now with harder numbers
+
+`gate1.log` over the window shows **139 `AT-ACTION-SKIP-BASH`** against 20 guard and 3 consult
+captures. So **most actions produce no record at all**, and which population a session feeds is decided
+by whether it happens to use `Bash` or `Edit`. This session demonstrated it live: **the guard count
+moved 17 → 19 → 20 between commands while consult stayed frozen at 3.** Because the baseline clock is
+denominated in **consult days**, this invites deliberately preferring `Edit` to accrue days faster —
+**and that move would make the measured population less representative of actual work, which is exactly
+what part (1) requires of it.**
+
+**This is a question for the founder and possibly the mentor. It is not resolved here, and tool choice
+was not steered either way.** It happened to have no bite today (2026-09-06 UTC is already counted).
+
+**A RELATED OBSERVATION FROM PR19 (blast-radius NIT), worth carrying:** 4 of the window's guard records
+were generated by the **review session's own read-only Bash calls** — i.e. **verification activity
+enters the measured population.** Whoever computes the guard rate should decide deliberately whether
+review-generated records belong in it, rather than inheriting them silently.
+
+### Consult-availability instrument — still NAMED, still NOT BUILT
+
+Not elected in-session, so not built; its specification remains complete at the S5b health document
+§6.3, and it is owed **before publication**, not now. **One new data point for it:** the window carries
+**1 `CONSULT-OUTAGE`** against 3 successes (4 attempted). **The standing trap is restated: the
+mentor's documents state the LOSS rate, not availability — an instrument reporting availability where
+the ruling reads loss inverts every comparison.**
+
+### Honest process note
+
+One self-inflicted cost: a batched verification command ran `ls -la` over a 3,759-entry directory and
+produced a 600KB output dump, on a completion/efficiency stake named at the time in the at-action
+elicitation and not acted on. Narrowed and re-run. Cheap lesson: size a directory before listing it.
+
+### Rollback
+
+`git revert` / discard the single uncommitted file. **Nothing else to undo** — no flag, no schema, no
+migration, no production surface, no commit, no push.
+
+**STATE:** the pin is **IN and mutation-verified in four directions**; `layer2-mechanisms.ts`
+**byte-unchanged**; the window **RUNNING and untouched**; the guard **armed, green, non-vacuous**;
+**baseline 1 of 5**. **S11-D2 remains BLOCKED on the threshold. The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**
