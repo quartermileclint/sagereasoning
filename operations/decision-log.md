@@ -36386,3 +36386,95 @@ which is the status quo; nothing in production is affected either way.
 `2026-09-05-mentor-rulings-five-relays-verbatim.md` Part 4; memory
 `harness-blind-on-substrate-sessions-a11b-schema-tokens` (updated to the built state);
 `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06` (the `route_errors` half, already done).
+
+---
+
+### D-D2-VIRTUE-DOMAIN-TAGGING-SCOPED-FOR-RULING-2026-09-06
+
+**2026-09-06, ~13:10 AEST** (machine date; the context date agreed today, but the artifacts are
+dated from `date` regardless, per the standing lesson). Session **S5** of the serial arc (standing
+opener Version 2026-09-05, Standing queue row S5; paste
+`2026-09-06-SESSION-S5-D2-scope-for-ruling-SESSION-PASTE.md`). Tier `governance`, autonomous.
+**Documents only — no code, schema, flag, credential, migration or public surface touched; nothing
+built, activated or pre-approved. `layer2-mechanisms.ts`, `derive-trust-events.ts` and
+`trust-transition.ts` were READ ONLY.** Model `claude-opus-5`. HEAD at open `793e493`.
+
+**Produced:** `operations/trust-layer-2026-07/2026-09-06-D2-virtue-domain-tagging-SCOPE-FOR-RULING.md`
+and the relay-ready `2026-09-06-mentor-question-D2-virtue-domain-tagging-FOR-RULING.md`, mirroring
+P1's shape — **with one deliberate, disclosed departure: P1's §6 stated a recommendation; this one
+states none and elects no remedy, because the commissioning paste forbade both.**
+
+**The mechanism, traced from source.** Two tests for "is dikaiosyne engaged" live in
+`layer2-mechanisms.ts`. `isDikaiosyneEngaged` (`:1688`) excludes `self_preservation` when
+`SUBSTRATE_AGENT_CIRCLES_ENABLED` is on and governs the proximity floor and Q2's routing.
+`computeVirtueDomains` (`:2008`) tags dikaiosyne on `circles ≥ 1 || is_kathekon !== null` with **no
+circle test**, and its output is `virtue_domains_engaged`, from which `derive-trust-events.ts:89`
+mints one `credential-completed` per domain — effect **`increase`** (`trust-transition.ts:41`). The
+rise is one rank per event, bounded by each assessment's own proximity, and gated on
+`coverageContinuous`, **which the one live caller leaves undefined so it defaults `true`**
+(`emission-hooks.ts:169`) — so the gate does not block it.
+
+**Four findings that go beyond the register.** **(A)** the correctly narrowed test already exists,
+live, 307 lines above the un-narrowed one in the same file — so the question is not "invent a rule"
+but "why do two coexist". **(B)** the register's own D2 row is **stale, pre-Q4, and datably so**
+(row written `94ba579` 2026-07-17; `isDikaiosyneEngaged` introduced `aac6442` 2026-08-02) — it
+describes a divergence about `natural_relationship` where the live one is about circle identity.
+**(C)** Q2's first-circle routing already **adds** phronesis/sophrosyne and its own docstring says it
+deliberately **does not remove** dikaiosyne — so M-1's carried note may be half-discharged; and the
+ledger consequence was **foreseen and disclosed in that docstring at Q2's build**. **(D)** the
+second disjunct is **non-monotone**: `is_kathekon !== null` fires on 3, 2 and **0** kathekon factors
+but not on 1, so an action with *no* extracted factors tags dikaiosyne while one with a single
+factor does not — and `derive-trust-events.ts:313` shows the project closed a *different* route out
+of this same tag in July (R11/S11b) without touching the tag.
+
+**PR19 — three blind reviewers on separate dimensions; every finding folded, none refuted. The
+review changed the document's character, not just its details, and that is the honest headline.**
+Source fidelity returned four real errors, two of which **understated costs the document exists to
+weigh**: `isDikaiosyneEngaged` is **not** exported (a genuine cost of the boundary remedy), and the
+`selfCircleOnlySuppression` collapse partition omitted the `met`-only case. Also a wrong `llms.txt`
+locus (`:418` inherited from D4's row rather than re-derived; the sentence is at **`:548`**) and
+"four months" where the Q2→M-1 gap is **fourteen days** — a correction *against* the drafting
+session's own point. **Ruling fidelity + neutrality was the serious group, and its findings ran in
+one direction — toward "a change is owed", which is precisely what the paste forbade.** The
+**2026-08-02 Q4-residual ruling was omitted entirely** — the prior ruling closest to the question
+(*"the ledger's job is to accumulate what happened, not to produce a verdict"*; *"different
+principles serving different functions"*; *"the answer that is right for one is wrong for the
+other"*) — and the reviewer showed how: §2.1 quoted that comment block and **stopped immediately
+before the paragraph stating the distinction.** Q2's own mentor wording was replaced by the
+builder's docstring on the precise question being re-put; **M-1's conditional was rendered as an
+asserted premise** about "the reducer" where the mentor wrote "the implementation", framing the
+mentor as partly wrong about something the mentor never claimed; §10's two "Costs" lists were
+**structurally asymmetric** (four harms vs two harms and two benefits), ranking by composition under
+a heading that promised none; two quoted elisions both removed the same exculpatory clause; and "the
+correct two domains plus the mis-attributed one" decided the question in the prose while §13 claimed
+it did not. All folded: Finding G added, both options given symmetric Gains/Costs headings, and the
+"no change is owed" disposition **promoted to a developed Option 3** — it turns out to have the
+strongest prior-ruling support of the three, and the material supporting it was in hand and dropped.
+Register/epistemic review narrowed an over-broad honesty heading ("any live agent" → the one live
+identity), added the missing locus to the one uncited quotation (which proved to be **this project's
+own code comment, not a ruling** — now labelled), surfaced the already-ruled engagement-vs-emission
+distinction under Q-D2-1 as a fact rather than an Option-2 aside, and prompted an explicit **R18
+disposition** (ruling on the question creates no R18 obligation; a build would carry its own).
+
+**Honest limits, carried into the document.** The multi-event rise past `deliberate` remains
+**REASONED, not measured** — deliberately not upgraded. That `SUBSTRATE_AGENT_CIRCLES_ENABLED` is on
+in production is **inferred** from orientation-reading rows that cannot exist otherwise; a repo
+session cannot read Vercel. **Live exposure today is nil on the one live harness identity** — no
+`credential-completed` since 2026-07-18, per D1's own query and its 409-before-emission cause — and
+**other agent ids were not checked**, which is stated rather than glossed.
+
+**Register:** the D2 row is **annotated, appended not rewritten**, carrying findings A and B, the
+Q4-residual qualification of A, and — because the append-only discipline forbids editing it — the
+`llms.txt:418`→`:548` correction to **D4's** row recorded in D2's. Table integrity re-verified at 3
+columns (the pipe-escaping defect a prior session hit on this same table).
+
+**Status:** Adopted (SCOPED — question not decided, no remedy elected, nothing built). **Weights
+remain BLOCKED; the S11 flip remains REFUSED; this question unblocks neither.** Next: the founder
+relays the question. Queue row S5 done; **S4 next** — noting that S4's leg (c) asks to confirm "S5
+needs no engine edit", which **this scope cannot confirm**: it depends on how §9 is ruled, and the
+engine option interacts with the not-yet-started false-hold window (the frozen 130-record buffer is
+insulated, since capture stores the already-computed field; a *new* window would not be).
+Cross-references: `S11-FLIP-PREREQUISITES-REGISTER.md` §D D1/D2/D4 · the 2026-07-19 self-circle
+verbatim · M-1 in `2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` · the Q4-residual verbatim
+`operations/agent-circles-2026-08/2026-08-02-mentor-consultation-q4-residual-verbatim.md` ·
+`D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`.
