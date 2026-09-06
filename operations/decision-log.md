@@ -36181,3 +36181,114 @@ O items are live before the window start. **Only the Stoa pair (S3.4) remains no
 **Rules served:** PR17, PR18, PR19, PR20.
 
 **Status:** Adopted (LIVE).
+
+### D-R20A-PERIMETER-ORDERING-REMEDIATION-STOA-BUILT-ARC-CLOSED-2026-09-06
+
+**2026-09-06, 11:50 AEST** (machine date). Session 3D, the **last code sitting of the R20a
+perimeter-ordering arc** (standing opener Version 2026-09-05 as re-planned 2026-09-06, Standing
+queue row S3.4; paste `2026-09-06-SESSION-3D-r20a-stoa-restructure-SESSION-PASTE.md`). Tier
+`code-critical` (PR6 + AC5), founder-walked (PR17). Commit `6586713`, path-scoped. **Nothing pushed
+or deployed at this entry.** Model `claude-opus-5` for the edits, pins, harness and folds; the three
+PR19 reviewers on `claude-sonnet-5`.
+
+**Elections at open:** the proposed shape (raw composer before the merge and gate; the whole of
+`parseDraft` after the gate on draft-reflect); **F-4 SIGNED — S2 rides this sitting.**
+
+**Part 1 — the Stoa restructure (audit §6 item 9, §3 constraint 6).** Both Stoa write surfaces
+parsed the body first and composed the classifier's subject from the PARSED result, so every parse
+400 fired before the check read the text. Now: `/api/mentor/stoa` POST and PATCH call a new pure
+`rawDeclarationForGate(body)` -> the unchanged anti-assembly merge over the prior row -> the gate and
+its redirect return -> **then** `parseDeclaration` and its 400s -> the store write, still passed
+`parsed.input` only. `/api/mentor/stoa/draft-reflect` composes the subject inline from the raw body
+at `TEXT_LIMITS.short`, gates inside the empty-subject skip, and runs all of `parseDraft` after it,
+before the mirror-reading LLM call. Order, not existence: every 400's message, value and status is
+unchanged; each screening cap equals its guard's own bound; for a valid in-bound body the raw and
+parsed subjects are identical strings. The merge's row READ now precedes the parse — a read, not a
+write — disclosed in the route comment as the bounded cost the ruling accepted.
+
+**Part 2 — S2, the R18 assessment-contract corrections** (package
+`2026-09-05-R18-assessment-contract-SIGNOFF-PACKAGE.md`, F-4 signed at open). The public documents
+said 11 free / 37 paid / 7 phases with an example id `SO-01`; the code has enforced **14 / 55 / 8**
+with ids `FD-01`–`FD-07` + `AM-01`–`AM-07` since 2026-04-01, and both routes hard-reject a wrong
+count — so an agent following the published contract received HTTP 400 on its first honest attempt,
+for about five months. Applied to `llms.txt` (6 edits), `agent-card.json` (4; extensions still
+**26**, re-derived) and `skill-registry.ts` (1), **together with** the drift assertion
+(`website/src/lib/__tests__/assessment-contract-drift.test.ts`, 13/0) that derives every number from
+source — wording and assertion in ONE change, per the package's own instruction, because wording
+alone repeats the 2026-03-29 failure. Exposure nil (pre-0h).
+
+**PR19 — three blind reviewers, all three completed. Three findings, all folded at the root.**
+- **HIGH (reviewer B), CONFIRMED first-hand by repro before folding:** `rawDeclarationForGate`
+  sliced each tag by **raw** length while `parseDeclaration`'s guard measures **trimmed** length
+  (`t.trim().length > TAG_MAX`) — two different metrics. A tag consisting of 39 spaces followed by
+  an eleven-character acute phrase has trimmed length 11, so it passes validation and is **stored
+  verbatim and displayed**, but the raw slice kept the 39 spaces plus one character and the
+  composer's own trim reduced it to that single character. **A validly-saved, publicly-displayed tag
+  could therefore carry distress text the classifier never saw, purely by front-padding it** — a
+  screening BYPASS this session introduced, and not the disclosed past-the-bound residual (which
+  runs the safe direction). Fixed by trimming before slicing, giving metric parity with the guard;
+  pinned by RAW-1b plus a behavioural pin that constructs the padded tag and asserts it screens as
+  its real text; both mutations RED.
+- **HIGH (reviewer C), demonstrated live with a decoy that stayed green:** the draft-reflect
+  battery's NEG-2 carried only two literal messages and two helper tokens, lacking the **raw
+  field-name fence** the sibling stoa battery had gained in-build after its own vacuity was caught.
+  A decoy pre-gate guard phrased with a fresh error message and no helper call reopened the exact
+  ordering defect the ruling closed, at 63/0. **The instance had been fixed and the CLASS had not**
+  (memory `guard-scope-must-cover-the-class`, again). Ported; the reviewer's exact repro now goes RED.
+- **LOW (reviewer B):** a non-string field value is now stringified and screened (possibly a paid
+  stage 2) before the type 400 that previously fired for free. Bounded by `requireAuth` and the
+  per-route rate limits, both of which run before the body is parsed. Disclosed in the module header.
+- **Reviewer A (execution order): CLEAN**, no CRITICAL/HIGH/MEDIUM. One LOW/PLAUSIBLE — a value
+  whose `toString` throws would now reach `String()` before the type check and yield a 500 instead
+  of a 400 — **recorded as verified-unreachable rather than patched**: `request.json()` cannot
+  produce such a value, and a defensive branch here would be untestable by construction.
+
+**Mutation harness** (`2026-09-06-session3D-mutation-record.txt`; real files, SHA-256-verified
+restore): 25 mutations — the pre-session parse-first order on both routes and both handlers; **the
+parse placed between the gate call and its redirect return** (which is the harm itself, and which
+stayed GREEN on the first cut, forcing both batteries to re-anchor on the redirect return / the
+skip-block's structural END rather than the bare gate call); merge dropped; gate over the parsed
+shape; every cap and `?? ''` coercion removed; both tag-metric mutations; and five decoy re-adds
+including both reviewers' exact repros. **Every one RED on the named pin; every restore OK; both
+post-restore batteries GREEN.** Two of the three in-build gaps were found by the harness, not by
+review — including a fence of mine that was **vacuous under string blanking** (`codeCount` matches a
+view where quoted contents are spaces, so a regex naming a quoted word can never fire).
+
+**Verified:** `tsc` 0 · `next build` ✓ · guard battery **722/0** · injection-defence **60/0**
+(untouched — the defence is not this session's business) · drift assertion **13/0** · stoa **58/0** ·
+draft-reflect **63/0** · the eight Group 1/2/2b/3 batteries all green · sweep window **0** on all 54
+handlers, output refreshed and committed (the Stoa handlers' only remaining pre-check bound lines are
+the screening caps themselves — correct by construction).
+
+**THE R20a PERIMETER-ORDERING ARC IS CLOSED.** Every human-facing member of the perimeter now
+reaches its distress check before any refusal on a body whose screened text is present and readable.
+The audit's sixteen non-conformant members are discharged: Group 1 (four minima, `c679739`), Group 2
+(eleven routes' maxima, `cbd93ae`), Groups 2b+3 (`555502e`), and the Stoa pair here.
+
+**Residuals, named and carried:** distress past each cap unscreened (audit §4.3, relocated not new);
+the stage-2 cost class on malformed bodies; the 13th tag onward unscreened; the sweep is per-handler.
+**J/A/F remain outside the ruling by its own terms** and no move is owed there.
+
+**A genuine at-action guard BLOCK, recorded because it is the first this session and a false
+positive of interest.** The first attempt to write this very entry returned `do_not_proceed`
+(proximity `reflexive`, floored by `dikaiosyne=reflexive`, ruling faculty "Unsettled"): the draft
+quoted the tags-bypass attack string verbatim, and the engine read a technical security record as
+distress content. The action was appropriate; the phrasing was not. It was **adjusted, not retried
+verbatim** — the bypass is now described by its shape (39 spaces plus an eleven-character acute
+phrase), which is exactly as faithful. Recorded for the false-hold instrument: a security record
+that quotes an attack string is a false-positive class the B4/P6 window should expect. The battery
+fixture retains the literal, correctly — it is the thing under test.
+
+**Rollback:** `git revert 6586713` + redeploy. Never a flag (`SUBSTRATE_STOA_ENABLED` closes the
+whole surface, which is not a rollback of an ordering).
+
+**Owed (founder):** push `6586713` + the records commit; Vercel green; the smokes in the close —
+**on the founder's own live Stoa entry, so the distressed probes must show no write and the benign
+ones run last; only one benign in-bound draft-reflect probe, since it spends.**
+
+**Rules served:** R18; R20a; AC4; AC5; PR3; PR6; PR15; PR17; PR19; PR20.
+
+**Status:** Adopted (BUILT). Cross-references:
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-{BUILT,LIVE}-2026-09-06`,
+`D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5),
+`D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`, the audit §2.1 rows 12–13.

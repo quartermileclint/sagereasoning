@@ -1,0 +1,27 @@
+=== src/app/api/mentor/stoa/route.ts
+  parse-before-gate-POST (the pre-session order)   exit=1 restored=OK -> RED as required; fails: ORD-2(POST), NEG-2(POST)
+  parse-before-gate-BOTH                           exit=1 restored=OK -> RED as required; fails: ORD-2(POST), NEG-2(POST), ORD-2(PATCH), NEG-2(PATCH)
+  parse-between-gate-and-redirect-POST             exit=1 restored=OK -> RED as required; fails: ORD-2(POST)
+  merge-dropped (gate over raw only, POST)         exit=1 restored=OK -> RED as required; fails: INV-15, ORD-1(POST), ORD-2(POST), ORD-3(POST)
+  gate-over-parsed-input (old shape)               exit=1 restored=OK -> RED as required; fails: ORD-1(POST), ORD-2(POST), ORD-3(POST)
+  raw-text-cap-removed                             exit=1 restored=OK -> RED as required; fails: RAW-1
+  raw-nullish-removed                              exit=1 restored=OK -> RED as required; fails: RAW-1
+  tag-cap-untrimmed (the PR19 HIGH: raw-length slice vs the guard's trimmed metric) exit=1 restored=OK -> RED as required; fails: RAW-1, RAW-1b
+  tag-guard-metric-changed-to-raw                  exit=1 restored=OK -> RED as required; fails: RAW-1b
+  raw-tag-cap-removed                              exit=1 restored=OK -> RED as required; fails: RAW-1, RAW-1b
+  decoy-visibility-readd-before-gate               exit=1 restored=OK -> RED as required; fails: NEG-2(POST)
+  decoy-fieldmax-readd-before-gate                 exit=1 restored=OK -> RED as required; fails: NEG-1(POST), NEG-2(POST)
+  decoy-visibility-readd-obfuscated                exit=1 restored=OK -> RED as required; fails: NEG-2(POST)
+  skip-rewritten-to-lt                             exit=1 restored=OK -> RED as required; fails: SKIP-1
+  merge-signature-narrowed-to-parsed-type          exit=1 restored=OK -> RED as required; fails: RAW-3
+  post-restore battery                             exit=0 -> GREEN
+=== src/app/api/mentor/stoa/draft-reflect/route.ts
+  parse-before-gate (the pre-session order)        exit=1 restored=OK -> RED as required; fails: ORD-2, NEG-2
+  parse-between-gate-and-redirect                  exit=1 restored=OK -> RED as required; fails: ORD-2
+  raw-cap-removed-one-field                        exit=1 restored=OK -> RED as required; fails: RAW-1
+  raw-nullish-removed                              exit=1 restored=OK -> RED as required; fails: RAW-1
+  compose-from-parsed-draft (old shape)            exit=1 restored=OK -> RED as required; fails: ORD-1, ORD-2, ORD-3, RAW-1, NEG-1, NEG-2
+  decoy-nothing-to-reflect-before-gate             exit=1 restored=OK -> RED as required; fails: NEG-2
+  decoy-validateTextLength-before-gate             exit=1 restored=OK -> RED as required; fails: NEG-1, NEG-2
+  post-restore battery                             exit=0 -> GREEN
+ALL MUTATIONS CAUGHT AND RESTORED

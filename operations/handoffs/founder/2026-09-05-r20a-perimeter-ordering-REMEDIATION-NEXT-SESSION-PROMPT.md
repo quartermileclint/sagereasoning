@@ -8,6 +8,14 @@
 
 > **RULED ADDITION 2026-09-05 (mentor Part 5, `2026-09-05-mentor-rulings-five-relays-verbatim.md`) — GROUP 2b, added to this list:** the principle extends beyond length guards. **P′ (three sites, Group-1 shape):** `score-scenario/route.ts:293` (`scenario` presence, screened field `response`), `mentor/journal-feed/route.ts:47` (sibling presence, screened `impression`), `journal/route.ts:34` (`day_number` presence, screened `reflection_text`) — line numbers at `19509bb`, re-derive. **O where the screened text is present, case by case:** e.g. `mentor/private/reflect` `bypass_pattern_cache` boolean 400; the Stoa `visibility` enum; `/api/reason`'s `session_marker`/`loop_id` 400s (human path). **Outside the principle, no move owed:** malformed-JSON 400s (J), founder-only 403s (A), flag-off 503s (F). The ruled boundary: route open + caller the intended human user + screened text present and readable, jointly.
 
+> # ⛔ ARC CLOSED 2026-09-06 — THIS PROMPT IS SPENT.
+> All sixteen non-conformant members are remediated: Group 1 (`c679739`), Group 2 (`cbd93ae`),
+> Groups 2b + 3 (`555502e`), and item 9, the Stoa pair (`6586713`, Session 3D —
+> `D-R20A-PERIMETER-ORDERING-REMEDIATION-STOA-BUILT-ARC-CLOSED-2026-09-06`). Every human-facing
+> perimeter member now reaches its distress check before any refusal on a body whose screened text
+> is present and readable. **Do not open a new sitting under this prompt.** The next row of the
+> serial arc is **S9** (`2026-09-06-SESSION-S9-harness-a11b-redaction-SESSION-PASTE.md`).
+
 # NEXT SESSION PROMPT — Session 3: the R20a perimeter-ordering REMEDIATION
 
 **Paste into a fresh session after the standing opener. Tier: `code-critical`** — every candidate is a
