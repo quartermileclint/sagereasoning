@@ -37019,3 +37019,72 @@ already reset at that point.
 built. No code, schema, flag or credential changed by this verification. **The false-hold window has
 not started; `GATE1_FALSE_HOLD_CAPTURE` remains unset. The S11 flip remains REFUSED; weights remain
 BLOCKED; the 0h call remains the founder's.**
+
+### D-MENTOR-RULING-F3PRIME-DISCHARGED-CONSULT-BOUND-ADOPTED-2026-09-06
+
+**2026-09-06, ~18:50 AEST** (machine date). Continuation of session S4. Tier `governance` —
+**documents only; no code, schema, flag or credential changed by this entry. The window has NOT been
+started by this entry; `GATE1_FALSE_HOLD_CAPTURE` remains unset at the time of writing.** Verbatim:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-F3prime-discharged-consult-bound-verbatim.md`
+(**verbatim wins over this cell**). Model `claude-opus-5`.
+
+**RULED. BOTH WINDOW PRECONDITIONS ARE NOW RESOLVED AND THE FOUNDER MAY SET THE FLAG.**
+
+**Q1 — F-3′ is DISCHARGED as a gate.** Reading (a) is correct: F-3′'s ground was stated in explicit
+denominator terms, the part-(3) ruling removed the guard population from part (3)'s denominator, and
+*"a precondition whose rationale has been dissolved by a subsequent ruling does not survive as a
+formality. Preconditions are not self-sustaining. They exist to protect something."* **What survives
+is the honesty requirement, which MIGRATES to the guard disclosure** — the guard population is
+reported separately with its availability rate disclosed.
+
+**Q2 — YES, a consult-side availability bound IS owed**, on the same reasoning that produced F-3′,
+and the consult figures make it *"more urgent, not less."* The mentor adopts this session's own
+measurement (guard 31.7% vs **consult 70.3%** over the full log span) and states the consequence
+plainly: *"A measurement whose denominator is losing 70% of its attempts to outage is not measuring
+what it claims to measure. It is measuring the subset of actions examined during low-latency
+periods, which is a systematically different population from the full set of actions attempted."*
+And on the scoping note's existing requirement: *"Counting the losses tells you the rate. It does not
+bound it."*
+
+**Q3 — NO, the window does not wait for it. The bound is a condition on PUBLICATION, not on START.**
+*"A bound that must be measured cannot be measured before the window starts. Requiring the bound
+before the window starts is requiring the measurement before the measurement is taken. That is not a
+precondition. It is a circularity."* If the measured consult rate misses the bound, the findings are
+**published with that disclosed as a qualification on validity, not suppressed.**
+
+**On the threshold — NOT set now, and deliberately not F-3′'s numbers.** F-3′'s ≤5%/≤10%/≥20 was
+calibrated for the guard path; the consult path is an order of magnitude above it and reusing those
+numbers *"would defer the window indefinitely. That is not the right outcome."* **The consult-side
+threshold is set after the first FIVE ordinary post-remedy days of window data**, on the same
+discipline as F-3′'s ≥3-ordinary-days requirement.
+
+**What the founder may do today, in the mentor's own summary:** set `GATE1_FALSE_HOLD_CAPTURE`; the
+window starts; F-3′ discharged as a gate; consult availability counted from day one per the scoping
+note; the guard population reported separately with its availability disclosed; the consult bound
+assessed after five ordinary post-remedy days; **publication waits for that assessment**; the D2
+sequencing unchanged.
+
+**⚠ A FORESEEABLE COLLISION THIS SESSION IDENTIFIED AT SOURCE, NAMED FOR S11-D2 RATHER THAN RESOLVED
+HERE — it is not a reason to delay the window.** The logos byte-identity guard
+(`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts`) is **window-conditional by
+the M1 ruling: it binds if and only if `GATE1_FALSE_HOLD_CAPTURE === 'true'`.** Its `GUARD_RE`
+includes **`layer2-mechanisms`** — which is exactly the file D2's `computeVirtueDomains` correction
+must edit. **So the moment the flag is set, the D2 build session will trip this guard on its own
+working-tree edits.** Two further facts, both verified at source: the guard reads `git status
+--short`, so it catches **uncommitted** modifications only — a committed-and-deployed change would
+alter the measured instrument mid-window without the guard detecting it, which is a gap in the guard
+rather than a licence; and §C2/§C2b (the `stoic-brain.ts` freeze + SHA pin) are **unconditional** and
+unaffected either way. **The open question for S11-D2 — genuinely open, and the mentor's phrase
+*"after the window establishes a baseline"* does not settle it — is whether "after the baseline"
+means after N baseline days (mid-window, tripping the guard, needing the founder's explicit
+stand-down) or after the window closes.** The D2 ruling's own mid-window regime-boundary discussion,
+which cites AE-1's segmentation precedent, implies **mid-window**; the guard implies otherwise. That
+is S11-D2's to resolve, with the founder, before it edits anything.
+
+**Records:** this entry; the verbatim ruling; the register's P5/P6/B4 rows annotated; the standing
+opener's S4 row updated. **Rollback:** `git revert` (documents only).
+
+**Status:** **the window may now start — the act remains the founder's and has NOT been taken by
+this session.** `GATE1_FALSE_HOLD_CAPTURE` unset at this writing; `GATE1_STATE_DIR` confirmed durable
+(`/Users/clintonaitkenhead/.sage-gate1`). **The S11 flip remains REFUSED; weights remain BLOCKED; the
+0h call remains the founder's — the ruling touches none of them.**
