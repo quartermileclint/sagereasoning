@@ -3,20 +3,54 @@
 # ============================================================================
 # SageReasoning Pre-Commit Hook
 #
-# Four checks, in order:
-#   1. TypeScript compilation (full codebase) — catches unused code, type
+# Six checks, in order:
+#   1. Measurement-integrity battery (ALWAYS, whole repo) — runs
+#      website/src/app/logos/__tests__/human-practitioner-boundary.test.ts.
+#      Its SECTION C2/C2b/C2c content pins read DISK bytes of stoic-brain.ts and
+#      layer2-mechanisms.ts, so unlike the git-status binding they catch a
+#      COMMITTED edit — which is exactly the gap the D2 window-sequencing ruling
+#      (2026-09-06) required be closed "genuinely enforceable rather than
+#      nominal". Runs ALWAYS, not only when a measured file is staged: the
+#      byte-identity guard's subject is files MODIFIED IN THE WORKING TREE,
+#      which need not be staged, so a staged-only trigger could not enforce it
+#      at all; and a trigger keyed on the committer's staging choices makes the
+#      gate rest on the very session discipline the pin exists to replace.
+#      Cost is not a factor: measured at ~0.5s against a full-codebase tsc.
+#      LIMIT, stated rather than papered over: the working-tree byte-identity
+#      guard binds only when GATE1_FALSE_HOLD_CAPTURE is set in the ENVIRONMENT
+#      OF THIS HOOK (M1 ruling 2026-08-15, "bind if and only if"). That variable
+#      comes from .claude/settings.local.json, so it is present when a Claude
+#      Code session commits and ABSENT under GitHub Desktop — where this check
+#      therefore enforces the unconditional C2/C2b/C2c pins only. This hook
+#      deliberately does NOT set or fake that variable: forcing it would bind
+#      the guard while the window is stopped, contradicting M1, and is a policy
+#      change that cannot ride a plumbing change.
+#      SECOND LIMIT, disclosed because it is a real cost on the founder's
+#      workflow (PR19 2026-09-06, HIGH, reproduced live): the battery is ONE
+#      flat script with no test isolation, so this gate blocks on ANY of its
+#      assertions, not only the C2/C2b/C2c pins -- including section D's checks
+#      that each linked practice route still exists. An unrelated in-progress
+#      page rename therefore blocks EVERY commit until it is finished, exactly
+#      as a type error already does. That was judged acceptable and NOT narrowed:
+#      extracting the pins into a second script would put the SHA constants in
+#      two places, which is the drift class this project keeps being bitten by,
+#      and it exceeds the authorised scope. What WAS fixed is the honesty defect
+#      it exposed -- the failure message no longer asserts that a measured file
+#      changed, because for a section-A/B/D failure that is false and sends the
+#      reader hunting a waiver they do not need.
+#   2. TypeScript compilation (full codebase) — catches unused code, type
 #      errors, and anything noUnusedLocals/noUnusedParameters surfaces.
-#   2. ESLint on safety-critical files only — extra guard on R20a modules.
-#   3. ByteString header check on STAGED API files only — catches non-ASCII in
-#      HTTP header literals, which throws at runtime while checks 1 and 2 (and
+#   3. ESLint on safety-critical files only — extra guard on R20a modules.
+#   4. ByteString header check on STAGED API files only — catches non-ASCII in
+#      HTTP header literals, which throws at runtime while checks 2 and 3 (and
 #      next build) all pass green. IW-2 route (a); see the script's own header
 #      for exactly what it covers and what it does not.
-#   4. Route-export check on STAGED route.ts files only — catches a non-handler
+#   5. Route-export check on STAGED route.ts files only — catches a non-handler
 #      export (a helper, a constant, an injectable test seam) that fails
 #      `next build` at Vercel while tsc and the tsx test suite both stay green.
 #      Reflections-arc item-3 leftover, taken up 2026-08-26; see the script's
 #      own header for exactly what it covers and what it does not.
-#   5. View-grants check on STAGED .sql files only — catches a CREATE VIEW
+#   6. View-grants check on STAGED .sql files only — catches a CREATE VIEW
 #      with no matching REVOKE ALL in the same file, which leaves Supabase's
 #      default ALL-privilege grant (SELECT + write) standing on a new public
 #      view. Reflections-arc item-3 leftover, taken up 2026-08-26; see the
@@ -25,7 +59,7 @@
 #      vulnerability_flag_owner_view — held pending its own founder decision,
 #      NOT allow-listed, so staging that file will correctly still flag it).
 #
-# If either fails, the commit is blocked. Fix the error, re-stage, commit.
+# If any fails, the commit is blocked. Fix the error, re-stage, commit.
 #
 # Requires Node.js. If npx is not found (e.g. GitHub Desktop on a machine
 # without Node in PATH), the hook prints a warning and allows the commit.
@@ -41,6 +75,28 @@ if ! command -v npx >/dev/null 2>&1; then
   echo "  Install Node.js to enable compile-time verification on commit."
   echo "  The tsconfig.json flags still enforce at build time on Vercel."
   exit 0
+fi
+
+echo "Pre-commit: measurement-integrity battery (logos boundary + C2/C2b/C2c pins)..."
+# `if ! ( ... )` rather than a bare command followed by `if [ $? -ne 0 ]`: this
+# script runs under `sh -e`, where a bare failing command terminates the script
+# AT THAT LINE and the following if-block is never reached. Every pre-existing
+# check in this file has that latent shape, so their custom messages are dead
+# code too; this one is written reachable because the guidance below is the
+# point of the check (PR19 2026-09-06, LOW, reproduced both ways).
+if ! ( cd website && npx tsx src/app/logos/__tests__/human-practitioner-boundary.test.ts ); then
+  echo ""
+  echo "Boundary battery FAILED -- commit blocked. READ THE FAIL LINE ABOVE: it"
+  echo "  names the assertion, and the two cases need opposite responses."
+  echo ""
+  echo "  * A C2/C2b/C2c pin, or the byte-identity guard: a MEASURED file changed."
+  echo "    Restore it. Update a pin ONLY as part of the ruled D2 correction or"
+  echo "    under a recorded founder waiver. Do NOT bypass with --no-verify."
+  echo ""
+  echo "  * ANYTHING ELSE (sections A/B/D -- import boundaries, page routes,"
+  echo "    required content): an ordinary defect on the Logos surface. Nothing"
+  echo "    measured has changed and no waiver is involved. Fix or stash it."
+  exit 1
 fi
 
 echo "Pre-commit: TypeScript compilation check..."
