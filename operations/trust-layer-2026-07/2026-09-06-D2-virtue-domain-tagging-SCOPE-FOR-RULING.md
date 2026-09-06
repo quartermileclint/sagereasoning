@@ -1,5 +1,19 @@
 # D2 — What tags a virtue domain as engaged (SCOPE, FOR RULING)
 
+> **⚠ RULED 2026-09-06, THE SAME DAY. THIS DOCUMENT IS THE PRE-RULING STATE AND IS DELIBERATELY NOT
+> REWRITTEN** — it is the document the mentor actually ruled from, so amending its argument would
+> falsify the record of what was put. **Read the ruling first:**
+> `2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md` (binding; verbatim wins).
+> **Disposition: a change IS owed** — at the **engine** (`computeVirtueDomains`), with the
+> over-broad `is_kathekon !== null` trigger corrected **in the same pass**, and **sequenced AFTER the
+> false-hold observation window opens**. **§10's Option 3 is ruled against BY NAME**: the
+> accumulation/verdict distinction *"governs how evidence is treated once correctly attributed. It
+> does not govern whether the attribution is correct in the first place."* So **§10's claim that
+> Option 3 has the strongest prior-ruling support did not survive** — the mentor engaged that
+> support directly and explained why it does not carry. **One question here was never relayed and is
+> therefore UNRULED: §9's Q-D2-4** (`\|\| hasNaturalRelationship` on a credit surface) — a defect in
+> the relay, not a mentor omission.
+
 **Status:** Authored 2026-09-06 (from `date`; HEAD `793e493`). **`governance` — documents only.**
 No code, schema, flag, credential or public-surface change; nothing built, activated, or
 pre-approved. This is the "its own design step" the S11 register's D2 row leaves undecided.
