@@ -36031,3 +36031,114 @@ both stand as record either way).
 
 **Status:** Adopted. Cross-references: `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06`,
 `0126645`, `97db750`.
+
+### D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-BUILT-2026-09-06
+
+**2026-09-06, 10:36 AEST** (machine date; session opened 08:55 AEST). Session 3C of the R20a
+perimeter-ordering arc — the first sitting of the single serial arc (standing opener Version
+2026-09-05 as re-planned 2026-09-06, Standing queue B row S3.3; paste
+`2026-09-06-SESSION-3C-r20a-remediation-group2b-group3-SESSION-PASTE.md`). Tier `code-critical`
+(PR6 + AC5), founder-walked (PR17): the AI edited, pinned, mutation-verified, ran PR19 and committed;
+**nothing is pushed or deployed — production is unchanged at this entry.** Commit `555502e`,
+path-scoped (16 files under `website/src/app/api/` + the refreshed sweep output). Model
+`claude-fable-5-1` for the edits, pins, harness and fold; the three PR19 reviewers ran on
+`claude-sonnet-5` at the founder's election (the model was dropped for the review and restored after).
+
+**Elections at open (AskUserQuestion):** scope = BOTH groups, one PR19, one push; journal-feed's two
+`event_timestamp` 400s (class O, screened text present, omitted from the paste) MOVED in the same
+edit. F-13: two interactive peers still showed (`sagereasoning-43`, `sagereasoning-a9`); read via the
+session tools, both were idle with completed turns and not awaiting input, and their last requests
+(push `0bc1e56`; close 43) were already discharged — reported before any write.
+
+**Executed, under the 2026-09-06 length-guard ruling and the mentor's 2026-09-05 Part 5 extension
+(P′ and O where the screened text is present and readable; J/A/F outside). Order, not existence —
+every guard value, message and status code byte-identical, reviewer-verified.**
+
+*Group 2b:* `/api/score-scenario` — the `scenario` presence/type 400 after the redirect return.
+`/api/mentor/journal-feed` — the three-field presence 400 + the two `event_timestamp` 400s after the
+check; the subject composed with `String(s ?? '')` (an absent field contributes nothing) and the
+check wrapped in `if (distressText.trim())` so an all-empty body skips stage 2 and falls to the 400
+(Part 5's boundary: the principle binds only where the screened text is present). `/api/journal` —
+`!day_number || !reflection_text` SPLIT: the screened half stays; the `day_number` presence half and
+the 1–56 range 400 after the sentinel block (message identical on both halves). `/api/mentor/private/
+reflect` — the `bypass_pattern_cache` boolean 400 after the moved minimum (the pre-remediation
+relative order max/max/min/boolean restored). **`/api/reason` human path** — the `session_marker`
+and `loop_id` validations in a dual-site closure `preSubstrateFieldGuardError` (assigns the two
+validated values as a side effect): called at the ORIGINAL site on the agent path
+(`r20aAudience !== 'human_user'` — order, messages, billing posture byte-identical) and after the
+redirect block on the human path, after the human-path length call, before token validation.
+**This lands the item the window start was coupled to** (the `/api/reason` freeze; E5). The route
+comment's three-class message-precedence disclosure is UPDATED: (b)/(c) no longer differ on the human
+path; only (a) the `clarification_response` TYPE check keeps the delta.
+
+*Group 3 (the founder-only proof routes — Part 5's class A excludes only the person a 403 turns away,
+not the founder the surface is designed for):* `/api/founder/hub/ring-proof` — the `persona` enum,
+the `message` `<5` minimum and its maximum after the check; new cap `screenedMessage` at `medium`;
+**the redirect's analytics row now records `persona` bounded-or-null** (a valid persona — max 7
+chars — is byte-identical; an invalid one was previously unreachable; reviewer-verified no injection
+or unbounded-row vector). `/api/mentor/ring/proof` — the `<5` minimum, the maximum, the `hub_id`
+enum and the `bypass_pattern_cache` boolean after the check; cap at `medium`. `/api/support/agent/
+proof` — the three minima, the `channel`/`priority` enums and the two maxima after the check;
+`subject` capped at `short`, `message` at `medium`; `customer` stays typeof-only (never screened).
+
+**Corrections to the paste, disclosed:** (1) `/api/mentor/private/reflect` has NO `hub_id` enum — the
+paste conflated it with `/api/mentor/ring/proof`'s, which moved under Group 3. (2) The journal-feed
+timestamp O items were missing from the paste's O table (elected in).
+
+**Pins.** Three NEW FV-6 batteries (`founder/hub/ring-proof`, `mentor/ring/proof`,
+`support/agent/proof`; 20 pins each: INV/PRES/ORD/ENUM/MAX/CAP/NEG-1/NEG-2). Five existing batteries
+extended: score-scenario SIB-1..3 (21), journal DAY-1..3 (22), journal-feed SIB-1..3 + TS-1 +
+re-anchored on the new skip-block END + the `?? ''` cap regex (23), private/reflect BYP-1..3 (21),
+reason FLD-1..5 (19). **New this session on every touched battery: NEG-2, the NON-LENGTH class
+fence** — the moved 400s' quoted error literals (comment-stripped, un-blanked source) AND their
+structural tokens (`!scenario`/`typeof scenario`, `?.trim()`/`new Date(event_timestamp)`/`isNaN(`,
+`!day_number`/`day_number <|>`, `body?.bypass_pattern_cache`/`requestedBypass`,
+`SESSION_MARKER_VALUES`/`validateLoopId(` outside the closure body, `ALLOWED_*.includes(`,
+`body?.hub_id`) must not occur in the pre-check span. **Mutation harness (real files, SHA-256-verified
+restore; `mutate3c.py`, scratchpad):** 56 mutations on first run + 3 on the fold — before-check,
+between-check-and-return, inside-block-before-check, deleted, cap-removed, cap-at-wrong-bound,
+skip-block-removed, `?? ''`-removed, decoy re-adds (presence/typeof/enum/boolean/timestamp/marker
+literal/marker token/loop_id/bare-length), the `/api/reason` agent-call-after-check, audience-literal
+swap and marker-validation-hoisted-out-of-closure — **every one RED on the named pin(s), every
+restore OK, every post-restore battery GREEN.** Record: `mutation-record-3c.txt` (scratchpad;
+summarised in the close).
+
+**PR19 — three blind reviewers in parallel, all completed (no session-limit death this time).**
+A (execution order on the actual control flow, decoy bypasses, `/api/reason` audience exhaustiveness,
+the journal-feed skip, byte-for-byte diff of every message/status): **CLEAN, no findings.** C
+(byte-identity, agent-path preservation, the ring-proof `persona` row, original-pin regressions,
+vacuous `-1` comparisons, the guard battery): **CLEAN**, one LOW/NIT (a new pin's `> -1` guarantee
+rests on an earlier pin in the same file — house style, not exploitable; noted, not changed).
+B (screening caps, classifier boundedness, cost): **two CONFIRMED MEDIUM, both folded at the root:**
+`/api/founder/hub/ring-proof`'s retained presence half was `typeof messageInput !== 'string'` ONLY,
+and `/api/support/agent/proof`'s `subject`/`message` halves likewise — an EMPTY string passed the type
+check and reached stage 2 (Haiku invoked on `''` / `'\n\n'`) where the route used to 400 for free; and
+inconsistent with the sibling `/api/mentor/ring/proof`, which this same diff wrote correctly as
+`!taskDescription || typeof … !== 'string'`. Both now falsy checks; PRES-1 asserts the falsy form and
+that no typeof-only variant survives; mutation-verified (typeof-only re-add → PRES-1/PRES-2 RED, ×3).
+B also confirmed: every cap equals its guard's bound; `day_number`/`bypass_pattern_cache`/
+`session_marker`/`loop_id` never touch a classifier subject; no new amplification vector (rate limits
+unchanged; the proof routes founder-only).
+
+**Verified at commit:** `tsc` 0 · `next build` ✓ · guard battery 722/0 · score-scenario 21/21 ·
+journal 22/22 · journal-feed 23/23 · private/reflect 21/21 · reason 19/19 · ring-proof 20/20 ·
+mentor/ring/proof 20/20 · support/agent/proof 20/20 · sweep window 0 on all 54 handlers (pre-check
+bound lines 34→29; output refreshed and committed).
+
+**Residuals, named:** distress past each cap unscreened (audit §4.3, relocated not new); the stage-2
+cost class on a short/empty-adjacent benign input on the three proof routes (founder-only,
+`RATE_LIMITS.admin`); `/api/mentor/private/reflect`'s `session_marker`-style class does not exist
+there (checked); the sweep is per-handler and still lists `/api/reason`'s closure guards pre-check via
+the agent-path call (the human-path order is proven by the pins). **The Stoa pair (item 9, S3.4) is
+the only non-conformant member left.**
+
+**Rollback:** `git revert 555502e` + redeploy. Never a flag. Each route's move is independent.
+
+**Owed (founder):** push `555502e`; Vercel green; the smokes in the close file (P′ ×3, O ×2, Group 3
+×3 — every benign proof-route probe must fail a guard or it spends); then the LIVE addendum.
+
+**Rules served:** R20a; AC4; AC5; PR3; PR6; PR15; PR17; PR19; PR20.
+
+**Status:** Adopted (BUILT). Cross-references: `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06`,
+`D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5), `D-SINGLE-SERIAL-ARC-REPLAN-AND-SESSION-3C-PASTE-2026-09-06`,
+the audit `2026-09-05-r20a-perimeter-ordering-AUDIT.md` §2.1 rows 4/6/8/9/10/14/15/16 (annotated).

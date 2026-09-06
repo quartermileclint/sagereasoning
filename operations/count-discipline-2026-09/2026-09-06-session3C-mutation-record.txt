@@ -1,0 +1,70 @@
+=== score-scenario
+  before-check                             exit=1 restored=OK -> RED as required; fails: SIB-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: SIB-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: SIB-1, SIB-2, SIB-3
+  decoy-presence-readd-before-check        exit=1 restored=OK -> RED as required; fails: NEG-2
+  decoy-typeof-readd-new-message           exit=1 restored=OK -> RED as required; fails: NEG-2
+  post-restore battery                     exit=0 -> GREEN
+=== journal-feed
+  before-check                             exit=1 restored=OK -> RED as required; fails: SIB-1, TS-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: SIB-1, TS-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: SIB-1, SIB-2, SIB-3, TS-1
+  inside-block-before-check                exit=1 restored=OK -> RED as required; fails: SIB-1, TS-1, NEG-2
+  cap-nullish-removed                      exit=1 restored=OK -> RED as required; fails: CAP-1, CAP-2, SIB-3
+  skip-block-removed                       exit=1 restored=OK -> RED as required; fails: MAX-1, MAX-3, SIB-1, SIB-3
+  decoy-presence-readd-before-check        exit=1 restored=OK -> RED as required; fails: NEG-2
+  decoy-timestamp-readd-before-check       exit=1 restored=OK -> RED as required; fails: NEG-2
+  post-restore battery                     exit=0 -> GREEN
+=== journal
+  before-check                             exit=1 restored=OK -> RED as required; fails: DAY-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: DAY-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: DAY-1, DAY-2, DAY-3
+  inside-block-before-check                exit=1 restored=OK -> RED as required; fails: DAY-1, NEG-2
+  decoy-day-readd-before-check             exit=1 restored=OK -> RED as required; fails: NEG-2
+  decoy-range-readd-before-check           exit=1 restored=OK -> RED as required; fails: NEG-2
+  post-restore battery                     exit=0 -> GREEN
+=== private-reflect
+  before-check                             exit=1 restored=OK -> RED as required; fails: BYP-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: BYP-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: BYP-1, BYP-2, BYP-3
+  decoy-bypass-readd-before-check          exit=1 restored=OK -> RED as required; fails: NEG-2
+  post-restore battery                     exit=0 -> GREEN
+=== reason
+  before-check                             exit=1 restored=OK -> RED as required; fails: FLD-3
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: FLD-3
+  deleted                                  exit=1 restored=OK -> RED as required; fails: FLD-3, FLD-4
+  agent-field-call-after-check             exit=1 restored=OK -> RED as required; fails: FLD-2
+  audience-literal-swap                    exit=1 restored=OK -> RED as required; fails: FLD-4
+  decoy-marker-literal-readd               exit=1 restored=OK -> RED as required; fails: FLD-5
+  decoy-marker-token-readd                 exit=1 restored=OK -> RED as required; fails: FLD-1, FLD-5
+  decoy-loopid-readd                       exit=1 restored=OK -> RED as required; fails: FLD-1, FLD-5
+  marker-validation-hoisted-out-of-closure exit=1 restored=OK -> RED as required; fails: FLD-1, FLD-5
+  post-restore battery                     exit=0 -> GREEN
+=== ring-proof
+  before-check                             exit=1 restored=OK -> RED as required; fails: ORD-1, ENUM-1, MAX-1, NEG-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: ORD-1, ENUM-1, MAX-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: ORD-1, ORD-2, ORD-3, ENUM-1, ENUM-2, MAX-1, MAX-2, MAX-3, CAP-2
+  cap-removed                              exit=1 restored=OK -> RED as required; fails: INV-2, PRES-2, ORD-2, ORD-4, ORD-5, ENUM-1, MAX-2, CAP-1, NEG-1, NEG-2
+  decoy-bare-guard-before-check            exit=1 restored=OK -> RED as required; fails: NEG-1
+  decoy-enum-readd-before-check            exit=1 restored=OK -> RED as required; fails: NEG-2
+  min-only-before-check                    exit=1 restored=OK -> RED as required; fails: ORD-1, ORD-3, ENUM-1, NEG-1
+  post-restore battery                     exit=0 -> GREEN
+=== mentor-ring-proof
+  before-check                             exit=1 restored=OK -> RED as required; fails: ORD-1, MAX-1, ENUM-1, NEG-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: ORD-1, MAX-1, ENUM-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: ORD-1, ORD-2, ORD-3, MAX-1, MAX-2, MAX-3, ENUM-1, ENUM-2, CAP-2
+  cap-removed                              exit=1 restored=OK -> RED as required; fails: INV-2, PRES-2, ORD-2, ORD-4, ORD-5, MAX-2, ENUM-1, CAP-1, NEG-1, NEG-2
+  decoy-bare-guard-before-check            exit=1 restored=OK -> RED as required; fails: NEG-1
+  decoy-hub-readd-before-check             exit=1 restored=OK -> RED as required; fails: NEG-2
+  decoy-bypass-token-readd                 exit=1 restored=OK -> RED as required; fails: NEG-2
+  post-restore battery                     exit=0 -> GREEN
+=== support-proof
+  before-check                             exit=1 restored=OK -> RED as required; fails: ORD-1, ENUM-1, MAX-1, NEG-1, NEG-2
+  between-check-and-return                 exit=1 restored=OK -> RED as required; fails: ORD-1, ENUM-1, MAX-1
+  deleted                                  exit=1 restored=OK -> RED as required; fails: ORD-1, ORD-2, ORD-3, ENUM-1, ENUM-2, MAX-1, MAX-2, MAX-3, CAP-2
+  cap-removed                              exit=1 restored=OK -> RED as required; fails: CAP-1
+  decoy-bare-guard-before-check            exit=1 restored=OK -> RED as required; fails: NEG-1
+  decoy-enum-readd-before-check            exit=1 restored=OK -> RED as required; fails: ENUM-1, ENUM-2, NEG-2
+  subject-cap-at-wrong-bound               exit=1 restored=OK -> RED as required; fails: CAP-1, CAP-2
+  post-restore battery                     exit=0 -> GREEN
+ALL MUTATIONS CAUGHT AND RESTORED
