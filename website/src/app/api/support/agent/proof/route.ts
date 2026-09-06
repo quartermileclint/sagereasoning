@@ -23,7 +23,10 @@
  * Approved: Founder, 25 Apr 2026.
  *
  * Rules served:
- *   R20a (distress classifier invoked via SafetyGate, AC4 invocation pattern)
+ *   R20a (distress classifier invoked via SafetyGate, AC4 invocation pattern —
+ *     the route's minimum/enum/maximum guards are placed AFTER the R20a block
+ *     under the 2026-09-05 ruling; order, not existence — Session 3C, Group
+ *     3, 2026-09-06)
  *   R3 (disclaimer included in support-agent prompt and final assembly)
  *   PR1 (second flow proven on a single endpoint before further rollout)
  *   PR2 (verified in same session)
@@ -138,44 +141,65 @@ export async function POST(request: NextRequest) {
     const channel: unknown = body?.channel ?? 'email'
     const priority: unknown = body?.priority ?? 'normal'
 
-    if (typeof subject !== 'string' || subject.trim().length < 3) {
+    // TYPE only, on the three text fields. The three MINIMA (`subject` <3,
+    // `customer` <2, `message` <5), the `channel`/`priority` enum 400s and the
+    // two MAXIMA (`subject` short, `message` medium) — all provenance 79974a4
+    // 2026-04-25, file creation, authored in the same commit as the check
+    // under the then-standing validate-first posture — used to sit HERE,
+    // before the distress check. MOVED after the R20a redirect return on
+    // 2026-09-06 (Session 3C, Group 3 of operations/count-discipline-2026-09/
+    // 2026-09-05-r20a-perimeter-ordering-AUDIT.md §6, item 11; the enums are
+    // the audit's §4.4 class O) under the binding 2026-09-06 ruling and the
+    // mentor's 2026-09-05 Part 5 extension. This route is founder-only, and
+    // the founder IS its intended human caller — Part 5's class A excludes
+    // only the person a 403 turns away. The TYPE halves stay: the screened
+    // subject is `subject + message`, and a non-string carries no text to
+    // screen (`customer` is not screened but its type check is kept in place
+    // so the minima below read a string, exactly as before). Messages are
+    // kept identical on both halves.
+    // PR19 fold (2026-09-06, Session 3C Group 3): typeof-only on `subject`/
+    // `message` let an empty string through to the classifier below (Haiku
+    // invoked on whitespace via combinedInput) — both are now FALSY checks,
+    // matching the sibling routes' shape. `customer` stays typeof-only: it is
+    // never part of the screened subject (combinedInput = subject + message
+    // only), so an empty customer cannot reach the classifier either way.
+    if (!subject || typeof subject !== 'string') {
       return NextResponse.json(
         { error: 'subject is required (string, min 3 characters)' },
         { status: 400, headers: corsHeaders() },
       )
     }
-    if (typeof customer !== 'string' || customer.trim().length < 2) {
+    if (typeof customer !== 'string') {
       return NextResponse.json(
         { error: 'customer is required (string, min 2 characters)' },
         { status: 400, headers: corsHeaders() },
       )
     }
-    if (typeof message !== 'string' || message.trim().length < 5) {
+    if (!message || typeof message !== 'string') {
       return NextResponse.json(
         { error: 'message is required (string, min 5 characters)' },
         { status: 400, headers: corsHeaders() },
       )
     }
-    if (typeof channel !== 'string' || !ALLOWED_CHANNELS.includes(channel as AllowedChannel)) {
-      return NextResponse.json(
-        { error: `channel must be one of: ${ALLOWED_CHANNELS.join(', ')}` },
-        { status: 400, headers: corsHeaders() },
-      )
-    }
-    if (typeof priority !== 'string' || !ALLOWED_PRIORITIES.includes(priority as AllowedPriority)) {
-      return NextResponse.json(
-        { error: `priority must be one of: ${ALLOWED_PRIORITIES.join(', ')}` },
-        { status: 400, headers: corsHeaders() },
-      )
-    }
 
-    const subjectErr = validateTextLength(subject, 'subject', TEXT_LIMITS.short)
-    if (subjectErr) return NextResponse.json({ error: subjectErr }, { status: 400, headers: corsHeaders() })
-    const messageErr = validateTextLength(message, 'message', TEXT_LIMITS.medium)
-    if (messageErr) return NextResponse.json({ error: messageErr }, { status: 400, headers: corsHeaders() })
-
-    // R20a — distress check on the combined inquiry text (AC4 invocation pattern)
-    const combinedInput = `${subject}\n\n${message}`
+    // R20a — distress check on the combined inquiry text (AC4 invocation
+    // pattern; placed BEFORE the minimum/enum/maximum guards under the
+    // 2026-09-05 ruling — order, not existence).
+    //
+    // SCREENING CAP (2026-09-06, Session 3C Group 3, audit §3 constraint 2):
+    // now that the maximum-length guards run AFTER this check, the raw fields
+    // are unbounded here, so each is sliced at ITS OWN bound (`subject` at
+    // TEXT_LIMITS.short, `message` at TEXT_LIMITS.medium — the same values the
+    // guards below enforce) before the classifier sees it. The join is
+    // unchanged; an in-bound request is screened byte-identically to before.
+    // DISCLOSED RESIDUAL (audit §4.3): distress appearing only past a field's
+    // bound is not screened — before this move it was not read at all (a bare
+    // 400). COST, disclosed: a short or oversized regex-silent inquiry now
+    // reaches stage 2 (Haiku) before its 400; RATE_LIMITS.admin governs and
+    // the caller is the founder alone.
+    const screenedSubject = subject.slice(0, TEXT_LIMITS.short)
+    const screenedMessage = message.slice(0, TEXT_LIMITS.medium)
+    const combinedInput = `${screenedSubject}\n\n${screenedMessage}`
     const gate = await enforceDistressCheck(detectDistressTwoStage(combinedInput))
     if (gate.shouldRedirect) {
       await supabaseAdmin
@@ -204,6 +228,57 @@ export async function POST(request: NextRequest) {
         { status: 200, headers: corsHeaders() },
       )
     }
+
+    // The three MINIMA, the `channel`/`priority` enums and the two MAXIMA —
+    // MOVED here 2026-09-06 (Session 3C, Group 3 of the perimeter-ordering
+    // audit, §6 item 11) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06) and the
+    // 2026-09-05 Part 5 extension for the two enums. A distressed inquiry
+    // with a too-short subject, a bad channel, or an oversized message now
+    // reaches the check above (each field capped at its own bound) and
+    // receives the crisis resources instead of a 400. ORDER, NOT EXISTENCE:
+    // values, messages, status and the guards' relative order (the three
+    // minima, the two enums, the two maxima — the original order) are
+    // unchanged, and all still precede the ring load and the LLM call. Pinned
+    // by ORD-1..5, ENUM-1..2, MAX-1..3, CAP-1..3, NEG-1..2 in
+    // __tests__/r20a-invocation.test.ts on the redirect block's brace-matched
+    // END; mutation-verified against both bypasses, the cap's removal and a
+    // decoy re-add.
+    if (subject.trim().length < 3) {
+      return NextResponse.json(
+        { error: 'subject is required (string, min 3 characters)' },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+    if (customer.trim().length < 2) {
+      return NextResponse.json(
+        { error: 'customer is required (string, min 2 characters)' },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+    if (message.trim().length < 5) {
+      return NextResponse.json(
+        { error: 'message is required (string, min 5 characters)' },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+    if (typeof channel !== 'string' || !ALLOWED_CHANNELS.includes(channel as AllowedChannel)) {
+      return NextResponse.json(
+        { error: `channel must be one of: ${ALLOWED_CHANNELS.join(', ')}` },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+    if (typeof priority !== 'string' || !ALLOWED_PRIORITIES.includes(priority as AllowedPriority)) {
+      return NextResponse.json(
+        { error: `priority must be one of: ${ALLOWED_PRIORITIES.join(', ')}` },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+
+    const subjectErr = validateTextLength(subject, 'subject', TEXT_LIMITS.short)
+    if (subjectErr) return NextResponse.json({ error: subjectErr }, { status: 400, headers: corsHeaders() })
+    const messageErr = validateTextLength(message, 'message', TEXT_LIMITS.medium)
+    if (messageErr) return NextResponse.json({ error: messageErr }, { status: 400, headers: corsHeaders() })
 
     // Load ring functions through the bridge
     const ring = await loadRingFunctions()

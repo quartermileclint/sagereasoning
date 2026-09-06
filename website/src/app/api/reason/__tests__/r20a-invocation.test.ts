@@ -205,6 +205,68 @@ expectTrue(
   LIMITS.medium === 5000,
   `medium=${LIMITS.medium}`,
 )
+// FLD-* — Session 3C (Group 2b, 2026-09-06): the `session_marker` and
+// `loop_id` 400s (the audit's §4.4 class O on this route; mentor Part 5)
+// moved after the redirect return on the HUMAN path via a dual-site closure
+// of exactly the Group 2 length-guard shape. The agent path calls the same
+// closure at the original site (purpose (a): nothing moves for a credential).
+{
+  const FIELD_CLOSURE_RE = /const\s+preSubstrateFieldGuardError\s*=\s*\(\s*\)\s*:\s*string\s*\|\s*null\s*=>\s*\{/
+  const MARKER_MEMBERSHIP_RE = /SESSION_MARKER_VALUES\s+as\s+readonly\s+string\[\]\)\.includes\s*\(/
+  const LOOP_VALIDATE_RE = /validateLoopId\s*\(\s*loop_id\s*\)/
+  const MARKER_ASSIGN_RE = /validatedSessionMarker\s*=\s*session_marker\s+as\s+SessionMarker/
+  const LOOP_ASSIGN_RE = /validatedLoopId\s*=\s*loopIdResult\.value/
+  const AGENT_FIELD_CALL_RE = new RegExp(`if\\s*\\(\\s*r20aAudience\\s*!==\\s*${QUOTED}\\s*\\)\\s*\\{\\s*const\\s+agentFieldErr\\s*=\\s*preSubstrateFieldGuardError\\s*\\(\\s*\\)`)
+  const HUMAN_FIELD_CALL_RE = new RegExp(`if\\s*\\(\\s*r20aAudience\\s*===\\s*${QUOTED}\\s*\\)\\s*\\{\\s*const\\s+humanFieldErr\\s*=\\s*preSubstrateFieldGuardError\\s*\\(\\s*\\)`)
+  const fieldClosure = structuralBlock(code, FIELD_CLOSURE_RE)
+  const agentFieldIdx = codeIndex(code, AGENT_FIELD_CALL_RE)
+  const humanFieldIdx = codeIndex(code, HUMAN_FIELD_CALL_RE)
+  const markerIdx = codeIndex(code, MARKER_MEMBERSHIP_RE)
+  const loopIdx = codeIndex(code, LOOP_VALIDATE_RE)
+  const inClosure = (i: number) => i > fieldClosure.openIdx && i < fieldClosure.endIdx
+  expectTrue(
+    'FLD-1 the closure preSubstrateFieldGuardError exists exactly once and holds the session_marker membership test, the loop_id validation and BOTH assignments exactly once each, all inside it, marker before loop_id (the original order)',
+    fieldClosure.matches === 1 && fieldClosure.openIdx > -1 && fieldClosure.endIdx > fieldClosure.openIdx &&
+      codeCount(code, MARKER_MEMBERSHIP_RE) === 1 && codeCount(code, LOOP_VALIDATE_RE) === 1 &&
+      codeCount(code, MARKER_ASSIGN_RE) === 1 && codeCount(code, LOOP_ASSIGN_RE) === 1 &&
+      inClosure(markerIdx) && inClosure(loopIdx) && loopIdx > markerIdx &&
+      inClosure(codeIndex(code, MARKER_ASSIGN_RE)) && inClosure(codeIndex(code, LOOP_ASSIGN_RE)),
+    `closure=${fieldClosure.openIdx}..${fieldClosure.endIdx} (${fieldClosure.matches}) marker=${markerIdx} loop=${loopIdx}`,
+  )
+  expectTrue(
+    'FLD-2 the AGENT-path call sits at the validations\' original position: after the closure, after the clarification TYPE check, BEFORE the distress check',
+    agentFieldIdx > fieldClosure.endIdx && fieldClosure.endIdx > -1 && agentFieldIdx > clarificationTypeIdx && checkIdx > agentFieldIdx,
+    `agentField=${agentFieldIdx} closureEnd=${fieldClosure.endIdx} clarType=${clarificationTypeIdx} check=${checkIdx}`,
+  )
+  expectTrue(
+    'FLD-3 the HUMAN-path call follows the structural END of the redirect-return block, follows the human-path LENGTH call (the pre-remediation relative order), and precedes continuation-token validation and the engine',
+    humanFieldIdx > -1 && block.endIdx > -1 && humanFieldIdx > block.endIdx && humanFieldIdx > humanCallIdx &&
+      tokenIdx > -1 && engineIdx > -1 && humanFieldIdx < tokenIdx && humanFieldIdx < engineIdx,
+    `humanField=${humanFieldIdx} blockEnd=${block.endIdx} humanLength=${humanCallIdx} token=${tokenIdx} engine=${engineIdx}`,
+  )
+  {
+    const agentLit = (code.match(/if\s*\(\s*r20aAudience\s*!==\s*'human_user'\s*\)\s*\{\s*const\s+agentFieldErr\s*=\s*preSubstrateFieldGuardError\s*\(\s*\)/g) ?? []).length
+    const humanLit = (code.match(/if\s*\(\s*r20aAudience\s*===\s*'human_user'\s*\)\s*\{\s*const\s+humanFieldErr\s*=\s*preSubstrateFieldGuardError\s*\(\s*\)/g) ?? []).length
+    expectTrue(
+      "FLD-4 the two call sites key on r20aAudience with the LITERAL 'human_user' (one !==, one ===), exactly once each, and the closure is called exactly twice",
+      agentLit === 1 && humanLit === 1 && codeCount(code, /preSubstrateFieldGuardError\s*\(\s*\)/) === 2,
+      `agentLiteral=${agentLit} humanLiteral=${humanLit} calls=${codeCount(code, /preSubstrateFieldGuardError\s*\(\s*\)/)}`,
+    )
+  }
+  {
+    const postIdx = codeIndex(code, POST_HANDLER_RE)
+    const spanOk = postIdx > -1 && fieldClosure.openIdx > postIdx && checkIdx > fieldClosure.endIdx && fieldClosure.endIdx > -1
+    const preSpan = spanOk ? code.slice(postIdx, fieldClosure.openIdx) + code.slice(fieldClosure.endIdx, checkIdx) : ''
+    expectTrue(
+      'FLD-5 the non-length class fence: outside the closure body, neither validation occurs between the handler start and the distress check in any form (the two error literals, the membership test and validateLoopId( are all absent)',
+      spanOk && !preSpan.includes('session_marker must be one of') &&
+        codeCount(preSpan, MARKER_MEMBERSHIP_RE) === 0 && codeCount(preSpan, /validateLoopId\s*\(/) === 0 &&
+        codeCount(preSpan, /SESSION_MARKER_VALUES/) === 0,
+      `spanOk=${spanOk} literal=${preSpan.includes('session_marker must be one of')} membership=${codeCount(preSpan, MARKER_MEMBERSHIP_RE)} validate=${codeCount(preSpan, /validateLoopId\s*\(/)} values=${codeCount(preSpan, /SESSION_MARKER_VALUES/)}`,
+    )
+  }
+}
+
 expectTrue(
   'R3-1 Branch 2 (the masked-200 fallback) logs the thrown cause via logRouteError with the REAL status (200) and the outage classification',
   codeCount(code, R3_LOG_RE) === 1 && codeCount(code, R3_STATUS_RE) === 1,

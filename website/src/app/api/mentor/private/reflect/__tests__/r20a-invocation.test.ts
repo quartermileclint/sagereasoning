@@ -169,6 +169,39 @@ expectTrue(
   `medium=${LIMITS.medium}`,
 )
 
+// BYP-* / NEG-2 — Session 3C (Group 2b, 2026-09-06): the
+// `bypass_pattern_cache` boolean 400 (the audit's §4.4 class O; mentor Part
+// 5) moved after the redirect return, below the moved minimum (restoring the
+// pre-remediation relative order max, max, min, boolean).
+{
+  const BYPASS_RE = /const\s+requestedBypass\s*:\s*unknown\s*=\s*body\?\.bypass_pattern_cache/
+  const BYPASS_TYPE_RE = /typeof\s+requestedBypass\s*===\s*['"][^'"]*['"]/
+  const bypassIdx = codeIndex(code, BYPASS_RE)
+  expectTrue(
+    'BYP-1 the bypass_pattern_cache boolean 400 follows the structural END of the redirect-return block and follows the moved minimum',
+    bypassIdx > -1 && block.endIdx > -1 && bypassIdx > block.endIdx && bypassIdx > minIdx,
+    `bypass=${bypassIdx} blockEnd=${block.endIdx} min=${minIdx}`,
+  )
+  expectTrue(
+    'BYP-2 it still precedes the first context load and the LLM call (order, not existence)',
+    bypassIdx > -1 && contextIdx > -1 && llmIdx > -1 && bypassIdx < contextIdx && bypassIdx < llmIdx,
+    `bypass=${bypassIdx} context=${contextIdx} llm=${llmIdx}`,
+  )
+  expectTrue(
+    'BYP-3 non-vacuity: the body read and the boolean typeof test each appear exactly once',
+    codeCount(code, BYPASS_RE) === 1 && codeCount(code, BYPASS_TYPE_RE) === 1,
+    `read=${codeCount(code, BYPASS_RE)} typeof=${codeCount(code, BYPASS_TYPE_RE)}`,
+  )
+  const postIdx = codeIndex(code, POST_HANDLER_RE)
+  const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+  expectTrue(
+    'NEG-2 the moved boolean 400 does not occur before the distress check in any form (its error literal, the body read and the requestedBypass identifier are all absent from the pre-check span)',
+    postIdx > -1 && checkIdx > postIdx && !preSpan.includes('bypass_pattern_cache must be a boolean') &&
+      codeCount(preSpan, /body\?\.bypass_pattern_cache/) === 0 && codeCount(preSpan, /requestedBypass/) === 0,
+    `literal=${preSpan.includes('bypass_pattern_cache must be a boolean')} read=${codeCount(preSpan, /body\?\.bypass_pattern_cache/)} ident=${codeCount(preSpan, /requestedBypass/)}`,
+  )
+}
+
 const total = passCount + failCount
 console.log('---')
 console.log(`${passCount}/${total} pass | ${failCount}/${total} fail`)

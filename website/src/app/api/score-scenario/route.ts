@@ -290,12 +290,16 @@ export async function POST(request: NextRequest) {
     const startTime = Date.now()
     const { scenario, response, audience, user_id } = await request.json()
 
-    if (!scenario || typeof scenario !== 'string') {
-      return NextResponse.json(
-        { error: 'scenario is required — the ethical dilemma text' },
-        { status: 400 }
-      )
-    }
+    // The `scenario` PRESENCE/TYPE check (provenance b0cecce 2026-03-24, file
+    // creation) used to sit HERE, before the distress check. MOVED after the
+    // R20a redirect return on 2026-09-06 (Session 3C, Group 2b of operations/
+    // count-discipline-2026-09/2026-09-05-r20a-perimeter-ordering-AUDIT.md —
+    // the audit's §4.4 P′ class) under the mentor's Part 5 ruling
+    // (D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05): "the person is
+    // refused because a sibling field is missing. Under the ruling's ground
+    // this is the length case wearing a different coat." `scenario` is NOT
+    // the screened field — `response` is — so a distressed `response` with
+    // no `scenario` must reach the check. See the check's new site below.
 
     // PRESENCE/TYPE only. The MINIMUM-length half of this check
     // (`.trim().length < 5`, provenance b0cecce 2026-03-24, file creation) was
@@ -307,9 +311,9 @@ export async function POST(request: NextRequest) {
     // field the check below screens, so a missing or non-string `response`
     // carries no text to screen, and the check's `detectDistressTwoStage(text:
     // string)` contract needs a string. The message is kept identical on both
-    // halves. (The `scenario` presence check above is a P-class check on a
-    // DIFFERENT field from the screened one — audit §4.4, a mentor question,
-    // deliberately not moved here.)
+    // halves. (The `scenario` presence check that used to sit above is a
+    // P′-class check on a DIFFERENT field from the screened one — audit §4.4;
+    // ruled in Part 5 and MOVED after the redirect return, Group 2b.)
     if (!response || typeof response !== 'string') {
       return NextResponse.json(
         { error: 'response is required — the user\'s answer (min 5 characters)' },
@@ -345,6 +349,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
         { status: 200, headers: corsHeaders() }
+      )
+    }
+
+    // `scenario` PRESENCE/TYPE — MOVED here 2026-09-06 (Session 3C, Group 2b
+    // of the perimeter-ordering audit, the §4.4 P′ class) under the mentor's
+    // 2026-09-05 Part 5 ruling. A distressed `response` submitted without a
+    // `scenario` now reaches the check above and receives the crisis
+    // resources instead of this 400. ORDER, NOT EXISTENCE: value, message and
+    // status are unchanged; the check still precedes the `scenario` maximum
+    // (which needs the string), every RAG/context load and the LLM call.
+    // Pinned by SIB-1..3 + NEG-2 in __tests__/r20a-invocation.test.ts on the
+    // redirect block's brace-matched END; mutation-verified against both
+    // bypasses and a decoy re-add before the check.
+    if (!scenario || typeof scenario !== 'string') {
+      return NextResponse.json(
+        { error: 'scenario is required — the ethical dilemma text' },
+        { status: 400 }
       )
     }
 

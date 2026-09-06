@@ -43,13 +43,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { impression, assent, action, event_timestamp } = body
 
-    // Validate required fields
-    if (!impression?.trim() || !assent?.trim() || !action?.trim()) {
-      return NextResponse.json(
-        { error: 'All three fields are required: impression, assent, action' },
-        { status: 400 }
-      )
-    }
+    // The three-field PRESENCE check (provenance 6b52fe8 2026-04-12, file
+    // creation) and the two `event_timestamp` 400s used to sit HERE, before
+    // the distress check. MOVED after the R20a redirect return on 2026-09-06
+    // (Session 3C, Group 2b of operations/count-discipline-2026-09/2026-09-05-
+    // r20a-perimeter-ordering-AUDIT.md — the audit's §4.4 P′ and O classes)
+    // under the mentor's Part 5 ruling (D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-
+    // 2026-09-05): the principle "applies wherever the screened text exists
+    // and the rejection fires before the check sees it." The screened subject
+    // here is the JOIN of all three fields, so a distressed `impression`
+    // submitted alone must reach the check. See the guards' new site below.
 
     // The three MAXIMUM-length guards (`impression`, `assent`, `action`;
     // provenance 6b52fe8 2026-04-12, file creation) used to sit HERE, before
@@ -60,19 +63,6 @@ export async function POST(request: NextRequest) {
     // human crisis form is rendered." See the guards' new site below. The
     // event_timestamp 400s that follow are class O in the audit (not length
     // guards) and are left where they are — audit §4.4, a mentor question.
-
-    // Validate event_timestamp if provided
-    let parsedEventTimestamp: string | null = null
-    if (event_timestamp) {
-      const ts = new Date(event_timestamp)
-      if (isNaN(ts.getTime())) {
-        return NextResponse.json({ error: 'Invalid event_timestamp format' }, { status: 400 })
-      }
-      if (ts > new Date()) {
-        return NextResponse.json({ error: 'event_timestamp cannot be in the future' }, { status: 400 })
-      }
-      parsedEventTimestamp = ts.toISOString()
-    }
 
     // R20a — Vulnerable-user detection (PR6 / AC5 ninth-route perimeter member).
     // Screen the combined free-text (impression + assent + action) through the
@@ -90,19 +80,64 @@ export async function POST(request: NextRequest) {
     // screened byte-identically to before. DISCLOSED RESIDUAL (audit §4.3):
     // distress appearing only past character 5,000 of a field is not
     // screened — before this move it was not read at all (a bare 400).
+    //
+    // PRESENCE MOVED (2026-09-06, Session 3C Group 2b): the three-field
+    // presence check now runs AFTER this check, so a field may be absent
+    // here. The subject is composed from whichever fields are present
+    // (`String(s ?? '')` — an absent field contributes nothing; a present
+    // non-string is coerced exactly as before). When NOTHING is present the
+    // composed subject is empty and the check is SKIPPED: the Part 5
+    // principle binds only where "the screened text is present and readable",
+    // and stage 2 (Haiku) would otherwise spend on an empty string before the
+    // presence 400 below. The skip test is `.trim()` truthiness, deliberately
+    // not a `.length` comparison (the NEG-1 class fence).
     const distressText = [impression, assent, action]
-      .map((s) => String(s).slice(0, TEXT_LIMITS.medium).trim())
+      .map((s) => String(s ?? '').slice(0, TEXT_LIMITS.medium).trim())
       .join('\n\n')
-    const gate = await enforceDistressCheck(detectDistressTwoStage(distressText))
-    if (gate.shouldRedirect) {
+    if (distressText.trim()) {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(distressText))
+      if (gate.shouldRedirect) {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { status: 200 }
+        )
+      }
+    }
+
+    // Three-field PRESENCE + the `event_timestamp` 400s — MOVED here
+    // 2026-09-06 (Session 3C, Group 2b of the perimeter-ordering audit, the
+    // §4.4 P′ and O classes) under the mentor's 2026-09-05 Part 5 ruling. A
+    // distressed `impression` submitted without `assent`/`action` (or with a
+    // malformed timestamp) now reaches the check above and receives the crisis
+    // resources instead of these 400s. ORDER, NOT EXISTENCE: values, messages,
+    // status and the guards' relative order (presence, then the two timestamp
+    // checks, then the maxima — the pre-remediation order) are unchanged, and
+    // all still precede encryption and the store. Pinned by SIB-1..3, TS-1
+    // and NEG-2 in __tests__/r20a-invocation.test.ts on the enclosing
+    // skip-block's brace-matched END; mutation-verified against both bypasses
+    // and a decoy re-add before the check.
+    if (!impression?.trim() || !assent?.trim() || !action?.trim()) {
       return NextResponse.json(
-        {
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        },
-        { status: 200 }
+        { error: 'All three fields are required: impression, assent, action' },
+        { status: 400 }
       )
+    }
+
+    // Validate event_timestamp if provided
+    let parsedEventTimestamp: string | null = null
+    if (event_timestamp) {
+      const ts = new Date(event_timestamp)
+      if (isNaN(ts.getTime())) {
+        return NextResponse.json({ error: 'Invalid event_timestamp format' }, { status: 400 })
+      }
+      if (ts > new Date()) {
+        return NextResponse.json({ error: 'event_timestamp cannot be in the future' }, { status: 400 })
+      }
+      parsedEventTimestamp = ts.toISOString()
     }
 
     // `impression` / `assent` / `action` MAXIMUM length — MOVED here

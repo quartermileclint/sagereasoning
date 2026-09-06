@@ -19,7 +19,10 @@
  * Approved: Founder, 25 Apr 2026.
  *
  * Rules served:
- *   R20a (distress classifier invoked via SafetyGate, AC4 invocation pattern)
+ *   R20a (distress classifier invoked via SafetyGate, AC4 invocation pattern —
+ *     the route's minimum/maximum/enum/boolean guards are placed AFTER the
+ *     R20a block under the 2026-09-05 ruling; order, not existence — Session
+ *     3C, Group 3, 2026-09-06)
  *   PR1 (single-endpoint proof before rollout)
  *   PR2 (verified in same session)
  *   KG1 rule 2 (Supabase writes — none here)
@@ -115,7 +118,83 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const taskDescription: unknown = body?.task_description
 
-    if (!taskDescription || typeof taskDescription !== 'string' || taskDescription.trim().length < 5) {
+    // PRESENCE/TYPE only. The MINIMUM-length half (`<5`), the MAXIMUM guard,
+    // the `hub_id` enum 400 and the `bypass_pattern_cache` boolean 400 (all
+    // provenance 90583a2 2026-04-25 / ADR-PE-01, authored under the then-
+    // standing validate-first posture) used to sit HERE, before the distress
+    // check. MOVED after the R20a redirect return on 2026-09-06 (Session 3C,
+    // Group 3 of operations/count-discipline-2026-09/2026-09-05-r20a-
+    // perimeter-ordering-AUDIT.md §6, item 11; the enum and boolean are the
+    // audit's §4.4 class O) under the binding 2026-09-06 ruling and the
+    // mentor's 2026-09-05 Part 5 extension. This route is founder-only, and
+    // the founder IS its intended human caller — Part 5's class A excludes
+    // only the person a 403 turns away. This half stays: an absent or
+    // non-string `task_description` carries no text to screen. The message
+    // is kept identical on both halves.
+    if (!taskDescription || typeof taskDescription !== 'string') {
+      return NextResponse.json(
+        { error: 'task_description is required (string, min 5 characters)' },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+
+    // R20a — distress check via SafetyGate (AC4 invocation pattern; placed
+    // BEFORE the minimum/maximum/enum/boolean guards under the 2026-09-05
+    // ruling — order, not existence).
+    //
+    // SCREENING CAP (2026-09-06, Session 3C Group 3, audit §3 constraint 2):
+    // now that the maximum-length guard runs AFTER this check, the raw field
+    // is unbounded here, so it is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guard below enforces) before
+    // the classifier sees it. An in-bound request is screened byte-identically
+    // to before. DISCLOSED RESIDUAL (audit §4.3): distress appearing only
+    // past character 5,000 is not screened — before this move it was not read
+    // at all (a bare 400). COST, disclosed: a short or oversized regex-silent
+    // description now reaches stage 2 (Haiku) before its 400; RATE_LIMITS.admin
+    // governs and the caller is the founder alone.
+    const screenedTaskDescription = taskDescription.slice(0, TEXT_LIMITS.medium)
+    const gate = await enforceDistressCheck(detectDistressTwoStage(screenedTaskDescription))
+    if (gate.shouldRedirect) {
+      // Log distress detection (no ring trace stored)
+      await supabaseAdmin
+        .from('analytics_events')
+        .insert({
+          event_type: 'distress_detected',
+          user_id: auth.user.id,
+          metadata: {
+            severity: gate.result.severity,
+            indicators: gate.result.indicators_found,
+            mentor_mode: 'proof',
+            endpoint: '/api/mentor/ring/proof',
+          },
+        })
+
+      return NextResponse.json(
+        {
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        },
+        { status: 200, headers: corsHeaders() },
+      )
+    }
+
+    // `task_description` MINIMUM and MAXIMUM, then the `hub_id` enum and the
+    // `bypass_pattern_cache` boolean — MOVED here 2026-09-06 (Session 3C,
+    // Group 3 of the perimeter-ordering audit, §6 item 11) under the
+    // 2026-09-06 ruling (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-
+    // 2026-09-06) and the 2026-09-05 Part 5 extension for the two non-length
+    // 400s. A distressed founder description that is too short, too long, or
+    // carries a bad hub id / non-boolean flag now reaches the check above
+    // (capped at this same bound) and receives the crisis resources instead
+    // of a 400. ORDER, NOT EXISTENCE: values, messages, status and the
+    // guards' relative order (minimum, maximum, hub_id, bypass — the original
+    // order) are unchanged, and all still precede the ring load, the profile
+    // load and the LLM call. Pinned by ORD-1..5, MAX-1..3, ENUM-1..2,
+    // CAP-1..3, NEG-1..2 in __tests__/r20a-invocation.test.ts on the redirect
+    // block's brace-matched END; mutation-verified against both bypasses, the
+    // cap's removal and a decoy re-add.
+    if (taskDescription.trim().length < 5) {
       return NextResponse.json(
         { error: 'task_description is required (string, min 5 characters)' },
         { status: 400, headers: corsHeaders() },
@@ -201,32 +280,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // R20a — distress check via SafetyGate (AC4 invocation pattern)
-    const gate = await enforceDistressCheck(detectDistressTwoStage(taskDescription))
-    if (gate.shouldRedirect) {
-      // Log distress detection (no ring trace stored)
-      await supabaseAdmin
-        .from('analytics_events')
-        .insert({
-          event_type: 'distress_detected',
-          user_id: auth.user.id,
-          metadata: {
-            severity: gate.result.severity,
-            indicators: gate.result.indicators_found,
-            mentor_mode: 'proof',
-            endpoint: '/api/mentor/ring/proof',
-          },
-        })
-
-      return NextResponse.json(
-        {
-          distress_detected: true,
-          severity: gate.result.severity,
-          redirect_message: gate.result.redirect_message,
-        },
-        { status: 200, headers: corsHeaders() },
-      )
-    }
+    // (The R20a distress check used to sit HERE — after the hub_id/bypass
+    // 400s. It now runs ABOVE those guards; see the SCREENING CAP note at its
+    // new site. Session 3C, Group 3, 2026-09-06.)
 
     // Load the ring functions through the bridge
     const ring = await loadRingFunctions()

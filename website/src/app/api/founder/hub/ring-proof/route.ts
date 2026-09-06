@@ -23,7 +23,10 @@
  * Same shape as the previous two proofs:
  *   - Founder-only (FOUNDER_USER_ID gate)
  *   - Reuses PROOF_PROFILE fixture
- *   - Distress check via website enforceDistressCheck (AC4 invocation)
+ *   - Distress check via website enforceDistressCheck (AC4 invocation) — the
+ *     route's persona/minimum/maximum guards are placed AFTER the R20a block
+ *     under the 2026-09-05 ruling; order, not existence (Session 3C, Group 3,
+ *     2026-09-06)
  *   - Returns the full ring trace + persona response in JSON
  *
  * Risk: Elevated. Approved: Founder, 25 Apr 2026.
@@ -144,28 +147,46 @@ export async function POST(request: NextRequest) {
     const personaInput: unknown = body?.persona
     const messageInput: unknown = body?.message
 
-    if (typeof personaInput !== 'string' || !ALLOWED_PERSONAS.includes(personaInput as AllowedPersona)) {
-      return NextResponse.json(
-        { error: `persona must be one of: ${ALLOWED_PERSONAS.join(', ')}` },
-        { status: 400, headers: corsHeaders() },
-      )
-    }
-    if (typeof messageInput !== 'string' || messageInput.trim().length < 5) {
+    // TYPE only. The `persona` enum 400, the `message` MINIMUM (`<5`) and the
+    // `message` MAXIMUM (all provenance 0725be1 2026-04-25, file creation —
+    // authored in the same commit as the check, under the then-standing
+    // validate-first posture) used to sit HERE, before the distress check.
+    // MOVED after the R20a redirect return on 2026-09-06 (Session 3C, Group 3
+    // of operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-
+    // ordering-AUDIT.md §6, item 11; the enum is the audit's §4.4 class O)
+    // under the binding 2026-09-06 ruling and the mentor's 2026-09-05 Part 5
+    // extension. This route is founder-only, and the founder IS its intended
+    // human caller — Part 5's class A excludes only the person a 403 turns
+    // away, not the one the surface is designed for. The TYPE half stays: a
+    // non-string `message` carries no text to screen. Messages are kept
+    // identical on both halves.
+    // PR19 fold (2026-09-06, Session 3C Group 3): typeof-only left an empty
+    // string through to the classifier below (Haiku invoked on '') — the
+    // presence half must be a FALSY check, matching the sibling route
+    // mentor/ring/proof's `!taskDescription || typeof … !== 'string'` shape.
+    if (!messageInput || typeof messageInput !== 'string') {
       return NextResponse.json(
         { error: 'message is required (string, min 5 characters)' },
         { status: 400, headers: corsHeaders() },
       )
     }
 
-    const lengthErr = validateTextLength(messageInput, 'message', TEXT_LIMITS.medium)
-    if (lengthErr) return NextResponse.json({ error: lengthErr }, { status: 400, headers: corsHeaders() })
-
-    const persona: AllowedPersona = personaInput as AllowedPersona
-    const message: string = messageInput
-    const config = PERSONAS[persona]
-
-    // R20a — distress check (AC4 invocation pattern)
-    const gate = await enforceDistressCheck(detectDistressTwoStage(message))
+    // R20a — distress check (AC4 invocation pattern; placed BEFORE the
+    // persona/minimum/maximum guards under the 2026-09-05 ruling — order, not
+    // existence).
+    //
+    // SCREENING CAP (2026-09-06, Session 3C Group 3, audit §3 constraint 2):
+    // now that the maximum-length guard runs AFTER this check, `messageInput`
+    // is unbounded here, so it is sliced at the route's own bound
+    // (TEXT_LIMITS.medium — the same value the guard below enforces) before
+    // the classifier sees it. An in-bound request is screened byte-identically
+    // to before. DISCLOSED RESIDUAL (audit §4.3): distress appearing only
+    // past character 5,000 is not screened — before this move it was not read
+    // at all (a bare 400). COST, disclosed: a short or oversized regex-silent
+    // message now reaches stage 2 (Haiku) before its 400; RATE_LIMITS.admin
+    // governs and the caller is the founder alone.
+    const screenedMessage = messageInput.slice(0, TEXT_LIMITS.medium)
+    const gate = await enforceDistressCheck(detectDistressTwoStage(screenedMessage))
     if (gate.shouldRedirect) {
       await supabaseAdmin
         .from('analytics_events')
@@ -177,7 +198,11 @@ export async function POST(request: NextRequest) {
             indicators: gate.result.indicators_found,
             mentor_mode: 'founder-hub-ring-proof',
             endpoint: '/api/founder/hub/ring-proof',
-            persona,
+            // The persona enum now runs AFTER this branch, so the value is
+            // unvalidated here: a valid persona is recorded byte-identically
+            // to before; an invalid or non-string one (previously a 400 that
+            // never reached this row) is recorded bounded, or as null.
+            persona: typeof personaInput === 'string' ? personaInput.slice(0, 64) : null,
           },
         })
 
@@ -190,6 +215,40 @@ export async function POST(request: NextRequest) {
         { status: 200, headers: corsHeaders() },
       )
     }
+
+    // `persona` enum, `message` MINIMUM and `message` MAXIMUM — MOVED here
+    // 2026-09-06 (Session 3C, Group 3 of the perimeter-ordering audit, §6
+    // item 11) under the 2026-09-06 ruling
+    // (D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06) and the
+    // 2026-09-05 Part 5 extension for the enum. A distressed founder message
+    // with a bad persona, a 4-character cry, or an oversized write-up now
+    // reaches the check above (capped at this same bound) and receives the
+    // crisis resources instead of a 400. ORDER, NOT EXISTENCE: values,
+    // messages, status and the guards' relative order (persona, minimum,
+    // maximum — the original order) are unchanged, and all three still
+    // precede the ring load and the LLM call. Pinned by ENUM-1, ORD-1..5,
+    // MAX-1..3, CAP-1..3, NEG-1..2 in __tests__/r20a-invocation.test.ts on
+    // the redirect block's brace-matched END; mutation-verified against both
+    // bypasses, the cap's removal and a decoy re-add.
+    if (typeof personaInput !== 'string' || !ALLOWED_PERSONAS.includes(personaInput as AllowedPersona)) {
+      return NextResponse.json(
+        { error: `persona must be one of: ${ALLOWED_PERSONAS.join(', ')}` },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+    if (messageInput.trim().length < 5) {
+      return NextResponse.json(
+        { error: 'message is required (string, min 5 characters)' },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+
+    const lengthErr = validateTextLength(messageInput, 'message', TEXT_LIMITS.medium)
+    if (lengthErr) return NextResponse.json({ error: lengthErr }, { status: 400, headers: corsHeaders() })
+
+    const persona: AllowedPersona = personaInput as AllowedPersona
+    const message: string = messageInput
+    const config = PERSONAS[persona]
 
     const ring = await loadRingFunctions()
     if (!ring) {

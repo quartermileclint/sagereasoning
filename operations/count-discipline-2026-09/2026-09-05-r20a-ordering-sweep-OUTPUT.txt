@@ -18,10 +18,10 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
       check→redirect window L132–L135: 0 bound line(s)
 ### src/app/api/score-scenario/route.ts
-  POST @L283 -> enforceDistressCheck @L343; direct pre-check bound lines: 1
-      L342 [TEXT_LIMITS]: const screenedResponse = response.slice(0, TEXT_LIMITS.medium)
+  POST @L283 -> enforceDistressCheck @L347; direct pre-check bound lines: 1
+      L346 [TEXT_LIMITS]: const screenedResponse = response.slice(0, TEXT_LIMITS.medium)
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
-      check→redirect window L343–L346: 0 bound line(s)
+      check→redirect window L347–L350: 0 bound line(s)
 ### src/app/api/score-social/route.ts
   POST @L94 -> enforceDistressCheck @L131; direct pre-check bound lines: 2
       L103 [length-eq+presence-zero]: if (!text || typeof text !== '      ' || text.trim().length === 0) {
@@ -29,15 +29,15 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
       check→redirect window L131–L134: 0 bound line(s)
 ### src/app/api/reason/route.ts
-  POST @L674 -> enforceDistressCheck @L1219; direct pre-check bound lines: 8
+  POST @L674 -> enforceDistressCheck @L1246; direct pre-check bound lines: 8
       L1028 [length-eq+presence-zero]: if (!input || typeof input !== '      ' || input.trim().length === 0) {
-      L1085 [validateTextLength+TEXT_LIMITS]: const inputErr = validateTextLength(input, '     ', TEXT_LIMITS.medium)
-      L1087 [validateTextLength+TEXT_LIMITS]: const contextErr = validateTextLength(context, '       ', TEXT_LIMITS.medium)
-      L1089 [validateTextLength+TEXT_LIMITS]: const domainErr = validateTextLength(domain_context, '              ', TEXT_LIMITS.medium)
-      L1097 [validateTextLength]: const clarificationErr = validateTextLength(
-      L1100 [TEXT_LIMITS]: TEXT_LIMITS.medium,
-      L1210 [TEXT_LIMITS]: const screenedInput = input.slice(0, TEXT_LIMITS.medium)
-      L1215 [TEXT_LIMITS]: ? clarification_response.slice(0, TEXT_LIMITS.medium)
+      L1091 [validateTextLength+TEXT_LIMITS]: const inputErr = validateTextLength(input, '     ', TEXT_LIMITS.medium)
+      L1093 [validateTextLength+TEXT_LIMITS]: const contextErr = validateTextLength(context, '       ', TEXT_LIMITS.medium)
+      L1095 [validateTextLength+TEXT_LIMITS]: const domainErr = validateTextLength(domain_context, '              ', TEXT_LIMITS.medium)
+      L1103 [validateTextLength]: const clarificationErr = validateTextLength(
+      L1106 [TEXT_LIMITS]: TEXT_LIMITS.medium,
+      L1237 [TEXT_LIMITS]: const screenedInput = input.slice(0, TEXT_LIMITS.medium)
+      L1242 [TEXT_LIMITS]: ? clarification_response.slice(0, TEXT_LIMITS.medium)
       checkPluginAuth@L720 (same-file helper, body followed: 3 bound line(s))
       via checkPluginAuth(): L413 [length-eq+presence-zero]: if (!headerValue || typeof headerValue !== '      ' || headerValue.length === 0) {
       via checkPluginAuth(): L428 [length-eq+presence-zero]: if (!secret || typeof secret !== '      ' || secret.length === 0) {
@@ -45,7 +45,7 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       validatePluginRequest@L886 (same-file helper, body followed: 0 bound line(s))
       validateSuppliedLayer1Schema@L936 (same-file helper, body followed: 0 bound line(s))
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, validateApiKey, extractPluginInstallToken, validatePluginInstallToken, corsHeaders, extractLoopId, generateLoopId, createLoopAccumulator, finalizeLoopResponse, l1SupplyRefused, isUpcCapabilityAuthEnabled, isOrientationReadingEnabled, isTier1ContinuationEnabled, validateTextLength, isSessionDeclineSignalEnabled, isLoopIdFieldEnabled, validateLoopId, composeContinuationDistressText
-      check→redirect window L1219–L1236: 0 bound line(s)
+      check→redirect window L1246–L1263: 0 bound line(s)
 ### src/app/api/reflect/route.ts
   POST @L69 -> enforceDistressCheck @L132; direct pre-check bound lines: 2
       L129 [TEXT_LIMITS]: const screenedWhatHappened = what_happened.slice(0, TEXT_LIMITS.medium)
@@ -53,21 +53,21 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
       check→redirect window L132–L150: 0 bound line(s)
 ### src/app/api/mentor/private/reflect/route.ts
-  POST @L139 -> enforceDistressCheck @L247; direct pre-check bound lines: 2
-      L244 [TEXT_LIMITS]: const screenedWhatHappened = what_happened.slice(0, TEXT_LIMITS.medium)
-      L245 [TEXT_LIMITS]: const screenedHowIResponded = String(how_i_responded || '').slice(0, TEXT_LIMITS.medium)
+  POST @L139 -> enforceDistressCheck @L243; direct pre-check bound lines: 2
+      L240 [TEXT_LIMITS]: const screenedWhatHappened = what_happened.slice(0, TEXT_LIMITS.medium)
+      L241 [TEXT_LIMITS]: const screenedHowIResponded = String(how_i_responded || '').slice(0, TEXT_LIMITS.medium)
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
-      check→redirect window L247–L268: 0 bound line(s)
+      check→redirect window L243–L264: 0 bound line(s)
 ### src/app/api/mentor/journal-feed/route.ts
-  POST @L34 -> enforceDistressCheck @L96; direct pre-check bound lines: 1
-      L94 [TEXT_LIMITS]: .map((s) => String(s).slice(0, TEXT_LIMITS.medium).trim())
+  POST @L34 -> enforceDistressCheck @L98; direct pre-check bound lines: 1
+      L95 [TEXT_LIMITS]: .map((s) => String(s ?? '').slice(0, TEXT_LIMITS.medium).trim())
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
-      check→redirect window L96–L100: 0 bound line(s)
+      check→redirect window L98–L102: 0 bound line(s)
 ### src/app/api/journal/route.ts
-  POST @L22 -> enforceDistressCheck @L77; direct pre-check bound lines: 1
-      L76 [TEXT_LIMITS]: const screenedReflectionText = String(reflection_text).slice(0, TEXT_LIMITS.medium)
+  POST @L22 -> enforceDistressCheck @L84; direct pre-check bound lines: 1
+      L83 [TEXT_LIMITS]: const screenedReflectionText = String(reflection_text).slice(0, TEXT_LIMITS.medium)
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth
-      check→redirect window L77–L81: 0 bound line(s)
+      check→redirect window L84–L88: 0 bound line(s)
 ### src/app/api/score-conversation/route.ts
   POST @L100 -> enforceDistressCheck @L182; direct pre-check bound lines: 0
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isScoreConversationR20aEnabled, composeConversationDistressSubject
@@ -255,26 +255,21 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isR20aGapClosureEnabled, composeDistressSubject, hasScreenableSubject
       check→redirect window L1260–L1264: 0 bound line(s)
 ### src/app/api/founder/hub/ring-proof/route.ts
-  POST @L124 -> enforceDistressCheck @L168; direct pre-check bound lines: 2
-      L153 [length-cmp]: if (typeof messageInput !== '      ' || messageInput.trim().length < 5) {
-      L160 [validateTextLength+TEXT_LIMITS]: const lengthErr = validateTextLength(messageInput, '       ', TEXT_LIMITS.medium)
-      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
-      check→redirect window L168–L186: 0 bound line(s)
+  POST @L127 -> enforceDistressCheck @L189; direct pre-check bound lines: 1
+      L188 [TEXT_LIMITS]: const screenedMessage = messageInput.slice(0, TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders
+      check→redirect window L189–L211: 0 bound line(s)
 ### src/app/api/mentor/ring/proof/route.ts
-  POST @L94 -> enforceDistressCheck @L205; direct pre-check bound lines: 2
-      L118 [length-cmp]: if (!taskDescription || typeof taskDescription !== '      ' || taskDescription.trim().length < 5) {
-      L125 [validateTextLength+TEXT_LIMITS]: const lengthError = validateTextLength(taskDescription, '                ', TEXT_LIMITS.medium)
-      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
-      check→redirect window L205–L223: 0 bound line(s)
+  POST @L97 -> enforceDistressCheck @L156; direct pre-check bound lines: 1
+      L155 [TEXT_LIMITS]: const screenedTaskDescription = taskDescription.slice(0, TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders
+      check→redirect window L156–L174: 0 bound line(s)
 ### src/app/api/support/agent/proof/route.ts
-  POST @L114 -> enforceDistressCheck @L179; direct pre-check bound lines: 5
-      L141 [length-cmp]: if (typeof subject !== '      ' || subject.trim().length < 3) {
-      L147 [length-cmp]: if (typeof customer !== '      ' || customer.trim().length < 2) {
-      L153 [length-cmp]: if (typeof message !== '      ' || message.trim().length < 5) {
-      L172 [validateTextLength+TEXT_LIMITS]: const subjectErr = validateTextLength(subject, '       ', TEXT_LIMITS.short)
-      L174 [validateTextLength+TEXT_LIMITS]: const messageErr = validateTextLength(message, '       ', TEXT_LIMITS.medium)
-      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders, validateTextLength
-      check→redirect window L179–L196: 0 bound line(s)
+  POST @L117 -> enforceDistressCheck @L203; direct pre-check bound lines: 2
+      L200 [TEXT_LIMITS]: const screenedSubject = subject.slice(0, TEXT_LIMITS.short)
+      L201 [TEXT_LIMITS]: const screenedMessage = message.slice(0, TEXT_LIMITS.medium)
+      imported calls pre-check (follow by hand): checkRateLimit, requireAuth, corsHeaders
+      check→redirect window L203–L220: 0 bound line(s)
 ### src/app/api/score/save/route.ts
   POST @L276 -> enforceDistressCheck @L318; direct pre-check bound lines: 0
       scoreSaveDistressSubject@L302 (same-file helper, body followed: 0 bound line(s))
@@ -301,5 +296,5 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
   PUT @L522: no check in handler
   DELETE @L525: no check in handler
 
-SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=34 via-same-file-helper=12 raw-total=46 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
+SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=29 via-same-file-helper=12 raw-total=41 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
 KNOWN-CASE score-conversation: R20a flag block L180-L200; format guard L367 (occurrences: 1); format guard AFTER block end: true (a single boolean on the brace-matched END anchor — it does not distinguish 'before the block' from 'inside it'; the per-handler counts above do)

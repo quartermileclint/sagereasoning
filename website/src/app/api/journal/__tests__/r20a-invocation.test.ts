@@ -276,6 +276,46 @@ function runOrderingPins(): void {
     LIMITS.medium === 5000,
     `medium=${LIMITS.medium}`,
   )
+
+  // DAY-* / NEG-2 — Session 3C (Group 2b, 2026-09-06): the combined
+  // `!day_number || !reflection_text` presence check was SPLIT — the
+  // `reflection_text` half stays (the screened text itself), the
+  // `day_number` half and the 1–56 RANGE 400 (audit §4.4 P′ and O; mentor
+  // Part 5) moved after the sentinel block's END.
+  {
+    const TEXT_PRESENCE_RE = /if\s*\(\s*!reflection_text\s*\)\s*\{/
+    const OLD_FUSED_RE = /!day_number\s*\|\|\s*!reflection_text/
+    const DAY_PRESENCE_RE = /if\s*\(\s*!day_number\s*\)\s*\{/
+    const DAY_RANGE_RE = /if\s*\(\s*day_number\s*<\s*1\s*\|\|\s*day_number\s*>\s*56\s*\)\s*\{/
+    const textPresenceIdx = codeIndex(code, TEXT_PRESENCE_RE)
+    const dayPresenceIdx = codeIndex(code, DAY_PRESENCE_RE)
+    const dayRangeIdx = codeIndex(code, DAY_RANGE_RE)
+    expectTrue(
+      'DAY-1 the day_number PRESENCE half and the 1–56 RANGE 400 both follow the structural END of the enclosing sentinel block (which contains the check AND its redirect return), keep their order (presence then range), and follow the moved maximum',
+      dayPresenceIdx > -1 && dayRangeIdx > -1 && sentinelBlock.endIdx > -1 &&
+        dayPresenceIdx > sentinelBlock.endIdx && dayRangeIdx > dayPresenceIdx && dayPresenceIdx > maxIdx,
+      `dayPresence=${dayPresenceIdx} dayRange=${dayRangeIdx} sentinelEnd=${sentinelBlock.endIdx} max=${maxIdx}`,
+    )
+    expectTrue(
+      'DAY-2 both still precede the first store touch (order, not existence)',
+      dayRangeIdx > -1 && storeIdx > -1 && dayRangeIdx < storeIdx,
+      `dayRange=${dayRangeIdx} store=${storeIdx}`,
+    )
+    expectTrue(
+      'DAY-3 non-vacuity: the reflection_text presence half exists exactly once BEFORE the check; the day_number presence half and the range check each exactly once; the old fused form is gone',
+      codeCount(code, TEXT_PRESENCE_RE) === 1 && textPresenceIdx > -1 && textPresenceIdx < checkIdx &&
+        codeCount(code, DAY_PRESENCE_RE) === 1 && codeCount(code, DAY_RANGE_RE) === 1 && codeCount(code, OLD_FUSED_RE) === 0,
+      `textPresence=${codeCount(code, TEXT_PRESENCE_RE)}@${textPresenceIdx} check=${checkIdx} dayPresence=${codeCount(code, DAY_PRESENCE_RE)} range=${codeCount(code, DAY_RANGE_RE)} fused=${codeCount(code, OLD_FUSED_RE)}`,
+    )
+    const postIdx = codeIndex(code, POST_HANDLER_RE)
+    const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+    expectTrue(
+      'NEG-2 neither moved day_number 400 occurs before the distress check in any form (the range literal, the `!day_number` presence token and any `day_number <`/`>` comparison are all absent from the pre-check span)',
+      postIdx > -1 && checkIdx > postIdx && !preSpan.includes('day_number must be between') &&
+        codeCount(preSpan, /!day_number\b/) === 0 && codeCount(preSpan, /day_number\s*[<>]/) === 0,
+      `literal=${preSpan.includes('day_number must be between')} presence=${codeCount(preSpan, /!day_number\b/)} cmp=${codeCount(preSpan, /day_number\s*[<>]/)}`,
+    )
+  }
 }
 
 // ============================================================================

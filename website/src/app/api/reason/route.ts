@@ -1069,7 +1069,13 @@ export async function POST(request: NextRequest) {
     // (flag SUBSTRATE_LOOP_ID_FIELD_ENABLED) now 400s on THAT field's message
     // first — those three checks sit between the guards' old site and their
     // new one — where before it 400'd on the length message. The same class
-    // Group 1 disclosed on score-conversation. Also: an oversized human
+    // Group 1 disclosed on score-conversation. [UPDATED 2026-09-06, Session 3C
+    // Group 2b: (b) and (c) MOVED after the redirect return on the human path
+    // too (their own dual-site closure below), so on the human path the
+    // length message is again first for (b)/(c); only (a) — the
+    // `clarification_response` TYPE check, which stays pre-check on both
+    // paths because a non-string answer is not screenable — keeps the
+    // message-precedence delta.] Also: an oversized human
     // `input` that REDIRECTS is served through the redirect branch
     // (isBillable: true) rather than the unbilled 400 it used to be — a
     // session caller is not metered by `respond` today, so no charge moves.
@@ -1135,44 +1141,65 @@ export async function POST(request: NextRequest) {
     // Flag off → never read (byte-identical). A malformed value is a plain
     // 400 (pre-substrate — no LLM cost incurred), never silently dropped or
     // coerced — a caller opting into declared sessions must get it right.
-    const sessionDeclineEnabled = isSessionDeclineSignalEnabled()
-    let validatedSessionMarker: SessionMarker | undefined
-    if (sessionDeclineEnabled && session_marker !== undefined && session_marker !== null) {
-      if (
-        typeof session_marker !== 'string' ||
-        !(SESSION_MARKER_VALUES as readonly string[]).includes(session_marker)
-      ) {
-        return await respond({
-          body: {
-            error: 'session_marker must be one of: ' + SESSION_MARKER_VALUES.join(', '),
-          },
-          status: 400,
-          headers: {},
-          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
-        })
-      }
-      validatedSessionMarker = session_marker as SessionMarker
-    }
-
+    //
     // QG-C: validate loop_id's shape before it reaches the orientation event
     // payload. Flag off → never read (byte-identical). A malformed value is a
     // plain 400 (pre-substrate — no LLM cost incurred), never silently dropped
     // or coerced: the B5 session_marker posture exactly. The validated value is
     // the TRIMMED string, so surrounding whitespace cannot split one runner
     // instance into two labels.
+    //
+    // ORDERING (2026-09-06, Session 3C Group 2b — the audit's §4.4 class O on
+    // this route; mentor Part 5, D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05):
+    // both validations used to run HERE on EVERY caller, before the distress
+    // check. They follow the Group 2 length-guard shape exactly: the two
+    // checks live in this closure ONCE, in their original order and with
+    // their original messages, and are CALLED
+    //   - on the AGENT path, right here, where they always ran — the agent
+    //     path's execution order and every response byte are unchanged
+    //     (purpose (a); nothing moves for a credential);
+    //   - on the HUMAN path, AFTER the R20a check and its redirect return
+    //     (the second call site below, after the human-path length guards),
+    //     before continuation-token validation and before the engine.
+    // The closure ASSIGNS `validatedSessionMarker` / `validatedLoopId` as a
+    // side effect, so the downstream consumers (the B5 write stamp; the
+    // orientation event payload) read the same values from either path.
+    // DISCLOSED message-precedence delta on the human path (status 400
+    // unchanged): a session request carrying a malformed `session_marker` or
+    // `loop_id` TOGETHER WITH an oversized `input`/`context`/`domain_context`
+    // now 400s on the LENGTH message first (the length guards run first on
+    // the human path, as they did before Group 2 on every path) — and one
+    // carrying distress in `input` receives the crisis form instead of either
+    // 400. The route comment above the length closure names this class.
+    const sessionDeclineEnabled = isSessionDeclineSignalEnabled()
+    let validatedSessionMarker: SessionMarker | undefined
     const loopIdFieldEnabled = isLoopIdFieldEnabled()
     let validatedLoopId: string | undefined
-    if (loopIdFieldEnabled && loop_id !== undefined && loop_id !== null) {
-      const loopIdResult = validateLoopId(loop_id)
-      if (!loopIdResult.ok) {
-        return await respond({
-          body: { error: loopIdResult.error },
-          status: 400,
-          headers: {},
-          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
-        })
+    const preSubstrateFieldGuardError = (): string | null => {
+      if (sessionDeclineEnabled && session_marker !== undefined && session_marker !== null) {
+        if (
+          typeof session_marker !== 'string' ||
+          !(SESSION_MARKER_VALUES as readonly string[]).includes(session_marker)
+        ) {
+          return 'session_marker must be one of: ' + SESSION_MARKER_VALUES.join(', ')
+        }
+        validatedSessionMarker = session_marker as SessionMarker
       }
-      validatedLoopId = loopIdResult.value
+      if (loopIdFieldEnabled && loop_id !== undefined && loop_id !== null) {
+        const loopIdResult = validateLoopId(loop_id)
+        if (!loopIdResult.ok) {
+          return loopIdResult.error
+        }
+        validatedLoopId = loopIdResult.value
+      }
+      return null
+    }
+
+    // AGENT-path call site — the validations' original position. Purpose (a):
+    // nothing moves for a credential-bearing caller.
+    if (r20aAudience !== 'human_user') {
+      const agentFieldErr = preSubstrateFieldGuardError()
+      if (agentFieldErr) return await respond({ body: { error: agentFieldErr }, status: 400, headers: {}, isBillable: false })  // Pre-substrate validation error — no LLM cost incurred.
     }
 
     // R20a — Vulnerable user detection (before any LLM call)
@@ -1261,6 +1288,25 @@ export async function POST(request: NextRequest) {
     if (r20aAudience === 'human_user') {
       const humanLengthErr = textLengthGuardError()
       if (humanLengthErr) return await respond({ body: { error: humanLengthErr }, status: 400, headers: {}, isBillable: false })
+    }
+
+    // HUMAN-path call site for the `session_marker` / `loop_id` validations —
+    // MOVED here 2026-09-06 (Session 3C, Group 2b of the perimeter-ordering
+    // audit, the §4.4 O class on this route) under the mentor's 2026-09-05
+    // Part 5 ruling. A signed-in practitioner whose distressed `input` rides
+    // with a malformed declared-session marker or loop id now reaches the
+    // check above and receives the crisis form instead of a bare 400. ORDER,
+    // NOT EXISTENCE: the closure holds both validations verbatim; values,
+    // messages, status and billing posture are unchanged; they still precede
+    // continuation-token validation and the engine, and they still follow the
+    // length guards (the pre-remediation relative order). The agent path
+    // called the same closure at the original site above and is untouched.
+    // Pinned by FLD-1..5 in __tests__/r20a-invocation.test.ts on the redirect
+    // block's brace-matched END; mutation-verified against both bypasses, a
+    // decoy re-add before the check, and the agent-path call moving.
+    if (r20aAudience === 'human_user') {
+      const humanFieldErr = preSubstrateFieldGuardError()
+      if (humanFieldErr) return await respond({ body: { error: humanFieldErr }, status: 400, headers: {}, isBillable: false })  // Pre-substrate validation error — no LLM cost incurred.
     }
 
     // M1-CP4e (2026-05-06): Continuation-token validation. Runs AFTER the

@@ -16,9 +16,11 @@
  * `response` (both TEXT_LIMITS.medium; only `response`'s move changes what
  * reaches the classifier), and the first post-guard load is the RAG block
  * (`loadLayer1BlockWithFallback`). The `scenario` presence check is a
- * P-class check on a DIFFERENT field from the screened one — audit §4.4, now
- * a ruled Group 2b item (its own sitting) — and is deliberately not pinned
- * either way.
+ * P′-class check on a DIFFERENT field from the screened one — audit §4.4,
+ * ruled by the mentor's 2026-09-05 Part 5 and MOVED after the redirect
+ * return by Session 3C (Group 2b, 2026-09-06): pinned by SIB-1..3 + NEG-2
+ * (the non-length class fence — a decoy re-add before the check must go red,
+ * matched on the quoted error literal AND the structural token).
  */
 
 import * as path from 'path'
@@ -167,6 +169,37 @@ expectTrue(
     postIdx > -1 && checkIdx > postIdx &&
       codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preSpan, BARE_LENGTH_GUARD_RE) === 0,
     `post=${postIdx} check=${checkIdx} vtl=${codeCount(preSpan, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preSpan, BARE_LENGTH_GUARD_RE)}`,
+  )
+}
+
+// SIB-* / NEG-2 — Session 3C (Group 2b, 2026-09-06): the `scenario`
+// presence/type 400 (the audit's §4.4 P′ class; mentor Part 5) moved after
+// the redirect return.
+{
+  const SCENARIO_PRESENCE_RE = new RegExp(`if\\s*\\(\\s*!scenario\\s*\\|\\|\\s*typeof\\s+scenario\\s*!==\\s*${QUOTED}\\s*\\)\\s*\\{`)
+  const sibIdx = codeIndex(code, SCENARIO_PRESENCE_RE)
+  expectTrue(
+    'SIB-1 the scenario PRESENCE/TYPE 400 (a sibling of the screened field) follows the structural END of the redirect-return block',
+    sibIdx > -1 && block.endIdx > -1 && sibIdx > block.endIdx,
+    `sib=${sibIdx} blockEnd=${block.endIdx}`,
+  )
+  expectTrue(
+    'SIB-2 the sibling presence check precedes the scenario MAXIMUM (which needs the string), the response guards, and the first RAG/context load and LLM call',
+    sibIdx > -1 && maxScenarioIdx > sibIdx && maxResponseIdx > sibIdx && minIdx > sibIdx && contextIdx > -1 && llmIdx > -1 && sibIdx < contextIdx && sibIdx < llmIdx,
+    `sib=${sibIdx} maxScenario=${maxScenarioIdx} maxResponse=${maxResponseIdx} min=${minIdx} context=${contextIdx} llm=${llmIdx}`,
+  )
+  expectTrue(
+    'SIB-3 non-vacuity: the sibling presence check appears exactly once',
+    codeCount(code, SCENARIO_PRESENCE_RE) === 1,
+    `count=${codeCount(code, SCENARIO_PRESENCE_RE)}`,
+  )
+  const postIdx = codeIndex(code, POST_HANDLER_RE)
+  const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+  expectTrue(
+    'NEG-2 the moved scenario 400 does not occur before the distress check in any form (its error literal, the `!scenario` presence token and a `typeof scenario` test are all absent from the pre-check span; the response presence check legitimately remains)',
+    postIdx > -1 && checkIdx > postIdx && !preSpan.includes('scenario is required') &&
+      codeCount(preSpan, /!scenario\b/) === 0 && codeCount(preSpan, /typeof\s+scenario\b/) === 0,
+    `literal=${preSpan.includes('scenario is required')} presence=${codeCount(preSpan, /!scenario\b/)} typeof=${codeCount(preSpan, /typeof\s+scenario\b/)}`,
   )
 }
 

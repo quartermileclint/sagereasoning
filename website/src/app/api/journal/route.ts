@@ -31,12 +31,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { day_number, phase_number, reflection_text } = body
 
-    if (!day_number || !reflection_text) {
+    // PRESENCE of the SCREENED field only. This check used to read
+    // `!day_number || !reflection_text` (provenance ab46c8c 2026-03-26,
+    // file creation) and was followed by the `day_number` 1–56 range 400. SPLIT on
+    // 2026-09-06 (Session 3C, Group 2b of operations/count-discipline-2026-09/
+    // 2026-09-05-r20a-perimeter-ordering-AUDIT.md — the audit's §4.4 P′ and O
+    // classes) under the mentor's Part 5 ruling (D-MENTOR-RULINGS-FIVE-RELAYS-
+    // ADOPTED-2026-09-05): the `reflection_text` half STAYS (it is the
+    // screened text itself — absent, there is nothing to screen); the
+    // `day_number` presence half and the range 400 MOVED after the R20a
+    // redirect return (see below). The message is kept identical on both
+    // halves.
+    if (!reflection_text) {
       return NextResponse.json({ error: 'day_number and reflection_text are required' }, { status: 400 })
-    }
-
-    if (day_number < 1 || day_number > 56) {
-      return NextResponse.json({ error: 'day_number must be between 1 and 56' }, { status: 400 })
     }
 
     // The MAXIMUM-length guard on `reflection_text` (provenance aeadbd1
@@ -98,6 +105,27 @@ export async function POST(request: NextRequest) {
     // END; mutation-verified against both bypasses and the cap's removal.
     const textErr = validateTextLength(reflection_text, 'Reflection text', TEXT_LIMITS.medium)
     if (textErr) return NextResponse.json({ error: textErr }, { status: 400 })
+
+    // `day_number` PRESENCE (the other half of the split above) + the 1–56
+    // RANGE — MOVED here 2026-09-06 (Session 3C, Group 2b of the perimeter-
+    // ordering audit, the §4.4 P′ and O classes) under the mentor's 2026-09-05
+    // Part 5 ruling. A distressed entry submitted without a `day_number` (or
+    // with one out of range) now reaches the check above and receives the
+    // crisis resources instead of these 400s. ORDER, NOT EXISTENCE: values,
+    // messages and status are unchanged, and both still precede the store
+    // client and every store touch. The `'__local__'` sentinel path is
+    // unchanged: a local-storage completion skips the check and lands here
+    // exactly as before. Pinned by DAY-1..3 + NEG-2 in
+    // __tests__/r20a-invocation.test.ts on the sentinel block's brace-matched
+    // END; mutation-verified against both bypasses and a decoy re-add before
+    // the check.
+    if (!day_number) {
+      return NextResponse.json({ error: 'day_number and reflection_text are required' }, { status: 400 })
+    }
+
+    if (day_number < 1 || day_number > 56) {
+      return NextResponse.json({ error: 'day_number must be between 1 and 56' }, { status: 400 })
+    }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

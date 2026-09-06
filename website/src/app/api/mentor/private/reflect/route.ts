@@ -176,8 +176,10 @@ export async function POST(request: NextRequest) {
     // the length guard on any route where the human crisis form is rendered."
     // This half stays: a missing or non-string field carries no text of its own
     // to screen. The message is kept identical on both halves. The
-    // bypass_pattern_cache boolean 400 below is class O in the audit (not a
-    // length guard) and is left where it is — audit §4.4, a mentor question.
+    // bypass_pattern_cache boolean 400 (class O in the audit, §4.4) used to
+    // sit just below this — MOVED after the redirect return on 2026-09-06
+    // (Session 3C, Group 2b) under the mentor's Part 5 ruling; see its new
+    // site below the minimum.
     if (!what_happened || typeof what_happened !== 'string') {
       return NextResponse.json(
         { error: 'what_happened is required (describe what happened today, min 10 characters)' },
@@ -207,20 +209,14 @@ export async function POST(request: NextRequest) {
     // Risk classification (worst case F): optional field, default false,
     // strict typeof === 'boolean' check. Anything other than undefined, null,
     // true, or false returns 400. Back-compat preserved for absent fields.
-    const requestedBypass: unknown = body?.bypass_pattern_cache
-    let bypassPatternCache: boolean
-    if (requestedBypass === undefined || requestedBypass === null) {
-      bypassPatternCache = false
-    } else if (typeof requestedBypass === 'boolean') {
-      bypassPatternCache = requestedBypass
-    } else {
-      return NextResponse.json(
-        {
-          error: `bypass_pattern_cache must be a boolean. Received: ${JSON.stringify(requestedBypass)}.`,
-        },
-        { status: 400 }
-      )
-    }
+    //
+    // ORDERING (2026-09-06, Session 3C Group 2b): the validation itself used
+    // to sit HERE, before the distress check. MOVED after the R20a redirect
+    // return under the mentor's Part 5 ruling (D-MENTOR-RULINGS-FIVE-RELAYS-
+    // ADOPTED-2026-09-05, class O — "a distressed person submitting a body
+    // whose screened text is present and readable is owed the crisis form
+    // before being told … their `bypass_pattern_cache` must be a boolean").
+    // See the new site below the moved minimum.
 
     // R20a — Vulnerable user detection (before any LLM call or structured observation extraction)
     // This MUST run at pipeline entry. Distress detection takes priority over all evaluation logic.
@@ -308,6 +304,32 @@ export async function POST(request: NextRequest) {
     if (what_happened.trim().length < 10) {
       return NextResponse.json(
         { error: 'what_happened is required (describe what happened today, min 10 characters)' },
+        { status: 400 }
+      )
+    }
+
+    // `bypass_pattern_cache` boolean validation — MOVED here 2026-09-06
+    // (Session 3C, Group 2b of the perimeter-ordering audit, the §4.4 O class)
+    // under the mentor's 2026-09-05 Part 5 ruling. Its design note stands at
+    // the original site above. A distressed write-up carrying a non-boolean
+    // flag now reaches the check above and receives the crisis resources
+    // instead of this 400. ORDER, NOT EXISTENCE: value, message and status
+    // are unchanged; the guards' relative order (max, max, min, then this —
+    // the pre-remediation order) is restored, and it still precedes every
+    // context load and the LLM call. Pinned by BYP-1..3 + NEG-2 in
+    // __tests__/r20a-invocation.test.ts on the redirect block's brace-matched
+    // END; mutation-verified against both bypasses and a decoy re-add.
+    const requestedBypass: unknown = body?.bypass_pattern_cache
+    let bypassPatternCache: boolean
+    if (requestedBypass === undefined || requestedBypass === null) {
+      bypassPatternCache = false
+    } else if (typeof requestedBypass === 'boolean') {
+      bypassPatternCache = requestedBypass
+    } else {
+      return NextResponse.json(
+        {
+          error: `bypass_pattern_cache must be a boolean. Received: ${JSON.stringify(requestedBypass)}.`,
+        },
         { status: 400 }
       )
     }

@@ -207,8 +207,13 @@ function runVerdictTests(): void {
 //
 // The three MAXIMUM guards (`impression`, `assent`, `action`; all
 // TEXT_LIMITS.medium) were MOVED after the distress check under the
-// 2026-09-06 ruling. The check is unconditional here, so the structural
-// anchor is the redirect-return block's brace-matched END.
+// 2026-09-06 ruling. Session 3C (Group 2b, 2026-09-06) then moved the
+// three-field PRESENCE check and the two `event_timestamp` 400s after the
+// check too (audit §4.4 P′ and O; mentor Part 5) and wrapped the check in
+// `if (distressText.trim()) { … }` so an all-empty body skips stage 2. The
+// structural anchor is therefore THAT enclosing skip-block's brace-matched
+// END — the block the check lives in (constraint 8; the journal sentinel
+// precedent) — not merely the inner redirect `if`.
 //
 // MUTATION RECORD (2026-09-05, real file, hash-verified restore): the
 // `impression` maximum placed BEFORE the check → MAX-1 fails; placed BETWEEN
@@ -224,14 +229,25 @@ function runOrderingPins(): void {
   const MAX_IMPRESSION_RE = new RegExp(`validateTextLength\\(\\s*impression\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
   const MAX_ASSENT_RE = new RegExp(`validateTextLength\\(\\s*assent\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
   const MAX_ACTION_RE = new RegExp(`validateTextLength\\(\\s*action\\s*,\\s*${QUOTED}\\s*,\\s*TEXT_LIMITS\\.medium\\s*\\)`)
-  const CAP_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s\s*\)\.slice\(\s*0\s*,\s*TEXT_LIMITS\.medium\s*\)\.trim\(\)\s*\)/
-  const UNCAPPED_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s\s*\)\.trim\(\)\s*\)/
+  // Session 3C: `String(s ?? '')` — an ABSENT field contributes nothing to
+  // the subject now that presence runs after the check (a bare `String(s)`
+  // would screen the literal word "undefined").
+  const CAP_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s\s*\?\?\s*['"]{2}\s*\)\.slice\(\s*0\s*,\s*TEXT_LIMITS\.medium\s*\)\.trim\(\)\s*\)/
+  const UNCAPPED_RE = /\.map\(\s*\(\s*s\s*\)\s*=>\s*String\(\s*s(?:\s*\?\?\s*['"]{2})?\s*\)\.trim\(\)\s*\)/
+  const SKIP_BLOCK_RE = /if\s*\(\s*distressText\.trim\(\)\s*\)\s*\{/
+  const PRESENCE_RE = /if\s*\(\s*!impression\?\.trim\(\)\s*\|\|\s*!assent\?\.trim\(\)\s*\|\|\s*!action\?\.trim\(\)\s*\)\s*\{/
+  const TS_PARSE_RE = /const\s+ts\s*=\s*new\s+Date\(\s*event_timestamp\s*\)/
+  const TS_FUTURE_RE = /if\s*\(\s*ts\s*>\s*new\s+Date\(\s*\)\s*\)/
   const SUBJECT_DEF_RE = /const\s+distressText\s*=\s*\[\s*impression\s*,\s*assent\s*,\s*action\s*\]/
   const ENCRYPT_RE = /encryptJournalProse\s*\(/
   const STORE_RE = /createClient\s*\(\s*supabaseUrl\s*,\s*supabaseServiceKey\s*\)/
 
   const checkIdx = codeIndex(code, CHECK_RE)
   const block = structuralBlock(code, REDIRECT_OPEN_RE)
+  const skipBlock = structuralBlock(code, SKIP_BLOCK_RE)
+  const presenceIdx = codeIndex(code, PRESENCE_RE)
+  const tsParseIdx = codeIndex(code, TS_PARSE_RE)
+  const tsFutureIdx = codeIndex(code, TS_FUTURE_RE)
   const maxImpressionIdx = codeIndex(code, MAX_IMPRESSION_RE)
   const maxAssentIdx = codeIndex(code, MAX_ASSENT_RE)
   const maxActionIdx = codeIndex(code, MAX_ACTION_RE)
@@ -241,11 +257,11 @@ function runOrderingPins(): void {
   const storeIdx = codeIndexAfter(code, STORE_RE, checkIdx)
 
   expectTrue(
-    'MAX-1 ALL THREE maximum guards (impression, assent, action) follow the structural END of the redirect-return block ' +
-      '(anchored on the block\'s own closing brace, so drift to anywhere inside it — before OR after the check — is caught)',
-    maxImpressionIdx > -1 && maxAssentIdx > -1 && maxActionIdx > -1 && block.endIdx > -1 &&
-      maxImpressionIdx > block.endIdx && maxAssentIdx > block.endIdx && maxActionIdx > block.endIdx,
-    `impression=${maxImpressionIdx} assent=${maxAssentIdx} action=${maxActionIdx} blockEnd=${block.endIdx}`,
+    'MAX-1 ALL THREE maximum guards (impression, assent, action) follow the structural END of the enclosing skip-block ' +
+      '(which contains the check AND its redirect return; anchored on that block\'s own closing brace, so drift to anywhere inside it — before OR after the check — is caught)',
+    maxImpressionIdx > -1 && maxAssentIdx > -1 && maxActionIdx > -1 && skipBlock.endIdx > -1 &&
+      maxImpressionIdx > skipBlock.endIdx && maxAssentIdx > skipBlock.endIdx && maxActionIdx > skipBlock.endIdx,
+    `impression=${maxImpressionIdx} assent=${maxAssentIdx} action=${maxActionIdx} skipEnd=${skipBlock.endIdx}`,
   )
   expectTrue(
     'MAX-2 the maxima keep their relative order (impression, assent, action) and still precede the store client and encryption (order, not existence)',
@@ -254,10 +270,11 @@ function runOrderingPins(): void {
     `impression=${maxImpressionIdx} assent=${maxAssentIdx} action=${maxActionIdx} store=${storeIdx} encrypt=${encryptIdx}`,
   )
   expectTrue(
-    'MAX-3 non-vacuity: each maximum appears exactly once; the redirect block was found exactly once, is non-degenerate, and follows the check',
+    'MAX-3 non-vacuity: each maximum appears exactly once; the skip-block and the redirect block were each found exactly once, are non-degenerate, and nest correctly around the check (skip open < check < redirect open < redirect end < skip end)',
     codeCount(code, MAX_IMPRESSION_RE) === 1 && codeCount(code, MAX_ASSENT_RE) === 1 && codeCount(code, MAX_ACTION_RE) === 1 &&
-      block.matches === 1 && checkIdx > -1 && block.openIdx > checkIdx && block.endIdx > block.openIdx,
-    `counts=${codeCount(code, MAX_IMPRESSION_RE)}/${codeCount(code, MAX_ASSENT_RE)}/${codeCount(code, MAX_ACTION_RE)} matches=${block.matches} open=${block.openIdx} end=${block.endIdx} check=${checkIdx}`,
+      block.matches === 1 && skipBlock.matches === 1 && checkIdx > -1 &&
+      skipBlock.openIdx > -1 && checkIdx > skipBlock.openIdx && block.openIdx > checkIdx && block.endIdx > block.openIdx && skipBlock.endIdx > block.endIdx,
+    `counts=${codeCount(code, MAX_IMPRESSION_RE)}/${codeCount(code, MAX_ASSENT_RE)}/${codeCount(code, MAX_ACTION_RE)} redirect=${block.openIdx}..${block.endIdx} (${block.matches}) skip=${skipBlock.openIdx}..${skipBlock.endIdx} (${skipBlock.matches}) check=${checkIdx}`,
   )
   expectTrue(
     'CAP-1 the three-field subject is composed with each field sliced at TEXT_LIMITS.medium before trim (exactly once, before the check) and the uncapped map is gone',
@@ -284,6 +301,40 @@ function runOrderingPins(): void {
     LIMITS.medium === 5000,
     `medium=${LIMITS.medium}`,
   )
+
+  // SIB-* / TS-* / NEG-2 — Session 3C (Group 2b, 2026-09-06).
+  expectTrue(
+    'SIB-1 the three-field PRESENCE 400 follows the structural END of the enclosing skip-block and precedes the maxima (the pre-remediation relative order: presence, timestamps, maxima)',
+    presenceIdx > -1 && skipBlock.endIdx > -1 && presenceIdx > skipBlock.endIdx && maxImpressionIdx > presenceIdx,
+    `presence=${presenceIdx} skipEnd=${skipBlock.endIdx} maxImpression=${maxImpressionIdx}`,
+  )
+  expectTrue(
+    'SIB-2 the presence check still precedes the store client and encryption (order, not existence)',
+    presenceIdx > -1 && storeIdx > -1 && encryptIdx > -1 && presenceIdx < storeIdx && presenceIdx < encryptIdx,
+    `presence=${presenceIdx} store=${storeIdx} encrypt=${encryptIdx}`,
+  )
+  expectTrue(
+    'SIB-3 non-vacuity: the presence check appears exactly once, and the subject composition uses `?? \'\'` so an absent field contributes nothing (the skip-block is what keeps an all-empty body off stage 2)',
+    codeCount(code, PRESENCE_RE) === 1 && codeCount(code, CAP_RE) === 1 && codeCount(code, SKIP_BLOCK_RE) === 1,
+    `presence=${codeCount(code, PRESENCE_RE)} cap=${codeCount(code, CAP_RE)} skip=${codeCount(code, SKIP_BLOCK_RE)}`,
+  )
+  expectTrue(
+    'TS-1 the two event_timestamp 400s (class O) follow the skip-block END, follow the presence check, keep their order (parse, then future), and precede the maxima and the store',
+    tsParseIdx > -1 && tsFutureIdx > -1 && tsParseIdx > skipBlock.endIdx && tsParseIdx > presenceIdx && tsFutureIdx > tsParseIdx &&
+      maxImpressionIdx > tsFutureIdx && storeIdx > tsFutureIdx && codeCount(code, TS_PARSE_RE) === 1 && codeCount(code, TS_FUTURE_RE) === 1,
+    `parse=${tsParseIdx} future=${tsFutureIdx} skipEnd=${skipBlock.endIdx} presence=${presenceIdx} maxImpression=${maxImpressionIdx} store=${storeIdx}`,
+  )
+  {
+    const postIdx = codeIndex(code, POST_HANDLER_RE)
+    const preSpan = postIdx > -1 && checkIdx > postIdx ? code.slice(postIdx, checkIdx) : ''
+    const literalHit = preSpan.includes('All three fields are required') || preSpan.includes('Invalid event_timestamp format') || preSpan.includes('cannot be in the future')
+    const tokenHits = codeCount(preSpan, /\?\.trim\(\)/) + codeCount(preSpan, /new\s+Date\(\s*event_timestamp\s*\)/) + codeCount(preSpan, /isNaN\s*\(/)
+    expectTrue(
+      'NEG-2 none of the moved 400s (three-field presence, timestamp parse, timestamp future) occurs before the distress check in any form (error literals and structural tokens — `?.trim()`, `new Date(event_timestamp)`, `isNaN(` — all absent from the pre-check span)',
+      postIdx > -1 && checkIdx > postIdx && !literalHit && tokenHits === 0,
+      `literal=${literalHit} tokens=${tokenHits}`,
+    )
+  }
 }
 
 // ============================================================================
