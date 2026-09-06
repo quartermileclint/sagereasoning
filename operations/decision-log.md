@@ -36763,3 +36763,61 @@ BLOCKED; the 0h call remains the founder's.** Next: the founder elects F-3′'s 
 weighs the §6 guard-deny-volume finding; ≥2026-09-08 UTC, a fresh session runs B4's actual
 follow-up measurement; if both preconditions are then met, the founder performs (d). Until then,
 S7/S6 remain window-neutral and may run.
+
+### D-F3PRIME-THRESHOLD-ELECTED-PART3-QUESTION-DRAFTED-R18-VERIFIED-LIVE-2026-09-06
+
+**2026-09-06, ~16:30 AEST** (machine date). Continuation of session S4 after the founder pushed
+`1251853` (Vercel green) and approved four recommendations. Tier: `governance` + one read-only live
+verification. **No code, schema, flag or credential changed. The window has NOT started;
+`GATE1_FALSE_HOLD_CAPTURE` remains unset.** Model `claude-opus-5`.
+
+**1. F-3′'s threshold is ELECTED, as proposed and unmodified** (founder, via AskUserQuestion):
+**aggregate guard-outage rate ≤5%, no single ordinary day above 10%, an ordinary day being one with
+≥20 guard attempts, sustained over ≥3 successive ordinary days.** Elected **before** B4's follow-up
+measurement exists (not due until ≥2026-09-08 UTC), which is the property that makes it a genuine
+pre-registration rather than a description of the result — carried with its disclosed qualification
+that the known post-remedy figures sit roughly an order of magnitude below it and it is therefore
+expected to pass, and with the independently re-verified counterweight that **zero of the 28
+three-successive-ordinary-day windows in the 57-day log would have passed it.** **This discharges
+only the THRESHOLD half of window precondition 2.** The measured rate itself remains owed (B4), so
+the precondition as a whole is still OPEN and the window remains closed. Recorded at the register's
+P6/F-3′ row (append-only) and at the head of the proposal, now marked ELECTED.
+
+**2. A mentor question is DRAFTED and awaiting relay — whether readiness part (3) is measurable at
+all on the denominator P8a will supply.**
+`operations/trust-layer-2026-07/2026-09-06-mentor-question-part3-guard-denominator-FOR-RULING.md`.
+Grounds: the guard-deny class (the whole of part (3)'s "correct holds on genuinely problematic
+actions") runs **15 events / 57 calendar days**, 45 of 50 active guard days at zero, **≈0.6 per week
+excluding one outlier**, every one `tool=Bash` / `proximity=reflexive` / `depth: ""`. The question
+puts three parts — whether part (3)'s comparison is within a population or across the two; whether
+a ~1/week denominator satisfies it if across; and whether the guard population must satisfy part
+(1)'s representativeness requirement on its own terms, given its narrowness is structural (the guard
+fires on an irreversible-action allowlist) rather than a sampling artefact. **It also names an
+interaction neither existing ruling had this measurement in front of it: a longer window defers the
+D2 engine correction, which the D2 ruling explicitly did not want deferred indefinitely.** The
+question states our own recommendation so it can be ruled against, and says plainly that *"start it
+and report the guard side honestly as thin"* is a perfectly good answer. **It reopens nothing** —
+not the D2 sequencing, not Q3's precondition, not the elected threshold.
+
+**3. The R18 assessment-contract corrections are VERIFIED LIVE — the ~5-month public-contract defect
+is closed in production.** Unauthenticated GETs against `www.sagereasoning.com`: `llms.txt` serves
+**14 / 55 assessments and 8 phases**, with **no** `SO-01` and **no** stale `11` / `37` / `7 phases`
+figures anywhere; `agent-card.json` carries **26 extensions** (matching the 2026-09-05 re-derivation)
+with the corrected figures and no stale ones. **This was a genuine gap, found rather than inherited:**
+`6586713` (the Stoa restructure carrying S2) has been on `origin/main` and deployed since 2026-09-06
+11:48 AEST, but the decision log held only a `-BUILT-ARC-CLOSED` entry — **no `-LIVE-` record and no
+post-deploy verification of any kind.** Half of that gap is now closed by observation.
+
+**STILL OWED, and it is the other half:** the **Stoa distress-ordering smoke** on
+`/api/mentor/stoa` POST **and** PATCH — that an acute submission now receives the crisis redirect
+with zero write, and a benign one still saves. That needs a Bearer JWT (memory
+`human-routes-bearer-jwt-console-smoke`) and is founder-walked. **Two live write surfaces changed
+ordering in production and have never been exercised.** Until that runs, the arc's "CLOSED" claim
+rests on the build's own batteries and PR19, not on production behaviour.
+
+**Records:** this entry; the register's P6/F-3′ row annotated; the proposal marked ELECTED; the new
+mentor question. **Rollback:** `git revert` (documents only).
+
+**Status:** window precondition 1 (P8a activation) NOT met; precondition 2 half-met (threshold
+elected, rate not measured). **The window has not started. The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**

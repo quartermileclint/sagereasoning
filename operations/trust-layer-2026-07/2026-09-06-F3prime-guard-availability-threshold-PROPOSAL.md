@@ -1,4 +1,16 @@
-# F-3′ — the guard-availability threshold: a PROPOSAL for the founder's election
+# F-3′ — the guard-availability threshold: PROPOSED, and ELECTED 2026-09-06
+
+> **✅ ELECTED BY THE FOUNDER, 2026-09-06 (machine date), as proposed and unmodified:**
+> **aggregate guard-outage rate ≤5%, no single ordinary day above 10%, an ordinary day being
+> one with ≥20 guard attempts, sustained over ≥3 successive ordinary days.** Elected BEFORE
+> B4's follow-up measurement exists (which is not due until ≥2026-09-08 UTC), which is what
+> makes it a pre-registration rather than a description of the result — see §5, including its
+> disclosure that the known post-remedy figures sit roughly an order of magnitude below the
+> elected threshold, so it is expected to pass. **This discharges the threshold half of
+> window precondition 2. The other half — B4's actual measured rate — remains owed, and the
+> window remains closed until it exists.** Nothing about this election starts the window,
+> sets a flag, or licenses the founder act.
+
 
 **Session S4 (window-start readiness), 2026-09-06 (`date`, AEST). Model `claude-opus-5`, adversarial
 review under `claude-sonnet-5`. Documents only — no code, schema, flag or credential changed.
