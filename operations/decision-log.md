@@ -35957,3 +35957,77 @@ passing every guard spends.
 
 **Rollback:** `git revert` this records commit. **Status:** the plan is re-based; S3.3 is queued on
 the founder's opening it.
+
+---
+
+## 2026-09-06 — D-CORRECTION-PR19-REVIEWER-COUNT-WAS-TWO-NOT-THREE-2026-09-06
+
+**Decision:** Correct a factual overclaim in `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06`
+(commit `97db750`) and its own commit message: both state *"three reviewers... converged"* /
+*"three independent reviewers... converged."* **Only two delivered results.** **`governance`** —
+correction only; no code, schema, flag or credential change; no behaviour touched.
+
+**Reasoning.** Three reviewers were launched in parallel on separate dimensions: ruling fidelity,
+safety and leak, and test adequacy. Task-notifications for **ruling fidelity** and **test adequacy**
+arrived with full findings and were folded into `97db750`. The **safety and leak** notification never
+arrived with results in the session that launched it. A later notification, arriving after a
+substantial gap, reported its status as `stopped` with *"No completion record found... may have been
+running when the previous Claude Code process exited."* Attempting recovery via `TaskOutput` (the
+only available retrieval path — `SendMessage` was disabled this session) returned `No task found with
+ID: a3b3566408b314714`. **The finding is genuinely unrecoverable, not merely unread.**
+
+**Consequence, stated precisely rather than minimised.** The convergence claimed — "the HIGH was
+found by all three, independently" — is true only of two: ruling fidelity and test adequacy, both of
+which independently identified the same wrongly-anchored ordering pin, with concrete mutations. The
+**safety and leak** dimension specifically — whether the guard's move reopens the engine-leak defect
+it exists to close, across every flag state and failure mode — never received independent adversarial
+review. What stands in its place is the author's own first-hand verification during the original
+change (`0126645`): reading that `domainContext` construction still follows the guard's new site, and
+that the composer's per-field slice still runs before the classifier regardless of submitted size.
+That is real, but it is self-review, not the independent pass PR19 exists to require, and the fold
+commit did not say so.
+
+**Why this was caught late.** The correction was made at session close, prompted by a background-task
+notification arriving with a large gap after the review was already folded and the change already
+pushed to production. The author did not notice the missing third result at the time of folding —
+having received two full reports in close succession, the fold proceeded as though the batch was
+complete. **No verification was performed at fold time that all three launched reviews had actually
+returned; presence of results was assumed from their arrival, not counted against the number
+launched.**
+
+**Files touched:**
+- `CLAUDE.md` — the bullet recording this fold annotated in place: the reviewer count corrected, the
+  safety-dimension gap disclosed, and a second stale claim in the same bullet ("that audit remains
+  open") corrected to record that the perimeter-wide audit and two remediation Groups have since
+  landed (`D-R20A-PERIMETER-ORDERING-AUDIT-COMPLETE-2026-09-05`,
+  `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-1-BUILT-2026-09-05`,
+  `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-BUILT-2026-09-06`), confirmed by re-reading the
+  route directly (the `<20`-character minimum-length rejection no longer precedes the R20a block;
+  the route's own battery is green, 75/75, against the current tree). The substance of those two
+  Groups was not reviewed by this session and is not characterised beyond what their own commit
+  messages state.
+
+**Not corrected, and why.** The underlying pin fix in `97db750` is not reopened by this entry — its
+mutation-verification (against both bypasses the two reporting reviewers demonstrated) stands on its
+own evidence, independent of how many reviewers found it. Only the count claim and the
+audit-still-open claim were wrong.
+
+**Risk classification:** Standard under 0d-ii — documentation only. AC7 not engaged. PR19, PR20
+engaged (this entry is itself a PR19-honesty correction).
+
+**Verification step (founder-performable):** none required; this is a documents-only correction.
+Confirm by reading the annotated bullet in `CLAUDE.md` and this entry side by side.
+
+**Open questions:** none new. The safety-and-leak dimension of the original move remains reviewed
+only first-hand. Given the route has since been further modified by downstream remediation work this
+entry did not review, a fresh independent pass on the CURRENT state of `score-conversation/route.ts`
+is a reasonable standing item for whichever session next touches that file, not an urgent one — no
+defect is suspected, only a gap in how the earlier claim was verified.
+
+**Rollback path:** `git revert` this commit (documents only; the CLAUDE.md annotation and this entry
+both stand as record either way).
+
+**Rules served:** PR19, PR20.
+
+**Status:** Adopted. Cross-references: `D-SCORE-CONVERSATION-FORMAT-MOVE-PR19-INDEPENDENT-REVIEW-FOLDED-2026-09-06`,
+`0126645`, `97db750`.
