@@ -36600,3 +36600,69 @@ returns*.
 
 **Status:** Adopted (PUT, not ruled). **Sequencing unchanged — the build still lands after the
 observation window opens. This does not gate S4.** Weights BLOCKED; the S11 flip REFUSED.
+
+---
+
+### D-MENTOR-RULING-D2-NATURAL-RELATIONSHIP-DISJUNCT-ADOPTED-2026-09-06
+
+**2026-09-06, ~15:10 AEST** (machine date). Session S5, fourth leg. Tier `governance`, autonomous.
+**Documents only — nothing built, production unchanged.** Model `claude-opus-5`.
+**ADOPTED AS BINDING SPECIFICATION.** Verbatim:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-natural-relationship-disjunct-verbatim.md`
+(verbatim wins over this entry).
+
+**D2's specification is now COMPLETE. No open axis remains.**
+
+**Term (b) — the `natural_relationship` factor — is RETAINED.** The 2026-07-19 boundary *"was not
+drawn at identified parties. It was drawn at other parties — named or anonymous, identified or
+foreseeably present."* An asserted natural relationship is *"evidence that an other party is
+foreseeably implicated"*; *"the engine does not require certainty; it requires a reasonable basis."*
+Dropping it would narrow the tag below that boundary and create a second verdict/tag divergence —
+the outcome the Q4 answer chose the engine location to avoid.
+
+**THE SESSION'S SHARPEST POINT WAS ANSWERED AGAINST IT, AND THAT IS THE ENTRY'S HEADLINE.** This
+session argued that a mirrored predicate would still tag dikaiosyne on a self-only action carrying a
+natural-relationship factor, *"partially defeating the correction the mentor ordered."* The ruling
+rejects that: such a case *"is a case where the extraction found evidence of an other party despite
+the circle identification. That evidence should be credited, not suppressed"* — and if the
+extraction is wrong, it is *"an extraction error, not a tagging error"*, correctable at the
+extraction layer. **The D2 ruling's self-only case is specifically the self circle alone AND no
+natural-relationship factor**, handled by term (a) being false. Recorded plainly because it is the
+one place this session's analysis pointed the wrong way, and because the register and the opener both
+carried that argument forward before it was ruled on.
+
+**The third possibility also fails**, for the reason the question itself anticipated: deliberate
+divergence *"would mean the verdict surface says dikaiosyne engaged and the accumulation surface says
+it did not. That is not a difference in treatment. It is a contradiction."*
+
+**The zero-credit self-correction was accepted and noted for the record** — *"Ruling on the inflated
+framing would have produced a narrower answer than the principle requires. The document corrected its
+own framing before asking."*
+
+**THE CORRECTED TAG, FULLY SPECIFIED:** dikaiosyne tags on **(a)** ≥1 circle beyond
+`self_preservation` **OR (b)** a `natural_relationship` factor — and **NOT** on `is_kathekon !== null`,
+removed as over-broad. **That is exactly the existing `isDikaiosyneEngaged` predicate**, so the
+"one rule, seen identically by every consumer" aim is satisfied **literally**, and Finding A's
+observation (the narrowed test already existed in the same module) is what the remedy adopts.
+
+**One build fact derived from source, NOT from the ruling, and it retires a cost this session
+recorded:** `isDikaiosyneEngaged` and `computeVirtueDomains` are in the **same module**, so **no
+export is required.** The export cost PR19 found and this session folded into the boundary option's
+cost list **applies only to that ruled-out option**. The call site already computes the needed
+boolean; threading it into `computeVirtueDomains` is a **signature change** for the build and for
+PR19.
+
+**Unchanged:** the sequencing — the build lands **after** the observation window opens — and both
+corrections (the kathekon trigger and the (b) retention) go in **one pass**.
+
+**Still open and owned by the build, not by either ruling:** the mid-window tagging-regime boundary
+the sequencing creates (AE-1's read-side S11b segmentation is the precedent); the ~12 consumers; the
+live score bonus; the published `llms.txt:548` `self_regarding` claim; and the build's own R18
+decision.
+
+**Records:** the verbatim ruling; the register's D2 row appended a fourth time (columns re-verified
+at 3); the opener's F-15 discharged and its S11-D2 row rewritten from "do not design the predicate"
+to the full specification; the S5 close given a second addendum; the S4 session paste refreshed.
+
+**Status:** Adopted (RULED — specification complete, build owed, still sequenced after the window).
+**S4 remains next. Weights BLOCKED; the S11 flip REFUSED; neither unblocked by either ruling.**

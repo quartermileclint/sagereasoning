@@ -30,9 +30,11 @@ Written 2026-09-06 (`date`), HEAD `55a29c6` plus the S5 ruling records. Model at
    is this session's most important inherited fact.**
 2. `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — **P8a, B4, F-3′, D1 and D2
    in full.** D2's row is long and was annotated twice on 2026-09-06; read it to the end.
-3. `operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md`
-   — **binding; verbatim wins.** Its Q4 answer contains the sequencing constraint that governs this
-   session's relationship to the next one.
+3. **BOTH D2 rulings of 2026-09-06 — binding; verbatim wins over every summary:**
+   `2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md` (the principal ruling; its Q4
+   answer carries the sequencing constraint that governs this session's relationship to the next
+   one) and `2026-09-06-mentor-ruling-D2-natural-relationship-disjunct-verbatim.md` (the follow-on,
+   which **completes the specification — D2 now has no open axis**).
 4. `operations/trust-layer-2026-07/2026-08-15-false-hold-new-window-scoping-note.md` §2.4 / §3 / §7 —
    the window's two preconditions and the recommendation column.
 5. `operations/handoffs/founder/2026-09-06-S5-D2-scope-for-ruling-CLOSE.md` **including its
@@ -65,6 +67,12 @@ framing is **superseded**, and in the opposite direction to the one anticipated:
 **So D2 does not gate S4. S4 gates D2.** Leg (c) is discharged by ruling: **no engine edit precedes
 the window.** Do not re-open it, and do not treat the D2 build as a competing candidate for this
 sitting.
+
+**D2 is now FULLY SPECIFIED (both rulings landed 2026-09-06).** The corrected tag = **(a)** ≥1
+circle beyond `self_preservation` **OR (b)** a `natural_relationship` factor, and **NOT** the
+`is_kathekon !== null` trigger, which is removed as over-broad — i.e. exactly the existing
+`isDikaiosyneEngaged` predicate. Both corrections build in **one pass**. **None of that is this
+session's work** — it is row **S11-D2**, and it lands only after this session's leg (d).
 
 **A consequence the ruling creates and does NOT resolve — carry it, do not act on it here.** Landing
 the correction after the window opens means the window's records span **two tagging regimes**. The
@@ -129,8 +137,11 @@ Success = an honest availability number with its denominator (or an honest "the 
 met"), a threshold **proposed** with its costs both ways, the two preconditions stated as met or
 not, and — if and only if the founder elects it — the window started, with the mid-window
 regime-boundary consequence of the D2 ruling recorded for the S11-D2 session rather than discovered
-by it. **The next row after this is S11-D2**, whose one unruled axis is the scope doc's **Q-D2-4**
-(`\|\| hasNaturalRelationship` on a credit surface) — **never relayed, so unruled; settle it or
-re-relay it, and do not let it look like the mentor declined it.**
+by it. **The next row after this is S11-D2**, and it now has **no unruled axis** — both D2 rulings landed
+2026-09-06 and the corrected predicate is specified exactly. What that build still owns, and what
+neither ruling touches: the **mid-window tagging-regime boundary** (§2), the ~12 consumers of
+`virtue_domains_engaged`, the live score bonus, the published `llms.txt:548` `self_regarding` claim,
+and its own R18 decision. **No export is required** — `isDikaiosyneEngaged` and `computeVirtueDomains`
+are in the same module; threading the boolean is a signature change for PR19.
 
 End of paste.

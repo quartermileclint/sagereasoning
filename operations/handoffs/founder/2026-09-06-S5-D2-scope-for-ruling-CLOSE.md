@@ -121,3 +121,44 @@ question headings against each other.
 **Next:** **S4** (window-start readiness; date gate ≥2026-09-08 UTC) — now unambiguously next and no
 longer gated on D2 — then the new **S11-D2** build row, `code-critical`, founder-walked, PR19.
 **Weights BLOCKED; the S11 flip REFUSED; neither unblocked.**
+
+---
+
+## SECOND ADDENDUM — the follow-on question was relayed and RULED (2026-09-06, ~15:10 AEST)
+
+`D-MENTOR-RULING-D2-NATURAL-RELATIONSHIP-DISJUNCT-ADOPTED-2026-09-06`. Verbatim:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-natural-relationship-disjunct-verbatim.md`.
+**Still documents only. Nothing built. Production unchanged. D2's specification is now COMPLETE —
+no open axis remains.**
+
+**Term (b) is RETAINED.** The 2026-07-19 boundary *"was not drawn at identified parties. It was
+drawn at other parties — named or anonymous, identified or foreseeably present."* An asserted
+natural relationship is *"evidence that an other party is foreseeably implicated"*, and *"the engine
+does not require certainty; it requires a reasonable basis."*
+
+**The concern this session raised as its sharpest point was answered, and answered against it.** We
+argued that a mirrored predicate would still tag dikaiosyne on a self-only action carrying a
+natural-relationship factor, *"partially defeating the correction the mentor ordered."* The ruling:
+that case *"is a case where the extraction found evidence of an other party despite the circle
+identification. That evidence should be credited, not suppressed"* — and if the extraction is wrong,
+that is *"an extraction error, not a tagging error"*, fixed at the extraction layer. **The D2
+ruling's self-only case is specifically the self circle alone AND no natural-relationship factor.**
+Recording this plainly because it is the one place this session's analysis pointed the wrong way.
+
+**The third possibility also fails**, for the reason the question anticipated: deliberate divergence
+*"would mean the verdict surface says dikaiosyne engaged and the accumulation surface says it did
+not. That is not a difference in treatment. It is a contradiction."*
+
+**The self-correction on the credit stake was accepted and noted for the record** — *"Ruling on the
+inflated framing would have produced a narrower answer than the principle requires."*
+
+**The corrected tag, fully specified:** dikaiosyne tags on **(a)** a circle beyond
+`self_preservation` **OR (b)** a `natural_relationship` factor — and **not** on `is_kathekon !== null`,
+removed as over-broad. **That is exactly the existing `isDikaiosyneEngaged` predicate**, so the
+one-rule aim is satisfied literally and Finding A's observation is what the remedy adopts. **From
+source, not from the ruling: no export is required** — both functions are in the same module, so the
+export cost recorded against the ruled-out boundary option does not apply; threading the boolean into
+`computeVirtueDomains` is a signature change for PR19.
+
+**Sequencing unchanged: the build lands after the observation window opens, and both corrections go
+in one pass.** **S4 is still next.** Weights BLOCKED; the S11 flip REFUSED.
