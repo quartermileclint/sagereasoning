@@ -36948,3 +36948,74 @@ separate disclosure with its narrowness named as structural.
 
 **Records:** this entry; the verbatim ruling; the register's P6 row annotated; the standing opener's
 S4 row updated. **Rollback:** `git revert` (documents only).
+
+### D-R20A-PERIMETER-ORDERING-REMEDIATION-STOA-LIVE-VERIFIED-2026-09-06
+
+**2026-09-06, ~18:20 AEST** (machine date). Founder-walked live verification of commit `6586713`,
+closing the gap this session found: the Stoa restructure had been on `origin/main` and deployed
+since 2026-09-06 11:48 AEST with **only a `-BUILT-ARC-CLOSED` record — no `-LIVE-` entry and no
+post-deploy smoke of any kind.** Two live write surfaces had changed ordering and had never been
+exercised in production. **The AI performed no live operation** — the founder ran every call from an
+authenticated browser console and every SQL statement; the AI composed them and read the output.
+
+**FOUR ASSERTIONS, FOUR PASSES. The ordering fix is confirmed live on both write surfaces.**
+
+| # | Assertion | Result |
+|---|---|---|
+| 1 | POST, acute distress + **deliberately invalid `visibility`** | **Crisis redirect, not a 400** |
+| 2 | That POST wrote nothing | Row still `withdrawn`, original text and `declaredAt` intact |
+| 3 | PATCH, acute distress + **deliberately invalid `visibility`** | **Crisis redirect, not a 400** |
+| 4 | That PATCH wrote nothing | `whatISeek` still the benign text, not the distress text |
+
+**Why the invalid `visibility` is the whole test.** Before `6586713`, `parseDeclaration` ran first
+and would have rejected the enum, returning `400 Invalid visibility` — **the distress text would
+never have reached the classifier.** Both bodies carried a bad enum *and* acute distress; both
+returned the crisis message. That is the gate running over the raw merged body ahead of the parse,
+demonstrated in production, on both paths. No other construction proves it.
+
+**The redirect also confirms the 2026-07-07 crisis-line correction is live on this surface:** the
+returned message carries all seven resources including **Shout (UK) 85258** and **988 (CA)**.
+
+**AN INCIDENTAL FINDING WORTH MORE THAN THE SMOKE — C5 IS RULED BUT UNBUILT, NOW CONFIRMED ON A REAL
+ROW IN PRODUCTION.** The benign control POST returned **`reactivated: true`**: it did not create a
+throwaway entry but reactivated the founder's genuine 2026-08-03 row, and **reset its `declared_at`
+to the reactivation time** (`2026-08-03T10:30:25` → `2026-09-06T07:46:28`). This is designed
+behaviour, not a defect — `stoa-store.ts:370` sets `declared_at: nowIso` on the reactivation path
+and its docstring says so explicitly. **But it is exactly the case the M3 ruling of 2026-08-15
+covers:** a re-declaration within 30 days of a withdrawal should **inherit** the prior `declared_at`.
+The withdrawal was ~2026-08-12 and the re-declaration 2026-09-06 — **~25 days, inside the window** —
+so under C5 the date should have been inherited, not reset. **The concurrent-arc C5 session now has
+a live, dated observation of the current behaviour on a real row.**
+
+**A TEST-DESIGN ERROR BY THE AI, RECORDED BECAUSE THE LESSON GENERALISES.** The smoke was written to
+create a throwaway entry and withdraw it, but the founder's identity already held a withdrawn row
+**with real content**, so the "create" step reactivated and **overwrote the founder's own words**
+(and moved `visibility` from `public` to `community`). The teardown as written (`DELETE` only) was
+**structurally incapable of repairing that** — a withdrawn Stoa row retains its content, which the
+smoke's own step-2 output had already demonstrated before step 4 was run. **The AI saw that output
+and did not revise the plan.** Standing lesson: **a smoke against a surface holding real user data
+needs a CONTENT-restore step, not a STATUS-restore step, and the baseline read must be consulted
+before the write step is executed, not merely captured.**
+
+**FULL RESTORE VERIFIED.** `what_i_bring`, `what_i_seek` and `visibility: public` restored by PATCH
+from the values captured in the baseline read; entry re-withdrawn by DELETE; `declared_at` restored
+by a founder-run one-row SQL `UPDATE` (unrestorable through any route — `declaredAt` is not a
+settable field on any surface). Confirmed by `SELECT`: **`withdrawn` / `2026-08-03 10:30:25.507+00`
+/ `public`**, four tags intact. **`renewed_at` stays at `2026-09-06T07:51:10` and is deliberately
+not restored** — it is a "last tended" field and today is honest for it. That is the one permanent
+artifact of this test, disclosed rather than tidied.
+
+**A method note that cost a round-trip:** the restore `UPDATE` returned *"Success. No rows
+returned"*, which is the normal response to any `UPDATE` without `RETURNING` and does **not**
+distinguish 1 row matched from 0. Verified by a follow-up `SELECT`. **Prefer
+`UPDATE … RETURNING id, declared_at;`** — it returns the count and the new value in one step. This
+is the same class as the standing memory `supabase-sql-editor-delete-no-count`.
+
+**Also corrected in this session's own record:** an earlier statement that `declaredAt` was "intact
+at 2026-08-03" was **wrong** — asserted from a truncated console object rather than checked. It was
+already reset at that point.
+
+**Status:** the R20a perimeter-ordering arc's Stoa pair is now **LIVE AND VERIFIED**, not merely
+built. No code, schema, flag or credential changed by this verification. **The false-hold window has
+not started; `GATE1_FALSE_HOLD_CAPTURE` remains unset. The S11 flip remains REFUSED; weights remain
+BLOCKED; the 0h call remains the founder's.**
