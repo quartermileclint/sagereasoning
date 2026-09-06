@@ -404,6 +404,23 @@ destination exists; only the removal is missing), or is Layer-2 classification a
 from the trust-ledger emission M-1 was ruling on, leaving the note fully open?
 
 **Q-D2-4. Is `hasNaturalRelationship` the right second disjunct for the tag?**
+
+> **⚠ NEVER RELAYED — and this framing OVERSTATED the stake. Annotated 2026-09-06, not rewritten.**
+> The relay renumbered and spent its Q4 on the location question, so this went unasked and unruled.
+> It is now put on its own:
+> `2026-09-06-mentor-question-D2-natural-relationship-disjunct-FOR-RULING.md`. **The correction:**
+> this question is framed below as a *credit* concern, but a circle-free natural-relationship input
+> floors the whole assessment to `reflexive` (`computeDikaiosyneFloor` — *"unidentified affected
+> party ⇒ obligation necessarily unresolved"*), the ledger event carries that floored value, and
+> `increase` raises only when the carried value **exceeds** the current level. **`reflexive` is rank
+> 0, so a tag arising this way cannot raise anything.** The stake is not an undeserved rise; it is
+> whether a row asserting *"dikaiosyne engaged"* should exist at all — which is the ruling's own
+> ground. **Two things this framing also missed, both sharper than what it did say:** a mirrored
+> predicate would still tag dikaiosyne on a **self-only** action whenever a natural-relationship
+> factor was extracted, **partially defeating the correction the mentor ordered**; and the ruled
+> kathekon-trigger fix does **not** close this route, since `natural_relationship` is also one of
+> the three kathekon factors.
+
 If the tag were aligned to `isDikaiosyneEngaged`, it would inherit that predicate's
 `|| hasNaturalRelationship` term — under which *"a relationship claimed with NO identified party"*
 floors to `reflexive` on the verdict surface (`:1702` docstring). On a *credit* surface that same

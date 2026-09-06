@@ -36552,3 +36552,51 @@ Cross-references: `2026-09-06-D2-virtue-domain-tagging-SCOPE-FOR-RULING.md` ·
 `agent-circles-2026-08/2026-08-02-mentor-consultation-q4-residual-verbatim.md` ·
 M-1 in `2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` · the 2026-07-19 self-circle verbatim ·
 `S11-FLIP-PREREQUISITES-REGISTER.md` §D D2/D4.
+
+---
+
+### D-D2-NATURAL-RELATIONSHIP-DISJUNCT-PUT-FOR-RULING-2026-09-06
+
+**2026-09-06, ~14:40 AEST** (machine date). Session S5, third leg — after the D2 ruling landed, the
+founder asked for the one question the relay had failed to carry. Tier `governance`, autonomous.
+**Documents only.** Model `claude-opus-5`.
+
+**What was put:** `operations/trust-layer-2026-07/2026-09-06-mentor-question-D2-natural-relationship-disjunct-FOR-RULING.md`
+— should the corrected engine tag fire on **(a)** an identified other-party circle alone, or on
+**(a) or (b)** where (b) is an asserted "natural relationship" with **no party identified**? Awaiting
+relay (opener **F-15**). It opens by naming the gap as **our drafting error, not a mentor omission**.
+
+**Re-deriving the mechanism to write the question corrected our own record in two directions, and
+the deflating correction is the one worth leading with.** The scope doc framed this axis as a
+**credit** concern. **That overstated it.** A circle-free natural-relationship input floors the whole
+assessment to `reflexive` (`computeDikaiosyneFloor` — *"unidentified affected party ⇒ obligation
+necessarily unresolved"*), the `credential-completed` event carries that floored value as
+`demonstratedProximity`, and the `increase` branch raises only when the carried value **exceeds** the
+current level. **`reflexive` is rank 0, so a tag arising this way cannot raise anything.** The stake
+is therefore not an undeserved rise but whether a ledger row asserting *"dikaiosyne engaged"* should
+exist at all — **which is the ruling's own ground, not ours.** The correction is stated inside the
+relay document itself rather than only in our records: *"We would rather correct our own framing than
+have you rule on a stake we had inflated."*
+
+**And two facts sharper than anything either record had said.** **(i)** A corrected tag that simply
+mirrors the existing verdict predicate **would still tag dikaiosyne on a SELF-ONLY action** whenever
+Layer 1 extracted a natural-relationship factor — the first term is false (the self circle is
+excluded) but the second is true — **partially defeating the correction the mentor just ordered.**
+**(ii)** The ruled kathekon-trigger fix does **not** close that route, because `natural_relationship`
+is itself one of the three factors feeding the kathekon assessment. So the two corrections must be
+decided together, which is why the question goes **before** the build rather than during it.
+Frequency of that extraction combination is **unmeasured** and is not guessed at.
+
+**Balance kept deliberately.** The question also carries the reading that cuts the other way — the
+2026-07-19 ruling's own *"That party need not be named explicitly. An action that foreseeably affects
+a third party, even anonymously, engages dikaiosyne"* — and a third possibility (that (b) is right
+for the verdict surface and wrong for the accumulation surface), with the note that this may fail for
+the same reason the accumulation/verdict distinction failed to rescue the tag. **No option elected.**
+
+**Records:** the relay question; the scope doc's Q-D2-4 **annotated in place, not rewritten** (it is
+the document the mentor ruled from); the register's D2 row appended again (columns re-verified at 3);
+the opener gains **F-15** and its **S11-D2** row now says *do not design the predicate before F-15
+returns*.
+
+**Status:** Adopted (PUT, not ruled). **Sequencing unchanged — the build still lands after the
+observation window opens. This does not gate S4.** Weights BLOCKED; the S11 flip REFUSED.
