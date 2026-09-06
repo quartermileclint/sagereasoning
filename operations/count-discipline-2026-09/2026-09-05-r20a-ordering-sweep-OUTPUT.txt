@@ -73,35 +73,34 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
       imported calls pre-check (follow by hand): checkRateLimit, requireAuth, isScoreConversationR20aEnabled, composeConversationDistressSubject
       check→redirect window L182–L189: 0 bound line(s)
 ### src/app/api/mentor/stoa/route.ts
-  POST @L336 -> runStoaDistressGate @L356; direct pre-check bound lines: 0
-      stoaClosed@L337 (same-file helper, body followed: 0 bound line(s))
-      readJsonBody@L345 (same-file helper, body followed: 0 bound line(s))
-      parseDeclaration@L349 (same-file helper, body followed: 3 bound line(s))
-      via parseDeclaration(): L150 [length-cmp+local-const]: } else if (v.length > FIELD_MAX) {
-      via parseDeclaration(): L171 [length-cmp+local-const]: if (body.tags.length > TAGS_MAX_COUNT) {
-      via parseDeclaration(): L176 [length-cmp+local-const]: if (t.trim().length > TAG_MAX) {
-      mergedDeclarationForGate@L355 (same-file helper, body followed: 0 bound line(s))
+  POST @L406 -> runStoaDistressGate @L430; direct pre-check bound lines: 0
+      stoaClosed@L407 (same-file helper, body followed: 0 bound line(s))
+      readJsonBody@L415 (same-file helper, body followed: 0 bound line(s))
+      mergedDeclarationForGate@L429 (same-file helper, body followed: 0 bound line(s))
+      rawDeclarationForGate@L429 (same-file helper, body followed: 2 bound line(s))
+      via rawDeclarationForGate(): L233 [local-const]: if (wireKey in body) raw[key] = String(body[wireKey] ?? '').slice(0, FIELD_MAX)
+      via rawDeclarationForGate(): L250 [local-const]: raw.tags = body.tags.slice(0, TAGS_MAX_COUNT).map((t) => String(t ?? '').trim().slice(0, TAG_MAX))
       imported calls pre-check (follow by hand): isStoaEnabled, checkRateLimit, requireAuth
-      check→redirect window L356–L357: 0 bound line(s)
-  PATCH @L387 -> runStoaDistressGate @L408; direct pre-check bound lines: 0
-      stoaClosed@L388 (same-file helper, body followed: 0 bound line(s))
-      readJsonBody@L396 (same-file helper, body followed: 0 bound line(s))
-      parseDeclaration@L400 (same-file helper, body followed: 3 bound line(s))
-      via parseDeclaration(): L150 [length-cmp+local-const]: } else if (v.length > FIELD_MAX) {
-      via parseDeclaration(): L171 [length-cmp+local-const]: if (body.tags.length > TAGS_MAX_COUNT) {
-      via parseDeclaration(): L176 [length-cmp+local-const]: if (t.trim().length > TAG_MAX) {
-      mergedDeclarationForGate@L407 (same-file helper, body followed: 0 bound line(s))
+      check→redirect window L430–L431: 0 bound line(s)
+  PATCH @L467 -> runStoaDistressGate @L487; direct pre-check bound lines: 0
+      stoaClosed@L468 (same-file helper, body followed: 0 bound line(s))
+      readJsonBody@L476 (same-file helper, body followed: 0 bound line(s))
+      mergedDeclarationForGate@L486 (same-file helper, body followed: 0 bound line(s))
+      rawDeclarationForGate@L486 (same-file helper, body followed: 2 bound line(s))
+      via rawDeclarationForGate(): L233 [local-const]: if (wireKey in body) raw[key] = String(body[wireKey] ?? '').slice(0, FIELD_MAX)
+      via rawDeclarationForGate(): L250 [local-const]: raw.tags = body.tags.slice(0, TAGS_MAX_COUNT).map((t) => String(t ?? '').trim().slice(0, TAG_MAX))
       imported calls pre-check (follow by hand): isStoaEnabled, checkRateLimit, requireAuth
-      check→redirect window L408–L409: 0 bound line(s)
-  DELETE @L438: no check in handler
+      check→redirect window L487–L488: 0 bound line(s)
+  DELETE @L522: no check in handler
 ### src/app/api/mentor/stoa/draft-reflect/route.ts
-  POST @L124 -> enforceDistressCheck @L155; direct pre-check bound lines: 1
-      L154 [length-cmp]: if (subject.length > 0) {
+  POST @L124 -> enforceDistressCheck @L171; direct pre-check bound lines: 4
+      L165 [TEXT_LIMITS]: whatIBring: String(body.what_i_bring ?? '').slice(0, TEXT_LIMITS.short),
+      L166 [TEXT_LIMITS]: whatISeek: String(body.what_i_seek ?? '').slice(0, TEXT_LIMITS.short),
+      L167 [TEXT_LIMITS]: contactChannel: String(body.contact_channel ?? '').slice(0, TEXT_LIMITS.short),
+      L170 [length-cmp]: if (subject.length > 0) {
       stoaClosed@L127 (same-file helper, body followed: 0 bound line(s))
-      parseDraft@L145 (same-file helper, body followed: 1 bound line(s))
-      via parseDraft(): L114 [validateTextLength+TEXT_LIMITS]: const err = validateTextLength(v, labels[key], TEXT_LIMITS.short)
       imported calls pre-check (follow by hand): isStoaEnabled, isStoaDraftReflectEnabled, checkRateLimit, requireAuth, composeStoaDistressSubject
-      check→redirect window L155–L162: 0 bound line(s)
+      check→redirect window L171–L178: 0 bound line(s)
 ### src/app/api/mentor/impulse/route.ts
   POST @L399 -> enforceDistressCheck @L447; direct pre-check bound lines: 0
       readJsonBody@L407 (same-file helper, body followed: 0 bound line(s))
@@ -296,5 +295,5 @@ MEMBERSHIP (re-derived from website/src/lib/__tests__/r20a-invocation-guard.test
   PUT @L522: no check in handler
   DELETE @L525: no check in handler
 
-SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=29 via-same-file-helper=12 raw-total=41 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
+SUMMARY write-handlers=62 with-check=54 pre-check-bound-lines: direct=32 via-same-file-helper=9 raw-total=41 (raw — reconciled by the manual trace in the audit §1.6); check→redirect-window bound lines=0 (handlers with no redirect marker found: 2); rate-limit config lines excluded=6
 KNOWN-CASE score-conversation: R20a flag block L180-L200; format guard L367 (occurrences: 1); format guard AFTER block end: true (a single boolean on the brace-matched END anchor — it does not distinguish 'before the block' from 'inside it'; the per-handler counts above do)

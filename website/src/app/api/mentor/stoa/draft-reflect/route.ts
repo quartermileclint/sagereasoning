@@ -142,14 +142,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const parsed = parseDraft(body)
-  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
-
   try {
     // R20a — before the mirror-reading LLM call ever fires (AC5; PR3), over
     // the SUBMITTED draft (there is no saved row to merge over — this is
     // pre-publish text, possibly never declared at all).
-    const subject = composeStoaDistressSubject(parsed.draft)
+    //
+    // ORDERING (Session 3D, 2026-09-06; audit §2.1 row 13, §3 constraint 6;
+    // the 2026-09-06 ruling + the 2026-09-05 Part 5 extension): the subject
+    // is composed from the RAW body BEFORE `parseDraft`, so the parse's 400s
+    // (type, the TEXT_LIMITS.short maximum, "Nothing to reflect on") run
+    // after the redirect return. Each field is `String(x ?? '').slice(0,
+    // TEXT_LIMITS.short)` — the guard's own bound, equal to the composer's
+    // STOA_DISTRESS_FIELD_CAP (2,000). A valid in-bound draft is screened
+    // byte-identically to before (a string at or under the bound slices to
+    // itself; an absent/null/'' field becomes '' which the composer skips).
+    // An all-empty draft composes to '' and skips the classifier, then meets
+    // the "Nothing to reflect on" 400 — so the move costs nothing there.
+    // DISCLOSED RESIDUAL (audit §4.3): text past 2,000 chars is not screened
+    // — before this move it was not read at all (a bare 400). Pinned by
+    // ORD-1..2 + RAW-1 + NEG-1..2 in __tests__/r20a-invocation.test.ts.
+    const subject = composeStoaDistressSubject({
+      whatIBring: String(body.what_i_bring ?? '').slice(0, TEXT_LIMITS.short),
+      whatISeek: String(body.what_i_seek ?? '').slice(0, TEXT_LIMITS.short),
+      contactChannel: String(body.contact_channel ?? '').slice(0, TEXT_LIMITS.short),
+    })
     let supportResources: StoaMildSupportResources | undefined
     if (subject.length > 0) {
       const gate = await enforceDistressCheck(detectDistressTwoStage(subject))
@@ -169,6 +185,12 @@ export async function POST(request: NextRequest) {
       }
       if (effective.severity === 'mild') supportResources = buildStoaMildSupportResources()
     }
+
+    // The parse's 400s — MOVED after the redirect return (Session 3D,
+    // 2026-09-06; order, not existence: every message, value and status
+    // unchanged). The mirror reading takes `parsed.draft` only.
+    const parsed = parseDraft(body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
     const result = await requestDraftMirrorReading(parsed.draft)
     if (!result.ok) {

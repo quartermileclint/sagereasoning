@@ -172,8 +172,8 @@
         "params": {
           "steps": [
             "1. Fetch the Stoic Brain: GET https://www.sagereasoning.com/api/stoic-brain",
-            "2. Take the Foundational Alignment Check (free): GET then POST to /api/assessment/foundational with your 11 self-assessment responses",
-            "3. Review your results — consider the full assessment (paid): POST to /api/assessment/full for all 37 assessments across 7 phases",
+            "2. Take the Foundational Alignment Check (free): GET then POST to /api/assessment/foundational with all 14 self-assessment responses",
+            "3. Review your results — consider the full assessment (paid): POST to /api/assessment/full for all 55 assessments across 8 phases",
             "4. Before any consequential action, check the guardrail: POST to /api/guardrail with your proposed action and risk_class",
             "5. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
             "6. Aim for 'deliberate' or higher katorthoma_proximity in your decisions"
@@ -648,7 +648,7 @@
     {
       "id": "foundational-assessment",
       "name": "Foundational Alignment Check (Free)",
-      "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns passion patterns identified, katorthoma_proximity per phase, prokoptos trajectory, and assessment notes. Free tier: 1/day.",
+      "description": "Structured self-assessment across 14 prompts (Phases 1-2: Foundations + Architecture of Mind). Returns passion patterns identified, katorthoma_proximity per phase, prokoptos trajectory, and assessment notes. Free tier: 1/day.",
       "tags": [
         "self-assessment",
         "passion-diagnosis",
@@ -665,7 +665,7 @@
     {
       "id": "full-assessment",
       "name": "Complete Virtue Alignment Assessment (Paid)",
-      "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue domain analysis (phronesis/dikaiosyne/andreia/sophrosyne), oikeiosis extension assessment, improvement directions per domain, and comprehensive alignment profile. Requires paid API key.",
+      "description": "Full 55-assessment evaluation across 8 phases. Returns individual virtue domain analysis (phronesis/dikaiosyne/andreia/sophrosyne), oikeiosis extension assessment, improvement directions per domain, and comprehensive alignment profile. Requires paid API key.",
       "tags": [
         "virtue-assessment",
         "oikeiosis-mapping",

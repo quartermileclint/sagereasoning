@@ -41,6 +41,16 @@ import {
   STOA_DISTRESS_FIELD_CAP,
   STOA_DISTRESS_SEPARATOR,
 } from '@/lib/stoa/stoa-r20a'
+// Session 3D (2026-09-06): the shared brace-matched structural helpers for the
+// EXECUTION-ORDER pins (memory guard-scope-must-cover-the-class).
+import {
+  loadCodeOnly,
+  structuralBlock,
+  codeIndexAfter,
+  codeCount,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+} from '@/lib/__tests__/r20a-ordering-pin-helpers'
 
 let passCount = 0
 let failCount = 0
@@ -274,6 +284,115 @@ for (const severity of ['moderate', 'acute'] as const) {
   expectTrue(`RH-2(${severity}) never the developer form`,
     !('status' in payload) && !('developer_note' in payload) &&
       !('suggested_user_message' in payload) && !('flow_terminated' in payload))
+}
+
+// ============================================================================
+// EXECUTION-ORDER PINS — Session 3D (2026-09-06), the R20a ordering
+// restructure (audit §2.1 row 12; §3 constraint 6; the 2026-09-06 ruling +
+// the 2026-09-05 Part 5 extension). The gate lives in the shared helper
+// runStoaDistressGate, so the pins anchor on the CALL-SITE order inside each
+// handler's brace-matched block: merge(raw) → gate → parseDeclaration → the
+// store write, each exactly once per handler; the raw composer's caps; the
+// non-length class fence (NEG-2) and the length fence (NEG-1) over the
+// handler-open → gate span; the merge invariant (the anti-assembly fold);
+// the empty-subject skip's exact presence form.
+//
+// MUTATION RECORD (2026-09-06, real file, hash-verified restore): see the
+// Session 3D close.
+// ============================================================================
+{
+  const code = loadCodeOnly(ROUTE_PATH)
+  const handlerBlock = (name: string) =>
+    structuralBlock(code, new RegExp(`export\\s+async\\s+function\\s+${name}\\s*\\([^)]*\\)\\s*\\{`))
+  const MERGE_RE = /mergedDeclarationForGate\s*\(\s*identity\s*,\s*rawDeclarationForGate\s*\(\s*parsedBody\.body\s*\)\s*\)/
+  const GATE_RE = /runStoaDistressGate\s*\(\s*merged\s*\)/
+  const PARSE_RE = /parseDeclaration\s*\(\s*parsedBody\.body\s*\)/
+  // MUTATION FOLD (2026-09-06, in-build): anchoring the parse on the GATE
+  // CALL was not enough — a mutation placing the parse BETWEEN the gate call
+  // and its redirect return stayed green, and that is the harm itself (a
+  // distressed body with a bad `visibility` would 400 before the crisis form
+  // was returned). The anchor is the REDIRECT RETURN, the same lesson the
+  // rest of this arc learned as "anchor on the block's structural END".
+  const REDIRECT_RE = /if\s*\(\s*gateOutcome\.redirect\s*\)\s*return\s+gateOutcome\.redirect/
+  const RAW_DEF_RE = /function\s+rawDeclarationForGate\s*\(\s*body\s*:\s*Record<string,\s*unknown>\s*\)\s*:\s*StoaGateFields\s*\{/
+  const RAW_TEXT_CAP_RE = /String\(\s*body\[wireKey\]\s*\?\?\s*['"]{2}\s*\)\.slice\(\s*0\s*,\s*FIELD_MAX\s*\)/
+  // PR19 fold (2026-09-06): the tag cap must TRIM BEFORE SLICING — the guard
+  // measures `t.trim().length`, so a raw-length slice is a different metric
+  // and a whitespace-padded tag screened as one character while saving in
+  // full. The regex requires the .trim() and the metric-parity pin below
+  // asserts the two measurements agree.
+  const RAW_TAG_CAP_RE = /body\.tags\.slice\(\s*0\s*,\s*TAGS_MAX_COUNT\s*\)\.map\(\s*\(\s*t\s*\)\s*=>\s*String\(\s*t\s*\?\?\s*['"]{2}\s*\)\.trim\(\)\.slice\(\s*0\s*,\s*TAG_MAX\s*\)\s*\)/
+  const RAW_TAG_UNTRIMMED_RE = /String\(\s*t\s*\?\?\s*['"]{2}\s*\)\.slice\(\s*0\s*,\s*TAG_MAX\s*\)/
+  const TAG_GUARD_METRIC_RE = /t\.trim\(\)\.length\s*>\s*TAG_MAX/
+  const MERGE_SIG_RE = /async\s+function\s+mergedDeclarationForGate\s*\(\s*identity\s*:\s*StoaIdentity\s*,\s*input\s*:\s*StoaGateFields\s*,?\s*\)/
+  const SKIP_RE = /if\s*\(\s*subject\.length\s*===\s*0\s*\)\s*return/
+  const SKIP_LT_RE = /subject\.length\s*[<>]=?/
+  const NEG2_LITERALS = ['Visibility must be', 'Tags must be a list', 'must be text', 'At most']
+  // MUTATION FOLD (2026-09-06, in-build): `/['"]visibility['"]\s+in\s+body/`
+  // was VACUOUS — codeCount matches over the STRING-BLANKED view, where
+  // `'visibility'` is eleven spaces between quotes, so the token could never
+  // fire; a decoy enum re-add reading `'visibility' in parsedBody.body` with
+  // a different error message passed the fence green. Identifier tokens
+  // (FIELD_MAX, parseDeclaration) survive blanking and did fire. The fix:
+  // keep the identifier tokens on the blanked view, and match the field
+  // NAMES on the raw (comment-stripped, unblanked) span, where a quoted key
+  // or a `.visibility` access both read literally. Nothing legitimate in the
+  // pre-gate span names these fields — the raw composer is a helper defined
+  // outside the handler.
+  const NEG2_TOKENS: RegExp[] = [/parseDeclaration\s*\(/, /\bFIELD_MAX\b/, /\bTAG_MAX\b/, /\bTAGS_MAX_COUNT\b/]
+  const NEG2_RAW_TOKENS: RegExp[] = [/\bvisibility\b/, /\btags\b/, /\bwhat_i_bring\b/, /\bwhat_i_seek\b/, /\bcontact_channel\b/]
+
+  for (const [name, WRITE_RE] of [['POST', /declareStoaEntry\s*\(\s*identity\s*,\s*parsed\.input\s*\)/], ['PATCH', /updateStoaEntry\s*\(\s*identity\s*,\s*parsed\.input\s*\)/]] as const) {
+    const h = handlerBlock(name)
+    const inBlock = (re: RegExp) => { const i = codeIndexAfter(code, re, h.openIdx); return i > -1 && i < h.endIdx ? i : -1 }
+    const mergeIdx = inBlock(MERGE_RE), gateIdx = inBlock(GATE_RE), parseIdx = inBlock(PARSE_RE), writeIdx = inBlock(WRITE_RE)
+    const redirectIdx = inBlock(REDIRECT_RE)
+    const span = h.openIdx > -1 && h.endIdx > h.openIdx ? code.slice(h.openIdx, h.endIdx) : ''
+    const preGate = gateIdx > -1 ? code.slice(h.openIdx, gateIdx) : ''
+    expectTrue(`ORD-1(${name}) the handler block was found exactly once and is non-degenerate; merge, gate, redirect-return, parse and write anchors each found inside it`,
+      h.matches === 1 && h.openIdx > -1 && h.endIdx > h.openIdx && mergeIdx > -1 && gateIdx > -1 && redirectIdx > -1 && parseIdx > -1 && writeIdx > -1,
+      `block=${h.openIdx}..${h.endIdx} (${h.matches}) merge=${mergeIdx} gate=${gateIdx} redirect=${redirectIdx} parse=${parseIdx} write=${writeIdx}`)
+    expectTrue(`ORD-2(${name}) call-site order: merge(raw body) < gate < REDIRECT RETURN < parseDeclaration < store write — the parse's 400s run after the crisis form has already returned, not merely after the gate call (mutation fold: anchoring on the gate call alone let a parse slip between the call and the return)`,
+      mergeIdx > -1 && gateIdx > mergeIdx && redirectIdx > gateIdx && parseIdx > redirectIdx && writeIdx > parseIdx,
+      `merge=${mergeIdx} gate=${gateIdx} redirect=${redirectIdx} parse=${parseIdx} write=${writeIdx}`)
+    expectTrue(`ORD-3(${name}) non-vacuity: merge(raw), gate, redirect return, parse and write each appear exactly once in the handler`,
+      codeCount(span, MERGE_RE) === 1 && codeCount(span, GATE_RE) === 1 && codeCount(span, REDIRECT_RE) === 1 && codeCount(span, PARSE_RE) === 1 && codeCount(span, WRITE_RE) === 1,
+      `counts=${codeCount(span, MERGE_RE)}/${codeCount(span, GATE_RE)}/${codeCount(span, REDIRECT_RE)}/${codeCount(span, PARSE_RE)}/${codeCount(span, WRITE_RE)}`)
+    expectTrue(`NEG-1(${name}) no length guard of ANY form exists between the handler open and the gate call (the class fence)`,
+      gateIdx > -1 && codeCount(preGate, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preGate, BARE_LENGTH_GUARD_RE) === 0,
+      `vtl=${codeCount(preGate, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preGate, BARE_LENGTH_GUARD_RE)}`)
+    const litHit = NEG2_LITERALS.filter((l) => preGate.includes(l))
+    const tokHits = NEG2_TOKENS.reduce((n, re) => n + codeCount(preGate, re), 0)
+    const rawTokHits = NEG2_RAW_TOKENS.filter((re) => re.test(preGate))
+    expectTrue(`NEG-2(${name}) none of the parse's 400s occurs before the gate in ANY form — error literals absent, identifier tokens (parseDeclaration(, FIELD_MAX/TAG_MAX/TAGS_MAX_COUNT) absent from the blanked span, and no declaration FIELD NAME (visibility, tags, the three prose keys) is named at all in the raw pre-gate span (mutation fold: the quoted-token form was vacuous under string blanking)`,
+      gateIdx > -1 && litHit.length === 0 && tokHits === 0 && rawTokHits.length === 0,
+      `literals=${JSON.stringify(litHit)} tokens=${tokHits} rawTokens=${rawTokHits.map((r) => r.source).join(',')}`)
+  }
+  expectTrue('RAW-1 rawDeclarationForGate is defined exactly once, typed to StoaGateFields, caps each text part with String(v ?? \'\').slice(0, FIELD_MAX) and each tag with String(t ?? \'\').slice(0, TAG_MAX) over at most TAGS_MAX_COUNT tags',
+    codeCount(code, RAW_DEF_RE) === 1 && codeCount(code, RAW_TEXT_CAP_RE) === 1 && codeCount(code, RAW_TAG_CAP_RE) === 1,
+    `def=${codeCount(code, RAW_DEF_RE)} text=${codeCount(code, RAW_TEXT_CAP_RE)} tag=${codeCount(code, RAW_TAG_CAP_RE)}`)
+  expectTrue('RAW-2 the raw composer\'s FIELD_MAX equals the composer\'s STOA_DISTRESS_FIELD_CAP (the cap equals the guard\'s bound) — read from both sources',
+    (() => { const m = /const\s+FIELD_MAX\s*=\s*(\d+)/.exec(code); return !!m && Number(m[1]) === STOA_DISTRESS_FIELD_CAP })(),
+    `cap=${STOA_DISTRESS_FIELD_CAP}`)
+  expectTrue('RAW-1b tag METRIC PARITY: the screening slice and the validity guard measure the SAME thing — the composer trims before slicing (matching the guard\'s t.trim().length > TAG_MAX), and no untrimmed raw-length tag slice survives. A raw-length slice let a whitespace-padded tag save in full but screen as one character (PR19 HIGH, 2026-09-06).',
+    codeCount(code, RAW_TAG_UNTRIMMED_RE) === 0 && codeCount(code, TAG_GUARD_METRIC_RE) === 1 && codeCount(code, RAW_TAG_CAP_RE) === 1,
+    `untrimmed=${codeCount(code, RAW_TAG_UNTRIMMED_RE)} guardMetric=${codeCount(code, TAG_GUARD_METRIC_RE)} cap=${codeCount(code, RAW_TAG_CAP_RE)}`)
+  expectTrue('RAW-1c BEHAVIOURAL: a tag the guard ACCEPTS is screened in full — a 39-space-padded "kill myself" (trimmed length 11, so valid and stored verbatim) reaches the classifier as its real text, not as a truncated fragment',
+    (() => {
+      const TAG_MAX_V = Number((/const\s+TAG_MAX\s*=\s*(\d+)/.exec(code) ?? [])[1])
+      const TAGS_MAX_V = Number((/const\s+TAGS_MAX_COUNT\s*=\s*(\d+)/.exec(code) ?? [])[1])
+      if (!TAG_MAX_V || !TAGS_MAX_V) return false
+      const evil = ' '.repeat(TAG_MAX_V - 1) + 'kill myself'
+      if (evil.trim().length > TAG_MAX_V) return false // must be guard-VALID for the case to bite
+      const screened = [evil].slice(0, TAGS_MAX_V).map((t) => String(t ?? '').trim().slice(0, TAG_MAX_V))
+      return composeStoaDistressSubject({ tags: screened }) === 'kill myself'
+    })(),
+    'the padded tag must screen as its real text')
+  expectTrue('RAW-3 mergedDeclarationForGate takes the gate-field shape (StoaGateFields), so the raw composer — not the parsed input — is what the gate merges',
+    codeCount(code, MERGE_SIG_RE) === 1, `sig=${codeCount(code, MERGE_SIG_RE)}`)
+  expectTrue('SKIP-1 the empty-subject skip in runStoaDistressGate keeps its presence form (subject.length === 0) exactly once and is never rewritten into a </> comparison',
+    codeCount(code, SKIP_RE) === 1 && codeCount(code, SKIP_LT_RE) === 0,
+    `skip=${codeCount(code, SKIP_RE)} lt=${codeCount(code, SKIP_LT_RE)}`)
 }
 
 console.log(`\nstoa r20a-invocation: ${passCount} passed, ${failCount} failed`)

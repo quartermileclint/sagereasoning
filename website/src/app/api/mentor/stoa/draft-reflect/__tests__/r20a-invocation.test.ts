@@ -35,6 +35,18 @@ import * as path from 'path'
 
 import { renderR20aRedirectResponse } from '@/lib/substrate/r20a-audience-renderer'
 import { isStoaDraftReflectEnabled } from '@/lib/stoa/stoa-draft-reflect'
+// Session 3D (2026-09-06): the shared structural helpers for the
+// EXECUTION-ORDER pins (memory guard-scope-must-cover-the-class).
+import {
+  loadCodeOnly,
+  structuralBlock,
+  codeIndexAfter,
+  codeCount,
+  readTextLimitsFromSource,
+  BARE_LENGTH_GUARD_RE,
+  VALIDATE_TEXT_LENGTH_CALL_RE,
+} from '@/lib/__tests__/r20a-ordering-pin-helpers'
+import { STOA_DISTRESS_FIELD_CAP } from '@/lib/stoa/stoa-r20a'
 
 let passCount = 0
 let failCount = 0
@@ -251,6 +263,80 @@ for (const severity of ['moderate', 'acute'] as const) {
   expectTrue(`RH-2(${severity}) never the developer form`,
     !('status' in payload) && !('developer_note' in payload) &&
       !('suggested_user_message' in payload) && !('flow_terminated' in payload))
+}
+
+// ============================================================================
+// EXECUTION-ORDER PINS — Session 3D (2026-09-06), the R20a ordering
+// restructure (audit §2.1 row 13; §3 constraint 6). The subject is composed
+// from the RAW body before parseDraft; the parse's 400s run after the
+// redirect return. Anchored on the call-site order inside the POST block:
+// compose(raw) → the empty-subject skip → gate → parseDraft → the LLM call.
+// ============================================================================
+{
+  const code = loadCodeOnly(ROUTE_PATH)
+  const LIMITS = readTextLimitsFromSource()
+  const h = structuralBlock(code, /export\s+async\s+function\s+POST\s*\([^)]*\)\s*\{/)
+  const COMPOSE_RE = /const\s+subject\s*=\s*composeStoaDistressSubject\s*\(\s*\{/
+  const RAW_FIELD_RE = (wire: string, key: string) => new RegExp(`${key}\\s*:\\s*String\\(\\s*body\\.${wire}\\s*\\?\\?\\s*['"]{2}\\s*\\)\\.slice\\(\\s*0\\s*,\\s*TEXT_LIMITS\\.short\\s*\\)`)
+  const SKIP_RE = /if\s*\(\s*subject\.length\s*>\s*0\s*\)\s*\{/
+  const GATE_RE = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(\s*subject\s*\)\s*\)/
+  const PARSE_RE = /const\s+parsed\s*=\s*parseDraft\s*\(\s*body\s*\)/
+  const LLM_RE = /requestDraftMirrorReading\s*\(\s*parsed\.draft\s*\)/
+  const OLD_COMPOSE_RE = /composeStoaDistressSubject\s*\(\s*parsed\.draft\s*\)/
+  const inBlock = (re: RegExp) => { const i = codeIndexAfter(code, re, h.openIdx); return i > -1 && i < h.endIdx ? i : -1 }
+  const composeIdx = inBlock(COMPOSE_RE), skipIdx = inBlock(SKIP_RE), gateIdx = inBlock(GATE_RE), parseIdx = inBlock(PARSE_RE), llmIdx = inBlock(LLM_RE)
+  // MUTATION FOLD (2026-09-06, in-build): anchoring the parse on the GATE
+  // CALL was not enough — a mutation placing the parse BETWEEN the gate call
+  // and its redirect return stayed green, and that is the harm itself. The
+  // anchor is the enclosing skip-block's brace-matched END (which contains
+  // the gate AND its redirect return), the arc's standing lesson.
+  const skipBlock = structuralBlock(code, SKIP_RE)
+  const span = h.openIdx > -1 && h.endIdx > h.openIdx ? code.slice(h.openIdx, h.endIdx) : ''
+  const preCompose = composeIdx > -1 ? code.slice(h.openIdx, composeIdx) : ''
+  const preGate = gateIdx > -1 ? code.slice(h.openIdx, gateIdx) : ''
+  expectTrue('ORD-1 the POST block was found exactly once and is non-degenerate; compose, skip, gate, parse and LLM anchors each found inside it; the skip block was found exactly once, is non-degenerate, and nests the gate (skip open < gate < skip end)',
+    h.matches === 1 && h.openIdx > -1 && h.endIdx > h.openIdx && composeIdx > -1 && skipIdx > -1 && gateIdx > -1 && parseIdx > -1 && llmIdx > -1 &&
+      skipBlock.matches === 1 && skipBlock.openIdx > -1 && skipBlock.endIdx > skipBlock.openIdx && gateIdx > skipBlock.openIdx && gateIdx < skipBlock.endIdx,
+    `block=${h.openIdx}..${h.endIdx} (${h.matches}) compose=${composeIdx} skip=${skipBlock.openIdx}..${skipBlock.endIdx} (${skipBlock.matches}) gate=${gateIdx} parse=${parseIdx} llm=${llmIdx}`)
+  expectTrue('ORD-2 order: compose(raw body) < the skip block (which holds the gate AND its redirect return) < parseDraft < the mirror-reading LLM call — the parse follows the block\'s structural END, so a parse placed anywhere inside it, before OR after the gate call, is caught (mutation fold)',
+    composeIdx > -1 && skipBlock.openIdx > composeIdx && skipBlock.endIdx > -1 && parseIdx > skipBlock.endIdx && llmIdx > parseIdx,
+    `compose=${composeIdx} skipOpen=${skipBlock.openIdx} skipEnd=${skipBlock.endIdx} parse=${parseIdx} llm=${llmIdx}`)
+  expectTrue('ORD-3 non-vacuity: compose, gate, parse and the LLM call each appear exactly once in the handler; the old parsed-draft composition is gone',
+    codeCount(span, COMPOSE_RE) === 1 && codeCount(span, GATE_RE) === 1 && codeCount(span, PARSE_RE) === 1 && codeCount(span, LLM_RE) === 1 && codeCount(code, OLD_COMPOSE_RE) === 0,
+    `counts=${codeCount(span, COMPOSE_RE)}/${codeCount(span, GATE_RE)}/${codeCount(span, PARSE_RE)}/${codeCount(span, LLM_RE)} old=${codeCount(code, OLD_COMPOSE_RE)}`)
+  expectTrue('RAW-1 all three draft fields are composed from the raw body as String(body.x ?? \'\').slice(0, TEXT_LIMITS.short), exactly once each',
+    codeCount(code, RAW_FIELD_RE('what_i_bring', 'whatIBring')) === 1 && codeCount(code, RAW_FIELD_RE('what_i_seek', 'whatISeek')) === 1 && codeCount(code, RAW_FIELD_RE('contact_channel', 'contactChannel')) === 1,
+    `bring=${codeCount(code, RAW_FIELD_RE('what_i_bring', 'whatIBring'))} seek=${codeCount(code, RAW_FIELD_RE('what_i_seek', 'whatISeek'))} contact=${codeCount(code, RAW_FIELD_RE('contact_channel', 'contactChannel'))}`)
+  expectTrue('RAW-2 the cap (TEXT_LIMITS.short) equals the composer\'s STOA_DISTRESS_FIELD_CAP and the guard\'s bound — read from source',
+    LIMITS.short === STOA_DISTRESS_FIELD_CAP && LIMITS.short === 2000, `short=${LIMITS.short} cap=${STOA_DISTRESS_FIELD_CAP}`)
+  expectTrue('NEG-1 no length guard of ANY form exists between the handler open and the subject composition (the class fence; the route\'s own empty-subject skip — subject.length > 0 — sits after the composition and is pinned by ORD-2 as the only such form before the gate)',
+    composeIdx > -1 && codeCount(preCompose, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preCompose, BARE_LENGTH_GUARD_RE) === 0 &&
+      codeCount(preGate, VALIDATE_TEXT_LENGTH_CALL_RE) === 0 && codeCount(preGate, BARE_LENGTH_GUARD_RE) === 1 && codeCount(preGate, SKIP_RE) === 1,
+    `preCompose vtl=${codeCount(preCompose, VALIDATE_TEXT_LENGTH_CALL_RE)} bare=${codeCount(preCompose, BARE_LENGTH_GUARD_RE)}; preGate bare=${codeCount(preGate, BARE_LENGTH_GUARD_RE)} skip=${codeCount(preGate, SKIP_RE)}`)
+  {
+    const lits = ['must be text', 'Nothing to reflect on'].filter((l) => preGate.includes(l))
+    const toks = codeCount(preGate, /parseDraft\s*\(/) + codeCount(preGate, /validateTextLength\s*\(/)
+    // PR19 fold (2026-09-06): the RAW field-name fence, ported from the
+    // sibling /api/mentor/stoa battery. Without it this check saw only two
+    // literal messages and two helper tokens, so a decoy pre-gate guard
+    // phrased with a FRESH error message and no helper call —
+    // `if (body.what_i_bring !== undefined && typeof body.what_i_bring !== 'string') return 400` —
+    // reopened the exact ordering defect the ruling closed and the battery
+    // stayed 63/0 (demonstrated live by a reviewer). The stoa battery had
+    // been hardened against this same class in-build and the fix was not
+    // ported to its sibling: the instance was fixed, the CLASS was not
+    // (memory `guard-scope-must-cover-the-class`). These are matched on the
+    // RAW comment-stripped span, not the string-blanked view, because a
+    // quoted key survives only there.
+    //
+    // The composition line itself necessarily names all three fields, so the
+    // span for this fence ends at the composition, not at the gate.
+    const NEG2_RAW_TOKENS: RegExp[] = [/\bwhat_i_bring\b/, /\bwhat_i_seek\b/, /\bcontact_channel\b/]
+    const rawToks = composeIdx > -1 ? NEG2_RAW_TOKENS.filter((re) => re.test(preCompose)) : NEG2_RAW_TOKENS
+    expectTrue('NEG-2 no rejection on a draft field occurs before the subject is composed and gated, in ANY form — parseDraft\'s error literals and its helper tokens are absent from the pre-gate span, AND no draft field is named at all in the span before the composition (the raw field-name fence, ported from the sibling battery after a decoy with a fresh message passed green)',
+      gateIdx > -1 && composeIdx > -1 && lits.length === 0 && toks === 0 && rawToks.length === 0,
+      `literals=${JSON.stringify(lits)} tokens=${toks} rawFieldNames=${rawToks.map((r) => r.source).join(',')}`)
+  }
 }
 
 console.log(`\nstoa draft-reflect r20a-invocation: ${passCount} passed, ${failCount} failed`)

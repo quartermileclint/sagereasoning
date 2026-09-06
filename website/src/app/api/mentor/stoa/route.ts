@@ -183,6 +183,76 @@ function parseDeclaration(
 }
 
 /**
+ * The four fields the distress gate screens, composed from the RAW body
+ * BEFORE `parseDeclaration` runs — the R20a ordering restructure (Session 3D,
+ * 2026-09-06; operations/count-discipline-2026-09/2026-09-05-r20a-perimeter-
+ * ordering-AUDIT.md §2.1 row 12, §3 constraint 6) under the binding
+ * 2026-09-06 ruling ("the distress check runs before the length guard on any
+ * route where the human crisis form is rendered") and the mentor's 2026-09-05
+ * Part 5 extension (a distressed person is "owed the crisis form before being
+ * told their `visibility` value is invalid"). Until this session every parse
+ * 400 (type, FIELD_MAX, the visibility enum, the tags list/count/TAG_MAX)
+ * fired before the gate ever read the text, because the gate consumed
+ * `parsed.input`. Now the gate reads THIS shape, merged over the prior row
+ * exactly as before, and the parse 400s run after the redirect return.
+ *
+ * Equivalence for a VALID body (the claim the PR19 reviewers test): a string
+ * at or under FIELD_MAX slices to itself; an explicit clear (`null` / `''`)
+ * becomes '' which the composer skips — the same absence the parsed `null`
+ * produced; an absent key is `undefined` and the merge falls back to the
+ * prior row, as before; a valid tags array is identical. So an in-bound
+ * request is screened byte-identically to before. A NON-STRING text value is
+ * screened as `String(v)` and then refused by the type 400 (order, not
+ * existence); a non-array `tags` falls back to the prior tags (more
+ * screening, never less) and is then refused. SCREENING CAPS: each text part
+ * at FIELD_MAX (the guard's own bound; the composer's STOA_DISTRESS_FIELD_CAP
+ * is the same 2,000), each tag at TAG_MAX, at most TAGS_MAX_COUNT tags.
+ * DISCLOSED RESIDUAL (audit §4.3): text past a field's bound, or a 13th tag,
+ * is not screened — before this move it was not read at all (a bare 400).
+ * DISCLOSED COST (PR19, 2026-09-06): a non-string field value is now
+ * stringified and screened (a two-stage pass, possibly a paid stage 2) before
+ * the type 400 that previously fired for free. Bounded by `requireAuth` and
+ * the per-route rate limits, both of which run before the body is parsed.
+ * The store still writes `parsed.input` only — never this shape.
+ */
+type StoaGateFields = {
+  whatIBring?: string | null
+  whatISeek?: string | null
+  contactChannel?: string | null
+  tags?: string[]
+}
+
+function rawDeclarationForGate(body: Record<string, unknown>): StoaGateFields {
+  const raw: StoaGateFields = {}
+  const textKeys: Array<['whatIBring' | 'whatISeek' | 'contactChannel', string]> = [
+    ['whatIBring', 'what_i_bring'],
+    ['whatISeek', 'what_i_seek'],
+    ['contactChannel', 'contact_channel'],
+  ]
+  for (const [key, wireKey] of textKeys) {
+    if (wireKey in body) raw[key] = String(body[wireKey] ?? '').slice(0, FIELD_MAX)
+  }
+  if ('tags' in body && Array.isArray(body.tags)) {
+    // PR19 fold (2026-09-06): TRIM BEFORE SLICING. The first cut sliced each
+    // tag by RAW length while `parseDeclaration`'s guard checks TRIMMED length
+    // (`t.trim().length > TAG_MAX`) — two different metrics. A tag of 39
+    // spaces followed by "kill myself" has trimmed length 11, so it passes
+    // validation and is STORED VERBATIM (`input.tags = body.tags`) and
+    // displayed — but a raw slice at 40 kept only the spaces plus one
+    // character, and the composer's own `.map(t => t.trim())` then reduced it
+    // to "k". A validly-saved tag could therefore carry distress text the
+    // classifier never saw, purely by front-padding it. That is a screening
+    // BYPASS, not the disclosed past-the-bound residual (which runs the safe
+    // direction: text that is rejected anyway). Trimming first makes the
+    // screening metric identical to the guard's, so any tag the guard ACCEPTS
+    // is screened in full — byte-identical to the pre-restructure path, where
+    // the validated array went to the composer untouched.
+    raw.tags = body.tags.slice(0, TAGS_MAX_COUNT).map((t) => String(t ?? '').trim().slice(0, TAG_MAX))
+  }
+  return raw
+}
+
+/**
  * Merge the submitted fields over the practitioner's existing (non-removed)
  * entry so the distress gate sees the entry AS IT WILL BE SERVED, not just
  * this request's delta (PR19 fold, 2026-08-03: a per-submission-only gate
@@ -194,7 +264,7 @@ function parseDeclaration(
  */
 async function mergedDeclarationForGate(
   identity: StoaIdentity,
-  input: StoaDeclarationInput,
+  input: StoaGateFields,
 ): Promise<{
   whatIBring: string | null | undefined
   whatISeek: string | null | undefined
@@ -346,15 +416,25 @@ export async function POST(request: NextRequest) {
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
 
   try {
-    const parsed = parseDeclaration(parsedBody.body)
-    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
-
     // R20a — before any store write (AC5; PR3), over the MERGED entry (a
     // partial reactivation keeps old field values, so the gate must see the
-    // entry as it will be served).
-    const merged = await mergedDeclarationForGate(identity, parsed.input)
+    // entry as it will be served) — and, since Session 3D (2026-09-06),
+    // BEFORE `parseDeclaration`: the subject is composed from the RAW body
+    // (see rawDeclarationForGate) so every parse 400 runs after the redirect
+    // return. The merge's row READ therefore precedes the parse; a malformed
+    // but distressed body now costs one read + the classifier before its
+    // 400 — the bounded cost the ruling accepted. Pinned by ORD-1..3 + RAW-1..2
+    // + NEG-1..2 in __tests__/r20a-invocation.test.ts on the call-site order
+    // inside this handler; mutation-verified.
+    const merged = await mergedDeclarationForGate(identity, rawDeclarationForGate(parsedBody.body))
     const gateOutcome = await runStoaDistressGate(merged)
     if (gateOutcome.redirect) return gateOutcome.redirect
+
+    // The parse's 400s — MOVED after the redirect return (Session 3D, 2026-09-06;
+    // order, not existence: every message, value and status unchanged). The
+    // store writes `parsed.input` only.
+    const parsed = parseDeclaration(parsedBody.body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
     const declared = await declareStoaEntry(identity, parsed.input)
     if (!declared.ok) {
@@ -397,16 +477,20 @@ export async function PATCH(request: NextRequest) {
   if (!parsedBody.ok) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
 
   try {
-    const parsed = parseDeclaration(parsedBody.body)
-    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
-
     // R20a — over the MERGED entry (patch over the existing row), so
     // distress content cannot be assembled across successive small edits
     // each below threshold. A pure renewal (empty patch on an unchanged
     // text-free entry) composes to '' and skips the classifier honestly.
-    const merged = await mergedDeclarationForGate(identity, parsed.input)
+    // Since Session 3D (2026-09-06) the subject is composed from the RAW body
+    // BEFORE `parseDeclaration` (see rawDeclarationForGate and the POST note).
+    const merged = await mergedDeclarationForGate(identity, rawDeclarationForGate(parsedBody.body))
     const gateOutcome = await runStoaDistressGate(merged)
     if (gateOutcome.redirect) return gateOutcome.redirect
+
+    // The parse's 400s — MOVED after the redirect return (Session 3D, 2026-09-06;
+    // order, not existence). The store writes `parsed.input` only.
+    const parsed = parseDeclaration(parsedBody.body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
     const updated = await updateStoaEntry(identity, parsed.input)
     if (!updated.ok) {

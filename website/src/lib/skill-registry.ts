@@ -427,7 +427,7 @@ export const SKILL_REGISTRY: SkillContract[] = [
     description: 'Agent assessment framework. 14 self-assessments (foundational) or 55 (full profile).',
     example_input: {
       agent_id: 'my-agent',
-      responses: [{ assessment_id: 'SO-01', response: 'I tend to prioritise my own goals.' }],
+      responses: [{ assessment_id: 'FD-01', response: 'I tend to prioritise my own goals.' }],
     },
     example_output: {
       result: {
