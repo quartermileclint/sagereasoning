@@ -6,7 +6,15 @@ the push. Model `claude-fable-5-1` throughout except the three PR19 reviewers (`
 founder's election — dropped for the review, restored after). Decision-log entry:
 `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-BUILT-2026-09-06`.
 
-## Production state at close
+## Production state at close — UPDATED after the founder's push and smokes
+
+**LIVE, 2026-09-06 11:12 AEST.** `555502e` + `7445204` on `origin/main`, Vercel green. Eighteen
+founder-run smokes on eight routes, all as expected — every distressed body with a broken sibling/
+enum/boolean field → 200 crisis redirect; every benign twin → 400 on the unchanged guard message
+(one prediction corrected as observed: support/agent/proof's benign probe 400'd on `customer`
+(`"x"` is under the `<2` minimum, which precedes the `channel` enum), not on `channel`). Full
+transcript in `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-LIVE-2026-09-06`. Owed rows 1–3
+below are DONE. Originally:
 
 **UNCHANGED.** Nothing pushed, nothing deployed. Two local commits ahead of `origin/main`: `555502e`
 (the build, path-scoped to 16 files under `website/src/app/api/` + the sweep output) and this

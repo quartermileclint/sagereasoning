@@ -36142,3 +36142,42 @@ the only non-conformant member left.**
 **Status:** Adopted (BUILT). Cross-references: `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06`,
 `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5), `D-SINGLE-SERIAL-ARC-REPLAN-AND-SESSION-3C-PASTE-2026-09-06`,
 the audit `2026-09-05-r20a-perimeter-ordering-AUDIT.md` §2.1 rows 4/6/8/9/10/14/15/16 (annotated).
+
+### D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-LIVE-2026-09-06
+
+**2026-09-06, 11:12 AEST.** Founder-walked live addendum to
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-BUILT-2026-09-06`. The founder pushed `555502e` +
+`7445204` to `origin/main` (confirmed 0-ahead/0-behind; `555502e` an ancestor of `origin/main`),
+Vercel deployed green, and ran the founder verification block plus the full live-smoke script from
+the close against production (`www.sagereasoning.com`) with a Bearer JWT from their own session.
+
+**Founder verification reproduced clean** ("verification done as expected"): `tsc` 0; guard
+722/0; every per-route battery at its recorded count.
+
+**Live smokes — all eight routes observed, both directions, eighteen probes.** Every DISTRESSED body
+carrying a broken sibling/enum/boolean field returned **HTTP 200** `distress_detected:true`,
+`severity:"acute"` with the crisis redirect message on `/api/score-scenario` (no `scenario`),
+`/api/journal` (no `day_number`), `/api/mentor/journal-feed` (`impression` alone), `/api/reason`
+(`session_marker:"bogus"`; and `loop_id:""`), `/api/mentor/private/reflect`
+(`bypass_pattern_cache:"yes"`), `/api/founder/hub/ring-proof` (`persona:"bogus"`),
+`/api/mentor/ring/proof` (`hub_id:"bogus"`), `/api/support/agent/proof` (`channel:"bogus"`,
+`customer:"x"`). Every BENIGN twin returned **HTTP 400** on the unchanged guard message:
+`scenario is required — the ethical dilemma text`; `day_number and reflection_text are required`;
+`All three fields are required: impression, assent, action`; `session_marker must be one of:
+session_open, session_close, mid_session`; `loop_id must be a non-empty string.`;
+`bypass_pattern_cache must be a boolean. Received: "yes".`; `persona must be one of: mentor, ops,
+tech, growth, support`; `hub_id must be one of: private-mentor, founder-mentor. Received: "bogus".`;
+and on support/agent/proof **`customer is required (string, min 2 characters)`** — observed, not the
+`channel` message the close predicted: the smoke's `customer:"x"` is one character, and the `<2`
+minimum precedes the `channel` enum in the restored original order (minima, then enums, then
+maxima). The guard fired exactly where the code places it; the prediction named the wrong first
+guard for that body. Recorded as observed.
+
+**Production is now NOT byte-equivalent on eight human-facing perimeter members** (`/api/reason`
+human path only; agent path byte-identical). Values unchanged. Rollback = `git revert 555502e` +
+redeploy, never a flag. The `/api/reason` freeze coupling (E5 / S4(d)) is DISCHARGED: the human-path
+O items are live before the window start. **Only the Stoa pair (S3.4) remains non-conformant.**
+
+**Rules served:** PR17, PR18, PR19, PR20.
+
+**Status:** Adopted (LIVE).
