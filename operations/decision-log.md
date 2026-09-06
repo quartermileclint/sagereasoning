@@ -36292,3 +36292,97 @@ ones run last; only one benign in-bound draft-reflect probe, since it spends.**
 `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-{BUILT,LIVE}-2026-09-06`,
 `D-MENTOR-RULINGS-FIVE-RELAYS-ADOPTED-2026-09-05` (Part 5),
 `D-MENTOR-RULING-R20A-LENGTH-GUARD-ORDERING-ADOPTED-2026-09-06`, the audit §2.1 rows 12–13.
+
+### D-S9-HARNESS-A11B-REDACTION-BUILT-2026-09-06
+
+**2026-09-06, ~12:25 AEST** (machine date). Session S9 of the serial arc (standing opener Version
+2026-09-05, Standing queue row S9; paste `2026-09-06-SESSION-S9-harness-a11b-redaction-SESSION-PASTE.md`).
+Tier `code-elevated`, autonomous. **Harness files only** — no production route, schema, flag,
+credential or migration, and the injection defence is byte-untouched (empty `git diff --stat`).
+Model `claude-opus-5`.
+
+**Executes the binding mentor ruling of 2026-09-05, Part 4.** The A11b defence rejects any Layer-1
+input containing the substrate's own field identifiers — correct for a practitioner, but a session
+that MAINTAINS the substrate emits them constantly, so the harness failed closed on exactly the
+sessions where the agent's actions are most consequential, with a `gate1.log` line indistinguishable
+from a genuine outage. Remedy (a), harness-side redaction, governs; the defence stays untouched; the
+credential-scoped downgrade was explicitly NOT elected.
+
+**Built:** `harness/gate1-pre-decision/claude-code/hooks/lib/schema-redaction.mjs` — one rule in one
+place. Each token becomes `⟨schema-field⟩` (the mentor's own example; it names the category, so a
+reader knows what was replaced); the count is returned on every path and logged as `redacted=N`.
+Redaction runs LAST, after truncation, so the count is what was actually sent; a token split by
+truncation is deliberately left alone, since a fragment is not a defence match either.
+
+**Scope — the substantive judgement of the session, and it is a narrowing.** A sweep found **seven**
+fetch call sites, not the two the paste named (its own warning that the list might be incomplete was
+correct). Redaction is applied only where text is actually EXAMINED: the consult (`input`,
+`context`), the guard (`action`, `context` — an unredacted action is an UNGUARDED action), and the
+spawn `reasoning_trace.trace`. It is deliberately NOT applied to the accreditation write or the
+hand-back: **both carry server-signed assessment envelopes whose fields legitimately include these
+identifiers, so redacting them would corrupt the signed bytes and break the verification the trust
+record rests on** — and neither route runs Layer-1 extraction, so the defence never sees them.
+`/api/practice/reflect` likewise runs no extraction. `delegated_task_preview` and the profile blocks
+are sent but never examined, so shaping them would alter text nobody reads.
+
+**The channel law** is satisfied on the mentor's own terms — *"shaped by a rule, not by the agent"* —
+conditional on disclosure and logging. Both discharged: README gained a "Schema-field redaction"
+section with the rule, the scope table and the mentor's reasoning quoted; SEVEN-LAYERS gained
+invariant 7; every log line that reports a redacted call carries `redacted=N`.
+
+**A gap in this session's own first cut, found by the live check and folded before the push.** The
+count was wired to every OUTAGE line but not to the two SUCCESS lines (`CONSULT`, `GUARD-PROCEED`'s
+sibling `GUARD-OUTAGE` helper took no count either). The ruling says *"log the replacement count per
+call"*, and a successful call is a call — worse, the success path is precisely the case that
+DEMONSTRATES the fix, so the evidence was invisible in `gate1.log`. Found by reading the live log
+after a token-dense consult returned a verdict and logged nothing, **not** by the battery, whose
+WIRE-6 pin then also proved too weak: it required the count to appear SOMEWHERE in
+`at-action-hook.mjs`, and it did — on the outage paths. WIRE-6 now ENUMERATES all nine log lines and
+requires each to carry it; both new paths are mutation-verified.
+
+**DIV-1 is the load-bearing pin.** The `.mjs` harness cannot import the TypeScript defence, so its
+token list is hard-coded — and this project has gone stale on hand-copied constants repeatedly.
+DIV-1 re-reads `injection-defence.ts`, anchors on the ENTRY (not the first textual mention, which is
+a doc comment), and asserts byte-identity. The defence's list moving now turns the battery red
+instead of leaving the harness silently under-redacting.
+
+**Verified:** `schema-redaction.test.mjs` **24/0** · logic-harness **173/0** · negative-battery
+**RELEASE GATE: PASS** · false-hold-capture **37/0** · close-content-variation **70/0** ·
+`injection-defence.test.ts` **60/0** with the defence byte-untouched · every `.mjs` `node --check`
+clean. **Mutation record** (`2026-09-06-S9-mutation-record.txt`, 14 mutations, hash-verified
+restore, all RED, post-restore GREEN): list drift; the placeholder emptied or replaced by a defence
+token; case- and global-flag dropped; the count not incremented; word boundaries removed; each of
+the three surfaces sending unredacted text; a count dropped from one failure path; the log dropping
+the count; and the scope fence — the accreditation write importing the redactor at all.
+
+**LIVE, observed in this session's own `gate1.log`** (the harness hot-reloads, so the fix took
+effect mid-session): `GUARD-CAUTION … redacted=12`, `GUARD-CAUTION … redacted=4`, and
+`CONSULT-OUTAGE reason="timeout after 55000ms" redacted=5`. Two guard calls carrying 12 and 4 tokens
+returned real verdicts; zero guard outages all session. **Stated honestly: this proves the wiring
+fires and counts, NOT that those specific calls would have failed without it — no live A/B on
+identical input was run.** The deterministic proof that a rejected action becomes clean is pin PH-3.
+The consult timeout is a separate, pre-existing latency failure (the composed-consult class), and it
+is now diagnosable *because* the line carries a count.
+
+**Three in-build corrections, recorded because two were found by the harness rather than by reading.**
+(1) The first divergence extractor anchored on a doc comment and compared against the wrong pattern.
+(2) A pin hard-coded "five pattern categories"; there are six — `role_reassignment` was missed — so
+the count now derives from the defence's own array. The placeholder was tested against all six and
+trips none, so the substantive claim was unaffected; the shape of the error was not. (3) A threshold
+pin ("at least twelve occurrences") passed a mutation that dropped the count from one failure path;
+replaced by a brace-matched check that every return carries it — whose own first cut then failed on
+correct code, because both function signatures destructure and the first `{` belongs to the
+parameter list.
+
+**Consequence for the queue:** E5's coupling is discharged — **S9 no longer gates S4(d)**. The next
+row is **S5** (D2 scope-for-ruling, autonomous, also before S4(d)).
+
+**Rollback:** `git revert` the commit. The harness returns to failing closed on substrate sessions,
+which is the status quo; nothing in production is affected either way.
+
+**Rules served:** R18; KG1; PR15; PR19 (battery + mutation discipline); PR20.
+
+**Status:** Adopted (BUILT). Cross-references: the ruling
+`2026-09-05-mentor-rulings-five-relays-verbatim.md` Part 4; memory
+`harness-blind-on-substrate-sessions-a11b-schema-tokens` (updated to the built state);
+`D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2-LIVE-2026-09-06` (the `route_errors` half, already done).

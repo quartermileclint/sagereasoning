@@ -31,6 +31,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { appendProvenance } from "./session-state.mjs";
+import { redactSchemaFields } from "./schema-redaction.mjs";
 
 export const MAX_CONTEXT_CHARS = 9500; // headroom under Claude Code's 10,000-char additionalContext cap.
 
@@ -541,8 +542,19 @@ export async function fetchFrame(cfg, task, opts = {}) {
   // 400 and the frame was lost entirely. Truncate HEAD-anchored with a loud marker:
   // a truncated frame examines the task's opening statement; an untruncated over-long
   // POST examines nothing.
-  const reqBody = { input: truncateForServer(task), depth, response_format: "assessment_first" };
-  if (typeof opts.context === "string" && opts.context) reqBody.context = opts.context;
+  // A11b HARNESS-SIDE REDACTION (S9, 2026-09-06; mentor Part 4 ruling). Runs
+  // LAST, after truncateForServer, so the logged count is what was actually
+  // sent and a token split by truncation is left alone (a fragment is not a
+  // defence match either). Without this the defence rejects any consult from a
+  // session that edits the substrate — the harness fails closed at exactly the
+  // most consequential actions. See lib/schema-redaction.mjs for the rule and
+  // the channel-law reasoning; the count is returned and logged by the caller.
+  const redactedInput = redactSchemaFields(truncateForServer(task));
+  const redactedContext =
+    typeof opts.context === "string" && opts.context ? redactSchemaFields(opts.context) : null;
+  const redactions = redactedInput.count + (redactedContext ? redactedContext.count : 0);
+  const reqBody = { input: redactedInput.text, depth, response_format: "assessment_first" };
+  if (redactedContext) reqBody.context = redactedContext.text;
   if (opts.priorFeedback && typeof opts.priorFeedback === "object") reqBody.prior_feedback = opts.priorFeedback;
   let res;
   try {
@@ -556,21 +568,22 @@ export async function fetchFrame(cfg, task, opts = {}) {
     return {
       ok: false,
       reason: e && e.name === "TimeoutError" ? `timeout after ${cfg.timeoutMs}ms` : `request failed: ${e?.message || e}`,
+      redactions,
     };
   }
-  if (!res.ok) return { ok: false, reason: `http ${res.status}` };
+  if (!res.ok) return { ok: false, reason: `http ${res.status}`, redactions };
   let body;
   try {
     body = await res.json();
   } catch {
-    return { ok: false, reason: "non-JSON response" };
+    return { ok: false, reason: "non-JSON response", redactions };
   }
   const verdict = extractVerdict(body);
-  if (!verdict) return { ok: false, reason: "no assessment in response" };
+  if (!verdict) return { ok: false, reason: "no assessment in response", redactions };
   // `signed` is ADDITIVE (D-D provenance): the signed envelope when the deployment signs Layer-2,
   // else null. H1/H2 ignore it; H3 + the shared provenance step use it. `body` is returned too so
   // callers (H3) can read response-level fields (e.g. examination_open) without a second parse.
-  return { ok: true, verdict, signed: extractSignedAssessment(body), body };
+  return { ok: true, verdict, signed: extractSignedAssessment(body), body, redactions };
 }
 
 // ---------------------------------------------------------------------------
@@ -579,6 +592,14 @@ export async function fetchFrame(cfg, task, opts = {}) {
 // The response is the standard envelope ({ result, meta }); the gate fields live on `.result`.
 // ---------------------------------------------------------------------------
 export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
+  // A11b HARNESS-SIDE REDACTION (S9, 2026-09-06) — after the truncation, for
+  // the same reason and under the same rule as fetchFrame. The guard runs the
+  // same Layer-1 extraction, so it fails closed on the same token class, and
+  // an unredacted action from a substrate session is an UNGUARDED action.
+  const redactedAction = redactSchemaFields(truncateForServer(action));
+  const redactedGuardContext =
+    typeof context === "string" && context ? redactSchemaFields(context) : null;
+  const redactions = redactedAction.count + (redactedGuardContext ? redactedGuardContext.count : 0);
   let res;
   try {
     res = await fetch(cfg.guardEndpoint, {
@@ -588,8 +609,8 @@ export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
         // S9b: cap at the server's 5000-char action limit (the S9 register-item-4
         // class: an over-long heredoc drew http 400 ⇒ unguarded-honest; a truncated
         // action is guarded on its operative opening instead).
-        action: truncateForServer(action),
-        ...(context ? { context } : {}),
+        action: redactedAction.text,
+        ...(redactedGuardContext ? { context: redactedGuardContext.text } : {}),
         ...(riskClass ? { risk_class: riskClass } : {}),
       }),
       signal: AbortSignal.timeout(cfg.timeoutMs),
@@ -598,23 +619,25 @@ export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
     return {
       ok: false,
       reason: e && e.name === "TimeoutError" ? `timeout after ${cfg.timeoutMs}ms` : `request failed: ${e?.message || e}`,
+      redactions,
     };
   }
-  if (!res.ok) return { ok: false, reason: `http ${res.status}` };
+  if (!res.ok) return { ok: false, reason: `http ${res.status}`, redactions };
   let body;
   try {
     body = await res.json();
   } catch {
-    return { ok: false, reason: "non-JSON response" };
+    return { ok: false, reason: "non-JSON response", redactions };
   }
   // The gate fields sit on `.result` (buildEnvelope shape); be defensive if a deployment returns
   // them flat. We never invent a verdict — an unrecognised shape is a structured failure.
   const result = body && typeof body === "object" && body.result && typeof body.result === "object" ? body.result : body;
   if (!result || typeof result !== "object" || typeof result.recommendation !== "string") {
-    return { ok: false, reason: "no guardrail verdict in response" };
+    return { ok: false, reason: "no guardrail verdict in response", redactions };
   }
   return {
     ok: true,
+    redactions,
     recommendation: result.recommendation, // proceed | proceed_with_caution | pause_for_review | do_not_proceed
     proceed: result.proceed === true,
     proximity: result.katorthoma_proximity ?? null,
@@ -745,6 +768,13 @@ export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", e
   } catch {
     /* a failed marker write is non-fatal — worst case the next turn re-frames once. */
   }
-  honestLog(cfg, `${logLabel} session=${sanitize(sessionKey)} depth=${cfg.depth} proximity=${r.verdict.katorthoma_proximity || "?"}`);
+  // S9 (2026-09-06): `redacted=N` is the mentor Part 4 disclosure requirement —
+  // "the redaction is logged so a future reader knows what was replaced". Only
+  // emitted when non-zero, so an ordinary session's log is byte-unchanged.
+  honestLog(
+    cfg,
+    `${logLabel} session=${sanitize(sessionKey)} depth=${cfg.depth} proximity=${r.verdict.katorthoma_proximity || "?"}` +
+      (r.redactions ? ` redacted=${r.redactions}` : "")
+  );
   process.exit(0);
 }
