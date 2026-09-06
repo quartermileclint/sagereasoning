@@ -37381,3 +37381,79 @@ not a failure.
    twice this session flagged such claims as **outside prohairesis**. Whether that is the extraction
    reading the *message's* content rather than the *act* is a live question about composed-input
    fidelity — **named, not diagnosed**, and a candidate input for the window's own analysis.
+
+## 2026-09-06 — D-MENTOR-RULING-D2-WINDOW-SEQUENCING-MID-WINDOW-ADOPTED-2026-09-06
+
+**Tier:** `governance` — documents only. **NO code, schema, flag, migration, credential or push.
+The observation window ran untouched. Production unchanged. AC7 not engaged.**
+
+**The mentor answered session S5b's scope document the same day. READING A GOVERNS: "after the
+baseline is established" means MID-WINDOW.** Verbatim record (canonical, wins over this entry):
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-window-sequencing-MID-WINDOW-verbatim.md`.
+**Adopted as binding specification.**
+
+**THE RULING ANSWERED THE §7 SUB-QUESTION FIRST, AND THAT IS WHAT DECIDED IT.** S5b flagged §7 as
+possibly decisive and declined to answer it. The mentor answered it before anything else, *"because
+the rest follows from it"*: **read-side segmentation DOES transfer to a write-side change, under one
+condition — the boundary is dated, recorded, and the changed fields are distinguishable in the data.**
+That condition is **established as met by S5b's own §3.3**: `circles`, `virtue_domains_engaged` and
+the `is_kathekon` trigger sit in every record, so *"the boundary does not need to be inferred. It is
+legible in the data."* B6's objection (that citing the precedent assumes the answer) is answered:
+*"That is not assuming the answer. It is establishing the precondition."*
+
+**B1 — the contamination rule — is ANSWERED, NOT OVERRIDDEN.** The scoping note's *"a window
+contaminated mid-flight by instrument edits measures neither state"* reaches **uncontrolled** edits,
+where the boundary is unknown and the regimes indistinguishable. *"The contamination rule is
+satisfied, not violated, by Reading A executed correctly."* A controlled, dated edit with
+distinguishable fields **creates two internally-consistent segments** rather than one mixed
+population.
+
+**Four grounds given for Reading A:** the plain language (the ruling says *"opens"* twice and never
+*"closes"*; Reading B *"requires inserting a word the ruling did not use"*); the stated purpose (only
+a single instrument observing both sides of a boundary matches *"observable against a known prior
+state"*); the named carried item (the mentor *"would not name a remedy for a consequence its own
+sequencing did not produce"* — under Reading B it is *"pointless"*); and the deferral warning
+(Reading B is *"bounded in principle but unbounded in practice"*).
+
+**S5b's finding that the guard argument cuts against itself is CONFIRMED:** *"B2's argument from the
+guard's arming proves less than it claims."*
+
+**THE THREE OPERATIONAL ANSWERS, NOW BINDING:**
+1. **BASELINE THRESHOLD — five ordinary days WITH CONSULT RECORDS.** Days producing **≥1** consult
+   record count; **days producing zero do not.** Same discipline as the F-3′ measurement. **The
+   correction may land only after that threshold is met.**
+2. **STAND-DOWN SHAPE — a recorded founder waiver for the named commit**, guard **left armed**, the
+   exception **documented rather than encoded**. An explicit scoped allowlist is acceptable **only if
+   landed as its own reviewed change and removed after the correction commits.** **A silent commit
+   exploiting the committed-edit coverage gap is FORBIDDEN** — S5b named that trap and the ruling
+   adopts the prohibition.
+3. **SEGMENTATION BOUNDARY = the commit timestamp** of the D2 correction to `layer2-mechanisms.ts`.
+   Records before it are the baseline regime, after it the corrected regime. **The guard disclosure
+   spans two tagging regimes and is reported as such, with the boundary dated.**
+
+**AN IMMEDIATE, ACTIONABLE ITEM THIS RULING CREATES — AND IT IS OWED *NOW*, NOT AT THE BUILD:**
+**a SHA-256 content pin on `layer2-mechanisms.ts`**, on the same footing as §C2b's pin on
+`stoic-brain.ts`. *"The pin is added now, before the baseline period"*, so that any uncommitted edit
+during the baseline trips the guard; **after the correction commits, the pin is updated to the
+corrected file's hash.** This closes the committed-edit gap for D2's target file and makes the
+post-baseline rule *"genuinely enforceable rather than nominal."*
+
+**NOT DONE THIS SESSION, AND DELIBERATELY SO.** The pin is a **code change to
+`website/src/app/logos/__tests__/human-practitioner-boundary.test.ts`**, and the S5b paste that
+governs this session authorises **no code change** (*"If the session concludes a build is owed, it
+scopes it and stops"*). **A ruling arriving mid-session does not retroactively widen the session's
+tier.** The pin is therefore **SCOPED and named as the immediate next action, for the founder's
+election.** Guard-safety was checked and is favourable: the test file's own path does **not** match
+`GUARD_RE`, so adding the pin does not itself trip the armed guard.
+
+**§3.3b IS EXPRESSLY LEFT OPEN AND ROUTED TO THE WINDOW.** The mentor endorses S5b's own hedge on the
+6/10-guard vs 0/3-consult defect distribution: if it holds, *"the mid-window correction changes
+nothing in part (3)'s denominator, and the contamination argument for part (3) specifically falls
+away"* — but it is n=3, must not be relied on, and *"the window will measure whether it holds."*
+
+**WHAT THIS RULING DOES NOT DO:** it does **not** open S11-D2 (that opens after the baseline
+threshold), does **not** license the correction today, and does **not** touch the flip or weights.
+
+**STATE:** window **RUNNING** and untouched; guard **armed and green**; **S11-D2 remains BLOCKED —
+now on a measurable threshold rather than an open question.** **The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**
