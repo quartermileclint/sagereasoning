@@ -83,6 +83,7 @@ import {
   appendObservability,
   makeSpanRef,
 } from "./lib/discernment.mjs";
+import { redactSchemaFields } from "./lib/schema-redaction.mjs";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
 
@@ -125,13 +126,28 @@ async function runSpawnDiscernmentStep(cfg, event, { spawnKey, task, toolInput }
   // The out-of-band trace (A7): the harness reads the transcript's trailing
   // assistant text — never an account the orchestrator is asked to give. An
   // unreadable transcript yields "" and the server holds honestly (audit-unavailable).
-  const trace = readTranscriptTail(event.transcript_path, dcfg.traceMaxChars);
+  const rawTrace = readTranscriptTail(event.transcript_path, dcfg.traceMaxChars);
+  // A11b HARNESS-SIDE REDACTION (S9, 2026-09-06; mentor Part 4). The trace is
+  // the ONLY field of this payload the server extracts (the L4 audit runs
+  // extractFeatures over it), so it is the only field the defence can reject —
+  // and on a substrate session a transcript tail is full of the token class by
+  // construction, which is why the discernment call used to 503. Applied AFTER
+  // readTranscriptTail's own truncation, for the reason given in
+  // lib/schema-redaction.mjs. `delegated_task_preview` and the profile blocks
+  // are deliberately NOT redacted: the server does not examine them, so
+  // shaping them would alter text nobody reads.
+  const redactedTrace = redactSchemaFields(rawTrace);
+  const trace = redactedTrace.text;
   const payload = buildSpawnPayload(dcfg, { taskRef: spawnKey, subagentType, taskText: task, trace });
 
   const t0 = Date.now();
   const r = await fetchDiscernment(cfg, dcfg, payload);
   if (!r.ok) {
-    honestLog(cfg, `DISCERN-OUTAGE session=${shortHash(sessionId)} spawn=${spawnKey} reason="${r.reason}"`);
+    honestLog(
+      cfg,
+      `DISCERN-OUTAGE session=${shortHash(sessionId)} spawn=${spawnKey} reason="${r.reason}"` +
+        (redactedTrace.count ? ` redacted=${redactedTrace.count}` : "")
+    );
     return ""; // fail-open: the frame still injects; nothing false recorded.
   }
 
@@ -188,7 +204,8 @@ async function runSpawnDiscernmentStep(cfg, event, { spawnKey, task, toolInput }
     cfg,
     `DISCERN session=${shortHash(sessionId)} spawn=${spawnKey} rec=${rec.recommendedAgentRef || "none"} ` +
       `chosen=${result.chosen ? result.chosen.candidateRef : "?"} l4=${l4 && l4.outcome ? l4.outcome.finalization : "?"} ` +
-      `l4commit=${l4 && l4.commit && l4.commit.written === true ? "written" : "not-written"} mode=measure`,
+      `l4commit=${l4 && l4.commit && l4.commit.written === true ? "written" : "not-written"} mode=measure` +
+      (redactedTrace.count ? ` redacted=${redactedTrace.count}` : ""),
   );
   return boundary;
 }

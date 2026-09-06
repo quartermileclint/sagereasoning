@@ -86,8 +86,9 @@ harness/gate1-pre-decision/
 │   └── SLICE3-LIVE-VERIFY-WALKTHROUGH.md   ← Slice-3 founder-walked plugin-install + subagent capture/verify
 └── test/                                  ← OUTSIDE the plugin root (not shipped)
     ├── mock-reason-server.mjs            ← mocks /api/reason + /api/guardrail + /api/practice/reflect + /api/accreditation + /api/practice/discernment (S8)
-    ├── logic-harness.mjs                 ← in-sandbox logic proof (91 assertions; incl. the S8 pure helpers + the G2 resolveSpawnKey pins)
-    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close / materialization / s8-discernment — 230)
+    ├── logic-harness.mjs                 ← in-sandbox logic proof (incl. the S8 pure helpers + the G2 resolveSpawnKey pins)
+    ├── schema-redaction.test.mjs         ← S9: the A11b redaction rule + the DIV-1 divergence gate against injection-defence.ts (24)
+    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close / materialization / s8-discernment)
 ```
 
 ## Installing as a Claude Code plugin (Slice 3)
@@ -261,11 +262,59 @@ wiring lands** (a named follow-up Critical session) — otherwise the "deletable
 not yet honoured by an automated path. A torn-down test loop (as in Slice 5b) is fine: delete the test
 `sage_reflect_sessions` rows by hand at teardown.
 
+## Schema-field redaction — substrate sessions produce REDACTED examined text (S9, 2026-09-06)
+
+**Read this if you are reading a `gate1.log` line that says `redacted=N`, or wondering why an
+examined action does not match the text you typed.**
+
+**The rule.** Before the harness sends text to a surface that runs Layer-1 extraction, it replaces
+every occurrence of the substrate's internal field identifiers with the placeholder
+`⟨schema-field⟩`, and logs how many replacements it made. The identifier list is exactly the
+`schema_field_injection` pattern from `website/src/lib/translation-sandwich/injection-defence.ts` —
+`distress_detected`, `distress_signal`, `shouldRedirect`, `redirect_message`, `is_kathekon`,
+`passions_present`, `layer1-schema`, `layer1_schema`, and `severity: none`. The rule lives in
+`claude-code/hooks/lib/schema-redaction.mjs`.
+
+**Why.** The injection defence hard-rejects those identifiers, correctly: a practitioner writing
+about their day never types them. But a session that MAINTAINS the substrate produces them
+constantly — in edits, in transcripts, in this very paragraph. So the defence used to fail the
+harness closed on exactly the sessions where the agent's actions are most consequential, and the
+`gate1.log` line was indistinguishable from a genuine outage. Ruled 2026-09-05 (mentor, Part 4):
+harness-side redaction, with the defence left untouched. A credential-scoped downgrade of the
+defence was considered and explicitly **not** elected.
+
+**Where it applies — and where it deliberately does not.**
+
+| Surface | Redacted? | Why |
+|---|---|---|
+| `/api/reason` consult (`input`, `context`) | **yes** | Layer-1 extracts both |
+| `/api/guardrail` (`action`, `context`) | **yes** | same extraction; an unredacted action is an UNGUARDED action |
+| `/api/practice/discernment` spawn (`reasoning_trace.trace`) | **yes** | the L4 audit extracts the trace |
+| the accreditation write; the hand-back | **no** | they carry SERVER-SIGNED assessment envelopes whose fields legitimately include these identifiers — redacting would corrupt the signed bytes — and neither runs Layer-1 extraction |
+| `/api/practice/reflect` | **no** | no Layer-1 extraction; the defence never fires |
+| `delegated_task_preview`, the profile blocks | **no** | the server does not examine them; shaping text nobody reads buys nothing |
+
+Redaction runs **last**, after truncation, so the logged count is what was actually sent. A token
+split by truncation is left alone deliberately: a fragment is not a defence match either.
+
+**Is a redacted tail still out-of-band verbatim?** Yes, and this is the mentor's answer, not the
+harness's: *"Mechanical redaction of schema identifiers with neutral placeholders is deterministic,
+not agent-authored, and does not give the agent any influence over what is sent. The examined text
+is shaped, but it is shaped by a rule, not by the agent. That is within the channel law's terms,
+provided the redaction rule is disclosed in the harness documentation and the redaction is logged so
+a future reader knows what was replaced."* This section is that disclosure; `redacted=N` is that log.
+
+**The rule cannot silently drift from the defence.** `test/schema-redaction.test.mjs` pin **DIV-1**
+re-reads `injection-defence.ts` and asserts the harness's pattern is byte-identical to the
+defence's. If the defence's list changes, that pin goes red and the harness must be updated in the
+same change — an executing check, not a written instruction.
+
 ## Run the in-sandbox gate
 
 ```
 node harness/gate1-pre-decision/test/logic-harness.mjs       # expect: 91 passed, 0 failed
-node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: 230 passed, 0 failed — RELEASE GATE: PASS
+node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: RELEASE GATE: PASS
+node harness/gate1-pre-decision/test/schema-redaction.test.mjs # expect: 24 passed, 0 failed (S9; DIV-1 gates drift from the defence)
 ```
 
 The **logic harness** (56) proves request construction + frame parsing (signed/unsigned, object-valued

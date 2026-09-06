@@ -516,7 +516,11 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
   if (!r.ok) return guardOutage(cfg, sessionId, toolName, action, r.reason);
 
   if (r.recommendation === "do_not_proceed") {
-    honestLog(cfg, `GUARD-BLOCK session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}`);
+    honestLog(
+      cfg,
+      `GUARD-BLOCK session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}` +
+        (r.redactions ? ` redacted=${r.redactions}` : "")
+    );
     emitBlock(
       "SageReasoning Gate (at-action guardrail) returned do_not_proceed for this irreversible action " +
         `(proximity: ${r.proximity || "unknown"}). ${r.reasoning || ""}`.trim() +
@@ -532,7 +536,11 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
 
   // Allowed. Surface a caution for anything short of a clean proceed; otherwise allow silently.
   if (r.recommendation !== "proceed") {
-    honestLog(cfg, `GUARD-CAUTION session=${sanitizeLog(sessionId)} tool=${toolName} rec=${r.recommendation}`);
+    honestLog(
+      cfg,
+      `GUARD-CAUTION session=${sanitizeLog(sessionId)} tool=${toolName} rec=${r.recommendation}` +
+        (r.redactions ? ` redacted=${r.redactions}` : "")
+    );
     // S9b G3: the outer gate fired and the action PROCEEDS — inject the three-
     // sub-question elicitation (ADVISE) + arm the out-of-band capture; and
     // S9b G5: a non-proceed guard verdict is a trust-reducing observation —
@@ -569,7 +577,11 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
     captureGuardObservation(cfg, { sessionId, toolName, action, guard: r, denied: false });
     process.exit(0);
   }
-  honestLog(cfg, `GUARD-PROCEED session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}`);
+  honestLog(
+    cfg,
+    `GUARD-PROCEED session=${sanitizeLog(sessionId)} tool=${toolName} proximity=${r.proximity || "?"}` +
+      (r.redactions ? ` redacted=${r.redactions}` : "")
+  );
   captureGuardObservation(cfg, { sessionId, toolName, action, guard: r, denied: false });
   allowSilently();
 }
@@ -678,7 +690,11 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   const r = await fetchFrame(cfg, action.text, { depth, priorFeedback: priorFeedback || undefined });
   if (!r.ok) {
     // Outage → fail-open-honest. Do NOT mark fired (a later retry can still consult once recovered).
-    honestLog(cfg, `CONSULT-OUTAGE session=${sanitizeLog(sessionId)} reason="${r.reason}"`);
+    honestLog(
+      cfg,
+      `CONSULT-OUTAGE session=${sanitizeLog(sessionId)} reason="${r.reason}"` +
+        (r.redactions ? ` redacted=${r.redactions}` : "")
+    );
     emitAllowWithContext(consultUnavailableNote(r.reason));
     process.exit(0);
   }

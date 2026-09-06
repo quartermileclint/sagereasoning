@@ -1,0 +1,16 @@
+  token-list-drifts-from-defence                       exit=1 restored=OK -> RED as required; fails: DIV-1, TOK-0, TOK-3, TOK-4, ID-5, PH-3
+  placeholder-emptied (silent deletion)                exit=1 restored=OK -> RED as required; fails: PH-2
+  placeholder-changed-to-a-defence-token               exit=1 restored=OK -> RED as required; fails: PH-1, PH-2, PH-3
+  case-sensitivity-dropped                             exit=1 restored=OK -> RED as required; fails: TOK-3
+  global-flag-dropped (only first token redacted)      exit=1 restored=OK -> RED as required; fails: TOK-3, TOK-4, PH-3
+  count-not-incremented                                exit=1 restored=OK -> RED as required; fails: TOK-1, TOK-2, TOK-3, TOK-4
+  word-boundaries-removed (over-redaction)             exit=1 restored=OK -> RED as required; fails: DIV-1, TOK-0
+  consult-sends-unredacted-input                       exit=1 restored=OK -> RED as required; fails: WIRE-1
+  guard-sends-unredacted-action                        exit=1 restored=OK -> RED as required; fails: WIRE-2
+  consult-context-unredacted                           exit=1 restored=OK -> RED as required; fails: WIRE-3
+  count-dropped-from-a-failure-path                    exit=1 restored=OK -> RED as required; fails: WIRE-5
+  framed-log-drops-the-count                           exit=1 restored=OK -> RED as required; fails: WIRE-6
+  spawn-sends-the-raw-trace                            exit=1 restored=OK -> RED as required; fails: WIRE-4
+  accreditation-write-redacts-signed-envelopes (the scope fence) exit=1 restored=OK -> RED as required; fails: WIRE-7
+  post-restore battery                                 exit=0 -> GREEN
+ALL MUTATIONS CAUGHT AND RESTORED
