@@ -36821,3 +36821,62 @@ mentor question. **Rollback:** `git revert` (documents only).
 **Status:** window precondition 1 (P8a activation) NOT met; precondition 2 half-met (threshold
 elected, rate not measured). **The window has not started. The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+### D-S2-SECTION-D-API-DOCS-ASSESSMENT-ENTRIES-CORRECTED-2026-09-06
+
+**2026-09-06, ~17:20 AEST** (machine date). Continuation of session S4, on the founder's election of
+S2 §D as window-neutral gap work. Tier `code-elevated`. **Documentation only — no route, schema,
+flag, credential or migration touched.** Model `claude-opus-5`; PR19 review under `claude-sonnet-5`.
+Commit `b999d4e`.
+
+**Closes the last open piece of the R18 assessment-contract item** (the §D the 2026-09-05 sign-off
+package deliberately excluded). The two `/api-docs` assessment entries documented a request shape
+**neither route accepts** and a response shape **neither route returns** — a caller following them
+received a 400, and had it succeeded would have parsed for fields that never existed.
+
+**The real contract, derived from route source rather than from any prior record:**
+`{ agent_id, responses: [{ assessment_id, response }] }` — **exactly 14** for
+`/api/assessment/foundational` (phases 1–2, free), **exactly 55** for `/api/assessment/full`
+(phases 1–8, paid key), each `response` min 50 / max 10,000 characters. Responses are
+`V3FoundationalResult` / `V3FullAssessmentResult`. Every documented key now traces to route source,
+verified mechanically (15/15 and 20/20).
+
+**PR19 independent review found THREE HIGH defects in this session's own first cut** — each
+confirmed at source before fixing, none taken on the reviewer's word: **(i)** `"assessment_id": "uuid"`
+was carried forward into the `/full` response where no such field exists — **the exact defect class
+the change was written to fix, reproduced inside the fix**; **(ii)** `"proficiens"` was **invented**
+as a Senecan grade in *both* blocks — `SenecanGradeId` is `grade_1|grade_2|grade_3|pre_progress` and
+the string appears nowhere in the codebase — corrected to `grade_2`; **(iii)** `"pleonexia"` was
+placed in `root_passion`, which is typed `epithumia|hedone|phobos|lupe`, while `llms.txt` states
+outright that pleonexia is a *sub_species* — moved to `sub_species` under `epithumia`. Also folded:
+the "GET for the prompts" claim reworded (GET returns an *index*; the prompts are at the returned
+`assessment_framework_url`), the missing `phase` field added to `/full`'s per-assessment sample, and
+the 403 free-tier gate documented.
+
+**Scope extended by three further entries — disclosed, not silent; all the identical defect class;
+all verified against source before touching.** `/api/baseline/agent` documented
+`{ agent_id, agent_name, domain }` against a real `{ agent_id, responses }` requiring **exactly 4**,
+with a response matching **none** of `V3AgentBaselineResult` — rewritten. Two
+`"root_passion": "thumos"` values in `/api/score-action` and `/api/user/profile` — **`thumos` exists
+nowhere in `website/src/lib/` or `website/src/app/api/`**, and the canonical four are universal
+across all three type sources — corrected to `epithumia`. The judgement: leaving a known-false
+public doc while already in the file, having verified the correct contract, would have been worse
+than the disclosed scope creep.
+
+**A self-inflicted error, recorded because the discipline is the point:** the baseline rewrite left
+three orphaned lines from the old response block outside its template literal. Caught by this
+session's own post-edit sweep, not by the review (which had already completed), and fixed.
+
+**The defect's shape, worth carrying:** both assessment routes' **own GET self-documentation was
+already correct**, returning the exact `{ agent_id, responses: [...] }` instruction. Only the
+separately hand-maintained `/api-docs` page had drifted. **This is the same pattern as the `llms.txt`
+figures** — a self-describing surface stays right while a hand-maintained one goes stale. Where a
+contract matters, prefer the surface that derives itself.
+
+**Verified:** `tsc` 0; `npm run build` compiled successfully; `/api-docs` registered; no invalid
+`root_passion` value remains anywhere on the page. **Rollback:** `git revert b999d4e`.
+
+**Status:** the R18 assessment-contract item is now closed end-to-end (llms.txt + agent-card +
+skill-registry landed 2026-09-06 and **verified live this session**; §D api-docs closed here). **The
+window has not started; `GATE1_FALSE_HOLD_CAPTURE` remains unset. The S11 flip remains REFUSED;
+weights remain BLOCKED; the 0h call remains the founder's.**
