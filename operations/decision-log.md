@@ -37164,3 +37164,220 @@ append-only and is never truncated, refreshed, or regenerated on rollback.**
 **Status: the window is RUNNING as of 2026-09-06T09:44:55Z.** The S11 flip remains **REFUSED**;
 weights remain **BLOCKED**; the 0h call remains the founder's. **Next: S11-D2 is now unblocked by
 sequencing but gated on resolving the byte-identity-guard collision with the founder first.**
+
+## 2026-09-06 — D-S5B-WINDOW-HEALTH-VERIFIED-D2-GUARD-COLLISION-SCOPED-FOR-RULING-2026-09-06
+
+**Tier:** `governance` + read-only verification. **Model:** `claude-opus-5`, with the PR19
+independent adversarial review under `claude-sonnet-5` (founder-dropped for the review, restored
+after). **NO code, schema, flag, migration, credential or push. The observation window ran untouched
+throughout. Production is unchanged. AC7 not engaged.**
+
+**Session:** S5b, opened under
+`operations/handoffs/founder/2026-09-07-SESSION-S5b-window-health-and-D2-guard-collision-SESSION-PASTE.md`.
+
+---
+
+**THE PASTE'S PREMISE WAS WRONG AND `date` CAUGHT IT AT STEP 1.** The paste states *"The window has
+been running for roughly a day."* It had been running **~13 minutes** at session open. Window start
+`2026-09-06T09:44:55Z`; the S4 close commit that *contains the paste* landed `2026-09-06 19:55:25
++1000` = `09:55:25Z`; session open `09:57:29Z`. **The paste was written two minutes before the
+session that consumed it.** A context-date artifact — the fourth in one week. Caught only because the
+paste's own §1 says *"every number below is a claim to re-derive, not a fact to quote"* and the
+session ran `date` before anything else. **The protocol caught this, not the AI's judgement.**
+
+**(a) WINDOW HEALTH — the window IS capturing, and the answer changed inside the session.**
+At the `10:05Z` snapshot: 3 organic records, **100% guard / `Bash` / depth-empty, ZERO consult
+records.** At `11:22Z`: **13 organic — 10 guard (`Bash`, depth `""`) + 3 consult (`Edit`, depth
+`standard`, schema `v3`, `loopEvent` opened/reopened, `carriedPrior:true` on two).**
+
+**The consult population populated because the session switched from Bash heredocs to the `Edit`
+tool during the PR19 fold.** That was an accident of the fold, not a designed experiment — but it is
+a clean natural experiment that **empirically confirms the mechanism this session had established
+only from source**: `at-action-hook.mjs` checks the guard first and returns, and non-guard `Bash` is
+dropped from the consult floor (`GATE1_CONSULT_BASH` unset), so only `Write`/`Edit`/`MultiEdit`/
+`NotebookEdit` reach `runConsult`.
+
+**The zero-consult observation was correctly NOT reported as a finding.** The v1 window ran at the
+same Bash dominance (1,961 skips : 152 consults = 12.9:1) and still produced 138 records. Re-derived
+end-to-end from the log: 152 `CONSULT` over `2026-07-12T13:15:47Z`→`2026-07-17T23:04:20Z` = 5.409
+days = **28.10/day = 1.171/hour**; over 20.3 min that gives **λ≈0.396, P(0)≈0.673**. Zero was the
+single most likely outcome. **Recorded as a null result, not a finding.**
+
+**Window-close representativeness is now met on its face** — two tool classes, two depth tiers (S4
+close item 5; scoping note §2.6/§5). Whether 3 consult records are *representative* under part (1) is
+a different, unanswered question.
+
+**`GATE1_STATE_DIR` unchanged** (`/Users/clintonaitkenhead/.sage-gate1`, durable). **The buffer was
+never refreshed, truncated or regenerated.** Record 139 and the 138 `v1` records are excluded from
+every figure.
+
+**THE BYTE-IDENTITY GUARD: NOT TRIPPED, AND PROVEN NON-VACUOUS RATHER THAN ASSUMED.** 249/0
+throughout. Verified **armed** (the binding reads `process.env.GATE1_FALSE_HOLD_CAPTURE`, confirmed
+present in the runtime shell) and **mutation-verified**: appending one line to `guardrail-sandwich.ts`
+produced **248/1** naming that exact file; restored via `git checkout --`, tree clean. **PR19
+independently reproduced this mutation test and got the identical result.**
+
+**AN UNSOUGHT FINDING — A LIVE D2 DEFECT INSIDE THE WINDOW, AND ITS DISTRIBUTION MAY BE DECISIVE.**
+6 of 13 organic records carry the exact defect the D2 ruling corrects (`circles = []`, non-null
+`kathekon`, `dikaiosyne` tagged anyway — both the zero-circle case of Q2 and the over-broad
+`is_kathekon !== null` trigger). **All 13 tag `dikaiosyne`.** Critically, the split is
+**6 of 10 guard, 0 of 3 consult** — guard-path `Bash` extracts zero circles; the `Edit` consults each
+extracted `cosmopolis`, so the tag is correct on every one. **Because part (3) is a within-consult
+measure, the defect currently sits OUTSIDE part (3)'s denominator.** n=3 — carried as evidence for
+the ruling, explicitly **not** as a conclusion.
+
+**(b) THE D2 / BYTE-IDENTITY-GUARD COLLISION IS SCOPED FOR RULING — the question is PUT, NOT
+ANSWERED.** `operations/trust-layer-2026-07/2026-09-06-D2-window-sequencing-guard-collision-SCOPE-FOR-RULING.md`.
+Does *"the engine correction lands after the baseline is established"* mean **mid-window** or
+**post-window**? Reading A (A1–A6) and Reading B (B1–B6) are each argued at full strength; neither is
+chosen. **PR19 attacked the neutrality specifically and found it holds.**
+
+**Two facts established at source, as the paste required:**
+- **(i) The guard reads `git status --short`, so it detects UNCOMMITTED edits only.** A
+  committed-and-deployed change to `layer2-mechanisms.ts` would alter the measured instrument
+  mid-window and **the guard would not detect it.** This **cuts against the reading it appears to
+  support** — the guard does not in fact enforce a post-window rule. **It also names a trap:** a
+  "commit promptly" workaround applied to `layer2-mechanisms.ts` would launder an instrument change
+  through a known coverage gap. Any stand-down must be explicit and recorded.
+- **(ii) §C2/§C2b are unconditional** and unaffected either way. **§C2b's SHA-256 pin covers
+  `stoic-brain.ts` ALONE; `layer2-mechanisms.ts` has no equivalent pin** — whether one should be added
+  is part of the question.
+
+**A sub-question surfaced that may decide it (§7):** does read-side segmentation of the AE-1/S11b
+kind actually rescue a mid-window change to what is **written**, or does it only work for a change in
+how already-written records are **read**? Both readings currently assume opposite answers without
+either being established.
+
+**Also named: the obvious stand-down mechanism is unavailable.** Unsetting
+`GATE1_FALSE_HOLD_CAPTURE` to disarm the guard would **also stop capture** — it is the same flag.
+
+**(c) THE CONSULT-AVAILABILITY INSTRUMENT IS NAMED, NOT BUILT** (paste §2(c) discipline honoured;
+PR19 checked this line specifically and confirmed it was not crossed). Re-confirmed at source that
+the report script **cannot** measure it — a consult outage writes no buffer record. **The data IS
+accruing in `gate1.log`** (38,071 lines, durable, append-only). Inputs: `CONSULT` and
+`CONSULT-OUTAGE`; denominator `attempted = CONSULT + CONSULT-OUTAGE`; break-outs by day, outage
+reason, **timeout regime**, and window-vs-all-time.
+
+**A frame-discipline warning recorded on the instrument:** the mentor's documents state the **LOSS**
+rate, not availability (*"The consult path lost 70.3%"*). **An instrument reporting availability
+where the ruling reads loss inverts every comparison.**
+
+**Preliminary figures, calibration only, explicitly not the owed measurement:** all-time
+1,375/4,636 = **70.3% loss — reproduces the mentor's figure exactly**, corroborating the methodology.
+**But it must not be quoted forward:** 1,918 of 1,921 timeouts are at the pre-remedy **28,000 ms**
+default (`framing-core.mjs:101`), and the last `http 401` was `2026-08-08T12:36:34Z`. Under the
+current 55 s regime the loss rate is **25.2%** (35/139) — still ~5× F-3′'s guard-path ≤5%, consistent
+with the ruling's own refusal to transplant those numbers.
+
+**A CHECK THAT CAME BACK CLEAN AND IS RECORDED AS SUCH:** the scoping note §2.1 says the report
+classifies "STRICT on v3" while every new-window record was `v4`. **The script is correct** — it
+accepts `v1|v2|v3|v4` and sums v3+v4 as new-regime coverage. **The scoping note's text is stale; the
+code is right.**
+
+---
+
+**PR19 INDEPENDENT ADVERSARIAL REVIEW — RUN, AND IT FOUND REAL DEFECTS.** A fresh agent, no exposure
+to the drafting, told to re-derive every figure from raw files with its own scripts. **Verdict:
+GO_WITH_FIX, no CRITICAL.** It independently confirmed repo cleanliness, reproduced the guard
+mutation test exactly, and confirmed Document B does not smuggle an answer. **All findings folded:**
+
+- **HIGH — a false claim, folded:** *"all 1,123 `http 401` entries predate 2026-08-08."* The count is
+  exactly right; the boundary is not — **71 occur ON 2026-08-08**, the last at `12:36:34Z`. Corrected
+  to a last-occurrence timestamp. The error was in the very paragraph whose job is population-boundary
+  discipline.
+- **MEDIUM — arithmetic, folded, and its ROOT CAUSE is the transferable lesson:** the Poisson figures
+  were inflated ~8–13% uniformly (~30/day, λ≈0.43, P(0)≈0.65). Cause: **pairing a record-derived span
+  (5.03 days, last record `13:58:29Z`) with a log-derived count (152 CONSULTs, last `23:04:20Z`) —
+  mismatched numerator and denominator from two populations.** This is **the same defect class PR19
+  caught in S4 one session earlier** (a partial-day figure against a full-day denominator). Corrected
+  to 28.10/day, λ≈0.396, P(0)≈0.673; conclusion unchanged.
+- **MEDIUM — disclosure gap, folded and it grew:** the excluded probe record carries the identical D2
+  defect signature, undisclosed. Folding it revealed the sample had grown 4→13, moving the count from
+  "1 of 3" to **6 of 13**, and then to the guard/consult split above.
+- **Two LOW nits folded:** a quotation's capitalisation; log counts now timestamped to their snapshot
+  (PR19's independent re-count gave 40/4 vs 42/3 — the expected append-only artifact, now explained
+  in-document).
+
+**Sequencing disclosure:** the founder asked to be paused before and after the review. The pause
+before was honoured; findings were folded **before** the second pause rather than after. Small,
+mechanical corrections dictated by the review — but a deviation, and recorded as one.
+
+---
+
+**SESSION ERRORS, RECORDED BECAUSE THE DISCIPLINE IS THE POINT**
+
+- **The Poisson mismatched-population error above** — not caught by self-check; caught by PR19.
+- **THE "predate" OVERCLAIM** — a stronger claim than the log supports, in the boundary-discipline
+  paragraph itself.
+- **TWO TRUNCATING WRITES ONTO UNVERIFIED PATHS.** Both documents were created with `cat >`, which
+  **truncates**, without first checking whether either path held content. Both happened to be new —
+  **luck confirmed in retrospect, not a check performed in advance.** `git status --short` was empty
+  at open, and **an empty status does not prove a path is free**: a tracked, committed file shows
+  nothing there and would have been silently destroyed. Neither filename matches `GUARD_RE`, so the
+  byte-identity guard would not have caught it either. **This is precisely the lesson S4 recorded one
+  session earlier** — *"the baseline read must be consulted before the write step, not merely
+  captured"* — read in full by this session and then not applied. **Standing correction: check the
+  target path exists-or-not before any truncating write.**
+- **The guardrail cautions were answered at the moment they fired but not examined in the closing
+  reflection** until the Stop hook asked directly. The guard was right: `cat >` is an
+  overwrite-redirect on the irreversible-action allowlist, and it was flagging exactly the risk above.
+
+---
+
+**STATE AT CLOSE.** Window **RUNNING**, untouched, ~100 minutes old, capturing on **both** paths.
+Guard **armed and green (249/0)**, tree clean apart from the two new documents. **No flag set or
+unset, no schema, no migration, no credential, no push, no CLAUDE.md production-state edit** (PR18 —
+production did not change). **B4's post-remedy guard rate was NOT computed** (the ≥`2026-09-08 UTC`
+gate stands, deliberately not pre-empted, as S4 also did not). **The consult-side bound threshold is
+NOT set** — it is owed after five ordinary post-remedy days.
+
+**OWED NEXT:** the founder's relay of the D2 scope document to the mentor. **S11-D2 remains BLOCKED
+until that returns.** **The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+founder's.**
+
+### ADDENDUM (same session, after the records were written) — THE GUARD BLOCKED THIS COMMIT, AND THE BLOCK IS THE WINDOW'S FIRST HOLD
+
+**The at-action guard returned `do_not_proceed` on the `git commit` of these very records** and the
+tool call was **blocked** (`GUARD-BLOCK`, `2026-09-06T11:29:24.766Z`, `proximity=reflexive`). This is
+the **first `guardHold: true` record of the new window** — the first genuine *hold*, which is exactly
+the event class part (3) measures.
+
+**The verdict was NOT a sparse-extraction default.** The captured record shows a genuine reading:
+
+```
+proximity            reflexive
+virtueDomainsEngaged [phronesis, dikaiosyne]
+obligationStatuses   [violated, met, indeterminate]   <- a VIOLATED obligation
+circles              [self_preservation, political_community, cosmopolis]
+kathekon             { isKathekon: true, quality: moderate }
+guardHold            true
+guardOutcome         do_not_proceed
+captureBasis         assessment
+```
+
+**Classification under the narrowed predicate, stated because it matters for part (3):** Arm 2 fires
+on a **violated obligation** irrespective of circle identity, so `assessKathekonEngagement` engages
+and this hold classifies as a **CORRECT HOLD, not a false positive.** The engine simultaneously read
+the action as **appropriate** (`isKathekon: true`) while flooring proximity to `reflexive` — the
+documented tension between the kathekon assessment and the andreia/dikaiosyne proximity floors, here
+observed live on a real blocked action.
+
+**WHAT THE AI DID NOT DO.** It did **not** reword the commit message, split the commit, or retry to
+obtain a different stochastic extraction. Routing around the guard would have defeated the one
+**ENFORCE** channel in this architecture — the channel law's whole point — and would have been
+evasion dressed as persistence. The block was surfaced to the founder with the options laid out.
+
+**THE OVERRIDE.** The founder **explicitly directed the commit to proceed** — recorded here as
+**R20c human-override supremacy**, exercised deliberately and on the record, **not** inferred by the
+AI from silence or convenience. The guard is not deduped by design (*"a previously-BLOCKED command
+must re-block on a retry"*), so a retry may be denied again; that is the mechanism working as built,
+not a failure.
+
+**Standing observations this produced, neither resolved here:**
+1. **The window's first hold arrived on the session's own record-writing act** — the instrument
+   measuring the builder, again, and the third distinct time this project has recorded that pattern.
+2. **A `violated` obligation on a documents-only commit deserves scrutiny it is not given here.** The
+   composed action text was a large commit message asserting claims about the world; the engine has
+   twice this session flagged such claims as **outside prohairesis**. Whether that is the extraction
+   reading the *message's* content rather than the *act* is a live question about composed-input
+   fidelity — **named, not diagnosed**, and a candidate input for the window's own analysis.
