@@ -81,3 +81,43 @@ against the drafting session's own point.
 ## Rollback
 
 `git revert` the records commit. Documents only.
+
+---
+
+## ADDENDUM — the question was relayed and RULED the same sitting (2026-09-06, ~14:05 AEST)
+
+`D-MENTOR-RULING-D2-VIRTUE-DOMAIN-TAGGING-ADOPTED-2026-09-06`. Verbatim:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md`.
+**Still documents only. Nothing built. Production unchanged.**
+
+**A change is owed.** The mentor accepted that `credential-completed` is an accumulation surface and
+that the Q4-residual distinction is real — **and ruled it does not rescue the tag**, because that
+distinction *"governs how evidence is treated once correctly attributed. It does not govern whether
+the attribution is correct in the first place."* The ground is more basic than anything this
+document argued: **the ledger accumulates what happened, and a domain that did not engage did not
+happen.** Crediting it is *"mis-accumulation, not mis-verdict"* — *"accumulation of a false
+impression."* **Option 3 fails by name.**
+
+Also ruled: zero-circle reaches the same answer; **the `is_kathekon !== null` trigger is over-broad
+and corrected in the same pass** (the zero-factor anomaly is a trigger-logic defect, not a separate
+principle question); **M-1's conditional meant the full implementation**, so the destination existing
+anywhere satisfied it and *"the interim is now over. The removal is owed."*; and the correction lives
+**at the engine**, because the boundary option *"defers the divergence rather than closing it."*
+
+**The sequencing inverts what this close said two hours earlier, and the correction is the point.**
+Above, under Carried, this close stated S4(c) could not be discharged until D2 was ruled. **The
+ruling discharges it in the opposite direction:** *"the observation window opens first, establishing
+a baseline; the engine correction lands after."* **D2 does not gate S4 — S4 gates D2.** The opener's
+S4 row and this close are both corrected rather than left to be reconciled by a later reader.
+
+**One thing carried that is this session's own defect.** The scope document put four questions; the
+relay carried three and spent its Q4 on the location question. **Q-D2-4 — whether the corrected tag
+should inherit `|| hasNaturalRelationship`, under which a relationship claimed with no identified
+party would still tag dikaiosyne on a credit surface — was never relayed**, and the phrase appears
+zero times in the document the mentor answered. It is unruled, carried to the build, and recorded as
+a relay failure rather than left looking like a mentor omission. Found by grepping the two documents'
+question headings against each other.
+
+**Next:** **S4** (window-start readiness; date gate ≥2026-09-08 UTC) — now unambiguously next and no
+longer gated on D2 — then the new **S11-D2** build row, `code-critical`, founder-walked, PR19.
+**Weights BLOCKED; the S11 flip REFUSED; neither unblocked.**

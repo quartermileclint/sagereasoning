@@ -36478,3 +36478,77 @@ Cross-references: `S11-FLIP-PREREQUISITES-REGISTER.md` §D D1/D2/D4 · the 2026-
 verbatim · M-1 in `2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` · the Q4-residual verbatim
 `operations/agent-circles-2026-08/2026-08-02-mentor-consultation-q4-residual-verbatim.md` ·
 `D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`.
+
+---
+
+### D-MENTOR-RULING-D2-VIRTUE-DOMAIN-TAGGING-ADOPTED-2026-09-06
+
+**2026-09-06, ~14:05 AEST** (machine date). Same session S5, after the founder relayed the question
+authored earlier in the sitting and returned the ruling. Tier `governance`, autonomous.
+**Documents only — no code, schema, flag, credential or public surface touched. Nothing built.**
+Model `claude-opus-5`.
+
+**ADOPTED AS BINDING SPECIFICATION.** Verbatim record:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md`
+(verbatim wins over every summary, including this entry).
+
+**The ruling: a change IS owed, and scope-doc Option 3 fails by name.** The ground is narrower and
+more basic than the one this session's document built up to. The mentor accepted that
+`credential-completed` is an accumulation surface and that the 2026-08-02 Q4-residual
+accumulation/verdict distinction is real — **and ruled that it does not rescue the tag**, because it
+*"governs how evidence is treated once correctly attributed. It does not govern whether the
+attribution is correct in the first place."* The operative principle: **the ledger accumulates what
+happened, and a domain that did not engage did not happen.** Crediting dikaiosyne on a self-only
+action is *"mis-accumulation, not mis-verdict"* — *"accumulation of a false impression."*
+
+**The other four dispositions.** **Zero-circle reaches the same answer by the same route.** **The
+`is_kathekon !== null` trigger is over-broad and is corrected IN THE SAME PASS** — appropriateness is
+assessed across all four virtues, so a non-null kathekon result does not isolate dikaiosyne; the
+zero-factor anomaly this session found is *"a defect in the trigger's logic, not a separate principle
+question."* **M-1's conditional referred to the FULL implementation, not the reducer alone** — so the
+destination existing anywhere in the system satisfied it; *"the interim is now over. The removal is
+owed."* **Location: at the ENGINE**, not the trust-core boundary — the boundary option *"defers the
+divergence rather than closing it"*, and its drift is *"the same class of drift this project has been
+paying for repeatedly."*
+
+**The sequencing is binding and it INVERTS this session's own earlier reading of S4.** *"The
+observation window opens first, establishing a baseline; the engine correction lands after"* —
+explicitly *"not a reason to defer the correction indefinitely… a reason to sequence it correctly."*
+Earlier in this same sitting the S5 close and the opener's S4 row had it the other way round: that
+S4(c) could not be discharged until D2 was ruled, because an engine edit might have to precede the
+window. **The ruling discharges S4(c) in the opposite direction — D2 does not gate S4; S4 gates D2.**
+Both records are corrected in place.
+
+**A RELAY GAP FOUND BY CHECKING, AND IT IS THIS SESSION'S OWN DEFECT, NOT A MENTOR OMISSION.** The
+scope document put four questions (Q-D2-1…4); the relay carried only three of them and spent its
+Q4 on the location question instead. **Q-D2-4 — whether the corrected tag should inherit
+`isDikaiosyneEngaged`'s `|| hasNaturalRelationship` term, under which a relationship claimed with NO
+identified party would still tag dikaiosyne on a credit surface — was never relayed.** The phrase
+appears **zero times** in the document the mentor answered. It is therefore **unruled**, is carried
+to the build session, and is recorded as a drafting failure of the relay rather than allowed to look
+like something the mentor declined to address. Found by grepping both documents' question headings
+against each other before writing the ruling record — not by reading.
+
+**Two further things the ruling does not decide,** recorded so the build does not assume them: the
+exact form of the corrected predicate (call `isDikaiosyneEngaged`, mirror it, or a third
+formulation); and the **mid-window tagging-regime boundary the ruled sequencing creates** — landing
+the correction after the window opens spans the window across two regimes, for which AE-1's
+read-side S11b boundary segmentation is the precedent. **Naming that is not re-litigating the
+sequence**, which is ruled; if the window's readiness part (3) turns out unable to tolerate it, that
+is a new question for the founder, not a licence to reorder.
+
+**Records:** the verbatim ruling; the register's D2 row annotated again (append-only; **and its
+pipes escaped — the annotation initially broke the table to five columns via an unescaped `||` in
+`\|\| hasNaturalRelationship`, caught by counting unescaped pipes per row, fixed, all five D-rows
+re-verified at 3 columns**, the same defect a prior session recorded on this same table); the
+opener's F-14 discharged, S5 row marked ruled, S4(c) corrected, and a new **S11-D2** build row added
+**gated on S4(d)**; the S5 close given a ruling addendum.
+
+**Status:** Adopted (RULED — build owed, not built, not scheduled ahead of the window).
+**Weights remain BLOCKED. The S11 flip remains REFUSED. Neither is unblocked by this ruling.**
+Cross-references: `2026-09-06-D2-virtue-domain-tagging-SCOPE-FOR-RULING.md` ·
+`2026-09-06-mentor-question-D2-virtue-domain-tagging-FOR-RULING.md` ·
+`D-D2-VIRTUE-DOMAIN-TAGGING-SCOPED-FOR-RULING-2026-09-06` ·
+`agent-circles-2026-08/2026-08-02-mentor-consultation-q4-residual-verbatim.md` ·
+M-1 in `2026-08-16-mentor-rulings-M1-M5-r2b-verbatim.md` · the 2026-07-19 self-circle verbatim ·
+`S11-FLIP-PREREQUISITES-REGISTER.md` §D D2/D4.
