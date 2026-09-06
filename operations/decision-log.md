@@ -36880,3 +36880,71 @@ contract matters, prefer the surface that derives itself.
 skill-registry landed 2026-09-06 and **verified live this session**; §D api-docs closed here). **The
 window has not started; `GATE1_FALSE_HOLD_CAPTURE` remains unset. The S11 flip remains REFUSED;
 weights remain BLOCKED; the 0h call remains the founder's.**
+
+### D-MENTOR-RULING-PART3-GUARD-DENOMINATOR-ADOPTED-2026-09-06
+
+**2026-09-06, ~18:00 AEST** (machine date). Continuation of session S4. Tier `governance` —
+**documents only; no code, schema, flag or credential changed. The window has NOT been started by
+this entry; `GATE1_FALSE_HOLD_CAPTURE` remains unset.** Model `claude-opus-5`. Verbatim record:
+`operations/trust-layer-2026-07/2026-09-06-mentor-ruling-part3-guard-denominator-verbatim.md`
+(**verbatim wins over this cell**).
+
+**RULED, and it dissolves the blocker rather than confirming it. Part (3) is a WITHIN-CONSULT-
+POPULATION measure. The guard population is a separately-reported disclosure, not the denominator of
+a cross-population ratio.**
+
+**Q1 — three grounds, all adopted.** (i) The P6 amendment's separation requirement *forbids* a
+denominator that mixes two measurement conditions, and a ratio of advisory holds to enforced denies
+is exactly such a mix — *"Reading part (3) as a cross-population ratio would require the amendment
+and part (3) to be simultaneously satisfied, which they cannot be."* (ii) The two events mean
+different things regardless of volume: a consult hold says *"this action warrants examination"*, a
+guard deny says *"this action is not permitted"* — *"different instruments measuring different
+things."* (iii) The 2026-07-17 blocker's concern was the guard path being **structurally absent**,
+not a ratio needing both paths; P8a closes the absence, and reporting the guard side separately and
+honestly *"does not need to be the denominator of part (3)'s ratio to satisfy the blocker's intent."*
+
+**Q2 — dissolved by Q1.** The guard thinness *"stops being a blocker and becomes a disclosure, as
+the document anticipated."* The disclosure must state what it is: **15 genuine denies over 57
+calendar days, all Bash, all reflexive, all depth-empty**, and must not claim representativeness.
+
+**Q3 — No.** Part (1)'s representativeness requirement applies to the population part (3) measures,
+which is the consult population. The guard population's narrowness is *"a property of the guard
+mechanism, not a sampling failure"* — it reflects the irreversible-action allowlist's scope, and
+*"a longer window would not broaden it, because the narrowness is not a function of time."*
+
+**On the sequencing interaction this session raised: named correctly, and it resolves cleanly.** The
+D2 sequencing holds unchanged (window first, engine correction after), but **Q1 removes the guard
+population from the window's duration constraint** — the window runs on the consult population's
+terms, which produced 130 records in five days. So the ruled sequence does **not** hold the D2
+correction open materially longer than the consult side requires. **The ruling closes: "Start the
+clock. Report the guard side honestly as thin. The window's duration is set by the consult
+population's terms, not the guard population's."**
+
+**⚠ ONE AMBIGUITY, NAMED RATHER THAN RESOLVED HERE, BECAUSE RESOLVING IT WOULD BE READING A LICENCE
+INTO A RULING THAT DID NOT GIVE ONE.** The ruling says *"Start the clock"* — but **F-3′ is a
+separate binding precondition from a different ruling** (2026-09-05, Q3: *"A bounded guard-outage
+rate is a further precondition on the window, in the same class as P8a"*), and **this response never
+names F-3′, B4, or guard availability.** The two are different quantities: this ruling is about
+guard **density** (how many denies exist); F-3′ is about guard **availability** (what fraction of
+guard attempts complete). Density was asked and answered; availability was not put.
+
+**The coherent reading, offered as a reading and not as a discharge:** F-3′'s stated ground was that
+*"a denominator losing a fifth to a third of its population to instrument outage is not a random
+sample"* — and under Q1 the guard population is **no longer a denominator**, so that ground no
+longer applies to part (3). What survives is Q-G1(c)'s separate requirement that the availability
+covariate is *"not optional for honest reporting"* — which now attaches to the **honesty of the
+guard disclosure**, not to a gate on part (3)'s rate. On that reading B4's measurement is still owed
+(it is what makes the disclosure honest) but no longer blocks the window's start.
+
+**This session does NOT act on that reading.** F-3′ stands as written until the founder elects
+otherwise or the mentor discharges it. **What is certain either way: the flag is the founder's act,
+it has not been taken, and nothing here takes it.**
+
+**Consequences recorded, none acted on:** the F-3′ threshold elected earlier today
+(`D-F3PRIME-THRESHOLD-ELECTED-…`) is unaffected as a number; P5/P6's status is unchanged; the S11
+flip remains REFUSED and weights BLOCKED — **the ruling touches neither, and says so by omission
+rather than by claim.** The window's report must now carry the guard population as an explicit
+separate disclosure with its narrowness named as structural.
+
+**Records:** this entry; the verbatim ruling; the register's P6 row annotated; the standing opener's
+S4 row updated. **Rollback:** `git revert` (documents only).
