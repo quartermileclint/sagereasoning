@@ -672,8 +672,12 @@ console.log('\n§12 — ruling 2 (outage exclusion) + ruling 3 (caller class, v5
       guard.includes('POPULATION: guard  (n=3)'), guard.slice(0, 200))
     check('§12.9c segment 3 names the outage exclusion',
       /SEGMENT 3 — outage \(no_assessment\): 1\b/.test(guard), guard)
-    check('§12.9d the LOWER-BOUND caveat rides the figure, not a footnote',
-      /LOWER BOUND/.test(guard) && /never a measurement of it/.test(guard), guard)
+    // SUPERSEDED 2026-09-07 by the Option D ruling: the 'LOWER BOUND' framing was
+    // amended to the stronger 'NOT a clean bill of health / not achievable at source'
+    // clause. §14 pins the amended wording; this pins that the caveat still RIDES
+    // the figure rather than becoming a footnote.
+    check('§12.9d the caveat rides the figure, not a footnote (Option D wording)',
+      /NOT a clean bill of health/.test(guard) && /UNKNOWN\s+PROPORTION/.test(guard), guard)
     check('§12.9e the reason for segment 2 having no rate is stated explicitly',
       /NO rate is computed over these, by ruling/.test(guard) && /PARENT id/.test(guard), guard)
   }
@@ -683,8 +687,10 @@ console.log('\n§12 — ruling 2 (outage exclusion) + ruling 3 (caller class, v5
     const fleet = { ...V5_OK, session: 'sess-12-fleet', capturedAt: '2026-09-06T10:05:00.000Z', callerClass: 'subagent' }
     const { out } = runReport([V5_OK, fleet], 'r3-fleet')
     const guard = popSection(out, 'guard')
-    check('§12.10 a callerClass:subagent record is counted as review-fleet and excluded',
-      /of which review-fleet, EXCLUDED from the population: 1\b/.test(guard), guard)
+    // Wording amended by the Option D ruling (2026-09-07); the MECHANISM is retained
+    // because the ruling states it is correct in principle, so it must still fire.
+    check('§12.10 a callerClass:subagent record is still counted as review-fleet',
+      /review-fleet records excluded: 1\b/.test(guard), guard)
   }
 }
 
@@ -737,6 +743,37 @@ console.log('\n§13 — PR19 fold: ruling 3\u2019s exclusion must reach the RATE
     check('\u00a713.7 the three segments sum to the population with no double-count',
       guard.includes('POPULATION: guard  (n=3)'), guard.slice(0, 200))
   }
+}
+
+
+// ============================================================================
+console.log('\n\u00a714 — OPTION D (ruled 2026-09-07): the amended segment-1 clause')
+// ============================================================================
+{
+  // The Option D ruling AMENDS the segment-1 clause published the same morning.
+  // The zero must NOT be readable as "no contamination found" — the ruling requires
+  // the structural reason be "stated in the disclosure, not buried".
+  const V5 = { ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v5', session: 'sess-14',
+    capturedAt: '2026-09-06T11:00:00.000Z', callerClass: 'unknown' }
+  const { out } = runReport([V5], 'optd')
+  const guard = popSection(out, 'guard')
+
+  check('\u00a714.1 the zero exclusion is explicitly NOT a clean bill of health',
+    /NOT a clean bill of health/.test(guard), guard)
+  check('\u00a714.2 the amended clause is stated: distinction NOT achievable at source',
+    /NOT\s+CURRENTLY ACHIEVABLE AT SOURCE/.test(guard), guard)
+  check('\u00a714.3 the population is disclosed as containing an UNKNOWN PROPORTION',
+    /UNKNOWN\s+PROPORTION of review-fleet records/.test(guard), guard)
+  check('\u00a714.4 the STRUCTURAL REASON is stated, not buried',
+    /THE STRUCTURAL REASON/.test(guard) && /no\s+\/subagents\/ segment/.test(guard), guard)
+  check('\u00a714.5 the disclosure distinguishes a correct mechanism from an absent input',
+    /not a failure of the build/.test(guard) && /finding about the/.test(guard), guard)
+  // Non-vacuity: the mechanism is RETAINED (correct in principle per the ruling), so a
+  // genuine 'subagent' record must still be excluded if the environment ever supplies one.
+  const fleet = { ...V5, session: 'sess-14-f', capturedAt: '2026-09-06T11:01:00.000Z', callerClass: 'subagent' }
+  const g2 = popSection(runReport([V5, fleet], 'optd-fleet').out, 'guard')
+  check('\u00a714.6 the retained mechanism still excludes a genuine subagent record',
+    /review-fleet records excluded: 1\b/.test(g2), g2)
 }
 
 

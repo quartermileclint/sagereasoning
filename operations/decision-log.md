@@ -37983,3 +37983,83 @@ baseline still **1 of 5** (unchanged this session — no consult record accrued:
 consult-eligible action was itself lost to a `CONSULT-OUTAGE`, observed live). **S11-D2 remains
 BLOCKED on the five-day threshold. The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
 remains the founder's.**
+
+## 2026-09-07 — D-MENTOR-RULING-CALLER-CLASS-OPTION-D-ADOPTED-EXECUTED-2026-09-07
+
+**Tier `code-elevated` — a disclosure-wording amendment on the report, its test pins, and records. NO
+production, schema, flag, credential or migration change. Nothing pushed. AC7 not engaged.**
+**VERBATIM RECORD, CANONICAL:**
+`operations/trust-layer-2026-07/2026-09-07-mentor-ruling-caller-class-option-D-verbatim.md`.
+**ADOPTED AS BINDING and EXECUTED the same session.**
+
+**⚠ THIS RULING AMENDS A CLAUSE PUBLISHED THE SAME MORNING.** The segment-1 clause of
+`2026-09-07-mentor-ruling-caller-class-schema-boundary-verbatim.md` is superseded; that earlier ruling
+otherwise stands in full (post-boundary only; no retroactive classification; three segments).
+
+**What was asked.** S7 built `caller_class` exactly as ruling 3 specified, then measured it running
+under two review fleets against its own diff: **20+ post-boundary records, every one `'unknown'`,
+including commands provably issued by a review-fleet subagent.** The `PreToolUse` hook fired inside a
+subagent receives a transcript path with **no `/subagents/` segment**. The question put to the mentor
+was what follows, with four options argued at full strength and none chosen.
+
+**The ruling: OPTION D.** *"The guard population is declared structurally unable to satisfy ruling 3's
+exclusion on the current harness as wired, and this is carried as a disclosed limit."* The mentor
+characterises the finding precisely: *"This is not a build failure. It is a discovery about the
+environment... The field is present at capture. It distinguishes nothing. That is the truth, and the
+field reports it truthfully."* The two-value asymmetry is credited with doing *"exactly what it was
+designed to do: it converted a false claim into an honest one."*
+
+**Option B (spawn-depth via H2/H5) is ruled OUT on measured evidence** — S7 found a genuine live-agent
+action interleaved between two fleet records in an observed window, so the marker would misflag it:
+*"The misclassification is not a theoretical edge case. It is the normal operating condition."*
+**Option A is "honest but incomplete"** — *"naming a contamination is not the same as resolving it."*
+**Option C is a candidate, not a solution** — investigation owed (below).
+
+**EXECUTED, three parts:**
+
+**(1) The segment-1 clause is amended in the live report** (`false-hold-observation-report.ts`), to the
+mentor's verbatim replacement: *"distinction between live-agent and review-fleet records not currently
+achievable at source; `caller_class` reports `unknown` for all records on this harness as wired; no
+exclusion is applied; the structural reason is disclosed."* The printed zero now reads **"and this ZERO
+is NOT a clean bill of health"** and names the population as containing an **unknown proportion** of
+review-fleet records. **The exclusion MECHANISM is retained** — the ruling states it is *"correct in
+principle"* — so it still fires if the environment ever supplies the signal (pinned §14.6); it simply
+fires on nothing today.
+
+**(2) The structural reason is stated in the disclosure, not buried** — the `PreToolUse`-inside-a-
+subagent path shape; that the mechanism is correct and end-to-end tested; that the environment does not
+supply the input; that no reliable heuristic exists either, established under controlled conditions with
+ground truth; and that a spawn-depth marker was measured to misflag a genuine live-agent action.
+
+**(3) The Option C investigation is authored as the ruling's bounded work item** —
+`2026-09-08-option-C-subagentstart-correlation-INVESTIGATION-NEXT-SESSION-PROMPT.md`. One session, one
+question, binary outcome: *does `SubagentStart` supply a signal that correlates to an H3 record via a key
+OTHER than session ID?* YES ⇒ Option C viable, ruling revisited. NO ⇒ Option D confirmed, disclosure
+final. The prompt names the real difficulty (`agent_id` alone is insufficient — H3 records under the
+parent id, so a correlation KEY is the actual problem), records that observing the wire needs
+`GATE1_DEBUG`, **a founder act on the live harness config that S7 refused to take**, and states that a
+confirmed NO is worth as much as a YES.
+
+**PR19 fleets continue as structured** under the founder's Option A election (ruling item 4): the pool
+grows, every post-boundary record carries `callerClass: 'unknown'`, and the disclosure reports the
+pool's size, its known composition, and why the proportion cannot be measured. *"This is honest. It is
+not clean. The distinction matters and the disclosure preserves it."*
+
+**Two of this session's own earlier test pins were SUPERSEDED and updated rather than deleted:** §12.9d
+(asserted the old "LOWER BOUND" wording) and §12.10 (asserted "EXCLUDED from the population"). Both now
+pin the amended clause; §12.10 continues to pin that the retained mechanism still excludes a genuine
+subagent record, so the amendment did not silently disable it.
+
+**Verified:** report battery 99 → **105/0** (+6 §14 pins for the amended clause, +2 updated). Two
+mutations verified red — reverting the amended clause to the superseded wording (2 fail), and burying
+the structural reason (1 fail) — each restore **SHA-verified**. `tsc` exit 0. The live report's actual
+output was read, not assumed. Boundary battery green pre-edit; the edit touches
+`false-hold-observation-report.ts`, which matches `GUARD_RE`, so this commit rides the **same recorded
+founder waiver** (D2 stand-down shape (a)) as `97320a0`.
+
+**Rollback:** `git revert` this commit. No flag, no schema, no migration, no production surface.
+
+**STATE:** Option D **ADOPTED AND EXECUTED**; the segment-1 clause **AMENDED in the live report**; the
+Option C investigation **AUTHORED, not started**; the window **RUNNING**; the guard **armed**; baseline
+**1 of 5**. **S11-D2 remains BLOCKED on the five-day threshold. The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**

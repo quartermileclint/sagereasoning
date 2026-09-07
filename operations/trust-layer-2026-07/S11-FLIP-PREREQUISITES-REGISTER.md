@@ -78,6 +78,21 @@ The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v
 ---
 
 ## Change log
+- **2026-09-07 (S7, later — OPTION D RULED and EXECUTED;
+  `D-MENTOR-RULING-CALLER-CLASS-OPTION-D-ADOPTED-EXECUTED-2026-09-07`; verbatim, canonical:
+  `2026-09-07-mentor-ruling-caller-class-option-D-verbatim.md`)** — **AMENDS the segment-1 clause
+  published the same morning.** `caller_class` was built exactly as ruled, then MEASURED null: 20+
+  post-boundary records, all `'unknown'`, incl. commands provably issued by a review-fleet subagent —
+  the `PreToolUse` hook fired inside a subagent receives no `/subagents/` path segment. **Ruled: the
+  guard population is STRUCTURALLY UNABLE to satisfy ruling 3's exclusion on this harness as wired;
+  carried as a DISCLOSED LIMIT.** *"This is not a build failure. It is a discovery about the
+  environment."* Spawn-depth (H2/H5) ruled OUT on measured evidence (it would misflag a genuine
+  live-agent action — *"the normal operating condition"*). The amended clause is LIVE in the report;
+  the printed zero now reads **NOT a clean bill of health**; the exclusion mechanism is RETAINED as
+  *"correct in principle"* and still fires if the environment ever supplies the signal. **Option C
+  investigation OWED as a bounded one-session work item** (does `SubagentStart` correlate to an H3
+  record via a key other than session id? YES ⇒ ruling revisited; NO ⇒ disclosure final) — authored,
+  not started; it needs a founder `GATE1_DEBUG` act. Report battery 99 → 105/0.
 - **2026-09-07 (S7 — rulings 2 and 3 executed under a recorded founder waiver;
   `D-S7-RULINGS-2-3-EXECUTED-CALLER-CLASS-BOUNDARY-2026-09-07`; commit under `--no-verify`, guard left
   armed, waived per D2 stand-down shape (a))** — the guard-side outage exclusion now reaches Part 3's

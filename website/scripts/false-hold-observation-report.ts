@@ -924,20 +924,35 @@ function reportRecommendationColumn(rows: Classified[]): void {
       const postBoundary = derivableAll.filter((r) => r.callerClass !== undefined)
       console.log('    ── three-segment disclosure (ruled 2026-09-07) ──')
       console.log(`    SEGMENT 1 — post-boundary (carry callerClass): ${postBoundary.length}`)
-      console.log(`      of which review-fleet, EXCLUDED from the population: ${reviewFleet.length}`)
-      console.log('      LOWER BOUND, and this sentence rides the figure: callerClass is')
-      console.log("      'subagent' only on a POSITIVE structural observation (a /subagents/")
-      console.log("      transcript-path segment). 'unknown' covers a session-shaped path too,")
-      console.log('      because such a path cannot distinguish "the live agent acted" from')
-      console.log('      \u201cthe wire hands a subagent the parent\u2019s path\u201d.')
-      console.log('      MEASURED, NOT MERELY DISCLOSED (2026-09-07, S7): two review fleets')
-      console.log('      ran against this diff and produced 14 real production records incl.')
-      console.log('      at least one confirmed fleet-generated command this session never ran.')
-      console.log('      EVERY ONE reads \u2018unknown\u2019. On this machine, under this harness,')
-      console.log('      as currently wired, the signal does NOT discriminate: this count is a')
-      console.log('      floor of ZERO on review-fleet contamination, never a measurement of it,')
-      console.log('      and the remainder is an UPPER bound on the live-agent population, not')
-      console.log('      the live-agent count.')
+      // AMENDED 2026-09-07 by the OPTION D ruling, which supersedes the segment-1
+      // clause published the same morning. The original clause read "live-agent and
+      // review-fleet records distinguished at source". That is NOT ACHIEVABLE and the
+      // ruling amends it: "distinction between live-agent and review-fleet records not
+      // currently achievable at source; caller_class reports unknown for all records on
+      // this harness as wired; no exclusion is applied; the structural reason is
+      // disclosed." The exclusion mechanism is retained because it is CORRECT IN
+      // PRINCIPLE (the ruling says so explicitly) and would fire if the environment ever
+      // supplied the signal — but it fires on nothing today, and the disclosure below
+      // says that rather than letting a zero read as a clean bill of health.
+      console.log(`      review-fleet records excluded: ${reviewFleet.length}  — and this ZERO is`)
+      console.log('      NOT a clean bill of health. RULED (2026-09-07, Option D): the')
+      console.log('      distinction between live-agent and review-fleet records is NOT')
+      console.log('      CURRENTLY ACHIEVABLE AT SOURCE on this harness as wired, so NO')
+      console.log('      exclusion is applied and this population contains an UNKNOWN')
+      console.log('      PROPORTION of review-fleet records.')
+      console.log('      THE STRUCTURAL REASON, stated here and not buried: the PreToolUse')
+      console.log('      hook fired INSIDE a subagent receives a transcript path with no')
+      console.log('      /subagents/ segment. The mechanism is correct and end-to-end')
+      console.log("      tested (a synthetic subagent-shaped path DOES yield 'subagent');")
+      console.log('      the ENVIRONMENT does not supply the input the mechanism requires.')
+      console.log('      This is not a failure of the build. It is a finding about the')
+      console.log('      environment. Measured, not assumed: every post-boundary record so')
+      console.log("      far reads 'unknown', including commands provably issued by a")
+      console.log('      review-fleet subagent. No reliable heuristic exists as an')
+      console.log('      alternative either — established under controlled conditions with')
+      console.log('      ground truth, and a spawn-depth marker was MEASURED to misflag a')
+      console.log('      genuine live-agent action, the direction ruled invisibly')
+      console.log('      destructive.')
       console.log(`    SEGMENT 2 — pre-boundary (no callerClass field): ${preBoundary.length}`)
       console.log('      Composition UNKNOWN. NO rate is computed over these, by ruling.')
       console.log('      Reason for the absence, stated explicitly: they were captured before')
