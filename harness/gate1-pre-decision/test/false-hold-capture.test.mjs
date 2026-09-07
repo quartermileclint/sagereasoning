@@ -27,6 +27,8 @@ import {
   buildFalseHoldRecord,
   appendFalseHoldRecord,
   falseHoldRecordPath,
+  classifyCaller,
+  buildGuardHoldRecord,
 } from "../claude-code/hooks/lib/false-hold-capture.mjs";
 
 const AT_ACTION_HOOK = fileURLToPath(new URL("../claude-code/hooks/at-action-hook.mjs", import.meta.url));
@@ -237,6 +239,64 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
   }
 
   server.close();
+}
+
+// ============================================================================
+// §3 — RULING 3 (2026-09-07): classifyCaller + the v5 caller-class boundary.
+//
+// The field exists so the guard population contains "only records where the live
+// agent was the actor at the moment the hook fired". Session id CANNOT do this —
+// a review-fleet subagent's record carries the PARENT id. The signal used instead
+// is the transcript path's SHAPE: a subagent's own transcript is written under
+// `<parent-session>/subagents/agent-*.jsonl` (live-confirmed 2026-06-21, Gate-1
+// Slice 3a; memory `claude-code-subagent-hook-contract`).
+//
+// THE ASYMMETRY IS THE POINT AND IS PINNED BELOW: "subagent" only on a POSITIVE
+// structural observation; "unknown" for everything else INCLUDING a session-shaped
+// path — because such a path cannot distinguish "the live agent acted" from "the
+// wire hands a subagent the parent's path", which has not been observed. A pin
+// that accepted "live_agent" here would bless exactly the guess the ruling forbids.
+// ============================================================================
+{
+  const SUB = "/Users/x/.claude/projects/-p/0927064c/subagents/workflows/wf_1/agent-abc.jsonl";
+  const PARENT = "/Users/x/.claude/projects/-p/0927064c-9c70-4dd4-a0c3-3de9f46cfba6.jsonl";
+
+  check("§3.1 a /subagents/ path segment reads 'subagent' (positive structural observation)",
+    classifyCaller(SUB) === "subagent", classifyCaller(SUB));
+  check("§3.2 a parent-session path reads 'unknown', NOT a live-agent claim",
+    classifyCaller(PARENT) === "unknown", classifyCaller(PARENT));
+  check("§3.3 a missing/empty/non-string path reads 'unknown' (never a false positive)",
+    classifyCaller(undefined) === "unknown" && classifyCaller("") === "unknown" && classifyCaller(42) === "unknown");
+  // SEGMENT, not substring: a directory merely NAMED "...subagents..." must not match.
+  check("§3.4 'subagents' as part of a longer directory name does NOT match",
+    classifyCaller("/Users/x/my-subagents-notes/t.jsonl") === "unknown",
+    classifyCaller("/Users/x/my-subagents-notes/t.jsonl"));
+  check("§3.5 a trailing /subagents directory DOES match",
+    classifyCaller("/Users/x/proj/subagents") === "subagent");
+
+  const mk = (callerClass) => buildGuardHoldRecord({
+    guard: { recommendation: "do_not_proceed", assessment: null },
+    sessionId: "s", tool: "Bash", actionText: "rm -rf /x",
+    nowIso: "2026-09-07T00:00:00.000Z", regime: "at-action-v2-composed",
+    denied: true, callerClass,
+  });
+
+  check("§3.6 the guard record is schema v5 (the dated caller-class boundary)",
+    mk("unknown").schema === "false-hold-record-v5", mk("unknown").schema);
+  check("§3.7 callerClass rides TOP-LEVEL — never inside signals, which recordHash hashes",
+    Object.prototype.hasOwnProperty.call(mk("unknown"), "callerClass") &&
+    !Object.prototype.hasOwnProperty.call(mk("unknown").signals, "callerClass"));
+  check("§3.8 'subagent' is carried through faithfully", mk("subagent").callerClass === "subagent");
+  // NORMALISATION: the builder never trusts the caller. Anything that is not the
+  // exact positive token degrades to "unknown" — so a plumbing bug upstream can
+  // only ever LOSE a subagent detection, never manufacture one.
+  check("§3.9 an absent value normalises to 'unknown', not undefined",
+    mk(undefined).callerClass === "unknown", String(mk(undefined).callerClass));
+  check("§3.10 a garbage value normalises to 'unknown' (never a false positive)",
+    mk("live_agent").callerClass === "unknown" && mk("SUBAGENT").callerClass === "unknown" && mk(7).callerClass === "unknown");
+  check("§3.11 the consult record is UNCHANGED at v3 (no caller class, deliberately)",
+    buildFalseHoldRecord({ verdict: {}, sessionId: "s", tool: "Write", depth: "standard",
+      loopEvent: "opened", actionText: "x", nowIso: "2026-09-07T00:00:00.000Z" }).schema === "false-hold-record-v3");
 }
 
 console.log(`\nfalse-hold-capture battery: ${pass} passed, ${fail} failed`);

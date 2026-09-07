@@ -395,9 +395,49 @@ routeState.reason = "ok";
   check("P8a: a guard DENY still denies with capture on", permOf(denied.out) === "deny");
   const dRecs = readRecs().filter((r) => r.path === "guard");
   check("P8a: the guard deny wrote a guard-path record", dRecs.length === 1, `got ${dRecs.length}`);
-  check("P8a: guard record is schema v4 (consult records stay v3)", dRecs[0]?.schema === "false-hold-record-v4");
+  // RULING 3 (2026-09-07) bumped the GUARD schema v4 -> v5 to carry `callerClass`.
+  // Consult records stay v3 (unchanged, deliberately — the consult path is the
+  // measured instrument with a frozen evidence buffer behind it).
+  check("P8a: guard record is schema v5 (caller-class boundary 2026-09-07; consult records stay v3)", dRecs[0]?.schema === "false-hold-record-v5");
+  // RULING 3: the field is present, top-level, and NORMALISED. A parent-session
+  // transcript path yields the honest "unknown" — NOT "live_agent", because a
+  // session-shaped path cannot distinguish "the live agent acted" from "the wire
+  // hands a subagent the parent's path". Asserting the exact value (not merely
+  // presence) is what makes this pin non-vacuous.
+  check("RULING3: guard record carries callerClass, top-level", Object.prototype.hasOwnProperty.call(dRecs[0] || {}, "callerClass"));
+  check("RULING3: a parent-session transcript path yields the honest 'unknown', never a live-agent claim", dRecs[0]?.callerClass === "unknown");
+  check("RULING3: callerClass is NOT nested inside signals (recordHash hashes signals — nesting would re-hash the frozen buffer)",
+    dRecs[0]?.signals && !Object.prototype.hasOwnProperty.call(dRecs[0].signals, "callerClass"));
   check("P8a: guard record marks guardHold=true (the deny IS the hold)", dRecs[0]?.guardHold === true);
   check("P8a: guard record carries loopEvent 'none' honestly (guard keeps no loop state)", dRecs[0]?.loopEvent === "none");
+
+  // PR19 FOLD (2026-09-07, MEDIUM): the ONLY thing that ever makes callerClass:
+  // 'subagent' possible in production is a PreToolUse event whose transcript_path
+  // carries a genuine /subagents/ segment. Every pin so far exercises the parent-
+  // session shape only. Run the SAME real hook (not a unit test of classifyCaller in
+  // isolation) with a subagent-shaped transcript_path, mirroring the sibling
+  // subagent-framing-hook tests' subEvent/s8TranscriptPath pattern, so a future
+  // refactor that silently breaks the wiring (e.g. describeAction dropping
+  // transcript_path before classifyCaller sees it) is caught end-to-end.
+  const subagentTranscriptPath =
+    "/Users/x/.claude/projects/-p/parent-session-id/subagents/workflows/wf_1/agent-abc.jsonl";
+  const subagentPtEvent = (sid, tool, toolInput) => ({
+    session_id: sid,
+    hook_event_name: "PreToolUse",
+    tool_name: tool,
+    tool_input: toolInput,
+    transcript_path: subagentTranscriptPath,
+  });
+  routeState.guard = "do_not_proceed";
+  const subDenied = await runHook(
+    AT_ACTION_HOOK,
+    subagentPtEvent("p8a-sub", "Bash", { command: "rm -rf /repo/other" }),
+    capEnv,
+  );
+  check("RULING3-E2E: the guard still denies when the caller is a subagent", permOf(subDenied.out) === "deny");
+  const subRecs = readRecs().filter((r) => r.path === "guard" && r.session.includes("p8a-sub"));
+  check("RULING3-E2E: a subagent-shaped transcript_path, run through the REAL hook end-to-end, produces callerClass:'subagent'",
+    subRecs[0]?.callerClass === "subagent", subRecs[0]?.callerClass);
 
   // (ii) A caution ALLOWS, so it is captured but is NOT a hold — otherwise the guard
   //      denominator would not be commensurable with the consult one.

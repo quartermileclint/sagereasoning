@@ -383,7 +383,12 @@ console.log('\n§8 — the structural zero: no target verdict is computed (HIGH 
   // it in place, and Part 3b explicitly defers to it. The first draft of this
   // assertion asserted the string was absent from the WHOLE report, which is
   // false; it failed on the classification column and was caught here.
-  const p3b = out.slice(out.indexOf('Part 3b'))
+  // ANCHOR ON THE HEADER, not the bare substring 'Part 3b' (corrected 2026-09-07).
+  // Part 3's own prose legitimately refers to Part 3b — the ruling-2 scope note does
+  // — and a bare-substring slice then starts INSIDE Part 3 and drags Part 3's target
+  // line into this section, failing §8.1 for a reason that has nothing to do with
+  // what §8.1 tests. The section header is the durable anchor.
+  const p3b = out.slice(out.indexOf('── Part 3b —'))
   check('§8.1 Part 3b computes NO "target (false ≤ correct)" verdict of its own',
     p3b.length > 500 && !/target \(false ≤ correct\):/.test(p3b), p3b.slice(0, 2500))
   check('§8.1b the classification column DOES still print its own target (the deferral target exists)',
@@ -553,6 +558,187 @@ console.log('\n§11 — DERIVED AT REPORT TIME: nothing stored, nothing re-hashe
   check('§11.10 liftToAssessment is byte-identical to the reference implementation’s',
     body(scriptSrc) === body(refSrc), `report:\n${body(scriptSrc)}\n\nref:\n${body(refSrc)}`)
 }
+
+// ============================================================================
+console.log('\n§12 — ruling 2 (outage exclusion) + ruling 3 (caller class, v5)')
+// ============================================================================
+{
+  // RULING 2 (2026-09-07): a no_assessment record "records that no examination
+  // happened, not that an examination happened and produced a result", so it must
+  // leave the rate DENOMINATOR. A strict-mode outage additionally carries
+  // guardHold:true, which made the classifier mark it a HOLD with no engaged arm —
+  // i.e. a manufactured FALSE POSITIVE in the NUMERATOR too.
+  const STRICT_OUTAGE = {
+    ...GUARD_CORRECT_DENY, session: 'sess-12-strict', capturedAt: '2026-09-06T10:02:00.000Z',
+    actionPreview: 'strict-mode guard outage', guardOutcome: 'do_not_proceed',
+    captureBasis: 'no_assessment', guardHold: true,
+    signals: { proximity: null, virtueDomainsEngaged: [], obligationStatuses: [], circles: [], subSpeciesPassions: [] },
+    kathekon: { isKathekon: null, quality: null },
+  }
+  const OPEN_OUTAGE = { ...STRICT_OUTAGE, session: 'sess-12-open', capturedAt: '2026-09-06T10:03:00.000Z',
+    guardHold: false, guardOutcome: 'outage_open', actionPreview: 'open-mode guard outage' }
+
+  // §12.1 — THE PIN THE WHOLE RULING RESTS ON.
+  {
+    const { out } = runReport([GUARD_CORRECT_DENY, STRICT_OUTAGE], 'r2-strict')
+    check('§12.1a a strict-mode outage leaves the DENOMINATOR (1 examination, not 2)',
+      /at-action examinations: 1\b/.test(out), out.slice(0, 2500))
+    check('§12.1b it leaves the NUMERATOR too — no manufactured false positive',
+      /false-positive holds \(no kathekon factor\): 0\b/.test(out), out.slice(0, 2500))
+  }
+
+  // §12.2 — the non-hold half. Without this the fix would only catch hold-shaped outages.
+  {
+    const { out } = runReport([GUARD_CORRECT_DENY, OPEN_OUTAGE], 'r2-open')
+    check('§12.2 an OPEN-mode outage is also out of the denominator',
+      /at-action examinations: 1\b/.test(out), out.slice(0, 2500))
+  }
+
+  // §12.3 — "log the count, and disclose it alongside the rate" (ruling 2, verbatim).
+  {
+    const { out } = runReport([GUARD_CORRECT_DENY, STRICT_OUTAGE], 'r2-disclose')
+    check('§12.3a the excluded count is printed ON the rate',
+      /excluded from the denominator — no_assessment \(non-examinations\): 1/.test(out), out.slice(0, 2500))
+    check('§12.3b it is broken out per population',
+      /guard population: 1\s+consult population: 0/.test(out), out.slice(0, 2500))
+    check('§12.3c the consult side is disclosed as structurally record-less, not estimated',
+      /writes NO record/.test(out) && /gate1\.log/.test(out), out.slice(0, 2500))
+  }
+
+  // ── RULING 3 — v5 validity. Each clause gets its OWN fixture: the three
+  //    broadened clauses are distinct code sites and a single fixture cannot
+  //    prove all three (PR19 finding, 2026-09-07).
+  const V5_OK = {
+    ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v5', session: 'sess-12-v5',
+    capturedAt: '2026-09-06T10:04:00.000Z', callerClass: 'unknown',
+  }
+
+  check('§12.4 a well-formed v5 record is ACCEPTED (the whitelist admits it)',
+    /parsed:\s+1 valid records/.test(runReport([V5_OK], 'r3-ok').out), runReport([V5_OK], 'r3-ok').out.slice(0, 1200))
+
+  // §12.5 — an UNRECOGNISED callerClass is malformed, not legacy. Absence alone is
+  // not enough: a weakened clause (typeof string) would still admit 'parent'.
+  {
+    const bad = { ...V5_OK, callerClass: 'parent' }
+    const { out } = runReport([bad], 'r3-badvalue')
+    check('§12.5 a v5 record with an unrecognised callerClass is INVALID',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+  {
+    const missing: Record<string, unknown> = { ...V5_OK }
+    delete missing.callerClass
+    const { out } = runReport([missing], 'r3-nocaller')
+    check('§12.6 a v5 record with NO callerClass is INVALID (not treated as pre-boundary)',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+
+  // §12.7 — the circles clause must reach v5, or a v5 record without circles would
+  // be admitted as if it were legacy v1/v2 and enter the unknown-identity bracket.
+  {
+    const noCircles: Record<string, unknown> = { ...V5_OK,
+      signals: { proximity: 'reflexive', virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: ['violated'], subSpeciesPassions: [] } }
+    const { out } = runReport([noCircles], 'r3-nocircles')
+    check('§12.7 a v5 record without signals.circles is INVALID',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+
+  // §12.8 — the path clause must reach v5, or a v5 record would land in the CONSULT
+  // population and lose its recordHash separation.
+  {
+    const noPath: Record<string, unknown> = { ...V5_OK }
+    delete noPath.path
+    const { out } = runReport([noPath], 'r3-nopath')
+    check('§12.8 a v5 record without path:guard is INVALID',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+
+  // §12.9 — the ruled three-segment disclosure, and that pre-boundary v4 records are
+  // NEVER retro-classified into segment 1.
+  {
+    const { out } = runReport([GUARD_CORRECT_DENY, V5_OK, STRICT_OUTAGE], 'r3-segments')
+    const guard = popSection(out, 'guard')
+    check('§12.9a segment 1 counts ONLY post-boundary (callerClass-carrying) records',
+      /SEGMENT 1 — post-boundary \(carry callerClass\): 1\b/.test(guard), guard)
+    // CORRECTED 2026-09-07 (PR19 fold): STRICT_OUTAGE in this fixture is a v4
+    // (pre-boundary) record that is ALSO non-derivable (captureBasis:'no_assessment').
+    // Before the PR19 HIGH fix, segments 1/2 were computed from ALL guard records
+    // regardless of derivability, so this non-derivable pre-boundary record was
+    // double-counted into segment 2 alongside segment 3. Segment 2 is now
+    // DERIVABLE-gated, matching segment 3's own predicate exactly, so it correctly
+    // counts only GUARD_CORRECT_DENY (the one derivable pre-boundary v4 record) — 1.
+    check('§12.9b segment 2 counts ONLY the derivable pre-boundary v4 records (not the outage)',
+      /SEGMENT 2 — pre-boundary \(no callerClass field\): 1\b/.test(guard), guard)
+    check('§12.9b\u00b2 the three segments partition the population with NO overlap (1+1+1 = n=3)',
+      guard.includes('POPULATION: guard  (n=3)'), guard.slice(0, 200))
+    check('§12.9c segment 3 names the outage exclusion',
+      /SEGMENT 3 — outage \(no_assessment\): 1\b/.test(guard), guard)
+    check('§12.9d the LOWER-BOUND caveat rides the figure, not a footnote',
+      /LOWER BOUND/.test(guard) && /never a measurement of it/.test(guard), guard)
+    check('§12.9e the reason for segment 2 having no rate is stated explicitly',
+      /NO rate is computed over these, by ruling/.test(guard) && /PARENT id/.test(guard), guard)
+  }
+
+  // §12.10 — a review-fleet record is EXCLUDED from the guard population.
+  {
+    const fleet = { ...V5_OK, session: 'sess-12-fleet', capturedAt: '2026-09-06T10:05:00.000Z', callerClass: 'subagent' }
+    const { out } = runReport([V5_OK, fleet], 'r3-fleet')
+    const guard = popSection(out, 'guard')
+    check('§12.10 a callerClass:subagent record is counted as review-fleet and excluded',
+      /of which review-fleet, EXCLUDED from the population: 1\b/.test(guard), guard)
+  }
+}
+
+// ============================================================================
+console.log('\n§13 — PR19 fold: ruling 3\u2019s exclusion must reach the RATE, not only a disclosure string')
+// ============================================================================
+{
+  // PR19 HIGH (2026-09-07, three converging findings): the review-fleet exclusion
+  // existed ONLY inside Part 3b\u2019s disclosure block; Part 3\u2019s own "at-action
+  // examinations" figure and the READINESS SUMMARY verdict counted a subagent record
+  // regardless. This is the pin that would have caught it.
+  const FLEET = { ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v5', session: 'sess-13-fleet',
+    capturedAt: '2026-09-06T10:06:00.000Z', callerClass: 'subagent' }
+
+  {
+    const { out } = runReport([GUARD_CORRECT_DENY, FLEET], 'r3-rate-excl')
+    check('\u00a713.1 Part 3\u2019s OWN "at-action examinations" figure drops the subagent record (1, not 2)',
+      /at-action examinations: 1\b/.test(out), out.slice(0, 2000))
+    check('\u00a713.2 the review-fleet exclusion is printed ON Part 3\u2019s own rate, not only Part 3b',
+      /excluded from the denominator — review-fleet \(ruling 3, callerClass:'subagent'\): 1/.test(out), out.slice(0, 2500))
+  }
+
+  // A subagent hold must not manufacture a false positive in the readiness verdict.
+  {
+    const fleetHold = { ...FLEET, session: 'sess-13-fleethold',
+      signals: { proximity: null, virtueDomainsEngaged: [], obligationStatuses: [], circles: [], subSpeciesPassions: [] },
+      kathekon: { isKathekon: null, quality: null }, guardHold: true, guardOutcome: 'do_not_proceed' }
+    const { out } = runReport([GUARD_CORRECT_DENY, fleetHold], 'r3-rate-hold')
+    check('\u00a713.3 a subagent-classified hold does NOT enter the false-positive tally',
+      /false-positive holds \(no kathekon factor\): 0\b/.test(out), out.slice(0, 2000))
+  }
+
+  // The three segments must PARTITION the guard population with no overlap, even when
+  // a post-boundary (v5-schema) outage is present.
+  {
+    const V5_OUTAGE = { ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v5', session: 'sess-13-v5out',
+      capturedAt: '2026-09-06T10:07:00.000Z', callerClass: 'unknown',
+      captureBasis: 'no_assessment', guardHold: true,
+      signals: { proximity: null, virtueDomainsEngaged: [], obligationStatuses: [], circles: [], subSpeciesPassions: [] },
+      kathekon: { isKathekon: null, quality: null } }
+    const { out } = runReport([GUARD_CORRECT_DENY, FLEET, V5_OUTAGE], 'r3-segments-sum')
+    const guard = popSection(out, 'guard')
+    check('\u00a713.4 SEGMENT 1 (post-boundary) excludes the v5 outage — it is derivable-gated',
+      /SEGMENT 1 — post-boundary \(carry callerClass\): 1\b/.test(guard), guard)
+    check('\u00a713.5 SEGMENT 2 (pre-boundary) is the one legacy v4 record',
+      /SEGMENT 2 — pre-boundary \(no callerClass field\): 1\b/.test(guard), guard)
+    check('\u00a713.6 SEGMENT 3 (outage) counts the v5 outage — NOT double-counted into segment 1',
+      /SEGMENT 3 — outage \(no_assessment\): 1\b/.test(guard), guard)
+    // n=3 total: segment 1 (1) + segment 2 (1) + segment 3 (1) = 3, no overlap.
+    check('\u00a713.7 the three segments sum to the population with no double-count',
+      guard.includes('POPULATION: guard  (n=3)'), guard.slice(0, 200))
+  }
+}
+
 
 rmSync(dir, { recursive: true, force: true })
 

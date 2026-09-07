@@ -135,7 +135,7 @@ interface FalseHoldRecord {
   // ── P8a (2026-08-17) — GUARD-PATH fields, v4 only. All TOP-LEVEL and all
   //    optional: anything added inside `signals` would change
   //    JSON.stringify(r.signals) and re-hash every existing record.
-  /** 'guard' on v4 records; absent on every consult record (v1/v2/v3). */
+  /** 'guard' on v4/v5 records; absent on every consult record (v1/v2/v3). */
   path?: string
   /** The guard DENIED the action. The guard keeps no loop state, so its hold
    *  cannot be read from loopEvent — the deny IS the hold. A caution/pause
@@ -144,8 +144,19 @@ interface FalseHoldRecord {
   /** The raw recommendation, for the human cross-check. */
   guardOutcome?: string | null
   /** 'no_assessment' ⇒ the guardrail's fail-safe branch returned no assessment,
-   *  so this observation is unclassifiable and is COUNTED but excluded. */
+   *  so this observation is unclassifiable: COUNTED, and excluded from the Part 3
+   *  denominator since 2026-09-07 (ruling 2). Before that date it was excluded only
+   *  from Part 3b. */
   captureBasis?: string
+  /** RULING 3 (2026-09-07) — present on v5 guard records ONLY; `undefined` on every
+   *  pre-boundary v4 record and on every consult record.
+   *  'subagent' is a POSITIVE structural observation (a `/subagents/` transcript-path
+   *  segment). 'unknown' covers everything else INCLUDING a session-shaped path,
+   *  because a session-shaped path cannot distinguish "the live agent acted" from
+   *  "the wire hands a subagent the parent's path". So an exclusion keyed on
+   *  'subagent' is a LOWER BOUND on review-fleet contamination, never a measurement
+   *  of it, and `undefined` means "captured before the boundary", never "clean". */
+  callerClass?: string
 }
 
 /**
@@ -269,11 +280,19 @@ function asDepthTier(depth: unknown): LoopDepthTier | undefined {
 }
 
 /**
- * Whether a record can feed the table at all. A guard record from the guardrail's
- * fail-safe branch carries `captureBasis: 'no_assessment'` and a null proximity:
- * it is a COUNTED loss, not a hold either way, and deriving a recommendation from
- * it would manufacture an `insufficient-evidence` pause that describes the
- * instrument's outage rather than the agent's action.
+ * Whether a record can feed the table at all — AND, since 2026-09-07 (ruling 2),
+ * whether it enters the Part 3 rate. A guard record from the guardrail's fail-safe
+ * branch carries `captureBasis: 'no_assessment'` and a null proximity: it is a
+ * COUNTED loss, and deriving a recommendation from it would manufacture an
+ * `insufficient-evidence` pause that describes the instrument's outage rather than
+ * the agent's action.
+ *
+ * CORRECTED 2026-09-07: this docstring previously said such a record is "not a hold
+ * either way". That was FALSE. A STRICT-mode guard outage is captured with
+ * `denied: true` ⇒ `guardHold: true` ⇒ `classifyObservation` marks it a hold, and
+ * with every signal array empty no arm fires, so it classified as a FALSE POSITIVE.
+ * It entered the rate's NUMERATOR as well as its denominator. That is what ruling 2
+ * corrects, and it is why this predicate now gates Part 3 and not only Part 3b.
  */
 function isDerivable(r: FalseHoldRecord): boolean {
   return r.captureBasis !== 'no_assessment' && typeof r.signals.proximity === 'string'
@@ -298,6 +317,13 @@ function recordHash(r: FalseHoldRecord): string {
 }
 
 const LOOP_EVENTS = new Set(['opened', 'reopened', 'closed', 'none'])
+
+/** The GUARD-path schemas. v4 (P8a) and v5 (the 2026-09-07 caller-class boundary)
+ *  are both guard records and share every structural requirement; only v5 carries
+ *  `callerClass`. Defined once so a future guard schema cannot be admitted to one
+ *  clause and missed by another. */
+const isGuardSchema = (schema: unknown): boolean =>
+  schema === 'false-hold-record-v4' || schema === 'false-hold-record-v5'
 function isValidRecord(x: unknown): x is FalseHoldRecord {
   const r = x as FalseHoldRecord
   return (
@@ -313,6 +339,11 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     // consult instrument and the frozen buffer are untouched.
     (r.schema === 'false-hold-record-v1' ||
       r.schema === 'false-hold-record-v2' ||
+      // v5 (RULING 3, 2026-09-07): the CALLER-CLASS boundary. v5 guard records carry
+      // `callerClass`; v4 guard records predate the boundary, carry none, and are
+      // NEVER retro-classified (mentor ruling 2026-09-07 — "post-boundary only is
+      // ruled"; a retroactive actionPreview pass "is not owed").
+      r.schema === 'false-hold-record-v5' ||
       r.schema === 'false-hold-record-v3' ||
       r.schema === 'false-hold-record-v4') &&
     typeof r.capturedAt === 'string' &&
@@ -329,16 +360,22 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     // extraction) is UNCLASSIFIABLE but not malformed. Admitting it — marked
     // `captureBasis: 'no_assessment'` — is what lets the report COUNT the loss
     // instead of silently dropping it into `invalid`, which is the coverage
-    // accounting the new-window scoping note asks for. It is excluded from the
-    // rate downstream, never counted as a hold either way.
+    // accounting the new-window scoping note asks for. It is EXCLUDED from the
+    // Part 3 rate downstream (ruling 2, applied 2026-09-07).
+    // CORRECTED 2026-09-07: this comment also claimed such a record is "never
+    // counted as a hold either way". That was FALSE. A STRICT-mode guard outage is
+    // captured with `denied: true`, so `guardHold` is true and `classifyObservation`
+    // marks it a hold; with every signal array empty no arm fires, so it classified
+    // as a FALSE POSITIVE — a non-examination manufactured into the rate's numerator.
+    // That is exactly what ruling 2 corrects.
     (typeof r.signals.proximity === 'string' ||
-      (r.schema === 'false-hold-record-v4' && r.captureBasis === 'no_assessment')) &&
+      (isGuardSchema(r.schema) && r.captureBasis === 'no_assessment')) &&
     Array.isArray(r.signals.virtueDomainsEngaged) &&
     Array.isArray(r.signals.obligationStatuses) &&
     Array.isArray(r.signals.subSpeciesPassions) &&
     // v3 and v4 must carry the circles field v3 introduced (a record without it at
     // those versions is malformed, not legacy).
-    (!(r.schema === 'false-hold-record-v3' || r.schema === 'false-hold-record-v4') ||
+    (!(r.schema === 'false-hold-record-v3' || isGuardSchema(r.schema)) ||
       Array.isArray(r.signals.circles)) &&
     // P6 §7 (PR19 fold): `path` is the population discriminator the ruling calls
     // "not optional", AND the guard/consult collision guard in `recordHash`
@@ -346,10 +383,18 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     // the CONSULT denominator — exactly the mixing the ruling forbids — and lose
     // its hash separation. `buildGuardHoldRecord` hardcodes `path: "guard"`, so a
     // v4 record lacking it is malformed, not legacy.
-    (r.schema !== 'false-hold-record-v4' || r.path === 'guard') &&
+    (!isGuardSchema(r.schema) || r.path === 'guard') &&
     // ...and the converse: no consult record may carry `path`, or it would be
     // counted in the guard population.
-    (r.schema === 'false-hold-record-v4' || r.path === undefined)
+    (isGuardSchema(r.schema) || r.path === undefined) &&
+    // RULING 3 (2026-09-07): a v5 record MUST carry a recognised `callerClass`.
+    // A v5 record without one is MALFORMED, not legacy — the whole point of the
+    // boundary is that post-boundary records are classified at source, so a
+    // missing or unrecognised value must not be admitted and silently treated as
+    // if it were a pre-boundary v4 record.
+    (r.schema !== 'false-hold-record-v5' ||
+      r.callerClass === 'subagent' ||
+      r.callerClass === 'unknown')
   )
 }
 
@@ -399,8 +444,12 @@ interface Classified extends FalseHoldRecord {
   //    maps explicit columns and carries none of these; the battery pins that.
   /** consult (v1/v2/v3, no `path`) or guard (v4, `path: 'guard'`). */
   population: Population
-  /** False ⇔ `captureBasis: 'no_assessment'` — a counted loss, excluded from
-   *  both the rate and the derivation, never a hold either way. */
+  /** False ⇔ `captureBasis: 'no_assessment'` — a counted loss, excluded from both
+   *  the Part 3 rate and the derivation (the rate exclusion landed 2026-09-07,
+   *  ruling 2; before that it gated the derivation only).
+   *  NOT "never a hold either way": a strict-mode guard outage IS classified a hold
+   *  (guardHold true, no arm engaged ⇒ false_positive). Exclusion here is what keeps
+   *  that non-examination out of the rate. */
   derivable: boolean
   /** The decision table's output for this record, derived at report time.
    *  `null` ⇔ not derivable. */
@@ -843,6 +892,61 @@ function reportRecommendationColumn(rows: Classified[]): void {
       }
       continue
     }
+    // ── RULING (mentor, 2026-09-07) — THE GUARD DISCLOSURE HAS THREE SEGMENTS.
+    // Verbatim: "1. Post-boundary records — caller_class field present at capture...
+    // rate computed over live-agent records only; review-fleet count disclosed
+    // separately. 2. Pre-boundary records — no caller_class field; composition
+    // unknown; size stated; no rate computed; the reason for the absence stated
+    // explicitly. 3. Outage records — excluded from both segments per the earlier
+    // ruling; count disclosed separately."
+    //
+    // POST-BOUNDARY ONLY IS RULED. A retroactive actionPreview classification of the
+    // pre-boundary records is NOT owed and must NOT be performed: a controlled
+    // experiment with ground truth (S7) scored every available heuristic and none was
+    // both complete and clean — the most sensitive caught 9 of 11 subagent records
+    // while misflagging 2 of 4 live-agent ones, i.e. it removes the very observations
+    // the measurement exists to capture. "A figure whose denominator includes records
+    // of unknown provenance is not a rate. It is a guess presented as a measurement."
+    if (pop === 'guard') {
+      // PR19 FOLD (2026-09-07, HIGH): the three segments must PARTITION `all` with no
+      // overlap. Before this fix, `postBoundary`/`preBoundary`/`reviewFleet` were
+      // computed from `all` (every guard record, including non-derivable ones), while
+      // Segment 3 separately filtered on `!r.derivable`. Since every NEW guard record —
+      // including outages — is stamped v5 with a callerClass since the 2026-09-07
+      // boundary, a post-boundary outage satisfied BOTH `callerClass !== undefined`
+      // (Segment 1) and `!r.derivable` (Segment 3) simultaneously: double-counted,
+      // contradicting the ruling's explicit 'excluded from both segments'. Segments 1
+      // and 2 are now derived from the DERIVABLE subset only, matching Segment 3's own
+      // predicate exactly, so the three sum to `all.length` with no overlap.
+      const derivableAll = all.filter((r) => r.derivable)
+      const reviewFleet = derivableAll.filter((r) => r.callerClass === 'subagent')
+      const preBoundary = derivableAll.filter((r) => r.callerClass === undefined)
+      const postBoundary = derivableAll.filter((r) => r.callerClass !== undefined)
+      console.log('    ── three-segment disclosure (ruled 2026-09-07) ──')
+      console.log(`    SEGMENT 1 — post-boundary (carry callerClass): ${postBoundary.length}`)
+      console.log(`      of which review-fleet, EXCLUDED from the population: ${reviewFleet.length}`)
+      console.log('      LOWER BOUND, and this sentence rides the figure: callerClass is')
+      console.log("      'subagent' only on a POSITIVE structural observation (a /subagents/")
+      console.log("      transcript-path segment). 'unknown' covers a session-shaped path too,")
+      console.log('      because such a path cannot distinguish "the live agent acted" from')
+      console.log('      \u201cthe wire hands a subagent the parent\u2019s path\u201d.')
+      console.log('      MEASURED, NOT MERELY DISCLOSED (2026-09-07, S7): two review fleets')
+      console.log('      ran against this diff and produced 14 real production records incl.')
+      console.log('      at least one confirmed fleet-generated command this session never ran.')
+      console.log('      EVERY ONE reads \u2018unknown\u2019. On this machine, under this harness,')
+      console.log('      as currently wired, the signal does NOT discriminate: this count is a')
+      console.log('      floor of ZERO on review-fleet contamination, never a measurement of it,')
+      console.log('      and the remainder is an UPPER bound on the live-agent population, not')
+      console.log('      the live-agent count.')
+      console.log(`    SEGMENT 2 — pre-boundary (no callerClass field): ${preBoundary.length}`)
+      console.log('      Composition UNKNOWN. NO rate is computed over these, by ruling.')
+      console.log('      Reason for the absence, stated explicitly: they were captured before')
+      console.log('      the caller-class boundary; session id cannot distinguish a review')
+      console.log('      fleet (its records carry the PARENT id); and no actionPreview')
+      console.log('      heuristic is reliable enough to classify them — established under')
+      console.log('      controlled conditions with ground truth, not asserted.')
+      console.log(`    SEGMENT 3 — outage (no_assessment): ${all.filter((r) => !r.derivable).length}  — excluded from both segments (ruling 2).`)
+    }
     const derivable = all.filter((r) => r.derivable)
     const excluded = all.length - derivable.length
     console.log(`    derivable: ${derivable.length}` + (excluded > 0 ? `   excluded (no_assessment — COUNTED, not dropped): ${excluded}` : ''))
@@ -857,8 +961,9 @@ function reportRecommendationColumn(rows: Classified[]): void {
     if (excludedHolds > 0) {
       console.log(`    ⚠ ${excludedHolds} HOLD(S) EXCLUDED FROM THE RECOMMENDATION COLUMN — classified a`)
       console.log('      hold (a real deny, or a strict-mode guard outage that blocked the call) but')
-      console.log('      carrying no assessment, so the table has no input. They are in the')
-      console.log('      classification rate above and in NO figure below.')
+      console.log('      carrying no assessment, so the table has no input. CORRECTED 2026-09-07')
+      console.log('      (ruling 2): they are now in NEITHER the Part 3 classification rate nor')
+      console.log('      any figure below, and are counted in the Part 3 outage-exclusion block.')
     }
     // Gated on the ACTUAL default, not on the population (PR19 fold): a CONSULT
     // record with an unrecognised depth also falls to the engine's 'standard'
@@ -998,12 +1103,63 @@ async function main() {
   console.log(`  span:   ${days.toFixed(2)} days   ⇒ ${days >= 7 ? 'MEETS ≥7 days' : `PENDING (need ${(7 - days).toFixed(2)} more days)`}`)
 
   // Part 3 — the false-hold rate (THE core output).
-  const holds = rows.filter((r) => r.isHold)
+  //
+  // RULING 2 (mentor, 2026-09-07): "GUARD-OUTAGE records are excluded from the guard
+  // rate denominator... a GUARD-OUTAGE record with captureBasis: 'no_assessment'
+  // records that no examination happened, not that an examination happened and
+  // produced a result. Including it in the guard rate's denominator would mean
+  // counting non-examinations alongside examinations."
+  //
+  // `derivable` is the ALREADY-COMPUTED per-record field (set in classifyAll), the
+  // SAME predicate Part 3b uses — deliberately not a re-call of isDerivable, so the
+  // two columns cannot drift apart.
+  //
+  // This is not only a denominator correction. A STRICT-mode guard outage is captured
+  // with `denied: true`, so `guardHold` is true and the record classifies as a HOLD
+  // with no engaged arm — i.e. a FALSE POSITIVE. Before this change a single such
+  // record entered the numerator too, and could flip the readiness verdict.
+  // PR19 FOLD (2026-09-07, HIGH, three independent findings converging on one root):
+  // ruling 3's population exclusion previously existed ONLY as a disclosure string
+  // inside Part 3b ("of which review-fleet, EXCLUDED from the population") — it never
+  // reached Part 3's own denominator/numerator, which is THE figure the readiness
+  // verdict is computed from. A subagent record was fully counted in "at-action
+  // examinations", the false-positive tally, and MET/NOT MET while the report
+  // simultaneously printed that it had been excluded.
+  //
+  // undefined !== 'subagent' is deliberate: a pre-boundary v4 record (no callerClass
+  // at all) and a post-boundary 'unknown' record are NOT excluded here — only a
+  // POSITIVE 'subagent' observation is (the same asymmetry classifyCaller itself
+  // enforces: guessing is forbidden, only a positive structural signal excludes).
+  const rated = rows.filter((r) => r.derivable && r.callerClass !== 'subagent')
+  const excludedSubagent = rows.filter((r) => r.derivable && r.callerClass === 'subagent').length
+  const excludedNoAssessment = rows.length - rated.length - excludedSubagent
+  const excludedGuard = rows.filter((r) => r.population === 'guard' && !r.derivable).length
+  const excludedConsult = excludedNoAssessment - excludedGuard
+  const holds = rated.filter((r) => r.isHold)
   const fps = holds.filter((r) => r.classification === 'false_positive')
   const corrects = holds.filter((r) => r.classification === 'correct_hold')
   console.log('\n── Part 3 — the false-hold rate (over the live distribution) ───────')
-  console.log(`  at-action examinations: ${rows.length}`)
-  console.log(`  holds (loop opened/reopened): ${holds.length}   (${pct(holds.length, rows.length)} of examinations)`)
+  console.log('  OUTAGE EXCLUSION (ruled 2026-09-07; on the rate, not footnoted):')
+  console.log(`    excluded from the denominator — no_assessment (non-examinations): ${excludedNoAssessment}`)
+  console.log(`      guard population: ${excludedGuard}    consult population: ${excludedConsult}`)
+  console.log(`    excluded from the denominator — review-fleet (ruling 3, callerClass:'subagent'): ${excludedSubagent}`)
+  console.log('    A no_assessment record says NO examination happened. Counting it')
+  console.log('    alongside examinations is the asymmetry D6a already ruled against on')
+  console.log('    the consult side; the guard side now matches it.')
+  console.log('    CONSULT-SIDE OUTAGES ARE NOT IN THIS FILE AT ALL, and that is why the')
+  console.log('    consult figure above is structurally 0: a consult outage returns before')
+  console.log('    the capture call (at-action-hook.mjs), so it writes NO record. The two')
+  console.log('    sides therefore reach the same exclusion by DIFFERENT mechanisms, and')
+  console.log('    the consult-side outage COUNT is derivable only from gate1.log')
+  console.log('    (CONSULT-OUTAGE lines), which this report does not read. It is NOT')
+  console.log('    reported here rather than estimated — F-3\u2032 asks for both sides, and an')
+  console.log('    invented number would not be one of them.')
+  console.log('    SCOPE, stated because ruling 2 speaks of "the guard rate": the figure')
+  console.log('    below POOLS the consult and guard populations — Part 3 has never been')
+  console.log('    population-split (only Part 3b is). The ruled exclusion is applied to')
+  console.log('    that pooled figure. A population-split Part 3 is an OPEN, UNRULED item.')
+  console.log(`  at-action examinations: ${rated.length}`)
+  console.log(`  holds (loop opened/reopened): ${holds.length}   (${pct(holds.length, rated.length)} of examinations)`)
   console.log(`    false-positive holds (no kathekon factor): ${fps.length}`)
   console.log(`    correct holds (kathekon-engaged):          ${corrects.length}`)
   console.log(`  false-positive rate among holds: ${pct(fps.length, holds.length)}`)
@@ -1046,7 +1202,7 @@ async function main() {
       ? r.extractionRegime
       : 'at-action-v1-lean (pre-mark)'
   const regimes = new Map<string, { n: number; fps: number; corrects: number }>()
-  for (const r of rows) {
+  for (const r of rated) {
     const key = regimeOf(r)
     const cur = regimes.get(key) ?? { n: 0, fps: 0, corrects: 0 }
     cur.n++

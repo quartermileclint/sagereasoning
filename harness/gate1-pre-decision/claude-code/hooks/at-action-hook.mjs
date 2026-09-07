@@ -64,7 +64,7 @@ import {
   decisionAlreadyFired,
   markDecisionFired,
 } from "./lib/session-state.mjs";
-import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord } from "./lib/false-hold-capture.mjs";
+import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord, classifyCaller } from "./lib/false-hold-capture.mjs";
 import { composeAction, renderBareInputNote } from "./lib/action-composer.mjs";
 import { classifyConsultSignal, computeKathekonConfidence } from "./lib/consult-signal.mjs";
 import { recordGuardCautionSignal, recordConsultSignal } from "./lib/close-signal-state.mjs";
@@ -297,13 +297,18 @@ function allowSilently() {
 //   (iv) loop-state adoptedCorrection   — now action.summary (unchanged bytes).
 // ---------------------------------------------------------------------------
 function describeAction(cfg, toolName, toolInput, transcriptPath) {
-  return composeAction({
+  const action = composeAction({
     toolName,
     toolInput,
     transcriptPath,
     mode: cfg.actionTextMode,
     sensitiveAdditions: cfg.sensitivePathAdditions,
   });
+  // RULING 3 (2026-09-07) — derive the caller class ONCE, here, where the
+  // transcript path is already in hand. The null-return path is preserved exactly:
+  // composeAction may legitimately return a falsy action (no examinable action in
+  // tool_input), and the caller at the call site below depends on that.
+  return action ? { ...action, callerClass: classifyCaller(transcriptPath) } : action;
 }
 
 // Is this action in the GUARD set (irreversible → guardrail can block)? Either the tool is in the
@@ -499,6 +504,7 @@ function captureGuardObservation(cfg, opts) {
         actionText: action && typeof action.summary === "string" ? action.summary : "",
         regime: action ? action.regime : "unknown",
         denied,
+        callerClass: action && typeof action.callerClass === "string" ? action.callerClass : "unknown",
       }),
     )
   } catch {

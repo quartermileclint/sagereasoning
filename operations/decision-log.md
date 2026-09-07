@@ -37871,3 +37871,115 @@ UTC); `layer2-mechanisms.ts` **byte-unchanged**; Option S **fixed, still never r
 convention now **RULED before any spend**. **Rulings 2 and 3 are ADOPTED but NOT EXECUTED — both need
 the D2 waiver mechanics. S11-D2 remains BLOCKED on the five-day threshold; the S11 flip remains
 REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-07 — D-S7-RULINGS-2-3-EXECUTED-CALLER-CLASS-BOUNDARY-2026-09-07
+
+**Tier `code-elevated`, founder-walked waiver, PR19 required and run. Commit under a RECORDED FOUNDER
+WAIVER (D2 stand-down shape (a) — `--no-verify`, guard left armed, exception documented not encoded).
+NO production, schema, flag, credential or migration change. Nothing pushed. The observation window
+ran untouched throughout except the two files it now measures via the founder's own live loop, which
+hot-reloaded mid-session (disclosed below). AC7 not engaged.**
+
+**Both rulings from `2026-09-07-mentor-rulings-S6b-three-questions-verbatim.md` executed, plus the
+disclosure shape from the same-day `2026-09-07-mentor-ruling-caller-class-schema-boundary-verbatim.md`.**
+
+**Corrections to the S7 session paste, each verified rather than assumed at open:** the five S6b
+commits were already pushed (`origin/main` moved 16:19:04 +1000, four minutes before this session
+opened); the guarded set for these two rulings is **six** files, not two — PR19 needs tests, and
+`false-hold-observation-report.test.ts`, `false-hold-capture.test.mjs` and `negative-battery.mjs` all
+match `GUARD_RE`; the founder's `npx`-not-found fail-closed precondition is DISCHARGED (`/usr/local/bin`
+is first in `/etc/paths`, `launchctl getenv PATH` unset — GitHub Desktop will find `npx`, inferred from
+PATH construction, not directly observed).
+
+**Ruling 2 — GUARD-OUTAGE excluded from the guard rate denominator.** NOT already satisfied (verified
+by reproducing the defect on a synthetic buffer before fixing it): the exclusion existed in Part 3b
+(`reportRecommendationColumn`) but not Part 3, the rate part (3) of the readiness standard actually
+names. Worse than a denominator gap — a strict-mode guard outage carries `denied:true` ⇒ `guardHold:
+true` ⇒ classified a HOLD with no engaged arm ⇒ a manufactured FALSE POSITIVE that could flip the
+readiness verdict. `website/scripts/false-hold-observation-report.ts` Part 3 now derives every figure
+from `rated` (the pre-existing `derivable` field, so Part 3/3b cannot drift), prints the excluded count
+per population, and the consult-side outage-count absence is disclosed as structural (a consult outage
+`process.exit(0)`s at `at-action-hook.mjs:704`, before the capture at `:747` — verified in code AND
+observed live this session: a genuine `CONSULT-OUTAGE` fired on this session's own `Write` and the
+consult count did not move). Four docstrings falsely claimed "excluded from the rate"; three of those
+also falsely claimed "never a hold either way" at both times — all four corrected, the false claim
+deleted rather than re-dated.
+
+**Ruling 3 — `caller_class`, at a dated v4→v5 schema boundary.** `classifyCaller` (new,
+`false-hold-capture.mjs`) reads `event.transcript_path` — TWO values only: `'subagent'` on a POSITIVE
+structural observation (a `/subagents/` path segment; live-verified 2026-06-21 that a subagent's own
+transcript lives at `<parent-session>/subagents/agent-*.jsonl`, memory
+`claude-code-subagent-hook-contract`), `'unknown'` for everything else INCLUDING a session-shaped path
+— deliberately no `'live_agent'` value, because a session-shaped path cannot distinguish "the live
+agent acted" from "the wire hands a subagent the parent's path". Top-level (not inside `signals`,
+which `recordHash` hashes — nesting would re-hash the frozen 138-record v1 buffer). Not ingested to the
+DB (the ingest maps an explicit column list and already omits every post-v2 field — no migration
+needed, verified at source before building). The three-segment disclosure (post-boundary / pre-boundary
+/ outage) implements the same-day disclosure-shape ruling verbatim; post-boundary only, no retroactive
+`actionPreview` classification (a controlled experiment with ground truth — this session's own review
+fleet, 11 of 15 records under one session id — scored every available heuristic and none was both
+complete and clean).
+
+**PR19 (six blind dimensions, 14 agents, 0 errors): 8 of 9 findings upheld, 0 refuted.** Two HIGH, one
+root: ruling 3's population exclusion existed ONLY inside Part 3b's disclosure string
+("...EXCLUDED from the population") — it never reached Part 3's own denominator/numerator or the
+READINESS SUMMARY verdict, so a subagent record was fully counted while the report simultaneously
+printed that it had been excluded. Fixed: `rated` now filters `callerClass !== 'subagent'`; the three
+segments are derived from the derivable subset only, so they partition the guard population with no
+overlap (a post-boundary outage had been double-counted into both Segment 1 and Segment 3). One MEDIUM
+folded: an end-to-end test drives the REAL `at-action-hook.mjs` with a genuine `/subagents/`-shaped
+`transcript_path`, proving the wiring — not merely `classifyCaller` in isolation — can produce
+`callerClass:'subagent'`. Two LOW folded (a stale segment-2 count from before the derivable-gate fix;
+an explicit sum-to-n partition assertion).
+
+**MEASURED FINDING, folded into the code's own disclosure.** This diff's own PR19 review fleets
+produced 14 real production v4/v5 records while under review, including at least one unambiguously
+fleet-generated command this session never ran (`git diff -- harness/ website/scripts/ >
+/tmp/fh_diff_full.txt`). **Every one reads `'unknown'`.** On this machine, under this harness, as
+currently wired, the transcript-path signal does NOT discriminate a subagent caller from a parent one
+— the E2E test proves the wiring is sound under a synthetic subagent-shaped path; the live measurement
+proves the real wire never supplies that shape. **This does not invalidate the two-value design; it is
+the reason for it** — had `'live_agent'` existed as a value, the field would now read 100%
+`live_agent` and be misread as "no contamination found" rather than "no signal was ever available". A
+harness-level open question is named for the founder/mentor, not resolved here: whether some other
+field (the SDK-callback `SubagentStartHookInput` shape — a different hook layer from the command-hook
+`PreToolUse` this file reads) could distinguish a subagent caller.
+
+**INCIDENT, disclosed rather than absorbed.** During mutation verification of the PR19 fixes, a
+restore-check fallback ran `git checkout --` on `at-action-hook.mjs`, which had no backup at that
+point, wiping this session's three-edit wiring change back to HEAD. Caught within the same command
+block (`git diff` empty, `classifyCaller` absent). Reconstructed from the exact diffs verified minutes
+earlier; checked — not merely assumed — by an exact `+8/-2` diff-stat match and every battery
+re-passing. No prior discipline lapse was structural: this session's own standing rule (back up before
+any truncating write) was skipped for exactly the file that needed it. All subsequent mutation
+restores in this commit are checked by SHA hash, not assumed.
+
+**Corrected in passing:** the boundary battery's own §8.1 test sliced on the bare substring `'Part 3b'`
+— Part 3's own prose referring to Part 3b dragged Part 3's target line into that section, a pre-existing
+fragile anchor exposed (not caused) by this diff's new disclosure text. Anchored on the section header.
+
+**A new mentor question drafted for relay** (§5 of the S7 paste's instruction — draft, don't decide):
+`2026-09-07-mentor-question-caller-class-schema-boundary-FOR-RULING.md`, answered same day.
+
+**THE FOUNDER'S LIVE LOOP CHANGES.** The at-action hook hot-reloads; v5 records with `callerClass` were
+observed being written during this session, not merely predicted.
+
+**Verified:** boundary battery 249/1 (the ONE failure names exactly the six waived files;
+C2/C2b/C2c SHA pins green, `layer2-mechanisms.ts` unchanged at `60cefedb…`, `stoic-brain.ts`
+unmodified); report battery 74→**91→99/0**; capture battery 37→**48/0**; negative battery
+251→**254→256/0 RELEASE GATE PASS**; logic harness **173/0** (unchanged); Option S **45/0**
+(unchanged). `tsc --noEmit` exit 0 throughout; all six manual pre-commit checks run and recorded in
+the commit message (tsc, eslint, header-bytestring, route-export, view-grants all exit 0). Ten
+mutations verified red across the session (one initial false negative caught and corrected — a
+mutation that never actually applied, due to shell escaping; re-applied properly it turned the battery
+red), all restores SHA-checked after the incident above.
+
+**Rollback:** `git revert` this commit. No flag, no schema, no migration, no production surface,
+nothing pushed. The window keeps running; the guard stays armed.
+
+**STATE:** rulings 2 and 3 **EXECUTED**; `layer2-mechanisms.ts` byte-unchanged; the window **RUNNING
+and untouched**; the guard **armed** (confirmed by its own refusal on this working tree pre-commit);
+baseline still **1 of 5** (unchanged this session — no consult record accrued: the session's one
+consult-eligible action was itself lost to a `CONSULT-OUTAGE`, observed live). **S11-D2 remains
+BLOCKED on the five-day threshold. The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
+remains the founder's.**

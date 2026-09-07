@@ -126,6 +126,64 @@ export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEven
 }
 
 /**
+ * RULING 3 (mentor, 2026-09-07) — the review-fleet caller class.
+ *
+ * WHY: the guard population must contain "only records where the live agent was
+ * the actor at the moment the hook fired". A review-fleet subagent fires the same
+ * hooks and its record carries the PARENT session id, so the session id CANNOT
+ * discriminate (established S6b; re-established S7 under controlled conditions —
+ * 11 of 15 records under one session id were that session's review fleet).
+ *
+ * WHAT THIS RETURNS, AND WHY ONLY TWO VALUES:
+ *   "subagent" — a POSITIVE STRUCTURAL OBSERVATION, never an inference: the
+ *     transcript path contains a `/subagents/` segment. The path SHAPE is
+ *     live-verified, not guessed — a subagent's own transcript is written to
+ *     `<parent-session>/subagents/agent-*.jsonl` (confirmed live 2026-06-21,
+ *     Gate-1 Slice 3a; memory `claude-code-subagent-hook-contract`). A path of
+ *     that shape cannot arise by accident, so a true positive is genuinely true.
+ *   "unknown" — EVERYTHING ELSE, INCLUDING a session-shaped path. This is the
+ *     load-bearing choice. A session-shaped path is exactly consistent with two
+ *     different worlds: (a) the live agent was the actor, and (b) the wire hands
+ *     a subagent the PARENT's transcript path. Labelling it "live_agent" would
+ *     collapse those worlds into a claim the evidence does not support, and a
+ *     field reading 100% live_agent would then be read as "no contamination
+ *     found" when it in fact means "no signal". That is the guessed
+ *     classification the honesty bar forbids.
+ *
+ * MEASURED, NOT MERELY DISCLOSED (2026-09-07, S7): at build time, what
+ * `transcript_path` contains when PreToolUse fires INSIDE a subagent had not been
+ * observed on this machine. It has been since. TWO separate review fleets ran
+ * against this very diff, producing 14 real production v4/v5 records — including
+ * at least one unambiguously fleet-generated command this session never ran
+ * (`git diff -- harness/ website/scripts/ > /tmp/fh_diff_full.txt`). EVERY ONE
+ * reads "unknown". The falsifiable prediction this docstring made at build time
+ * has come back negative: the signal does NOT discriminate on this machine, under
+ * this harness, as currently wired — the wire hands the hook a path with no
+ * `/subagents/` segment even when the caller genuinely is a subagent.
+ *
+ * THIS DOES NOT INVALIDATE THE TWO-VALUE DESIGN; it is the reason for it. Had this
+ * function emitted "live_agent" for a session-shaped path (the design considered
+ * and rejected), the field would now read 100% "live_agent" and be misread as "no
+ * contamination found" when it means "no signal was ever available". Because the
+ * field reads "unknown" instead, the exclusion downstream is an honest LOWER BOUND
+ * of ZERO on this machine today, not a false clean bill of health. `classifyCaller`
+ * itself needs no code change — it correctly reports what it is given. What is
+ * open is a harness-level question, named for the founder/mentor rather than
+ * resolved here: does some OTHER available field distinguish a subagent caller
+ * (the SDK-callback `SubagentStartHookInput` shape is a documented candidate, per
+ * memory `claude-code-subagent-hook-contract` — but that is a different hook layer
+ * from the command-hook PreToolUse this file reads), or does ruling 3's exclusion
+ * remain a correct mechanism with no live population to exclude until the wire
+ * itself changes?
+ */
+export function classifyCaller(transcriptPath) {
+  if (typeof transcriptPath !== "string" || transcriptPath === "") return "unknown";
+  // A PATH SEGMENT, not a substring: a directory merely NAMED e.g. "my-subagents-notes"
+  // must not read as a subagent transcript.
+  return /(^|\/)subagents(\/|$)/.test(transcriptPath) ? "subagent" : "unknown";
+}
+
+/**
  * P8a (2026-08-17) — build one GUARD-PATH observation record.
  *
  * WHY THIS EXISTS: register P5 records that part (3) of the readiness standard has
@@ -150,10 +208,21 @@ export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEven
  * `captureBasis` is honest about the guard's fail-safe branches: an
  * engine-unavailable or tier-1 pause verdict carries NO assessment and NO
  * proximity, so it cannot be classified. Those are recorded as
- * `no_assessment` and EXCLUDED from the rate rather than silently dropped —
- * the coverage/loss accounting the new-window scoping note asks for.
+ * `no_assessment` rather than silently dropped — the coverage/loss accounting
+ * the new-window scoping note asks for.
+ *
+ * CORRECTED 2026-09-07 (ruling 2). This paragraph previously claimed such records
+ * were "EXCLUDED from the rate". That was FALSE when written: the exclusion existed
+ * only in the report's derived recommendation column (Part 3b), never in Part 3 —
+ * the rate part (3) of the readiness standard actually names. The exclusion landed
+ * in Part 3 on 2026-09-07, in website/scripts/false-hold-observation-report.ts.
+ * A SECOND claim carried alongside it — that such a record is "never a hold either
+ * way" — was false at BOTH times and is deleted rather than re-dated: a STRICT-mode
+ * guard outage passes `denied: true` (see `guardHold` below), so the classifier
+ * marks it a hold, and with every signal array empty it classified as a FALSE
+ * POSITIVE — a non-examination manufactured into the rate's numerator.
  */
-export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIso, regime, denied }) {
+export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIso, regime, denied, callerClass }) {
   const assessment = guard && typeof guard === "object" && guard.assessment && typeof guard.assessment === "object"
     ? guard.assessment
     : null;
@@ -163,7 +232,11 @@ export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIs
       : {};
   const signals = kathekonSignalsFromVerdict(assessment);
   return {
-    schema: "false-hold-record-v4",
+    // v5 (RULING 3, 2026-09-07): + callerClass. The boundary is DATED and RECORDED;
+    // v4 guard records predate it, carry no caller class, and are NEVER
+    // retro-classified (mentor ruling 2026-09-07: "post-boundary only is ruled";
+    // a retroactive actionPreview pass "is not owed").
+    schema: "false-hold-record-v5",
     // The population marker. The consult and guard denominators are NOT
     // commensurable (a consult hold is an advisory opening a correction loop; a
     // guard hold is an enforced deny), so the report must be able to split them.
@@ -201,6 +274,13 @@ export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIs
     guardHold: denied === true,
     guardOutcome: typeof guard?.recommendation === "string" ? guard.recommendation : null,
     captureBasis: assessment && typeof signals.proximity === "string" ? "assessment" : "no_assessment",
+    // RULING 3 (2026-09-07). TOP-LEVEL for the same load-bearing reason as every
+    // field above: `recordHash` hashes JSON.stringify(r.signals), so a field added
+    // INSIDE `signals` would re-hash every existing v1/v2/v3/v4 record and break
+    // ingest idempotency against the frozen buffer. NORMALISED HERE rather than
+    // trusted from the caller, so an absent or malformed value degrades to the
+    // honest "unknown" and never to a false positive.
+    callerClass: callerClass === "subagent" ? "subagent" : "unknown",
   };
 }
 
