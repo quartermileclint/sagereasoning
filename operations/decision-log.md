@@ -38405,3 +38405,156 @@ clause **unchanged and still live as amended**; baseline **2 of 5 with compositi
 **Nothing built, nothing activated, nothing published. The window RUNNING; the guard armed;
 `layer2-mechanisms.ts` byte-unchanged. S11-D2 remains BLOCKED. The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-S9-CONDITION-1-AGENTID-PARENT-SESSION-PASSES-2026-09-08
+
+**Session type:** `code-elevated` (env-flag act on the founder's own local harness config only; no
+production, schema, credential, or repo-code change). **AC7 not engaged** — no production or credential
+op. Owed by the 2026-09-07 five-question ruling (`D-MENTOR-RULING-S8-FIVE-QUESTIONS-ADOPTED-2026-09-08`),
+which conditionally reopened Option D on THREE required conditions before `classifyCaller` may be
+modified. This session addressed **Condition 1 only**: does a PARENT (top-level) session ever act with
+`agent_id` set in H3's `PreToolUse` stdin?
+
+**Result: NO, across eight captures spanning four configurations, on client 2.1.260 / `claude-desktop`.
+Condition 1 PASSES, with disclosed limitations. Full record + all raw capture content:
+`operations/trust-layer-2026-07/2026-09-08-condition-1-agentid-parent-session-CAPTURE-EVIDENCE.md`.
+`classifyCaller` is byte-unchanged. NOTHING WAS BUILT.**
+
+**The founder's `GATE1_DEBUG` act was put to a formal question and elected explicitly** (not assumed
+from S8's waiver, per the prompt's own instruction): AI sets it, sequential capture, no guarded-file
+edit. The config file (`.claude/settings.local.json`, gitignored) was SHA-backed-up before the edit and
+SHA-verified reverted to byte-identity after — **but the runtime effect of the variable itself was
+independently confirmed still active post-revert by a fresh sentinel probe**, reproducing and
+sharpening S8's revert-lag finding into an asymmetry: addition took effect within one tool call,
+removal had not taken effect at all by session close.
+
+**Method — a session-original addition to S8's:** every capture carried a unique sentinel string in
+its own `tool_input`, and no capture was accepted as evidence for a claimed configuration unless the
+sentinel confirmed it. This let the single-slot dump be used safely under genuine concurrent fleet
+activity without editing `framing-core.mjs` (a `GUARD_RE`-matched file) — the prompt's route (b) was
+therefore not needed and not taken. The method caught two real race overwrites in real time (rejected,
+not counted) and independently corroborated agent-issued captures by a second channel: each spawned
+agent's `agentId`, reported back by the Agent tool itself, exactly matched the `agent_id` on the wire.
+
+**Findings by configuration:**
+- **Control (top-level, no concurrent activity):** no `agent_id`, matching S8.
+- **Configuration 1 — nested delegation:** the intermediate agent's H3 capture carries its OWN
+  `agent_id`, never its parent's, never none. Ruled `consistent with the mechanism, not a
+  falsification` per the ruling's own stated criterion (an intermediate is a "parent" relative to its
+  own child but is not a top-level session — the failure case is specifically a top-level session).
+- **Configurations 2+3 — background/concurrent agents (the case the ruling's own reasoning turns on):**
+  a top-level H3 capture taken while two background agents were provably in flight — corroborated
+  three independent ways — carries no `agent_id`. This is the structure that falsified Option B (a
+  live action sitting between fleet records); here the discriminator held through it.
+- **Configuration 4 — worktree isolation (untested at S8):** `agent_id` present normally; `cwd` alone
+  differs, confirming S8's finding and extending it.
+- **Configuration 5 — a different client entrypoint: NOT attempted.** No `claude` CLI exists on this
+  machine; producing one would have been at cost, against the prompt's own instruction. Disclosed as a
+  genuine, undischarged gap.
+
+**A source-level check not present at S8 closed one of the ruling's own open questions first-hand:**
+read the actual `at-action-hook.mjs` code path rather than trusting the capture-record schema —
+`maybeDebugDump(cfg, raw)` is called on `raw = readStdin()` **before** `JSON.parse`, and no code path
+anywhere writes to `event.agent_id`. The captured field is genuinely Claude Code's own PreToolUse
+stdin, not a hook-synthesized value — the evidence answers the question the ruling actually asked, not
+a subtly different one.
+
+**PR19 (all three dimensions, sonnet/low per founder authorization) found and this session corrected
+TWO genuine defects, neither smoothed over:**
+1. The revert-lag reproduction above (dimension 2's independent confirmation of a live probe result
+   this session had already surfaced).
+2. **The closing window-health figures were stale by one buffer record at write time** — guard count
+   129→130, 2026-09-07 guard 53→54, `isKathekon=false` "98 of 129"→98 of 130 (with a previously-unnamed
+   `null` third bucket of 2 records), and this session's own contribution to the buffer 1→2 records
+   (an ad-hoc time filter had excluded an earlier guard record from the same session). Root cause: the
+   buffer is live-appended by the same session reading it, and the aggregate tallies were computed
+   once early and never re-derived at close. **Corrected by an appended addendum in the evidence file,
+   not an in-place edit** — the S8 in-place-edit deviation recorded in the S11 register above this
+   session's own row was deliberately not repeated.
+
+**Dimension 1 (substantive claim) reviewer disclosed it had not read the source files before
+answering**; its live structural questions were closed first-hand against source rather than accepted
+as findings (the `maybeDebugDump` check above is one). **Dimension 3 (scope/safety): CLEAN** — no
+guarded file touched, both SHA pins (`layer2-mechanisms.ts`, `stoic-brain.ts`) held throughout, no
+stray worktree, nothing committed or pushed, the peer's unrelated `environmental-context.json` left
+untouched and unstaged, no credential or token leaked in the new artifact, the buffer verified
+append-only and intact.
+
+**An incidental instrument-composition finding, recorded for the eventual pre-flip report:** this
+session authored a governance document via Bash heredocs and generated ONE guard record and ZERO
+consult records for the SAME class of work that produced 12 consult records at S8 via Write/Edit. The
+consult denominator is sensitive to a session's own authoring-tool convention, not only to action
+class — a live caveat on the ruled baseline-composition disclosure, not adjusted for here.
+
+**Conditions 2 (a second capture on a separate day and session) and 3 (client-version pinning with
+fallback) remain OUTSTANDING.** One honest note offered for the founder's/mentor's judgement, not
+decided here: this session's UTC day is 2026-09-07 — the **same** UTC day as S8's, on the **same**
+client 2.1.260. Whether that satisfies "a separate day and session" is not this session's call.
+
+**STATE: Condition 1 of three PASSES. NO BUILD IS LICENSED — Conditions 2 and 3 remain outstanding
+regardless. `classifyCaller` byte-unchanged. The window keeps running; the guard is armed and verified
+green at close; `layer2-mechanisms.ts` and `stoic-brain.ts` byte-unchanged. The S11 flip remains
+REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-MENTOR-RULING-S9-FOUR-QUESTIONS-ADOPTED-2026-09-08
+
+**Session type:** `governance` — documents only. **No code, schema, flag, credential, migration or
+production change. AC7 not engaged. `classifyCaller` byte-unchanged. Nothing built or activated.**
+
+**Verbatim canonical record:**
+`operations/trust-layer-2026-07/2026-09-08-mentor-ruling-S9-four-questions-verbatim.md`.
+**Where any summary, decision-log text or register row differs from that file, the verbatim wins.**
+
+The four questions surfaced at S9 close (`D-S9-CONDITION-1-AGENTID-PARENT-SESSION-PASSES-2026-09-08`)
+were relayed by the founder and **ruled. All four AI recommendations were UPHELD.** Two were changed
+in force or scope, and those two are the substance of this entry — the other two confirm what S9
+already recorded and are not re-litigated here.
+
+**(1) Condition 2 is NOT satisfied by S9's capture. Ruled on the AI's own stated grounds.** A same-UTC-day,
+same-client capture *"confirms the finding holds across session IDs, which is useful, but it does not
+discharge what Condition 2 exists to establish"* — namely what varies with wall-clock conditions
+(*"server state, session initialisation, client behaviour across time"*). **The next capture must be on
+a genuinely different calendar day, a different session ID, and the SAME client version (2.1.260)** —
+the same-client requirement is now explicit, and the day boundary is *"literal, not approximate."*
+**Condition 2 remains OUTSTANDING.**
+
+**(2) Condition 1 is COMPLETE without Configuration 5.** Condition 1 is *"scoped to the parent-versus-agent
+distinction on the current harness as wired"*, and it passed on that scope. Testing a second entrypoint
+under Condition 1 *"would duplicate work Condition 3 already exists to do"* — version work belongs to
+Condition 3. **Condition 1: complete. Conditions 2 and 3: outstanding.** The untested entrypoint is
+therefore no longer carried as a Condition-1 gap.
+
+**(3) THE `GATE1_DEBUG` PRE-CHECK IS ELEVATED FROM A FOUNDER QUESTION TO A STANDING REQUIREMENT — this
+is the one new binding obligation from this ruling.** Before **any** session runs `GATE1_DEBUG` again,
+including Condition 2's capture session, **both** of the following are required and **neither is
+optional**: (i) `rm ~/.sage-gate1/*-stdin.json`; (ii) **open a fresh session, run a control probe, and
+confirm no fresh dumps appear.** If dumps appear, the variable is still live and *"its persistence
+mechanism must be understood before it is used again"*; only if none appear may the capture proceed.
+Grounds: *"A debug session run without this confirmation is a debug session whose outputs cannot be
+trusted to reflect the current wire rather than a residual state"* — named as *"the same class of
+invisible contamination the project has ruled against consistently."* **Neither step was performed by
+this session** (the confirmation probe requires a *fresh* session by construction, and the `rm` was
+scoped to the founder at S9's own prompt). Both are now prerequisites on Condition 2's capture session,
+not optional hygiene.
+
+**(4) The instrument-composition finding stays a DISCLOSED CAVEAT — with a substantive addition that
+enlarges what the pre-flip report must say.** Correcting the measurement mid-window is refused as
+*"the post-hoc narrowing of a population the project has ruled against twice."* **The addition:** the
+finding must be folded into the pre-flip report *"not only as a named limitation but as a named
+structural dependency"*, stating explicitly that the consult denominator's composition is partly a
+function of tool mode, that tool mode is partly a function of the kind of work a session does, and —
+the sharpest formulation, which S9 had not reached — that **the measured population "is not a random
+sample of all actions the agent takes — it is a sample of actions taken with
+Write/Edit/MultiEdit/NotebookEdit tools."** A reader *"should see that dependency clearly, not discover
+it in a session's evidence file."* It is folded into the already-required loop-count-by-action-class
+report as a **parallel disclosure**: loop counts by action class, and consult-denominator composition
+by tool mode, *"both named as structural properties of the measurement rather than session-specific
+artefacts."* **Neither report is built** (`false-hold-observation-report.ts` matches `GUARD_RE`, so each
+needs a founder waiver and its own session).
+
+**STATE: Condition 1 COMPLETE and closed. Conditions 2 and 3 OUTSTANDING; Condition 2 now carries a
+mandatory two-step pre-check and an explicit same-client/different-day/different-session
+specification. One pre-flip disclosure obligation ENLARGED (structural dependency, not merely a
+limitation). NO BUILD IS LICENSED. `classifyCaller` byte-unchanged; the window keeps running; the
+guard armed; `layer2-mechanisms.ts` and `stoic-brain.ts` byte-unchanged. The S11 flip remains REFUSED;
+weights remain BLOCKED; the 0h call remains the founder's.**

@@ -102,6 +102,25 @@ Bespoke election requires justification in the session's decision-log entry unde
 > one; report the guard population separately with its rate; set the consult-side bound threshold
 > after five ordinary post-remedy days; **publication waits on it, the start did not.**
 
+> **2026-09-08 (04:15 AEST, machine date = 2026-09-07 UTC) — S9 LEFT THE FOUNDER'S LIVE LOOP IN A
+> CHANGED RESIDUAL STATE. NOT production — no Vercel variable, route, schema, flag or credential
+> changed, and nothing was deployed, committed or pushed.** S9 (Condition 1 of the Option C′ gate)
+> set **`GATE1_DEBUG=1`** in the gitignored `.claude/settings.local.json` under a recorded founder
+> waiver, and removed it at close — the file is **byte-identical to its pre-session backup,
+> SHA-verified both directions**. **But the runtime effect did NOT revert.** A post-revert sentinel
+> probe was still written to `~/.sage-gate1/PreToolUse-stdin.json`, so the harness is **still dumping
+> every `PreToolUse` hook's raw stdin to disk** — which includes raw tool inputs and session content.
+> This **reproduces S8's revert-lag finding and sharpens it into an ASYMMETRY**: the addition took
+> effect within one tool call; the removal had not taken effect at all by close. Mechanism unknown
+> (memory `claude-code-desktop-app-hook-env`). **Consequences:** (i) H1/H4 fire at turn boundaries, so
+> dumps reappear regardless — a manual **`rm ~/.sage-gate1/*-stdin.json`** is the founder's; (ii) the
+> 2026-09-08 S9 ruling makes a **two-step pre-check MANDATORY before ANY future `GATE1_DEBUG`
+> session** — the `rm`, then a **fresh-session control probe confirming no dumps appear**; neither
+> optional, and a capture run without it *"cannot be trusted to reflect the current wire rather than a
+> residual state."* **Rollback = the `rm` plus confirming inertness in a fresh session; there is
+> nothing to redeploy and no repo change to revert.** The observation window, the buffer, the armed
+> byte-identity guard and both SHA pins are **untouched and verified green at S9 close**.
+
 ## Production state (**as of 2026-09-06** — the newest dated refresh block is directly below this heading; the 2026-09-03 and 2026-08-12 blocks that follow it are retained as history and NOT current, and the long 2026-06-25 parenthetical after that is older history still. Read the 2026-09-06 block, then the 2026-09-03 block, then the "Live in production" list, first.)
 
 > **2026-09-05 grounding note (a documents-only session; production is unchanged since the annotation at the end of item 2 in the block below).** The standing session opener has been re-grounded as **Version 2026-09-05** — `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md` — and now carries the current state, the verified-at-writing table, the prioritised session plan and the standing queue; **read it before this section.** **A date-label discrepancy to read past, not fix:** the block directly below is labelled "2026-09-06", and a cluster of records carry "2026-09-06"/"2026-09-07" labels (`2026-09-06-post-sweep-carried-items-CLOSE.md`, `2026-09-06-mentor-ruling-r20a-length-guard-ordering-verbatim.md`, `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`, `2026-09-06-environmental-scan-staleness-SCOPE.md`, `2026-09-06-P6-recommendation-column-BUILD-NEXT-SESSION-PROMPT.md`, the five decision-log entries headed 2026-09-06). **Git shows every one of them authored on 2026-09-05 AEST** (commits `aa4e567`…`099b218`, 05:31–09:15 +1000; the P6 BUILD prompt on 2026-09-04 19:57 +1000): those sessions took their date from the conversation context rather than the machine clock, one day ahead. The labels are left as they are — they are cited by filename elsewhere, and renaming would break those citations — and each file is correctly identified by its git author date. **Date artifacts from `date` and `git log`, never from the context date.**
