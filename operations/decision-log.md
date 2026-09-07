@@ -38063,3 +38063,345 @@ founder waiver** (D2 stand-down shape (a)) as `97320a0`.
 Option C investigation **AUTHORED, not started**; the window **RUNNING**; the guard **armed**; baseline
 **1 of 5**. **S11-D2 remains BLOCKED on the five-day threshold. The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-S8-OPTION-C-INVESTIGATION-AGENTID-CANDIDATE-FOUND-2026-09-08
+
+**Tier `code-elevated` with a recorded founder waiver on one non-repo config edit (see below). NO
+production, schema, credential or migration change. Nothing committed to the repo, nothing pushed.
+The observation window ran throughout. AC7 not engaged.**
+
+**What was owed.** The Option D ruling's bounded investigation (item 3): *"does `SubagentStart`
+supply a signal that correlates to an H3 record via a key OTHER than session ID? YES ⇒ Option C
+viable, ruling revisited. NO ⇒ Option D confirmed, disclosure final."*
+
+**What was found: neither cleanly.** `SubagentStart` was never observed — a simpler candidate
+appeared first, in the course of testing it, and superseded the question as framed.
+
+**Method.** Per the ruling's method requirement (observe the wire, do not infer from SDK types), the
+founder set `GATE1_DEBUG=1` under a **recorded waiver**: the standing rule (session paste; task
+prompt, twice; S7's own refusal precedent) reserves this act to the founder; the founder explicitly
+directed the AI to perform the edit this session ("you add it for me"). Scope: one key added to the
+`env` block of the gitignored `.claude/settings.local.json` — not a guarded file (`GUARD_RE` does not
+match it), no production/schema/credential surface. Backed up first to the scratchpad (outside the
+repo, SHA-verified match before and after), restored the same session via `cp` from that backup
+(never `git checkout`), SHA-verified identical to the pre-edit original. Two `PreToolUse` (H3)
+captures were taken: one fired inside a genuine spawned subagent (confirmed by `tool_uses:1` and the
+subagent's own transcript at `<session>/subagents/agent-<id>.jsonl`, `isSidechain:true`), one fired
+at the top level, same session, same tool (`Bash echo`), immediately after. Read with the **Read**
+tool, never Bash — a Bash read of the dump file is itself matched by H3's own matcher and would
+overwrite the file with its own invocation before completing.
+
+**The diff, complete.** `session_id` and `transcript_path` were identical (both the parent's) in both
+captures — re-confirming both established findings on the current client (2.1.260). The delta:
+**`agent_id` and `agent_type` are present in H3's own stdin when fired inside a subagent, and absent
+entirely (key does not exist) when fired at the top level.** This field pair was NOT in the
+2026-06-20 raw-stdin capture the project's standing memory records
+(`claude-code-subagent-hook-contract`) — the client wire has changed since, without any harness-side
+edit.
+
+**Consequence: the literal question is superseded, not answered inside its own frame.** If
+`agent_id`'s mere presence at H3 discriminates, no `SubagentStart` registration, no correlation
+marker, and no `hooks.json` edit are needed — `classifyCaller` could read `agent_id` directly instead
+of `transcript_path`. This is a different, simpler mechanism than the one "Option C" named, found
+while testing Option C's premise.
+
+**Not built. Relayed to the mentor rather than decided unilaterally** — per the task's own bound
+("Do NOT build the mechanism this session. Determine whether it is possible.") and the ruling's own
+governing discipline (a classifier that misflags a live-agent record is "invisibly destructive," the
+exact standard that falsified Option B/spawn-depth). The candidate has NOT been checked against that
+standard — whether a top-level session can ever legitimately carry an `agent_id`-shaped value
+(`CLAUDE_CODE_CHILD_SESSION=1` was observed set in this session's own top-level tool environment, a
+fact surfaced but not chased down, out of scope) is the open question that would need answering
+before any build. Three questions put to the mentor, verbatim:
+`operations/trust-layer-2026-07/2026-09-07-mentor-question-caller-class-agentid-in-h3-FOR-RULING.md`.
+A scope record for a licensed future build (not started):
+`operations/trust-layer-2026-07/2026-09-08-option-C-investigation-RESULT-agentid-candidate-found.md`.
+
+**Nothing built, nothing changed in the repo.** `classifyCaller`, `at-action-hook.mjs`,
+`false-hold-capture.mjs` byte-unchanged this session; `layer2-mechanisms.ts` SHA-pin re-verified
+`60cefedb5f4f78822301b3f9c195813b63b00546431ecde08473b118bea52f73`, unchanged. Batteries re-verified
+at open, unchanged: boundary **250/0**, report **105/0**, capture **48/0**, negative **256/0 RELEASE
+GATE PASS**. Working tree at open and close carries only the peer's pre-existing modification to
+`website/src/data/environmental-context.json` (untouched by this session, per instruction).
+
+**Window health, re-derived, cutoff `2026-09-07T09:07Z`.**
+
+| | |
+|---|---|
+| Corroboration | **AGREE** — guard **125 = 125**, consult **3 = 3** (family derived from `gate1.log` at the log-line timestamp boundary, split by exact token match — `CONSULT\b` was found to over-match `CONSULT-OUTAGE` on a naive prefix test and was corrected before reporting). |
+| 2026-09-06 UTC | guard 77 · consult 3 |
+| 2026-09-07 UTC | guard 48 · consult 0 |
+| **BASELINE** | **1 of 5 — UNCHANGED.** |
+| Buffer | 266 total (265 at session open + 1 legitimate `GUARD-CAUTION` from this session's own earlier, unrelated env-probe work, `callerClass:'unknown'`, timestamped before the `GATE1_DEBUG` work began). |
+| `callerClass` distribution, post-boundary (28 v5-schema records) | `unknown` **28**, `subagent` **0** — the measured invariant from S7 holds, re-confirmed. |
+| `GATE1_STATE_DIR` | unchanged. |
+| Guard status | no evidence of a trip; tree verified clean; pin green throughout. |
+
+**Rollback:** nothing to revert — no repo file changed. The `GATE1_DEBUG` edit was itself reverted
+within the session (SHA-verified) before this entry was written.
+
+**STATE:** Option D **stands, not yet revisited** — the ruling's own revisit condition
+("If yes... the ruling is revisited") is triggered in substance but the relay, not a unilateral
+decision, is what was owed and what was done. The mentor's ruling on the new question determines
+whether a build session opens next. The window **RUNNING**; the guard **armed and green**; baseline
+**1 of 5 — unchanged**. **S11-D2 remains BLOCKED on the five-day threshold. The S11 flip remains
+REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-S8-CORRECTION-WINDOW-HEALTH-STALE-BASELINE-MOVED-2026-09-08
+
+**Correction to the entry immediately above (`D-S8-OPTION-C-INVESTIGATION-AGENTID-CANDIDATE-FOUND`),
+not a rewrite of it — per standing practice, entries are never edited in place.**
+
+**Found during PR19 (three independent dimensions, sonnet/low, founder-authorized model drop).** One
+reviewer, checking the window/corroboration arithmetic against fresh source, found every headline
+figure in the prior entry's health table stale — not wrong at the time it was derived (cutoff
+`2026-09-07T09:07Z`), but overtaken by growth **while the review itself ran**, requiring a fresh
+re-derivation before any number in that entry could be trusted going forward.
+
+**Cause, verified precisely, not guessed at:** the reviewer's first hypothesis — that its own
+review-fleet activity had contaminated the buffer it was measuring — was **checked and found
+wrong**: every new record traces by timestamp to **this session's own foreground Write/Edit tool
+calls** (writing the mentor-question document, the scope-record document, the memory-file edit, and
+the close document itself), all under session id `1a999627-…`, all landing squarely in the windows
+between those specific writes. Write/Edit sit inside the established consult floor
+(`Write`/`Edit`/`MultiEdit`/`NotebookEdit`), so authoring this very investigation's own governance
+documents fed the measured population — a live instance of the standing named-and-unresolved
+tool-choice question ("a session's tool MODE decides whether its work enters the measured population
+at all"), not a defect and not review-fleet noise.
+
+**One reviewer claim rejected on source-checking:** the same reviewer additionally claimed the 8
+residual (`path`-absent) records were mislabelled "consult" and should be called something else. That
+claim is **itself wrong** — the session paste's own stated vocabulary, verbatim: *"consult = schema
+v3, no path"*. The terminology was correct; only the counts were stale. Recorded so the correction is
+not over-corrected.
+
+**The re-derived figures, fresh cutoff `2026-09-07T09:26:55Z`:**
+
+| | prior entry (stale) | corrected |
+|---|---|---|
+| Buffer total | 266 | **273** |
+| Post-boundary (non-v1) | 128 | **135** |
+| Guard / consult split | 125 / 3 | **127 / 8** |
+| `callerClass` on v5 records | 28 total, 0 `subagent` | **30 total, 0 `subagent`** (invariant holds) |
+| Corroboration | 125=125 · 3=3 | **127=127 · 8=8** (still AGREE) |
+| 2026-09-06 UTC | guard 77 · consult 3 | unchanged |
+| 2026-09-07 UTC | guard 48 · consult 0 | **guard 50 · consult 5** |
+| **BASELINE** | **1 of 5** | **2 of 5 — MOVED** |
+
+**Baseline genuinely moved, for the first time this window, and the reason is disclosed rather than
+smoothed over: it moved because this session wrote its own required governance documents through the
+Write/Edit tool, not because of any code or investigation work.** Under the rules as written (*"days
+with ≥1 consult record count"*, no carve-out for what kind of work produced the record), this
+counts. Whether a day earned by documentation-writing alone should count the same as a day earned by
+substantive engineering work is a fair question and is **not decided here** — named for the founder
+alongside the existing tool-choice question, not resolved unilaterally.
+
+**The measured invariant central to this session's own investigation is unaffected:** `callerClass`
+on v5 records remains 100% `unknown`, 0% `subagent`, at every re-derivation (28 then 30). Nothing
+about the Option C finding, the mentor question, or the agent_id candidate changes.
+
+**S11 register row is corrected in place for the baseline figure only** (the register's own
+convention is append-only for new items, but a same-session numeric correction to a row this session
+itself just wrote, before any other session has built on it, is treated as continuing to write that
+row rather than rewriting history — the distinction the register's rule protects). See the row dated
+2026-09-08.
+
+**Nothing built, nothing committed, nothing pushed. The window RUNNING and untouched throughout —
+this correction is a report-quality fix, not a window or production change. S11-D2 remains BLOCKED
+(now at 2 of 5, still short of 5). The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
+remains the founder's.**
+
+## 2026-09-08 — D-S8-PR19-COMPLETE-TWO-FOLDED-ONE-REJECTED-2026-09-08
+
+**PR19, three independent dimensions (sonnet/low, founder-authorized model drop, three parallel
+Agent-tool reviewers — no Workflow, no ultracode). Covers both this session's substantive finding
+(the `agent_id` field diff) and its records (close, decision-log, register, memory).**
+
+**Dimension A (field-diff claim) — CONFIRMED, one documentation gap folded.** The two-sample field
+diff itself holds exactly as reported. One gap: `maybeDebugDump` keys its dump file by **event name**
+(`PreToolUse-stdin.json`), and H2 (`subagent-framing-hook.mjs`) and H3 (`at-action-hook.mjs`) both
+register under the SAME event name — so the dump filename alone cannot prove which hook wrote a
+given capture. The two captures are still provably H3's, because both carry `tool_name:"Bash"`, a
+value H2's `Task|Agent`-only matcher can never see — but neither the mentor question nor the close
+document said so; both asserted "genuinely H3" without showing the disambiguating step. **Folded:**
+the mentor-question document (`2026-09-07-mentor-question-caller-class-agentid-in-h3-FOR-RULING.md`)
+is amended with an explicit paragraph naming the shared-filename ambiguity and the `tool_name`
+disambiguator that resolves it for these two specific captures.
+
+**Dimension B (window/corroboration arithmetic) — CONFIRMED wrong, folded as its own correction
+entry** (`D-S8-CORRECTION-WINDOW-HEALTH-STALE-BASELINE-MOVED-2026-09-08`, immediately above in this
+file). One collateral claim from the same reviewer — that v3-schema records are mislabelled
+"consult" — was checked against the session paste's own stated vocabulary and **rejected**: the paste
+states verbatim *"consult = schema v3, no path"*; the terminology was correct, only the counts were
+stale.
+
+**Dimension C (scope/safety) — 6 of 7 checks PASS, 1 FAIL, folded.** SHA pin, git status scope,
+no-commit/no-push, `GATE1_DEBUG` reverted in the file, no guarded-file edit — all independently
+verified clean. **FAIL: stdin dump cleanup was incomplete.** This session cleaned the two dumps it
+deliberately read (`PreToolUse-stdin.json`, `PostToolUse-stdin.json`) but missed two more that were
+silently written during the same `GATE1_DEBUG=1` window by hooks the session never explicitly probed
+— `Stop-stdin.json` (H4, fired by an intervening Sage Reflect turn) and `UserPromptSubmit-stdin.json`
+(H1, fired on an ordinary prompt boundary). **All four confirmed removed** (`ls ~/.sage-gate1/ | grep
+-ci stdin` → 0) before this entry was written.
+
+**A further finding surfaced while cleaning up, not by any reviewer — recorded because it bears on
+the reliability of the whole waiver mechanism:** two of the four dump files (`PreToolUse-stdin.json`,
+`PostToolUse-stdin.json`) carried mtimes of **19:33–19:34**, roughly 27–28 minutes AFTER the
+`settings.local.json` file's own mtime (19:06) showed `GATE1_DEBUG` already removed, and after the
+founder's intervening "model dropped" message. Cause unconfirmed — this session has no visibility
+into the app's internal env-caching — but the observation is real and checkable (file mtimes
+compared directly), and is recorded in `claude-code-desktop-app-hook-env.md` as a **revert-lag
+finding**: editing the config file back was necessary but was NOT observed to be sufficient for an
+immediate revert. **Consequence for future founder-waived toggles:** verify the revert actually took
+effect (check for the artifact the flag produces) rather than trusting the file edit alone,
+especially across a pause or model-switch boundary.
+
+**Nothing built, nothing committed, nothing pushed by the review itself.** The window kept running
+throughout; no guarded file was touched by any reviewer or by the fold. `layer2-mechanisms.ts` SHA
+unchanged. **S11-D2 remains BLOCKED** (baseline 2 of 5, per the correction above). **The S11 flip
+remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-S8-GATE1-DEBUG-PERSISTS-BEYOND-REVERT-CLEANUP-ABANDONED-2026-09-08
+
+**Correction to the revert-lag finding folded into `D-S8-PR19-COMPLETE-TWO-FOLDED-ONE-REJECTED`
+above: the delay is not brief.** A fourth stdin dump reappeared during a purely read-only
+verification command (`ls ~/.sage-gate1/ | grep -i stdin`), **~32 minutes after** the config file's
+own mtime showed `GATE1_DEBUG` removed, confirming `maybeDebugDump`'s guard
+(`if (!process.env.GATE1_DEBUG) return;`) is still returning false for this session's hook
+subprocesses — i.e. `GATE1_DEBUG` remains truthy in the running session's hook environment, contrary
+to the current file content, for the remainder of this session so far. The dump's content was
+confirmed benign (this session's own last command echoed back; no secrets).
+
+**Cleanup by further Bash command is self-defeating and was abandoned, not silently given up:**
+`at-action-hook.mjs` matches on `Bash` itself, so any `rm` command issued to delete the dump is
+itself captured and re-writes the same file with ITS OWN invocation before the delete would even
+register as clean. **This dump file is left in place deliberately.** It contains no sensitive
+content (verified: task-command echoes only, same class of content this whole investigation has been
+reading). It will keep regenerating for the rest of this session on any further `Bash`/`Edit`/`Write`
+action; whether the app's env cache ever resyncs mid-session, or only on a fresh conversation, is
+unconfirmed. **Founder note:** `~/.sage-gate1/PreToolUse-stdin.json` may need a manual `rm` after this
+session ends, outside any tool loop that would itself regenerate it.
+
+**Nothing sensitive exposed; nothing built; nothing committed; window untouched.** This is a
+housekeeping finding about the toggle mechanism's actual behaviour under this client, recorded
+precisely rather than claimed resolved.
+
+## 2026-09-08 — D-S8-CORRECTION-DUMP-MECHANISM-MISSTATED-H1-H4-ARE-THE-CAUSE-2026-09-08
+
+**Corrects the mechanism stated in `D-S8-GATE1-DEBUG-PERSISTS-BEYOND-REVERT-CLEANUP-ABANDONED`
+above. The practical advice in that entry was right; its stated reason was wrong, and the wrong
+reason would mislead a future session into thinking a live dump cannot be cleaned at all.**
+
+**What that entry claimed:** *"any `rm` command is itself captured and re-writes the same file with
+ITS OWN invocation before the delete would even register as clean"* — i.e. cleanup is impossible from
+inside the session.
+
+**What is actually true, verified empirically this session rather than reasoned about:**
+`maybeDebugDump` runs at hook time, **before** the tool executes (`at-action-hook.mjs`: `readStdin()`
+→ `maybeDebugDump()` → …, with the tool running only after the hook exits). Confirmed directly: a
+Bash block was made to read the dump and print its `tool_input.command`, and the dump held **that
+very block's own command**, not the previous one. So an `rm` placed in a Bash block deletes the dump
+its own hook just wrote, and the block ends genuinely clean. **Cleanup from inside the session works.**
+
+**The real reason dumps keep reappearing: H1 and H4 fire at turn boundaries, outside any Bash block.**
+Observed concretely — `Stop-stdin.json` at `19:39` (H4, written when the previous assistant turn
+ended, after that file had been deleted at ~19:36) and `UserPromptSubmit-stdin.json` at `20:51` (H1,
+written when the founder's next message arrived). Neither is reachable by any cleanup the assistant
+can schedule, because both fire between actions rather than during one.
+
+**Consequence for the founder — unchanged in substance, corrected in reason:** a manual `rm
+~/.sage-gate1/*-stdin.json` after the session ends is still the right step, because H4 will fire once
+more as the session closes and write `Stop-stdin.json` after any final cleanup. Not because cleanup
+is impossible, but because the last writer is a turn-boundary hook the assistant cannot follow.
+
+**The persistence finding is also strengthened, not merely repeated:** `GATE1_DEBUG` was removed from
+`.claude/settings.local.json` at file-mtime `19:06`. Dumps were still being written at `20:52` — **a
+span of ~1 hour 45 minutes, across at least two founder turn boundaries and a model switch.** The
+earlier "~28 minutes" figure in `claude-code-desktop-app-hook-env.md` understates it and is corrected
+there. Mechanism still unconfirmed (no visibility into the app's env cache); the observation is
+recorded, the cause is not guessed at.
+
+**Nothing built, nothing committed, nothing pushed; no guarded file touched; window untouched.**
+
+## 2026-09-08 — D-MENTOR-RULING-S8-FIVE-QUESTIONS-ADOPTED-2026-09-08
+
+**Tier `governance` — documents only. NO code, schema, flag, credential, migration or public-surface
+change. Nothing built, nothing committed, nothing pushed. AC7 not engaged.**
+**VERBATIM RECORD, CANONICAL:**
+`operations/trust-layer-2026-07/2026-09-07-mentor-ruling-S8-five-questions-verbatim.md`.
+**ADOPTED AS BINDING SPECIFICATION.** Verbatim wins over this entry and every other summary.
+
+Answers `2026-09-07-mentor-question-caller-class-agentid-in-h3-FOR-RULING.md` — five questions: the
+three owed by the Option D ruling's bounded investigation, plus two (A and B) surfaced by this
+session's own PR19 and folded into the same relay at the founder's direction.
+
+**1. Option D is CONDITIONALLY REOPENED.** *"Option D's 'unimplementable on this harness as wired' is
+conditionally reopened."* The `agent_id` finding is accepted as real, and the provenance discipline is
+explicitly credited: *"both captures carry `tool_name: Bash`, which H2's matcher structurally cannot
+see, so these are provably H3 records by content — is exactly the discipline the ruling's method
+requirement asked for."* The superseding of Option C is characterised as *"not a failure of the
+investigation. It is the investigation working correctly."* The candidate is named **Option C′** — H3
+self-discrimination via `agent_id` presence.
+
+**⚠ THREE CONDITIONS, ALL REQUIRED, BEFORE `classifyCaller` MAY BE MODIFIED.** Recorded here because
+a future session must not rediscover them: **(1) a false-positive check under controlled conditions
+with ground truth**, applying the discipline that falsified Option B, and *"the first thing the
+false-positive check must examine"* is the `CLAUDE_CODE_CHILD_SESSION` question this session
+deliberately left unchased — *"a parent session acting with `agent_id` set would mean `agent_id`
+presence does not discriminate — it would be the spawn-depth failure mode in a different form."*
+**(2) a second live capture on a separate day and session** confirming the field's presence — *"One
+capture on one client version on one machine is a candidate… A third capture establishes it is
+stable."* **(3) client-version pinning in the build**, with the harness detecting the field's absence
+and falling back to `unknown` *"rather than silently misclassifying."* *"The investigation is not
+complete until Condition 1's `CLAUDE_CODE_CHILD_SESSION` question is answered under controlled
+conditions."*
+
+**NOTHING IS EXECUTED BY THIS ADOPTION.** *"The amended segment-1 clause stands exactly as the Option
+D ruling left it until a build actually lands. A candidate mechanism, however promising, does not
+change what the disclosure may currently claim."* The live report is unchanged and correctly still
+reports `unknown` for all records.
+
+**2. Question A — the documentation-only baseline day COUNTS.** *"The day counts."* Part (1)'s
+representativeness clause is satisfied because *"a day composed entirely of markdown authoring is a
+day the instrument examined Write and Edit actions. Those are actions the instrument examines. They
+are in the measured population by design."* Filtering was rejected on the grounds this session
+proposed: it *"would be a post-hoc narrowing of the population mid-window — the move ruled against
+twice already."* **A1:** counts on the same footing, composition disclosed. **A2:** disclosure, not
+filtering — *"the Option D shape."* The mentor adds an observation the question had not drawn out:
+*"the instrument's measured population is shaped by tool mode, and tool mode is shaped by the kind of
+work the session does… That is the window working correctly."* **Baseline stands at 2 of 5.**
+
+**3. Question B — G6(a) does NOT bind on this class, and a FURTHER QUALIFICATION IS RULED.** **B1:**
+No. *"The eleven abandonments in this session are not that pattern. They are a working mechanism
+measuring a session that never paused to re-examine until the end."* **B2:** the kathekon-engagement
+qualification *"is not sufficient as it stands for this class."* The ruled boundary — and the
+distinction is sharper than the question proposed: *"The distinction is not between documentation and
+engineering in general. It is between actions the protocol requires and actions the agent elects."*
+**Ruled qualification: G6(a) binds on kathekon-engaged loops opened by consequential actions on the
+product or its governing documents, NOT on loops opened by the agent's own protocol-required
+record-keeping** — *"carried as a disclosed property of the measurement, not as a filter on the loop
+count."* Grounds: *"whether the protocol's own requirements can generate a do-not-proceed condition on
+the act of following the protocol. They should not."* **B3:** Yes — a loops-opened-vs-closed **by
+action class** figure is owed in the pre-flip report; leaving it to flip time is *"the move the window
+was designed to prevent."*
+
+**4. Two new pre-flip owings, registered so they are not rediscovered:** (i) **baseline composition
+disclosure** (day-by-day, tool distribution); (ii) **loop count by action class** (product actions vs.
+protocol-required documentation). Both belong in the pre-flip report alongside the false-hold rate.
+**Neither is built.** The report script (`false-hold-observation-report.ts`) matches `GUARD_RE`, so
+either would need a founder waiver and its own session; the ruling requires them *before the flip*,
+not now, and baseline stands at 2 of 5.
+
+**5. The recursion observation was ruled on rather than passed over.** The session's decision to stop
+counting loops rather than chase them is endorsed: *"practical wisdom includes knowing when an inquiry
+has reached the point where further pursuit of the inquiry becomes the thing the inquiry is
+examining… That is phronesis applied to the act of inquiry itself, in its most demanding form."*
+Recorded because it settles, as a matter of ruled practice, that stopping was correct — not merely
+tolerable.
+
+**STATE:** Option D **conditionally reopened**, three conditions owed before any build; the segment-1
+clause **unchanged and still live as amended**; baseline **2 of 5 with composition disclosed**; G6(a)
+**gains a ruled further qualification**, unbuilt; two pre-flip disclosures **owed and registered**.
+**Nothing built, nothing activated, nothing published. The window RUNNING; the guard armed;
+`layer2-mechanisms.ts` byte-unchanged. S11-D2 remains BLOCKED. The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**
