@@ -224,3 +224,81 @@ bundled three governance-file edits plus `git add` plus the commit into one irre
 committed blind without verifying any edit had landed, and **left the S11 register carrying the same
 wrong claim**, so the records would have disagreed with one another. The action was decomposed and the
 register included, rather than reworded to get past the classifier.
+
+---
+
+## MENTOR RULINGS — all three questions answered, adopted 2026-09-07
+
+**VERBATIM RECORD (canonical, wins over this summary):**
+`operations/trust-layer-2026-07/2026-09-07-mentor-rulings-S6b-three-questions-verbatim.md`
+
+**1. The even-K median convention — `lower_median` is RULED.** *"Averaging two ordinal ranks produces
+a number that may not correspond to any actual rank on the scale. Lower_median stays on the scale."*
+The timing flag was confirmed: *"Change this after a run and every `would_option_M_record` is wrong.
+Settle it now."* It remains **a convention, not a ruling on the underlying scale** — revisited if the
+scale changes or K moves off 10.
+
+**No code change was needed, and that was VERIFIED rather than assumed.** The ruled definition is *"the
+value at position K/2 rather than the average of positions K/2 and K/2+1"*. On a K=10 fixture the
+implementation returns position 5 (`habitual`), never averages, and the two conventions genuinely
+differ there (`habitual` vs `deliberate`) — so the ruling is consequential, not cosmetic. `option-s-runner.py`
+is unchanged; only its wording is upgraded from *"a convention the mentor may set otherwise"* to
+*"RULED 2026-09-07"*.
+
+**2. `GUARD-OUTAGE` records — EXCLUDE from the guard rate denominator.** *"A `GUARD-OUTAGE` record with
+`captureBasis: "no_assessment"` records that no examination happened, not that an examination happened
+and produced a result."* **Symmetry is the governing principle** — the consult side already excludes
+outages, so the guard side does too; the outage rate is **reported separately on both sides** per F-3′.
+The self-labelling is the mechanism that makes exclusion clean. **Log the count, disclose beside the
+rate.**
+
+**3. Review-fleet subagent records — EXCLUDE from the guard population.** *"A review-fleet subagent
+firing the same hooks under the parent session ID is not the live agent taking a consequential action —
+it is a review process examining a prior action."* Mixing them mixes **actions taken with actions
+reviewed** — the same class the P6 amendment forbids. Mechanism: exclude on session ID **if it can
+distinguish**; **if not, a `caller_class` field on the record is the right addition — before
+publication, not after.**
+
+**This session already established that session ID CANNOT distinguish** — subagent records carry the
+**parent** session id. So **`caller_class` is owed.**
+
+### ⚠ THE RULINGS COLLIDE WITH THE ARMED GUARD — the D2 collision class, reproduced TWICE
+
+Executing rulings 2 and 3 requires editing **two files that `GUARD_RE` matches**, verified at source:
+
+| Ruling | File to edit | `GUARD_RE` |
+|---|---|---|
+| 2 (exclude outages from the rate) | `website/scripts/false-hold-observation-report.ts` | **MATCHES** (`false-hold`) |
+| 3 (`caller_class` on the record) | `harness/gate1-pre-decision/claude-code/hooks/lib/false-hold-capture.mjs` | **MATCHES** (`false-hold`, `harness/gate1`) |
+
+While the window runs and the guard is armed, **neither may sit modified in the working tree.** This is
+precisely the collision the D2 window-sequencing ruling resolved for `layer2-mechanisms.ts`, and its
+mechanics carry: **a recorded founder waiver for the named commit, the guard LEFT ARMED, the exception
+documented not encoded, and never a silent commit.** Unlike `layer2-mechanisms.ts`, neither file
+carries a SHA pin.
+
+**And ruling 3 raises a question the ruling does not settle, which is NOT resolved here.** Adding
+`caller_class` mid-window creates a **schema boundary** (the `v4` → a `v5`): records already captured
+carry no such field, and the ~75 in the window can be classified only by inspecting `actionPreview` —
+the heuristic this session used by hand. **Is a retroactive `actionPreview`-based classification
+acceptable for the pre-boundary records, or does the guard rate report only over post-boundary
+records?** That is a mentor question, named and left open.
+
+**Scope note, and it lowers the urgency:** ruling 3 affects the guard **disclosure** only. This
+session verified the consult population is **clean** — all 3 consult records are S5b's `Edit`s on its
+own documents, and this session produced 50 records, **all `Bash`, all guard, zero consult**. No
+subagent has ever produced a consult record, so **the gated within-consult measure carries none of
+this contamination.**
+
+## THE TWO FOUNDER DECISIONS — recommended, NOT taken here
+
+**Decision 1 — `npx not found`: the mentor recommends FAIL CLOSED.** *"A pin that can be silently
+skipped is not a pin… A guard that passes on machines where it cannot run is not a guard. It is a
+false assurance."* **NOT APPLIED — this is a founder election and it carries a live risk that must be
+checked first:** the hook runs `npx` for every check, so if the founder's **GitHub Desktop** does not
+carry Node on PATH, failing closed would block them from committing **at all**. Verify Node is on
+GitHub Desktop's PATH *before* making the change, not after.
+
+**Decision 2 — five open peers: the mentor recommends closing four and working one arc.** *"Epithumia —
+craving — presents as urgency… more arcs means more surface area for errors to propagate undetected."*
+**The founder's action; nothing here closes a peer session.**

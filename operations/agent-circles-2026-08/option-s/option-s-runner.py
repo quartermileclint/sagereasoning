@@ -176,13 +176,21 @@ BLOCKED_PROXIMITIES = tuple(
     if rank < PROXIMITY_RANK[DEFAULT_THRESHOLD]
 )
 
-# Even-K median convention. K is ruled 10, which is EVEN, so the ordinal median
-# is not unique. This instrument takes the LOWER of the two central values --
-# the more conservative (closer-to-floor) reading -- consistent with this
-# project's standing "conservative MIN, never an average" discipline for ordinal
-# virtue quantities. STATED, not silent: it is a convention, it is published on
-# the output as `M_even_K_convention`, and it is a live input to the deferred
-# M/W/S election. If the mentor rules otherwise, this is the one place to change.
+# Even-K median convention -- RULED 2026-09-07. K is ruled 10, which is EVEN, so
+# the ordinal median is not unique. The mentor ruled `lower_median`: "the value
+# at position K/2 rather than the average of positions K/2 and K/2+1 -- is the
+# correct choice for an ordinal scale where the values are ranks, not
+# quantities. Averaging two ordinal ranks produces a number that may not
+# correspond to any actual rank on the scale. Lower_median stays on the scale."
+# Verbatim record (canonical):
+#   operations/trust-layer-2026-07/2026-09-07-mentor-rulings-S6b-three-questions-verbatim.md
+#
+# It remains a CONVENTION, not a ruling on the underlying scale: "If the scale
+# changes, the convention is revisited. If K changes from 10, the convention is
+# revisited." This constant is the one place to change if either happens.
+#
+# The ruling was settled BEFORE any run, deliberately -- "Change this after a run
+# and every `would_option_M_record` is wrong. Settle it now."
 M_EVEN_K_CONVENTION = "lower_median"
 
 # Outcomes admitted to the distribution, per D6a: a 200 with no proximity is the
@@ -794,15 +802,17 @@ def summary(runs_dir: str) -> None:
                                 f"about the frozen text, and its conservative "
                                 f"proceed=false would inflate the rate with "
                                 f"transport health."),
-        "M_even_K_convention": (f"{M_EVEN_K_CONVENTION} -- K is ruled 10, which "
-                                f"is EVEN, so the ordinal median is not unique. "
-                                f"The LOWER (closer-to-floor) central value is "
-                                f"taken, consistent with this project's standing "
-                                f"conservative-MIN-never-an-average discipline. "
-                                f"This is a CONVENTION, not a ruling, and it is a "
-                                f"live input to the M/W/S election -- if the "
-                                f"mentor rules otherwise, change "
-                                f"M_EVEN_K_CONVENTION."),
+        "M_even_K_convention": (f"{M_EVEN_K_CONVENTION} -- RULED 2026-09-07. K is "
+                                f"ruled 10, which is EVEN, so the ordinal median "
+                                f"is not unique. The mentor ruled the value at "
+                                f"position K/2, not the average of K/2 and "
+                                f"K/2+1: averaging two ordinal ranks yields a "
+                                f"number that may correspond to no actual rank "
+                                f"on the scale, whereas lower_median stays on "
+                                f"it. Settled BEFORE any run, deliberately. It "
+                                f"remains a CONVENTION, not a ruling on the "
+                                f"underlying scale -- revisited if the scale "
+                                f"changes or K moves off 10."),
         "directional_decomposition": ("REMOVED by mentor ruling 2026-09-05 "
                                       "(2026-09-05-mentor-rulings-five-relays-"
                                       "verbatim.md Part 1): 'The decomposition is "
