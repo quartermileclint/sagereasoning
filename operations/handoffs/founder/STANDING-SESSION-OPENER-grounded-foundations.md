@@ -1,510 +1,553 @@
 # Standing Session Opener — Grounded Foundations
 
-**Version 2026-09-05** (amends the 2026-08-29 version, archived at
-`archive/2026-08-29_STANDING-SESSION-OPENER-grounded-foundations.md`; predecessors at
-`archive/2026-08-15_…`, `archive/2026-08-12_…`, `archive/2026-08-01_…`).
+**Version 2026-09-08** (amends the 2026-09-05 version, now archived at
+`archive/2026-09-05_STANDING-SESSION-OPENER-grounded-foundations.md`; predecessors at
+`archive/2026-08-29_…`, `archive/2026-08-15_…`, `archive/2026-08-12_…`, `archive/2026-08-01_…`,
+`archive/2026-07-25_…`, `archive/2026-07-13_…`).
 
-> **How this version was grounded.** Written by a Fable 5.1 session on 2026-09-05 (Sat, AEST) that
-> re-derived the whole 2026-08-29 → 2026-09-05 window from primary sources, **first-hand and without
-> subagents**: every decision-log entry from `D-STANDING-OPENER-2026-08-29-UPDATE` to the physical
-> tail (`D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06`, ~75 entries, read in full); the
-> fourteen session closes dated 2026-09-03 → 2026-09-06-labelled; every open or recently-spent
-> next-session prompt; the S11 register in full; the priority index's head and named-input register;
-> the 2026-08-24 outstanding-questions register and its 08-30 addendum; the count-discipline
-> directory; the standing protocol cache; and direct first-hand checks of git state, the R20a registry
-> arrays, the agent-card extension count, the PR range by enumeration, `vercel.json`, the founder's
-> dogfood `settings.local.json` (keys only — no token read), the live `gate1.log`, the false-hold
-> buffer, and one unauthenticated public GET (`llms.txt`). Claims a repo session cannot verify —
-> Vercel environment values, Supabase state, whether the founder has pushed — are marked
-> **unverified** rather than restated. **The record's last activity is 2026-09-05 09:15 AEST**
-> (`099b218`); at writing `git log origin/main..HEAD` showed **one unpushed records commit**
-> (`099b218` — the founder pushes). Re-derive both facts at your own open.
+> **How this version was grounded.** Written 2026-09-08 (Tue) ~18:45 AEST = 2026-09-08 ~08:45 UTC,
+> dated from `date`, not from the conversation context. It re-derives the **2026-09-07 16:19 AEST →
+> now** window — everything after the previous version's last in-place amendment (commit `3437dc0`)
+> — **first-hand and without subagents**: the four session closes since (S6b, S7, S8, S9), the S10
+> working-notes file (a paused, deliberately record-less session), every decision-log entry from
+> `D-MENTOR-RULINGS-S6B-THREE-QUESTIONS-ADOPTED-2026-09-07` to the physical tail
+> (`D-MENTOR-RULING-S9-FOUR-QUESTIONS-ADOPTED-2026-09-08`), the two governing mentor rulings of that
+> window in full, the S11 register's D2/P6/B4 rows, and the amended Condition-2 prompt. **Live
+> first-hand checks, not restatements:** `git status` and `git log origin/main..HEAD`; the false-hold
+> buffer parsed record-by-record in Python; `gate1.log`'s tail; `~/.sage-gate1/` for `*-stdin.json`
+> residue; `.claude/settings.local.json` (keys only, no token read); both SHA pins; the byte-identity
+> guard battery **run, not quoted**; the R20a registry arrays, the agent-card extensions array, the
+> PR range, and `vercel.json`'s crons all **counted from source**; `ListAgents`.
+> **Claims a repo session cannot verify — Vercel environment values, Supabase state — are marked
+> unverified rather than restated.** At writing the tree is **clean of guarded files, `origin/main`
+> and `HEAD` are level at `ff6b51d`, and nothing is unpushed.** Re-derive all of it at your own open.
 
 **For the founder. Paste this as the FIRST message of a new session, then state your task beneath it
-(or in your next message).** This opener grounds the session in the project's current state and the
-trust-layer harness *before* any work begins, under the standard protocol. It is **reusable across
-any task** — a preamble, **not a task**: read, confirm, then wait for the task. **The prioritised
-session plan is the "Standing queue" section below; the first-priority session has its own
-paste-ready prompt** (`2026-09-05-SESSION-1-r20a-perimeter-ordering-audit-SESSION-PASTE.md`).
+(or in your next message).** It grounds the session in the project's state and the trust-layer harness
+*before* any work begins. It is **reusable across any task** — a preamble, **not a task**: read,
+confirm, then wait for the task.
 
 ---
 
 ## ⚠️ The facts every session in this window must know before anything else
 
-1. **Production has changed six times since the 08-29 opener, all founder-walked or founder-pushed,
-   all recorded, none reverted.** In order: the **verdict-variance disclosure** on the public R18
-   surfaces + `TRUST_RECORD_ENVELOPE` (08-30/31 — n=100, 12%, Wilson 7.0–19.8%, per-probe leads, no
-   directional split, the borderline class split, live-verified at all seven places); **provenance
-   ledger slice 3** + the **404-contract alignment** (08-30/31 — served `provenance_gaps`, the ENV-1
-   gate relaxed, live under the already-`true` `SUBSTRATE_PROVENANCE_LEDGER_ENABLED`; **unsetting
-   that flag is NOT a rollback path**); **`/api/score/save` joined the R20a perimeter** (09-02,
-   `SUBSTRATE_SCORE_SAVE_R20A_ENABLED=true`, 422 refusal, ten fields screened); the **PostgREST
-   row-cap fixes** — founder-hub thread + C1 + C4, 24+ sites now exhaustive-read (09-03, code-only);
-   **register D4 activated** (09-05, `SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true` — a
-   self-only-circle assessment emits no `dikaiosyne` justice event; **took-effect proven the same
-   day** on a torn-down throwaway); and the **`/api/score-conversation` `format` length guard**
-   landed (09-05, always-on, `4c1cd94`) **then MOVED behind the distress check** under a mentor
-   ruling the same day (`0126645` + PR19 fold `97db750`; both on `origin/main`, Vercel green).
-   ~~Three guards still precede that route's R20a block~~ **[SUPERSEDED 2026-09-06: NO length guard precedes that route's block any more — Group 1 moved the `<20` minimum (`c679739`, 09-05) and Group 2 moved the two maxima (`cbd93ae`, 09-06), both live-smoked. Sixteen non-conformant members are now down to the Stoa pair, the three proof routes, and the ruled 2b additions — see the Standing queue.]** Rollback for the guard work is `git revert` of the relevant commits, never a flag.
+### 1. The observation window is RUNNING, and most sessions add nothing to it
 
-2. **A cluster of records is labelled one day ahead of reality — read past it, do not fix it.**
-   Everything labelled "2026-09-06" or "2026-09-07" (the CLAUDE.md item-E block; the post-sweep
-   close + prompt; the R20a ordering ruling verbatim; the environmental-scan scope; the audit prompt;
-   the five decision-log entries headed 2026-09-06; the P6 BUILD prompt) was **authored on
-   2026-09-05 AEST per git** (commits `aa4e567`…`099b218`, 05:31–09:15 +1000; the P6 BUILD prompt on
-   09-04 19:57). Those sessions took the date from the conversation context. The labels stay (they
-   are cited by filename); each file carries its true date in `git log`. **Date your own artifacts
-   from `date` and `git log`, never from the context date** — the same error misdated three separate
-   sessions this window (memory `date-artifacts-from-machine-clock`).
+Started **2026-09-06T09:44:55Z**, took-effect proven. `GATE1_FALSE_HOLD_CAPTURE=true` is present in
+the founder's local `.claude/settings.local.json` (verified first-hand). **Nothing about the window
+lives in Vercel** — the flag is read only by `harness/gate1-pre-decision/**`; a false start that set
+it in Vercel was caught at S4 and is on record.
 
-3. **The R20a perimeter-ordering ruling is binding and its follow-on is the ruled next step.**
-   *"Purpose (b) governs for human-facing members of the perimeter. The distress check runs before the
-   length guard on any route where the human crisis form is rendered."* **THE ARC IS CLOSED (2026-09-06):** the audit ran 2026-09-05 and all sixteen non-conformant members are remediated — Groups 1, 2, 2b, 3 LIVE (`c679739`, `cbd93ae`, `555502e`) and the Stoa pair BUILT (`6586713`, pending push). Every human-facing member reaches its distress check before any refusal on a body whose screened text is present. **J/A/F are outside the ruling by its own terms; no move is owed there.** Next row: S9. Originally: a
-   **perimeter-wide execution-order audit** (its own `governance` session; prompt authored; **a
-   textual-position sweep was tried and discarded as unsound — do not resurrect its 20/10/13 split**),
-   then a `code-critical` founder-walked remediation. Agent-facing members are governed by purpose (a)
-   alone and must **not** be "fixed". Framing: *"inherited properties are not examined properties"* —
-   report findings as accretion, not as anyone's error.
+Buffer at this writing: **298 records** — 138 pre-window `v1` (a different regime, **never mixed
+in**), record 139 the deliberate took-effect probe (**excluded**), leaving a window population of
+**159** = **139 guard + 20 consult**.
 
-4. **The S11 track moved a long way and the flip is still REFUSED.** P1 ruled and discharged (the
-   at-action verdict, filtered by Q3's kathekon threshold, is the table's per-action input; the
-   sibling seam `interventionInputFromAtAction` is built dark, wired to nothing); D5 closed
-   (`taskHasJusticeSurface` now REQUIRED at every call site); the H3 advisory no longer injects the S4
-   recommendation; P6's purpose **widened** to measure the table's recommendation (derived at report
-   time, never stored — the report script now prints both columns, PR19-folded); **D4 live and
-   proven**; **D1's re-latch watch is OPEN and cannot discharge from harness traffic** (the close hook
-   is seed-only and the row exists ⇒ 409 before emission — the 08-30 C2 finding, now cross-referenced
-   in the register); **D2's priority is RAISED** (`credential-completed` still tags dikaiosyne on a
-   self-only action — now an `increase` where D4 removed a cap); **bound B4** (guard availability
-   11–32% on ordinary days, 60% on the 09-04 outlier; the remedy — `GATE1_TIMEOUT_MS=55000` + all hook
-   timeouts to 60 s — is applied, its follow-up measurement **due ≥2026-09-08 UTC**); **F-3′** makes a
-   bounded availability rate a **second window precondition** with its threshold **unset** (a P6
-   design question). **The window therefore cannot start yet, and its start is one founder act with
-   three names** — setting `GATE1_FALSE_HOLD_CAPTURE` is P8a's activation, the window start, the
-   standing-runner track's "item D restoration", and the byte-identity guard re-arming, all at once.
+| UTC day | consult | guard |
+|---|---|---|
+| 2026-09-06 | 3 | 76 |
+| 2026-09-07 | 17 | 63 |
+| 2026-09-08 | **0** | **0** |
 
-5. **The standing-runner track has run three sittings (R8, R9, R10) and waits on founder elections.**
-   The Option S gate is **item-level**: only the M/W/S floor-semantics election and R8-D7's sampling
-   policy wait on its data; everything else is ungated and the session may open on the founder's act.
-   **Option S is built and has never made a call**; a PR19 review found **four pre-run blockers**
-   and one **mentor question pending relay** (should the directional decomposition exist at all — if
-   removed, blocker B1 is moot); **Path A's one precondition is the production extraction** (F2).
-   The twelve-environment agent architecture is REVISED-not-confirmed and **prospective in v1**;
-   Q1 reaches any composed pipeline (assent at Threshold's handoff); environment agents accumulate no
-   trust records in v1; Attic/Cellar not elected. Hold prompt:
-   `2026-09-04-standing-runner-post-R10-grounding-and-await-NEXT-SESSION-PROMPT.md`.
+**BASELINE: 2 of 5.** The gate is **five ordinary days WITH CONSULT RECORDS** — a day with ≥1
+consult counts; a zero-consult day does **not** (binding, D2 ruling). Two days qualify. **S11-D2 is
+blocked on this counter and on nothing else.**
 
-6. **Concurrency produced this project's first real collision, and two practices now bind.** On
-   2026-09-05 a peer's unscoped `git add` swept 187 lines of another session's decision-log entry into
-   `468fcf9` under an unrelated message (content intact; history not rewritten). The standing cache's
-   "zero actual collisions" sentence is annotated false; **whether this triggers the pre-commit-hook
-   / PR26 escalation is the founder's call.** Standing practices: **a peer's push publishes your local
-   commits** (the commit is the point of no return); **run `git status` whole, never truncated**;
-   `ListAgents` at open (**three interactive peers at this writing**); path-scoped commits, always.
+**Never "refresh" the buffer. It is append-only and is never truncated.**
 
-7. **CLAUDE.md is CURRENT through the 09-06-labelled item-E block** — a reversal of the 08-29 opener's
-   fact 3 — and carries a 2026-09-05 grounding note pointing here. Its ~20 dated extension counts and
-   every perimeter figure are **historical by design**; re-derive every count from source
-   (`HUMAN_FACING_POST_ROUTES` / `SUBSTRATE_GATE_ROUTES` in
-   `website/src/lib/__tests__/r20a-invocation-guard.test.ts`; the agent-card `extensions` array;
-   PR1–PR25 by enumeration).
+### 2. ⚠ SESSION NUMBERS S7–S10 NOW MEAN TWO DIFFERENT THINGS. This version renames them.
 
-8. **Three mentor questions are pending relay and one R18 package awaits signature** — see the
-   "Founder actions between sessions" list in the Standing queue. Nothing self-starts on them.
+The standing queue used `S1…S11` as *queue row labels*. The caller-class arc of 2026-09-07/08 then
+reused `S6a, S6b, S7, S8, S9, S10` as *its own* session numbers, for entirely different work. The
+collision is real and would mislead a session told to "run S7":
+
+| Label | Queue row (older meaning) | Caller-class arc (2026-09-07/08 usage) |
+|---|---|---|
+| S7 | item 2b — `l1_supply` out of the `ecosystem` preset — **still queued** | rulings 2 & 3 executed — **done** |
+| S8 | records fold + governing-surface edits — **still queued** | Option C investigation — **done** |
+| S9 | harness A11b redaction — **done 2026-09-06** | Condition 1 — **done 2026-09-08** |
+| S10 | founder-hub mentor continuity — **still queued** | Condition 2 capture — **paused, unreached** |
+
+**From this version the two namespaces are separated and the queue rows below use the new names.**
+Queue rows are `Q-…` (by topic, not number). Caller-class arc sessions keep their historical
+`S6a…S10` labels **only** as references to work already done. **Never open a session by a bare
+number again — name the deliverable.**
+
+### 3. The Option C′ gate: three conditions, one complete, and NO BUILD IS LICENSED
+
+`classifyCaller` may not be modified until **all three** are met (S8 five-question ruling, binding):
+
+- **Condition 1 — false-positive check under controlled conditions. ✅ COMPLETE and closed by
+  ruling (S9).** A top-level session never carried `agent_id` at H3 across eight captures / four
+  configurations on client `2.1.260`. The `CLAUDE_CODE_CHILD_SESSION` question the ruling named as
+  *"the first thing to examine"* is answered: it reads `1` in a top-level session whose H3 captures
+  carry no `agent_id`. Configuration 5 (a second entrypoint) is **ruled out of scope** — it belongs
+  to Condition 3, so it is no longer a Condition-1 gap.
+- **Condition 2 — a second live capture. ❌ OUTSTANDING.** Must be a **genuinely different calendar
+  day** (*"literal, not approximate"*), a **different session ID**, and the **same client 2.1.260**.
+- **Condition 3 — client-version pinning in the build, with detection of the field's absence falling
+  back to `unknown` rather than silently misclassifying. ❌ OUTSTANDING, not started.**
+
+**`classifyCaller` is byte-unchanged. Nothing may be built against this candidate.**
+
+**S10 attempted Condition 2 and correctly could not run it** — it opened ~10 minutes after S9 closed,
+the same day under both conventions. It is **paused, not closed**: no decision-log entry, no register
+row, no `D-` code, by founder ruling. Its working notes
+(`operations/trust-layer-2026-07/2026-09-08-S10-WORKING-NOTES-session-paused-NOT-CLOSED.md`,
+**untracked**) hold perishable evidence only. **Do not cite S10 as a finding.**
+**The first unambiguously qualifying day for Condition 2 is 2026-09-09 local.** UTC rolls at 10:00
+AEST, so 11:00 AEST on 09-08 is a new UTC day but the same *local* day — it does not qualify.
+
+### 4. A binding pre-check now gates any future `GATE1_DEBUG` session
+
+Before **any** session sets `GATE1_DEBUG` again, **both** are required and **neither is optional**
+(S9 four-question ruling): **(i)** `rm ~/.sage-gate1/*-stdin.json`; **(ii)** open a **fresh session**,
+run a control probe, and **confirm no fresh dumps appear**. If dumps appear, the variable is still
+live and *"its persistence mechanism must be understood before it is used again."*
+
+**Current state, verified first-hand at this writing: no `*-stdin.json` files exist.** The S9
+residual has cleared. **This does NOT discharge the pre-check** — the ruling requires it run in the
+capturing session itself.
+
+**Why it exists:** `GATE1_DEBUG` shows a **revert asymmetry**. Addition took effect within one tool
+call; removal had not taken effect at all by S9's close (sentinel-proven). The config file was
+byte-identical to its backup both times; the *runtime effect* was not. S10 eliminated two candidate
+carriers (app-process restart — the app PID was continuous across S8/S9/S10; pure elapsed-time TTL —
+contradicted, ≥1h45m in S8 vs ≤9min in S10) and **the carrier is still not identified.** A session
+boundary survives as the one differing variable.
+
+### 5. The measured population depends on tool mode — and this session is a live example
+
+**Ruled disclosure (S9), now a named *structural dependency* in the pre-flip report, not merely a
+limitation:** the consult denominator *"is not a random sample of all actions the agent takes — it is
+a sample of actions taken with Write/Edit/MultiEdit/NotebookEdit tools."* `Bash` is dropped from the
+consult floor, so a session authoring via heredocs adds **nothing** to the consult population.
+
+Observable right now in `gate1.log`: this session's every Bash call logs
+`AT-ACTION-SKIP-BASH reason=bash-dropped-from-score` (or `housekeeping`). **A Bash-authored session
+cannot advance the baseline toward 5 of 5. A Write/Edit-authored one can.**
+
+Two consequences, both named rather than decided by any session:
+- **Composition is disclosed, never filtered.** All 20 consult records in the window are
+  documentation authoring; **zero `website/src` engineering actions** so far. The mentor ruled such
+  days **count** — *"a day composed entirely of markdown authoring is a day the instrument examined
+  Write and Edit actions"* — and that filtering them would be *"a post-hoc narrowing of the
+  population mid-window, the move ruled against twice already."*
+- **Tool choice therefore moves a gated counter.** Choosing a tool *because of* its measurement
+  effect, in either direction, would be shaping the instrument. Choose on the task's merits and
+  disclose the effect.
+
+### 6. Eleven interactive sessions are open on this project, against a standing ruling to consolidate
+
+`ListAgents` at this writing: **10 interactive peers + this one.** At S6b the mentor ruled on exactly
+this: *"Epithumia — craving — presents as urgency… more arcs means more surface area for errors to
+propagate undetected."* At S7 there were six. **The count has grown, not shrunk.**
+
+This matters for any proposal to add a parallel arc — see **"Running a side arc in parallel"** below,
+which states the four constraints that actually bind.
+
+### 7. Production is unchanged since 2026-09-06 and the R20a ordering arc is CLOSED
+
+No production surface has changed since the Stoa restructure went live and was smoke-verified
+(2026-09-06). Everything since is **repo-only or local-harness**: no flag set or unset, no schema, no
+migration, no credential, no deploy. **Every human-facing member of the R20a perimeter now reaches
+its distress check before any refusal on a body whose screened text is present.** Groups 1, 2, 2b, 3
+and the Stoa pair are all live. J/A/F members are outside the ruling by its own terms — **no move is
+owed there, and they must not be "fixed."**
+
+### 8. Every count in every document is a claim to re-derive
+
+Re-derived from source at this writing: **R20a 43 route-level + 2 substrate-gate = 45**;
+**agent-card extensions 26**; **PR1–PR25**; **6 crons** (none is the environmental scan).
+CLAUDE.md's ~20 dated extension counts and every perimeter figure in it are **historical by design**.
+**Date your own artifacts from `date` and `git log`, never from the conversation context** — that
+error misdated three separate sessions in the previous window and is why a cluster of files is
+labelled one day ahead of reality (read past it; the labels are cited by filename and stay).
+
+### 9. Two mentor items and several founder acts are pending — nothing self-starts on them
+
+See "Founder actions between sessions" below.
 
 ---
 
 ## Part A — Open under the standard protocol (Tier 1 — always; ~8–10 min)
 
 Read, in order:
+
 1. `/adopted/standing-protocol-cache.md` — session protocol, model selection (AC1), risk
-   classification (0d-ii), the five-row AI-failure-mode table, the **concurrency check §6** (now
-   carrying the 2026-09-05 collision annotation), the status vocabulary. **Process rules are PR1–PR25
-   — verify by enumeration in `/adopted/project-instructions-snapshot.md`, do not quote this line.**
+   classification (0d-ii), the five-row AI-failure-mode table, the **concurrency check §6** (carrying
+   the 2026-09-05 collision annotation), the status vocabulary. **Process rules are PR1–PR25 —
+   verify by enumeration in `/adopted/project-instructions-snapshot.md`; do not quote this line.**
 2. `/adopted/build-sessions-protocol-cache.md` — if the task is a substrate/trust-layer build.
-3. `/adopted/project-instructions-snapshot.md` — PR19 (independent review REQUIRED — this window
-   again shows independent review finding HIGHs first-hand review missed, five separate times), PR20
-   as amended (timestamp-check present-tense mechanism facts at relay), PR25.
+3. `/adopted/project-instructions-snapshot.md` — **PR19** (independent review REQUIRED — it has now
+   found HIGHs that first-hand review missed **eight** separate times across two windows), PR20 as
+   amended (timestamp-check present-tense mechanism facts at relay), PR25.
 4. `/manifest.md` — targeted sections only: R0 + the **four** un-numbered mentor-directed sections
    (the Moral Community Boundary; the ATRF; the Consciousness and Continuity Obligation; **the
-   Prerequisite Criterion, binding governance since 2026-08-29**); AC5 (note its internal
-   contradiction, fact 7 of the queue below); AC7.
+   Prerequisite Criterion**, binding governance since 2026-08-29); AC5 (note its internal
+   contradiction — it bolds *"does not hand-enumerate route-level membership"* then enumerates all
+   43; counts correct today, the contradiction is a founder call); AC7.
 5. `/CLAUDE.md` — the 2026-09-05 grounding note, then the 09-06-labelled item-E block, then the
-   "Live in production" list. Treat every count as a claim to re-derive.
-6. `/operations/decision-log.md` — the last 3 entries at the **physical tail** (as of this writing:
-   `D-STANDING-OPENER-2026-09-05-UPDATE-SESSION-PLAN-AND-RECORDS-HYGIENE`,
-   `D-SCORE-CONVERSATION-FORMAT-MOVE-DEPLOYED-LIVE-2026-09-06`,
-   `D-D4-TOOK-EFFECT-PROVEN-D1-WATCH-OPEN-RETRY-HELD-2026-09-05`). The head of the file is NOT the
-   newest material (the placement note).
-7. **The most recent close matched to your task:** S11 track →
-   `2026-09-05-post-D4-live-op-cluster-CLOSE.md` and `2026-09-05-D4-activation-and-F3prime-CLOSE.md`;
-   R20a / count-discipline → `2026-09-06-post-sweep-carried-items-CLOSE.md` and
-   `2026-09-05-post-ruling-autonomous-work-CLOSE.md`; standing runner →
-   `2026-09-04-standing-runner-design-R10-twelve-environment-CLOSE.md`; this grounding →
-   `2026-09-05-grounding-and-session-plan-CLOSE.md`.
-8. **`git status`** (whole) and **`git fetch origin && git log --oneline origin/main..HEAD`** — know
-   the pending tree and whether anything is unpushed. Expected at this writing: a clean tree; HEAD at
-   or after `099b218`; nothing ahead of `origin/main` once the founder has pushed. Never stage another
-   session's files.
+   "Live in production" list. **⚠ Its S9 production-state block currently says the loop is "still
+   dumping every `PreToolUse` hook's raw stdin to disk" and that a manual `rm` is owed. Both are
+   now FALSE** (fact 4). The correction belongs in the resumed Condition-2 session's own complete
+   record; it is deliberately left uncorrected rather than annotated from a half-finished session.
+6. `/operations/decision-log.md` — the last 3 entries at the **physical tail**, which as of this
+   writing are `D-S9-CONDITION-1-AGENTID-PARENT-SESSION-PASSES-2026-09-08`,
+   `D-MENTOR-RULING-S9-FOUR-QUESTIONS-ADOPTED-2026-09-08`, and before them
+   `D-MENTOR-RULING-S8-FIVE-QUESTIONS-ADOPTED-2026-09-08`. **The head of the file is NOT the newest
+   material**, and the newest entries use `## <date> — D-…` headings, not the older `## D-…` form —
+   a bare `grep '^## D-'` will silently miss everything after 2026-09-05.
+7. **The most recent close matched to your task:** caller-class / Option C′ →
+   `2026-09-08-S9-condition-1-agentid-CLOSE.md` then `2026-09-08-S8-option-C-investigation-CLOSE.md`;
+   window + Option S → `2026-09-07-S6b-commit-gate-and-option-s-fixes-CLOSE.md` and
+   `2026-09-07-S7-rulings-2-and-3-executed-CLOSE.md`; R20a → the four
+   `2026-09-06-r20a-perimeter-ordering-remediation-*-CLOSE.md` files; standing runner →
+   `2026-09-04-standing-runner-design-R10-twelve-environment-CLOSE.md`.
+8. **`git status`** (whole, never truncated) and **`git fetch origin && git log --oneline
+   origin/main..HEAD`**. Expected at this writing: `HEAD` = `origin/main` = `ff6b51d`; nothing
+   unpushed; **two modified files and one untracked file in the tree that are NOT yours** (see
+   "What is in the tree that you did not put there"). **Never stage another session's files.**
 9. **`ListAgents`** — note the peer count before writing anything.
 
-*Tier 2 (task-dependent):* the day's deliverable in full; for the S11 track,
-`operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` **in full** plus
-`2026-08-15-false-hold-new-window-scoping-note.md` §2.4/§3/§7; for the standing-runner track,
-`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` §"Named inputs" (the register) and the
-R9/R10 designs' head-of-document withdrawals and RULED addenda; for the R20a ordering work,
-`operations/count-discipline-2026-09/` (the ruling verbatim, the two mentor questions, the R18
-package, the Option S findings) and `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`;
-for anything in the agent-circles/ATRF/EE/provenance line, `operations/agent-circles-2026-08/` (the
-mentor verbatims are canonical — **verbatim wins over every summary including this one**).
+*Tier 2 (task-dependent):* the day's deliverable in full; for the S11/caller-class track,
+`operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` **in full** plus the S8 and S9
+mentor verbatims; for the standing-runner track,
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` §"Named inputs" and the R9/R10 designs'
+head-of-document withdrawals and RULED addenda; for R20a/count-discipline,
+`operations/count-discipline-2026-09/`; for anything in the agent-circles/ATRF/EE/provenance line,
+`operations/agent-circles-2026-08/`. **The mentor verbatims are canonical — verbatim wins over every
+summary, including this one.**
 
 ---
 
 ## Part B — Ground in the current project state (confirm you can state these)
 
-### Production state — what is live beyond the 08-29 opener's list
+### Production state
 
-The substrate is live at `www.sagereasoning.com`. Everything the 08-29 opener listed as live remains
-live. **New or changed since 2026-08-29, in rough order of consequence:**
+The substrate is live at `www.sagereasoning.com`. **Nothing has changed in production since
+2026-09-06.** Everything the 2026-09-05 opener listed as live remains live, and its "what is live
+beyond the 08-29 list" section stands unamended — read it in
+`archive/2026-09-05_STANDING-SESSION-OPENER-grounded-foundations.md` if you need the detail. The
+headline items, unchanged:
 
-- **The R20a perimeter is 43 route-level + 2 substrate-gate members** (re-derived 2026-09-05 from
-  the registry arrays; 31 flag-pair entries across 30 flag-gated routes + 13 unconditional). The
-  43rd is `/api/score/save` (09-02). **The perimeter count is now enforced, not warned:** the guard
-  battery asserts that no hand-maintained count appears anywhere in its own comments (RA-2 closed
-  09-04; widened 09-05 after two body-position counts were found beside the corrected assertions —
-  *"a guard scoped to where the last instance happened does not arrest the class"*); the same battery
-  now strips comments before every per-route import check (a commented-out safety import used to
-  pass — mutation-proven both ways; guard **722/0** at this writing).
-- **`/api/score-conversation`** — the `format` length guard (always-on 400 above `TEXT_LIMITS.long`)
-  now sits **after** the R20a block and before `domainContext`; pinned by a brace-matched
-  block-end anchor (FV-6a–d) after three PR19 reviewers found the first pin anchored on the block's
-  *opening*. The `conversation`/`context` max guards and the `conversation` min guard still precede
-  the block — **non-conformant under the ruling, carried to the audit.** The authenticated live smoke
-  of the new ordering (an oversized distressed `format` should now redirect, not 400) has **never
-  been run** — needs a Bearer JWT (memory `human-routes-bearer-jwt-console-smoke`).
-- **D4 live** (`SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true`, 09-05, `99e9603`): the
-  reducer withholds the dikaiosyne justice emission for self-only-circle assessments, symmetric across
-  all four outcomes per M-1. Proven by a three-legged took-effect test (`indeterminate` path only;
-  `violated`/`met` un-exercised). The predicate deliberately does **not** receive the flag — passing
-  it would empty `loop_fold`'s live `self_regarding` bucket and falsify the R18 claim at
-  `llms.txt:548`. D4 does not close D1's full-ledger-replay caveat.
-- **The row-cap arc is closed** (09-02 → 09-03): the founder-hub thread truncation (1,013 rows,
-  the mentor re-answering row 1000) fixed with keyset pagination + a "Load earlier messages"
-  affordance; two shared primitives (`website/src/lib/db/paged-select.ts` — `pagedRows` keyset;
-  `pagedRangeSelect` offset, with a disclosed ordering residual); C1 (cost-alerts, abuse, SLO,
-  admin-metrics — H10/H11 were truncating live) and C4 (all data-rights + store reads) live. Two
-  deliberate exceptions: `provenance-ledger-store.ts` (WATCHED) and C5 (Stripe-gated). A
-  `REQUEST_VELOCITY_LOOKBACK_HOURS: 24` bound was added to abuse detection. The
-  `/api/practice/discernment` route now writes `route_errors` on both catch paths (the 63
-  historical `ELICIT-OUTAGE` 503s remain unrecoverable without founder Vercel-log access).
-- **Provenance ledger:** slice 3 + the 404-contract tail live (08-30/31); `provenance_gaps` served
-  at `data.record.provenance_gaps` (empty for every agent until slice 5 enforces — the empty-state
-  note says so); `/limitations` gained a trust-record section. **Switch-on scoreboard: C1 ✅ (empty
-  population, re-check at switch-on is a HARD obligation) · C2 ✅ (discharged on SCOPE's pre-ledger
-  exclusion after the project's own population premise was found wrong) · C4 ✅ · C3 ⏳ the 90-day
-  soak from 2026-08-26 → ~2026-11-24. Slice 5 is not to be opened before that.** The C2 finding
-  also established that **the harness close hook can never produce a classifiable write on the
-  existing `s9-loop` row** (seed-only, 409 before emission) — the same fact that keeps D1 open.
-- **The verdict-variance disclosure is live at seven places** (08-30/31, five applications in three
-  days; battery 156/0 at the last count; every figure re-derived from raw probe records):
-  `/api/guardrail` 12% aggregate disagreement, Wilson 95% CI 7.0–19.8%, n=100, per-input crossings
-  0/0/2/2/8 of 20, no directional decomposition, the class limit at K=20, composition dependence
-  published beside it, the borderline population split (grave-vocabulary traffic vs near-boundary
-  inputs), role-blindness reclassified a confirmed design deficiency, `/api/reason`'s rate stated
-  unmeasured. D6a's runs are frozen evidence (`operations/agent-circles-2026-08/d6a/`) — **never
-  "refresh" the figures.**
-- **The at-action seam** (`at-action-seam.ts`, 09-04) is built dark and wired to no live caller;
-  its first consumer is S11 G6(a) work, which is refused. **D5 is closed** (the flag is REQUIRED;
-  the two live `false` call sites are load-bearing and must not be flipped). **The H3 advisory line
-  `S4 measure-mode recommendation: …` is gone** from the injected frame (aggregate line stays; the
-  observation relocated to the log and the API). **The P6 report script** prints classification
-  and recommendation columns, split by population, with four bounds printed on the rate and a v3/v4
-  lift check that aborts (PR19: five reviewers, one HIGH — an arithmetic-identity "target MET" —
-  removed; six vacuous pins rebuilt; battery 74/0). Over the frozen 130 the P1 filter moves exactly
-  one record; **Q2's zero-false-positive floor was restored by the S11b reducer narrowing of
-  2026-07-18, not by P1.**
-- **The founder-loop harness config** (read first-hand, keys only): `GATE1_TIMEOUT_MS=55000`; hook
-  timeouts `UserPromptSubmit` 60 s, `PreToolUse Task|Agent` 120 s, `PreToolUse Bash|Edit|…` 60 s,
-  `PostToolUse Task|Agent` 60 s, `Stop` 60 s; `GATE1_FALSE_HOLD_CAPTURE` **absent** (window not
-  started; byte-identity guard dormant; `stoic-brain.ts` freeze + SHA pin unconditional);
-  `GATE1_ACTION_TEXT_MODE` absent (composed — lean mode is ruled **doctrinal**, not an operational
-  preference); `GATE1_TELOS_LINE_ENABLED=true`; `GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true`;
-  `SAGE_GATE1_REFLECT_PERSIST_ENABLED=true`; `GATE1_STATE_DIR=/Users/clintonaitkenhead/.sage-gate1`.
-  The false-hold buffer holds **138** v1 records, of which the frozen file is an exact 130-record
-  prefix (`runs/2026-07-17/FREEZE-NOTE.md`).
-- **The public assessment contract is still broken on three served surfaces** (`llms.txt`,
-  `agent-card.json`, `skill-registry.ts` document 11/37/7 assessments and a phantom `SO-01` id
-  against a live 14/55/8 — the routes return 400 on the documented shape; ~5 months old; exposure
-  nil pre-0h). **Re-confirmed served live by unauthenticated GET on 2026-09-05.** The eleven-edit
-  R18 package + a drift assertion are drafted and verified both directions; **apply wording and
-  assertion as one change, on the founder's signature.** `api-docs/page.tsx` documents a request
-  shape neither assessment route ever accepted — a separate R18 rewrite.
-- **`environmental_context` has no producer.** Six crons are scheduled and none is the weekly scan;
-  no route writes the table; two live perimeter routes (`/api/skill/sage-classify`,
-  `/api/skill/sage-prioritise`) read it into the LLM user message; the loader is fail-safe on
-  `last_scanned`. Severity turns on one founder-run query; the disposition (deliberate P7
-  scaffolding vs unfinished wiring) is a purpose question, deliberately not recommended on.
-- **`/api/community-map` 42703** — fixed and live since 2026-08-03 (`f198736`); its carried cause
-  ("column missing") was wrong; the CLAUDE.md bullet is annotated. Lesson carried: re-derive a
-  carried item's cause before trusting its priority.
+- **The R20a perimeter: 43 route-level + 2 substrate-gate members**, counted from the registry
+  arrays at this writing. The count is **enforced, not warned** — the guard battery asserts no
+  hand-maintained count appears in its own comments, and strips comments before every per-route
+  import check.
+- **The R20a ordering arc is closed** (fact 7). Groups 1/2/2b/3 and the Stoa pair live.
+- **D4 live and took-effect proven** (`SUBSTRATE_JUSTICE_SELF_CIRCLE_NARROWING_ENABLED=true`).
+  D4 does **not** close D1's full-ledger-replay caveat.
+- **The row-cap arc is closed**; two deliberate exceptions remain (`provenance-ledger-store.ts`
+  WATCHED, and C5 Stripe-gated).
+- **Provenance ledger:** slice 3 + the 404-contract tail live. Switch-on scoreboard C1 ✅ · C2 ✅ ·
+  C4 ✅ · **C3 ⏳ the 90-day soak to ~2026-11-24. Slice 5 is not to be opened before that.**
+- **The verdict-variance disclosure is live at seven places.** D6a's runs are **frozen evidence** —
+  never "refresh" the figures.
+- **The public assessment contract is FIXED** on the three served surfaces (S2 rode `6586713`,
+  2026-09-06: llms.txt ×6, agent-card ×4, skill-registry ×1, drift assertion 13/0). **Still open,
+  deliberately excluded by the package's own §D:** the `api-docs/page.tsx` assessment-entry rewrite —
+  both entries still document a request shape neither assessment route ever accepted.
+- **`environmental_context` still has no scheduled producer** — but see "What is in the tree", below:
+  a peer session has a **hand-run weekly scan sitting uncommitted**, which changes the disposition
+  question from "is this abandoned scaffolding?" to "is this meant to be run by hand?"
 
-### Verified first-hand at this writing (2026-09-05, AEST morning)
+### Verified first-hand at this writing (2026-09-08, ~18:45 AEST)
 
 | Claim | Check | Result |
 |---|---|---|
-| Git state | `git status`; `git log origin/main..HEAD` | clean tree; **`099b218` unpushed** (records only) |
-| R20a route-level members | count of quoted entries inside `HUMAN_FACING_POST_ROUTES` | **43** |
-| Substrate-gate members / flag-pair entries | `route:` keys inside the two other arrays | **2** / **31** |
+| Git state | `git status`; `git log origin/main..HEAD` | `HEAD` = `origin/main` = **`ff6b51d`**; **nothing unpushed**; 2 modified + 1 untracked, none mine |
+| R20a route-level / substrate-gate | entries counted inside each array body | **43** / **2** |
 | Agent-card extensions | `len(d['capabilities']['extensions'])` | **26** |
-| Process rules | headings enumerated in the snapshot | **PR1–PR25** |
+| Process rules | enumerated in the snapshot | **PR1–PR25** |
 | Scheduled crons | `vercel.json` | **6** (none is the environmental scan) |
-| Harness config | `settings.local.json` keys | as listed above; `GATE1_FALSE_HOLD_CAPTURE` absent |
-| Guard log since the timeout raise | `gate1.log` after the last `28000ms` line | 83 guard events, **1** outage (`55000ms`) — an early indication, **not** B4's measurement |
-| False-hold buffer | `wc -l` | 138 |
-| Stale assessment contract | unauthenticated `curl` of the live `llms.txt` | still served (`11 assessments`, `SO-01`, `37 assessments`) |
-| D4 flag / any Vercel value | — | **unverified** from a repo session (recorded at activation, founder-observed) |
-| Supabase state (ledger counts, `justice_floor_active`) | — | **unverified** here; last read 2026-09-05 by the D4-proof session |
+| Byte-identity guard | battery **run**, not quoted | **250 passed, 0 failed** — armed and green |
+| `layer2-mechanisms.ts` SHA pin | `shasum -a 256` | `60cefedb5f4f…` — **unchanged** |
+| `stoic-brain.ts` SHA pin | `shasum -a 256` | `fa8895ec949b…` — **unchanged** |
+| False-hold buffer | parsed record-by-record | **298** rows; window **159** = 139 guard + 20 consult |
+| Baseline days (≥1 consult) | grouped by `capturedAt` UTC day | **2 of 5** (09-06, 09-07) |
+| `GATE1_FALSE_HOLD_CAPTURE` | `.claude/settings.local.json` | **`true`** — window running |
+| `GATE1_DEBUG` residue | `ls ~/.sage-gate1/*-stdin.json` | **none** — S9 residual cleared |
+| Harness identity | config keys | `sagereasoning:s9-loop@v1`; `GATE1_TIMEOUT_MS=55000`; `GATE1_DEPTH=standard` |
+| Open sessions | `ListAgents` | **10 interactive peers + this one** |
+| Vercel / Supabase state | — | **unverified from a repo session** |
 
-### The window's method lessons (fresh instances, all this window)
+### What is in the tree that you did not put there
 
-- **Independent review found what first-hand review missed — five more times.** The `format` guard's
-  own tests (two HIGH: a commented-out check passed; an inline array literal was parsed); the move's
-  ordering pin anchored on the block's *opening* (three reviewers converged); the P6 column's
-  "target MET" arithmetic identity + six vacuous pins; Option S's first version (6 HIGH) and second
-  (4 pre-run blockers); R9's three and R10's eight structural over-claims, one a false source claim.
-  **PR19 is not a formality here, and self-review that checks *presence* rather than *strength* of a
-  constraint misses the relaxations.**
-- **Checks calibrated to expectation rather than to the specification.** One session wrote six
-  miscalibrated checks and caught all six itself; the discipline that saved it was discarding the
-  unsound result rather than publishing it (which the mentor commended by name).
-- **Date from the machine, not the context** (fact 2). **A carried item's stated cause is worth
-  re-deriving before its priority is trusted** (community-map). **A guard scoped to the last instance
-  does not arrest the class** (the perimeter count, fifth recurrence). **Rulings issued to two tracks
-  on one day can carry a condition that belongs to only one** (the v3/v4 lift check landed in the
-  Path A ruling; caught at provenance). **Re-relaying an answered question without its ruling
-  attached risks a divergent second ruling** (the ordering ruling's second relay was consistent; the
-  cheap mitigation is to attach the prior ruling).
-- **Under an ENFORCE deny, an agent softened four phrases toward what the classifier would pass
-  without deciding to** (D4 close §8b) — the failure mode the instrument cannot see, because it keeps
-  verdicts, not the drafts shaped to earn them. **Read the grounds of every guardrail caution**
-  (sparse-extraction ×2 and a genuine engine outage appeared in one session and would have been
-  flattened by habit); a deny is ENFORCE and is honored; an outage is not a deny.
-- **The harness capture was run before the P8a build was recorded in the register** — a
-  present-tense mechanism fact ("the guard path writes no record") stayed in the register 19 days
-  after it became false and was inherited by a scope document. PR20's timestamp check earns its
-  place on carried items, not only on relayed ones.
+Three files are modified/untracked at this writing and **none belongs to a session you are opening**:
 
-### Threads (updated)
+- `website/src/data/environmental-context.json` — **modified, uncommitted, a peer's.** A genuine
+  hand-run weekly environmental scan (`last_scanned` 08-31 → **09-07**, both domain summaries
+  rewritten with primary-source citations). Substantive and worth committing; **not yours to stage.**
+- `operations/handoffs/founder/2026-09-08-condition-2-second-capture-NEXT-SESSION-PROMPT.md` —
+  **modified, uncommitted.** S10's amendment: a **STEP 0 date gate** (+69 lines) and a client-version
+  correction. **UNSPENT.**
+- `operations/trust-layer-2026-07/2026-09-08-S10-WORKING-NOTES-session-paused-NOT-CLOSED.md` —
+  **untracked.** Perishable evidence from the paused S10. **Not a finding; do not cite it.**
 
-1. **Trust Layer / S11** — see fact 4. Register:
-   `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` (P1 discharged; P2/P3
-   landed; P4/P5/P6 open; B1–B4; D1 open with its C2 cross-reference; D2 raised; D3 standing; D4
-   live+proven; D5 closed). **The window's two preconditions:** P8a activation (= the window start)
-   and a bounded guard-availability rate whose threshold is a P6 design question. B4's follow-up
-   measurement is due **≥2026-09-08 UTC** (≥3 days of ordinary traffic after the 09-04 ~19:00 UTC
-   raise). **The S11 flip is REFUSED, MEASURE throughout, weights BLOCKED.**
-2. **Standing runner / agent circles** — see fact 5. Founder elections standing (R9 §16): Path A;
-   the build brief's second increment; the A2 engine change (gated on item D); item D's restoration
-   (= the window start); the ATRF item-3 amendment draft; the vocabulary-direction recommendation;
-   the two unoccupied-room heuristics (not elected by Q-F); the v2 chooser; the
-   environment-sensitive indicator (a mentor question if ever wanted); **a harness identity with an
-   examined record for the v1 executing actor** (the binding prerequisite three findings converge
-   on). R11 is the founder's to open. O-C Gate 3 is **CLOSED** (ruled 09-03; its §11 items named
-   to this track). Route (i) scoped 09-03 with a mentor question pending (recommendation: elect item
-   2b, defer route (i)).
-3. **R20a perimeter + website** — see facts 1 and 3. Also open: the `/api/score/save`
-   local-storage bypass (§6(b) — no in-app way to change storage mode after the first choice);
-   `api/mentor/private/reflect/route.ts:660`'s body-supplied `user_id` (founder-ordered first of
-   the named-unbuilt list on 08-24, still unbuilt); the view-grants remediation migration
-   (authored, not run) + the escalated `vulnerability_flag_owner_view`; `triggered_rules`
-   encryption; M-5(b) identity threading; 15 of 22 routes without per-route invocation tests; the
+**None matches `GUARD_RE`.** Path-scoped commits, always. A peer's push publishes your local commits
+too — **the commit, not the push, is the point of no return.**
+
+### The window, in the detail a session actually needs
+
+- **Gate:** five ordinary days **with consult records**. Currently **2 of 5**.
+- **What a guard record is:** four `GUARD-*` tokens in `gate1.log`, matched **whole**, never by
+  prefix (`CONSULT` matches `CONSULT-OUTAGE` — split by exact token or you over-count).
+- **What is excluded, by ruling:** `GUARD-OUTAGE` records (they record that no examination happened);
+  consult outages (excluded by construction — the hook returns before the capture); review-fleet
+  subagent records (excluded in principle — see the null finding below); the 138 `v1` records; the
+  took-effect probe at index 139.
+- **The `caller_class` signal measures NULL, and that is the honest result.** S7 built it at a dated
+  v4→v5 schema boundary with **two** values only — `'subagent'` on positive structural evidence,
+  `'unknown'` for everything else. Across every re-derivation since (19 → 27 → 28 → 30 → all
+  post-boundary v5 records), **every record reads `unknown`; none reads `subagent`** — including
+  records provably generated by review fleets. So the exclusion is a correct mechanism with **no live
+  population to exclude**, and reports an honest **lower bound of zero**. Had a `'live_agent'` value
+  existed, the field would now read 100% `live_agent` and be misread as *"no contamination found"*
+  when it means *"no signal was available."* The `agent_id` candidate (Option C′) is the possible
+  fix, and it is behind the three-condition gate.
+- **Corroboration recipe, with its two traps:** anchor the day boundary on the **`gate1.log` line
+  timestamp**, not the buffer's `capturedAt` (the same event is stamped twice, milliseconds apart);
+  and split token families by **exact match**, never prefix.
+- **Re-derive aggregate tallies at close, immediately before writing them** — a running session
+  appends to the buffer it is reading, and attribute records by the buffer's own `session` field,
+  never by an ad-hoc time filter. Both S8 and S9 published stale figures and had them caught by PR19.
+
+### The window's method lessons (added this window)
+
+- **A mutation test that PASSES may mean the mutation never landed.** S7 hit a false negative caused
+  by shell escaping; re-applied properly, the battery went red. **Assert the file actually changed.**
+- **A shell *fallback* must never run a destructive git command.** S7 ran `git checkout --` on an
+  un-backed-up file as a restore-check fallback and wiped its own working change. Recovered, but the
+  lesson is structural: **back up before any truncating write, and stop to diagnose rather than
+  letting a fallback fire.** All restores are now SHA-checked, not assumed.
+- **Naming the pull is not resisting it.** S10 identified its own blocking condition in its *first
+  tool call*, then ran a pre-check, a full window re-derivation that provably could not have moved, 
+  ~600 lines of records and a three-agent PR19 — while its own examination named the driver three
+  times (*"the pull to fill the gap with visible output"*). **A session that correctly refuses to
+  start owes nothing. A two-line report is a complete and successful output.**
+- **A reviewer that has not read the source can still ask a good question — but its answer is not a
+  finding.** S9's PR19 dimension 1 disclosed it had not read the files; its structural questions were
+  followed up first-hand against source rather than accepted.
+- **`maybeDebugDump` keys its file by event NAME, not by which hook wrote it** — H2 and H3 share the
+  `PreToolUse` slot, and reading the dump with Bash is itself matched by H3's matcher and overwrites
+  the file before the read completes. **Use the Read tool.**
+- **A subagent turn that answers in text without a real tool call produces `tool_uses:0`** — a
+  diagnostic depending on a hook firing must instruct the subagent to invoke a tool, and the caller
+  must check `tool_uses`, not merely that a response came back.
+- **Sentinel-content-provenance** (a unique string in each action's own `tool_input`, accepted as
+  evidence only on an exact match) makes a single-slot dump usable under genuine concurrency
+  **without editing any guarded file**. It caught two real race overwrites in flight.
+
+### Threads
+
+1. **Trust Layer / S11 + caller-class.** Register:
+   `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md`. P1 discharged; P2/P3 landed;
+   P4/P5/P6 open; B1–B4; **D1 open** with its C2 cross-reference (the close hook is seed-only and the
+   row exists ⇒ 409 before emission, so harness traffic can never discharge it); **D2 raised and
+   BLOCKED on baseline 2→5**; D3 standing; **D4 live and proven**; D5 closed. **Option C′ behind its
+   three conditions.** **The S11 flip is REFUSED, MEASURE throughout, weights BLOCKED.**
+2. **Standing runner / agent circles.** R8/R9/R10 sat; founder elections standing (R9 §16). The Option
+   S gate is **item-level** — only the M/W/S floor-semantics election and R8-D7's sampling policy wait
+   on its data. **Option S is fixed and has still never made a call.** The twelve-environment agent
+   architecture is REVISED-not-confirmed and **prospective in v1**. R11 is the founder's to open.
+3. **R20a perimeter + website.** Arc closed. Still open: the `/api/score/save` local-storage bypass;
+   `api/mentor/private/reflect/route.ts:660`'s body-supplied `user_id` (**founder-ordered first of
+   the named-unbuilt list on 2026-08-24, still unbuilt**); the view-grants remediation migration
+   (authored, not run) + the escalated `vulnerability_flag_owner_view`; `triggered_rules` encryption;
+   M-5(b) identity threading; 15 of 22 routes without per-route invocation tests; the
    `mentor_profiles` decrypt failure; `founder_conversations` plaintext-at-rest + no data-rights
-   wiring (two LOWs); `stoa-boundary` battery RED since 08-03 (awaiting ruling #20).
-4. **Count discipline / R18** — the assessment-contract package (signature owed); the api-docs
-   rewrite; the manifest AC5 contradiction (bolds "does not hand-enumerate" then enumerates all 43 —
-   counts correct today; a governing surface, the founder's); the same false claim in
-   `D-RA2-CLOSED-PERIMETER-COUNT-ENFORCED-NOT-WARNED-2026-09-04`.
-5. **Provenance ledger** — C3 clock only; the switch-on re-check is a hard obligation; the 454
-   pre-stamp consults are repairable by no ledger; item 2b carried.
-6. **Reflections / close hook** — case 2 (the consult-verdict path) still unobserved, a founder
-   decision pending on one disclosed constructed test case; IW-7 opening 2 HELD by ruling.
-7. **Founder hub / mentor continuity** — the row-cap fix live; the continuity-window question
-   (`operations/founder-hub-2026-09/2026-09-02-mentor-question-continuity-window-FOR-RULING.md`)
-   pending relay, gated on the founder's own reading of the contamination-window verbatim (rows
-   1001–1013, incl. the 08-31 corrected ruling generated without sight of row 1001).
-8. **Future directions** (recorded, not build items): SagePals / the Prudence Group (Stage-3 scoping
-   not convened); the engine-evolution examination; the incubation entry type; melete (needs an
-   agent-side rehearsal surface).
+   wiring; `stoa-boundary` battery RED since 08-03 (awaiting ruling #20).
+4. **Count discipline / R18.** The assessment-contract package is **applied**; the `api-docs` rewrite
+   is not; the manifest AC5 contradiction is a founder call.
+5. **Provenance ledger.** C3 clock only; the switch-on re-check is a **hard** obligation.
+6. **Reflections / close hook.** Case 2 (the consult-verdict path) still unobserved; IW-7 opening 2
+   HELD by ruling.
+7. **Founder hub / mentor continuity.** Row-cap fix live; the continuity-window question is **ruled on
+   shape** but **Q4 is still owed and is the founder's alone** — read rows 1001–1011 and decide
+   whether the 08-31 corrected ruling stands.
+8. **Future directions** (recorded, not build items): SagePals / the Prudence Group; the
+   engine-evolution examination; the incubation entry type; melete.
 
 ### The 0h launch hold-point
 
 **Unchanged in substance.** P2's verdict stands; the founder's three branches remain the standing
 decision; the 2026-08-22 sequencing stands (all current tasks complete before any 0h assessment).
-Nothing in this window bears on the call. **Weights BLOCKED throughout** (GS-CYB-1's two-condition
+**Nothing in this window bears on the call.** Weights **BLOCKED** throughout (GS-CYB-1's two-condition
 gate + the Prerequisite Criterion). **The Q1 hard constraint holds: the loop proposes; it never
-executes** — and now reaches any composed pipeline on this harness (Q-B, 2026-09-04).
+executes** — and reaches any composed pipeline on this harness.
 
 ---
 
-## Standing queue — the prioritised session plan (as of 2026-09-05; none self-starts)
+## Standing queue — the prioritised session plan (as of 2026-09-08; none self-starts)
 
 **Ordering principle:** each session removes a blocker for the next or closes a live harm class;
 autonomous sessions lead where the founder's action is not on the critical path; founder-attended
 work is batched so one sitting discharges many gates; every session is sized to one context window.
 
+**Naming:** rows are `Q-<topic>`, not numbers (fact 2). Historical `S…` labels appear only as
+back-references to completed work.
+
 ### A. Founder actions between sessions (no session needed — each unblocks something)
 
 | # | Action | Unblocks |
 |---|---|---|
-| F-1 | **Push the latest records commits** via GitHub Desktop (at 2026-09-06 05:20 AEST: `0bc1e56`, the Group 2 LIVE record, is unpushed; `cbd93ae` is pushed and live) | the record's visibility; nothing deploys |
-| F-2 | ~~Relay the Option S decomposition question~~ **RULED 2026-09-05 — the decomposition is REMOVED; B1 moot; correct `option-s-runner.py:45` before any spend** (`count-discipline-2026-09/2026-09-06-mentor-question-option-s-directional-decomposition-FOR-RULING.md`) | S6 (Option S pre-run fixes) → Path A → the M/W/S election |
-| F-3 | ~~Relay the route (i) question~~ **RULED 2026-09-05 — elect 2b now; route (i) NOT built; flag-and-proceed if ever** (`agent-circles-2026-08/2026-09-03-MENTOR-QUESTION-route-i-what-is-l1-supply-for.md`) | S7 (item 2b, `l1_supply` out of the ecosystem preset) or route (i) |
-| F-4 | ~~Sign the R18 assessment-contract package~~ **SIGNED 2026-09-06; S2 applied in `6586713`.** The package's §D api-docs rewrite remains its own item | ~~Sign the R18 assessment-contract package~~ (`count-discipline-2026-09/2026-09-05-R18-assessment-contract-SIGNOFF-PACKAGE.md`) — or say what to change | S2 |
-| F-14 | ~~Relay the D2 question~~ **DONE + RULED 2026-09-06 — a change IS owed; at the ENGINE; sequenced AFTER the window opens; the kathekon trigger corrected in the same pass** (`2026-09-06-mentor-ruling-D2-virtue-domain-tagging-verbatim.md`). Originally: **Relay the D2 question** (`operations/trust-layer-2026-07/2026-09-06-mentor-question-D2-virtue-domain-tagging-FOR-RULING.md`) — does the self-circle ruling reach the *domain tag* as well as the justice emission? Full trace in the paired scope doc. **Nothing self-starts on the answer; nothing unblocks the flip either way** | S5's close; informs S4(c) |
-| F-15 | ~~Relay the D2 follow-on question~~ **DONE + RULED 2026-09-06 — term (b) RETAINED; D2's specification is COMPLETE with no open axis** (`2026-09-06-mentor-ruling-D2-natural-relationship-disjunct-verbatim.md`). Originally: **Relay the D2 follow-on question** (`operations/trust-layer-2026-07/2026-09-06-mentor-question-D2-natural-relationship-disjunct-FOR-RULING.md`) — should the corrected tag fire on an identified other-party circle alone, or also on an asserted "natural relationship" with no party identified? **This is the one question our own scope doc raised and our relay failed to carry.** Settling it before the S11-D2 build avoids designing the corrected predicate around an open axis | the **S11-D2** build (not S4 — the window is unaffected) |
-| F-5 | **Run the one `environmental_context` query** in `operations/2026-09-06-environmental-scan-staleness-SCOPE.md` and say whether the two call sites are deliberate P7 scaffolding | the item's disposition (S8 or a route session) |
-| F-6 | ~~The two `/api/score-conversation` smokes~~ **DONE 2026-09-05 (Group 1 walk)** | — |
-| F-7 | **Decide the manifest AC5 fix** (remove the enumeration, or remove the bolded claim) | a governing-surface edit any session can then apply |
-| F-8 | **Decide the concurrency escalation** after the first collision (pre-commit hook / PR26 / leave as convention) | the standing cache's §6 |
-| F-9 | **TEST parity, one sitting:** the ATRF-EE Step-0 read-only determination on TEST; TEST's `project_context` row (v1.4.0 parity) | removes two "undetermined" carries |
-| F-10 | **Path A's production extraction** (`option-s/EXTRACTION.sql` §PRE/§2/§3) — only after F-2's ruling; if it returns 24, the ruling's "20 winners" gets a correction note | S6's run |
-| F-11 | ~~Relay the mentor-continuity question~~ **RULED 2026-09-05 on shape (session-bounded context channel; tell the mentor what it cannot see). STILL OWED, the founder's alone: Q4 — read rows 1001–1011, decide whether the 08-31 corrected ruling stands, recover any uncaptured ruling** | the founder-hub `MENTOR_HISTORY_WINDOW` decision |
-| F-12 | ~~Relay the mentor's reception of R9/R10~~ **DONE 2026-09-05** (`3c44929`; E5 adopted — S9 before the window). Elections from R9 §16 remain yours | the standing-runner track |
-| F-13 | ~~Close the second interactive session~~ **DONE 2026-09-06 — all four idle sagereasoning sessions archived** (the audit session, the Group 2 session, `Post-sweep carried items`, `Post-D4 live-op cluster handoff`); each was read first and each had closed on its own account with nothing owed. Originally: **Close the second interactive session** (`sagereasoning-43`, the audit/governance session — `git status` clean, nothing owed from it). *Checked 2026-09-06 at S3.3's open via the session tools: both `sagereasoning-43` and `sagereasoning-a9` (the Group 2 session) were idle with completed turns, not awaiting input; both can simply be closed.* From 2026-09-06 the plan runs as ONE serial arc, one session at a time (see B below) | removes the collision class of fact 6 |
+| **F-A** | **Commit the four S9 record files + the S8 staged records** (the founder commits by name; the AI never pushes). None matches `GUARD_RE`. | the record's visibility |
+| **F-B** | **Commit or discard the peer's `environmental-context.json` scan** — it is real, sourced work sitting uncommitted | closes F-5's disposition question at the same time |
+| **F-C** | **Relay nothing new — but decide Condition 3's shape.** S10 found `version` rides the hook payload, so the harness can read the client version **at runtime** rather than hard-coding a constant. That is a materially better shape for the Condition-3 build. | `Q-CALLER-C3` |
+| **F-D** | **`npx` fail-closed** on the pre-commit guard (mentor-recommended; the precondition — Node on GitHub Desktop's PATH — was **discharged at S7**) | makes the commit gate real rather than nominal |
+| **F-E** | **Close idle peer sessions.** 10 interactive peers are open against a standing ruling to work one arc. | error surface; the mentor ruled on this twice |
+| **F-F** | **Decide the manifest AC5 fix** (remove the enumeration, or remove the bolded claim) | a governing-surface edit any session can then apply |
+| **F-G** | **Decide the concurrency escalation** after the first collision (pre-commit hook / PR26 / leave as convention) | the standing cache's §6 |
+| **F-H** | **Founder-hub Q4** — read rows 1001–1011, decide whether the 08-31 corrected ruling stands, recover any uncaptured ruling | `Q-HUB-CONTINUITY` |
+| **F-I** | **Path A's production extraction** (`option-s/EXTRACTION.sql` §PRE/§2/§3) — if it returns 24, the ruling's "20 winners" gets a correction note | `Q-OPTION-S-RUN` |
+| **F-J** | **TEST parity, one sitting:** the ATRF-EE Step-0 read-only determination on TEST; TEST's `project_context` row | removes two "undetermined" carries |
+| **F-K** | **The tool-choice measurement-validity question** — named at S6a, carried unresolved through S6b/S7/S8/S9. Now sharper: fact 5 makes it a ruled *structural dependency*, and the baseline cannot advance on Bash-authored sessions. **Do you want sessions steered toward Write/Edit while the window runs, or not?** | the window's own composition |
 
-### B. Sessions, in priority order — ONE SERIAL ARC from 2026-09-06 (re-planned 2026-09-06 05:30 AEST)
+### B. Sessions, in priority order — ONE SERIAL ARC
 
-> **Why one arc.** Through 2026-09-05 two interactive sessions ran this queue concurrently — a
-> governance session (S1 audit → rulings → relays → opener) and a code session (S3 Groups 1–2). Both
-> wrote to this one queue; the split produced fact 6's collision and a peer-blind `git add` class.
-> From here the queue runs **serially, one session per sitting, each opened from its own paste**.
-> The ordering respects two hard couplings: the mentor's **E5** (S9's harness redaction lands
-> BEFORE the window start, S4(d)) and the **`/api/reason` freeze** (every human-path edit on that
-> file — Group 2b's O items — lands BEFORE S4(d), or waits for the window to close). Founder-attended
-> sittings are batched so the walk discharges several gates at once.
-
-| # | Session | Tier / attendance | State | Paste |
-|---|---|---|---|---|
-| S1 | R20a perimeter-ordering AUDIT | governance, autonomous | **RUN 2026-09-05** | — |
-| S3.1 | Remediation Group 1 (four minima) | code-critical, founder-walked | **LIVE 2026-09-05** (`c679739`, 8 smokes) | — |
-| S3.2 | Remediation Group 2 (eleven routes' maxima + `/api/reason` human path + the R3 Branch-2 row) | code-critical, founder-walked | **LIVE 2026-09-06** (`cbd93ae`, 20 smokes; `D-…-GROUP-2-LIVE-2026-09-06`) | — |
-| S3.3 | **Remediation Group 2b + Group 3.** **LIVE 2026-09-06** (`555502e` on `origin/main`, Vercel green, 18 smokes on 8 routes; `D-R20A-PERIMETER-ORDERING-REMEDIATION-GROUP-2B-3-{BUILT,LIVE}-2026-09-06`; PR19 3/3 completed, 2 MEDIUM folded). The `/api/reason` human-path O items are live — **the window-start coupling (E5 / S4(d)) is discharged.** Originally: 2b (mentor Part 5): the three P′ presence-on-sibling-field sites (`score-scenario` `scenario` presence; `journal-feed` sibling presence; `journal` `day_number` presence + range) and the O items where the screened text is present (`mentor/private/reflect` `bypass_pattern_cache` boolean; **`/api/reason` human path `session_marker` + `loop_id` 400s — must land before S4(d)**). Group 3: the three founder-only proof routes (`founder/hub/ring-proof`, `mentor/ring/proof`, `support/agent/proof` — minima AND maxima, plus their O items case by case). The Stoa `visibility` enum is NOT here (it lives inside item 9's parse). | code-critical, founder-walked, PR19 | queued | `2026-09-06-SESSION-3C-r20a-remediation-group2b-group3-SESSION-PASTE.md` |
-| S3.4 | **LIVE AND SMOKE-VERIFIED 2026-09-06** (`D-R20A-PERIMETER-ORDERING-REMEDIATION-STOA-LIVE-VERIFIED-2026-09-06`): four assertions, four passes — POST and PATCH each returned the crisis redirect for an acute body carrying a **deliberately invalid `visibility`** (before `6586713` the parse would have 400'd first and the distress text would never have reached the classifier), and neither wrote. Seven-resource crisis list confirmed live. **Incidental, and more valuable than the smoke: C5 is ruled-but-unbuilt, now confirmed on a real production row** — the benign control returned `reactivated: true` and reset `declared_at`, where M3 (2026-08-15) holds that a re-declaration within 30 days of withdrawal should INHERIT it (~25 days elapsed). Founder's row fully restored (content + visibility by API, `declared_at` by one-row SQL); `renewed_at` left as the one disclosed artifact. Originally: **The Stoa restructure — BUILT 2026-09-06** (`6586713`; `D-R20A-PERIMETER-ORDERING-REMEDIATION-STOA-BUILT-ARC-CLOSED-2026-09-06`; PR19 3/3, two HIGH folded), **pending the founder's push + smokes. THE R20a ORDERING ARC IS CLOSED.** S2 rode this sitting (F-4 signed at open) and is landed in the same commit. Originally: — item 9 (`/api/mentor/stoa` `parseDeclaration` + `draft-reflect` `parseDraft`): the gate runs after a store read over the merged entry; compose the screened subject from the raw body (and the prior entry on PATCH) BEFORE parsing; the parse's 400s (incl. the `visibility` enum, the 2b O case) after the gate. Design on paper first (remediation prompt §3.6). **Closes the R20a ordering arc.** S2 may ride this sitting if the founder signs F-4 at open. | code-critical, founder-walked, PR19 | queued; **paste authored 2026-09-06** | `2026-09-06-SESSION-3D-r20a-stoa-restructure-SESSION-PASTE.md` |
-| S9 | **BUILT 2026-09-06** (`D-S9-HARNESS-A11B-REDACTION-BUILT-2026-09-06`; battery 24/0, 14 mutations red, live `redacted=N` observed). **E5's coupling is discharged — S9 no longer gates S4(d).** Originally: harness-side `schema_field_injection` redaction (`⟨schema-field⟩` placeholders, per-call replacement count logged, harness docs name the rule). **The Branch-2 `route_errors` row is DONE (Group 2) — do not repeat it.** Inside the measured surface; **gates S4(d) (E5)**. | code-elevated, autonomous (the dogfood hot-reloads) | queued; **paste authored 2026-09-06** | `2026-09-06-SESSION-S9-harness-a11b-redaction-SESSION-PASTE.md` |
-| S5 | **DONE 2026-09-06** (`D-D2-VIRTUE-DOMAIN-TAGGING-SCOPED-FOR-RULING-2026-09-06`). Scope doc + relay-ready question authored; PR19 three blind reviewers, all findings folded, none refuted — incl. a **wholly omitted on-point ruling** (the 2026-08-02 Q4-residual ledger-vs-verdict distinction) and a structurally asymmetric options list, both of which had steered toward *"a change is owed"*. **Question NOT decided, no remedy elected** (the paste's scope). Register D2 annotated (append-only); D4's `llms.txt:418`→`:548` mis-citation recorded there too. **RELAYED AND RULED the same day** — a change is owed, at the ENGINE, sequenced AFTER the window opens; scope-doc Option 3 ruled against by name; the `is_kathekon !== null` trigger corrected in the same pass. Build owed (row S11-D2 below). Originally: D2 scope-for-ruling (`computeVirtueDomains` self-only dikaiosyne tagging; remedy location engine vs reducer; mirrors P1's shape) → relay | governance, autonomous | **done** | `2026-09-06-SESSION-S5-D2-scope-for-ruling-SESSION-PASTE.md` (spent) |
-| S2 | R18 assessment-contract corrections + drift assertion — **DONE 2026-09-06**, rode S3.4 (`6586713`): llms.txt ×6, agent-card ×4 (extensions still 26), skill-registry ×1, assertion 13/0. **Still open, deliberately excluded by the package's §D:** the `api-docs/page.tsx` assessment-entry rewrite (both entries document a request shape neither route accepts) — its own R18 item | code-elevated | **the §D api-docs rewrite remains** | to author |
-| S4 | **✅ COMPLETE 2026-09-06 — THE OBSERVATION WINDOW IS RUNNING** (started 09:44:55Z; `D-FALSE-HOLD-OBSERVATION-WINDOW-STARTED-LIVE-2026-09-06`). Took-effect PROVEN: buffer 138 → 139, first-ever `false-hold-record-v4`, `path: guard` (P8a live). **A false start was caught first** — the flag was initially set in Vercel, which is inert (no route reads it); the file mtime and unmoved buffer disproved it before anything was recorded. **Record 139 is a took-effect probe — exclude from the rate.** **The byte-identity guard is now ARMED and blocks S11-D2** until the mid-window-vs-post-window question is resolved with the founder. Originally: **BOTH WINDOW PRECONDITIONS ARE NOW RESOLVED — the founder MAY set `GATE1_FALSE_HOLD_CAPTURE`, and that act is the only thing left.** Two mentor rulings landed the same day. **(1) part (3) is a WITHIN-CONSULT measure** — the guard population is a separately-reported disclosure, its ~0.6/week thinness *"stops being a blocker and becomes a disclosure"*, and the window's duration is set by the consult population alone. **(2) F-3′ is DISCHARGED as a gate** (`2026-09-06-mentor-ruling-F3prime-discharged-consult-bound-verbatim.md`) — its denominator-integrity ground was dissolved by (1), and *"a precondition whose rationale has been dissolved by a subsequent ruling does not survive as a formality"*; the honesty requirement migrates to the guard disclosure. **A CONSULT-side bound replaces it — owed at PUBLICATION, not at start** (requiring it first *"is not a precondition. It is a circularity"*), with its threshold set after **five ordinary post-remedy days of window data**, deliberately NOT F-3′'s numbers. This session measured the fact that drove it: **consult 70.3% outage vs guard 31.7%** over the full log. **⚠ Carried to S11-D2, not resolved here: the logos byte-identity guard binds iff the capture flag is set and its regex includes `layer2-mechanisms` — the exact file D2 must edit — so the D2 build will trip it; whether *"after the baseline"* means mid-window or post-window is genuinely open.** Original outcome: **Mentor ruling same day** (`2026-09-06-mentor-ruling-part3-guard-denominator-verbatim.md`): **part (3) is a WITHIN-CONSULT-POPULATION measure; the guard population is a separately-reported DISCLOSURE, not a denominator** — so its ~0.6/week thinness *"stops being a blocker and becomes a disclosure"*, part (1)'s representativeness does not apply to it, and **the window's duration is set by the consult population alone** (130 records in 5 days), which means the ruled D2 sequencing does NOT hold the engine correction open materially longer. The ruling closes *"Start the clock."* **⚠ BUT it never names F-3′/B4/guard AVAILABILITY — a different quantity from the guard DENSITY it answered — so F-3′ stands as written until the founder elects otherwise; the coherent reading that it lapses is recorded as a reading, not acted on.** Original outcome: (`D-S4-WINDOW-START-READINESS-BLOCKED-DATE-GATE-2026-09-06`). (a) B4's follow-up **correctly NOT run** — `date -u` at open was 2026-09-06T04:11:54Z, gate is ≥2026-09-08 UTC. (b) F-3′'s threshold **PROPOSED**: `2026-09-06-F3prime-guard-availability-threshold-PROPOSAL.md` — ≤5% aggregate AND ≤10% any single ordinary day (≥20 guard attempts), over ≥3 successive ordinary days; PR19-reviewed (1 HIGH + 2 MEDIUM fixed: a partial-day 60% figure wrongly paired with a full-day count, corrected to the day's actual 25.25%; "lean mode is closed" corrected to "held pending founder election"; an unsourced concurrency figure removed after the reviewer found it was being used backwards from its source). Independently re-verified: of 28 windows of three successive ordinary days in the log, ZERO pass both rules — binding, though the known post-remedy figures sit ~10× below 5%, so it is expected to pass once B4 actually runs. **Founder elects.** (c) confirmed at source, unchanged from the ruling: the window opens FIRST, D2's engine edit lands after — S4 gates D2. (c′) S9 confirmed BUILT AND FIRING at source (`redacted=` observed live, not just committed). (d) **NOT performed** — neither precondition met (P8a confirmed still absent by `grep`; F-3′ unelected AND B4 not due). **A companion finding for the founder, not flip-gating:** the guard-deny population (P5's eventual denominator) is thin — 15 events/57 days, 45 of 50 active guard days at zero, ≈0.6/week excluding one outlier — P8a activation will not populate it, only stop it being structurally absent; see the proposal §6. Register P5/B4/F-3′ rows annotated; a Change-log entry added. | read-only autonomous half + one founder act | **done; window not started; the founder act awaits F-3′'s election AND ≥2026-09-08 UTC** | `2026-09-06-SESSION-S4-window-start-readiness-SESSION-PASTE.md` (spent) |
-| S5b | **✅ COMPLETE 2026-09-06 — WINDOW HEALTH VERIFIED; D2/GUARD COLLISION SCOPED FOR RULING** (`D-S5B-WINDOW-HEALTH-VERIFIED-D2-GUARD-COLLISION-SCOPED-FOR-RULING-2026-09-06`). **The window IS capturing on BOTH paths** — at ~100 min: 13 organic = **10 guard** (`Bash`, depth `""`) + **3 consult** (`Edit`, depth `standard`, real loop closure). **Window-close representativeness (>1 tool class/depth) is MET on its face**; whether 3 consult records are *representative* under part (1) is unanswered. **The consult population populated only when the session switched from Bash heredocs to the `Edit` tool** — an accident of the PR19 fold, but a clean natural experiment confirming the source-read mechanism (guard checked first and returns; non-guard `Bash` dropped from the consult floor). **An earlier zero-consult reading was correctly recorded as a NULL RESULT, not a finding** (v1 window: same 12.9:1 Bash dominance, 138 records; λ≈0.396 over 20 min ⇒ P(0)≈0.673). **Guard NOT tripped, and proven non-vacuous by live mutation** (248/1 naming the file, restored) — PR19 independently reproduced it. **Unsought: 6 of 13 organic records carry the live D2 defect and all 13 tag `dikaiosyne`, but 6/10 guard vs 0/3 consult.** **Consult-availability instrument NAMED not built** (the report script cannot measure it; data accrues in `gate1.log`). **Calibration only, do not quote forward:** all-time loss **70.3%** reproduces the mentor's figure exactly, but 1,918/1,921 timeouts are pre-remedy 28,000 ms — current 55 s regime is **25.2%**. **⚠ The mentor's documents state LOSS, not availability — reporting availability inverts every comparison.** **B4 NOT computed** (≥2026-09-08 UTC gate stands). **The paste's "running for roughly a day" was FALSE — it was 13 minutes; the paste was written 2 minutes before the session opened.** PR19: **GO_WITH_FIX, no CRITICAL**; 1 HIGH (a false "predate 2026-08-08" boundary claim) + 2 MEDIUM (Poisson figures from a mismatched record-span/log-count pairing — the same class PR19 caught in S4; an undisclosed probe-record defect) + 2 LOW, all folded. | `governance` + read-only | **done; nothing self-starts** | `2026-09-07-SESSION-S5b-window-health-and-D2-guard-collision-SESSION-PASTE.md` (spent) |
-| S11-D2 | **⚖️ RULED 2026-09-06 — MID-WINDOW. NOW BLOCKED ON A MEASURABLE THRESHOLD, NOT AN OPEN QUESTION.** The correction lands **mid-window** and the window **keeps running after it lands** (`D-MENTOR-RULING-D2-WINDOW-SEQUENCING-MID-WINDOW-ADOPTED-2026-09-06`). **GATE TO OPEN: five ordinary days WITH CONSULT RECORDS** — days with ≥1 consult count, zero-consult days do NOT. **Stand-down = a recorded founder waiver for the named commit, guard LEFT ARMED, exception documented not encoded**; a scoped allowlist only as its own reviewed change, removed after; **a silent commit exploiting the committed-edit gap is FORBIDDEN.** **Segmentation boundary = the D2 commit timestamp**; the guard disclosure reports two regimes with the boundary dated. **⚠ OWED NOW, BEFORE THE BASELINE PERIOD (not at the build): a SHA-256 pin on `layer2-mechanisms.ts`** — scoped at S5b, NOT built (that paste authorises no code change); **founder elects.** Originally: **⚠ BLOCKED 2026-09-06 (S5b) ON A RULING, NOT ON WORK — the mid-window-vs-post-window question is SCOPED AND RELAY-READY: `operations/trust-layer-2026-07/2026-09-06-D2-window-sequencing-guard-collision-SCOPE-FOR-RULING.md`. Does *"the correction lands after the baseline is established"* mean MID-window or POST-window? Both readings argued at full strength, neither chosen (PR19 attacked the neutrality and it held). **Two facts established at source: (i) the guard reads `git status --short`, so it catches UNCOMMITTED edits only — a committed change would contaminate the window undetected, which CUTS AGAINST the reading the guard appears to support, and makes any "commit promptly" workaround a laundering of the gap; (ii) §C2/§C2b are unconditional, and §C2b's SHA pin covers `stoic-brain.ts` ALONE — `layer2-mechanisms.ts` has none.** **The obvious stand-down is unavailable: unsetting `GATE1_FALSE_HOLD_CAPTURE` would also STOP capture.** **Evidence from the running window, carried in the scope doc: 6 of 13 organic records show the live D2 defect — but the split is 6/10 guard, 0/3 consult, so it currently sits OUTSIDE part (3)'s within-consult denominator** (n=3; evidence, not conclusion). **Do NOT open this build until the ruling returns.** Originally: **D2 engine correction (RULED, build owed).** Correct `computeVirtueDomains` at source so dikaiosyne tags only when another party is implicated, and correct the over-broad `is_kathekon !== null` trigger **in the same pass**. **HARD SEQUENCING BY RULING: must land AFTER the false-hold window opens (S4(d)).** **FULLY SPECIFIED — no open axis (both rulings landed 2026-09-06).** The corrected tag = **(a)** a circle beyond `self_preservation` **OR (b)** a `natural_relationship` factor, and **NOT** the `is_kathekon !== null` trigger, which is removed as over-broad — **i.e. exactly the existing `isDikaiosyneEngaged` predicate**. Both corrections land in **ONE pass**. The self-only-plus-(b) case is ruled to be **other-party evidence that should be credited, not suppressed**; a wrong extraction there is an **extraction-layer** problem. **No export needed** (same module); threading the boolean into `computeVirtueDomains` is a signature change for PR19. **Still open and owned by the build:** the mid-window tagging-regime boundary (AE-1 S11b segmentation precedent), the ~12 consumers, the live score bonus, the published `llms.txt:548` claim, and its own R18 decision. Blast radius: ~12 consumers, a live score bonus, the flip's own predicate, and the published `llms.txt:548` `self_regarding` claim | code-critical, founder-walked, PR19 | **gated on S4(d)** | to author **✅ THE OWED PIN IS BUILT — 2026-09-06 (S6a; `D-S6A-LAYER2MECHANISMS-SHA-PIN-BUILT-UNCONDITIONAL-PR19-FOLDED-2026-09-06`). This row's "⚠ OWED NOW … SCOPED at S5b, NOT built" is DISCHARGED.** §C2c pins `layer2-mechanisms.ts` in `human-practitioner-boundary.test.ts`; hash derived fresh, equal to the S5b anchor; reads DISK bytes so it catches **committed** edits (which the `git status` binding structurally cannot) as well as uncommitted. **Mutation-verified FOUR ways**, incl. a simulated committed edit where **the pin fires ALONE (249/1)** and, with the capture flag unset, **still fires (248/1)** — the unconditional design proven, not merely argued. Battery **250/0**; `layer2-mechanisms.ts` byte-unchanged; nothing committed or pushed. **Design question DECIDED UNCONDITIONAL** (decisive ground: a window-conditional pin would share its off-switch with what it polices). **PR19: three independent reviewers, no HIGH, all folded** — incl. a spliced-quotation MEDIUM found by two of them independently, and a LOW that corrected the author's own counter-argument in the author's favour. **⚠ CARRIED FOR THE FOUNDER, named not taken:** `.husky/pre-commit` is an ACTIVE commit-time gate blocking on five check classes that **does not run this battery** (no CI, no npm test script) — so *"genuinely enforceable rather than nominal"* rests on session discipline at exactly the moment the committed-edit gap lives. **One-line remedy, recommended, NOT applied** (out of the session's authorised scope; it changes local commit behaviour). **BASELINE AT CLOSE: 1 of 5 days with consult records** (2026-09-06 UTC only) — unchanged from S5b and unchangeable that day, since it is already counted. **This row's gate is otherwise unmoved.** **⚠ MEASUREMENT-VALIDITY QUESTION FLAGGED, NOT RESOLVED (founder/mentor):** the baseline clock is denominated in CONSULT days, but consult records accrue only from `Write`/`Edit`/`MultiEdit`/`NotebookEdit` — the window shows **139 `AT-ACTION-SKIP-BASH`** against 20 guard and 3 consult captures, and S6a watched its own guard count move 17→19→20 while consult stayed at 3. **Preferring `Edit` would accrue baseline days faster and make the population LESS representative of actual work** — the opposite of what part (1) requires. Tool choice was NOT steered. Related: PR19 found **4 window guard records were generated by the review session's own read-only calls** — verification activity enters the measured population; whoever computes the guard rate should decide deliberately whether those belong in it. **✅ S6b, 2026-09-07 — THE PIN NOW BITES AT COMMIT TIME** (`D-S6B-COMMIT-GATE-WIRED-OPTION-S-PRE-RUN-BLOCKERS-FIXED-2026-09-07`; `af67e4c`, **not pushed**). S6a's carried item — *`.husky/pre-commit` is an ACTIVE gate that does not run this battery, so "genuinely enforceable" rests on session discipline* — is **DISCHARGED**. The battery runs **first and ALWAYS** in the hook; **always-on beat staged-only on the merits**, not on cost: a staged-only trigger cannot enforce the byte-identity guard at all, since that guard's subject is files *modified in the working tree*, which need not be staged. **Mutation-proven to block a real commit** (HEAD did not move), and to block on the **unconditional** pin with the capture flag unset — the GitHub Desktop path. PR19 folded 1 HIGH + 1 LOW. **THREE limits carried:** the working-tree guard binds only when the flag is in the *hook's* environment (absent under GitHub Desktop) and the hook deliberately does NOT set or fake it (M1); the battery is one flat script, so the gate blocks on ANY of its assertions; and **NOT fixed, a founder call** — the pre-existing `npx not found` branch `exit 0`s the hook, so a machine without Node on PATH silently skips the pin and commits. **BASELINE AT S6b CLOSE: still 1 of 5** (2026-09-06 UTC only; it could not move that day, already counted). **⚠ THE CORROBORATION RECIPE IN §3 OF THE S6b PASTE IS STALE — DO NOT INHERIT IT.** S6a's `CAUTION+PROCEED+BLOCK` tally was an enumeration that was *accidentally complete*; S6b produced the window's first **`GUARD-OUTAGE`**, after which that recipe reads a **FALSE disagreement** (log 69 vs buffer 70, stable across three reads — not a race). Derive the **`GUARD-*` family** (four tokens) and it AGREES 72=72. A guard outage still writes a buffer record but **labels itself** (`captureBasis: "no_assessment"`, `guardOutcome: "outage_open"`), so it can be excluded deliberately — asymmetric with the consult side, where D6a already excludes outages. **⚠ THE TOOL-CHOICE QUESTION IS NOW MUCH SHARPER, still unresolved:** S6b contributed **45 of the window's 75 new-window records (60%), ALL guard** (S6a's PR19 flagged 4) — and, corrected at its own close reflection, **NOT "read-only": 23 of 48 carry an overwrite redirect, the guard's irreversible-action signal; and 10 of 48 are PR19 review-fleet SUBAGENT commands recorded under the PARENT session id**, so a review fleet's traffic enters the measured population invisibly, one level further from actual work. **⚠ RULED 2026-09-07 (`D-MENTOR-RULINGS-S6B-THREE-QUESTIONS-ADOPTED-2026-09-07`): review-fleet subagent records AND `GUARD-OUTAGE` records are BOTH EXCLUDED — from the guard population and the guard rate denominator respectively. Session id does NOT distinguish, so a `caller_class` field is OWED before publication. NEITHER RULING IS EXECUTED: both need edits to files matching `GUARD_RE` (`false-hold-observation-report.ts`, `false-hold-capture.mjs`), so the D2 waiver mechanics carry — recorded founder waiver, guard LEFT ARMED, never a silent commit. NEW open mentor question: `caller_class` mid-window makes a `v4`→`v5` schema boundary and the ~75 existing records are classifiable only by an `actionPreview` heuristic — retroactive classification, or post-boundary only? The consult population is CLEAN (all 3 consult records are S5b's; S6b produced 50, all guard, ZERO consult), so the gated within-consult measure is unaffected** — and the **new half**: S6b ran under a harness directive preferring `Bash`, which is dropped from the consult floor, so **a session's tool MODE decides whether its work enters the measured population at all**, not merely whether a session *chooses* `Edit` to accrue days faster. Both directions distort the representativeness part (1) requires. Tool choice was NOT steered. |
-| S7 | Item 2b — `l1_supply` out of the `ecosystem` preset (ruled F-3; verify `active_with_l1_supply = 0` at open) | code-critical, founder-walked, PR19 | queued; window-neutral, may run during the window | to author |
-| S6 | **✅ PRE-RUN FIXES DONE 2026-09-07 (S6b, `6bdff56`, not pushed; `D-S6B-COMMIT-GATE-WIRED-OPTION-S-PRE-RUN-BLOCKERS-FIXED-2026-09-07`).** All four blockers resolved: **B1 moot BY REMOVAL** under the 2026-09-05 ruling (line 45's assertion corrected, `direction` gone); **B2** fixed by reading the gate's **own `proceed`** rather than re-deriving a decision from rank — which collapses B2+B4 into one quantity and sidesteps the open `habitual`-in-the-floor-set question (`p_hat_floor` deliberately unchanged); **B3** fixed with an ordinal rank transcribed from `guardrails.ts` — and since **K is ruled 10, which is EVEN**, the median convention is published as `M_EVEN_K_CONVENTION = "lower_median"` — **RULED 2026-09-07** (the value at position K/2, never an average; *"settled BEFORE any run"*), and still a CONVENTION on the underlying scale, revisited if the scale changes or K moves off 10. Verbatim: `2026-09-07-mentor-rulings-S6b-three-questions-verbatim.md`. **No code change was needed and that was VERIFIED, not assumed**; **B4** with B2. Plus series ids, `--resume`, series-aware pooling, the six D6a safeguards, a **fail-closed** spend gate with a dollar figure, a **refused** 3xx (the "No redirect handler" comment was false), and L4 read from data (**24**: 15 winner / 9 rejection). NEW `option-s-runner-test.py`, **45 assertions, mutation-verified TWELVE ways**; PR19 3 raised / **0 refuted** / all folded, incl. a **MEDIUM vacuous spend-gate probe** that passed without ever reaching the tty gate. **OPTION S HAS STILL NEVER MADE A CALL — `runs/` is empty and the battery asserts that emptiness.** Remaining: **F-10** (the founder's production extraction) → the founder-elected run (≈$3.41 at K=10) → the M/W/S + R8-D7 brief. | code-elevated + PR19 **done**; run = founder spend | **fixes complete; the run is the founder's** | — |
-| S10 | Founder-hub mentor continuity (session-bounded token-budgeted fetch; the "what you cannot see" line; `MENTOR_HISTORY_WINDOW` pin changes only by a ruling-citing diff) | code-elevated | **gated on F-11 Q4** | to author |
-| S8 | Records fold + governing-surface edits on election (AC5 per F-7; `environmental_context` per F-5; retire spent prompts) | governance | batch into the next production-changing sitting, never alone | — |
-
-**Superseded by this table:** the numbered list that stood here 2026-09-05 (S1–S11 with S3's Group 2b
-as item 10). Its content is preserved in the rows above; nothing was dropped.
+| Row | Session | Tier / attendance | State |
+|---|---|---|---|
+| **Q-CALLER-C2** | **Condition 2 — the second live capture.** Different calendar day, different session ID, same client `2.1.260`. **STEP 0 date gate STOPS the session if the day does not qualify.** Mandatory two-step `GATE1_DEBUG` pre-check first. | `code-elevated`, founder-attended | **PROMPT UNSPENT AND AMENDED.** Earliest qualifying day **2026-09-09 local** |
+| **Q-CALLER-C3** | **Condition 3 — client-version pinning**, with absence-detection falling back to `unknown`. Shape improved by S10's `version`-rides-the-payload finding (F-C). | `code-elevated`, PR19 | to author; gated behind C2 |
+| **Q-CALLER-BUILD** | `classifyCaller` modified to read `agent_id`. **Licensed by nothing until all three conditions are met.** Touches `false-hold-capture.mjs` (`GUARD_RE`) ⇒ needs a founder waiver, guard left armed. | `code-elevated`, founder waiver | **NOT LICENSED** |
+| **Q-L1SUPPLY-2B** | Item 2b — `l1_supply` out of the `ecosystem` preset (ruled; verify `active_with_l1_supply = 0` at open). *(Was queue-row "S7".)* | `code-critical`, founder-walked, PR19 | queued; **window-neutral, may run during the window** |
+| **Q-OPTION-S-RUN** | Run Option S against the 29 decision-bearing candidates (≈$1.24). All four pre-run blockers fixed at S6b; the median convention **ruled `lower_median` before any spend**. | `code-elevated` | **fixed, still never run**; needs F-I |
+| **Q-HUB-CONTINUITY** | Founder-hub mentor continuity (session-bounded token-budgeted fetch; the "what you cannot see" line; `MENTOR_HISTORY_WINDOW` changes only by a ruling-citing diff). *(Was queue-row "S10".)* | `code-elevated` | **gated on F-H** |
+| **Q-PREFLIP-REPORTS** | The **two owed pre-flip disclosures**, both registered and **neither built**: (i) baseline composition day-by-day with tool distribution; (ii) **loop count by action class** (product/governing-document actions vs protocol-required record-keeping). `false-hold-observation-report.ts` matches `GUARD_RE` ⇒ founder waiver + its own session. Required **before the flip**, not now. | `code-elevated`, founder waiver | to author |
+| **Q-G6A-QUALIFICATION** | Encode the **ruled further qualification** to G6(a): it binds on kathekon-engaged loops opened by **consequential actions on the product or its governing documents**, not on loops opened by the agent's own **protocol-required record-keeping**. *"Whether the protocol's own requirements can generate a do-not-proceed condition on the act of following the protocol. They should not."* | `code-elevated` | ruled, **unbuilt** |
+| **Q-D2-ENGINE** | The D2 correction at the engine (`computeVirtueDomains`), landing **mid-window**, window keeps running after. Needs the waiver mechanics + the SHA pin surviving. | `code-critical`, founder waiver | **BLOCKED on baseline 2 → 5** |
+| **Q-RECORDS-FOLD** | Records fold + governing-surface edits on election (AC5 per F-F; `environmental_context` per F-B; retire spent prompts; correct CLAUDE.md's now-false S9 stdin-dump block). *(Was queue-row "S8".)* | `governance` | batch into the next production-changing sitting, **never alone** |
 
 ### C. Held / gated — do not open
 
-Slice 5 (C3 clock → ~2026-11-24, then the hard C2 re-check); IW-7 opening 2 (signal-quality gap);
-Spec 4 dispersion (M-4 restoration); the hegemonikon uniformity family (unruled); melete; the
-Prudence Stage-3 scoping session; Layer 3 activation (`SUBSTRATE_LAYER3_ENABLED` unset; O-C Gate 3
-CLOSED; per-consumer rendering owned by the standing-runner track's next session); R11 (the founder
-opens); Attic/Cellar heuristics (founder-walked, own scoping session); the `agent_hold_observations`
-sweep (HOLD by ruling until P6 says the buffer is finished with); the `stoic-brain.json` citations
-(HOLD — P6's call; the guard is dormant today but the freeze on `stoic-brain.ts` is unconditional);
-Resend / ST7; AE-3 (deferred, preconditions unmet); the S11 flip; the 0h call; **weights**.
+Slice 5 (C3 clock → ~2026-11-24, then the hard C2 re-check); IW-7 opening 2; Spec 4 dispersion (M-4
+restoration); the hegemonikon uniformity family (unruled); melete; the Prudence Stage-3 scoping
+session; Layer 3 activation (`SUBSTRATE_LAYER3_ENABLED` unset; O-C Gate 3 CLOSED); R11 (the founder
+opens); Attic/Cellar heuristics; the `agent_hold_observations` sweep (HOLD by ruling until P6 says
+the buffer is finished with); the `stoic-brain.json` citations (**HOLD** — the freeze on
+`stoic-brain.ts` is unconditional and SHA-pinned); Resend / ST7; AE-3; **the S11 flip; the 0h call;
+weights.**
 
-### D. Longer-tail named-unbuilt (unchanged; re-derive before acting)
+### D. Longer-tail named-unbuilt (re-derive before acting)
 
 The view-grants migration + the escalated view; `triggered_rules` encryption + M-5(b); reflect
-`route.ts:660` `user_id` (founder-ordered first); close-hook case 2; R3 (`/api/reason` status
+`route.ts:660` `user_id` (**founder-ordered first**); close-hook case 2; R3 (`/api/reason` status
 masking; input-cap steps 2/3); R7 (permission-scrutiny 14–17); C5 (Stoa reactivation guard, ruled
 M3); the `/api/score` local-storage bypass; `founder_conversations` LOWs; the `mentor_profiles`
-decrypt failure; the CLAUDE.md dated bullets (never rewritten — annotated only).
+decrypt failure; the `api-docs/page.tsx` assessment rewrite; the CLAUDE.md dated bullets (**never
+rewritten — annotated only**).
+
+### E. Future milestones — the forward map
+
+These are **sequenced dependencies, not dates.** Nothing here is scheduled; each is gated.
+
+| Milestone | Gate | Currently |
+|---|---|---|
+| **M1 · Window baseline reached** | 5 ordinary days with ≥1 consult record | **2 of 5.** Cannot advance on Bash-authored sessions (fact 5) |
+| **M2 · D2 engine correction lands** | M1 | blocked on M1 |
+| **M3 · Option C′ decided** | Conditions 1 ✅ + 2 + 3 | C2 earliest 2026-09-09 |
+| **M4 · Pre-flip report complete** | M1 + `Q-PREFLIP-REPORTS` + `Q-G6A-QUALIFICATION` + the false-hold rate + guard-availability bound (F-3′ threshold, a P6 design question, **still unset**) | not started |
+| **M5 · The S11 readiness standard re-examined** | M4 + the four-part standard: ≥7 days representative MEASURE · all four cardinal domains evaluated, ≥2 above conservative · a **measured** false-hold rate · G6(a) qualification encoded | **REFUSED** — and the assent is re-confirmed at flip time regardless (PR7) |
+| **M6 · Provenance slice 5** | C3 soak → **~2026-11-24**, then the **hard** C2 re-check | clock only |
+| **M7 · Standing-runner v1 build brief** | founder elections (R9 §16) + **a harness identity with an examined record for the v1 executing actor** — the binding prerequisite three findings converge on | founder's to open |
+| **M8 · Option S data → M/W/S election + R8-D7 sampling policy** | `Q-OPTION-S-RUN` (F-I first) | item-level gate; everything else ungated |
+| **M9 · The 0h launch call** | all current tasks complete (2026-08-22 sequencing); P2's verdict + the founder's three branches | **the founder's, and only the founder's** |
+| **M10 · Weights-tier use** | GS-CYB-1's two-condition gate + the Prerequisite Criterion | **BLOCKED.** No public claim |
 
 ---
 
-## Part C — The trust-layer harness + its capabilities (deltas since 08-29)
+## Running a side arc in parallel — the four constraints that actually bind
 
-On top of the 08-29 opener's Part C (all of which stands):
+A parallel arc is not forbidden. Four things bind it, and only these:
 
-- **The trust record's envelope grew again:** the verdict-variance `does_not_attest` item (verdicts
-  are draws from a probabilistic Layer-1 extraction; the signature attests the deterministic Layer 2
-  given that extraction — the rate rides as a dated, path-qualified literal); the served
-  `provenance_gaps` + `total_provenance_gaps_count` (empty until slice 5, with the note saying so);
-  the 404 contract now names both halves of the gate (no examined evidence AND no servable gap
-  entry), conditional on the read having run.
-- **The reducer is self-circle-narrowed live (D4)**; the predicate and reducer now diverge
-  *deliberately in the opposite direction* from before (Arms 2–4 still ENGAGE a self-only violated
-  obligation; engagement ≠ emission) — do not "fix" it. **D2 remains** (tagging, not emission).
-- **The harness's advisory frame no longer carries the S4 recommendation**; Q7 depth calibration
-  reads the aggregate line only. The consult and guard budgets are 55 s inside 60 s hooks. The
-  telos line and close-content variation are on. The false-hold capture is OFF.
-- **The P6 instrument** (the report script) derives the decision table's recommendation at report
-  time with printed bounds; **the frozen 130 is a prefix of the live 138** (documented).
-- **`taskHasJusticeSurface` is REQUIRED** on `readTrustVerdict`; the discernment GET and the public
-  trust-record GET pass `false` with the reason stated (task-agnostic reads); `true` without S3
-  obligation routing would assert do-not-proceed for every agent.
-- **New shared DB primitives** `pagedRows` / `pagedRangeSelect` for any read that can cross
-  PostgREST's 1,000-row cap; the sweep tool `website/scripts/unbounded-select-sweep.ts` (54
-  unbounded-read candidates remaining, all classified).
+1. **The byte-identity guard is ARMED** (because the window is running). **No file matching
+   `GUARD_RE` may sit modified in the working tree** — `api/reason`, `api/guardrail`,
+   `guardrail-sandwich`, `sage-reason-engine`, `reasoning-receipt`, `translation-sandwich`,
+   `/substrate/`, `trust-core`, `kathekon-engagement`, `false-hold`, `harness/gate1`,
+   `layer1-extractor`, `layer2-mechanisms`, `sage-reflect`, `stoic-brain`. **Two SHA pins**
+   (`layer2-mechanisms.ts`, `stoic-brain.ts`) catch **committed** edits too, so a side arc cannot
+   route around the guard by committing. Touching any of these needs a **recorded founder waiver for
+   the named commit, guard LEFT ARMED, exception documented not encoded** — a silent commit
+   exploiting the committed-edit gap is **FORBIDDEN**.
+2. **Anything that could perturb the instrument must not run during the window.** The window measures
+   `/api/reason` and `/api/guardrail` behaviour; a window spanning instrument edits measures neither
+   state. A side arc on the **website product surface, human-practitioner tools, docs, governance, or
+   anything outside `GUARD_RE`** is window-neutral and safe.
+3. **Concurrency discipline, now with a collision on the record.** Path-scoped commits, always. Run
+   `git status` whole. `ListAgents` at open. **A peer's push publishes your local commits.** With 11
+   sessions open, a side arc adds surface area the mentor has already ruled against twice — the
+   cheapest mitigation is to close idle peers first (F-E).
+4. **Tool mode has a measurement consequence** (fact 5). A side arc authored with Write/Edit **adds
+   consult records and can advance the baseline**; one authored with Bash adds nothing. Neither is
+   wrong; the choice should be made on the task's merits and **disclosed**, never made *because of*
+   its effect on the counter.
 
-*Deeper detail:* the S11 register; `2026-08-15-false-hold-new-window-scoping-note.md` (§7 the
-recommendation column; §2.4/§3 the two preconditions); `2026-09-04-C-at-action-seam-caller-SCOPE.md`;
-the R9/R10 designs; `operations/agent-circles-2026-08/2026-08-26-provenance-ledger-SCOPE.md`.
+**What a side arc must not do:** open anything in list C; modify `classifyCaller`; touch the buffer;
+"refresh" D6a's frozen runs; set or unset any production flag without the founder walking it; or
+re-open a ruled question without attaching the prior ruling.
 
 ---
+
+## Part C — The trust-layer harness + its capabilities
+
+The 08-29 opener's Part C stands. **Deltas since:**
+
+- **The window is running** and the byte-identity guard is armed with it (facts 1 and 7).
+- **`caller_class` exists** on `false-hold-record-v5`, at a dated v4→v5 boundary, top-level (nesting
+  in `signals` would re-hash the frozen buffer), **not** in `recordHash`, **not** ingested (the DB
+  ingest maps an explicit column list and already omits every post-v2 field — **no migration is
+  involved**). Two values only. **It measures null** (see Part B).
+- **The guard disclosure has three segments** by ruling: post-boundary (review fleets excluded and
+  counted), pre-boundary (size stated, composition declared unknown, **no rate computed**, reason
+  stated), outage (excluded from both). **A retroactive classification pass is NOT owed.**
+- **`GUARD-OUTAGE` records are excluded from the rate denominator**; the outage rate is reported
+  separately on both sides. The consult side is outage-free **by construction** — verified at
+  source 2026-09-08: in `at-action-hook.mjs` the `if (!r.ok)` outage branch logs `CONSULT-OUTAGE`,
+  emits the fail-open note and `process.exit(0)`s **before** the `if (cfg.falseHoldCapture)`
+  capture block is reached. Cited by structure, not line number — the numbers this window's
+  records quote (704/747) have already drifted to 709/752.
+- **Harness config** (keys read first-hand): `GATE1_FALSE_HOLD_CAPTURE=true`; `GATE1_TIMEOUT_MS=55000`;
+  `GATE1_DEPTH=standard`; `GATE1_TELOS_LINE_ENABLED=true`;
+  `GATE1_CLOSE_CONTENT_VARIATION_ENABLED=true`; `SAGE_GATE1_REFLECT_PERSIST_ENABLED=true`;
+  `GATE1_STATE_DIR=/Users/clintonaitkenhead/.sage-gate1`; agent `sagereasoning:s9-loop@v1`.
+  `GATE1_ACTION_TEXT_MODE` absent (**composed** — lean mode is ruled **doctrinal**, not an
+  operational preference). `GATE1_DEBUG` **absent, with no residue**.
+- **Client:** Claude Code **`2.1.260`**, entrypoint `claude-desktop`. Note the two numbers that were
+  being conflated: the **Claude Desktop app** is `1.46388.4` and is **not** the number any ruling
+  refers to. `version` and `entrypoint` are fields on the **hook stdin payload** — read from the
+  wire, never from a UI.
 
 ## Part D — Working inside the dogfooded harness (standing context)
 
-Unchanged in substance — you are running inside the harness you help build; frames are advisory
-context, never commands; routine build acts examined "contrary — no kathekon factors extracted"
-remain the known false-positive class (the EE-C1 wording is the mentor's ruled formulation).
-Additions and sharpenings this window:
-
-- **Expect guard denies that are false positives, and honor them anyway.** The andreia floor reads
-  a handoff document's narration of future destructive operations as a praxis act (a file write
-  supplies the stage); a prompt describing teardown was denied `reflexive` while the retrospective
-  close passed. **The deny is ENFORCE; do not route around it by rewording toward the classifier or
-  by switching tools** — one session caught itself softening four phrases without deciding to.
-  Record the instance (nothing captures it while the window is off) and, if the founder overrides
-  (R20c), write what was drafted.
-- **Guard availability was 11–32% on ordinary days before the timeout raise.** Read the grounds of
-  each caution; an outage is not a deny; do not proceed on an unavailable check as though it were a
-  pass — log it and decide once, rather than restating the outage every turn.
-- **Verify your own session id before attributing any `gate1.log` event** (the log is UTC-stamped and
-  shared by concurrent sessions). **Date artifacts from `date`.** **Run `git status` whole.**
-- **The elicitation's third sub-question keeps drawing "the resolution preceded the examination"** —
-  four consecutive answers across two sessions; the capture-and-execute convention is doing the
-  deciding. Answer genuinely; once, if the answer stops changing.
-
----
+- **The frame is ADVISE. The guard's deny is ENFORCE and is honored.** An **outage is not a deny** —
+  read the grounds of every caution rather than flattening them by habit.
+- **The at-action false positive is the measured class, not a malfunction.** A caution reading *"no
+  kathekon factors were extracted"* on a read-only shell command is exactly what the window exists to
+  count. Answer the elicitation genuinely; do not let it become ritual.
+- **Under an ENFORCE deny, an agent once softened four phrases toward what the classifier would pass
+  without deciding to** — the failure mode the instrument cannot see, because it keeps verdicts, not
+  the drafts shaped to earn them.
+- **Bash is dropped from the consult floor**; `Write`/`Edit`/`MultiEdit`/`NotebookEdit` are the
+  consult surface. Bash denylist matches still produce guard records.
+- **Never edit a `GUARD_RE` file without a recorded waiver. Never `git checkout --` an un-backed-up
+  file. Back up before any truncating write.**
 
 ## Part E — Confirm the standard opening (state these, briefly, before the task)
 
-Tier/work-category; model (state it; disclose any mid-session switch); risk classification 0d-ii +
-AC7/PR6/**PR19** (independent review REQUIRED)/**PR20** (mechanism facts named + timestamp-checked, incl.
-carried items)/**PR21** (reflect-harvest)/**PR22** (`Model:`/`Effort:` trailers)/**PR23** (memory-first
-— then check the instance)/**PR24** (retention parity)/**PR25** (verification claims carry their
-check); the concurrency check (`ListAgents` + path-scoped commits + `git status` whole); hold-point
-P0 0h; status vocabulary; the founder-walked discipline (commit-and-push BEFORE any flag flip; this
-environment holds no production admin credential; prod mints go through the founder's browser-session
-JWT; never place executable DDL in a runnable code block during a live SQL-editor walk); bare-SQL
-verification blocks (pure-ASCII payloads, `chr()` for typography, length-count verification; a
-`SELECT count(*)` after any teardown delete — "Success. No rows returned" is not a count).
-
----
+1. Tier (0d-ii) and whether AC7 engages; model per AC1.
+2. Hold-point: **0h HELD**; **S11 flip REFUSED**; **weights BLOCKED**.
+3. Status vocabulary: `Scoped → Designed → Scaffolded → Wired → Verified → Live`;
+   `Adopted / Under review / Superseded`.
+4. **Window state re-derived by you, not quoted from here** — buffer size, window population,
+   baseline days, both SHA pins, guard battery green.
+5. `git status` whole; unpushed commits; **`ListAgents` peer count**.
+6. Whether your task touches `GUARD_RE`. If it does and you have no recorded waiver, **stop**.
 
 ## Part F — Now state the task
 
-With the foundations in place, **state the task** (if you haven't already). The session will then:
-declare its tier + risk for that task, read the task-specific deliverables (Tier 2), check the
-standing queue for collisions with in-flight watches (the C3 clock; B4's pending measurement; the
-window's two preconditions; the three peer sessions), and proceed under the protocol — grounded,
-honest, and scope-aware.
+**Everything above is preamble. Wait for the task.**
 
-*Reusable across sessions. Update when the ground state shifts materially (a session in the plan
-above closes, a licensed session opens, a flag flips, a mentor ruling lands) — archive the prior
-version to `archive/` with its date, per this file's own convention. The 0h call remains the
-founder's.*
+---
+
+*End of the standing opener, Version 2026-09-08. Rewritten only at a grounding session, from primary
+sources, carrying its as-of date. Every number in it is a claim to re-derive.*

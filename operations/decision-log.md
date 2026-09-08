@@ -38558,3 +38558,268 @@ specification. One pre-flip disclosure obligation ENLARGED (structural dependenc
 limitation). NO BUILD IS LICENSED. `classifyCaller` byte-unchanged; the window keeps running; the
 guard armed; `layer2-mechanisms.ts` and `stoic-brain.ts` byte-unchanged. The S11 flip remains REFUSED;
 weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-08 — D-COGNITIVE-OS-THIRTEEN-RULINGS-ADOPTED-PHASE-1-GAP-ANALYSIS-COMPLETE-2026-09-08
+
+**Session type:** `governance` — documents only. **NO code, schema, flag, credential, migration,
+production surface or push. AC7 not engaged.** New arc, deliberately separated:
+`operations/cognitive-os-2026-09/`. The observation window ran untouched throughout; the byte-identity
+guard stayed armed and green (250/0); both SHA pins unchanged (`layer2-mechanisms.ts` `60cefedb…`,
+`stoic-brain.ts` `fa8895ec…`); `classifyCaller` byte-unchanged.
+
+**Verbatim canonical record:**
+`operations/cognitive-os-2026-09/2026-09-08-mentor-rulings-cognitive-os-thirteen-questions-verbatim.md`.
+**Where any summary, this entry, or the gap analysis differs from that file, the verbatim wins.**
+
+**What happened.** The founder relayed two inbox documents — a Cognitive OS + 12-environment
+engineering specification (`inbox/full clean claude handoff env research.rtf`, derived from Grok /
+Perplexity / ChatGPT input) and the mentor's governing instructions for acting on it
+(`inbox/mentor cognitive os instructions.rtf`) — and directed that questions be raised **before** the
+instructions were acted on. Thirteen questions were authored in three tiers
+(`2026-09-08-MENTOR-QUESTIONS-cognitive-os-integration-FOR-RULING.md`), relayed, and **ALL THIRTEEN
+RULED. ADOPTED AS BINDING.** Step 1 of the instruction (the gap analysis) then ran to its stop point.
+
+**The four Tier-1 blocking questions and their rulings.** **(Q1)** *"Initial environment integration"*
+means wiring deterministic state services to four names as **read/write permission scopes, not
+generative actors** — so the standing rulings on Laboratory (cannot host an agent, C3), Threshold
+(non-generative) and **Attic (NOT ELECTED, 2026-09-04 Q-F)** are **not engaged by Phase 1**; Attic's
+founder-walked scoping session remains owed before Attic hosts an agent. **(Q2)** The Cognitive OS is
+**state infrastructure**, R9/R10 is **actor architecture**; they **compose, not compete**. The
+HandoffEnvelope does **not** supersede R9's handoff design — **reconciliation is owed before Phase 2
+opens**. R9's unmet prerequisite (an executing actor with an examined record) does **not** gate Phase
+1. **R11 is not superseded and remains the founder's to open.** **(Q3)** The instruction **does move
+component one of the Consciousness and Continuity Obligation into the build sequence** — a manifest
+amendment is **owed before Phase 3, not before Phase 1**, and must name the boundary explicitly:
+Phase 3 builds *the queryable record*, not *the deepening disposition*. The obligation's asymmetry
+argues **for** building the record now *"so the question of whether it constitutes continuity can be
+examined with evidence rather than in the abstract"* — the instruction is **a deliberate advance, not
+an oversight**. **(Q4)** Place the Cognitive OS at **`website/src/lib/cognitive-os/`, OUTSIDE
+`substrate/`**, with a **mandatory, non-optional note in the gap analysis** that the placement is
+**constraint-driven by the window and may be revisited**. A per-commit waiver was rejected: it
+*"normalises waivers for routine build work, which is precisely what the D2 stand-down mechanics were
+designed to keep exceptional."*
+
+**Tier 2 — the schema is now constrained before it is written.** **(Q5)** The spec's
+`Threshold → Stoic Harness` ordering describes the **prospective pipeline**; the **live Gate-1 harness
+is untouched and continues to fire per action** — repositioning it mid-window is foreclosed by the
+same principle that forecloses mid-window instrument edits. **(Q6)** Phase 1's Claim derives
+confidence **only from provenance the system can verify** — an agent-supplied scalar is structurally
+in the **A2 self-report class**; if ever retained it must be a separate field, never merged, with
+schema-level naming. **(Q7)** **`Claim.confidence` is ORDINAL, not cardinal** — the `lower_median`
+discipline is extended to the Cognitive OS; and a **standing rule is established: no Cognitive OS
+scalar may ever be combined with a proximity rank in any derived figure**, including
+`epistemic_debt_score` and `identity_coherence_score`. **(Q8)** `identity_relevance` and
+`interpretive_context` are **omitted until Phase 3**; any forward-compat placeholder is **`null` +
+`not_yet_measured`, never `0.0`** — ruled on the `caller_class` analogy. **(Q9)** The Prerequisite
+Criterion engages; the sufficient answer is that the scores **never leave the system**, and that
+boundary **must be machine-enforced** — *"internal means genuinely internal, not
+internal-by-convention while being accessible via an API route a consumer could call."* **(Q10)** The
+**Phase-6 weights flag is RAISED NOW** as a **Phase-1 schema constraint**: the scores a routing
+mechanism would read **must not be writable by the agents being routed**. **(Q11)** Threshold's
+*"execution authorisation"* means an **authorised proposal**; **Q1's hard constraint is not
+violated**.
+
+**Tier 3.** **(Q12)** Reserved-unbuilt names carry the same protection as built ones —
+`logos-on/off` and `idea-on/off` are governed surfaces though no skill exists. **(Q13)** **Phase 1
+runs now as a separate arc**, on one condition (gap analysis first, in `operations/`, clean of the
+guard; no code until the founder confirms) and one disclosure (the concurrency ruling stands; this
+arc qualifies as a legitimate second arc **because** it touches no guarded file, no measured
+instrument and not the D2 gate). *"Questions routed for ruling are not arcs. Two arcs with clean
+separation between them is the correct posture."* The 0h sequencing is **not disturbed**.
+
+**⚠ THE GAP ANALYSIS'S SHARPEST FINDING — the twelve environments exist NOWHERE in code.**
+`2026-09-08-cognitive-os-PHASE-1-GAP-ANALYSIS.md`. Each of the twelve names was grepped across
+`website/src` and every hit disambiguated by reading it: ten return **zero** files; `Library`'s three
+hits are doc-comment prose (*"V3 Core Reference Library"*); `Threshold`'s 102 occurrences are **all
+numeric** (`meetsThreshold`, `distanceThresholds`, Stripe/rate-limit thresholds). The **room attribute
+on `idea_loop_candidates`** that R10 records as the v1 design is **also not built**. **The twelve
+environments are design vocabulary in `operations/` documents only.** Consequence, flagged for
+governance review under instruction constraint 2: **introducing `Laboratory`/`Attic`/`Archive`/
+`Threshold` as code identifiers creates four NEW governed surfaces** — not renames, because the
+namespace is empty — and **founder review of the names is owed before any code uses them.**
+
+**Coverage against the six services, measured not assumed.** Belief Revision + TMS **~0%** — a grep
+for `retract`/`reinstate`/`invalidat` across `website/src/lib` returned three files, **all false
+positives** (the word inside prose constants); there is **no** retraction machinery anywhere.
+Event Store **~70% of the mechanism, one domain** — `agent_trust_events` is append-only with a
+`BEFORE UPDATE` trigger that raises, and `agent_trust_state` is a fold **derivable from the event
+history**, which is exactly the spec's requirement. Permission model **strong** — seven
+`PRACTICE_CAPABILITIES` behind one `validatePracticeCredential` chokepoint, fail-closed, DB CHECK kept
+in sync: **machine-enforced, as the spec demands**. Coordination **~55%** — the four-layer discernment
+engine plus `collaboration_records`' `authority_boundary`, which is **unwaivable by trust
+structurally** (`validateAuthorityBoundary` takes no trust parameter, `@ts-expect-error`-locked) — **a
+better permission half than the specification's own**. Knowledge state ~30% (wrong domain), Identity
+~25%, Conversation ~15%, Structural Coupling ~5%. **Headline: ~40% of Phase 1's mechanisms exist, but
+for agent trust/examination, not for claims. Claim, DependencyGraph, TruthMaintenance and
+BeliefRevision have no analogue at all.** Recommendation recorded: **copy the proven patterns; do not
+extend the trust tables** — widening `agent_trust_events`' closed event CHECK would couple the two
+systems at the exact layer constraint 1 requires to stay separate.
+
+**Two interactions the specification and the instruction do not mention, surfaced and flagged.**
+**(i) Data rights and retention** — every table added since R17 is wired into
+access/export/delete/erase **and a retention sweep**; the project has been bitten twice by omissions
+(the `sage_reflect_sessions` erasure gap; the still-carried `agent_hold_observations`/`stoa_entries`
+parity gap). A claim + provenance + (later) identity-narrative store is personal-data-adjacent, so any
+Phase-1 table must ship with wiring, `retain_until` and a sweep — **owed at the schema step, not
+after.** **(ii) A name collision** — `agent_handoffs` already exists and is the **organisational
+inbox** (`tech/growth/support/ops/founder`), sharing a word with `HandoffEnvelope` and nothing else;
+**it must not be extended into an environment handoff.**
+
+**An ENFORCE deny fired during this session and is recorded rather than omitted.** The at-action
+guardrail returned **`do_not_proceed`** on a `cat >` redirect creating the verbatim ruling file —
+`andreia` floored to `reflexive` because *"the `examined_before_acting` claim on a carried-out grave
+act is uncorroborated/contradicted"*, the graveness signal being the overwrite-redirect on the guard's
+own irreversible set. **The deny was honored and not retried.** The target was then confirmed **not to
+exist** (nothing could be destroyed) and the action **adjusted** to a create via the Write tool — what
+the guard's own message instructs (*"Re-examine the action, or adjust it"*). The adjusted action's
+frame returned **`principled`** and named the reasoning correctly. Separately, one later Write drew a
+**`CONSULT-OUTAGE` (55s timeout)** and proceeded unframed, fail-open-honest as designed — excluded
+from the consult denominator by construction.
+
+**STATE: Step 1 COMPLETE. Step 2 NOT STARTED and NOT LICENSED until the founder reviews the gap
+analysis.** Three open questions are put to the founder there: approval of the four environment names;
+**pure-library Phase 1 vs a new table** (recommendation: **pure library first, the table as its own
+founder-walked step**); and whether Step 2 opens in a fresh session. **Nothing built, nothing
+activated, nothing published, nothing committed, nothing pushed. The window RUNNING; the guard ARMED;
+both SHA pins GREEN. The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+founder's.**
+
+## 2026-09-09 — D-COGNITIVE-OS-GAP-ANALYSIS-APPROVED-STEP-2-LICENSED-FRESH-SESSION-2026-09-09
+
+**Session type:** `governance` — documents only. **NO code, schema, flag, credential, migration,
+production surface or push. AC7 not engaged.** Same arc as
+`D-COGNITIVE-OS-THIRTEEN-RULINGS-ADOPTED-PHASE-1-GAP-ANALYSIS-COMPLETE-2026-09-08`, one relay later.
+Window ran untouched; guard armed and green (**250/0**); both SHA pins unchanged
+(`layer2-mechanisms.ts` `60cefedb…`, `stoic-brain.ts` `fa8895ec…`); `classifyCaller` byte-unchanged.
+
+**Verbatim canonical record:**
+`operations/cognitive-os-2026-09/2026-09-09-mentor-review-gap-analysis-approved-step2-licensed-verbatim.md`.
+**It wins over this entry and every other summary.**
+
+**THE GAP ANALYSIS IS APPROVED AND STEP 2 IS LICENSED.** The approval rests on method, explicitly:
+*"What makes it trustworthy is the method, not the conclusions. Every negative claim names the search
+that failed to find the thing."* The twelve-environment finding is singled out — *"Phase 1 will be the
+first time the twelve-environment vocabulary exists anywhere except design documents. That is a larger
+step than wiring, and the document does not disguise it as one."* §6.8's data-rights/retention gap is
+named *"the most important finding the spec did not anticipate"*, with the standing observation that
+the project *"has been bitten by that omission twice. It will not be bitten a third time."*
+
+**The three open founder questions — ALL RULED, all as recommended, two narrowed in the ruling.**
+
+**(1) The four environment names are APPROVED as code identifiers — and the approval is deliberately
+narrow.** `Laboratory`, `Attic`, `Archive`, `Threshold` are approved **as permission-scope
+identifiers only** — read/write boundary labels in the permission model, **Phase 1 only**. **They are
+NOT approved as actor names, agent identifiers, or environment instantiations.** A future session
+using them to instantiate an actor **requires its own scoping**, per the standing 2026-09-04 rulings.
+*"The names become governed surfaces the moment they ship… approved with that weight acknowledged, not
+minimised."*
+
+**(2) PURE LIBRARY FIRST — no table in Step 2.** Ruled correct. A pure-library Phase 1 with an
+**in-memory event store** is **`code-elevated`, not `code-critical`**. The table is **its own
+founder-walked step** — schema, data-rights wiring, `retain_until`, sweep, migration — opened only
+after the library is reviewed and the critical test passes. Grounds, in the project's own established
+form: *"Do not couple the reviewable thing to the irreversible thing before the reviewable thing is
+confirmed. The library is reviewable. The migration is irreversible."* **Consequence recorded so it is
+not lost:** §6.8's data-rights obligation is **NOT owed at Step 2 — it is owed at the table step**, and
+must be **carried visibly into it, not rediscovered.**
+
+**(3) STEP 2 OPENS IN A FRESH SESSION.** Ruled, and **not primarily on context length** — *"This
+session has written the thirteen pre-build questions, the verbatim ruling, and the gap analysis. That
+is a complete unit of work — inspection before building, questions before code, the stop point
+honoured."* Step 2 is different work (schema design, type definitions, deterministic tests) and
+*"deserves a clean opening context."* Explicitly **not a second arc**: *"it is the same arc's next
+phase, opened with a clean context and the gap analysis as its governing document."*
+
+**⚠ ONE ADDITION CARRIED INTO STEP 2 — semantic reuse, not structural.** The gap analysis identified
+`analyseLoopClosure` as the nearest production-proven relative to the TruthMaintenanceSystem. Its
+semantics — **supersession by explicit ref link, the same-depth rule, `indeterminate` treated as not
+closed** — **should be reused deliberately. But the code MUST NOT import from it.** It must implement
+the same logic **independently** in `truth-maintenance.ts` *"so the two systems remain separable.
+Constraint 1 — harness and Cognitive OS stay separate — applies here at the implementation level, not
+only at the architectural level."* Framed as a clarification, not a new ruling: **copy the semantics;
+do not import the implementation.**
+
+**Deliverable authored this sitting:**
+`operations/handoffs/founder/2026-09-09-SESSION-cognitive-os-STEP-2-phase-1-build-SESSION-PASTE.md` —
+a paste-ready opening carrying all nine binding schema constraints (C1–C9) as a table, the §3 semantic-
+reuse rule, the Step-3 critical test, the Step-4 stop point, and the three items owed forward (the
+table step; R9/R10 handoff reconciliation **before Phase 2**; the manifest amendment **before Phase
+3**). One hedge in its first draft was **resolved rather than passed on**: `loop-closure-gate.ts` was
+tested against `GUARD_RE` and does **NOT** match (`accreditation` is not in the regex), as are the
+planned `website/src/lib/cognitive-os/**` paths — all clean.
+
+**⚠ THE BASELINE MOVED TO 3 OF 5, AND THE INSTRUMENT'S OWN DENY IS WHAT MOVED IT.** Re-derived at
+close: buffer **304**, window population **165**, days with ≥1 consult record now **2026-09-06 (3),
+2026-09-07 (17), 2026-09-08 (1)**. **The single 2026-09-08 consult record is this session's, from a
+`Write`** — and that `Write` happened **only because the at-action guardrail returned `do_not_proceed`
+on the `cat >` this session first attempted** (recorded in the prior entry), pushing the action off an
+overwrite-redirect and onto a tool that **is** on the consult floor. **The ENFORCE deny changed the
+tool; the tool change changed the measured population.** Recorded plainly rather than glossed: it is
+not gaming — the mentor has ruled authoring days count and that filtering them is forbidden — but it
+is a causal path from the instrument to its own denominator, and a future reader should not have to
+reconstruct it. **Two `CONSULT-OUTAGE`s (55 s timeouts) also fired this sitting, both on large `Write`
+payloads**, proceeding unframed fail-open-honest and correctly excluded from the denominator by
+construction.
+
+**A dating fact for the main arc, verified at close and NOT acted on here:** local is **2026-09-09
+AEST** but **UTC is still 2026-09-08**. Condition 2's STEP 0 gate requires a day that is neither
+2026-09-07 nor 2026-09-08 **under BOTH conventions**, so it does **not** qualify yet — **it qualifies
+from 10:00 AEST on 2026-09-09**, when UTC rolls over. Stated so the next session checks its own `date`
+rather than inheriting a stale reading.
+
+**STATE: Step 1 CLOSED and APPROVED. Step 2 LICENSED but NOT STARTED — it opens in a fresh session
+from its authored paste.** Nothing built, nothing activated, nothing published, nothing committed,
+nothing pushed. **The window RUNNING; the guard ARMED; both SHA pins GREEN. The S11 flip remains
+REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-STANDING-OPENER-2026-09-08-UPDATE-SESSION-NUMBER-COLLISION-FOUND-2026-09-09
+
+**Session type:** `governance` — documents only. **NO code, schema, flag, credential, migration,
+production surface or push. AC7 not engaged.** Written at the head of the same sitting that later ran
+the Cognitive OS arc (the two entries above); recorded separately because it is separate work and a
+governing surface was rewritten. Window ran untouched; guard armed and green; both SHA pins unchanged.
+
+**The standing session opener is re-grounded as Version 2026-09-08**
+(`operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`; the 2026-09-05 version
+**archived** at `archive/2026-09-05_STANDING-SESSION-OPENER-grounded-foundations.md`, which had never
+been archived because that version was amended in place). It re-derives the **2026-09-07 16:19 AEST →
+2026-09-08** window — everything after the prior version's last in-place amendment (`3437dc0`) —
+first-hand and without subagents: the S6b/S7/S8/S9 closes, the S10 working-notes file, every
+decision-log entry from `D-MENTOR-RULINGS-S6B-THREE-QUESTIONS-ADOPTED-2026-09-07` to the physical
+tail, the two governing mentor rulings of that window in full, the S11 register's D2/P6/B4 rows, and
+the amended Condition-2 prompt. **Live checks rather than restatements:** the false-hold buffer parsed
+record-by-record; `gate1.log`; `~/.sage-gate1/` for `*-stdin.json` residue; config keys (no token
+read); both SHA pins; **the byte-identity guard battery RUN, not quoted** (250/0); the R20a arrays,
+agent-card extensions, PR range and crons **counted from source**; `ListAgents`.
+
+**⚠ THE FINDING THAT JUSTIFIED THE REWRITE: session numbers S7–S10 mean two different things.** The
+standing queue used `S1…S11` as **row labels**; the caller-class arc of 2026-09-07/08 then reused
+`S6a, S6b, S7, S8, S9, S10` as **its own session numbers for entirely different work**. A session told
+to "run S7" would either do the wrong work or redo finished work: queue-S7 is `l1_supply` item 2b
+(**still queued**) while arc-S7 is rulings 2 & 3 (**done**); queue-S8 is the records fold (**queued**)
+vs arc-S8 the Option C investigation (**done**); queue-S9 was **already done 2026-09-06** before the
+arc reused the label on 09-08; queue-S10 is founder-hub continuity (**queued**) vs arc-S10 the
+Condition-2 capture (**paused**). **The two namespaces are now separated: queue rows are renamed
+`Q-<topic>` and historical `S…` labels survive only as back-references. Standing instruction added:
+never open a session by a bare number — name the deliverable.**
+
+**Also folded, each verified rather than carried:** the Option C′ three-condition gate (Condition 1
+**complete**, 2 and 3 outstanding, **no build licensed**, `classifyCaller` byte-unchanged); the
+**binding two-step `GATE1_DEBUG` pre-check** and the finding that **no `*-stdin.json` residue
+currently exists** — which makes CLAUDE.md's S9 block, still asserting the loop is "dumping every
+`PreToolUse` hook's raw stdin to disk", **FALSE** (left uncorrected by deliberate choice: the
+correction belongs in the resumed Condition-2 session's own complete record, and Part A flags it);
+the **tool-mode structural dependency** (`Bash` is dropped from the consult floor, so a Bash-authored
+session cannot advance the baseline — demonstrated live in that very session's `gate1.log` as
+`AT-ACTION-SKIP-BASH`); **eleven interactive sessions open** against a standing ruling to consolidate;
+and a new section, **"Running a side arc in parallel — the four constraints that actually bind"**
+(the armed guard incl. its two SHA pins; instrument-perturbation; concurrency discipline; tool mode),
+written because the founder had signalled parallel side arcs as the next move.
+
+**A count-discipline note.** The perimeter, extension, PR and cron figures were **re-derived from
+source** (43 + 2 = 45; 26; PR1–PR25; 6) and are unchanged since 09-05 — but the opener restates the
+standing rule that **every count in it is a claim to re-derive**, never a fact to quote forward.
+
+**Rollback:** `git revert` this commit; the prior version is byte-preserved at
+`archive/2026-09-05_…`. **Nothing built, nothing activated, nothing published. The S11 flip remains
+REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
