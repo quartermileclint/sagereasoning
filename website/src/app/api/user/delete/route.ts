@@ -37,6 +37,12 @@ import { deleteAgentSessions } from '@/lib/sage-reflect/session-store'
 // milestones lesson); missing-table-benign until the migration lands; the
 // profiles FK cascade is the backstop.
 import { deleteStoaDataForOwner, deleteStoaDataForCredential } from '@/lib/stoa/stoa-store'
+// Cognitive OS core slice (2026-09-09) — genuine deletion (R17c) of the owner's
+// cognitive-os state, in two arms (owner_user_id + each owned credential_ref).
+// Wired at birth, per the milestones lesson; missing-table-benign until the
+// migration lands. Q-R6 ruled this obligation onto the table step's OPENING
+// surface, so the wiring was designed before the schema, not after it.
+import { deleteCognitiveDataForOwner } from '@/lib/cognitive-os-store/store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -268,6 +274,50 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Cognitive OS core slice (R17c, 2026-09-09) — genuine deletion of the
+  // owner's cognitive-os state. TWO ARMS, for the same reason the Stoa delete
+  // above has two: a `cognitive_contexts` row created under one of this user's
+  // CREDENTIALS carries no owner_user_id, and would otherwise survive account
+  // deletion. Keyed by credential_ref exactly, never by agent_id.
+  //
+  // The store deletes every child table EXPLICITLY and verifies each by an exact
+  // count — the FK cascade to cognitive_contexts is a backstop, never the
+  // mechanism ("erasure is verified by query, never inferred from a cascade").
+  // Always-on and missing-table-benign, so this is correct before the migration
+  // lands as well as after.
+  {
+    // M6 row-cap discipline: this key list DRIVES which credentials' contexts
+    // get deleted, so it is paged on `id` (api_keys' UUID PK) and never
+    // truncated at the 1,000-row cap.
+    const { rows: cogKeyRows, error: cogKeysError } = await pagedRows<{ id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id',
+      { eqColumn: 'owner_user_id', eqValue: userId }
+    )
+    if (cogKeysError) {
+      deletionErrors.push(`cognitive_os (credential resolution): ${cogKeysError}`)
+    }
+    // DELIBERATE DIVERGENCE from the Stoa and reflect blocks above, which SKIP
+    // their credential arm entirely on a resolution error (PR19 nit, 2026-09-09
+    // — flagged as an unexplained inconsistency, so it is explained rather than
+    // silently aligned). On an ERASURE path, deleting what can be reached is
+    // strictly better than deleting nothing: arm 1 still runs, the failure is
+    // surfaced in deletionErrors, and the response is honestly
+    // `partial_deletion`. The opposite choice would leave owner-keyed rows
+    // undeleted as well, for no gain.
+    //
+    // Note this is the OPPOSITE of the right answer on the ACCESS path, where
+    // proceeding on a partial list would present an incomplete copy as complete.
+    // Erasure fails safe by doing more; disclosure fails safe by doing less.
+    const cogCredentialRefs = (cogKeyRows ?? []).map((r) => `api_key:${r.id}`)
+    const cognitiveDelete = await deleteCognitiveDataForOwner(userId, cogCredentialRefs)
+    if (!cognitiveDelete.ok) {
+      deletionErrors.push(`cognitive_os: ${cognitiveDelete.error}`)
+    }
+  }
+
   for (const table of tablesToDelete) {
     const { error } = await supabaseAdmin
       .from(table)
@@ -291,7 +341,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'idea_loop_cycles', 'sage_reflect_sessions', 'stoa_entries', 'agent_provenance_ledger', 'agent_provenance_gaps'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'idea_loop_cycles', 'sage_reflect_sessions', 'stoa_entries', 'agent_provenance_ledger', 'agent_provenance_gaps', 'cognitive_contexts', 'cognitive_events', 'cognitive_claims', 'cognitive_belief_states'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

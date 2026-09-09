@@ -39019,3 +39019,133 @@ byte-identical to its pre-session state (SHA-verified) though its *runtime* effe
 revert-lag above; this is a residual state, not a production or repository change, and no
 CLAUDE.md production-state note is due on that basis alone. **The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-COGNITIVE-OS-TABLE-STEP-CORE-SLICE-AUTHORED-PR19-FOLDED-NOT-APPLIED-2026-09-09
+
+**Tier `code-critical`, founder-walked. AC7 ENGAGES AND IS NOT DISCHARGED — nothing was applied.**
+Production is UNCHANGED: no flag, no schema, no migration run, no credential, no deploy. The four
+tables exist in no environment. The AI performed no Supabase, Vercel, git-push or mint operation.
+
+**What ran.** The Cognitive OS table step (carried item 1 of the Phase-1 close): schema authored,
+R17 data-rights wired, retention sweep built, PR19-reviewed, mutation-verified. **Phase 2 remains
+NOT LICENSED.** Close: `operations/cognitive-os-2026-09/2026-09-09-TABLE-STEP-CORE-SLICE-CLOSE.md`.
+
+**Two findings shaped the step, both from designing the R17 wiring BEFORE the schema (Q-R6).**
+(i) **The Phase-1 library carries no ownership field at all** — `created_by`/`caused_by` are
+free-form service strings, and R17's four routes all key on `owner_user_id` or `credential_ref`. The
+table step had to introduce the axis; a schema written first would have bent the wiring to fit it.
+(ii) **Q9 collides with R17 export concretely**: `/api/user/export` is "an API route a consumer could
+call" and the standing pattern is `select('*')`. Resolved by construction from Q-R7's own preference
+— **no Cognitive OS scalar is persisted at all**, so there is nothing at rest to leak and Q7/Q9/Q-R7
+are satisfied by one decision.
+
+**Founder elections (2026-09-09):** single scoping root (`cognitive_contexts`, children FK
+`ON DELETE CASCADE`); core slice first (contexts + events + claims + belief_states; decisions,
+handoffs and the dependency graph deferred to a second walked migration); persist components only.
+
+**Rulings encoded structurally, not documented:** Q1/Q11 (an `EXECUTE` row is unstorable without a
+named external executor); C3/Q7 (`confidence` is a TEXT enum — a cardinal value cannot be stored);
+C6/Q8 (no `identity_relevance`/`interpretive_context` columns — absent, not null-filled); Q-R6 (an
+identity CHECK makes every row reachable by at least one R17 path); the 2026-08-16 RLS shape (RLS on,
+**zero policies**, explicit REVOKEs, service-role GRANT); append-only via a plain — not
+`SECURITY DEFINER` — trigger, with DELETE deliberately retained for erasure and the sweep.
+
+**The Phase-1 purity guard caught a real violation this session introduced.** The store was first
+written inside `src/lib/cognitive-os/`; the battery went **149/0 → 146/3** on `§9.PURE` ×2 and
+**`§12.C9`** (every import must be a relative sibling — itself hardened after a PR19 MEDIUM found the
+C9 "no executor" check defeated by import aliasing). **The layer was moved out to
+`src/lib/cognitive-os-store/` rather than the guard relaxed**; relaxing it would have weakened the
+exact constraint Q11 turns on. The pure library is byte-unchanged.
+
+**PR19 — three blind dimensions on `sonnet`. CAP TRANSPARENCY (Q3): cap 10 per dimension; the cap
+did NOT bind on any dimension** (2, 2 and 4 findings; each reviewer stated nothing was dropped).
+**8 findings, 8 folded, 0 refuted**, each verified first-hand before folding. Three HIGH: a
+**vacuous `§1.5` pin** (a character-window search from any occurrence of a table's name; all four
+matched the same span — deleting a table's `retain_until` outright left it green); the migration
+header's **SECURITY DEFINER evidence did not reproduce** (a narrower `grep` quoted than the one run —
+found independently by two reviewers); and `/api/user/access` returning **ok with a silently
+incomplete Art 15 copy** on a credential-resolution error, with a comment claiming the opposite of
+what the code did. Also folded: a real `tsc` TS6133; a sweep reporting a pre-delete count; two nits.
+
+**The SECURITY DEFINER finding is a RECURRENCE.** `supabase-practice-family-rls-lockdown-migration.sql`
+already carries a post-PR19 correction of the identical class on the identical check, and the
+session prompt itself quotes the superseded command. Per **PR25** the fold is not a better sentence:
+the battery now **re-runs the sweep** (`§1.13d–f`), walking every `.sql` in the repo and asserting
+that none names a `cognitive_` table. True figures: 18 hits / 12 files, zero touching `cognitive_`.
+
+**One finding was kept rather than aligned, and the asymmetry recorded:** the delete route proceeds
+on a credential-resolution error where its siblings skip. For erasure that is the better shape
+(delete what can be reached; the error still surfaces as `partial_deletion`) — and it is the exact
+opposite of the right answer on the access path. **Erasure fails safe by doing more; disclosure fails
+safe by doing less.**
+
+**A ninth finding surfaced by the session's own post-review verification:** `consumer-erasure.test.ts`
+failed its happy path once the cognitive arm joined the chain — a **test-double gap**, not a defect
+under test (the suite's fake client predates `pagedRows` and lacks `.gt/.order/.limit`, so the call
+threw and the erasure honestly reported `ok:false`). The double was **extended to model the real
+client** rather than the new tables special-cased, and the suite now pins that the arm reaches
+`cognitive_contexts` by `credential_ref`. It appeared after the records were drafted; it was this
+session's own change, not a pre-existing failure.
+
+**Gates (run, not quoted):** cognitive-os battery **149/0** · critical scenario **30/0** · new
+table-step battery **137/0** · erase handler **41/0** · consumer-erasure **26/0** · byte-identity
+guard **250/0** · `tsc --noEmit` **0** · `npm run build`
+exit 0 with the new cron route registered · both SHA pins unchanged · `GUARD_RE` vs 12 changed paths
+**0 matches**. **12 mutations, 12 RED, 0 vacuous**, each proved landed and SHA-verified restored.
+
+**Window (re-derived at open and close):** buffer 373 → **390**; window 233 → **250** (209 guard, 41
+consult); **4 consult-bearing days of the 5 required**. The prompt's "4 of 4" is corrected to **4 of
+5**; the flagged denominator discrepancy is currently **moot** (no elapsed UTC day since the window
+opened is empty, so both readings give 4) and remains open as a threshold question. **Tool mode:**
+mixed on merit — Write/Edit for new source (heredoc escaping is a recorded hazard), Bash for
+inspection and anchored mechanical edits; **effect disclosed: +14 consult records** (09-09: 1 → 15),
+which deepened one day's composition but did **not** move the gated day count.
+
+**Carried:** the entire founder walk (§8 of the close — TEST `§PRE`/`§APPLY`/`§VERIFY` incl. the four
+TEST-only behavioural probes, then production; **the close deliberately contains no runnable DDL**,
+per the standing correction); the sweep flag as its own activation decision; the second migration,
+where the Q9-vs-export question returns in its sharpest form.
+
+**The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-COGNITIVE-OS-TABLE-STEP-SCHEMA-APPLIED-TEST-AND-PRODUCTION-2026-09-09
+
+**Tier `code-critical`, founder-walked. AC7 ENGAGES AND IS NOW DISCHARGED.** The founder ran every
+live step on both TEST and production; the AI performed no Supabase operation, only preparing exact
+SQL text (extracted and SHA-checksummed rather than retyped) and confirming outputs against the
+migration's own stated expectations.
+
+**Sequence run, in the founder's own order:** TEST `§PRE` → `§APPLY` → `§VERIFY` V1–V8 (all green) →
+`§VERIFY` V9a–V9d, four TEST-only behavioural probes, **each correctly FAILED** with its named error
+code (`23514` on the identity CHECK; `23514` on EXECUTE without an external executor; `P0001`
+append-only on the UPDATE; `23514` on a cardinal `0.85` confidence) → teardown DELETE + the count
+query confirming the cascade reached all three child tables → production `§PRE` (**P1 returned zero
+rows** — a genuine first application, not a partial one) → `§APPLY` → `§VERIFY` V1–V8, **all green**.
+
+**Two of my own `§VERIFY` steps were wrong and were corrected IN THE MIGRATION FILE mid-walk — the
+database was never wrong, my written expectation was.** V3 originally said "expect ONLY
+service_role rows," which is false (`postgres`, the table owner, always appears and is not an
+exposure path — PostgREST never connects as owner); corrected to the negative form the three prior
+lockdown migrations already use. V8 said "expect the six allowed string values," meaning the six
+values *inside* the confidence CHECK, misread as a row count; the correct count is **seven** (four
+inline column CHECKs + three named table CHECKs). A third warning was added at the V9 teardown: on
+a DELETE, "Success. No rows returned" is not evidence of anything, unlike on the SELECT it correctly
+passes at V3 — this project has been misled by that exact phrase before.
+
+**PRODUCTION SCHEMA STATE: LIVE.** Four tables, RLS on with zero policies, REVOKE/GRANT confirmed,
+both FK cascades confirmed, the append-only trigger confirmed, zero score columns confirmed, seven
+`cognitive_claims` CHECK constraints confirmed.
+
+**⚠ Code is uncommitted and unpushed.** `git log origin/main..HEAD` is empty. The deployed
+application is byte-identical to before this session — only the database schema changed. The tables
+are empty and RLS-locked, so this is safe in both directions, but the R17 data-rights obligation is
+not yet live end to end; committing (path-scoped — two peer files remain in the tree and must not be
+staged) and pushing are the founder's own next acts.
+
+**Window re-derived at this update:** buffer 397, window 257 (216 guard + 41 consult), **still 4 of
+5 consult-bearing days**. Byte-identity guard **250/0**, re-run.
+
+Full record: `operations/cognitive-os-2026-09/2026-09-09-TABLE-STEP-CORE-SLICE-CLOSE.md` (now
+updated in place with this outcome).
+
+**The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**

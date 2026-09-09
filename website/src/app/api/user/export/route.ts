@@ -37,6 +37,10 @@ import { getAgentSessionsForExport } from '@/lib/sage-reflect/session-store'
 // Stoa ST2 (R17i, 2026-08-03) — portability of the practitioner's Stoa entries
 // (owner_user_id-keyed standing declarations). Missing-table-benign.
 import { getStoaDataForOwner, getStoaDataForCredentials } from '@/lib/stoa/stoa-store'
+// Cognitive OS core slice (2026-09-09) — the operator's cognitive-os state for
+// the Art 20 copy. Whole rows are safe ONLY because no Cognitive OS scalar is
+// persisted (Q9 + Q-R7); see the call site before adding any score column.
+import { getCognitiveDataForOwner } from '@/lib/cognitive-os-store/store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -214,6 +218,44 @@ export async function GET(request: NextRequest) {
     } else {
       exportData.agent_provenance_ledger = provenanceExport.value.ledger
       exportData.agent_provenance_gaps = provenanceExport.value.gaps
+    }
+  }
+
+  // 2e-ii. Cognitive OS core slice (R17i, 2026-09-09) — the operator's
+  //        cognitive-os state: contexts, the append-only event log, claims and
+  //        belief-state versions. TWO ARMS, like the Stoa export below: contexts
+  //        created under this user's CREDENTIALS carry no owner_user_id, yet the
+  //        operator is the accountable party, so they belong in the Art 20 copy.
+  //        Keyed by credential_ref exactly, never by agent_id.
+  //
+  //        WHOLE ROWS ARE SAFE HERE, and the reason is load-bearing rather than
+  //        incidental: the core slice persists NO Cognitive OS scalar. Q9 requires
+  //        epistemic_debt_score and identity_coherence_score to be machine-enforced
+  //        internal — "not internal-by-convention while being accessible via an API
+  //        route a consumer could call" — and this IS such a route. Persisting only
+  //        the debt COMPONENTS (Q-R7's own preference) means there is nothing at
+  //        rest for this export to leak. IF A LATER SLICE ADDS ANY SCORE COLUMN,
+  //        THIS MUST BECOME AN EXPLICIT PROJECTION AND STOP EXPORTING WHOLE ROWS.
+  //
+  //        Row-cap discipline: the credential list drives which contexts appear,
+  //        so an incomplete list would present an incomplete Art 20 export as
+  //        complete. Paged on `id` (api_keys' UUID PK).
+  {
+    const { rows: cogCredRows, error: cogCredError } = await pagedRows<{ id: string }>(
+      supabaseAdmin,
+      'api_keys',
+      'id',
+      'id',
+      { eqColumn: 'owner_user_id', eqValue: userId }
+    )
+    if (cogCredError) {
+      exportData.cognitive_os = { error: cogCredError }
+    } else {
+      const cogRefs = (cogCredRows ?? []).map((r) => `api_key:${r.id}`)
+      const cognitiveExport = await getCognitiveDataForOwner(userId, cogRefs)
+      exportData.cognitive_os = cognitiveExport.ok
+        ? cognitiveExport.value
+        : { error: cognitiveExport.error }
     }
   }
 

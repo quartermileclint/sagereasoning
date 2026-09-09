@@ -22,6 +22,9 @@ import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-en
 // Stoa ST2 (R17g/R17i, 2026-08-03) — the practitioner's Stoa entries in the
 // Art 15 access copy (owner_user_id-keyed; missing-table-benign).
 import { getStoaDataForOwner, getStoaDataForCredentials } from '@/lib/stoa/stoa-store'
+// Cognitive OS core slice (2026-09-09) — the operator's cognitive-os state for
+// the Art 15 access copy. Missing-table-benign until the migration lands.
+import { getCognitiveDataForOwner } from '@/lib/cognitive-os-store/store'
 import { pagedRows, pagedRangeSelect } from '@/lib/db/paged-select'
 
 /**
@@ -138,6 +141,19 @@ export async function gatherUserPersonalData(
     }
   }
 
+  // The owner's `api_key:<id>` refs, resolved once in the Stoa block below and
+  // reused by the cognitive-os block after it. Declared here so both see it.
+  //
+  // BOTH are needed. An earlier version carried only the list, and on a
+  // credential-resolution error it stayed EMPTY while the cognitive-os block
+  // still returned ok — producing an Art 15 copy that was silently missing every
+  // agent-created context yet carried no error and no `incomplete` marker. The
+  // comment at the time claimed the opposite of what the code did. Found by
+  // independent review (PR19, 2026-09-09, HIGH). "Resolution failed" and "this
+  // user has no credentials" are different facts and must not render alike.
+  let cognitiveCredentialRefs: string[] = []
+  let cognitiveCredentialRefsError: string | null = null
+
   // 1b. Stoa ST2 (2026-08-03) — the practitioner's Stoa entries, keyed by
   //     owner_user_id (= profiles.id, NOT user_id — so they cannot ride the
   //     loop above). Standing declarations (#24 — no retention sweep covers
@@ -166,10 +182,53 @@ export async function gatherUserPersonalData(
     )
     if (credError) {
       data.stoa_agent_entries = { error: credError }
+      // Carried, not swallowed: the cognitive-os block below shares this
+      // resolution and must report the failure rather than proceed on an empty
+      // list that is indistinguishable from "no credentials".
+      cognitiveCredentialRefsError = credError
     } else {
       const refs = (credRows ?? []).map((r) => `api_key:${r.id}`)
+      // Reused by the cognitive-os block below rather than re-reading api_keys.
+      cognitiveCredentialRefs = refs
       const agentStoa = await getStoaDataForCredentials(refs)
       data.stoa_agent_entries = agentStoa.ok ? agentStoa.value : { error: agentStoa.error }
+    }
+  }
+
+  // 1c. Cognitive OS core slice (2026-09-09) — the operator's cognitive-os
+  //     state: contexts, the append-only event log, claims and belief-state
+  //     versions. Keyed by owner_user_id (= profiles.id) and by credential_ref,
+  //     so like the Stoa block above it cannot ride the user_id loop.
+  //
+  //     TWO ARMS: a context created under one of this user's credentials carries
+  //     no owner_user_id, yet the operator is the accountable party, so it
+  //     belongs in the Art 15 copy. Keyed by credential_ref exactly.
+  //
+  //     Whole rows are safe here for the same load-bearing reason as in the
+  //     export: the core slice persists NO Cognitive OS scalar, so there is
+  //     nothing at rest that Q9 would forbid returning through an API route a
+  //     consumer can call. If a later slice adds a score column, this must
+  //     become an explicit projection.
+  //
+  //     Missing-table-benign until the migration lands, so this is correct
+  //     before as well as after. Reuses the credential list resolved above
+  //     rather than re-reading api_keys.
+  {
+    if (cognitiveCredentialRefsError !== null) {
+      // Arm 2 could not be resolved. Reporting the owner-arm rows alone would be
+      // an incomplete access copy presented as complete — so this reports the
+      // failure instead. Mirrors /api/user/export/route.ts's own block, which
+      // resolves its credentials independently and does the same.
+      data.cognitive_os = {
+        error: `credential resolution failed, so agent-created contexts could not be included: ${cognitiveCredentialRefsError}`,
+      }
+    } else {
+      const cognitive = await getCognitiveDataForOwner(userId, cognitiveCredentialRefs)
+      if (!cognitive.ok) {
+        data.cognitive_os = { error: cognitive.error }
+      } else {
+        data.cognitive_os = cognitive.value
+      }
     }
   }
 

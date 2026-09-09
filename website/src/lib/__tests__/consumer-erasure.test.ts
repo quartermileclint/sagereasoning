@@ -45,6 +45,10 @@ interface Capture {
   eq: Array<[string, unknown]>
   is?: [string, unknown]
   not?: [string, string, unknown]
+  gt?: [string, unknown]
+  gte?: [string, unknown]
+  order?: string
+  limit?: number
   maybeSingle?: boolean
 }
 class FakeQuery {
@@ -72,6 +76,29 @@ class FakeQuery {
   }
   not(col: string, op: string, val: unknown): this {
     this.cap.not = [col, op, val]
+    return this
+  }
+  // ── pagedRows support (2026-09-09) ──────────────────────────────────────────
+  // The Cognitive OS erasure arm reads through `pagedRows`, which chains
+  // .gt/.gte/.order/.limit. This double predates that helper and had none of
+  // them, so the call threw, the store caught it, and the whole happy path
+  // reported ok:false — a TEST-DOUBLE gap, not a defect in the code under test.
+  // Modelled rather than special-cased: a double that does not model the real
+  // client is the class that lets a genuine mismatch pass unseen.
+  gt(col: string, val: unknown): this {
+    this.cap.gt = [col, val]
+    return this
+  }
+  gte(col: string, val: unknown): this {
+    this.cap.gte = [col, val]
+    return this
+  }
+  order(col: string): this {
+    this.cap.order = col
+    return this
+  }
+  limit(n: number): this {
+    this.cap.limit = n
     return this
   }
   maybeSingle(): Promise<Result> {
@@ -173,6 +200,13 @@ async function main(): Promise<void> {
     const traj = captures.find((c) => c.table === 'agent_assessment_history')!
     assert(traj.op === 'delete' && traj.eq[0][0] === 'credential_ref' && traj.eq[0][1] === 'api_key:cred-1',
       'erase: trajectory hard-deleted by credential_ref (api_key:<id>)')
+    // Cognitive OS core slice (2026-09-09): the erasure arm must actually reach
+    // the ownership root, keyed by credential_ref exactly.
+    const cog = captures.find((c) => c.table === 'cognitive_contexts')
+    assert(
+      cog !== undefined && cog.eq.some(([c, v]) => c === 'credential_ref' && v === 'api_key:cred-1'),
+      'erase: cognitive_contexts queried by credential_ref (api_key:<id>)',
+    )
     const keys = captures.find((c) => c.table === 'api_keys')!
     assert(keys.op === 'update' && keys.eq[0][0] === 'id' && keys.eq[0][1] === 'cred-1',
       'erase: api_keys row updated by id')

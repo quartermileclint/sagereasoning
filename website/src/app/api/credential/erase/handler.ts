@@ -265,6 +265,11 @@ export async function runConsumerErasure(
       `idea_loop_completion_signals (credential-scoped: ${credentialRef}; ${result.value.completion_signals_deleted} rows)`,
       // Provenance-ledger slice 1: agent_provenance_ledger + agent_provenance_gaps.
       `agent_provenance_ledger + agent_provenance_gaps (credential-scoped: ${credentialRef}; ${result.value.provenance_deleted} rows)`,
+      // Cognitive OS core slice (2026-09-09): contexts plus every child row —
+      // events, claims and belief states. Reported as ONE total because they are
+      // deleted as one unit per context and are keyed on the SAME credential;
+      // the per-table counts are verified inside the store by exact count.
+      `cognitive_contexts + cognitive_events + cognitive_claims + cognitive_belief_states (credential-scoped: ${credentialRef}; ${result.value.cognitive_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
@@ -280,6 +285,7 @@ export async function runConsumerErasure(
       reflect_rows_deleted: result.value.reflect_deleted,
       stoa_rows_deleted: result.value.stoa_deleted,
       watching_rows_deleted: result.value.watching_deleted,
+      cognitive_rows_deleted: result.value.cognitive_deleted,
       billing_rows_depersonalised: result.value.billing_depersonalised,
       credential: 'anonymised_and_revoked',
       retained_by_law: RETAINED_BY_LAW,
