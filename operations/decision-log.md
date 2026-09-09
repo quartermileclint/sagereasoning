@@ -38823,3 +38823,107 @@ standing rule that **every count in it is a claim to re-derive**, never a fact t
 **Rollback:** `git revert` this commit; the prior version is byte-preserved at
 `archive/2026-09-05_…`. **Nothing built, nothing activated, nothing published. The S11 flip remains
 REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-COGNITIVE-OS-PHASE-1-BUILT-PR19-FOLDED-MENTOR-APPROVED-2026-09-09
+
+**Session type:** `code-elevated`. Opened under
+`2026-09-09-SESSION-cognitive-os-STEP-2-phase-1-build-SESSION-PASTE.md`, per the licensing chain in
+the two entries immediately above. **AC7 not engaged.** No table, no migration, no SQL, no flag, no
+credential, no deploy, no harness file, no `GUARD_RE` file touched — verified by testing every planned
+path against the regex with positive controls, and re-checked at close (`git status` clean of anything
+matching it).
+
+**Full build report:** `operations/cognitive-os-2026-09/2026-09-09-STEP-2-PHASE-1-BUILD-REPORT.md`.
+**Close, carrying the mentor's post-hoc review and all three founder-relayed rulings:**
+`operations/cognitive-os-2026-09/2026-09-09-STEP-2-PHASE-1-BUILD-CLOSE.md`. **Both win over this
+entry.**
+
+**PHASE 1 BUILT AND MENTOR-APPROVED.** A pure, deterministic, dependency-free TypeScript library at
+`website/src/lib/cognitive-os/` (2,462 library lines + tests) — the nine ruled Phase-1 components,
+in-memory only, nothing wired to any live response. **The Step-3 critical test passed
+deterministically** (belief retraction → dependency propagation → decision reopening, the whole
+scenario run twice from independent clocks, traces compared byte-for-byte, 30/0).
+
+**PR19 independent review — 22 agents, 8 dimensions, each finding adversarially verified, `sonnet`
+throughout per the founder's explicit permission to drop the review tier — found 14 upheld, 0 refuted,
+all folded.** The two HIGHs: `EvidenceRef.verification` was caller-settable with no verification
+subsystem behind it while three headers falsely claimed it was "set by the system" — fixed by
+**branding** the type to one chokepoint (`attestEvidence`) and **stating the honest limit instead of
+the false claim** (`phase1UnverifiedAuthority` marks every attestation `unverified_phase1`; a real
+verifier is now a named Phase-2 prerequisite, not absorbed quietly). And the C8 "internal-only score
+never leaves the system" boundary had **four live bypasses** (Map/Set contents, non-enumerable
+properties, prototype getters, Symbol keys) — one chained into a real leak through the actual public
+API (`sendExternally`) — fixed not by four patches but by making the egress scan **fail-closed on
+anything it cannot exhaustively read**. Session mutation total: **40 applied, 2 survivors (both found
+by naming the reviewer's own stake before trusting a first-pass green), both closed and re-verified
+killing.** Final gates: battery **147/0** · critical scenario **30/0** · project-wide `tsc --noEmit`
+**0 diagnostics** · byte-identity guard **250/0**, both SHA pins unchanged.
+
+**The mentor's review of the report, relayed by the founder — Phase 1 APPROVED.** *"The work is
+complete in the sense that matters: not merely passing, but honest about what it does not yet do."*
+Singled out for praise: both HIGH fixes **named their own residual** rather than absorbing it quietly,
+and the mutation-verification finding (two vacuous pins, both in the semantic the review had named
+load-bearing) was called *"the most honest part of the document — found because the session named the
+stake explicitly… not as a virtue marker in the abstract, but as a specific mutation that would have
+survived undetected."*
+
+**The three founder-flagged items — all ruled.** (a) The `"actor": "Laboratory"` spec-vs-ruling
+collision: resolution confirmed correct, no further ruling needed. (b) The immutable-decision-record
+contradiction (step 9 vs step 10 of the critical scenario): resolution confirmed correct — status
+derived from the event log, the record never edited. (c) **Attic's zero write verbs — now RULED, not
+merely inferred:** *"Attic holds no write verbs"* — Constraint 6 made structural rather than
+procedural, *"because a procedural rule can be forgotten; a structural one cannot."*
+
+**Phase 2 confirmed NOT LICENSED, prerequisites sharpened rather than merely restated.** R9/R10
+handoff reconciliation is *"a prerequisite, not a follow-up."* The table step's data-rights obligation
+*"opens that step, not closes it."* **C7 and C8 must be designed against from Phase 2's opening, not
+retrofitted** — the debt score becomes real and the egress boundary becomes load-bearing in Phase 2.
+The manifest amendment stays gated at Phase 3.
+
+**Three session-originated questions, all ruled — two produce standing obligations, not just
+answers.**
+
+**(1) Bash-authoring / consult-floor coupling.** The counter is **not broken** — it measures consult
+events correctly; what was incomplete was treating that count as a reliable cross-tool-mode proxy for
+examination density. **No change to the counter, no change to the floor.** New standing obligation:
+**the pre-flip report must disclose tool-mode composition per baseline day alongside the consult
+count** — Option D discipline applied to the baseline itself. Sharpened with a concrete figure: **day
+2 of the baseline was 12 consult records, all governance documentation; day 3 (this session) was 1
+consult record for a 2,462-line build with 147 tests and 40 mutations verified** — named as the mirror
+image of the standing representativeness concern (a documentation-only day can satisfy the counting
+rule while under-representing engineering; a substantive engineering day can satisfy representativeness
+while barely registering in the count). A further question — should harness tool-mode routing become
+founder-visible rather than automatic — is **raised, not ruled**, carried to the standing-runner design
+session.
+
+**(2) The `cat >` truncating-redirect pattern.** **Ruled: disclosure-after-the-fact is not sufficient
+as standing practice.** The precise failure named: not the use of the pattern, but classifying the
+guard's signal from a **prior session's** classification instead of the current frame — twelve
+firings, twelve times read through an old lens (named a synkatathesis error). **No ENFORCE** — a
+truncating redirect to an empty path is not the same action as one to an existing file, and blocking
+the shape would catch legitimate uses. **Ruling: a practice requirement** (examine the signal from the
+current frame every time) **plus a standing addition owed to the session opener**: *"`cat >` redirects
+will fire the guard; read the frame before proceeding."* **Not yet added — carried forward.**
+
+**(3) PR19 finding-cap disclosure.** Confirmed real. **Ruling: cap-transparency is now a standing
+requirement for future review workflows** — any per-dimension finding cap must be disclosed, stating
+the cap value and whether it bound. Does not retroactively change this session's findings
+(independently verified regardless); applies going forward.
+
+**Verified at close:** guard **250/0**; SHA pins `layer2-mechanisms.ts` `60cefedb…`, `stoic-brain.ts`
+`fa8895ec…` unchanged; false-hold buffer **361** rows, window **222**, baseline **3 of 5** (09-06,
+09-07, 09-08); `git status` whole — only `operations/cognitive-os-2026-09/` and
+`website/src/lib/cognitive-os/` are this session's to stage.
+
+**Carried forward, visibly:** the table step (schema, data-rights, `retain_until`, sweep, migration —
+founder-walked); R9/R10 reconciliation before Phase 2; the pre-flip report now has **three** named
+disclosures owed (baseline composition, loop-count-by-action-class, tool-mode composition per
+day — all still unbuilt, `Q-PREFLIP-REPORTS`, gated on a founder waiver since the report script
+matches `GUARD_RE`); the session-opener `cat >` addition (not yet made); the cap-transparency
+requirement (not yet encoded in process instructions); the manifest amendment before Phase 3.
+
+**Rollback:** the library is a standalone addition with no callers and no wiring — `git revert` the
+commit, or simply delete `website/src/lib/cognitive-os/` (nothing else references it). **STATE: Phase
+1 COMPLETE and mentor-approved. Phase 2 NOT STARTED and NOT LICENSED.** The window RAN UNTOUCHED
+throughout; the guard ARMED and GREEN; both SHA pins GREEN. **The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**
