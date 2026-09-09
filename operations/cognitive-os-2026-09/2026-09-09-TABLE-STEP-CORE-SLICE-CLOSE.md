@@ -1,4 +1,4 @@
-# Cognitive OS — the TABLE STEP (core slice): authored, reviewed, NOT APPLIED
+# Cognitive OS — the TABLE STEP (core slice): authored, reviewed, APPLIED, DEPLOYED, LIVE-VERIFIED
 
 **Session date: 2026-09-09 AEST**, dated from `date` (the prompt is filed as `2026-09-10`; that
 filename is the known context-date artifact and is left as-is because it is cited by name).
@@ -37,15 +37,31 @@ policies, REVOKE/GRANT confirmed, both FK cascades confirmed, the append-only tr
 present, zero score columns confirmed, the seven `cognitive_claims` CHECK constraints confirmed.
 **Empty and currently completely inert** — see the state note directly below.
 
-**⚠ THE CODE THAT READS/WRITES THESE TABLES IS STILL UNCOMMITTED, UNPUSHED, AND NOT DEPLOYED.**
-`git log origin/main..HEAD` is empty; `git status` shows the R17 wiring, `cognitive-os-store/`, the
-cron route and this migration file all as local working-tree changes. **So today, in production,
-the schema exists but nothing calls it** — the deployed application is byte-identical to before this
-session; only the database schema changed. This is safe in both directions (missing-table-benign
-made it safe before code landed; the tables being empty and RLS-locked makes it safe now that the
-schema exists but the code has not shipped) but it means the R17 obligation is not yet LIVE end to
-end. That requires committing (path-scoped — two peer files sit in the tree and must not be staged)
-and pushing, which are the founder's own acts per this session's tier.
+**UPDATE (same day): CODE COMMITTED, PUSHED, DEPLOYED, AND LIVE-VERIFIED.** Commit `40259fc`,
+path-scoped to exactly this session's 16 files (two peer files — `environmental-context.json`, the
+S10 working notes — were confirmed left unstaged both before and after). The pre-commit gate ran its
+own independent checks on push and all passed: measurement-integrity battery 250/0, `tsc`, ESLint,
+ByteString headers, route-export, view-grants. Pushed via GitHub Desktop by the founder; Vercel
+confirmed green by the founder.
+
+**Three post-deploy checks, all founder-run, all pass:**
+1. `ƒ /api/cron/cognitive-os-retention-sweep` present in the Vercel function list.
+2. **The R17 code path is live and correct**, confirmed via an authenticated
+   `GET /api/user/access` from the browser console (the user's own session JWT pulled from
+   `localStorage`, an in-scope self-service call). Response: `STATUS: 200`,
+   `personal_data.cognitive_os = {"contexts":[],"events":[],"claims":[],"belief_states":[]}` — all
+   four arrays present, empty (correct — no data exists yet), no `error` key.
+   **A genuine probing mistake was made and corrected in the same exchange:** the first probe read
+   `d.cognitive_os` at the response's top level and got `undefined`; `gatherUserPersonalData()`'s
+   output is actually nested under `personal_data` in `/api/user/access`'s response shape (verified
+   by reading the route source, not guessed at) — the second, corrected probe passed. Also cost one
+   call of the 5/hour `RATE_LIMITS.dataRights` budget on the wrong probe; four remained.
+3. `curl -s -o /dev/null -w "%{http_code}" https://www.sagereasoning.com/api/cron/cognitive-os-retention-sweep`
+   → `401`, confirming the cron route deployed and its auth gate holds with no `CRON_SECRET` supplied.
+
+**Production state as of this update: schema live + code live + R17 wiring confirmed correct against
+the deployed build, not merely against the local one.** `SUBSTRATE_COGNITIVE_OS_SWEEP_ENABLED`
+remains deliberately unset (its own future activation decision).
 
 ---
 

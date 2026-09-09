@@ -39149,3 +39149,41 @@ Full record: `operations/cognitive-os-2026-09/2026-09-09-TABLE-STEP-CORE-SLICE-C
 updated in place with this outcome).
 
 **The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-COGNITIVE-OS-TABLE-STEP-DEPLOYED-LIVE-VERIFIED-CLOSED-2026-09-09
+
+**Tier `code-critical`, founder-walked. AC7 fully discharged — schema applied (both environments),
+code committed, pushed, deployed, and LIVE-VERIFIED against the deployed build, not merely the local
+one.** Commit `40259fc`, pushed via GitHub Desktop, Vercel confirmed green.
+
+**Three founder-run post-deploy checks, all pass:** the sweep route registered in Vercel's function
+list; the sweep route's auth gate returns `401` with no `CRON_SECRET` supplied; and — the substantive
+one — an authenticated `GET /api/user/access` from the browser console (the founder's own session
+JWT) returned `200` with `personal_data.cognitive_os = {contexts:[],events:[],claims:[],belief_states:[]}`,
+confirming the R17 code path runs cleanly against the new tables in production.
+
+**A genuine probing mistake was made and corrected in the same exchange, worth recording as method:**
+the first smoke probe read `d.cognitive_os` at the response's top level and got `undefined` — an
+assumption about response shape, not a read of it. `gatherUserPersonalData()`'s output is actually
+nested under `personal_data` in `/api/user/access`'s response (`route.ts` §5, `personal_data:
+personalData`). Reading the route source before writing the probe would have caught this on the first
+try; instead it cost one of five hourly `RATE_LIMITS.dataRights` calls. Corrected same-turn, second
+probe passed.
+
+**Gates re-confirmed at close:** cognitive-os battery **149/0** · table-step battery **137/0** ·
+byte-identity guard **250/0** · `tsc --noEmit` **0**. Window at close: buffer **398**, population
+**258** (217 guard + 41 consult), **4 of 5 consult-bearing days** — unchanged in day-count from open
+(the session's own consult activity deepened one already-qualifying day's composition, per the
+standing disclosure obligation; not filtered, per the mentor's ruling against exactly that move).
+`ListAgents`: 3 interactive peers, unchanged.
+
+**Next-session prompt authored:**
+`operations/handoffs/founder/2026-09-09-cognitive-os-second-migration-and-standing-items-NEXT-SESSION-PROMPT.md`
+— the second migration (decisions, handoffs, dependency graph), carrying forward the two method
+lessons above (an unrun verification claim is not evidence; an assumed response shape is not a fact)
+as explicit practice-discipline items, not just history.
+
+**This closes the table step in full.** The full record, updated in place with this outcome:
+`operations/cognitive-os-2026-09/2026-09-09-TABLE-STEP-CORE-SLICE-CLOSE.md`.
+
+**The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
