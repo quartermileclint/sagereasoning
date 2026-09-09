@@ -13,6 +13,53 @@ this arc's local-date labels; the UTC day of authoring is 2026-09-07. Date your 
 
 ---
 
+## ⚠⚠ STEP 0 — THE DATE GATE. RUN `date` BEFORE ANYTHING ELSE, INCLUDING THE PRE-CHECK.
+
+**[AMENDMENT 2026-09-08, added by session S10 — which failed this gate and then failed to STOP at it.
+This section is the correction. Nothing below it is weakened.]**
+
+```bash
+date
+```
+
+**The capture requires a calendar day that is NOT 2026-09-07 and NOT 2026-09-08 under BOTH the local
+(AEST) and UTC readings.** The ruling: *"genuinely different calendar day… literal, not approximate."*
+A day qualifies only if different under **both** conventions.
+
+**The non-obvious trap:** UTC rolls over at **10:00 AEST**. A session opening 11:00 AEST on 2026-09-08
+is a **new UTC day but the same LOCAL day** as S9 — it does **not** qualify and reopens exactly the
+ambiguity the ruling closed. **The first unambiguously qualifying day is 2026-09-09 local.**
+
+### If the gate FAILS — this is the whole instruction, and it is short by design
+
+**STOP. Report to the founder in two or three sentences: today's `date`, why it does not qualify, and
+the earliest day that does. Then END THE SESSION and await the founder's word.**
+
+**Do NOT, on a failed gate:**
+- run the two-step pre-check "because it is date-independent";
+- re-derive window/baseline health "because it is owed every session";
+- write an evidence file, decision-log entry, register row, or close;
+- run PR19;
+- investigate anything adjacent, however cheap or genuinely useful it looks.
+
+**NOTHING IS OWED BY A SESSION THAT STOPS AT THIS GATE.** "Always do" and "Records owed at close" bind
+a session that **runs**; they do not bind one that correctly refuses to start. **A two-line report is
+the complete and successful output of a failed gate.**
+
+**Why this is stated so bluntly:** S10 opened ~10 minutes after S9 closed, identified the block in its
+first tool call — and then, instead of stopping, ran the pre-check, a full window re-derivation of
+figures that **could not have moved** (no new day had begun, so the baseline was provably static),
+~600 lines of records, and a three-agent PR19 costing roughly a million tokens to review documents
+about a session that did no engineering. Its own examination named the driver three times — *"the pull
+to fill the gap with visible output"*, *"justifying the session"* — and it proceeded anyway. **Naming
+the pull is not resisting it. This gate is the resistance. Use it.** The founder's ruling on that
+session: *"this session is not complete and has no value… we should pause here… complete the tasks for
+the session thoroughly before declaring the session complete."*
+
+**If the gate PASSES,** continue to the mandatory pre-check below, then the capture.
+
+---
+
 ## ⚠ STOP — A MANDATORY TWO-STEP PRE-CHECK RUNS BEFORE ANYTHING ELSE
 
 **This is a ruled requirement, not hygiene. Both steps. Neither optional.**
@@ -52,6 +99,25 @@ the dump with the reading command's own stdin before `cat` executes.
 - the **SAME client version, 2.1.260**. If the client has auto-updated, **STOP and report** — a
   version change makes this Condition 3's problem, not Condition 2's, and the capture would not be
   comparable.
+
+  **[AMENDED 2026-09-08 by S10 — the original left HOW to read the version unstated, and the session
+  that tried to answer it got it wrong. Two numbers exist; do not conflate them.]**
+  - **`2.1.260` is the CLAUDE CODE version — the one this condition pins.**
+  - **The Claude DESKTOP app version is `1.46388.4`** (`/Applications/Claude.app/Contents/Info.plist`).
+    **NOT this number; irrelevant here.**
+  - **You do not need a founder UI reading and must not ask for one.** S8 and S9 read `2.1.260`
+    **off the hook payload itself** — `version` and `entrypoint` (`claude-desktop`) ride the Claude
+    Code hook stdin alongside `session_id`/`transcript_path`. See the S9 evidence file's capture-table
+    header: *"Client 2.1.260, entrypoint `claude-desktop`"*.
+  - **Verify the version FROM YOUR OWN CAPTURE** — the same wire the finding rests on, stronger than
+    any reported figure. The apparent circularity (unreadable before `GATE1_DEBUG` is on) does not
+    bite: take the capture, read `version` from the dump, and **if it is not `2.1.260`, discard the
+    capture and STOP.**
+  - **Residual to close in your first second:** S10 *inferred* the field's presence from how S9
+    reported it and could not observe it (dumps deleted). **Confirm `version` is actually on the
+    payload when your first dump lands.** If absent, say so — that is itself a Condition 3 input.
+  - **Bearing on Condition 3:** if `version` rides the payload the harness can read it **at runtime**
+    rather than hard-coding a constant. An input to that build, not a licence to start it.
 
 **If it REPRODUCES** → Condition 2 passes. Condition 3 (client-version pinning with fallback) remains.
 **If it does NOT reproduce** → that is the more valuable result. Option C′ is falsified or
@@ -209,7 +275,9 @@ day, different session, same client 2.1.260, under the mandatory pre-check, with
 construction — plus an honest re-derived statement of window health including the ruled
 baseline-composition and tool-mode disclosures, and the pins left intact and green.
 
-**Acceptable alternative outcomes, both honest and complete:** the founder declines the `GATE1_DEBUG`
+**Acceptable alternative outcomes, honest and complete:** **the STEP 0 date gate fails and the session
+stops there with a two-line report** (added 2026-09-08 — a SUCCESSFUL outcome, not a wasted session;
+nothing further is owed); or the founder declines the `GATE1_DEBUG`
 act (Condition 2 recorded as untestable-without-it); or the pre-check finds the variable still live
 and this session becomes the investigation of that persistence mechanism instead.
 

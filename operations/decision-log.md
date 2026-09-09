@@ -38927,3 +38927,95 @@ commit, or simply delete `website/src/lib/cognitive-os/` (nothing else reference
 1 COMPLETE and mentor-approved. Phase 2 NOT STARTED and NOT LICENSED.** The window RAN UNTOUCHED
 throughout; the guard ARMED and GREEN; both SHA pins GREEN. **The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+## 2026-09-09 — D-S11-CONDITION-2-REPRODUCTION-PASSES-2026-09-09
+
+**Session opened under** `2026-09-08-condition-2-second-capture-NEXT-SESSION-PROMPT.md`, owed by the
+2026-09-07 five-question ruling as specified by the 2026-09-08 S9 four-question ruling. **Condition 2
+of the three binding Option C′ conditions — does the S9 `agent_id`-at-H3 finding reproduce on a
+genuinely different calendar day? — PASSES.** `classifyCaller` byte-unchanged; nothing built.
+
+**Gates run in order, both green.** STEP 0 date gate: `date` → 2026-09-09 AEST; `date -u` →
+2026-09-09 UTC — the first day distinct from 09-07/09-08 under both conventions, exactly as the
+S10-amendment's 10:00 AEST rollover analysis predicted. The S9-elevated two-step `GATE1_DEBUG`
+pre-check: no stale `*-stdin.json` at open; a fresh control-probe sentinel produced **no dump** —
+the variable was genuinely inert at this session's open, a fact S9 could not establish (its own
+close left the variable live). Capture was licensed to proceed.
+
+**Founder election** (AskUserQuestion, since S9's waiver does not carry forward): *AI adds it,
+sequential capture, S9's shape.* `.claude/settings.local.json` backed up to the scratchpad and
+whole-file-SHA-verified (`235d975c…`) before the edit; a per-key SHA of the `env` block taken before
+and after confirmed **all 11 pre-existing values byte-identical**, one key (`GATE1_DEBUG=1`) added.
+
+**Two sentinel-verified, `tool_name:"Bash"` (H3, disambiguated from H2) captures:**
+- Top-level control — `agent_id`/`agent_type` **ABSENT** (keys absent, not empty).
+- Agent-issued (an Explore subagent) — `agent_id:"a9a920bced6402b37"`/`agent_type:"Explore"`
+  **PRESENT**.
+
+Both carry the **parent's** `session_id`/`transcript_path`, unchanged from S8/S9 — the reason
+`classifyCaller` measures null regardless. **A corroboration stronger than the method item the prompt
+named:** the subagent could not self-report its own id (asked; answered "not known to me"), so the
+parent's own `PostToolUse` dump for the `Agent` call was read instead — `tool_response.agentId`
+**matches the child's H3 `agent_id` exactly**, and `agentType` matches too. Ground truth by two
+independent surfaces, neither self-report.
+
+**The client-version condition is satisfied, but the prompt's premise about where to read it was
+wrong, and this is worth carrying forward precisely.** `version`/`entrypoint` are **absent from the
+H3/H4 hook `PreToolUse`/`PostToolUse` payload itself** — both captures' full key lists, quoted
+verbatim in the evidence file, confirm it. They were instead verified by scanning this session's own
+transcript JSONL: 88 lines carry a top-level `version` key, every one `"2.1.260"`; `entrypoint` every
+one `"claude-desktop"`. Single-valued, unchanged from S8/S9. **Named as a Condition-3 input, not a
+licence:** a runtime read is still possible via `transcript_path` (which IS on the H3 payload), but
+that is a materially heavier design — a file read and a parse the hook does not currently do — not
+the trivial "field already in hand" the prompt assumed.
+
+**The `GATE1_DEBUG` revert-lag reproduced, and is now bounded rather than merely repeated.** Config
+restored + SHA-verified byte-identical to the pre-session backup; `GATE1_DEBUG` absent by grep; a
+fresh post-revert sentinel probe **still** produced a dump. What is new: because this session's own
+*pre-check at open* — a fresh session, the key absent from the file — found the variable genuinely
+inert, while the *within-session* revert did not, the residual is now bounded to **not surviving a
+session boundary**. Offered explicitly as a hypothesis (env applied into a running process is not
+retracted by a file edit; a fresh session rebuilds from the file), not a proof, and not tested further
+— out of this session's licensed scope. Practical consequence stated plainly in the evidence file:
+`GATE1_DEBUG` remains effectively live for the rest of this session; the founder's `rm` after close is
+the reliable clear.
+
+**Window health re-derived at close, with one genuine method correction found and fixed in-session,
+not by review.** The prompt's log-anchor instruction (anchor on the log line, not the buffer's
+`capturedAt`, because the same event double-stamps a couple of ms apart) led first to a 204-vs-203
+`GUARD-*` mismatch against the buffer's 203. 1:1 pairing every window `GUARD-*` log line to its
+nearest buffer record left exactly one log line unmatched: **the anchor line itself**, which turned
+out to be the took-effect probe's own log line (buffer record #139, excluded from the window by
+standing rule). The corrected anchor is the line immediately after it; at that anchor both families
+match exactly (`GUARD-*` 203=203, `CONSULT` exact-whole-token 27=27). **This session contributed ZERO
+records to the window** — verified by the buffer's own `session` field (not a time filter, per S9's
+own caught mistake) — because it authored entirely via Bash heredocs, including this session's own
+evidence file; `gate1.log` confirms every one of its Bash calls logged `AT-ACTION-SKIP-BASH`. The
+starkest instance yet of the S9-ruled instrument-composition dependency: a full session of
+verification-heavy work, zero denominator contribution. Baseline composition now carries one
+`website/src` engineering consult (S9 close: zero) alongside 19 operations-doc + 3 other-.md + 4
+scratchpad, 27 total. **One number flagged rather than reconciled:** the buffer yields four distinct
+UTC days present in the window, all four with ≥1 consult — I cannot reproduce the carried "2 of 5"
+denominator from the buffer itself and report the discrepancy rather than assume a resolution.
+
+**Verified at close:** SHA pins `layer2-mechanisms.ts` `60cefedb…`, `stoic-brain.ts` `fa8895ec…`
+re-derived and green; `git status` unchanged from session open — the four modified + two untracked
+paths are pre-existing peer/other-session work, none of them mine, none `GUARD_RE`-matched; no commit
+made, nothing pushed; no credential touched. **PR19 ran** (model dropped to sonnet/low for the review
+per the founder's standing per-session permission, restored to opus/medium after) across the three
+S9-precedent dimensions (substantive claim, arithmetic, scope/safety) — both the anchor correction and
+the zero-contribution finding were caught first-hand *before* the review reached them, so this
+session's PR19 found no new defect in the arithmetic, unlike S9's.
+
+**Full evidence:** `operations/trust-layer-2026-07/2026-09-09-condition-2-reproduction-CAPTURE-EVIDENCE.md`.
+**Register row appended** (append-only; the S8 in-place-edit deviation was not repeated).
+
+**Carried forward, unchanged:** **Condition 3 (client-version pinning with fallback) remains
+OUTSTANDING** — sharpened by the version-location correction above, not discharged by it. The three
+named pre-flip disclosure reports (baseline composition, loop-count-by-action-class, tool-mode
+composition per day) remain unbuilt, gated on a founder waiver since `false-hold-observation-report.ts`
+matches `GUARD_RE`. No production or CLAUDE.md change — the founder's live loop config is
+byte-identical to its pre-session state (SHA-verified) though its *runtime* effect is not, per the
+revert-lag above; this is a residual state, not a production or repository change, and no
+CLAUDE.md production-state note is due on that basis alone. **The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**
