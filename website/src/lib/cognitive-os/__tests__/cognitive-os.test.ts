@@ -436,6 +436,46 @@ console.log('§7  HANDOFFS — validation, permission, missing state, stale vers
   const leaky = { ...env, payload: { sneaky: epistemicDebtScore(1) } }
   check('§7.9 C8 — a score hidden in the PAYLOAD is still refused on egress',
     threw(() => sendExternally(leaky as any, { kind: 'external_consumer', label: 'partner' }), InternalScoreEgressError))
+
+  // ==========================================================================
+  // §7.10 — THE Q1 ASSENT BOUNDARY IS *NOT* ENFORCED. PINNED DELIBERATELY.
+  //
+  // This pin asserts a NON-guarantee, which is unusual and is the point. Per the
+  // mentor's Q-R1/Q-R4 ruling (2026-09-09), the interim posture for this boundary
+  // is R9's: record it, disclose it, and PIN the non-enforcement — so that a future
+  // session which ADDS enforcement sees this pin change and knows what it is doing,
+  // rather than discovering the boundary's semantics by accident.
+  //
+  // A scope check (`from === 'Threshold'`) was EXPLICITLY RULED AGAINST as an
+  // interim measure: "a label that looks like a verification is worse than no
+  // check, because it creates the impression of enforcement where none exists."
+  //
+  // ⚠ IF YOU ARE HERE BECAUSE THIS PIN FAILED: you have added enforcement to
+  // `sendExternally`. That may well be correct — but it is a Q1 doctrinal change,
+  // not a refactor. Do not "fix" the pin to make it pass. Invert it deliberately,
+  // and record the ruling that licensed the change.
+  // See operations/cognitive-os-2026-09/2026-09-09-R9-R10-HANDOFF-RECONCILIATION.md §5.
+  // ==========================================================================
+  {
+    const nonThreshold = createHandoffEnvelope(
+      { from: 'Laboratory', to: 'Laboratory', belief_state_id: 'bs-0001', belief_state_version: 7,
+        epistemic_debt_score: epistemicDebtScore(2) },
+      clock,
+    )
+    let emitted: unknown = undefined
+    const refused = threw(() => {
+      emitted = sendExternally(nonThreshold, { kind: 'external_consumer', label: 'an adopter' })
+    })
+    check('§7.10 Q1 NON-ENFORCEMENT PINNED — sendExternally emits from a NON-Threshold scope, ' +
+      'with no COMMIT, to an external consumer (it enforces C8 score-egress only)',
+      !refused && emitted !== undefined)
+    // Non-vacuity: the emitted view must genuinely still carry the non-Threshold
+    // origin. Without this, the pin above would pass even if `from` were silently
+    // rewritten or dropped on egress — which would be a different behaviour wearing
+    // the same green tick.
+    check('§7.10 the emitted view still carries its non-Threshold origin (pin is non-vacuous)',
+      (emitted as { from?: unknown } | undefined)?.from === 'Laboratory')
+  }
 }
 
 // ============================================================================

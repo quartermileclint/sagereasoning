@@ -13,6 +13,16 @@
  * actor architecture begins consuming these state services. Recorded here as well
  * as in the report so it is not rediscovered.
  *
+ * ⚠ sendExternally is the Q1 assent boundary and does not enforce it: it consults
+ * no scope, requires no COMMIT, and will emit an envelope from any scope to an
+ * external consumer. It enforces C8 score-egress only. See
+ * 2026-09-09-R9-R10-HANDOFF-RECONCILIATION.md §5.
+ *
+ * (Text approved verbatim by the mentor's Q-R4 ruling, 2026-09-09. The interim
+ * posture is R9's — record, disclose, and PIN the non-enforcement: battery §7.10.
+ * A scope check `from === 'Threshold'` was EXPLICITLY RULED AGAINST as an interim
+ * measure — "a label that looks like a verification is worse than no check.")
+ *
  * Constraints enforced here:
  *   C5   `epistemic_debt.score` and `carried_proximity_rank` are SEPARATE FIELDS and
  *        are never merged here. Adding the two wrappers is a compile error; field-
