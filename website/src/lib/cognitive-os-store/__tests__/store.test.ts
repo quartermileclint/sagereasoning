@@ -52,7 +52,12 @@ import {
   EVENTS_TABLE,
   CLAIMS_TABLE,
   BELIEF_STATES_TABLE,
+  DECISIONS_TABLE,
+  HANDOFFS_TABLE,
+  DEPENDENCY_NODES_TABLE,
+  DEPENDENCY_EDGES_TABLE,
   CHILD_TABLES,
+  assertNoInternalScalarAtRest,
 } from '../store'
 import { isCognitiveOsSweepEnabled } from '../sweep-flag'
 
@@ -279,9 +284,34 @@ assert(
 
   assert(sqlFiles.length > 20, '§1.13d the .sql sweep actually traversed the repo (non-vacuity floor)')
 
-  const definerFiles = sqlFiles.filter((f) =>
-    /SECURITY DEFINER/i.test(fs.readFileSync(f, 'utf8')),
-  )
+  // A migration that DISCUSSES "SECURITY DEFINER" in its header is not a
+  // migration that CREATES one. The original form of this pin excluded the core
+  // migration BY FILENAME for exactly that reason; the second migration
+  // discusses it too, and a growing filename allowlist is the wrong shape - it
+  // would eventually exclude a file that really did define one.
+  //
+  // So comments are stripped instead, and the question asked of EXECUTABLE SQL
+  // only. Strictly stronger: no file is exempt, and a real definition inside an
+  // otherwise-discursive migration is still caught.
+  // COMMENT ON ... IS '...' string literals legitimately DOCUMENT the absence
+  // of SECURITY DEFINER in prose (this migration's own guard function comment
+  // does exactly that). Stripped here for the same reason createTableBodies
+  // excludes them when scanning for column names: a pin that fires on a
+  // migration correctly documenting an absence teaches the next session to
+  // relax the pin, which is worse than not having it.
+  const stripCommentOnLiterals = (src: string): string =>
+    src.replace(/COMMENT ON[\s\S]*?IS\s*\n?\s*'[\s\S]*?';/g, '')
+
+  const executableOf = (f: string): string =>
+    stripCommentOnLiterals(
+      fs
+        .readFileSync(f, 'utf8')
+        .split('\n')
+        .filter((l) => !l.trimStart().startsWith('--'))
+        .join('\n'),
+    )
+
+  const definerFiles = sqlFiles.filter((f) => /SECURITY DEFINER/i.test(executableOf(f)))
   assert(
     definerFiles.length > 0,
     '§1.13e the sweep finds the SECURITY DEFINER files that DO exist (proves it can find them)',
@@ -290,10 +320,7 @@ assert(
   // THE LOAD-BEARING RESULT: no OTHER SECURITY DEFINER file names a cognitive_
   // table. A table-level REVOKE is invisible to a SECURITY DEFINER function, so
   // this is the check that makes the RLS lockdown meaningful rather than nominal.
-  const offenders = definerFiles.filter(
-    (f) => !f.endsWith('supabase-cognitive-os-core-migration.sql') &&
-      /\bcognitive_\w+/.test(fs.readFileSync(f, 'utf8')),
-  )
+  const offenders = definerFiles.filter((f) => /\bcognitive_\w+/.test(executableOf(f)))
   assert(
     offenders.length === 0,
     `§1.13f NO SECURITY DEFINER function touches a cognitive_ table (found: ${offenders.join(', ')})`,
@@ -642,7 +669,34 @@ SECTIONS.push(async () => {
   )
 })
 
-assert(CHILD_TABLES.length === 3, '§6.9 three child tables are known to the store')
+// §6.9 REPLACED at the second migration. A bare count told a future session
+// nothing about WHY the order matters, and bumping 3 -> 7 would have discharged
+// the failure without preserving the property. The ordering IS the property:
+// decisions and handoffs FK to cognitive_belief_states ON DELETE CASCADE, so
+// sweeping belief states first would cascade them away and the explicit delete
+// that followed would count ZERO - a real erasure UNDER-REPORTED while reporting
+// success. Edges/nodes are the same shape.
+{
+  const idx = (t: string): number => (CHILD_TABLES as readonly string[]).indexOf(t)
+  assert(idx(DECISIONS_TABLE) >= 0 && idx(HANDOFFS_TABLE) >= 0, '§6.9a decisions and handoffs are known to the store')
+  assert(idx(DEPENDENCY_NODES_TABLE) >= 0 && idx(DEPENDENCY_EDGES_TABLE) >= 0, '§6.9b dependency nodes and edges are known to the store')
+  assert(
+    idx(DECISIONS_TABLE) < idx(BELIEF_STATES_TABLE),
+    '§6.9c decisions are deleted BEFORE belief_states (else the cascade zeroes their count)',
+  )
+  assert(
+    idx(HANDOFFS_TABLE) < idx(BELIEF_STATES_TABLE),
+    '§6.9d handoffs are deleted BEFORE belief_states (else the cascade zeroes their count)',
+  )
+  assert(
+    idx(DEPENDENCY_EDGES_TABLE) < idx(DEPENDENCY_NODES_TABLE),
+    '§6.9e edges are deleted BEFORE nodes (else the cascade zeroes their count)',
+  )
+  assert(
+    new Set(CHILD_TABLES as readonly string[]).size === CHILD_TABLES.length,
+    '§6.9f no child table is listed twice (a double visit would double-count)',
+  )
+}
 assert(!(CHILD_TABLES as readonly string[]).includes(CONTEXTS_TABLE), '§6.10 the root is not a child of itself')
 
 // ============================================================================
@@ -780,6 +834,420 @@ for (const file of ['src/app/api/user/export/route.ts', 'src/lib/user-data-gathe
   assert(
     !/grep -rn "SECURITY DEFINER" supabase\/migrations\/ operations\/migrations\/\s*\n-- returns/.test(sql),
     '§8.4 the header no longer quotes a command that cannot produce its own numbers',
+  )
+}
+
+// ============================================================================
+// §13  THE SECOND MIGRATION - decisions, handoffs, dependency graph
+// ============================================================================
+//
+// ⚠ READ BEFORE "FIXING" A FAILURE HERE.
+//
+// The second migration's load-bearing claim is NOT "four more tables exist". It
+// is that the deliberately ABSENT epistemic_debt_score remains RE-DERIVABLE:
+// both DecisionRecord and HandoffEnvelope carry that score as a REQUIRED field
+// in TypeScript, and it is recovered by joining (context_id, belief_state_id,
+// belief_state_version) to cognitive_belief_states' five debt components.
+//
+// A COMPOSITE FOREIGN KEY is what turns that from a hope into a property: a row
+// whose score could not be re-derived is unstorable. §13.4 is therefore the pin
+// that matters most in this section. If it fails, the correct response is to
+// restore the FK - never to relax the pin and never to add a score column.
+//
+// Pins here anchor INSIDE each table's own CREATE TABLE body. The first PR19
+// review of the core slice found §1.5 vacuous for exactly this reason: it
+// searched a character window from any occurrence of a table name, and all four
+// names co-occur in the §PRE block, so every assertion matched the same span and
+// deleting a real column left it green.
+
+const MIGRATION_2 = path.join(websiteRoot, 'supabase-cognitive-os-second-migration.sql')
+const sql2 = fs.readFileSync(MIGRATION_2, 'utf8')
+// Comment lines AND `COMMENT ON ... IS '...'` string literals stripped, so a
+// SECURITY-DEFINER pin over this variable cannot fire on prose or in-schema
+// documentation that legitimately DISCLOSES an absence, only on a real clause.
+const executableSql2 = sql2
+  .split('\n')
+  .filter((l) => !l.trimStart().startsWith('--'))
+  .join('\n')
+  .replace(/COMMENT ON[\s\S]*?IS\s*\n?\s*'[\s\S]*?';/g, '')
+
+/** One table's CREATE TABLE body, brace-matched, comments stripped. Anchored on
+ *  the table's OWN definition, never on a name that also appears in prose. */
+function bodyOf(source: string, table: string): string {
+  const re = new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${table}\\s*\\(`, 'g')
+  const m = re.exec(source)
+  if (m === null) return ''
+  let depth = 1
+  let i = re.lastIndex
+  while (i < source.length && depth > 0) {
+    if (source[i] === '(') depth++
+    else if (source[i] === ')') depth--
+    i++
+  }
+  return source
+    .slice(re.lastIndex, i - 1)
+    .split('\n')
+    .filter((l) => !l.trimStart().startsWith('--'))
+    .join('\n')
+}
+
+const NEW_TABLES = [
+  'cognitive_decisions',
+  'cognitive_handoffs',
+  'cognitive_dependency_nodes',
+  'cognitive_dependency_edges',
+] as const
+
+{
+  // §13.0 non-vacuity floor. Without this, a bodyOf() that silently returned ''
+  // would make every "column is absent" pin below pass trivially - the exact
+  // shape of the vacuous pin PR19 found in the core slice.
+  for (const t of NEW_TABLES) {
+    const body = bodyOf(executableSql2, t)
+    assert(body.length > 200, `§13.0 ${t}'s CREATE TABLE body was located (non-vacuity floor)`)
+    assert(
+      /context_id\s+UUID NOT NULL/.test(body),
+      `§13.0b ${t}'s body is really column definitions, not prose`,
+    )
+  }
+
+  // §13.1 pure ASCII. The SQL editor has corrupted non-ASCII literals via
+  // MacRoman on this project before (an em-dash arrived as three characters).
+  // Section markers live only in comments, which the editor never executes; this
+  // asserts the EXECUTABLE half is clean.
+  const nonAscii = [...executableSql2].filter((c) => c.charCodeAt(0) > 127)
+  assert(
+    nonAscii.length === 0,
+    `§13.1 the executable SQL is pure ASCII (found ${nonAscii.length}: ${nonAscii.slice(0, 5).join('')})`,
+  )
+
+  // §13.2 NO SCORE COLUMN, per table, anchored in that table's own body.
+  for (const t of NEW_TABLES) {
+    const body = bodyOf(executableSql2, t)
+    for (const forbidden of [
+      'epistemic_debt_score',
+      'identity_coherence_score',
+      'debt_score',
+      'coherence_score',
+      'identity_relevance',
+      'interpretive_context',
+    ]) {
+      assert(
+        !new RegExp(`\\b${forbidden}\\b`).test(body),
+        `§13.2 ${t} defines NO ${forbidden} column (Q9 / Q-R7 / C6)`,
+      )
+    }
+  }
+
+  // §13.3 no status column on decisions - deriveDecisionStatus reads the log,
+  // and a stored status is a second source of truth that can drift from it.
+  assert(
+    !/\bstatus\b/.test(bodyOf(executableSql2, 'cognitive_decisions')),
+    '§13.3 cognitive_decisions defines NO status column (it is derived from the event log)',
+  )
+
+  // §13.4 THE LOAD-BEARING PIN. Both composite FKs exist and reference the
+  // belief-state unique key. This is what makes the absent score re-derivable.
+  for (const t of ['cognitive_decisions', 'cognitive_handoffs']) {
+    const body = bodyOf(executableSql2, t)
+    assert(
+      /FOREIGN KEY \(context_id, belief_state_id, belief_state_version\)/.test(body),
+      `§13.4 ${t} carries the composite belief-state FOREIGN KEY`,
+    )
+    assert(
+      /REFERENCES public\.cognitive_belief_states \(context_id, belief_state_id, version\)/.test(body),
+      `§13.4b ${t}'s composite FK references the belief-state unique key`,
+    )
+    assert(
+      /REFERENCES public\.cognitive_belief_states[\s\S]{0,120}ON DELETE CASCADE/.test(body),
+      `§13.4c ${t}'s belief-state FK cascades (a decision must not outlive its basis)`,
+    )
+    // Both columns must actually be NOT NULL, or the FK is satisfiable by NULLs
+    // and the derivability guarantee is void for those rows.
+    assert(
+      /belief_state_id\s+TEXT\s+NOT NULL/.test(body) &&
+        /belief_state_version\s+INTEGER NOT NULL/.test(body),
+      `§13.4d ${t}'s belief-state columns are NOT NULL (a nullable FK is satisfiable by NULLs)`,
+    )
+  }
+
+  // §13.5 edges FK BOTH endpoints - the encoded form of addEdge()'s throw.
+  {
+    const body = bodyOf(executableSql2, 'cognitive_dependency_edges')
+    assert(
+      /FOREIGN KEY \(context_id, from_node\)/.test(body),
+      '§13.5a the edge from_node endpoint is a foreign key',
+    )
+    assert(
+      /FOREIGN KEY \(context_id, to_node\)/.test(body),
+      '§13.5b the edge to_node endpoint is a foreign key',
+    )
+    assert(
+      (body.match(/REFERENCES public\.cognitive_dependency_nodes \(context_id, node_id\)/g) ?? []).length === 2,
+      '§13.5c both endpoints reference the node unique key (storage cannot hold a graph addEdge would refuse)',
+    )
+    assert(
+      /UNIQUE \(context_id, from_node, to_node\)/.test(body),
+      '§13.5d an edge is unique per direction (addEdge is idempotent in memory and must be here)',
+    )
+  }
+
+  // §13.6 the guard function is plain and IMMUTABLE, never SECURITY DEFINER.
+  // A SECURITY DEFINER function is invisible to a table-level REVOKE, which is
+  // the class the 2026-08-16 mentor_profiles fix found the hard way.
+  assert(
+    /CREATE OR REPLACE FUNCTION public\.cognitive_os_jsonb_has_internal_scalar/.test(executableSql2),
+    '§13.6a the internal-scalar guard function is created',
+  )
+  assert(
+    !/SECURITY DEFINER/i.test(executableSql2),
+    '§13.6b the second migration creates NO SECURITY DEFINER function (executable SQL only)',
+  )
+  assert(
+    /IMMUTABLE/.test(executableSql2),
+    '§13.6c the guard function is IMMUTABLE (required for use in a CHECK)',
+  )
+
+  // §13.7 both free-form JSONB containers carry the guard CHECK. This is the
+  // half of the Q9 boundary the §7 column-name pin structurally cannot see.
+  assert(
+    /cognitive_decisions_stoic_evaluation_no_internal_scalar[\s\S]{0,200}cognitive_os_jsonb_has_internal_scalar\(stoic_evaluation\)/.test(
+      bodyOf(executableSql2, 'cognitive_decisions'),
+    ),
+    '§13.7a stoic_evaluation is guarded against a top-level internal scalar',
+  )
+  assert(
+    /cognitive_handoffs_payload_no_internal_scalar[\s\S]{0,200}cognitive_os_jsonb_has_internal_scalar\(payload\)/.test(
+      bodyOf(executableSql2, 'cognitive_handoffs'),
+    ),
+    '§13.7b payload is guarded against a top-level internal scalar',
+  )
+  // The guard must catch the WRAPPER shape, not only the key name. The library's
+  // own scalars ARE {kind, value} objects, so a key-name-only guard would miss
+  // the most likely leak.
+  assert(
+    /v->>'kind' IN \('epistemic_debt_score', 'identity_coherence_score'\)/.test(executableSql2),
+    '§13.7c the guard catches a top-level {kind,value} wrapper, not just a key name',
+  )
+
+  // §13.8 RLS in the proven shape on all four, with no policy to mis-write.
+  for (const t of NEW_TABLES) {
+    assert(
+      new RegExp(`ALTER TABLE public\\.${t}\\s+ENABLE ROW LEVEL SECURITY`).test(executableSql2),
+      `§13.8a RLS is enabled on ${t}`,
+    )
+    for (const role of ['PUBLIC', 'anon', 'authenticated']) {
+      assert(
+        new RegExp(`REVOKE ALL ON public\\.${t}\\s+FROM ${role};`).test(executableSql2),
+        `§13.8b ${t} revokes ALL from ${role}`,
+      )
+    }
+    assert(
+      new RegExp(`GRANT ALL ON public\\.${t}\\s+TO service_role;`).test(executableSql2),
+      `§13.8c ${t} grants to service_role only`,
+    )
+  }
+  assert(
+    !/CREATE POLICY/i.test(executableSql2),
+    '§13.8d the second migration creates ZERO policies (none exists to be mis-written USING (true))',
+  )
+
+  // §13.9 every new table hangs off the single ownership root, so R17 is
+  // structural: a table cannot exist without a data-rights path.
+  assert(
+    (executableSql2.match(/REFERENCES public\.cognitive_contexts\(context_id\) ON DELETE CASCADE/g) ?? []).length === 4,
+    '§13.9 all FOUR new tables FK to the ownership root with CASCADE',
+  )
+
+  // §13.10 the four migration sections exist, and §INVERSE is honest about
+  // scope: it must drop the FOUR new tables and must NOT drop the core slice.
+  for (const section of ['§PRE', '§APPLY', '§VERIFY', '§INVERSE']) {
+    assert(sql2.includes(section), `§13.10a the migration carries a ${section} section`)
+  }
+  {
+    const inverse = sql2.slice(sql2.indexOf('§INVERSE'))
+    for (const t of NEW_TABLES) {
+      assert(
+        new RegExp(`DROP TABLE IF EXISTS public\\.${t};`).test(inverse),
+        `§13.10b §INVERSE drops ${t}`,
+      )
+    }
+    for (const core of ['cognitive_contexts', 'cognitive_events', 'cognitive_claims', 'cognitive_belief_states']) {
+      assert(
+        !new RegExp(`DROP TABLE IF EXISTS public\\.${core};`).test(inverse),
+        `§13.10c §INVERSE does NOT drop the core-slice table ${core}`,
+      )
+    }
+    assert(
+      /DROP FUNCTION IF EXISTS public\.cognitive_os_jsonb_has_internal_scalar\(jsonb\);/.test(inverse),
+      '§13.10d §INVERSE drops the guard function',
+    )
+    assert(
+      inverse.lastIndexOf('DROP FUNCTION') > inverse.lastIndexOf('DROP TABLE'),
+      '§13.10e §INVERSE drops the function AFTER the tables whose CHECKs call it',
+    )
+  }
+
+  // §13.11 the migration's §VERIFY asks the LIVE schema for score columns, not
+  // only this battery asking the file. A schema can drift without the file
+  // changing, and only the live query would catch that.
+  assert(
+    /information_schema\.columns[\s\S]{0,800}debt_score/.test(sql2),
+    '§13.11 §VERIFY queries the live schema for score columns too',
+  )
+
+  // §13.12 PR25, THE EXECUTING FORM. The migration's V8 states expected CHECK
+  // constraint counts per table. A written count goes stale; this DERIVES the
+  // counts from the file and asserts the prose matches, so a future edit that
+  // adds a constraint without updating V8 fails here rather than misleading the
+  // founder mid-walk. This is the corrected shape of the defect that reached the
+  // core migration's own V8 twice - and that reached this file's first draft,
+  // which listed three constraints for cognitive_decisions and wrote "4".
+  {
+    const v8 = sql2.slice(sql2.indexOf('-- V8.'), sql2.indexOf('-- V9.'))
+    assert(v8.length > 200, '§13.12a the V8 block was located (non-vacuity floor)')
+    for (const [t, expected] of [
+      ['cognitive_decisions', 3],
+      ['cognitive_handoffs', 5],
+      ['cognitive_dependency_nodes', 1],
+      ['cognitive_dependency_edges', 0],
+    ] as const) {
+      const actual = (bodyOf(executableSql2, t).match(/\bCHECK\s*\(/g) ?? []).length
+      assert(
+        actual === expected,
+        `§13.12b ${t} really has ${expected} CHECK constraints (found ${actual})`,
+      )
+      // ...and V8's prose says the same number, on that table's OWN DATA line -
+      // not the earlier warning paragraph, which also names the table in prose.
+      // The data line is the one where the table name is the first token after
+      // the "--" comment prefix.
+      const line =
+        v8.split('\n').find((l) => new RegExp(`^--\\s+${t}\\b`).test(l)) ?? ''
+      assert(
+        expected === 0 ? /no row returned/.test(line) : new RegExp(`\\b${expected}\\b`).test(line),
+        `§13.12c V8's prose for ${t} matches the file (line: ${line.trim().slice(0, 80)})`,
+      )
+    }
+    assert(
+      /EXPECT THREE ROWS, NOT FOUR/.test(v8),
+      '§13.12d V8 warns that the zero-constraint table returns no row at all',
+    )
+  }
+
+  // §13.13 the behavioural probes must include the two that prove properties
+  // rather than assert them: the FK rejection, and the DISCLOSED LIMIT.
+  assert(
+    /B1\.[\s\S]{0,400}23503/.test(sql2),
+    '§13.13a a probe proves the composite FK rejects an unpersisted belief-state version',
+  )
+  assert(
+    /B2c\.[\s\S]{0,800}EXPECT SUCCESS/.test(sql2),
+    '§13.13b a probe PROVES the top-level-only limit rather than merely stating it',
+  )
+  assert(
+    /B6\.[\s\S]{0,800}Expect 0\./.test(sql2),
+    '§13.13c a probe proves the cascade rather than assuming it',
+  )
+  assert(
+    /"Success\. No rows returned" IS NOT EVIDENCE ON A DELETE/.test(sql2),
+    '§13.13d the teardown carries the recorded SQL-editor warning',
+  )
+
+  // §13.14 the store's export and deletion shapes actually carry the new tables.
+  // Without this, the migration could land and R17 silently return three of the
+  // seven child tables while reporting success.
+  {
+    const storeSrc = fs.readFileSync(path.join(websiteRoot, 'src/lib/cognitive-os-store/store.ts'), 'utf8')
+    for (const field of ['decisions', 'handoffs', 'dependency_nodes', 'dependency_edges']) {
+      assert(
+        new RegExp(`readonly ${field}: unknown\\[\\]`).test(storeSrc),
+        `§13.14a CognitiveExport carries ${field}`,
+      )
+      assert(
+        new RegExp(`readonly ${field}: number`).test(storeSrc),
+        `§13.14b CognitiveDeletion carries ${field}`,
+      )
+    }
+    // §13.14c CORRECTED after its own mutation test proved it vacuous: it
+    // checked for the literal text `else states = r.deleted`, but that variable
+    // was renamed to `tally` in the same edit that introduced DELETION_FIELD, so
+    // a REINTRODUCED fall-through using the new variable name (e.g.
+    // `else tally.belief_states = r.deleted`) passed the old pin silently.
+    // Checking the PROPERTY instead: deleteContext's per-table branch must
+    // assign through the DELETION_FIELD map, never through a bare `else`.
+    const deleteContextBody = storeSrc.slice(
+      storeSrc.indexOf('async function deleteContext'),
+      storeSrc.indexOf('const before = await exactCount(CONTEXTS_TABLE'),
+    )
+    assert(
+      deleteContextBody.length > 200,
+      '§13.14c0 deleteContext body was located (non-vacuity floor)',
+    )
+    assert(
+      !/\belse\s+(tally\.\w+|states)\s*=\s*r\.deleted/.test(deleteContextBody),
+      '§13.14c deleteContext has NO bare else-fallback assignment (old or new variable name)',
+    )
+    assert(
+      /DELETION_FIELD\[table\]/.test(deleteContextBody),
+      '§13.14d deleteContext assigns THROUGH the DELETION_FIELD map, not around it',
+    )
+  }
+
+  // §13.15 every child table has a DELETION_FIELD entry. A table that is deleted
+  // but unmapped would erase rows and report nothing - quieter than reporting
+  // none, and the reason the map replaced the fall-through.
+  {
+    const storeSrc = fs.readFileSync(path.join(websiteRoot, 'src/lib/cognitive-os-store/store.ts'), 'utf8')
+    const mapBlock = storeSrc.slice(storeSrc.indexOf('const DELETION_FIELD'))
+    const mapped = mapBlock.slice(0, mapBlock.indexOf('})'))
+    for (const constName of [
+      'EVENTS_TABLE',
+      'CLAIMS_TABLE',
+      'BELIEF_STATES_TABLE',
+      'DECISIONS_TABLE',
+      'HANDOFFS_TABLE',
+      'DEPENDENCY_NODES_TABLE',
+      'DEPENDENCY_EDGES_TABLE',
+    ]) {
+      assert(mapped.includes(constName), `§13.15 DELETION_FIELD maps ${constName}`)
+    }
+  }
+}
+
+// §13.16 the write boundary closes the DEEP case the CHECK cannot reach.
+{
+  const deep = { outer: { inner: { kind: 'epistemic_debt_score', value: 7 } } }
+  const r1 = assertNoInternalScalarAtRest(deep, 'payload')
+  assert(r1.ok === false, '§13.16a a NESTED internal scalar is refused at the write boundary')
+
+  const topKey = { epistemic_debt_score: 7 }
+  assert(
+    assertNoInternalScalarAtRest(topKey, 'payload').ok === false,
+    '§13.16b a top-level internal-scalar KEY is refused',
+  )
+
+  const topWrapper = { anything: { kind: 'identity_coherence_score', value: 1 } }
+  assert(
+    assertNoInternalScalarAtRest(topWrapper, 'payload').ok === false,
+    '§13.16c a top-level {kind,value} wrapper is refused',
+  )
+
+  // Unscannable is a REFUSAL, not a pass: you cannot certify what you cannot
+  // read, and this is a Q9 boundary.
+  assert(
+    assertNoInternalScalarAtRest({ m: new Map([['a', 1]]) }, 'payload').ok === false,
+    '§13.16d a container that cannot be exhaustively read is REFUSED, not waved through',
+  )
+
+  // NON-VACUITY: it must actually accept a legitimate payload, or the pins above
+  // would pass on a function that refused everything.
+  assert(
+    assertNoInternalScalarAtRest({ note: 'ordinary', n: 1, nested: { ok: true } }, 'payload').ok === true,
+    '§13.16e an ordinary payload is ACCEPTED (the guard is not refuse-everything)',
+  )
+  assert(
+    assertNoInternalScalarAtRest({ kind: 'proximity_rank', rank: 'deliberate' }, 'payload').ok === true,
+    '§13.16f a CARRIED proximity rank is accepted - it is not an internal-only scalar (C5)',
   )
 }
 

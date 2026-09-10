@@ -398,7 +398,7 @@ routeState.reason = "ok";
   // RULING 3 (2026-09-07) bumped the GUARD schema v4 -> v5 to carry `callerClass`.
   // Consult records stay v3 (unchanged, deliberately — the consult path is the
   // measured instrument with a frozen evidence buffer behind it).
-  check("P8a: guard record is schema v5 (caller-class boundary 2026-09-07; consult records stay v3)", dRecs[0]?.schema === "false-hold-record-v5");
+  check("P8a: guard record is schema v6 (S11/Condition 3, mentor ruling 2026-09-10; consult records stay v3)", dRecs[0]?.schema === "false-hold-record-v6", dRecs[0]?.schema);
   // RULING 3: the field is present, top-level, and NORMALISED. A parent-session
   // transcript path yields the honest "unknown" — NOT "live_agent", because a
   // session-shaped path cannot distinguish "the live agent acted" from "the wire

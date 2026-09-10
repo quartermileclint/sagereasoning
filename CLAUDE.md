@@ -121,6 +121,31 @@ Bespoke election requires justification in the session's decision-log entry unde
 > nothing to redeploy and no repo change to revert.** The observation window, the buffer, the armed
 > byte-identity guard and both SHA pins are **untouched and verified green at S9 close**.
 
+> **⚠ CORRECTION, 2026-09-10 (Condition 3 session) — the "still dumping" claim above was true when S9
+> wrote it and became false, then true again, twice over since. The current true state is neither S9's
+> claim nor a simple "it's fine now" — state it precisely, per the S11/Condition-3 prompt's own
+> instruction, rather than repeating either prior claim a third time.** Sequence, each leg independently
+> observed: **(a)** the 2026-09-09 Condition-2 session found the residual INERT at its own fresh-session
+> open (the mandatory pre-check's control probe found no dump); **(b)** that same session then set
+> `GATE1_DEBUG` under a recorded founder waiver, reverted it in-session, and found the residual LIVE
+> AGAIN after the in-session revert (§5 of its evidence file — a fresh dump appeared carrying a
+> post-revert sentinel; config SHA-identical to the pre-session backup throughout); **(c)** the very
+> next session (this one, Condition 3, 2026-09-10) opened fresh with NO `GATE1_DEBUG` act performed at
+> all and found the three `*-stdin.json` files present on disk but with mtimes from **the Condition-2
+> session's own run** (`2026-09-09 20:5x`) — i.e. **inert throughout this session's entire duration**
+> (repeated `PreToolUse`/`UserPromptSubmit` hook fires this session rewrote none of them). **The
+> mechanism this narrows to:** the residual does NOT survive a session boundary on its own (leg a, leg
+> c), but DOES reappear within a session that itself performs a `GATE1_DEBUG` set-then-revert (leg b).
+> This is consistent with Condition 2's own hypothesis (an already-exported process-env variable
+> survives a file-level revert for the rest of that process's life) and adds a THIRD independent
+> confirmation of the "does not survive a session boundary" half — it does not test the "reappears
+> within a live-debug session" half again, since no `GATE1_DEBUG` act was performed this session. **The
+> stale files themselves are still sitting on disk** (`~/.sage-gate1/{PreToolUse,PostToolUse,UserPromptSubmit}-stdin.json`,
+> content dated to the Condition-2 session) and the founder's manual `rm` remains owed as a standing
+> item — not because the variable is currently live, but because the files are stale artifacts of a
+> RECORDED, waived act and cleaning them is simple hygiene, independent of whether the variable is
+> currently exported in any process.
+
 ## Production state (**as of 2026-09-06** — the newest dated refresh block is directly below this heading; the 2026-09-03 and 2026-08-12 blocks that follow it are retained as history and NOT current, and the long 2026-06-25 parenthetical after that is older history still. Read the 2026-09-06 block, then the 2026-09-03 block, then the "Live in production" list, first.)
 
 > **2026-09-05 grounding note (a documents-only session; production is unchanged since the annotation at the end of item 2 in the block below).** The standing session opener has been re-grounded as **Version 2026-09-05** — `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md` — and now carries the current state, the verified-at-writing table, the prioritised session plan and the standing queue; **read it before this section.** **A date-label discrepancy to read past, not fix:** the block directly below is labelled "2026-09-06", and a cluster of records carry "2026-09-06"/"2026-09-07" labels (`2026-09-06-post-sweep-carried-items-CLOSE.md`, `2026-09-06-mentor-ruling-r20a-length-guard-ordering-verbatim.md`, `2026-09-07-r20a-perimeter-ordering-AUDIT-NEXT-SESSION-PROMPT.md`, `2026-09-06-environmental-scan-staleness-SCOPE.md`, `2026-09-06-P6-recommendation-column-BUILD-NEXT-SESSION-PROMPT.md`, the five decision-log entries headed 2026-09-06). **Git shows every one of them authored on 2026-09-05 AEST** (commits `aa4e567`…`099b218`, 05:31–09:15 +1000; the P6 BUILD prompt on 2026-09-04 19:57 +1000): those sessions took their date from the conversation context rather than the machine clock, one day ahead. The labels are left as they are — they are cited by filename elsewhere, and renaming would break those citations — and each file is correctly identified by its git author date. **Date artifacts from `date` and `git log`, never from the context date.**

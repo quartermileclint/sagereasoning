@@ -17,7 +17,7 @@
  * Exit: 0 if every assertion passes, 1 otherwise.
  */
 import { spawn } from "node:child_process";
-import { mkdtempSync, existsSync, readFileSync } from "node:fs";
+import { mkdtempSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,6 +29,7 @@ import {
   falseHoldRecordPath,
   classifyCaller,
   buildGuardHoldRecord,
+  readClientContext,
 } from "../claude-code/hooks/lib/false-hold-capture.mjs";
 
 const AT_ACTION_HOOK = fileURLToPath(new URL("../claude-code/hooks/at-action-hook.mjs", import.meta.url));
@@ -242,7 +243,12 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
 }
 
 // ============================================================================
-// §3 — RULING 3 (2026-09-07): classifyCaller + the v5 caller-class boundary.
+// §3 — RULING 3 (2026-09-07): classifyCaller's ORIGINAL two-value design.
+// WIDENED by the mentor's 2026-09-10 ruling on S11/Condition 3 — the pins below
+// that tested the OLD two-value behaviour are PRESERVED where the behaviour is
+// UNCHANGED (§3.1–§3.5, §3.7, §3.9, §3.11) and UPDATED where the ruling
+// deliberately changed it (§3.6 schema bump; §3.10, "live_agent" is no longer
+// garbage). New pins (§3.12+) cover the licensed three-value gate itself.
 //
 // The field exists so the guard population contains "only records where the live
 // agent was the actor at the moment the hook fired". Session id CANNOT do this —
@@ -251,11 +257,14 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
 // `<parent-session>/subagents/agent-*.jsonl` (live-confirmed 2026-06-21, Gate-1
 // Slice 3a; memory `claude-code-subagent-hook-contract`).
 //
-// THE ASYMMETRY IS THE POINT AND IS PINNED BELOW: "subagent" only on a POSITIVE
-// structural observation; "unknown" for everything else INCLUDING a session-shaped
-// path — because such a path cannot distinguish "the live agent acted" from "the
-// wire hands a subagent the parent's path", which has not been observed. A pin
-// that accepted "live_agent" here would bless exactly the guess the ruling forbids.
+// THE STRUCTURAL PATH-SEGMENT TELL IS UNCONDITIONAL AND STILL PINNED FIRST:
+// "subagent" on a POSITIVE structural observation regardless of client version.
+// The gate below governs ONLY the second, newly-licensed path to a
+// classification (agent_id presence) — a synthetic path with no real backing
+// transcript file correctly falls through to "unknown" on every pin below,
+// since `readClientContext` fails soft on a nonexistent file exactly as
+// designed, and a version/entrypoint gate failure degrades to "unknown" by
+// construction, never to a guess.
 // ============================================================================
 {
   const SUB = "/Users/x/.claude/projects/-p/0927064c/subagents/workflows/wf_1/agent-abc.jsonl";
@@ -263,7 +272,7 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
 
   check("§3.1 a /subagents/ path segment reads 'subagent' (positive structural observation)",
     classifyCaller(SUB) === "subagent", classifyCaller(SUB));
-  check("§3.2 a parent-session path reads 'unknown', NOT a live-agent claim",
+  check("§3.2 a parent-session path with NO opts reads 'unknown' (no synthetic file backs it)",
     classifyCaller(PARENT) === "unknown", classifyCaller(PARENT));
   check("§3.3 a missing/empty/non-string path reads 'unknown' (never a false positive)",
     classifyCaller(undefined) === "unknown" && classifyCaller("") === "unknown" && classifyCaller(42) === "unknown");
@@ -281,22 +290,143 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
     denied: true, callerClass,
   });
 
-  check("§3.6 the guard record is schema v5 (the dated caller-class boundary)",
-    mk("unknown").schema === "false-hold-record-v5", mk("unknown").schema);
+  check("§3.6 the guard record is schema v6 (S11/Condition 3, mentor ruling 2026-09-10)",
+    mk("unknown").schema === "false-hold-record-v6", mk("unknown").schema);
   check("§3.7 callerClass rides TOP-LEVEL — never inside signals, which recordHash hashes",
     Object.prototype.hasOwnProperty.call(mk("unknown"), "callerClass") &&
     !Object.prototype.hasOwnProperty.call(mk("unknown").signals, "callerClass"));
   check("§3.8 'subagent' is carried through faithfully", mk("subagent").callerClass === "subagent");
-  // NORMALISATION: the builder never trusts the caller. Anything that is not the
-  // exact positive token degrades to "unknown" — so a plumbing bug upstream can
-  // only ever LOSE a subagent detection, never manufacture one.
+  // NORMALISATION: the builder never trusts the caller. Anything that is not one
+  // of the three recognised tokens degrades to "unknown" — so a plumbing bug
+  // upstream can only ever LOSE a classification, never manufacture one.
   check("§3.9 an absent value normalises to 'unknown', not undefined",
     mk(undefined).callerClass === "unknown", String(mk(undefined).callerClass));
-  check("§3.10 a garbage value normalises to 'unknown' (never a false positive)",
-    mk("live_agent").callerClass === "unknown" && mk("SUBAGENT").callerClass === "unknown" && mk(7).callerClass === "unknown");
+  check("§3.10 'live_agent' now carries through faithfully (WIDENED, 2026-09-10 ruling) — and garbage still degrades",
+    mk("live_agent").callerClass === "live_agent" && mk("SUBAGENT").callerClass === "unknown" && mk(7).callerClass === "unknown",
+    `live_agent=${mk("live_agent").callerClass} garbage=${mk("SUBAGENT").callerClass} num=${mk(7).callerClass}`);
   check("§3.11 the consult record is UNCHANGED at v3 (no caller class, deliberately)",
     buildFalseHoldRecord({ verdict: {}, sessionId: "s", tool: "Write", depth: "standard",
       loopEvent: "opened", actionText: "x", nowIso: "2026-09-07T00:00:00.000Z" }).schema === "false-hold-record-v3");
+
+  // ==========================================================================
+  // §3.12+ — S11/CONDITION 3 (mentor ruling, 2026-09-10): the licensed
+  // three-value gate itself. Real synthetic transcript files, not mocked
+  // return values — proving `readClientContext`'s tail-scan and
+  // `classifyCaller`'s AND-gate against genuine file content.
+  // ==========================================================================
+  const tDir = mkdtempSync(join(tmpdir(), "fhc-c3-"));
+  const PINNED_V = "2.1.260";
+  const PINNED_E = "claude-desktop";
+
+  const mkTranscript = (name, lines) => {
+    const p = join(tDir, name);
+    writeFileSync(p, lines.map((l) => JSON.stringify(l)).join("\n") + "\n");
+    return p;
+  };
+
+  const pinnedTranscript = mkTranscript("pinned.jsonl", [
+    { type: "user", version: PINNED_V, entrypoint: PINNED_E },
+    { type: "assistant", version: PINNED_V, entrypoint: PINNED_E },
+  ]);
+  const staleTranscript = mkTranscript("stale.jsonl", [
+    { type: "user", version: "2.1.258", entrypoint: PINNED_E },
+  ]);
+  const wrongEntrypointTranscript = mkTranscript("cli.jsonl", [
+    { type: "user", version: PINNED_V, entrypoint: "claude-cli" },
+  ]);
+  // A session that straddles a client update — the EXACT class of transcript
+  // the design-phase adversarial sweep found (17/400 real transcripts, two of
+  // them straddling this literal boundary). The version-bearing line is NOT
+  // last; the read must find the TRUE last one, not merely "a" one.
+  const straddlingTranscript = mkTranscript("straddle.jsonl", [
+    { type: "user", version: "2.1.258", entrypoint: PINNED_E },
+    { type: "assistant", text: "no version key on this line at all" },
+    { type: "user", version: PINNED_V, entrypoint: PINNED_E },
+  ]);
+  const noVersionTranscript = mkTranscript("noversion.jsonl", [
+    { type: "user", text: "never carries a version key" },
+  ]);
+
+  check("§3.12 readClientContext on a pinned-version transcript returns the pinned pair",
+    JSON.stringify(readClientContext(pinnedTranscript)) === JSON.stringify({ version: PINNED_V, entrypoint: PINNED_E }),
+    JSON.stringify(readClientContext(pinnedTranscript)));
+  check("§3.13 readClientContext TAIL-reads a straddling transcript — the LAST version wins, not the first",
+    JSON.stringify(readClientContext(straddlingTranscript)) === JSON.stringify({ version: PINNED_V, entrypoint: PINNED_E }),
+    JSON.stringify(readClientContext(straddlingTranscript)));
+  check("§3.14 readClientContext on a transcript with no version line ever returns nulls",
+    JSON.stringify(readClientContext(noVersionTranscript)) === JSON.stringify({ version: null, entrypoint: null }));
+  check("§3.15 readClientContext on a nonexistent file fails soft to nulls, never throws",
+    JSON.stringify(readClientContext("/no/such/file.jsonl")) === JSON.stringify({ version: null, entrypoint: null }));
+  check("§3.16 readClientContext on a missing/non-string path fails soft to nulls",
+    JSON.stringify(readClientContext(undefined)) === JSON.stringify({ version: null, entrypoint: null }) &&
+    JSON.stringify(readClientContext(42)) === JSON.stringify({ version: null, entrypoint: null }));
+
+  // classifyCaller's own gate, exercised with real opts (mirroring exactly what
+  // describeAction now threads through).
+  const gateOk = { agentIdPresent: false, clientVersion: PINNED_V, clientEntrypoint: PINNED_E };
+  check("§3.17 gate passes + agent_id ABSENT ⇒ 'live_agent' (Option C′, licensed 2026-09-10)",
+    classifyCaller(PARENT, gateOk) === "live_agent", classifyCaller(PARENT, gateOk));
+  check("§3.18 gate passes + agent_id PRESENT ⇒ 'subagent' (Option C′'s other half)",
+    classifyCaller(PARENT, { ...gateOk, agentIdPresent: true }) === "subagent");
+  check("§3.19 version mismatch ⇒ 'unknown' EVEN THOUGH agent_id is absent — MODE-3 PROTECTION (the ruling's own named dangerous case: a client update that starts setting agent_id on top-level sessions must not be misread as evidence of a subagent)",
+    classifyCaller(PARENT, { agentIdPresent: false, clientVersion: "9.9.999", clientEntrypoint: PINNED_E }) === "unknown");
+  check("§3.20 entrypoint mismatch ⇒ 'unknown' — CONFIGURATION 5 SAFETY (an untested CLI at the pinned version must not be misclassified; it degrades to Option D's status quo)",
+    classifyCaller(PARENT, { agentIdPresent: false, clientVersion: PINNED_V, clientEntrypoint: "claude-cli" }) === "unknown");
+  check("§3.21 agentIdPresent not a genuine boolean ⇒ 'unknown', never coerced",
+    classifyCaller(PARENT, { agentIdPresent: undefined, clientVersion: PINNED_V, clientEntrypoint: PINNED_E }) === "unknown" &&
+    classifyCaller(PARENT, { agentIdPresent: "true", clientVersion: PINNED_V, clientEntrypoint: PINNED_E }) === "unknown");
+  check("§3.22 the /subagents/ structural tell OUTRANKS the gate — a subagent path classifies even with a failing/absent gate",
+    classifyCaller(SUB, { agentIdPresent: false, clientVersion: "9.9.999", clientEntrypoint: "wrong" }) === "subagent");
+  check("§3.23 an untested entrypoint (Configuration 5's own class) with the RIGHT version still degrades to 'unknown', not 'live_agent' — the exact CLI-safety property argued in the design's §4",
+    classifyCaller(PARENT, { agentIdPresent: false, clientVersion: PINNED_V, clientEntrypoint: "claude-cli" }) === "unknown");
+
+  // End-to-end: readClientContext's real output fed straight into classifyCaller,
+  // no mocked opts — proving the two functions compose correctly, which the pins
+  // above (each tested in isolation) cannot by themselves guarantee. THE FIELD
+  // RENAME BELOW (version→clientVersion, entrypoint→clientEntrypoint) is NOT
+  // cosmetic: `readClientContext` returns {version, entrypoint} (its own
+  // internal shape) while `classifyCaller`'s opts contract is
+  // {clientVersion, clientEntrypoint} — exactly the rename `describeAction`
+  // performs in the real wiring. A first draft of this test spread the raw
+  // return value directly and every pin below still ran — §3.25/§3.26 PASSED
+  // FOR THE WRONG REASON (the naming bug produced 'unknown' by accident,
+  // coinciding with their expected answer); only §3.24 (whose correct answer is
+  // NOT 'unknown') caught the mismatch. Left as a comment so the lesson survives
+  // the fix: two of three pins were silently vacuous and only the third exposed it.
+  const toGateOpts = (agentIdPresent, ctx) => ({
+    agentIdPresent,
+    clientVersion: ctx.version,
+    clientEntrypoint: ctx.entrypoint,
+  });
+  check("§3.24 end-to-end: a real pinned transcript + agent_id present ⇒ 'subagent'",
+    classifyCaller(PARENT, toGateOpts(true, readClientContext(pinnedTranscript))) === "subagent",
+    classifyCaller(PARENT, toGateOpts(true, readClientContext(pinnedTranscript))));
+  check("§3.25 end-to-end: a real STALE-version transcript + agent_id absent ⇒ 'unknown', not 'live_agent'",
+    classifyCaller(PARENT, toGateOpts(false, readClientContext(staleTranscript))) === "unknown");
+  check("§3.26 end-to-end: a real wrong-entrypoint transcript + agent_id absent ⇒ 'unknown'",
+    classifyCaller(PARENT, toGateOpts(false, readClientContext(wrongEntrypointTranscript))) === "unknown");
+  // The genuinely-passing counterpart to §3.25/§3.26: same helper, PINNED
+  // transcript, must now reach 'live_agent' — proves the fixed helper can also
+  // produce the POSITIVE outcome, closing the "passes regardless" class.
+  check("§3.24b end-to-end: a real pinned transcript + agent_id ABSENT ⇒ 'live_agent'",
+    classifyCaller(PARENT, toGateOpts(false, readClientContext(pinnedTranscript))) === "live_agent",
+    classifyCaller(PARENT, toGateOpts(false, readClientContext(pinnedTranscript))));
+
+  const mk2 = (opts) => buildGuardHoldRecord({
+    guard: { recommendation: "do_not_proceed", assessment: null },
+    sessionId: "s", tool: "Bash", actionText: "rm -rf /x",
+    nowIso: "2026-09-10T00:00:00.000Z", regime: "at-action-v2-composed",
+    denied: true, callerClass: opts.callerClass, clientVersion: opts.clientVersion, clientEntrypoint: opts.clientEntrypoint,
+  });
+  check("§3.27 clientVersion/clientEntrypoint ride TOP-LEVEL — never inside signals",
+    Object.prototype.hasOwnProperty.call(mk2({ clientVersion: PINNED_V, clientEntrypoint: PINNED_E }), "clientVersion") &&
+    !Object.prototype.hasOwnProperty.call(mk2({ clientVersion: PINNED_V, clientEntrypoint: PINNED_E }).signals, "clientVersion"));
+  check("§3.28 clientVersion/clientEntrypoint normalise a non-string to null, never fabricate",
+    mk2({ clientVersion: 7, clientEntrypoint: null }).clientVersion === null &&
+    mk2({ clientVersion: 7, clientEntrypoint: null }).clientEntrypoint === null);
+  check("§3.29 a genuine version+entrypoint pair is carried through faithfully",
+    mk2({ clientVersion: PINNED_V, clientEntrypoint: PINNED_E }).clientVersion === PINNED_V &&
+    mk2({ clientVersion: PINNED_V, clientEntrypoint: PINNED_E }).clientEntrypoint === PINNED_E);
 }
 
 console.log(`\nfalse-hold-capture battery: ${pass} passed, ${fail} failed`);

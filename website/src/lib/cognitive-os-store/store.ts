@@ -67,6 +67,10 @@
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { pagedRows } from '@/lib/db/paged-select'
+// The library's own full-depth, cycle-safe egress scanner. Reused, never
+// re-derived (PR15). This store imports FROM the pure library; the library
+// imports nothing from here, which is what §12.C9 guards.
+import { scanForEgress } from '@/lib/cognitive-os/permissions'
 
 // ============================================================================
 // SHARED PLUMBING (mirrors collaboration-store.ts)
@@ -111,12 +115,36 @@ export const EVENTS_TABLE = 'cognitive_events'
 export const CLAIMS_TABLE = 'cognitive_claims'
 export const BELIEF_STATES_TABLE = 'cognitive_belief_states'
 
+// Second migration (decisions, handoffs, dependency graph), 2026-09-10.
+export const DECISIONS_TABLE = 'cognitive_decisions'
+export const HANDOFFS_TABLE = 'cognitive_handoffs'
+export const DEPENDENCY_NODES_TABLE = 'cognitive_dependency_nodes'
+export const DEPENDENCY_EDGES_TABLE = 'cognitive_dependency_edges'
+
 /** The child tables, in the order a delete must visit them: children before the
  *  parent. The FK cascade is a backstop; this project verifies erasure by query
- *  and never infers it from a cascade. */
+ *  and never infers it from a cascade.
+ *
+ *  ** THIS ORDER IS LOAD-BEARING, NOT COSMETIC. ** Two dependencies inside the
+ *  list itself, both introduced by the second migration:
+ *
+ *    decisions + handoffs BEFORE belief_states - they FK to
+ *      cognitive_belief_states ON DELETE CASCADE. Visiting belief states first
+ *      would cascade them away, and the explicit delete that followed would then
+ *      count ZERO: a real erasure UNDER-REPORTED while reporting success. That is
+ *      precisely the failure mode this file's exact-head-count discipline exists
+ *      to prevent, so the ordering carries the same weight as the counting.
+ *
+ *    edges BEFORE nodes - same reasoning, via the edge endpoint FKs.
+ *
+ *  Pinned in the store battery. Do not reorder without reading that pin. */
 export const CHILD_TABLES = [
   EVENTS_TABLE,
   CLAIMS_TABLE,
+  DEPENDENCY_EDGES_TABLE,
+  DEPENDENCY_NODES_TABLE,
+  DECISIONS_TABLE,
+  HANDOFFS_TABLE,
   BELIEF_STATES_TABLE,
 ] as const
 
@@ -166,6 +194,10 @@ export interface CognitiveExport {
   readonly events: unknown[]
   readonly claims: unknown[]
   readonly belief_states: unknown[]
+  readonly decisions: unknown[]
+  readonly handoffs: unknown[]
+  readonly dependency_nodes: unknown[]
+  readonly dependency_edges: unknown[]
 }
 
 const EMPTY_EXPORT: CognitiveExport = Object.freeze({
@@ -173,6 +205,10 @@ const EMPTY_EXPORT: CognitiveExport = Object.freeze({
   events: [],
   claims: [],
   belief_states: [],
+  decisions: [],
+  handoffs: [],
+  dependency_nodes: [],
+  dependency_edges: [],
 })
 
 /**
@@ -293,6 +329,25 @@ export async function getCognitiveDataForOwner(
     const states = await childRowsForContexts(BELIEF_STATES_TABLE, ids, client)
     if (states.error) return { ok: false, error: states.error }
 
+    const decisions = await childRowsForContexts(DECISIONS_TABLE, ids, client)
+    if (decisions.error) return { ok: false, error: decisions.error }
+
+    const handoffs = await childRowsForContexts(HANDOFFS_TABLE, ids, client)
+    if (handoffs.error) return { ok: false, error: handoffs.error }
+
+    const nodes = await childRowsForContexts(DEPENDENCY_NODES_TABLE, ids, client)
+    if (nodes.error) return { ok: false, error: nodes.error }
+
+    const edges = await childRowsForContexts(DEPENDENCY_EDGES_TABLE, ids, client)
+    if (edges.error) return { ok: false, error: edges.error }
+
+    // Whole rows remain safe on the SECOND slice for the same reason as the
+    // first, and the reason is now narrower than "nothing has a scalar":
+    // no score COLUMN exists, and the two free-form JSONB containers
+    // (cognitive_decisions.stoic_evaluation, cognitive_handoffs.payload) are
+    // refused at the write boundary by assertNoInternalScalarAtRest below if
+    // they carry one at ANY depth. If either guarantee is ever weakened, this
+    // export must become an explicit projection.
     return {
       ok: true,
       value: {
@@ -300,6 +355,10 @@ export async function getCognitiveDataForOwner(
         events: events.rows,
         claims: claims.rows,
         belief_states: states.rows,
+        decisions: decisions.rows,
+        handoffs: handoffs.rows,
+        dependency_nodes: nodes.rows,
+        dependency_edges: edges.rows,
       },
     }
   } catch (e) {
@@ -331,6 +390,92 @@ async function childContextRows(
 }
 
 // ============================================================================
+// WRITE BOUNDARY - the deep half of the JSONB score guard (second migration)
+// ============================================================================
+
+/**
+ * Refuse a free-form JSONB container that carries an internal-only Cognitive OS
+ * scalar ANYWHERE inside it.
+ *
+ * WHY THIS EXISTS AT ALL. The second migration persists two open-ended
+ * containers - `cognitive_decisions.stoic_evaluation` and
+ * `cognitive_handoffs.payload`, both `Readonly<Record<string, unknown>>` in the
+ * library. The store battery's §7 pin reads COLUMN NAMES, so a score inside a
+ * JSONB document passes it cleanly: "no score column" and "no score at rest"
+ * stop being the same claim the moment a free-form container is stored.
+ *
+ * THE DATABASE CLOSES ONLY THE TOP LEVEL. `cognitive_os_jsonb_has_internal_scalar`
+ * catches a top-level key and a top-level {kind,value} wrapper, and cannot
+ * recurse - a CHECK constraint may not contain an aggregate. The migration's
+ * behavioural probe B2c PROVES that limit rather than asserting it, by inserting
+ * a nested score and expecting success.
+ *
+ * SO THE DEEP CASE IS DESIGNED TO BE CLOSED HERE - reusing the library's own
+ * `scanForEgress` (permissions.ts) rather than re-deriving a walker: it already
+ * matches both key names and `kind` wrappers at ANY depth, is cycle-safe, and
+ * REFUSES containers it cannot exhaustively read (Map, Set, class instances,
+ * accessors) instead of waving them through (PR15 - reuse the primitive).
+ *
+ * ** CAUGHT BY PR19: this function is CORRECT BUT CURRENTLY UNWIRED. ** Phase 1
+ * has no writer for these tables at all - no insert path anywhere in `src/`
+ * calls this function. It is staged for whichever future writer needs it, not
+ * presently enforcing anything, because there is nothing yet for it to guard.
+ * An earlier version of this comment claimed the deep case "is closed", present
+ * tense, which overstated what exists today. Any future writer that inserts
+ * into `stoic_evaluation` or `payload` MUST call this first, or the claim this
+ * file makes becomes false again.
+ *
+ * `unscannable` is treated as a REFUSAL, not a pass. You cannot certify what you
+ * cannot read, and this is a Q9 boundary: the conservative direction is to
+ * refuse the write, not to store a container whose contents were never verified.
+ *
+ * HONEST SCOPE: this guards the WRITE PATH. It is not a claim about rows already
+ * at rest, and it cannot be, because a function-based CHECK is not re-validated
+ * retroactively. If the guard is ever widened, existing rows need their own pass.
+ */
+export function assertNoInternalScalarAtRest(
+  container: unknown,
+  field: string,
+): { ok: true } | { ok: false; error: string } {
+  const scan = scanForEgress(container)
+  if (scan.found.length > 0) {
+    return {
+      ok: false,
+      error:
+        `${field} carries an internal-only Cognitive OS scalar at ${scan.found[0]} - ` +
+        `refused at the write boundary (Q9). Internal scalars are never persisted.`,
+    }
+  }
+  if (scan.unscannable.length > 0) {
+    return {
+      ok: false,
+      error:
+        `${field} contains a container that cannot be exhaustively read ` +
+        `(${scan.unscannable[0]}) - refused rather than stored uncertified.`,
+    }
+  }
+  return { ok: true }
+}
+
+/**
+ * The ordering requirement the composite FK imposes, stated where a writer will
+ * meet it.
+ *
+ * cognitive_decisions and cognitive_handoffs both FK
+ * (context_id, belief_state_id, belief_state_version) into
+ * cognitive_belief_states' unique key, which is what makes the deliberately
+ * absent epistemic_debt_score RE-DERIVABLE rather than merely absent.
+ *
+ * The consequence for any future writer: PERSIST THE BELIEF-STATE VERSION FIRST.
+ * A decision or handoff written before its belief state will be rejected with
+ * 23503, and that rejection is the constraint working, not a bug to route around
+ * by dropping the FK.
+ */
+export const BELIEF_STATE_WRITE_ORDER_NOTE =
+  'Persist the belief-state version before any decision or handoff that cites it: ' +
+  'the composite FK is what makes the absent epistemic_debt_score re-derivable.'
+
+// ============================================================================
 // DELETE (R17c) - genuine deletion, verified by query
 // ============================================================================
 
@@ -339,6 +484,10 @@ export interface CognitiveDeletion {
   readonly events: number
   readonly claims: number
   readonly belief_states: number
+  readonly decisions: number
+  readonly handoffs: number
+  readonly dependency_nodes: number
+  readonly dependency_edges: number
 }
 
 const EMPTY_DELETION: CognitiveDeletion = Object.freeze({
@@ -346,6 +495,27 @@ const EMPTY_DELETION: CognitiveDeletion = Object.freeze({
   events: 0,
   claims: 0,
   belief_states: 0,
+  decisions: 0,
+  handoffs: 0,
+  dependency_nodes: 0,
+  dependency_edges: 0,
+})
+
+/** Table name -> the CognitiveDeletion field it reports into.
+ *
+ *  Replaces an `else` fall-through that assigned every non-events, non-claims
+ *  table to `belief_states`. With three child tables that read correctly; with
+ *  seven it would have silently mis-attributed four of them - reporting a real
+ *  deletion under the wrong name, which is a quieter failure than reporting none.
+ *  An explicit map cannot fall through, and a missing entry is a compile error. */
+const DELETION_FIELD: Readonly<Record<string, keyof CognitiveDeletion>> = Object.freeze({
+  [EVENTS_TABLE]: 'events',
+  [CLAIMS_TABLE]: 'claims',
+  [BELIEF_STATES_TABLE]: 'belief_states',
+  [DECISIONS_TABLE]: 'decisions',
+  [HANDOFFS_TABLE]: 'handoffs',
+  [DEPENDENCY_NODES_TABLE]: 'dependency_nodes',
+  [DEPENDENCY_EDGES_TABLE]: 'dependency_edges',
 })
 
 /**
@@ -414,26 +584,38 @@ async function deleteContext(
   contextId: string,
   client: SupabaseClient,
 ): Promise<{ counts: CognitiveDeletion; error: string | null }> {
-  let events = 0
-  let claims = 0
-  let states = 0
+  const tally: Record<keyof CognitiveDeletion, number> = {
+    contexts: 0,
+    events: 0,
+    claims: 0,
+    belief_states: 0,
+    decisions: 0,
+    handoffs: 0,
+    dependency_nodes: 0,
+    dependency_edges: 0,
+  }
+  const snapshot = (): CognitiveDeletion => ({ ...tally })
 
   for (const table of CHILD_TABLES) {
     const r = await deleteForContext(table, contextId, client)
     if (r.error) {
-      return { counts: { contexts: 0, events, claims, belief_states: states }, error: r.error }
+      return { counts: snapshot(), error: r.error }
     }
-    if (table === EVENTS_TABLE) events = r.deleted
-    else if (table === CLAIMS_TABLE) claims = r.deleted
-    else states = r.deleted
+    const field = DELETION_FIELD[table]
+    // A table in CHILD_TABLES with no DELETION_FIELD entry would otherwise
+    // delete rows and report nothing. Fail loudly rather than under-report.
+    if (field === undefined) {
+      return { counts: snapshot(), error: `delete ${table}: no CognitiveDeletion field mapped` }
+    }
+    tally[field] = r.deleted
   }
 
   const before = await exactCount(CONTEXTS_TABLE, 'context_id', contextId, client)
   if (before.missingTable) {
-    return { counts: { contexts: 0, events, claims, belief_states: states }, error: null }
+    return { counts: snapshot(), error: null }
   }
   if (before.error) {
-    return { counts: { contexts: 0, events, claims, belief_states: states }, error: before.error }
+    return { counts: snapshot(), error: before.error }
   }
 
   const { error } = await client.from(CONTEXTS_TABLE).delete().eq('context_id', contextId)
@@ -441,7 +623,7 @@ async function deleteContext(
     const e = asError(error)
     if (!isMissingTableError(e)) {
       return {
-        counts: { contexts: 0, events, claims, belief_states: states },
+        counts: snapshot(),
         error: `delete ${CONTEXTS_TABLE}: ${e.message}`,
       }
     }
@@ -449,17 +631,17 @@ async function deleteContext(
 
   const after = await exactCount(CONTEXTS_TABLE, 'context_id', contextId, client)
   if (after.error) {
-    return { counts: { contexts: 0, events, claims, belief_states: states }, error: after.error }
+    return { counts: snapshot(), error: after.error }
   }
   if (after.count !== 0) {
     return {
-      counts: { contexts: 0, events, claims, belief_states: states },
+      counts: snapshot(),
       error: `delete ${CONTEXTS_TABLE} left ${after.count} row(s) - erasure NOT complete`,
     }
   }
 
   return {
-    counts: { contexts: before.count, events, claims, belief_states: states },
+    counts: { ...snapshot(), contexts: before.count },
     error: null,
   }
 }
@@ -470,6 +652,10 @@ function addCounts(a: CognitiveDeletion, b: CognitiveDeletion): CognitiveDeletio
     events: a.events + b.events,
     claims: a.claims + b.claims,
     belief_states: a.belief_states + b.belief_states,
+    decisions: a.decisions + b.decisions,
+    handoffs: a.handoffs + b.handoffs,
+    dependency_nodes: a.dependency_nodes + b.dependency_nodes,
+    dependency_edges: a.dependency_edges + b.dependency_edges,
   }
 }
 
@@ -557,6 +743,23 @@ export async function deleteCognitiveDataForCredential(
  * Children are swept before contexts so a parent row is never removed while its
  * children are still being counted. Each table is swept on its own
  * `retain_until`, so a long-lived context does not keep expired events alive.
+ *
+ * ** DISCLOSED LIMIT (PR19), retention-vs-COUNTING, not retention-vs-deletion. **
+ * Retention itself is enforced correctly and, if anything, more aggressively
+ * than the returned counts show: no expired row survives a sweep. But the
+ * per-table counts CAN under-report. Each table is counted-then-deleted in
+ * CHILD_TABLES order (decisions/handoffs before belief_states; edges before
+ * nodes - the same ordering that makes deleteContext's counts exact). If a
+ * belief_states row expires and is removed LATER in the same pass, its
+ * ON DELETE CASCADE can remove a decisions/handoffs row whose OWN retain_until
+ * had not yet passed - that row is genuinely deleted, but was already visited
+ * (and read as zero) earlier in the loop, so it is never added to any returned
+ * count. The same applies to dependency_edges cascaded away by a later
+ * dependency_nodes expiry. The aggregate `deleted` total can therefore be
+ * strictly LESS than the true number of rows a sweep run actually removes.
+ * Closing this would need a second, post-loop count-delta pass per table
+ * rather than the current per-step accounting - deliberately not built here,
+ * so the gap is stated rather than silently accepted or half-fixed.
  */
 export async function purgeExpiredCognitive(
   client?: SupabaseClient,
@@ -566,6 +769,10 @@ export async function purgeExpiredCognitive(
   events: number
   claims: number
   belief_states: number
+  decisions: number
+  handoffs: number
+  dependency_nodes: number
+  dependency_edges: number
   error: string | null
 }> {
   const zero = {
@@ -574,6 +781,10 @@ export async function purgeExpiredCognitive(
     events: 0,
     claims: 0,
     belief_states: 0,
+    decisions: 0,
+    handoffs: 0,
+    dependency_nodes: 0,
+    dependency_edges: 0,
     error: null as string | null,
   }
   let db: SupabaseClient
@@ -645,13 +856,25 @@ export async function purgeExpiredCognitive(
   const events = counts[EVENTS_TABLE] ?? 0
   const claims = counts[CLAIMS_TABLE] ?? 0
   const belief_states = counts[BELIEF_STATES_TABLE] ?? 0
+  const decisions = counts[DECISIONS_TABLE] ?? 0
+  const handoffs = counts[HANDOFFS_TABLE] ?? 0
+  const dependency_nodes = counts[DEPENDENCY_NODES_TABLE] ?? 0
+  const dependency_edges = counts[DEPENDENCY_EDGES_TABLE] ?? 0
 
+  // Summed from the per-table figures rather than accumulated separately, so
+  // `deleted` cannot drift from the breakdown it claims to total.
   return {
-    deleted: contexts + events + claims + belief_states,
+    deleted:
+      contexts + events + claims + belief_states +
+      decisions + handoffs + dependency_nodes + dependency_edges,
     contexts,
     events,
     claims,
     belief_states,
+    decisions,
+    handoffs,
+    dependency_nodes,
+    dependency_edges,
     error: firstError,
   }
 }

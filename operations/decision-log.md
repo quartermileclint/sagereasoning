@@ -39187,3 +39187,98 @@ as explicit practice-discipline items, not just history.
 `operations/cognitive-os-2026-09/2026-09-09-TABLE-STEP-CORE-SLICE-CLOSE.md`.
 
 **The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+---
+
+**2026-09-10 (Condition 3 — client-version-pinning DESIGN, `D-CONDITION-3-VERSION-PIN-DESIGN-2026-09-10`).**
+A **`code-elevated` design-only session — NO code, schema, flag, credential, or `GUARD_RE`-matched file
+change; `classifyCaller.ts` and every guarded path byte-unchanged vs HEAD, verified at open and again
+at close.** Session `76d3b72c-e7c9-4ff6-b5c3-0fb7b4fce2e5`.
+
+Executed the third and final condition of the 2026-09-07 five-question ruling: a written design for
+the version-pin-with-fallback that Option C′'s `classifyCaller` build must carry, plus a relay to the
+mentor/founder asking whether Conditions 1–3 jointly license a build. **Two deliverables:**
+`operations/trust-layer-2026-07/2026-09-10-condition-3-version-pinning-DESIGN.md` and its companion
+`…-gate-discharge-RELAY.md`.
+
+**The design's central finding, found by measurement rather than assumed:** reading the client version
+from the *head* of the session transcript (the obvious implementation) is wrong. `version`/`entrypoint`
+are absent from the H3/H4 hook payload (confirmed by key-list inspection of existing dumps — no new
+`GATE1_DEBUG` capture was taken); they ride the transcript, reachable only via `transcript_path`. A
+scan of 400 transcripts on this machine found **17 (4.25%) carry more than one `version` value**,
+including **two** that straddle exactly `2.1.258 → 2.1.260` — the pinned boundary this condition is
+about. A head-read would report the session-start version while the live client had moved on,
+reproducing the exact silent-misclassification failure the ruling forbids. **The design specifies a
+tail-read instead**, gated on version AND entrypoint AND field-presence, falling back to `unknown` on
+any failure — with the three-value vocabulary (`subagent`/`live_agent`/`unknown`) argued as a deliberate
+widening of ruling 3's two-value design, licensed by Condition 1's closed negative result and reversible
+if that finding is ever overturned.
+
+**Two build-trap findings surfaced by reading the current report code, not assumed:** (1) `recordHash`
+in `false-hold-observation-report.ts` hashes `JSON.stringify(r.signals)` but not `schema`, so a v6 bump
+with all new fields top-level (mirroring the v4→v5 precedent) moves no existing hash; (2) the report's
+own validator hard-codes `callerClass === 'subagent' || 'unknown'` for v5 records — an unextended
+validator would **silently drop** every `live_agent` record from the population the moment one is
+emitted, a data-loss failure dressed as a schema check. Both must be fixed in the same commit as any
+future build, not after.
+
+**Configuration 5 (a second entrypoint) argued explicitly, not assumed:** a version-only gate does
+NOT make the untested-CLI gap safe (a same-version CLI would pass the gate with its `agent_id` wire
+behaviour entirely unverified — the exact mode-3 failure the design's own table names as the dangerous
+one). Pinning `entrypoint` alongside `version` closes it: an untested entrypoint fails the gate and
+degrades to Option D's status quo, asserting nothing new.
+
+**Adversarial self-review, model dropped to Sonnet 5 per founder authorization, then found and folded
+one real overclaim before this record was written:** the design's first draft claimed the proposed
+64 KB tail-scan window was "comfortably larger than observed inter-version-line spacing." Direct
+measurement of this session's own transcript found the single largest line at **1,142,339 bytes**
+(an `attachment`-type line) — 17x the proposed window, and it is one of the boundary-relevant lines.
+The claim was retracted and replaced with the actual finding: the giant line itself happens to carry
+`version`, so a backward scan finds it immediately in practice (version-density 192/245 ≈78% on this
+transcript), but the "comfortably larger" *guarantee* was false as originally stated. Correctness is
+unaffected either way (the conditional's fallback to `unknown` covers a failed scan by construction);
+only the claimed *margin* was wrong, and both affected sections of the design doc were corrected in
+place with the finding disclosed rather than quietly fixed.
+
+**Window health, re-derived (not quoted):** buffer 400 lines, 0 unparseable; schema distribution
+v1=138, v3=41, v4=97, v5=124. Window (line 140–400, took-effect probe at line 139 excluded from the
+rate) = 262 records: **41 consult, 221 guard** (`consult` = v3/no-`path`; `guard` = v4/v5/`path=guard`
+— exhaustive+exclusive). Per-UTC-day: 09-06 = 3 consult/76 guard; 09-07 = 17/63; 09-08 = 6/57; 09-09 =
+15/26 (grew from the prior session's 1/7 as the day accumulated further activity). **Baseline days
+(UTC days with ≥1 consult) = 4 of 4 days present in the window** — reconciling the prompt's carried "2
+of 5" discrepancy in the same direction as the immediately-prior session (4 is now independently
+re-derived twice). `gate1.log` corroboration: exact 1:1 pairing on 09-07/08/09 (guard 63/63, 17/17;
+57/57, 6/6; 26/26, 15/15); on the partial first day 09-06, the naive `>=` boundary double-counts the
+took-effect probe's own log line (`.265Z` sorts before its buffer write at `.267Z`) exactly as the
+Condition-2 session warned — resolved by handling the probe consistently on both sides, giving exact
+76/76 and 3/3. This session's own `.loop.json` file does not exist — **zero Edit/Write tool calls this
+session** (every write went through Bash heredocs), confirming the instrument-composition/tool-mode
+dependency the ruling names: this session contributes **zero records** to the buffer.
+
+**A stale CLAUDE.md claim (named in the prompt's §3, itself already twice-deferred) was corrected
+precisely rather than restated a third time.** The S9 production-state block's "still dumping every
+PreToolUse hook's raw stdin to disk" is now annotated with the true three-leg sequence: inert at the
+Condition-2 session's own open → live again after that session's in-session `GATE1_DEBUG` revert →
+inert throughout this session's entire duration (repeated hook fires this session rewrote none of the
+three stale `*-stdin.json` files, which are dated to the Condition-2 session's run). The founder's
+manual `rm` remains owed as hygiene on stale files, independent of whether the variable is currently
+exported in any live process.
+
+**One thing noticed and correctly excluded from this session's own scope, named rather than silently
+passed over:** `git status` at various points this session showed `website/src/lib/cognitive-os-store/store.ts`,
+its test file, and a new `website/supabase-cognitive-os-second-migration.sql` as dirty/untracked, with
+mtimes falling inside this session's own window (05:05–05:06 local). This session touched none of
+them — no Edit/Write tool call was made against any path outside `operations/trust-layer-2026-07/*`
+and `CLAUDE.md`, confirmed by `git diff --stat` at close. The decision-log's own immediately-prior
+entry (a cognitive-os "table step" close) explains this as concurrent activity from a separate session
+on the shared checkout, not an artifact of this one.
+
+**Relayed, not decided:** whether Conditions 1–3 jointly license a build, whether the mentor wants the
+`live_agent` value or the conservative two-value fallback, and whether the entrypoint pin is accepted
+as closing Configuration 5 or a live CLI test is still owed — all three put to the mentor/founder in
+the relay document, per this arc's standing precedent of never assuming the gate opens itself.
+
+**Nothing built.** `classifyCaller.ts`, `false-hold-observation-report.ts`, and every `GUARD_RE`-matched
+path remain byte-identical to HEAD. PR19 applies with the mandatory fourth check (verified via
+`git diff --stat`, not merely asserted): confirmed clean. **The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.**

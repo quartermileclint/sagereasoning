@@ -64,7 +64,7 @@ import {
   decisionAlreadyFired,
   markDecisionFired,
 } from "./lib/session-state.mjs";
-import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord, classifyCaller } from "./lib/false-hold-capture.mjs";
+import { appendFalseHoldRecord, buildFalseHoldRecord, buildGuardHoldRecord, classifyCaller, readClientContext } from "./lib/false-hold-capture.mjs";
 import { composeAction, renderBareInputNote } from "./lib/action-composer.mjs";
 import { classifyConsultSignal, computeKathekonConfidence } from "./lib/consult-signal.mjs";
 import { recordGuardCautionSignal, recordConsultSignal } from "./lib/close-signal-state.mjs";
@@ -296,7 +296,7 @@ function allowSilently() {
 //   (iii) renderGate2ElicitationBlock   — now shows action.summary (unchanged UX).
 //   (iv) loop-state adoptedCorrection   — now action.summary (unchanged bytes).
 // ---------------------------------------------------------------------------
-function describeAction(cfg, toolName, toolInput, transcriptPath) {
+function describeAction(cfg, toolName, toolInput, transcriptPath, agentIdPresent) {
   const action = composeAction({
     toolName,
     toolInput,
@@ -308,7 +308,24 @@ function describeAction(cfg, toolName, toolInput, transcriptPath) {
   // transcript path is already in hand. The null-return path is preserved exactly:
   // composeAction may legitimately return a falsy action (no examinable action in
   // tool_input), and the caller at the call site below depends on that.
-  return action ? { ...action, callerClass: classifyCaller(transcriptPath) } : action;
+  //
+  // WIDENED 2026-09-10 (S11/Condition 3, mentor-licensed): `readClientContext` is
+  // called ONCE here (never inside `classifyCaller`, which stays a pure function
+  // of its arguments) so the same transcript file is not re-read for the record's
+  // own clientVersion/clientEntrypoint disclosure fields (threaded onto `action`
+  // below, which `captureGuardObservation` forwards into `buildGuardHoldRecord`
+  // exactly as it already does for `callerClass`). `agentIdPresent` is threaded
+  // in from `main()`, where the raw H3 stdin (`event`) is still in scope — this
+  // function has no access to the raw event, by design, so the presence check
+  // must happen at the call site, not be re-derived here.
+  if (!action) return action;
+  const { version: clientVersion, entrypoint: clientEntrypoint } = readClientContext(transcriptPath);
+  return {
+    ...action,
+    callerClass: classifyCaller(transcriptPath, { agentIdPresent, clientVersion, clientEntrypoint }),
+    clientVersion,
+    clientEntrypoint,
+  };
 }
 
 // Is this action in the GUARD set (irreversible → guardrail can block)? Either the tool is in the
@@ -389,11 +406,17 @@ async function main() {
     return;
   }
 
+  // S11/CONDITION 1's own defining reading of "presence" (2026-09-08 evidence
+  // file): a KEY-presence check, not a truthiness check — `agent_id` is either
+  // present as a non-empty string or the key is entirely absent from the H3
+  // stdin object; it has never been observed present-but-falsy.
+  const agentIdPresent = Object.prototype.hasOwnProperty.call(event, "agent_id");
   const action = describeAction(
     cfg,
     toolName,
     event.tool_input,
     typeof event.transcript_path === "string" ? event.transcript_path : "",
+    agentIdPresent,
   );
   if (!action) {
     // No examinable action (e.g. a tool_input with no command/path). Fail-open-honest: allow.
@@ -505,6 +528,10 @@ function captureGuardObservation(cfg, opts) {
         regime: action ? action.regime : "unknown",
         denied,
         callerClass: action && typeof action.callerClass === "string" ? action.callerClass : "unknown",
+        // S11/Condition 3 (2026-09-10): threaded from `action` exactly like
+        // `callerClass` above — read ONCE in `describeAction`, never re-read here.
+        clientVersion: action && typeof action.clientVersion === "string" ? action.clientVersion : null,
+        clientEntrypoint: action && typeof action.clientEntrypoint === "string" ? action.clientEntrypoint : null,
       }),
     )
   } catch {

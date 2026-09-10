@@ -28,7 +28,7 @@
  * No third-party dependencies. Node 18+.
  */
 
-import { mkdirSync, appendFileSync } from "node:fs";
+import { mkdirSync, appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /** One durable file for the whole 7-day accumulation (NOT per-session). */
@@ -176,11 +176,151 @@ export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEven
  * remain a correct mechanism with no live population to exclude until the wire
  * itself changes?
  */
-export function classifyCaller(transcriptPath) {
+/**
+ * S11/CONDITION 3 (mentor ruling, 2026-09-10 — the 2026-09-07 five-question
+ * ruling's third and final condition, discharged by that ruling): the client
+ * build/entrypoint pair at which `agent_id` was FIRST OBSERVED PRESENT on a
+ * top-level session's H3 PreToolUse payload — Condition 1's negative result —
+ * and CONFIRMED STABLE on a second, genuinely different calendar day —
+ * Condition 2. Bump BOTH constants together, and ONLY after re-running
+ * Conditions 1 and 2 against the new pair — never independently, and never on
+ * a hunch that the wire "probably" still behaves the same way. The ruling's own
+ * words: "If the mechanism is built and the client updates, the harness must
+ * detect the field's absence and fall back to `unknown` rather than silently
+ * misclassifying." This pair, and the gate below that checks it, is that
+ * detection.
+ */
+const PINNED_CLIENT_VERSION = "2.1.260";
+const PINNED_CLIENT_ENTRYPOINT = "claude-desktop";
+
+/**
+ * Read the client `version`/`entrypoint` a transcript was written under, AT
+ * THE TAIL — not the head, and this is load-bearing, not a style choice.
+ *
+ * `version`/`entrypoint` are ABSENT from the PreToolUse/PostToolUse hook
+ * payload itself (confirmed 2026-09-09/2026-09-10 by direct key-list
+ * inspection of live captures across three separate sessions) — they ride the
+ * transcript JSONL, one value per line, reachable only via `transcript_path`.
+ *
+ * A HEAD read is the obvious implementation and it is WRONG: a design-time
+ * sweep of 400 transcripts on the build machine (2026-09-10) found 17 (4.25%)
+ * carrying MORE THAN ONE `version` value — a session that straddles a client
+ * update writes lines under both — including two that straddle exactly this
+ * module's own pinned boundary, `2.1.258 → 2.1.260`. A head-read on such a
+ * session would report the session-START version while the LIVE client had
+ * already moved past it, reproducing the exact silent-misclassification
+ * failure this whole mechanism exists to prevent.
+ *
+ * A BOUNDED backward byte-window was considered and rejected in design (an
+ * adversarial self-review of the design found a single 1,142,339-byte line in
+ * one transcript, 17x a proposed 64KB window — a bounded scan could miss the
+ * one version-bearing line it needed). This reads the WHOLE file instead,
+ * matching the established `readTranscriptTail` pattern in
+ * `lib/discernment.mjs` (already loaded on every H3/H2 firing for the SAME
+ * transcript, at the SAME file scale) — a full read cannot miss the true last
+ * version-bearing line, at the cost this codebase already pays elsewhere.
+ *
+ * Fails soft to `{version: null, entrypoint: null}` on any missing, unreadable
+ * or unparseable transcript — mirrors `readTranscriptTail`'s own contract:
+ * this function must never throw, and an unreadable transcript must degrade to
+ * the gate failing (⇒ "unknown"), never to a fabricated value.
+ */
+export function readClientContext(transcriptPath) {
+  try {
+    if (typeof transcriptPath !== "string" || !transcriptPath || !existsSync(transcriptPath)) {
+      return { version: null, entrypoint: null };
+    }
+    const lines = readFileSync(transcriptPath, "utf8").split("\n");
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const t = lines[i].trim();
+      if (!t) continue;
+      let obj;
+      try {
+        obj = JSON.parse(t);
+      } catch {
+        continue; // skip a non-JSON line; do not let one bad line abort the scan
+      }
+      if (obj && typeof obj === "object" && typeof obj.version === "string") {
+        return {
+          version: obj.version,
+          entrypoint: typeof obj.entrypoint === "string" ? obj.entrypoint : null,
+        };
+      }
+    }
+    return { version: null, entrypoint: null };
+  } catch {
+    return { version: null, entrypoint: null };
+  }
+}
+
+/**
+ * RULING 3 (mentor, 2026-09-07) — the ORIGINAL two-value `caller_class` design.
+ * PRESERVED VERBATIM BELOW (superseded 2026-09-10; kept because the reasoning
+ * it recorded is exactly what licenses the widening, and deleting it would
+ * discard the argument that makes the new value safe rather than assumed):
+ *
+ * WHY: the guard population must contain "only records where the live agent was
+ * the actor at the moment the hook fired". A review-fleet subagent fires the same
+ * hooks and its record carries the PARENT session id, so the session id CANNOT
+ * discriminate (established S6b; re-established S7 under controlled conditions —
+ * 11 of 15 records under one session id were that session's review fleet).
+ *
+ * WHAT THIS RETURNED, AND WHY ONLY TWO VALUES (pre-2026-09-10):
+ *   "subagent" — a POSITIVE STRUCTURAL OBSERVATION, never an inference: the
+ *     transcript path contains a `/subagents/` segment.
+ *   "unknown" — EVERYTHING ELSE, INCLUDING a session-shaped path. A
+ *     session-shaped path was exactly consistent with two different worlds:
+ *     (a) the live agent was the actor, and (b) the wire hands a subagent the
+ *     PARENT's transcript path. Labelling it "live_agent" would have collapsed
+ *     those worlds into a claim the evidence did not then support.
+ *
+ * WHAT CLOSED THE AMBIGUITY (2026-09-07 → 2026-09-10): Condition 1 tested world
+ * (b) directly and found it FALSE — a top-level session's H3 PreToolUse stdin
+ * never carries `agent_id`, across every configuration tested including
+ * concurrent background agents (`operations/trust-layer-2026-07/2026-09-08-condition-1-agentid-parent-session-CAPTURE-EVIDENCE.md`).
+ * Condition 2 confirmed the finding stable on a second, different calendar day.
+ * The mentor's 2026-09-10 ruling on Condition 3's design licensed the third
+ * value on exactly this basis: "The two-world ambiguity that ruling 3 was
+ * protecting against no longer exists... Emitting `live_agent`... is now a
+ * classification that rests on verified evidence, not on an assumption."
+ *
+ * THE DEPENDENCY IS STRUCTURAL, NOT A COMMENT: if Condition 1's finding is ever
+ * overturned by a later capture — a client update makes a top-level session
+ * carry `agent_id` — the version+entrypoint gate below makes withdrawal
+ * AUTOMATIC rather than manual. The new client fails the gate, every record
+ * captured under it reads "unknown" (never a guess), and `live_agent` is
+ * withdrawn by construction until Conditions 1 and 2 are re-verified under the
+ * new pair and the pinned constants above are deliberately bumped.
+ *
+ * THE GATE, exactly (mentor ruling 2026-09-10, Q1/Q3): version AND entrypoint
+ * AND agent_id-presence all determinable, or the answer is "unknown" — never a
+ * default in either direction. This is what makes an untested second
+ * entrypoint (Configuration 5 — no `claude` CLI has ever run on this machine)
+ * SAFE rather than merely unaddressed: a same-version CLI session fails the
+ * entrypoint half of the gate and degrades to "unknown", exactly Option D's
+ * pre-existing status quo, asserting nothing new about a wire that was never
+ * characterised.
+ */
+export function classifyCaller(transcriptPath, opts) {
   if (typeof transcriptPath !== "string" || transcriptPath === "") return "unknown";
   // A PATH SEGMENT, not a substring: a directory merely NAMED e.g. "my-subagents-notes"
-  // must not read as a subagent transcript.
-  return /(^|\/)subagents(\/|$)/.test(transcriptPath) ? "subagent" : "unknown";
+  // must not read as a subagent transcript. Checked FIRST and UNCONDITIONALLY —
+  // this positive structural tell does not depend on client version at all.
+  if (/(^|\/)subagents(\/|$)/.test(transcriptPath)) return "subagent";
+
+  const o = opts && typeof opts === "object" ? opts : {};
+  // Option C′ (agent_id presence) requires a genuine boolean — an absent/
+  // non-boolean value means the caller never determined presence, which must
+  // degrade to "unknown", never to a guess.
+  if (typeof o.agentIdPresent !== "boolean") return "unknown";
+  // THE GATE. All three conditions in `opts` are supplied by the caller
+  // (`describeAction`, which reads the transcript ONCE via `readClientContext`
+  // and threads the result here — this function stays a pure classifier of its
+  // arguments, exactly as it was before this change; the file I/O lives outside it).
+  if (o.clientVersion !== PINNED_CLIENT_VERSION || o.clientEntrypoint !== PINNED_CLIENT_ENTRYPOINT) {
+    return "unknown";
+  }
+  return o.agentIdPresent ? "subagent" : "live_agent";
 }
 
 /**
@@ -222,7 +362,7 @@ export function classifyCaller(transcriptPath) {
  * marks it a hold, and with every signal array empty it classified as a FALSE
  * POSITIVE — a non-examination manufactured into the rate's numerator.
  */
-export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIso, regime, denied, callerClass }) {
+export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIso, regime, denied, callerClass, clientVersion, clientEntrypoint }) {
   const assessment = guard && typeof guard === "object" && guard.assessment && typeof guard.assessment === "object"
     ? guard.assessment
     : null;
@@ -232,11 +372,19 @@ export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIs
       : {};
   const signals = kathekonSignalsFromVerdict(assessment);
   return {
-    // v5 (RULING 3, 2026-09-07): + callerClass. The boundary is DATED and RECORDED;
-    // v4 guard records predate it, carry no caller class, and are NEVER
-    // retro-classified (mentor ruling 2026-09-07: "post-boundary only is ruled";
-    // a retroactive actionPreview pass "is not owed").
-    schema: "false-hold-record-v5",
+    // v6 (mentor ruling, 2026-09-10 — the S11/Condition-3 five-question ruling's
+    // ANSWER): `callerClass` widens from two values to three
+    // (subagent/live_agent/unknown) and two new top-level fields
+    // (clientVersion/clientEntrypoint) are added, per the ruling's Condition-3
+    // requirement that the disclosure name the client build a classification
+    // rests on. v5 records predate this boundary, carry NO clientVersion/
+    // clientEntrypoint, and their `callerClass` is restricted to
+    // subagent/unknown (never live_agent — that value did not exist under the
+    // v5 boundary's rules, so a v5 record carrying it would be malformed, not
+    // legacy). v5 records are NEVER retro-classified — the same discipline the
+    // v4→v5 boundary established (mentor ruling 2026-09-07: "post-boundary only
+    // is ruled"; a retroactive pass "is not owed").
+    schema: "false-hold-record-v6",
     // The population marker. The consult and guard denominators are NOT
     // commensurable (a consult hold is an advisory opening a correction loop; a
     // guard hold is an enforced deny), so the report must be able to split them.
@@ -274,13 +422,32 @@ export function buildGuardHoldRecord({ guard, sessionId, tool, actionText, nowIs
     guardHold: denied === true,
     guardOutcome: typeof guard?.recommendation === "string" ? guard.recommendation : null,
     captureBasis: assessment && typeof signals.proximity === "string" ? "assessment" : "no_assessment",
-    // RULING 3 (2026-09-07). TOP-LEVEL for the same load-bearing reason as every
-    // field above: `recordHash` hashes JSON.stringify(r.signals), so a field added
-    // INSIDE `signals` would re-hash every existing v1/v2/v3/v4 record and break
-    // ingest idempotency against the frozen buffer. NORMALISED HERE rather than
-    // trusted from the caller, so an absent or malformed value degrades to the
-    // honest "unknown" and never to a false positive.
-    callerClass: callerClass === "subagent" ? "subagent" : "unknown",
+    // TOP-LEVEL for the same load-bearing reason as every field above:
+    // `recordHash` hashes JSON.stringify(r.signals), so a field added INSIDE
+    // `signals` would re-hash every existing v1/v2/v3/v4/v5 record and break
+    // ingest idempotency against the frozen buffer.
+    //
+    // callerClass — RULING 3 (2026-09-07), WIDENED by the 2026-09-10 ruling.
+    // NORMALISED HERE rather than trusted from the caller, so an absent or
+    // malformed value degrades to the honest "unknown" and never to a false
+    // positive in EITHER direction — a garbage string can only ever LOSE a
+    // classification, never manufacture "subagent" or "live_agent" out of
+    // nothing. This mirrors the pre-existing discipline for "subagent" exactly;
+    // "live_agent" is held to the identical standard.
+    callerClass:
+      callerClass === "subagent" || callerClass === "live_agent" ? callerClass : "unknown",
+    // clientVersion/clientEntrypoint — CONDITION 3's own disclosure requirement:
+    // "note the client version… at which agent_id was first observed." Read
+    // ONCE by the caller (`describeAction`, via `readClientContext`) and
+    // threaded here rather than re-read, so a single hook firing never touches
+    // the transcript file twice for the same purpose. Normalised to
+    // string-or-null so a read failure degrades honestly rather than throwing
+    // or fabricating a value; `null` here means "could not be determined", the
+    // same reason `callerClass` would independently read "unknown" for that
+    // record (the two fields are expected to co-vary, and a future audit can
+    // check that they do).
+    clientVersion: typeof clientVersion === "string" ? clientVersion : null,
+    clientEntrypoint: typeof clientEntrypoint === "string" ? clientEntrypoint : null,
   };
 }
 

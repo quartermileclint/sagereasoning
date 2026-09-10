@@ -695,6 +695,102 @@ console.log('\n§12 — ruling 2 (outage exclusion) + ruling 3 (caller class, v5
 }
 
 // ============================================================================
+console.log('\n§12b — S11/CONDITION 3 (mentor ruling, 2026-09-10): v6 validity + the widened vocabulary')
+// ============================================================================
+{
+  const V6_LIVE_AGENT = {
+    ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v6', session: 'sess-12b-live',
+    capturedAt: '2026-09-10T10:00:00.000Z', callerClass: 'live_agent',
+    clientVersion: '2.1.260', clientEntrypoint: 'claude-desktop',
+  }
+  const V6_UNKNOWN = {
+    ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v6', session: 'sess-12b-unk',
+    capturedAt: '2026-09-10T10:01:00.000Z', callerClass: 'unknown',
+    clientVersion: null, clientEntrypoint: null,
+  }
+  // Locally scoped — §12's `V5_OK` lives inside that section's own block and is
+  // out of scope here (caught by actually running this file, not assumed).
+  const V5_OK_LOCAL = {
+    ...GUARD_CORRECT_DENY, schema: 'false-hold-record-v5', session: 'sess-12b-v5',
+    capturedAt: '2026-09-10T10:02:00.000Z', callerClass: 'unknown',
+  }
+
+  check('§12b.1 a well-formed v6 record with callerClass:live_agent is ACCEPTED',
+    /parsed:\s+1 valid records/.test(runReport([V6_LIVE_AGENT], 'r3b-ok').out),
+    runReport([V6_LIVE_AGENT], 'r3b-ok').out.slice(0, 1200))
+  check('§12b.2 a well-formed v6 record with callerClass:unknown is ALSO accepted',
+    /parsed:\s+1 valid records/.test(runReport([V6_UNKNOWN], 'r3b-ok2').out))
+  check('§12b.3 a v6 record with callerClass:subagent is accepted (all three values valid at v6)',
+    /parsed:\s+1 valid records/.test(runReport([{ ...V6_LIVE_AGENT, callerClass: 'subagent' }], 'r3b-sub').out))
+
+  // §12b.4 — THE HEADLINE PROTECTION THIS SECTION EXISTS FOR: a v5 record carrying
+  // 'live_agent' must be REJECTED, not silently treated as a valid legacy record.
+  // That value did not exist under the v5 boundary's own rules — its presence on a
+  // v5 record means corruption or a version-stamping bug, not a legitimate record,
+  // and admitting it would let a malformed record slip into the rate's numerator.
+  {
+    const badV5 = { ...V5_OK_LOCAL, callerClass: 'live_agent' }
+    const { out } = runReport([badV5], 'r3b-badv5')
+    check("§12b.4 a v5 record carrying 'live_agent' is INVALID — the vocabularies are NOT shared",
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+  // §12b.5 — the converse: an UNRECOGNISED value on a v6 record is still rejected,
+  // exactly like v5 — the widening adds a value, it does not loosen the check.
+  {
+    const bad = { ...V6_LIVE_AGENT, callerClass: 'parent' }
+    const { out } = runReport([bad], 'r3b-badvalue')
+    check('§12b.5 a v6 record with an unrecognised callerClass is still INVALID',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+  // §12b.6 — a v6 record with NO callerClass at all is invalid, same discipline as v5.
+  {
+    const missing: Record<string, unknown> = { ...V6_LIVE_AGENT }
+    delete missing.callerClass
+    const { out } = runReport([missing], 'r3b-nocaller')
+    check('§12b.6 a v6 record with NO callerClass is INVALID',
+      /parsed:\s+0 valid records/.test(out), out.slice(0, 1200))
+  }
+  // §12b.7 — a live_agent record is NOT counted as review-fleet (the exclusion is
+  // keyed on 'subagent' specifically; a bug that widened the exclusion filter to
+  // match live_agent too would silently shrink the included population).
+  {
+    const { out } = runReport([V6_LIVE_AGENT], 'r3b-notfleet')
+    const guard = popSection(out, 'guard')
+    check("§12b.7 a callerClass:live_agent record is NOT counted as review-fleet",
+      /review-fleet records excluded: 0\b/.test(guard), guard)
+  }
+  // §12b.8 — mixed v5+v6 buffer: both generations coexist in one report run without
+  // one schema's presence breaking the other's validity or counts.
+  {
+    const { out } = runReport([V5_OK_LOCAL, V6_LIVE_AGENT, V6_UNKNOWN], 'r3b-mixed')
+    check('§12b.8 a mixed v5+v6 buffer parses ALL THREE records',
+      /parsed:\s+3 valid records/.test(out), out.slice(0, 1200))
+  }
+
+  // §12b.9 — the NEW additive disclosure block. A buffer with ZERO v6 records
+  // (today's real buffer) must print the honest "0 records so far" branch, never
+  // a fabricated split.
+  {
+    const { out } = runReport([V5_OK_LOCAL], 'r3b-disclosure-zero')
+    const guard = popSection(out, 'guard')
+    check('§12b.9 zero v6 records ⇒ the honest "0 records so far" line, not a fabricated split',
+      /SEGMENT 1v6.*0 records so far/.test(guard), guard)
+  }
+  // §12b.10 — a real v6 buffer with both live_agent and unknown present must
+  // report BOTH counts correctly, and the pinned client pair by name.
+  {
+    const { out } = runReport([V6_LIVE_AGENT, V6_UNKNOWN], 'r3b-disclosure-split')
+    const guard = popSection(out, 'guard')
+    check('§12b.10a the live_agent count is reported',
+      /live_agent \(INCLUDED[\s\S]*?:\s*1\b/.test(guard), guard)
+    check('§12b.10b the unknown count is reported separately',
+      /unknown \(INCLUDED[\s\S]*?:\s*1\b/.test(guard), guard)
+    check('§12b.10c the pinned client pair is named',
+      /version 2\.1\.260/.test(guard) && /entrypoint claude-desktop/.test(guard), guard)
+  }
+}
+
+// ============================================================================
 console.log('\n§13 — PR19 fold: ruling 3\u2019s exclusion must reach the RATE, not only a disclosure string')
 // ============================================================================
 {

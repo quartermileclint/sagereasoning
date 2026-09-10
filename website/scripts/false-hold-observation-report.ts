@@ -148,15 +148,34 @@ interface FalseHoldRecord {
    *  denominator since 2026-09-07 (ruling 2). Before that date it was excluded only
    *  from Part 3b. */
   captureBasis?: string
-  /** RULING 3 (2026-09-07) — present on v5 guard records ONLY; `undefined` on every
+  /** RULING 3 (2026-09-07), WIDENED by the mentor's 2026-09-10 ruling on
+   *  S11/Condition 3 — present on v5 AND v6 guard records; `undefined` on every
    *  pre-boundary v4 record and on every consult record.
    *  'subagent' is a POSITIVE structural observation (a `/subagents/` transcript-path
-   *  segment). 'unknown' covers everything else INCLUDING a session-shaped path,
-   *  because a session-shaped path cannot distinguish "the live agent acted" from
-   *  "the wire hands a subagent the parent's path". So an exclusion keyed on
-   *  'subagent' is a LOWER BOUND on review-fleet contamination, never a measurement
-   *  of it, and `undefined` means "captured before the boundary", never "clean". */
+   *  segment, OR — v6 only — a version+entrypoint-gated `agent_id` presence read,
+   *  Option C′). 'live_agent' (v6 ONLY — a v5 record carrying this value would be
+   *  malformed, not legacy: the value did not exist under the v5 boundary's rules)
+   *  is a POSITIVE observation too, licensed by Condition 1's closed negative result
+   *  (a top-level session's H3 stdin never carries `agent_id`) — NOT the guess ruling
+   *  3 originally refused, because the two-world ambiguity that refusal protected
+   *  against is now closed. 'unknown' covers a genuine gate failure (client moved,
+   *  entrypoint untested, transcript unreadable) OR — on v5 records only — the
+   *  pre-Option-C′ state where no mechanism existed at all; the two cases are NOT
+   *  distinguishable from `callerClass` alone, which is why `clientVersion`/
+   *  `clientEntrypoint` below exist. `undefined` means "captured before the v5
+   *  boundary", never "clean". */
   callerClass?: string
+  /** v6 ONLY (S11/Condition 3, mentor ruling 2026-09-10) — the client build this
+   *  record was captured under, string-or-null (`null` = could not be determined,
+   *  the same reason `callerClass` independently reads 'unknown' for that record).
+   *  Disclosed per the ruling's own Condition-3 requirement: "note the client
+   *  version… at which agent_id was first observed." Absent (not merely null) on
+   *  every v3/v4/v5 record, which predate the field's existence. */
+  clientVersion?: string | null
+  /** v6 ONLY, paired with `clientVersion` above — the entrypoint (`claude-desktop`,
+   *  or an as-yet-untested value) the record was captured under. Absent on every
+   *  earlier schema. */
+  clientEntrypoint?: string | null
 }
 
 /**
@@ -318,12 +337,18 @@ function recordHash(r: FalseHoldRecord): string {
 
 const LOOP_EVENTS = new Set(['opened', 'reopened', 'closed', 'none'])
 
-/** The GUARD-path schemas. v4 (P8a) and v5 (the 2026-09-07 caller-class boundary)
- *  are both guard records and share every structural requirement; only v5 carries
- *  `callerClass`. Defined once so a future guard schema cannot be admitted to one
- *  clause and missed by another. */
+/** The GUARD-path schemas. v4 (P8a), v5 (the 2026-09-07 caller-class boundary) and
+ *  v6 (the 2026-09-10 mentor ruling widening callerClass to three values + adding
+ *  clientVersion/clientEntrypoint) are all guard records and share every structural
+ *  requirement; v5/v6 carry `callerClass`, v6 additionally carries
+ *  clientVersion/clientEntrypoint. Defined once so a future guard schema cannot be
+ *  admitted to one clause and missed by another — the exact defect class a v6 bump
+ *  would otherwise risk (this list, the schema whitelist below, and the
+ *  callerClass vocabulary check must ALL widen together, or a v6 record with
+ *  callerClass:'live_agent' is silently INVALID and dropped from the population —
+ *  a data-loss failure dressed as a schema check). */
 const isGuardSchema = (schema: unknown): boolean =>
-  schema === 'false-hold-record-v4' || schema === 'false-hold-record-v5'
+  schema === 'false-hold-record-v4' || schema === 'false-hold-record-v5' || schema === 'false-hold-record-v6'
 function isValidRecord(x: unknown): x is FalseHoldRecord {
   const r = x as FalseHoldRecord
   return (
@@ -344,6 +369,10 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
       // NEVER retro-classified (mentor ruling 2026-09-07 — "post-boundary only is
       // ruled"; a retroactive actionPreview pass "is not owed").
       r.schema === 'false-hold-record-v5' ||
+      // v6 (mentor ruling, 2026-09-10 — S11/Condition 3's ANSWER): widens
+      // `callerClass` to three values and adds clientVersion/clientEntrypoint. v5
+      // records are NEVER retro-classified into v6 — same discipline as v4→v5.
+      r.schema === 'false-hold-record-v6' ||
       r.schema === 'false-hold-record-v3' ||
       r.schema === 'false-hold-record-v4') &&
     typeof r.capturedAt === 'string' &&
@@ -391,9 +420,20 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     // A v5 record without one is MALFORMED, not legacy — the whole point of the
     // boundary is that post-boundary records are classified at source, so a
     // missing or unrecognised value must not be admitted and silently treated as
-    // if it were a pre-boundary v4 record.
+    // if it were a pre-boundary v4 record. v5's vocabulary stays RESTRICTED to
+    // subagent/unknown — 'live_agent' did not exist under the v5 boundary's own
+    // rules, so a v5 record carrying it is malformed (a corrupted/hand-edited
+    // record, or a schema-version bug), never a legitimate legacy record; it must
+    // be REJECTED here, not silently upgraded to the v6 vocabulary.
     (r.schema !== 'false-hold-record-v5' ||
       r.callerClass === 'subagent' ||
+      r.callerClass === 'unknown') &&
+    // v6 (mentor ruling, 2026-09-10): the WIDENED vocabulary — a v6 record MUST
+    // carry ONE of the three recognised values. Mirrors the v5 clause exactly, so
+    // a future v7 boundary cannot be added to one clause and missed in the other.
+    (r.schema !== 'false-hold-record-v6' ||
+      r.callerClass === 'subagent' ||
+      r.callerClass === 'live_agent' ||
       r.callerClass === 'unknown')
   )
 }
@@ -922,6 +962,16 @@ function reportRecommendationColumn(rows: Classified[]): void {
       const reviewFleet = derivableAll.filter((r) => r.callerClass === 'subagent')
       const preBoundary = derivableAll.filter((r) => r.callerClass === undefined)
       const postBoundary = derivableAll.filter((r) => r.callerClass !== undefined)
+      // S11/CONDITION 3 (mentor ruling, 2026-09-10) — POST-BOUNDARY splits further
+      // into a PRE-Option-C′ generation (v5: every callerClass reads 'unknown' by
+      // construction, no mechanism existed) and a POST-Option-C′ generation (v6:
+      // 'unknown' can now mean either "no mechanism" — impossible at v6, since the
+      // mechanism always runs — or "gate failed" — client moved, entrypoint
+      // untested, transcript unreadable). The two 'unknown' populations are NOT the
+      // same claim and must not be summed without saying so.
+      const v6Records = postBoundary.filter((r) => r.schema === 'false-hold-record-v6')
+      const v6LiveAgent = v6Records.filter((r) => r.callerClass === 'live_agent')
+      const v6StillUnknown = v6Records.filter((r) => r.callerClass === 'unknown')
       console.log('    ── three-segment disclosure (ruled 2026-09-07) ──')
       console.log(`    SEGMENT 1 — post-boundary (carry callerClass): ${postBoundary.length}`)
       // AMENDED 2026-09-07 by the OPTION D ruling, which supersedes the segment-1
@@ -953,6 +1003,32 @@ function reportRecommendationColumn(rows: Classified[]): void {
       console.log('      ground truth, and a spawn-depth marker was MEASURED to misflag a')
       console.log('      genuine live-agent action, the direction ruled invisibly')
       console.log('      destructive.')
+      console.log('      THE PARAGRAPH ABOVE DESCRIBES v5 RECORDS SPECIFICALLY (the pre-')
+      console.log('      Option-C′ generation, where the mechanism above is not yet built —')
+      console.log("      every v5 record reads 'unknown' by construction, not by gate")
+      console.log('      failure). It is scoped to that generation, not to the whole')
+      console.log('      post-boundary population — see the v6 block immediately below,')
+      console.log('      which reports what actually happens once the mechanism runs.')
+      if (v6Records.length > 0) {
+        console.log(`    SEGMENT 1v6 — post-Option-C′ (S11/Condition 3, mentor ruling 2026-09-10): ${v6Records.length}`)
+        console.log(`      live_agent (INCLUDED in the rate — licensed by Condition 1's closed`)
+        console.log(`      negative result): ${v6LiveAgent.length}`)
+        console.log(`      unknown (INCLUDED in the rate, disclosed residual — gate failed:`)
+        console.log(`      client moved / entrypoint untested / transcript unreadable, OR the`)
+        console.log(`      agent_id-presence signal itself was indeterminate): ${v6StillUnknown.length}`)
+        console.log('      subagent (EXCLUDED, counted above in the shared review-fleet total)')
+        console.log(`      is the remainder of these ${v6Records.length}.`)
+        console.log('      Pinned client build for this generation: version 2.1.260,')
+        console.log('      entrypoint claude-desktop (S11/Condition 1+2). A record whose')
+        console.log('      clientVersion/clientEntrypoint differ from that pair, or read null,')
+        console.log("      classified 'unknown' by the gate — never a guess in either")
+        console.log('      direction.')
+      } else {
+        console.log('    SEGMENT 1v6 — post-Option-C′ (S11/Condition 3): 0 records so far.')
+        console.log('      No record in this buffer was captured under the widened mechanism')
+        console.log('      yet; this line will populate once the harness runs again with the')
+        console.log('      built classifier live.')
+      }
       console.log(`    SEGMENT 2 — pre-boundary (no callerClass field): ${preBoundary.length}`)
       console.log('      Composition UNKNOWN. NO rate is computed over these, by ruling.')
       console.log('      Reason for the absence, stated explicitly: they were captured before')

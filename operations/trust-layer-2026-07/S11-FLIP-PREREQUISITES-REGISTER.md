@@ -133,3 +133,62 @@ The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v
 *Append entries with a date + the binding source. If an item is discharged, mark it and say where — do not delete it; the point of this file is that nothing here gets rediscovered from scratch.*
 
 - **2026-09-09 (S11 — Condition 2 of the five-question ruling's three-condition Option C′ gate; `D-S11-CONDITION-2-REPRODUCTION-PASSES-2026-09-09`; evidence: `2026-09-09-condition-2-reproduction-CAPTURE-EVIDENCE.md`)** — **CONDITION 2 PASSES on a genuinely different calendar day (2026-09-09 under both AEST and UTC), a different session, same client 2.1.260. `classifyCaller` is byte-unchanged; nothing built or activated.** STEP 0's date gate ran first and passed by inspection (both `date` and `date -u` return 09-09); the S9-elevated two-step `GATE1_DEBUG` pre-check ran clean (no stale dump; a fresh control probe wrote none) — confirming the variable was **inert at session open**, a boundary S9 could not observe. A founder-elected `GATE1_DEBUG` capture (AI-performed, sequential, config-only, byte-verified by both a whole-file SHA and a per-key SHA of the `env` block before/after — all 11 pre-existing values unchanged, one key added) took two sentinel-verified `tool_name:"Bash"` H3 captures: top-level control (`agent_id`/`agent_type` **absent**, keys absent not empty) and agent-issued (`agent_id`/`agent_type` **present**, `Explore`) — the finding reproduces exactly as at S8/S9. **A stronger-than-required corroboration was found: the parent's own `PostToolUse` dump for the `Agent` tool call reports `tool_response.agentId` byte-matching the child's H3 `agent_id`** — the subagent could not self-report its id (asked, answered "not known to me"), so the harness's own spawn report substituted and agreed. **The client-version condition is satisfied but by a different route than the prompt assumed:** `version`/`entrypoint` are **absent from the H3/H4 hook payload itself** (both captures' full key lists confirm it) — S9's evidence-file header describing them as read "off the hook payload" was imprecise; they were verified instead by scanning this session's own transcript JSONL, where 88 lines carry `version:"2.1.260"`/`entrypoint:"claude-desktop"`, single-valued throughout. Named as a genuine input to Condition 3 (a runtime version read would need `transcript_path`, which IS on the payload, plus a file read and parse — a materially different design from reading a field already in hand), not a licence to start it. **The revert-lag reproduced and is now bounded, not merely repeated:** the config was restored and SHA-verified byte-identical to the pre-session backup, `GATE1_DEBUG` absent by grep — and a fresh post-revert sentinel probe still produced a dump, exactly as at S9. New this session: because the *pre-check at open* (fresh session, key absent from file) found the variable genuinely inert, while the *within-session* revert did not, the residual is now bounded to **not surviving a session boundary** — offered as a hypothesis consistent with two sessions' observations (env applied into a running process cannot be retracted by a file edit; a new session rebuilds its environment from the file), explicitly not proven, and not further tested (out of this session's scope). **Window health re-derived at close, with one method correction to the log-anchor discipline itself:** the anchor the prompt specifies (the log line, not the buffer's `capturedAt`, because the same event double-stamps) turned out to be the took-effect probe's own log line — anchoring inclusively there double-counts an event whose buffer record (#139) is excluded by rule; the correct anchor is the line immediately after it, found by 1:1 pairing every window `GUARD-*` log line to a buffer record, which left exactly one log line unmatched (the anchor itself). At the corrected anchor, log and buffer agree exactly in both families (`GUARD-*` 203=203, `CONSULT` exact-token 27=27). **This session contributed ZERO records to the window** (verified by the buffer's own `session` field) — it authored entirely via Bash heredocs (including its own evidence file), which the log confirms logs `AT-ACTION-SKIP-BASH` and enters neither the consult nor the guard floor; the starkest instance yet of the ruled instrument-composition dependency. Baseline composition now carries one `website/src` engineering consult (up from S9's zero) alongside 19 operations-doc + 3 other-md + 4 scratchpad. **One discrepancy flagged, not resolved:** the buffer yields four distinct UTC days present, all four with ≥1 consult, against the prompt's carried "2 of 5" — reported as a derivation mismatch rather than reconciled by assumption. PR19 ran (dropped to sonnet/low for the review per founder standing permission, returned to opus/medium after) across the three S9-precedent dimensions; no defect found in the arithmetic this time (both the anchor correction and the zero-contribution finding were caught first-hand before review, not by it). **Condition 3 (client-version pinning with fallback) remains OUTSTANDING, sharpened by §4's correction above. `classifyCaller` byte-unchanged; nothing built. The flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+
+- **2026-09-10 (S11/Condition 3 — client-version-pinning DESIGN executed;
+  `D-CONDITION-3-VERSION-PIN-DESIGN-2026-09-10`)** — the third and final condition of the 2026-09-07
+  five-question ruling was designed, not built: `classifyCaller.ts` and every `GUARD_RE`-matched path
+  remain byte-unchanged, verified at open and close. The obvious implementation (read `version` off
+  the head of the session transcript) was tested against real data and found wrong: a scan of 400
+  transcripts on this machine found 17 (4.25%) carry more than one `version` value, including two
+  straddling exactly the pinned boundary `2.1.258 → 2.1.260` — a head-read would report the
+  session-start version while the live client had moved on, reproducing the silent-misclassification
+  failure Option D exists to prevent. **The design specifies a tail-read instead** (scan backward from
+  end-of-file for the nearest `version`+`entrypoint`-bearing transcript line, since neither field rides
+  the hook payload itself — confirmed by key-list inspection of existing dumps, no new capture taken),
+  gated on version AND entrypoint AND field-presence, all three AND-ed, falling back to `unknown` on
+  any single failure. Widens ruling 3's deliberate two-value vocabulary to three (`subagent`/
+  `live_agent`/`unknown`), argued as licensed by Condition 1's closed negative result and explicitly
+  named as reversible if that finding is ever overturned. Configuration 5 (the untested second
+  entrypoint) is argued — not assumed — safe-by-construction ONLY once `entrypoint` is pinned alongside
+  `version`; a version-only gate would let an untested-but-same-version CLI pass with its `agent_id`
+  wire behaviour entirely unverified, which the design's own failure-mode table names as the one
+  genuinely dangerous case. Two build-traps in the existing report code were surfaced by reading it,
+  not assumed: `recordHash` doesn't hash `schema` (a v6 bump is hash-safe if new fields stay top-level,
+  mirroring the v4→v5 precedent) but the report's validator hard-codes `callerClass ∈
+  {'subagent','unknown'}` for v5 — an unextended validator would silently DROP every future
+  `live_agent` record from the population, a data-loss failure dressed as a schema check; both must be
+  fixed in the same commit as any build. **Adversarial self-review (model dropped to Sonnet 5 per
+  founder standing permission for this step) found and folded a real overclaim before this record was
+  written**: the design's first draft claimed the proposed 64 KB tail-scan window was "comfortably
+  larger" than worst-case inter-version-line spacing; direct measurement of this session's own
+  transcript found a single 1,142,339-byte line (17x the window) — the claim was retracted and
+  replaced with the actual finding (the giant line itself happens to carry `version`, so the scan
+  still succeeds in practice; correctness is unaffected either way since the fallback covers a failed
+  scan by construction, but the claimed margin was false as stated). **Baseline days re-derived a
+  second consecutive session at 4 of 4** (reconciling the still-carried "2 of 5" discrepancy in the
+  same direction as S11/Condition 2); per-day guard/consult counts and gate1.log 1:1 pairing (incl. the
+  probe-partner correction the immediately-prior session first identified) both reproduced exactly.
+  This session contributed ZERO records to the buffer (no Edit/Write tool call; every write went
+  through Bash heredocs), the starkest instance yet of the ruled instrument-composition dependency.
+  The stale CLAUDE.md `GATE1_DEBUG` claim (already twice-deferred) was corrected precisely — the true
+  state is a three-leg sequence (inert at S11/Condition-2's own open → live again after that session's
+  in-session revert → inert throughout this entire session) — rather than restated a third time.
+  **Nothing built, nothing licensed. A relay asking whether Conditions 1–3 jointly discharge the gate,
+  and which of the two named judgement calls (the `live_agent` value; the entrypoint pin) the
+  mentor/founder prefers, is outstanding: `2026-09-10-condition-3-gate-discharge-RELAY.md`. The flip
+  remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-10 (same session, post-mentor-ruling — `D-S11-CONDITION3-CLASSIFYCALLER-BUILT-2026-09-10`)**
+  — the mentor ruled the three-condition gate DISCHARGED and licensed the build in the same session
+  the design above was authored. Built: `classifyCaller` (three-value gate — version+entrypoint+
+  agent_id-presence, all AND-ed, `unknown` on any failure), schema bump to `false-hold-record-v6`,
+  and the report's validator/vocabulary/disclosure extended to admit it without dropping records.
+  A genuine test-authoring bug (a field-name mismatch that made two of three new end-to-end pins
+  pass for the wrong reason) was found and fixed before commit, not after. Harness batteries 67+256+
+  173+24+70 = 590 assertions green; report battery 117/0; `tsc` clean. The `/logos` live byte-identity
+  guard was observed going RED while the tree was dirty (confirming it is a working-tree check, not a
+  permanent freeze) and is expected GREEN again once this commits. SHA pins on `layer2-mechanisms.ts`
+  and `stoic-brain.ts` re-verified clean vs HEAD, unchanged. **`classifyCaller` is no longer inert —
+  Option C′ is live in the harness code as of this commit.** Full record:
+  `operations/handoffs/founder/2026-09-10-condition-3-version-pinning-design-CLOSE.md`.
