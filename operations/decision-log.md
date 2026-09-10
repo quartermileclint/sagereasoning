@@ -39282,3 +39282,217 @@ the relay document, per this arc's standing precedent of never assuming the gate
 path remain byte-identical to HEAD. PR19 applies with the mandatory fourth check (verified via
 `git diff --stat`, not merely asserted): confirmed clean. **The S11 flip remains REFUSED; weights
 remain BLOCKED; the 0h call remains the founder's.**
+
+## D-S11-CONDITION3-NULL-ANOMALY-DIAGNOSED-2026-09-10 — post-build verification, read-only
+
+**2026-09-10.** Session opened under `2026-09-10-post-condition3-build-verification-NEXT-SESSION-PROMPT.md`,
+the successor to the same-day Condition-3 design+build session. Read-only verification and diagnosis;
+nothing built, nothing activated, nothing edited in any `GUARD_RE`-matched file (confirmed via
+`git status` — the working tree's dirty/untracked entries are all concurrent cognitive-os-arc or
+prior-session files, none matching the guard pattern).
+
+**§4a — the null/null anomaly, diagnosed with direct evidence.** The build session's close document
+left one genuine open question: why the two earliest `false-hold-record-v6` captures (both on session
+`f4a10611-40cd-45b9-989f-293a2df009fd`, at 2026-09-09T19:27:17Z and 19:28:21Z) read `callerClass:
+unknown`, `clientVersion: null`, `clientEntrypoint: null`, against a disclosed-but-untested hypothesis
+that a hook firing on that session read a transiently inconsistent intermediate state of
+`false-hold-capture.mjs` while the build session was mid-edit. This session re-derived, first-hand:
+(1) the `f4a10611…` transcript file genuinely carries `version:"2.1.260"`/`entrypoint:"claude-desktop"`
+on the line closest to each anomalous timestamp — line 624 at 19:27:17.289Z, essentially the same
+instant as the 19:27:17.253Z capture — ruling out "the transcript genuinely had nothing to find"; (2)
+the build session's own Bash-tool command timestamps place `false-hold-capture.mjs`'s sequential
+`sed`/heredoc rewrite between 19:25:00Z and 19:29:27Z, with the first passing `node --check` only at
+19:29:54Z — both anomalous captures fall inside that window, each landing between two consecutive edit
+commands. **The edit-window hypothesis is corroborated by direct timestamp correlation, not proven by
+reconstructing the exact intermediate file state read** — reported at that honest confidence level, per
+the prompt's own instruction not to force a conclusion the evidence doesn't support. A fourth
+correct-classification firing (a sixth v6 record, `live_agent`/`2.1.260`/`claude-desktop`, captured
+2026-09-10T06:16:26Z on the build session's own id) is consistent with the anomaly being a one-time
+build-timing artifact rather than a standing defect, though this session does not claim that as proven
+either.
+
+**§4b — window health, re-derived.** Buffer: 423 lines, 0 unparseable. Schema distribution (full
+buffer): v1=138, v3=47, v4=97, v5=135, v6=6. Window (post-probe, index 139 onward) = 284 records: 47
+consult (v3/no-`path`) + 237 guard (v4/v5/v6, `path:guard`). Per-UTC-day: 09-06 = 3/76; 09-07 = 17/63;
+09-08 = 6/57; 09-09 = 18/40; 09-10 = 3/1 (partial day, just opened). **Baseline days (≥1 consult) = 5
+of 5** — a genuine change from the prior two sessions' independently-agreeing 4 of 4, since a new UTC
+day (2026-09-10) has entered the window. `gate1.log` cross-check: raw `CONSULT ` token counts per day
+reconcile closely with the buffer's consult counts on the four non-09-06 days (17=17, 6=6, 18=18,
+3=3); a naive per-day `GUARD-CAUTION` log-line count did **NOT** reconcile 1:1 against the buffer's
+per-day guard count this session (log counts ran higher on every day, most sharply 09-06 at 138 log
+lines vs 76 buffer records) — reported honestly as a non-match rather than forced into agreement or
+silently omitted; not investigated further this session (out of the bounded diagnostic scope of §4a),
+named for a future session. `/logos` byte-identity guard re-run live: 250 passed, 0 failed. SHA-256
+pins re-derived: `layer2-mechanisms.ts` = `60cefedb5f4f78822301b3f9c195813b63b00546431ecde08473b118bea52f73`,
+`stoic-brain.ts` = `fa8895ec949b9f6d2f95b9e941a423a095e9c66abe600a1e13fa1b84469b4928` — both unchanged
+from the build session's own close, clean vs HEAD.
+
+**§4c — the mentor relay.** Judged worth sending now rather than holding for a longer observation
+period: the build was already self-corroborating (two independent sessions, three matching live_agent
+records) before this session even opened, and the one open diagnostic question is now resolved with
+direct evidence rather than left standing. Sent: `operations/trust-layer-2026-07/2026-09-10-post-build-outcome-RELAY.md`.
+
+**§4d.** The observation window's standing obligations are unchanged — no buffer refresh, no manufactured
+traffic, no `GATE1_DEBUG` act performed this session.
+
+**Records:** the S11 register row appended (not edited in place); this entry; a close document
+(`operations/handoffs/founder/2026-09-10-post-condition3-build-verification-CLOSE.md`). PR19 applies
+at the lighter verification-only bar (per the prompt's own allowance for a genuinely read-only
+session): confirmed via `git status`/`git diff --stat` that nothing was built or edited outside the
+two new documents + the register/decision-log appends; the one substantive claim (the edit-window
+correlation) rests on directly-read timestamps, not inference from this file's own prior prose.
+
+**The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## D-S11-CONDITION3-MENTOR-ACKNOWLEDGED-2026-09-10 — relay acknowledged, verbatim recorded
+
+**2026-09-10, same session.** The mentor's response to the build-outcome relay was received and
+recorded verbatim at `operations/trust-layer-2026-07/2026-09-10-post-build-outcome-mentor-response-verbatim.md`.
+Acknowledged in full: the edit-window anomaly is named the report's most important finding — fail-closed
+behaviour (`unknown` degradation) demonstrated under a real, unanticipated runtime condition (a hook
+reading a mid-rewrite intermediate file state) rather than a constructed test; the baseline is
+confirmed complete in the counting sense (5 of 5); the report's precision in not proposing a next step
+is affirmed as correct. **One figure in the mentor's response is carried forward without independent
+verification, named honestly rather than silently absorbed:** "51 guard records, 1 consult record, a
+full build session" attributed to the Cognitive OS session — this session's own window re-derivation
+did not isolate per-session counts and did not check this figure; a future session should re-derive it
+rather than quote it. No code, schema, flag, or credential touched. **The S11 flip remains REFUSED.
+Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## D-GUARD-LOG-BUFFER-RECONCILED-TRAPS-RECORDED-2026-09-10 — the carried GUARD-CAUTION non-reconciliation is CLOSED; two new counting traps recorded
+
+**Thu Sep 10 17:06:10 AEST 2026** (from `date`). Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4`. Read-only diagnostic
+analysis; **AC7 not engaged**; no code, schema, flag, credential, migration or production surface
+touched; no `GUARD_RE` file modified; the buffer was not refreshed, truncated or written to.
+
+**What was open.** The GUARD-CAUTION log-vs-buffer per-day non-reconciliation, named as an open item
+by `2026-09-10-post-condition3-build-verification-CLOSE.md` §4b and carried forward unaddressed by the
+mentor's own response (*"is not addressed in this response and remains open"*).
+
+**Closed.** The guard **population count** reconciles exactly: as of 2026-09-10T07:06:10Z, **258 window guard log
+lines = 258 window guard buffer records**, zero sessions with a count mismatch (per-session ordered
+pairing), zero strict token-to-outcome failures, max |Δt| 11 ms. **There was never a discrepancy in
+the data** — the apparent gap was three compounding measurement errors: (a) the log was not clipped to
+the window start, sweeping ~9.8 h of pre-window traffic into 09-06; (b) one token (`GUARD-CAUTION`)
+was compared against the buffer's whole guard family, which **deflates** every fully-in-window day —
+so the carried claim that log ran higher *on every day* is itself imprecise, since on 09-07/08/09 it
+runs **lower** (56 vs 63, 54 vs 57, 37 vs 40); (c) TRAP-1 below.
+
+**Two new traps, neither previously recorded.** **TRAP-1 — `GUARD-OUTAGE` log lines carry no `tool=`
+field** (`mode=`/`reason=` instead); any regex keyed on `tool=` drops them silently. Verified
+**universal** by an independent reviewer: 0 of 687 such lines in the whole log carry `tool=`, against
+100% of 1,676 CAUTION / 47 PROCEED / 18 BLOCK. This matters because outage records are excluded from
+the rate denominator **by ruling** and the outage rate is **reported separately** — the bug makes that
+separately-reported rate read **zero**, a silent false negative in an obligated disclosure. It is the
+mirror of the documented `CONSULT`/`CONSULT-OUTAGE` prefix trap: that one over-counts, this one
+under-counts. **TRAP-3 — "record N" in this project's records is 1-INDEXED.** CLAUDE.md's *"the buffer
+moved 138 → 139 and record 139 is the first `false-hold-record-v4`"* means 0-based index **138**;
+verified directly (0-based 138 is the first v4, `path:guard`, `captureBasis:assessment`, matching the
+probe's description; 0-based 137 is the last v1, two months earlier). **Two sessions have now read
+that sentence two different ways.**
+
+**Attribution, corrected by this session after PR19 had already passed.** The 1:1 pairing method was
+**established at the 2026-09-09 Condition-2 session**, whose own register row records an exact tie
+(`GUARD-*` 203=203, `CONSULT` 27=27). This session **reproduced** it across all five window days,
+diagnosed why the naive per-day method fails, and recorded the two traps — it did not invent the
+method. Neither reviewer was pointed at the register and neither caught this; it was found while
+reading the register in order to append to it.
+
+**PR19 — two blind reviewers (Sonnet, per the founder's standing permission for adversarial passes),
+both folded.** Reviewer A (method/arithmetic) **upheld a real defect**: this document's window anchor
+was off by one — TRAP-3 — silently dropping one genuine window record; verified first-hand before
+folding, not accepted on the reviewer's word; both anchors independently reproduce an exact tie, so
+the headline survived but the count was corrected (09-06: 75 → 76). It also stress-tested the pairing
+harder than the author had (strict per-position token check; the 11 sessions mixing both caution
+grades) — zero failures — and confirmed the 87 verbatim duplicate log lines are **all**
+`AT-ACTION-SKIP-BASH`, none in the guard family. Reviewer B (claims vs evidence) verified both
+quotations verbatim, re-derived the six counts behind cause (b), verified TRAP-1 as universal, and
+**re-ran the whole reconciliation at a later moment** getting 250=250 against the author's 243=243 —
+the method reproducing under buffer growth being stronger evidence than any single snapshot. One LOW
+folded: §1's verdict is now explicitly scoped to *population count* rather than skimmable as broader.
+
+**Author errors disclosed, because both are the same shape as the bug under investigation.** A greedy
+nearest-neighbour pairing produced a **false orphan** (apparent max |Δt| 33,339 s ≈ 9.3 h; truth
+11 ms), and an incomplete mapping table produced 24 phantom "token disagreements". Both were found
+only by reading raw log lines rather than trusting an aggregate. A third: this session's own
+diagnostic printed a line **labelled** `last v1 record (138)` whose **data** read
+`false-hold-record-v4`, and the contradiction was read past — that was the available tell for TRAP-3.
+
+**Records:** `operations/trust-layer-2026-07/2026-09-10-guard-log-buffer-RECONCILIATION.md`; this
+entry; a register row appended (not edited in place).
+
+**Does NOT close:** the false-hold rate; the consult-side bound; the guard-availability bound (F-3′,
+still unset); `Q-PREFLIP-REPORTS` (unbuilt, needs a founder waiver); the baseline day count; and the
+mentor's other carried item — the *"51 guard records, 1 consult record"* per-session figure, still
+**not re-derived by anyone**.
+
+**The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## D-MENTOR-RULING-GUARD-RECONCILIATION-THREE-QUESTIONS-ADOPTED-2026-09-10 — ruling adopted; the licensed retroactive check RUN and CLEAN; a figure in the ruling found off by one
+
+**Thu Sep 10 17:20:25 AEST 2026** (from `date`). Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4`. Read-only; **AC7 not
+engaged**; no code, schema, flag, credential, migration or production surface touched; no `GUARD_RE`
+file modified; buffer not written to. **Verbatim, canonical:**
+`operations/trust-layer-2026-07/2026-09-10-mentor-ruling-guard-reconciliation-three-questions-verbatim.md`.
+**Verbatim wins over this summary.**
+
+**ADOPTED IN FULL.**
+
+**Q1 — RULED, and it does NOT unblock D2.** *"'Ordinary' is doing independent work, and the ruling is
+that it matters. A day on which the measuring apparatus was functionally modified is not an ordinary
+day in the sense the baseline requires."* Counting completion (5 of 5) is a **necessary but not
+sufficient** condition for D2. **D2 REMAINS BLOCKED.** The pre-flip report must carry the
+instrument-change disclosure **explicitly, not as a footnote**: the schema distribution, the
+edit-window anomaly and its explanation, and the fact that **`live_agent` was not a possible emission
+for days 1 through most of day 4**. *"A reader of the false-hold rate must be able to see what the
+instrument was on each day it measured."* Whether that disclosure suffices for the flip is **the 0h
+call — the founder's**, and the ruling explicitly declines to pre-empt it.
+
+**Q2 — RULED: a retroactive check IS owed; the prior no-retroactive-pass ruling does NOT extend**
+(*"a false negative in an obligated disclosure is not the same as an absent signal"*). **The check was
+licensed by the ruling and RUN this session. It comes back CLEAN, and the reason is structural: no
+published figure is computed from `gate1.log` at all.** `false-hold-observation-report.ts` — the sole
+producer of published figures — never reads the log (its only mention is inside a `console.log`
+string that itself states the limitation); it reads exactly one file, the buffer, and derives outage
+exclusion from buffer fields. Every other file naming `gate1.log` is a **writer** (`appendFileSync`)
+or a comment. **No `tool=`-keyed parse exists anywhere in the codebase** — the sole `tool=` hit is a
+test assertion on a buffer record field. **TRAP-1 is therefore a trap for ad-hoc session analyses,
+including this session's own, not for the report pipeline. Obligation discharged with a negative
+finding.** One residual named at honest confidence: the 2026-09-09 register row's published
+cross-check (`GUARD-*` 203=203) came from an **uncommitted ad-hoc script that cannot be re-read**;
+its exactness is *evidence against* the bug (a `tool=`-keyed regex would have dropped the single
+in-window `GUARD-OUTAGE` record, yielding 202 vs 203, and that session reported exactly one unmatched
+**log line** and no unmatched buffer record) — an inference from the result, not verification of the
+method.
+
+**Q3 — RULED: the F-3′ claim is UPHELD, not an overreach.** The guard-side **denominator** is
+established; the **numerator (the rate) remains uncomputed and unclaimed**. *"A session should not be
+prohibited from establishing a component of an obligation because the full obligation is not yet
+discharged."*
+
+**A FIGURE IN THE RULING IS OFF BY ONE — surfaced, not corrected.** The ruling designates the schema
+distribution as required pre-flip content and states *"v3=47, v4=96, v5=135, v6=6"*. **`v4=96` is
+wrong; the correct figure at that buffer state is `v4=97`**, provable by arithmetic: the buffer is
+append-only, so its first 423 rows are that state — v1=138 · v3=47 · **v4=97** · v5=135 · v6=6 — and
+**sum to exactly 423**, where the ruling's set sums to **422**. Provenance traced: the 09-10
+verification session's **close (§4b) recorded 97** (correct); its **register row recorded 96**; the
+ruling adopted the register row. **Because the ruling designates these figures as required pre-flip
+content, the error would have propagated into the pre-flip report.** This is the **second** off-by-one
+this session found travelling a records chain (TRAP-3 was the first). Surfaced for the founder and
+mentor; **the verbatim ruling is not edited.** All four counts are in any case already stale (450
+lines at this writing) and must be re-derived when written.
+
+**Founder items, mentor-recommended (not this session's to act on).** **F-K resolved in
+recommendation:** do **not** extend the window for more days solely to produce v6 consult records —
+*"Extending the window to smooth the composition would be adjusting the measurement to look cleaner —
+the same error the project has ruled against in other contexts."* Tool-mode routing, if wanted, should
+be *"a deliberate founder-visible setting, not an auto-mode outcome."* **Opener regrounding: overdue,
+a founder act, before the next session opens** — three of its facts are false (baseline "2 of 5";
+`classifyCaller` byte-unchanged; `caller_class` measures null).
+
+**Owed and NOT done here:** the pre-flip report itself (`Q-PREFLIP-REPORTS`, unbuilt, needs a founder
+waiver — the ruling adds required content to it but does not license building it); the mentor's other
+carried item, the *"51 guard records, 1 consult record"* figure, **still not re-derived by anyone**.
+
+**D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

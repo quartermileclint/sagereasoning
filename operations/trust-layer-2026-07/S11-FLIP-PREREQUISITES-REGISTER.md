@@ -192,3 +192,35 @@ The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v
   and `stoic-brain.ts` re-verified clean vs HEAD, unchanged. **`classifyCaller` is no longer inert —
   Option C′ is live in the harness code as of this commit.** Full record:
   `operations/handoffs/founder/2026-09-10-condition-3-version-pinning-design-CLOSE.md`.
+
+- **2026-09-10 (post-build verification session — `D-S11-CONDITION3-NULL-ANOMALY-DIAGNOSED-2026-09-10`)**
+  — read-only verification, nothing built or changed. `classifyCaller`/`false-hold-capture.mjs`/the
+  report file untouched (confirmed via `git status`; none of the working tree's six dirty/untracked
+  entries match `GUARD_RE`). **The null/null anomaly the build session's close document disclosed as
+  unresolved is now diagnosed with direct evidence, not merely re-hypothesised:** the other session's
+  transcript (`f4a10611-40cd-45b9-989f-293a2df009fd`) genuinely carries `version`/`entrypoint` on the
+  transcript line closest to each anomalous capture timestamp (ruling out "nothing to find"); the build
+  session's own Bash-tool command timestamps place both anomalous captures (19:27:17Z, 19:28:21Z)
+  squarely inside the 19:25:00Z–19:29:27Z window during which `false-hold-capture.mjs` was being
+  rewritten via sequential `sed`/heredoc edits, with the first passing `node --check` only at
+  19:29:54Z. The edit-window hypothesis is corroborated by timestamp correlation, not confirmed by
+  reconstruction of the exact bytes read — reported at that honest confidence level. The mechanism has
+  since fired correctly a fourth time (a sixth v6 record, `live_agent`/`2.1.260`/`claude-desktop`,
+  captured 2026-09-10T06:16:26Z on the build session's own id), consistent with the null/null reads
+  being a one-time build-timing artifact rather than a standing defect. **Window re-derived: buffer 423
+  lines, 0 unparseable; window (post-probe) 284 records = 47 consult + 237 guard; schema v3=47/v4=96/
+  v5=135/v6=6; baseline days = 5 of 5** (a new UTC day, 2026-09-10, entered the window since the prior
+  session — reconciling forward from the two prior sessions' independently-agreeing 4 of 4). A naive
+  `GUARD-CAUTION`-log-line-count-per-day cross-check against the buffer's per-day guard count did NOT
+  reconcile 1:1 this session (log counts ran higher than buffer counts on most days, most sharply
+  09-06: 138 log lines vs 76 buffer records) — reported as an honest non-match rather than forced to
+  agree; CONSULT counts DID reconcile closely on the four non-09-06 days. This discrepancy is not
+  resolved here and is named for a future session rather than explained away. `/logos` byte-identity
+  guard green (250/0); SHA pins on `layer2-mechanisms.ts`/`stoic-brain.ts` unchanged, clean vs HEAD. A
+  relay reporting the build's live, corroborated outcome and the anomaly's diagnosis was sent to the
+  mentor this session (`2026-09-10-post-build-outcome-RELAY.md`) rather than held for a longer
+  observation period — judged sufficient given the build was already self-corroborating before this
+  session opened. **Nothing built, nothing activated. The flip remains REFUSED; weights remain
+  BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-10 (guard population reconciliation — `D-GUARD-LOG-BUFFER-RECONCILED-TRAPS-RECORDED-2026-09-10`; evidence: `operations/trust-layer-2026-07/2026-09-10-guard-log-buffer-RECONCILIATION.md`)** — **The carried GUARD-CAUTION log-vs-buffer non-reconciliation is CLOSED. The guard POPULATION COUNT reconciles exactly: 258 = 258 as of 2026-09-10T07:06:10Z, zero session mismatches, zero strict token failures, max |Δt| 11 ms.** Bears on the **F-3′ standing obligation** to *"report the guard population separately with its rate"*: the guard-side **denominator** is now verified against the log and therefore trustworthy. **The rate itself is NOT computed here and is not moved.** There was never a data discrepancy — three compounding measurement errors: the log not clipped to the window start (09-06 only, ~9.8 h of pre-window traffic); one token compared against the whole guard family (which **deflates** every fully-in-window day, making the carried *"log ran higher on every day"* imprecise — it runs **lower** on 09-07/08/09); and TRAP-1. **TWO NEW TRAPS, both bearing on the pre-flip report. TRAP-1: `GUARD-OUTAGE` log lines carry NO `tool=` field** — any regex keyed on it drops them silently (verified universal: 0 of 687 across the whole log). Because outage records are excluded from the rate denominator **by ruling** and the outage rate is **reported separately**, this bug makes that separately-reported rate read **zero** — a silent false negative in an obligated disclosure. **TRAP-3: "record N" in this project's records is 1-INDEXED** — CLAUDE.md's *"record 139 is the first v4"* is 0-based index **138**; the probe sits at 0-based 138 and the window is 0-based **139 onward**. Two sessions have now read that sentence two different ways; **this document's own first draft got it wrong** and was corrected by PR19. Also recorded: the log token is **lossier than the buffer** — `GUARD-CAUTION` covers both `pause_for_review` and `proceed_with_caution`, so caution **grade** is not recoverable from the log; the buffer is authoritative. **Attribution corrected by the author after PR19 passed:** the 1:1 pairing method was **established at the 2026-09-09 Condition-2 session** (its own row records `GUARD-*` 203=203, `CONSULT` 27=27); this session **reproduced** it across all five days, diagnosed the failure modes, and added the traps — it did not invent it. Neither reviewer was pointed at this register and neither caught the attribution gap. **PR19: two blind reviewers (Sonnet), both folded** — one upheld a real off-by-one in the window anchor (TRAP-3, verified first-hand before folding; both anchors independently tie, so the headline held and the count was corrected 75 → 76 on 09-06); one re-ran the reconciliation at a later moment and got 250=250 against the author's 243=243, the method reproducing under buffer growth. **Nothing built, nothing activated, no `GUARD_RE` file modified, buffer not refreshed. Baseline day count untouched. The flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
