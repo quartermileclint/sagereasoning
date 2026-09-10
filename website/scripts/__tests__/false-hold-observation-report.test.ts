@@ -391,8 +391,14 @@ console.log('\n§8 — the structural zero: no target verdict is computed (HIGH 
   const p3b = out.slice(out.indexOf('── Part 3b —'))
   check('§8.1 Part 3b computes NO "target (false ≤ correct)" verdict of its own',
     p3b.length > 500 && !/target \(false ≤ correct\):/.test(p3b), p3b.slice(0, 2500))
-  check('§8.1b the classification column DOES still print its own target (the deferral target exists)',
-    /mentor's target \(false ≤ correct\):/.test(out), out)
+  // PR19-adjacent fold (2026-09-11): the pooled classification column no
+  // longer prints its own inline "mentor's target" verdict line at all — per
+  // the 2026-09-11 mentor ruling, the pooled figure is a disclosure only and
+  // the operative target now lives exclusively in the regime-scoped
+  // "OPERATIVE READING FOR PART (3)" block further down Part 3. The deferral
+  // target this test checks for still exists; it just moved.
+  check('§8.1b the operative target IS computed somewhere in Part 3 (moved to the regime-scoped block, per the 2026-09-11 ruling)',
+    /OPERATIVE READING FOR PART \(3\)/.test(out), out)
   check('§8.2 the structural zero is stated in terms', /zero BY CONSTRUCTION, not by measurement/.test(out), out)
   check('§8.3 the false cell is marked as structurally zero at the figure', /kathekon-free {2}\(FALSE hold\): {3}0 {3}← STRUCTURALLY ZERO/.test(out), out)
   check('§8.4 the precedent is cited so a reader can check it', /RA-1-F2/.test(out) && /D6a/.test(out), out)
@@ -981,6 +987,53 @@ console.log('\n§16 — classifyActionClass: the G6A heuristic, direct unit chec
   const { out: outGov } = runReport([manifestEdit, claudeMdEdit, adrEdit], 'g6a-governing-docs')
   check('§16.4 manifest.md/CLAUDE.md/an ADR all classify product-or-governing-document (not unclassified)',
     /opened\/reopened: protocol-required=0\s+product-or-governing-document=3\s+unclassified=0\s+\(total 3\)/.test(outGov), outGov)
+}
+
+// ============================================================================
+console.log('\n§17 — the regime-scoped readiness fix (2026-09-11 mentor ruling)')
+// ============================================================================
+{
+  // A legacy record (no extractionRegime ⇒ the pre-mark fallback) that reads
+  // false_positive, plus a composed-regime record (extractionRegime:
+  // 'at-action-v2-composed') that reads correct_hold. Pooled: 1 fp / 1
+  // correct — would ambiguously print either MET or NOT MET depending on the
+  // ≤ boundary, so this fixture ALSO checks the regime split is what
+  // actually governs, not the pooled tie.
+  const legacyFP = { ...RECORDS[2], schema: 'false-hold-record-v1', session: 'sess-legacy-fp',
+    capturedAt: '2026-07-12T09:00:00.000Z', loopEvent: 'opened' }
+  const composedCorrect = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-composed',
+    capturedAt: '2026-09-06T09:00:00.000Z', loopEvent: 'opened', extractionRegime: 'at-action-v2-composed' }
+  const { out: outRegime } = runReport([legacyFP, composedCorrect], 'regime-fix')
+
+  check('§17.1 the pooled figure is now explicitly labelled DISCLOSURE ONLY, not the headline',
+    /DISCLOSURE ONLY, per the 2026-09-11 mentor ruling/.test(outRegime), outRegime)
+  check('§17.2 the OPERATIVE READING block prints the at-action-v2-composed regime',
+    /OPERATIVE READING FOR PART \(3\)[\s\S]*?at-action-v2-composed: false-positive=0\s+correct=1\s+⇒ MET/.test(outRegime), outRegime)
+  check('§17.3 the READINESS SUMMARY part (3) line reads MET under the composed regime, not the pooled tie',
+    /\(3\) false ≤ correct holds:\s+MET under at-action-v2-composed \(0 false-positive holds, 1 correct holds\)/.test(outRegime), outRegime)
+  check('§17.4 the instrument-age qualification is present',
+    /Instrument age: approximately [\d.]+ days\./.test(outRegime), outRegime)
+  check('§17.5 the pre-window exclusion note names the legacy regime and its composition',
+    /Pre-window at-action-v1-lean records \(n=1: 1 false-positive, 0 correct, 0 not-a-hold\) excluded per ADR-014/.test(outRegime), outRegime)
+
+  // Non-vacuity: a buffer with NO at-action-v2-composed records at all must
+  // read UNKNOWN, never a fabricated MET/NOT MET off zero operative evidence.
+  const { out: outNoOperative } = runReport([legacyFP], 'regime-no-operative')
+  check('§17.6 no operative-regime records ⇒ honest UNKNOWN, never a fabricated verdict',
+    /\(3\) false ≤ correct holds:\s+UNKNOWN — no at-action-v2-composed records in this buffer yet/.test(outNoOperative), outNoOperative)
+
+  // PR19 FOLD (2026-09-11, HIGH, confirmed by live reproduction): `fps <=
+  // corrects` with both at 0 evaluates true, so an operative regime with
+  // RECORDS but ZERO holds (every record closed / not-a-hold) would have
+  // printed a dishonest "MET" on no hold evidence at all. Fixture: a single
+  // operative-regime CLOSED record (not a hold either way).
+  const operativeNoHolds = { ...RECORDS[3], schema: 'false-hold-record-v3', session: 'sess-op-nohold',
+    capturedAt: '2026-09-06T09:00:00.000Z', loopEvent: 'closed', extractionRegime: 'at-action-v2-composed' }
+  const { out: outZeroHolds } = runReport([operativeNoHolds], 'regime-zero-holds')
+  check('§17.7 operative regime WITH records but ZERO holds ⇒ honest "NO HOLDS YET", never a fabricated MET',
+    /\(3\) false ≤ correct holds:\s+NO HOLDS YET under at-action-v2-composed \(0 false-positive, 0 correct\) — neither MET nor NOT MET/.test(outZeroHolds), outZeroHolds)
+  check('§17.8 the zero-holds reading does NOT print the string "MET" as a verdict (only inside "NOT MET"/"NO HOLDS")',
+    !/false ≤ correct holds:\s+MET\b/.test(outZeroHolds), outZeroHolds)
 }
 
 rmSync(dir, { recursive: true, force: true })

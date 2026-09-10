@@ -39590,3 +39590,41 @@ still not computed.
 
 D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-11 — D-S11-PART3-REGIME-SCOPED-CORRECTION-2026-09-11
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation). code-elevated, a fresh separately-
+recorded founder waiver (distinct from the earlier pre-flip-disclosures waiver, per the mentor's
+explicit instruction), PR19 required and run. AC7 not engaged.
+
+Running the newly-built pre-flip disclosures against the real buffer found the false-hold rate's
+pooled headline read NOT MET (137 false-positive, 61 correct) - but the report's own ADR-014
+regime-split diagnostic showed those 137 false positives are entirely the retired at-action-v1-lean
+pre-window instrument (137 false / 0 correct), while the current instrument, at-action-v2-composed,
+reads 0 false-positive / 61+ correct.
+
+Escalated to the mentor rather than deciding unilaterally. Ruling (verbatim, canonical): the
+regime-scoped figure governs part (3), not the pooled figure - "the pooled figure does not describe
+either instrument ... using it is evaded, not answered." The correction needed its own fresh,
+separately-recorded waiver (granted, recorded before the edit). Part (3) reads MET with an
+instrument-age qualification (not a small-sample flag), verbatim form supplied by the ruling.
+
+Built the fix in false-hold-observation-report.ts: the READINESS SUMMARY's part (3) line now
+reports the at-action-v2-composed regime's own figures with the mentor's exact qualification; the
+pooled figure is relabeled DISCLOSURE ONLY.
+
+PR19 found one real HIGH, confirmed by live reproduction: fps <= corrects evaluated at both zero
+(0<=0=true) would have printed a dishonest MET for an operative regime with records but zero holds.
+Fixed with an explicit non-vacuity guard, printing "NO HOLDS YET" instead; regression-pinned.
+
+Verified: tsc clean; battery 141/0; real-buffer smoke re-confirmed MET (0 false-positive, 73
+correct) after every fix. GUARD_RE files touched = exactly the two waived paths. SHA pins
+unchanged.
+
+Full record: operations/handoffs/founder/2026-09-11-part3-regime-scoped-correction-CLOSE.md.
+
+Part (2) still needs a live DB pass. The S11 flip itself remains a separate founder-walked Critical
+activation - a corrected readiness figure is not a flip. D2 remains blocked (a different
+condition).
+
+The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.

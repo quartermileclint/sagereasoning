@@ -302,3 +302,31 @@ BLOCKED; the 0h call remains the founder's.
   **Nothing activated; this is a diagnostic script, no DB write; the measured false-hold rate itself
   is still NOT computed. D2 remains blocked (Q1's "ordinary" condition, not counting). The S11 flip
   remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-11 (Part 3 corrected to a regime-scoped readiness answer — `D-S11-PART3-REGIME-SCOPED-CORRECTION-2026-09-11`; a FRESH, separately-recorded founder waiver, mentor-ruled, PR19-reviewed).**
+  **Part (3) of the S11 four-part readiness standard now reads MET.** Running the newly-built Part 5
+  against the real buffer found the false-hold rate's POOLED headline reads NOT MET (137
+  false-positive, 61 correct at the time) — but the report's own ADR-014 regime-split diagnostic shows
+  those 137 false positives are ENTIRELY the retired `at-action-v1-lean` pre-window instrument (137
+  false / 0 correct); the CURRENT instrument, `at-action-v2-composed`, reads **0 false-positive
+  holds, 61+ correct holds**. Put to the mentor
+  (`2026-09-11-mentor-question-regime-mixed-false-hold-rate-FOR-RULING.md`) rather than decided
+  unilaterally. **Ruled** (verbatim, canonical:
+  `2026-09-11-mentor-ruling-regime-mixed-false-hold-rate-verbatim.md`): the regime-scoped figure
+  governs part (3) — "the pooled figure ... does not describe either instrument ... [using it] is
+  evaded, not answered" — the pooled figure may appear only as a disclosure, never the headline; the
+  correction needed its own **fresh, separately-recorded waiver** (granted, recorded BEFORE the edit
+  per the ruling's explicit instruction:
+  `2026-09-11-founder-waiver-part3-regime-correction.md`); part (3) reads **MET with an
+  instrument-age qualification** (not a small-sample flag), verbatim form supplied by the ruling and
+  now reproduced in the script's own output. **PR19 found one real HIGH**, confirmed by live
+  reproduction: the naive `fps <= corrects` comparison reads `0 <= 0 = true`, so an operative regime
+  with records but ZERO holds would have printed a dishonest "MET" on no hold evidence at all — fixed
+  with an explicit non-vacuity guard (`operativeHoldCount > 0`), now printing a distinct "NO HOLDS
+  YET" state instead, regression-pinned. Battery **141/0**; `tsc` clean; real-buffer smoke
+  re-confirmed **MET** (0 false-positive, 73 correct as of this write) after every fix. Full record:
+  `operations/handoffs/founder/2026-09-11-part3-regime-scoped-correction-CLOSE.md`.
+  **Part (2) still needs a live DB pass; the S11 flip itself remains a separate, founder-walked
+  Critical activation — a corrected readiness figure is not a flip. D2 remains blocked (a different
+  condition). The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+  founder's.**

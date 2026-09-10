@@ -1433,9 +1433,19 @@ async function main() {
   console.log(`    false-positive holds (no kathekon factor): ${fps.length}`)
   console.log(`    correct holds (kathekon-engaged):          ${corrects.length}`)
   console.log(`  false-positive rate among holds: ${pct(fps.length, holds.length)}`)
-  const target = fps.length <= corrects.length
-  console.log(`  mentor's target (false ≤ correct): ${target ? 'MET' : 'NOT MET'}  (${fps.length} ${target ? '≤' : '>'} ${corrects.length})` +
-    (holds.length < 5 ? '   [small sample — a rate over few holds is not yet meaningful]' : ''))
+  // MENTOR RULING (2026-09-11, Q1, VERBATIM, binding): "A pooled figure that
+  // combines [the retired regime's] records with [the current regime's]
+  // records does not describe either instrument... Using that mixture to
+  // answer 'is the false-hold rate at target' is precisely the presentation
+  // ADR-014 forbids... The pooled figure should not appear in the READINESS
+  // SUMMARY as an answer to part (3). It may appear as a disclosure... but
+  // it must not be the headline." This line is therefore now explicitly
+  // labelled as a DISCLOSURE, not the operative answer — the operative
+  // figure is computed below, regime-scoped, and is what the READINESS
+  // SUMMARY's part (3) line now reports.
+  console.log(`  [DISCLOSURE ONLY, per the 2026-09-11 mentor ruling — this pooled figure mixes retired`)
+  console.log(`   and current instrument regimes and is NOT the operative answer to part (3); see the`)
+  console.log(`   regime-scoped figure below and the READINESS SUMMARY]`)
 
   // THE LEGACY BRACKET (2026-07-19 self-circle narrowing): legacy v1/v2 records
   // carry no circle names, so the beyond-self requirement cannot be evaluated
@@ -1485,6 +1495,50 @@ async function main() {
   }
   for (const [k, v] of regimes) {
     console.log(`    regime ${k}: n=${v.n} false_positive=${v.fps} correct=${v.corrects}`)
+  }
+
+  // MENTOR RULING (2026-09-11, PR19-reviewed, binding) — the pooled figure
+  // above is NOT a legitimate answer to readiness standard part (3); only
+  // the CURRENT/OPERATIVE regime's own figures may answer it. This constant
+  // names that regime explicitly — it is NOT auto-detected as "whichever
+  // regime is newest", because an instrument change is itself always a
+  // ruled, disclosed event in this project (ADR-014's own discipline), never
+  // an inference. If the operative regime ever changes again, updating this
+  // constant is part of THAT ruling's own follow-through, not a silent code
+  // change.
+  const OPERATIVE_REGIME = 'at-action-v2-composed'
+  const operative = regimes.get(OPERATIVE_REGIME)
+  // PR19 FOLD (2026-09-11, HIGH, confirmed by live reproduction): `fps <=
+  // corrects` with BOTH at zero (an operative regime with records but no
+  // holds at all yet — every record not-a-hold) evaluates 0<=0=true and
+  // would have printed a dishonest "MET" on literally zero hold evidence,
+  // the same "arithmetic identity, not a measurement" class this script's
+  // own §8 structural-zero fold already names and guards against elsewhere
+  // (RA-1-F2 2026-07-17; D6a 2026-08-30). Explicit non-vacuity guard: MET/
+  // NOT MET requires at least one hold under the operative regime.
+  const operativeHoldCount = operative ? operative.fps + operative.corrects : 0
+  const operativeTarget = operative && operativeHoldCount > 0 ? operative.fps <= operative.corrects : null
+  const preWindow = regimes.get('at-action-v1-lean (pre-mark)')
+  // Instrument age is computed from the EARLIEST operative-regime record's
+  // own timestamp against wall-clock now — re-derived on every run, never a
+  // value baked in at the time of the ruling (which would silently go stale
+  // the day after it was written).
+  const operativeRecords = rated.filter((r) => regimeOf(r) === OPERATIVE_REGIME)
+  const operativeAgeDays = operativeRecords.length
+    ? (Date.now() - Math.min(...operativeRecords.map((r) => Date.parse(r.capturedAt)))) / (24 * 3600 * 1000)
+    : null
+  console.log(`\n  OPERATIVE READING FOR PART (3) (mentor ruling, 2026-09-11 — the regime-scoped figure`)
+  console.log(`  governs, the pooled figure above is a disclosure only):`)
+  if (!operative) {
+    console.log(`    UNKNOWN — no ${OPERATIVE_REGIME} records exist in this buffer yet.`)
+  } else {
+    const verdictWord = operativeHoldCount === 0 ? 'NO HOLDS YET (neither MET nor NOT MET — zero hold evidence)' : (operativeTarget ? 'MET' : 'NOT MET')
+    console.log(`    ${OPERATIVE_REGIME}: false-positive=${operative.fps}  correct=${operative.corrects}  ⇒ ${verdictWord}` +
+      (operativeHoldCount > 0 && operativeHoldCount < 5 ? '   [small sample — a rate over few holds is not yet meaningful]' : ''))
+    console.log(`    instrument age: ~${operativeAgeDays!.toFixed(1)} days (from the earliest ${OPERATIVE_REGIME} record to now)`)
+    if (preWindow) {
+      console.log(`    pre-window ${'at-action-v1-lean (pre-mark)'} records excluded per ADR-014: n=${preWindow.n} (${preWindow.fps} false-positive, ${preWindow.corrects} correct, ${preWindow.n - preWindow.fps - preWindow.corrects} not-a-hold)`)
+    }
   }
 
   // P6 §7 — the recommendation column (both populations, bounds on the rate).
@@ -1538,7 +1592,23 @@ async function main() {
   console.log('  READINESS SUMMARY (the enforce assent remains the founder\'s, PR7):')
   console.log(`   (1) duration ≥7 days:            ${days >= 7 ? 'MET' : 'PENDING'}`)
   console.log(`   (2) 4 domains + confidence:      ${dryRun ? 'run against DB' : 'see Part 2 above (founder\'s call)'}`)
-  console.log(`   (3) false ≤ correct holds:       ${target ? 'MET' : 'NOT MET'}${holds.length < 5 ? ' (small sample)' : ''}`)
+  // MENTOR RULING (2026-09-11, VERBATIM, binding) — part (3) is answered by
+  // the OPERATIVE regime's figures, never the pooled figure (ADR-014). The
+  // exact qualification text below follows the ruling's own stated form:
+  // "MET under at-action-v2-composed (N false-positive holds, M correct
+  // holds). Instrument age: approximately D days. Pre-window at-action-v1-
+  // lean records (n=P, all false-positive) excluded per ADR-014 — mixed
+  // regimes may not be presented as one distribution."
+  if (!operative) {
+    console.log(`   (3) false ≤ correct holds:       UNKNOWN — no ${OPERATIVE_REGIME} records in this buffer yet`)
+  } else if (operativeHoldCount === 0) {
+    console.log(`   (3) false ≤ correct holds:       NO HOLDS YET under ${OPERATIVE_REGIME} (0 false-positive, 0 correct) — neither MET nor NOT MET; zero hold evidence is not a measurement.`)
+  } else {
+    console.log(`   (3) false ≤ correct holds:       ${operativeTarget ? 'MET' : 'NOT MET'} under ${OPERATIVE_REGIME} (${operative.fps} false-positive holds, ${operative.corrects} correct holds).` +
+      (operativeHoldCount < 5 ? ' [small sample]' : ''))
+    console.log(`       Instrument age: approximately ${operativeAgeDays!.toFixed(1)} days.` +
+      (preWindow ? ` Pre-window at-action-v1-lean records (n=${preWindow.n}: ${preWindow.fps} false-positive, ${preWindow.corrects} correct, ${preWindow.n - preWindow.fps - preWindow.corrects} not-a-hold) excluded per ADR-014 — mixed regimes may not be presented as one distribution.` : ''))
+  }
   console.log('   (4) Q3 predicate encoded:        SATISFIED')
   console.log('════════════════════════════════════════════════════════════════════\n')
   process.exit(0)
