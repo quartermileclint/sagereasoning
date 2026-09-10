@@ -879,6 +879,185 @@ function runLiftCheck(rows: FalseHoldRecord[]): void {
  */
 const DO_NOT_PROCEED: InterventionAction = 'do-not-proceed'
 
+// ── Q-G6A-QUALIFICATION (2026-09-07 S8 ruling, question B2) ──────────────────
+// Verbatim: "G6(a) binds on kathekon-engaged loops opened by consequential
+// actions on the product or its governing documents, not on loops opened by
+// the agent's own protocol-required record-keeping... The distinction is
+// carried as a disclosed property of the measurement, not as a filter on the
+// loop count." This is that disclosure. It is a HEURISTIC over `actionPreview`
+// text, stated as such — not a stored classification, not silently applied
+// anywhere upstream, and any record it cannot confidently place is reported
+// UNCLASSIFIED rather than force-fitted into either bucket.
+//
+// PROTOCOL-REQUIRED: the specific record-keeping artifacts this project's own
+// standing protocol requires every session produce — the decision log, session
+// close/handoff/relay documents, mentor-consultation verbatim records, and the
+// S11 flip-prerequisites register itself. The ruling's own example (a Write
+// that IS the governance record the protocol requires) is exactly this set.
+const PROTOCOL_REQUIRED_RE =
+  /decision-log\.md|-CLOSE\.md|-NEXT-SESSION-PROMPT\.md|-verbatim\.md|-RELAY\.md|-RECONCILIATION\.md|FLIP-PREREQUISITES-REGISTER\.md|STANDING-SESSION-OPENER/i
+type ActionClass = 'protocol-required' | 'product-or-governing-document' | 'unclassified'
+// PR19 FOLD (2026-09-10, MEDIUM/HIGH, confirmed by direct regex execution):
+// the first draft's fallback (`/\/(operations|website)\//`) missed exactly
+// the paradigm "governing documents" the ruling names — manifest.md,
+// CLAUDE.md, and every ADR live at the repo root or under /adopted/, not
+// under /operations/ or /website/, and this project edits them routinely.
+// Widened to match the tool-preview's own generic shape (`Write (create/
+// overwrite) the file …` / `Edit the file …`, the format every actionPreview
+// in this buffer carries for a file write) rather than enumerating path
+// prefixes — any recognized Write/Edit action that is NOT protocol-required
+// is, by the ruling's own binary, the product-or-governing-document class.
+const WRITE_OR_EDIT_ACTION_RE = /^(Write\s*\(create\/overwrite\)\s*the\s*file|Edit\s*the\s*file)\b/i
+function classifyActionClass(preview: string): ActionClass {
+  if (!preview) return 'unclassified'
+  if (PROTOCOL_REQUIRED_RE.test(preview)) return 'protocol-required'
+  if (WRITE_OR_EDIT_ACTION_RE.test(preview)) return 'product-or-governing-document'
+  return 'unclassified'
+}
+
+/**
+ * Part 5 — the two pre-flip disclosures owed by the 2026-09-07 ruling
+ * (Q-G6A-QUALIFICATION's loop-count-by-action-class figure; Q-PREFLIP-REPORTS'
+ * baseline-composition figure) plus the three additions the 2026-09-10 Q1
+ * ruling named as required pre-flip content (schema distribution, the
+ * edit-window anomaly and its explanation, the live_agent non-emission-window
+ * fact). Every figure here is DERIVED AT REPORT TIME from `rows`, never
+ * stored — the same discipline `reportRecommendationColumn` above uses, for
+ * the same reason: a stored reading would freeze evidence that looks
+ * authoritative while the classification it depends on is still under
+ * active ruling.
+ */
+function reportPreFlipDisclosures(rows: Classified[]): void {
+  console.log('\n── Part 5 — pre-flip disclosures (ruled 2026-09-07 + 2026-09-10) ───')
+
+  // WINDOW SCOPING — applies to EVERY figure in this Part, including 5a.
+  // PR19 FOLD (2026-09-10, HIGH): the first draft computed 5a over the WHOLE
+  // buffer (v1 included) and its own comment/test claimed this matched "the
+  // Q1 ruling's own convention". That claim was false — the primary source
+  // says the opposite, verbatim: "schema distribution IN THE WINDOW: v3=47,
+  // v4=96, v5=135, v6=6" (2026-09-10-post-condition3-build-verification's own
+  // relay, `...post-build-outcome-RELAY.md:52`) — v1 excluded, post-probe
+  // only. Every session that has published this figure has published the
+  // WINDOW figure, never the whole-buffer figure. Fixed here to match.
+  //
+  // Derived structurally from the schema field — never a hardcoded line
+  // number (TRAP-3: a hardcoded "139" is exactly the mistake this project has
+  // made twice already). v1 is the sole pre-window schema; the probe is the
+  // first non-v1 record; the window is everything after it, MINUS any stray
+  // v1 record the index-slice alone would not catch (PR19 FOLD, MEDIUM: the
+  // first draft sliced by INDEX only, so a v1 record occurring after the
+  // slice point — not possible on the real append-only buffer, but not
+  // structurally prevented either — would have silently entered the window.
+  // The explicit schema filter below closes that regardless of ordering).
+  const firstNonV1Index = rows.findIndex((r) => r.schema !== 'false-hold-record-v1')
+  // Three cases: -1 (every record is v1 — a pure pre-window buffer, window is
+  // empty); 0 (no v1 prefix at all — no pre-window regime ever existed, so
+  // there was never a probe to strip either; the whole buffer IS the window);
+  // >0 (a real v1 prefix followed by the took-effect probe at firstNonV1Index
+  // — strip the prefix AND the probe). A fixture/test with no v1 records must
+  // not have its first record misread as "the probe" and silently dropped.
+  const windowRows = (
+    firstNonV1Index === -1 ? [] : firstNonV1Index === 0 ? rows : rows.slice(firstNonV1Index + 1)
+  ).filter((r) => r.schema !== 'false-hold-record-v1')
+  console.log(`  [window scoping for this whole Part: ${rows.length - windowRows.length} pre-window/probe record(s) excluded (v1 + the took-effect probe), ${windowRows.length} window record(s) used]`)
+
+  // 5a — schema distribution (Q1 ruling, 2026-09-10). WINDOW-SCOPED (see
+  // above) — v1 never appears here by construction (filtered out of
+  // `windowRows`), matching every session's published convention.
+  const schemaDist = new Map<string, number>()
+  for (const r of windowRows) schemaDist.set(r.schema, (schemaDist.get(r.schema) ?? 0) + 1)
+  console.log('  5a — SCHEMA DISTRIBUTION IN THE WINDOW (required pre-flip content, Q1 ruling):')
+  for (const [schema, n] of [...schemaDist.entries()].sort()) {
+    console.log(`    ${schema}: ${n}`)
+  }
+  console.log(`    total (window only, v1 excluded): ${windowRows.length}`)
+  console.log(`    (whole-buffer total incl. ${rows.length - windowRows.length} pre-window/probe record(s): ${rows.length})`)
+
+  // 5b — the edit-window anomaly, re-derived rather than hardcoded: any
+  // schema-v6 record reading callerClass:'unknown' with clientVersion:null
+  // is exactly the anomalous shape diagnosed in
+  // 2026-09-10-post-condition3-build-verification-CLOSE.md §4a (a hook firing
+  // while false-hold-capture.mjs was mid-rewrite, read a transiently
+  // inconsistent file state, and degraded honestly to 'unknown' rather than
+  // emitting a false classification — the safety property held). v6 records
+  // are always in-window, but filtered here for consistency with the rest
+  // of this Part.
+  const anomalous = windowRows.filter(
+    (r) => r.schema === 'false-hold-record-v6' && r.callerClass === 'unknown' && r.clientVersion === null,
+  )
+  console.log(`  5b — EDIT-WINDOW ANOMALY: ${anomalous.length} record(s) match the diagnosed shape`)
+  console.log('    (schema v6, callerClass:unknown, clientVersion:null). Diagnosed at an honest')
+  console.log('    confidence level (corroborated by timestamp correlation with the build')
+  console.log('    session\'s own edit commands, not proven by byte-exact reconstruction):')
+  console.log('    2026-09-10-post-condition3-build-verification-CLOSE.md §4a. The safety')
+  console.log('    property held — a transiently inconsistent read degraded to the honest')
+  console.log('    `unknown`, never to a false classification.')
+
+  // 5c — the live_agent non-emission-window fact (Q1 ruling). 'live_agent' is
+  // structurally impossible before the first v6 record exists — the value was
+  // not in the callerClass vocabulary under v5. Derived, not hardcoded.
+  const v6sorted = windowRows.filter((r) => r.schema === 'false-hold-record-v6').sort((a, b) => Date.parse(a.capturedAt) - Date.parse(b.capturedAt))
+  console.log('  5c — LIVE_AGENT NON-EMISSION WINDOW (Q1 ruling):')
+  if (v6sorted.length === 0) {
+    console.log('    no schema-v6 records in this buffer — live_agent has never been emitted.')
+  } else {
+    console.log(`    first possible emission: ${v6sorted[0].capturedAt} (the earliest v6 record).`)
+    console.log('    Every record captured before that timestamp reads unknown/subagent by')
+    console.log('    construction, not by gate failure — the value did not exist in the')
+    console.log('    vocabulary until the schema-v6 build landed (S11/Condition 3).')
+  }
+
+  // 5d — baseline composition, day-by-day, with tool distribution
+  // (Q-PREFLIP-REPORTS item i). Consult population, WINDOW ONLY — the
+  // baseline's own gate ("five ordinary days with consult records") is
+  // defined over the observation window, per the standing register and the
+  // opener, not the buffer's full history.
+  const consultRows = windowRows.filter((r) => r.population === 'consult')
+  const byDay = new Map<string, { total: number; tools: Map<string, number> }>()
+  for (const r of consultRows) {
+    const day = r.capturedAt.slice(0, 10)
+    const entry = byDay.get(day) ?? { total: 0, tools: new Map<string, number>() }
+    entry.total++
+    entry.tools.set(r.tool, (entry.tools.get(r.tool) ?? 0) + 1)
+    byDay.set(day, entry)
+  }
+  console.log('  5d — BASELINE COMPOSITION, day-by-day, tool distribution (consult population):')
+  for (const [day, entry] of [...byDay.entries()].sort()) {
+    const toolStr = [...entry.tools.entries()].sort().map(([t, n]) => `${t}=${n}`).join(', ')
+    console.log(`    ${day}: ${entry.total} consult record(s) — ${toolStr}`)
+  }
+  console.log(`    baseline days (≥1 consult record): ${byDay.size}`)
+  console.log('    COUNTING-COMPLETE is NOT the same as ORDINARY (Q1 ruling, 2026-09-10): a day')
+  console.log('    on which the measuring apparatus was functionally modified is not an')
+  console.log('    ordinary day in the sense the baseline requires. Cross-reference 5a/5b/5c')
+  console.log('    above against this table before treating the baseline as sufficient.')
+
+  // 5e — loop count by action class (Q-G6A-QUALIFICATION, Q-PREFLIP-REPORTS
+  // item ii). SCOPING DISCLOSED: this counts loopEvent OCCURRENCES
+  // (opened/reopened vs closed), not reconciled loop LIFECYCLES — a full
+  // opened-vs-closed-vs-abandoned reconciliation needs to walk the
+  // prior_feedback_ref/examination.ref chain the way analyseLoopClosure does,
+  // which this figure does not attempt. Named as a scoping limit, not hidden.
+  const openEvents = consultRows.filter((r) => r.loopEvent === 'opened' || r.loopEvent === 'reopened')
+  const closeEvents = consultRows.filter((r) => r.loopEvent === 'closed')
+  function tally(events: FalseHoldRecord[]): Record<ActionClass, number> {
+    const out: Record<ActionClass, number> = { 'protocol-required': 0, 'product-or-governing-document': 0, unclassified: 0 }
+    for (const r of events) out[classifyActionClass(r.actionPreview)]++
+    return out
+  }
+  const openTally = tally(openEvents)
+  const closeTally = tally(closeEvents)
+  console.log('  5e — LOOP EVENTS BY ACTION CLASS (Q-G6A-QUALIFICATION disclosure, heuristic —')
+  console.log('       see PROTOCOL_REQUIRED_RE in source; counts EVENTS not reconciled lifecycles):')
+  console.log(`    opened/reopened: protocol-required=${openTally['protocol-required']}  product-or-governing-document=${openTally['product-or-governing-document']}  unclassified=${openTally.unclassified}  (total ${openEvents.length})`)
+  console.log(`    closed:          protocol-required=${closeTally['protocol-required']}  product-or-governing-document=${closeTally['product-or-governing-document']}  unclassified=${closeTally.unclassified}  (total ${closeEvents.length})`)
+  console.log('    RULED (2026-09-07, B2): G6(a) binds on the product-or-governing-document')
+  console.log('    class; it does NOT bind on the protocol-required class — the protocol\'s own')
+  console.log('    requirements should not generate a do-not-proceed condition on the act of')
+  console.log('    following the protocol. This is a disclosed property, not a filter — no')
+  console.log('    record above was excluded from any other Part\'s figures on this basis.')
+}
+
 function reportRecommendationColumn(rows: Classified[]): void {
   console.log('\n── Part 3b — the decision table’s recommendation (P6 §7, ruled 2026-09-05) ──')
   console.log('  BOTH COLUMNS per record: the hold classification (the frozen Q3 predicate) AND')
@@ -1338,6 +1517,15 @@ async function main() {
   console.log('\n── Part 4 — Q3 kathekon-engagement qualification encoded ──────────')
   console.log('  SATISFIED — assessKathekonEngagement (kathekon-engagement.ts) is the classifier used above,')
   console.log('  and is the exact shared function the eventual S11 G6(a) qualification binds on.')
+
+  // Part 5 — the pre-flip disclosures owed by the 2026-09-07 S8 five-question
+  // ruling (Q-G6A-QUALIFICATION, Q-PREFLIP-REPORTS) and the 2026-09-10 Q1
+  // ruling (the instrument-change disclosure). Verbatim sources:
+  // operations/trust-layer-2026-07/2026-09-07-mentor-ruling-S8-five-questions-verbatim.md
+  // and the 2026-09-10 mentor ruling on guard reconciliation. Nothing below is
+  // stored — every figure is derived at report time from the records already
+  // read, matching the P6 §7 recommendation column's own discipline.
+  reportPreFlipDisclosures(rows)
 
   // Ingest + trust-state read (non-dry-run).
   if (!dryRun) {

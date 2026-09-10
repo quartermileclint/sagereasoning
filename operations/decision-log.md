@@ -39557,3 +39557,36 @@ W2 (record honesty) was out of scope and untouched. Full record:
 No production surface touched. No `GUARD_RE` file modified. No public surface applied.
 
 **The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-10 — D-Q-G6A-QUALIFICATION-AND-Q-PREFLIP-REPORTS-BUILT-2026-09-10
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation). code-elevated, founder waiver
+(GUARD_RE touched — website/scripts/false-hold-observation-report.ts matches), PR19 required and
+run. AC7 not engaged.
+
+Founder confirmed skipping W2 (no verified dependency into this pair; the W2->G6A->PREFLIP chain
+came from the "Practice, Logos, Idea" artifact with no ruling backing it). Built directly against
+the 2026-09-07 S8 ruling and the 2026-09-10 Q1 ruling: a new Part 5 in the false-hold observation
+report covering the schema distribution (window-scoped), the edit-window anomaly count, the
+live_agent non-emission-window fact, the baseline composition day-by-day, and the loop-count-by-
+action-class figure (Q-G6A-QUALIFICATION), via a new heuristic classifyActionClass.
+
+PR19 (independent adversarial review, general-purpose agent) found 3 real, source-confirmed
+defects in the first draft, all fixed at the root:
+1. HIGH - 5a computed over the whole buffer, contradicting the verbatim "schema distribution IN
+   THE WINDOW" convention (2026-09-10-post-build-outcome-RELAY.md:52) - fixed to window-scope.
+2. MEDIUM/HIGH - the action-class fallback regex missed governing documents (manifest.md,
+   CLAUDE.md, ADRs), defeating the qualification's own purpose - fixed + regression-pinned.
+3. MEDIUM - a stray v1 record past the window's index-slice prefix would not have been excluded -
+   fixed with an explicit schema filter.
+
+Verified: tsc clean; battery 133/0; real-buffer smoke re-confirmed baseline still reads 5 of 5
+after every fix; GUARD_RE files touched = exactly the two waived paths; SHA pins unchanged.
+
+Full record: operations/handoffs/founder/2026-09-10-Q-G6A-QUALIFICATION-and-Q-PREFLIP-REPORTS-CLOSE.md.
+
+Nothing activated - diagnostic script only, no DB write. The measured false-hold rate itself is
+still not computed.
+
+D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

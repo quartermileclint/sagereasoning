@@ -873,6 +873,116 @@ console.log('\n\u00a714 — OPTION D (ruled 2026-09-07): the amended segment-1 c
 }
 
 
+// ============================================================================
+console.log('\n§15 — Part 5: the pre-flip disclosures (Q-G6A-QUALIFICATION, Q-PREFLIP-REPORTS)')
+// ============================================================================
+{
+  // Uses the top-level 4-record fixture (A v1/opened, B v3/opened, C v1/opened,
+  // D v3/closed) and its already-computed `out`. Verified against the exact
+  // literal output of a real run before being pinned (not guessed).
+  check('§15.1 Part 5 header prints', out.includes('Part 5 — pre-flip disclosures'), out)
+
+  // PR19 FOLD (2026-09-10, HIGH): the first draft of this section asserted
+  // 5a was a WHOLE-BUFFER figure and cited that as "the Q1 ruling's own
+  // convention" — a claim verified FALSE against the primary source
+  // (`...post-build-outcome-RELAY.md:52`: "schema distribution IN THE
+  // WINDOW"). 5a is now window-scoped, matching every session's own published
+  // convention. Fixture order is A(v1) B(v3) C(v1) D(v3): firstNonV1Index=1
+  // (B), rows.slice(2)=[C,D], then the explicit schema filter removes the
+  // stray v1 record C (PR19 FOLD, MEDIUM: the index-slice alone would have
+  // let a stray v1 past the prefix through — closed by filtering on schema,
+  // not position, regardless of ordering) ⇒ windowRows=[D] only.
+  check('§15.2 window scoping: 3 pre-window/probe excluded (A, B-as-probe, AND stray-v1 C), 1 window record used',
+    /3 pre-window\/probe record\(s\) excluded[\s\S]*?1 window record\(s\) used/.test(out), out)
+  check('§15.3 5a schema distribution: v3=1 (D only — A/B/C all excluded)', /false-hold-record-v3: 1\b/.test(out), out)
+  // Scoped to the 5a block specifically — the report's own v3/v4 lift-check
+  // section (unrelated to Part 5) legitimately prints per-schema v1 lines
+  // elsewhere in `out`, so a whole-string search would false-fail here.
+  const section5a = out.slice(out.indexOf('5a — SCHEMA'), out.indexOf('5b — EDIT-WINDOW'))
+  check('§15.4 5a does NOT print v1 at all (window-scoped, not whole-buffer)', !/false-hold-record-v1:/.test(section5a), section5a)
+  check('§15.5 5a window total = 1, whole-buffer total disclosed separately = 4',
+    /total \(window only, v1 excluded\): 1[\s\S]*?whole-buffer total incl\. 3 pre-window\/probe record\(s\): 4/.test(out), out)
+
+  // 5b/5c — no v6 records in this fixture ⇒ both must read the honest-absence
+  // form, never a false positive count or a fabricated timestamp.
+  check('§15.6 5b: 0 anomalous records (no v6 in fixture)', /EDIT-WINDOW ANOMALY: 0 record/.test(out), out)
+  check('§15.7 5c: honest absence, no v6 in buffer', /no schema-v6 records in this buffer/.test(out), out)
+
+  // 5d — baseline composition, WINDOW ONLY. Only D (2026-07-19, Edit,
+  // consult) survives windowing — A, B, and C are all excluded (A/C are
+  // pre-window v1; B is the probe). THIS IS THE REGRESSION PIN for the bug
+  // this session found and fixed: an earlier draft used the FULL buffer for
+  // 5d, which pulled every historical consult day (back to July) into what
+  // must be a window-scoped baseline figure — a real defect this exact
+  // fixture would not have caught under the earlier (wrong) 5d-only scoping,
+  // which is why the window-scope computation was moved to cover all of
+  // Part 5, including 5a, not just 5d/5e.
+  check('§15.8 5d baseline days = 1 (D only — A and C are pre-window, B is the probe)',
+    /baseline days \(≥1 consult record\): 1\b/.test(out), out)
+  check('§15.9 5d shows ONLY 07-19 with Edit=1 (record D)',
+    /2026-07-19: 1 consult record\(s\) — Edit=1/.test(out), out)
+  check('§15.10 5d does NOT show 07-12 at all (A and C both excluded)',
+    !/2026-07-12:/.test(out), out)
+
+  // 5e — loop events by action class, window-only. D is the sole window
+  // record (loopEvent='closed'); its actionPreview ("v3, closed — not a
+  // hold regardless of engagement") matches neither PROTOCOL_REQUIRED_RE nor
+  // the Write/Edit action-preview shape ⇒ classifies 'unclassified' by the
+  // heuristic's own honest-fallback rule, never force-fitted.
+  check('§15.11 5e opened/reopened: all-zero (no window record is opened/reopened)',
+    /opened\/reopened: protocol-required=0\s+product-or-governing-document=0\s+unclassified=0\s+\(total 0\)/.test(out), out)
+  check('§15.12 5e closed: unclassified=1 (record D, the sole window record)',
+    /closed:\s+protocol-required=0\s+product-or-governing-document=0\s+unclassified=1\s+\(total 1\)/.test(out), out)
+}
+
+// ============================================================================
+console.log('\n§16 — classifyActionClass: the G6A heuristic, direct unit checks')
+// ============================================================================
+{
+  // Runs the classifier via a records fixture rather than importing the
+  // module-private function (main() executes at import, so importing this
+  // file for its internals is unsafe — the same reasoning the file's own
+  // header states for driving it as a subprocess).
+  const protocolRequired = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-pr',
+    capturedAt: '2026-09-06T10:00:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Edit the file /Users/x/sagereasoning/operations/decision-log.md — applying this change' }
+  const closeDoc = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-close',
+    capturedAt: '2026-09-06T10:01:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Write (create/overwrite) the file /Users/x/sagereasoning/operations/handoffs/founder/2026-09-10-example-CLOSE.md' }
+  const product = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-prod',
+    capturedAt: '2026-09-06T10:02:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Edit the file /Users/x/sagereasoning/website/src/app/api/reason/route.ts — applying this change' }
+  const { out: outCC } = runReport([protocolRequired, closeDoc, product], 'g6a-classes')
+  check('§16.1 decision-log.md classifies protocol-required',
+    /opened\/reopened: protocol-required=2\s+product-or-governing-document=1\s+unclassified=0/.test(outCC), outCC)
+  check('§16.2 a -CLOSE.md file classifies protocol-required (matches decision-log.md too)',
+    /protocol-required=2/.test(outCC), outCC)
+  check('§16.3 website/src/... classifies product-or-governing-document',
+    /product-or-governing-document=1/.test(outCC), outCC)
+
+  // PR19 FOLD (2026-09-10, MEDIUM/HIGH, confirmed): the first draft's
+  // fallback (`/\/(operations|website)\//`) missed exactly the paradigm
+  // "governing documents" the ruling names — manifest.md, CLAUDE.md, and
+  // every ADR live at the repo root or under /adopted/, neither of which the
+  // old regex matched, so a governing-document edit silently fell to
+  // 'unclassified' instead of the class G6A is supposed to bind on. This
+  // fixture is the regression pin: three governing-document edits with NO
+  // /operations/ or /website/ segment in the path, none protocol-required,
+  // must all classify product-or-governing-document.
+  const manifestEdit = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-manifest',
+    capturedAt: '2026-09-06T10:03:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Edit the file /Users/x/sagereasoning/manifest.md — applying this change' }
+  const claudeMdEdit = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-claudemd',
+    capturedAt: '2026-09-06T10:04:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Edit the file /Users/x/sagereasoning/CLAUDE.md — applying this change' }
+  const adrEdit = { ...RECORDS[1], schema: 'false-hold-record-v3', session: 'sess-adr',
+    capturedAt: '2026-09-06T10:05:00.000Z', loopEvent: 'opened',
+    actionPreview: 'Write (create/overwrite) the file /Users/x/sagereasoning/adopted/adr/2026-07-08-sage-trust-layer.md' }
+  const { out: outGov } = runReport([manifestEdit, claudeMdEdit, adrEdit], 'g6a-governing-docs')
+  check('§16.4 manifest.md/CLAUDE.md/an ADR all classify product-or-governing-document (not unclassified)',
+    /opened\/reopened: protocol-required=0\s+product-or-governing-document=3\s+unclassified=0\s+\(total 3\)/.test(outGov), outGov)
+}
+
 rmSync(dir, { recursive: true, force: true })
 
 console.log(`\nfalse-hold-observation-report battery: ${passed} passed, ${failed} failed`)
