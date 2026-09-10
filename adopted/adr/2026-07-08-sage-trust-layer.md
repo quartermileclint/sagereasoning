@@ -182,6 +182,56 @@ Adopted under `D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED`. The verbatim
 - **G6 → S11:** unclosed correction loops produce a do-not-proceed on the triggering action until closed (the A8 two-then-escalate bound), and the trust-record update is **held pending** alongside the action.
 - **CI-16 CLOSED (G7):** value classification is **depth-invariant on the credential-bearing surfaces** — verified at the code level same-day (record §3: neither `extractFeatures` nor `applyMechanisms` takes a depth parameter; `DEPTH_MECHANISMS` belongs to the legacy prose engine, which carries no credential); the quick consult tier owes neither the single-question patch nor the screened label. End-to-end pin named for the S9 batteries. The screened-label rule re-engages if any surface ever credentials the legacy bundled-depth output.
 
+## 12. 2026-09-10 amendment — logos-on named as fifth-circle instantiation (W1, binding)
+
+Adopted under `D-LOGOS-ON-W1-W3-EXECUTED-2026-09-10`, executing the logos-on plan's W1 workstream
+(`operations/agent-circles-2026-08/2026-08-01-agent-circles-logos-on-plan.md` §3) from the binding
+mentor verdicts L1–L2 of
+`operations/agent-circles-2026-08/2026-08-01-mentor-consultation-agent-circles-logos-on-verbatim.md`
+(verbatim wins over this digest, the same rule as §§5/11). **This amendment changes no mechanism.**
+
+**The deterministic engine's existing fidelity work — the unity thesis, the justice floors, the
+corroboration overrides — already instantiates the fifth circle** (the rational order, per the
+2026-08-01 agent-circles mapping): a settled disposition (hexis) within which practitioners develop,
+aligned with the rational order deterministically, not through ongoing examination. Verbatim: *"The
+deterministic engine's existing fidelity work… already instantiates what the fifth-circle ruling
+describes: a settled disposition within which practitioners develop, aligned with the rational order
+deterministically, not through ongoing examination. The shipped system already embodies this
+property."* The circles work therefore opened **no new enforcement build workstream** — the machinery
+predates it; the amendment supplies its philosophical grounding.
+
+**Logos-on and practice-on are two postures of one instrument, not two tools.** Verbatim: *"The
+distinction between logos-on and practice-on is not a distinction between two separate tools that
+happen to share infrastructure. It is a distinction between two postures of one instrument: the
+infrastructure holding the rational order as a fixed condition, and the practitioner developing within
+that condition through examined responses."* This completes, and is not a reversal of, this ADR's own
+§7 practice=MEASURE / logos=ENFORCE framing (itself sourced from ADR-012) — L1 confirms it
+philosophically rather than changing it mechanically.
+
+**The deny surface is described as the infrastructure declining on the rational order's behalf, not
+merely a guardrail blocking a prohibited action.** Verbatim (L2): *"the deny surface is now understood
+as the infrastructure declining on the rational order's behalf, not merely as a guardrail blocking a
+prohibited action. That is a meaningful change in how the enforcement posture is described and
+justified. It is not a change in what the enforcement posture does."*
+
+**The 2026-07-12 staged-flip ruling (§7 of this ADR) stands exactly as given — mechanics, the
+do-not-proceed definition, and the zero-false-positive readiness floor all unchanged.** The circles
+work re-grounds its justification only, and adds one **new named prerequisite**, layered onto (not
+replacing) the four-part readiness standard this ADR already documents: the practice-on first-circle
+correction must be fully settled — landed and calibrated — before the logos-on flip proceeds. This is
+also recorded as a dated register annotation
+(`operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` §F, added the same session).
+
+**What this amendment does NOT do, stated per §10's own discipline:** it pre-approves no activation
+and changes no code path; it does not touch the S11 flip's readiness gate beyond adding the one named
+prerequisite above; the W2 record-honesty machinery (the enforcement class that moves no domain level,
+per-entry regime markers, the compliance-not-virtue clause) and the W3 pins (the orientation reading
+never an enforce input; no enforcement path keying on first-circle-only findings) remain **unbuilt**,
+named in the register (§F) for their own future, founder-waived sessions since they touch `GUARD_RE`.
+The public-surface (R18) restatement of this framing is **drafted, not yet applied** — held for
+founder sign-off before any public document changes, per the plan's own discipline for public
+surfaces.
+
 ---
 
 *End ADR-013. Phase 0 of the Trust Layer arc is complete with this adoption: the design-of-record the P1–P4 slices cite, the honest-claims envelope S10/S11 must stay inside, and the canonical vocabulary S1 inherits. Next: S1 — trust state + event vocabulary (`code-critical`; its own founder-walked 0c-ii for the migration). The 0h call remains the founder's.*

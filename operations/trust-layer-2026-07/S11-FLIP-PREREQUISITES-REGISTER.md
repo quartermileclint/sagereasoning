@@ -77,6 +77,46 @@ The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v
 
 ---
 
+## F. Logos-on W3 — S11-anchored staging (register annotations, adopted 2026-09-10)
+
+Per `operations/agent-circles-2026-08/2026-08-01-agent-circles-logos-on-plan.md` §3 (W3), executing
+the binding mentor verdicts L2–L4 and L6 from
+`operations/agent-circles-2026-08/2026-08-01-mentor-consultation-agent-circles-logos-on-verbatim.md`
+(verbatim wins over this annotation). **W3's dependency gate — C1c, C2, D4 all closed — is now
+discharged**: C2/C1c live since 2026-08-08, D4 live and took-effect-proven since 2026-09-05
+(re-verified from `/CLAUDE.md`'s "Live in production" list at this writing). **Nothing here
+activates anything. These are dated annotations to this register, per W3.1** — pins (W3.2) are
+listed separately below as named-not-yet-built, since they touch `GUARD_RE`-matched source
+(`website/src/lib/substrate/trust-core/intervention-engine.ts` matches both `/substrate/` and
+`trust-core`) and this register itself does not.
+
+| # | Annotation | Source |
+|---|---|---|
+| **W3-a** | **Circle-4 enters the S11 flip's staged PAUSE tier only, never the do-not-proceed class.** Promotion to a stronger tier is earned by the extraction demonstrating the SAME zero-false-positive floor on circle-4 candidates that the kathekon-free class must demonstrate on its own — the practice record's accumulated circle-4 track record is the promotion-evidence instrument. | L3 |
+| **W3-b** | **The first circle (own reasoning integrity / prohairesis) is measure-only under enforcement, permanently** — the tool must structure the hegemonikon, never substitute for it. **Narrow exception (L4):** when a task-pressure assent produces an other-directed (circle-2/3/4) violation, the enforcement block is justified by THAT violation; the record distinguishes — enforcement trigger = the other-directed violation; the first-circle failure is recorded separately, measure-only, never as the cited enforcement ground. | L4 |
+| **W3-c** | **NEW named prerequisite: the practice-on first-circle correction (C1) must be FULLY SETTLED — landed AND calibrated — before the S11 flip proceeds.** This is in addition to, not a replacement for, the 2026-07-12 four-part readiness standard (§A above) — the 2026-07-12 shape is unchanged (L2). Cross-reference to §A when this register's own hard-prerequisites table is next revised. | L2 |
+| **W3-d** | **The W2 record machinery (the enforcement class + per-entry regime markers + the compliance-not-virtue clause) is a flip component.** The flip must not activate without it, or enforced outcomes would land in the trust record unrecorded and unmarked — an honest-claims violation on its own terms, independent of readiness. Status of W2 itself: **NOT built** as of this annotation (soft-dependent on C1c's schema being settled per the plan §3 W2 item 4/§4 dependency graph item 7 — a soft, not hard, dependency; W2 was deliberately not decided to ride inside any earlier schema step). | L5, L7 |
+
+**Pins named, NOT built here (W3.2 — `code-standard`, buildable dark, but touches `GUARD_RE`;
+needs its own founder-waived session, guard left armed):**
+1. The fifth-circle orientation reading (`C2`/`C1c`'s `orientation-reading-{toward,away,indeterminate}`
+   event class) is never an input to `recommendIntervention` or any enforce path — L6, *"the enforce
+   layer may NOT consume the orientation reading… enforcement's blindness to unexamined reasoning is
+   addressed by strengthening the corroboration standard, never by feeding orientation into the
+   loop."* The intervention engine's existing `import type`-only purity discipline (documented at its
+   S4 build, `/CLAUDE.md`'s Trust Layer S4 refresh) already structurally helps; this pin would make the
+   guarantee an explicit, asserted battery test rather than an inherited property.
+2. No enforcement path keys on first-circle-only findings — L4's dual-recording rule, the negative
+   direction: an enforcement decision citing ONLY a first-circle (prohairesis) finding, with no
+   other-directed circle-2/3/4 violation present, should be structurally unrepresentable or
+   battery-caught.
+
+**Both pins are named here so a future waived session does not have to re-derive them from the plan
+document.** Neither is built. Nothing activates. The S11 flip remains REFUSED; weights remain
+BLOCKED; the 0h call remains the founder's.
+
+---
+
 ## Change log
 - **2026-09-07 (S7, later — OPTION D RULED and EXECUTED;
   `D-MENTOR-RULING-CALLER-CLASS-OPTION-D-ADOPTED-EXECUTED-2026-09-07`; verbatim, canonical:
@@ -224,3 +264,19 @@ The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v
   BLOCKED; the 0h call remains the founder's.**
 
 - **2026-09-10 (guard population reconciliation — `D-GUARD-LOG-BUFFER-RECONCILED-TRAPS-RECORDED-2026-09-10`; evidence: `operations/trust-layer-2026-07/2026-09-10-guard-log-buffer-RECONCILIATION.md`)** — **The carried GUARD-CAUTION log-vs-buffer non-reconciliation is CLOSED. The guard POPULATION COUNT reconciles exactly: 258 = 258 as of 2026-09-10T07:06:10Z, zero session mismatches, zero strict token failures, max |Δt| 11 ms.** Bears on the **F-3′ standing obligation** to *"report the guard population separately with its rate"*: the guard-side **denominator** is now verified against the log and therefore trustworthy. **The rate itself is NOT computed here and is not moved.** There was never a data discrepancy — three compounding measurement errors: the log not clipped to the window start (09-06 only, ~9.8 h of pre-window traffic); one token compared against the whole guard family (which **deflates** every fully-in-window day, making the carried *"log ran higher on every day"* imprecise — it runs **lower** on 09-07/08/09); and TRAP-1. **TWO NEW TRAPS, both bearing on the pre-flip report. TRAP-1: `GUARD-OUTAGE` log lines carry NO `tool=` field** — any regex keyed on it drops them silently (verified universal: 0 of 687 across the whole log). Because outage records are excluded from the rate denominator **by ruling** and the outage rate is **reported separately**, this bug makes that separately-reported rate read **zero** — a silent false negative in an obligated disclosure. **TRAP-3: "record N" in this project's records is 1-INDEXED** — CLAUDE.md's *"record 139 is the first v4"* is 0-based index **138**; the probe sits at 0-based 138 and the window is 0-based **139 onward**. Two sessions have now read that sentence two different ways; **this document's own first draft got it wrong** and was corrected by PR19. Also recorded: the log token is **lossier than the buffer** — `GUARD-CAUTION` covers both `pause_for_review` and `proceed_with_caution`, so caution **grade** is not recoverable from the log; the buffer is authoritative. **Attribution corrected by the author after PR19 passed:** the 1:1 pairing method was **established at the 2026-09-09 Condition-2 session** (its own row records `GUARD-*` 203=203, `CONSULT` 27=27); this session **reproduced** it across all five days, diagnosed the failure modes, and added the traps — it did not invent it. Neither reviewer was pointed at this register and neither caught the attribution gap. **PR19: two blind reviewers (Sonnet), both folded** — one upheld a real off-by-one in the window anchor (TRAP-3, verified first-hand before folding; both anchors independently tie, so the headline held and the count was corrected 75 → 76 on 09-06); one re-ran the reconciliation at a later moment and got 250=250 against the author's 243=243, the method reproducing under buffer growth. **Nothing built, nothing activated, no `GUARD_RE` file modified, buffer not refreshed. Baseline day count untouched. The flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-10 (logos-on W1 + W3 opened — `D-LOGOS-ON-W1-W3-EXECUTED-2026-09-10`)** — **§F above
+  added**: the four W3 register annotations (a)–(d) per the 2026-08-01 logos-on plan, plus the two
+  named-not-built pins (orientation reading never an enforce input; no enforcement path keying on
+  first-circle-only findings) — both matching `GUARD_RE`, correctly not built here, left for a
+  founder-waived session. W3's dependency gate (C1c + C2 + D4 all closed) independently re-verified
+  from `/CLAUDE.md`'s Live-in-production list before annotating, not merely quoted from the
+  Cognitive-OS standing-close prompt that named it unblocked. **Same session: W1 (the ADR-level
+  documentation/justification workstream) also executed** — see `adopted/adr/2026-07-08-sage-trust-layer.md`
+  §11-dated-amendment and `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md`'s
+  matching amendment for the fifth-circle-instantiation framing; the R18 public-surface component of
+  W1 is **drafted, not applied** — held for founder sign-off per the plan's own "sign-off-before-touch"
+  discipline for public surfaces. Full record:
+  `operations/handoffs/founder/2026-09-10-logos-on-W1-W3-CLOSE.md`. **Nothing production-facing
+  changed. No `GUARD_RE` file touched. The S11 flip remains REFUSED; weights remain BLOCKED; the 0h
+  call remains the founder's.**

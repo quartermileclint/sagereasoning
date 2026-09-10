@@ -39524,3 +39524,36 @@ agent-card extensions 26; PR1–PR26; `ListAgents` 10 peers + this one.
 
 **D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## 2026-09-10 — D-LOGOS-ON-W1-W3-EXECUTED-2026-09-10
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation). W1 = `governance`+R18
+(sign-off-before-touch); W3 = register annotations `governance`, pins `code-standard`. AC7 not
+engaged. Executed `operations/agent-circles-2026-08/2026-08-01-agent-circles-logos-on-plan.md` §3
+W1 + W3, from the binding 2026-08-01 mentor verdicts (verbatim wins).
+
+Gate re-verified from `/CLAUDE.md`'s Live-in-production list before opening either workstream (not
+trusted from the user's paraphrase): D4 live since 2026-09-05; C2/C1c live since 2026-08-08. Both
+discharge the plan's dependency graph gates for W1 and W3 ("the narrowest gate in the whole graph").
+
+**W1:** ADR-013 gains §12, a dated amendment naming the deterministic engine's fidelity work as
+fifth-circle instantiation and logos-on/practice-on as two postures of one instrument, quotes
+anchored to the verbatim record (L1/L2). **The R18 public-surface restatement is DRAFTED, not
+applied** — held for founder sign-off per the plan's own discipline for public surfaces (no
+`llms.txt`/`agent-card.json`/`api-docs` file touched).
+
+**W3:** The S11-FLIP-PREREQUISITES-REGISTER gains §F — the four register annotations (a)-(d) per
+the plan (circle-4 pause-tier-first with a promotion bar; first circle measure-only with the L4
+other-directed exception; the new C1-must-be-settled prerequisite; W2 as a flip component) plus two
+named-not-built pins (orientation reading never an enforce input; no enforcement path keying on
+first-circle-only findings). **The pins are correctly NOT built** — they target
+`website/src/lib/substrate/trust-core/intervention-engine.ts`, which matches `GUARD_RE`
+(`/substrate/` + `trust-core`), and the observation window is currently armed with no waiver for
+this session.
+
+W2 (record honesty) was out of scope and untouched. Full record:
+`operations/handoffs/founder/2026-09-10-logos-on-W1-W3-CLOSE.md`.
+
+No production surface touched. No `GUARD_RE` file modified. No public surface applied.
+
+**The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
