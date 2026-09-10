@@ -39496,3 +39496,31 @@ carried item, the *"51 guard records, 1 consult record"* figure, **still not re-
 
 **D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## 2026-09-10 — D-OPENER-REGROUNDED-AND-51-1-FIGURE-REDERIVED-2026-09-10
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation), read-only diagnostic + documents.
+AC7 not engaged. Closed the two carried items the mentor named as the queue's next work:
+
+1. **The standing opener is regrounded — Version 2026-09-10, DRAFTED not yet founder-adopted**
+   (`operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`; 2026-09-08 archived).
+   All three mentor-named false facts corrected with independent re-derivation: baseline **5 of 5**
+   (D2 still blocked — the Q1 "ordinary" condition, not counting, is what blocks it now);
+   `classifyCaller` **built and live**, self-activating, already fired correctly on production
+   traffic; `caller_class` carries **three** values (unknown 137 / subagent 12 / live_agent 18) on
+   `false-hold-record-v6`.
+2. **The "51 guard records, 1 consult record" figure REPRODUCES exactly**, scoped to session
+   `a7ee3eeb-8b49-4db1-b281-e0db4f8270b0`'s records through buffer line 360 (the buffer's size at the
+   moment the Cognitive OS build session reported it). That session ID continued afterward (a ~6h gap
+   suggests a resumed session) to a lifetime total of 55 (53 guard, 2 consult) against the current
+   452-line buffer. Method now recorded in the opener for reuse: group by the buffer's own `session`
+   field, split by `path=='guard'`, never an ad-hoc time filter.
+3. **The v4=96/97 off-by-one inside the mentor's own ruling is re-verified as real, not corrected**
+   (the verbatim stays canonical) — surfaced for a founder/mentor decision.
+
+Full record: `operations/handoffs/founder/2026-09-10-opener-regrounding-and-51-1-rederivation-CLOSE.md`.
+Verified: byte-identity guard 250/0; both SHA pins unchanged; no `GUARD_RE` file touched; R20a 43+2=45;
+agent-card extensions 26; PR1–PR26; `ListAgents` 10 peers + this one.
+
+**D2 REMAINS BLOCKED. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
