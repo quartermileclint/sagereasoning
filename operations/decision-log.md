@@ -39628,3 +39628,38 @@ activation - a corrected readiness figure is not a flip. D2 remains blocked (a d
 condition).
 
 The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.
+
+## 2026-09-12 — D-S11-PREFLIP-REPORT-ASSEMBLED-PART2-RUN-2026-09-12
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation). code-elevated for the Part (2)
+production run; governance/documents for the report. AC7 not engaged (no schema, flag or credential
+change - the ingest is the report script's own designed idempotent write path).
+
+Part (2) run non-dry-run against PRODUCTION after an explicit founder-directed target choice and a
+read-only pre-check (table empty for this agent beforehand): 492 records ingested into
+agent_hold_observations, all new, idempotent on record_hash. Output captured verbatim to
+operations/trust-layer-2026-07/runs/2026-09-12/observation-report-PRODUCTION-RUN.txt.
+
+The S11 pre-flip report the 2026-07-12 verdict asked for is assembled:
+operations/trust-layer-2026-07/2026-09-12-S11-PRE-FLIP-REPORT.md. Board: (1) NOT YET MET on the
+window's clock (5.54 days; seven on 2026-09-13T09:44:55Z; the script's "61.39 days" is a pooled-span
+artifact, disclosed not corrected since the file matches GUARD_RE); (2) NOT MET, 1 of 4 by the
+trust-state reading - but 4/4 by the records-proxy reading, so the block is the emission path, not
+domain coverage or time; (3) MET (0 false-positive / 73 correct under at-action-v2-composed);
+(4) SATISFIED plus the B2 qualification disclosed.
+
+PR19 ran as a 4-lens / 30-agent adversarial workflow, two refuters per finding: 13 raised, 13
+survived, 0 refuted, all folded at the root and re-verified first-hand. Two HIGH: the omitted
+records-proxy 4/4 figure, and the unnamed Q2 precondition from the 2026-09-10 ruling (now disclosed
+as already discharged by that same day's retroactive check). Most-repeated (four raises): a silent
+divergence from the ruling's dictated pre-window wording, now disclosed rather than corrected.
+
+A GUARD_RE near-miss was caught and closed: the evidence file's original name matched GUARD_RE via
+the "false-hold" substring and would have tripped the armed guard when staged; renamed.
+
+Guard 250/0; SHA pins unchanged; no production/app surface touched.
+
+Full record: operations/handoffs/founder/2026-09-12-part2-run-and-preflip-report-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

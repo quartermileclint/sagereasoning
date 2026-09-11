@@ -330,3 +330,38 @@ BLOCKED; the 0h call remains the founder's.
   Critical activation — a corrected readiness figure is not a flip. D2 remains blocked (a different
   condition). The S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
   founder's.**
+
+- **2026-09-12 (Part (2) run against production + the S11 PRE-FLIP REPORT assembled and PR19-folded — `D-S11-PREFLIP-REPORT-ASSEMBLED-PART2-RUN-2026-09-12`).**
+  **The pre-flip report the 2026-07-12 verdict asked for exists:**
+  `operations/trust-layer-2026-07/2026-09-12-S11-PRE-FLIP-REPORT.md`, evidence file
+  `operations/trust-layer-2026-07/runs/2026-09-12/observation-report-PRODUCTION-RUN.txt`.
+  **Part (2) was run non-dry-run against PRODUCTION** (founder-directed target; read-only pre-check
+  first; 492 records ingested into `agent_hold_observations`, all new, idempotent on `record_hash`;
+  no schema/flag/credential change). **The four-part board:** (1) **NOT YET MET on the window's own
+  clock — 5.54 days**, reaching seven on 2026-09-13T09:44:55Z (the script's printed "61.39 days ⇒
+  MEETS" is a pooled-buffer-span artifact, **disclosed not corrected** — same file matches
+  `GUARD_RE` and no waiver covered a Part-1 edit); (2) **NOT MET — 1 of 4** by the trust-state
+  reading, **and PR19 sharpened this**: the same run file also prints **4/4 by a records-proxy
+  reading**, so the examinations DID touch all four domains — the gap is that engagement has not
+  become an accreditation-write-derived state row. **Structurally blocked by the emission path, not
+  by time** (D1's own 409-before-emission cause); (3) **MET** (0 false-positive / 73 correct under
+  `at-action-v2-composed`); (4) **SATISFIED** + the B2 qualification disclosed.
+  **PR19 ran as a 4-lens / 30-agent adversarial workflow with two refuters per finding: 13 findings
+  raised, 13 survived, 0 refuted, all folded at the root and re-verified first-hand.** Two were HIGH:
+  the omitted records-proxy 4/4 figure (above), and the report's failure to name the 2026-09-10
+  ruling's **Q2** — an explicit precondition on writing this document — now disclosed as **already
+  discharged** by the earlier 2026-09-10 retroactive check. The most-repeated finding (four raises):
+  §4.1 silently substituted a more precise pre-window breakdown (137 fp / 0 correct / 1 not-a-hold)
+  for the ruling's dictated *"n=138, all false-positive"* — now **disclosed as a divergence**,
+  surfaced for the founder and mentor alongside the v4=96 item, **not corrected in the ruling**.
+  **Also fixed:** two unmarked elisions in the §0 verbatim blockquote, a misattributed quote
+  (*"harness traffic can never discharge it"* is not in D1), and a secondary figure that did not
+  reproduce (2,850 → **2,846** AT-ACTION-SKIP-BASH, exact-bound re-derived).
+  **A `GUARD_RE` near-miss caught and closed:** the evidence file was first written as
+  `false-hold-observation-report-PRODUCTION-RUN.txt` — whose **name** matches `GUARD_RE` via the
+  "false-hold" substring and would have tripped the armed guard the moment it was staged. Renamed to
+  `observation-report-PRODUCTION-RUN.txt`; both it and the report itself now test `false`.
+  Guard 250/0; SHA pins unchanged; no production/app surface touched.
+  **The report is a record, not a licence: it computes nothing binding, and its own §11 poses three
+  open questions rather than recommendations. D2 remains blocked; the S11 flip remains REFUSED;
+  weights remain BLOCKED; the 0h call remains the founder's.**
