@@ -365,3 +365,45 @@ BLOCKED; the 0h call remains the founder's.
   **The report is a record, not a licence: it computes nothing binding, and its own §11 poses three
   open questions rather than recommendations. D2 remains blocked; the S11 flip remains REFUSED;
   weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-12 (THE PRE-FLIP REPORT IS RULED ON — `D-MENTOR-RULING-PREFLIP-REPORT-THREE-QUESTIONS-ADOPTED-2026-09-12`; verbatim, canonical: `operations/trust-layer-2026-07/2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md`).**
+  **All three of the pre-flip report's §11 questions are answered; the report is folded and its §12
+  now lists what is owed.** **Q-A — the WINDOW-CLOCK reading is operative for part (1)**, on the
+  2026-09-11 reasoning (*"the pooled span is a disclosure, not an answer"*): **part (1) is NOT MET**
+  at 5.54 days and reaches its counting threshold **2026-09-13T09:44:55Z = Sun 13 Sep 19:44 AEST**.
+  The report's §8 item 1 (Part 1's duration reads the pooled-buffer span) is **CONFIRMED AS A
+  DEFECT** and **needs its own waiver before it can be fixed** — the ruling dictates the grounds the
+  request must state. **Not requested or granted; the fix is NOT made.** The ruling also adds a
+  composition paragraph to carry into the seven-day assessment: the window's 78 consult records are
+  overwhelmingly governance/record-keeping Write/Edit, the 2,846 Bash actions are dropped entirely,
+  and the 73 correct holds are **all justice-surface reads** — *"the seven-day clock reaching its
+  mark does not change what the window contains."*
+  **Q-B — the TRUST-STATE reading is operative for part (2)**, resolving the ambiguity the report
+  identified: *"the standard asks for evaluation that produces a record — not engagement that passes
+  through the harness without leaving a trace"*; the records-proxy 4/4 *"answers a different
+  question."* **Part (2) reads 1 of 4, NOT MET, structurally blocked by the emission path.** Of the
+  three branches: **Branch 1 (a founder-walked accreditation write) is the recommended path** —
+  *"not a workaround… the path the system was built for"*; **Branch 2 (changing the close hook's
+  seed-only shape) is expressly NOT recommended**; **Branch 3 (re-reading the standard) is closed**
+  by the Q-B ruling itself. **WHICH BRANCH TO TAKE IS THE FOUNDER'S CALL — the ruling declines to
+  pre-empt it. AND THE CONDITION ON BRANCH 1 IS BINDING AND IS THE MOST IMPORTANT LINE IN THE
+  RULING:** *"If they are not ready to be made honestly, the accreditation write should not be
+  performed to discharge a gate. The gate exists to ensure the record reflects genuine assessment,
+  not to be discharged by any available mechanism… If the honest assessment of phronesis, andreia
+  and sophrosyne is that the evidence is thin, the write should say so. A conservative confidence
+  weight on a domain with thin evidence is not a failure. It is the correct reading."*
+  **Q-C — the guard-side three-event rate DISCHARGES the F-3′ "reported separately with its rate"
+  obligation and CARRIES a small-sample qualification**, wording dictated and now used verbatim in
+  the report: *"MET (0 false-positive holds, 3 correct holds; n=3 — rate stated, not leaned on)."*
+  The asymmetry with the unflagged 73-hold consult figure is ruled *"not inconsistency"* — *"73
+  holds is enough to characterise a rate. 3 holds is enough to report a rate."* The guard-side
+  availability figure (275/276) carries **no** analogous qualification.
+  **BOTH WORDING DIVERGENCES ARE SETTLED:** the **v4 operative figure is 96** (*"the prior ruling's
+  figure was a snapshot of a moving buffer; the current run's figure is the authoritative one"*),
+  and the report's §4.1 substitution of the precise pre-window breakdown for the ruling's
+  *"all false-positive"* **stands** (*"the ruling's wording was imprecise… which is exactly the
+  discipline the report applied"*). Neither remains an open item.
+  **Owed after this ruling (report §12):** the founder's Branch-1 honesty examination; a waiver
+  request for §8 item 1; part (1)'s threshold on Sunday evening; and Part 3's consult/guard split,
+  **still open and unruled**. **Nothing built, activated or flipped. D2 remains blocked; the S11 flip
+  remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**

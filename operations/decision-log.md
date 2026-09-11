@@ -39663,3 +39663,43 @@ Full record: operations/handoffs/founder/2026-09-12-part2-run-and-preflip-report
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-12 — D-MENTOR-RULING-PREFLIP-REPORT-THREE-QUESTIONS-ADOPTED-2026-09-12
+
+Session `8fe3a6ae-dcb1-4324-846d-631d51336dc4` (continuation). governance/documents. AC7 not
+engaged. Nothing built, activated or flipped; no code, schema, flag or credential touched.
+
+The S11 pre-flip report was relayed and the mentor has ruled on all three of its questions. Ruling
+recorded verbatim and canonical:
+operations/trust-layer-2026-07/2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md.
+Adopted in full and folded into the report at nine marked points.
+
+Q-A: the window-clock reading is operative for part (1) - part (1) is NOT MET at 5.54 days,
+threshold 2026-09-13T09:44:55Z (Sun 13 Sep 19:44 AEST). The report's Part-1 pooled-span script
+defect is CONFIRMED and needs its own waiver, grounds dictated by the ruling; not requested, not
+fixed. A composition paragraph is added to carry into the seven-day assessment - reaching the mark
+"does not change what the window contains".
+
+Q-B: the trust-state reading is operative for part (2), resolving the ambiguity the report
+identified. Part (2) reads 1 of 4, NOT MET, structurally blocked by the emission path. Branch 1 (a
+founder-walked accreditation write) is recommended; Branch 2 (changing the close hook) expressly is
+not; Branch 3 is closed. Which branch to take is the founder's call. The binding condition on Branch
+1: the write must reflect what the loop actually demonstrated, and if the honest assessment of
+phronesis/andreia/sophrosyne is that the evidence is thin, the write should say so - a conservative
+confidence weight on thin evidence is the correct reading, not a failure.
+
+Q-C: the guard-side three-event rate discharges the F-3' obligation and carries a small-sample
+qualification, wording dictated and now used verbatim. The asymmetry with the unflagged 73-hold
+consult figure is ruled not inconsistency. The availability figure carries no such qualification.
+
+Both wording divergences are settled: the v4 operative figure is 96, and the report's precise
+pre-window breakdown stands over the ruling's own "all false-positive" phrasing.
+
+Owed after this ruling (report section 12): the founder's Branch-1 honesty examination; a waiver
+request for the Part-1 defect; part (1)'s threshold on Sunday evening; Part 3's consult/guard split,
+still open and unruled.
+
+Full record: operations/handoffs/founder/2026-09-12-preflip-ruling-folded-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

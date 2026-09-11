@@ -7,10 +7,16 @@
 production, buffer at **492 lines** at run time. Consult-side outage figures are the one thing below
 that the script does not produce; they were read from `gate1.log` by the method stated in §4.4.
 
+**STATUS: RELAYED AND RULED ON, 2026-09-12.** The mentor has reviewed this report and ruled on all
+three of its §11 questions; those rulings are folded into §§1–4, §6, §8 and §11 below, each marked
+⚖️ at the point it binds. Canonical verbatim:
+`operations/trust-layer-2026-07/2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md`
+— **verbatim wins over every line of this report.** §12 lists what is owed after the ruling.
+
 **What this report is:** the record the 2026-07-12 enforce-gate verdict asked to be brought back —
 *"Return in seven days with the record. The assent will be examined then."* It carries every
 disclosure the rulings since have made required pre-flip content (the 2026-09-07 S8 ruling; the
-2026-09-10 Q1 ruling; the 2026-09-11 regime ruling).
+2026-09-10 Q1 ruling; the 2026-09-11 regime ruling; and now the 2026-09-12 ruling on this report).
 
 **What this report is not:** a licence to flip. It computes nothing binding. The S11 flip remains a
 founder-walked Critical activation, re-confirmed at flip time regardless (PR7). **Every number below
@@ -40,16 +46,23 @@ bullet) but silently truncated two others with no mark at all. Every elision bel
 
 ## 1. The board, honestly
 
+**⚖️ RULED 2026-09-12 — all three of this report's §11 questions are answered.** Verbatim, canonical:
+`operations/trust-layer-2026-07/2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md`
+(verbatim wins over every line below). The board is updated to the ruled readings; §11 now records
+the answers rather than posing the questions.
+
 | Part | Reading at this assembly | Basis |
 |---|---|---|
-| **(1) Duration ≥ 7 days, representative** | **NOT YET MET on the window's own clock — 5.54 days** (7-day mark: 2026-09-13T09:44:55Z = Sun 13 Sep 19:44 AEST). The script prints "61.39 days ⇒ MEETS" — a **pooled-span artifact**, see §2.1. Representativeness: composition disclosed, §2.2. | window start 2026-09-06T09:44:55Z → run 2026-09-11T22:39:56Z |
-| **(2) All four domains evaluated; ≥2 above conservative** | **NOT MET — 1 of 4.** Only `dikaiosyne` carries evidence (`habitual`, confidence weight 0.420); `phronesis`, `andreia`, `sophrosyne` have **no state row at all**. Structural, not a waiting problem — §3. | production trust-state read |
-| **(3) Measured false-hold rate, false ≤ correct** | **MET under `at-action-v2-composed` (0 false-positive holds, 73 correct holds).** Instrument age ≈ 5.5 days. Pre-window `at-action-v1-lean` (n=138: 137 false-positive, 0 correct, 1 not-a-hold) excluded per ADR-014. Ruled 2026-09-11. | §4 |
+| **(1) Duration ≥ 7 days, representative** | **NOT MET — 5.54 days on the window's own clock. RULED 2026-09-12 (Q-A): the window-clock reading is the operative one**, on the same reasoning the 2026-09-11 ruling applied to part (3); the script's "61.39 days ⇒ MEETS" is a pooled-span artifact and *"a disclosure, not an answer."* Counting threshold reached **2026-09-13T09:44:55Z = Sun 13 Sep 19:44 AEST**. Representativeness: composition disclosed, §2.2 — and the ruling adds that reaching the mark *"does not change what the window contains."* | window start 2026-09-06T09:44:55Z → run 2026-09-11T22:39:56Z |
+| **(2) All four domains evaluated; ≥2 above conservative** | **NOT MET — 1 of 4. RULED 2026-09-12 (Q-B): the trust-state reading is the operative one**, resolving the ambiguity this report identified — *"the standard asks for evaluation that produces a record, not engagement that passes through the harness without leaving a trace."* The records-proxy 4/4 answers a different question. **Structurally blocked by the emission path; the recommended path is Branch 1** (a founder-walked accreditation write) — §3. | production trust-state read |
+| **(3) Measured false-hold rate, false ≤ correct** | **MET under `at-action-v2-composed` (0 false-positive holds, 73 correct holds).** Instrument age ≈ 5.5 days. Pre-window `at-action-v1-lean` (n=138: 137 false-positive, 0 correct, 1 not-a-hold) excluded per ADR-014. Ruled 2026-09-11. **Guard-side sub-figure carries its own ruled qualification (Q-C): MET (0 false-positive holds, 3 correct holds; n=3 — rate stated, not leaned on)** — §4.2. | §4 |
 | **(4) The G6 composition question** | **SATISFIED** (the shared Q3 predicate is the classifier used) **plus the further qualification ruled 2026-09-07 encoded as a disclosure**, §5. | §5 |
 
-**Read plainly: two of four parts are met; one is 1.46 days from being met on the window's clock;
-one is structurally blocked and will not be met by waiting.** Part (2) is now the long pole, not
-part (3).
+**Read plainly: two of four parts are met; part (1) reaches its counting threshold on Sunday
+evening; part (2) is structurally blocked and will not be met by waiting.** Part (2) is the long
+pole, and the 2026-09-12 ruling confirms it: the block is the emission path, and the path through it
+is a founder-walked accreditation write **that must reflect what the loop actually demonstrated** —
+see §3's closing, which carries the most important sentence in that ruling.
 
 ---
 
@@ -66,9 +79,20 @@ days ⇒ MEETS ≥7 days`. That span begins at the buffer's first **pre-window `
 retired July instrument). It is the same class of error the 2026-09-11 ruling addressed for part (3)
 — a figure computed over a mixture of the retired and current instruments describes neither — and it
 is **disclosed here, not silently corrected**: `false-hold-observation-report.ts` matches `GUARD_RE`,
-the window is armed, and no waiver covers a Part-1 edit. **The window-clock figure above is the
-operative one for this report.** A future waived session should scope Part 1's span to the window
-(the first post-probe record), exactly as Part 3 was scoped.
+the window is armed, and no waiver covers a Part-1 edit.
+
+**⚖️ RULED 2026-09-12 (Q-A) — the window-clock reading is operative, and the script defect is
+confirmed.** Verbatim: *"The pooled span is a disclosure, not an answer… Part (1) is NOT MET at the
+time of this assembly and reaches its counting threshold on Sunday evening."* The ruling confirms
+§8 item 1 as a defect *"on the same grounds as the Part 3 defect the 2026-09-11 ruling corrected"*
+and holds that **it needs its own waiver before it can be fixed**, with the grounds it should state
+dictated by the ruling itself:
+
+> the window-clock figure is the operative one per this ruling; the script's current output is the
+> same class of pooled-span artifact that Part 3 carried before correction.
+
+**That waiver has not been requested or granted as of this fold, and the fix is NOT made here.** The
+correction is scoped to Part 1's span computation only — the same shape the Part 3 correction took.
 
 ### 2.2 Representativeness — composition disclosed, never filtered
 
@@ -109,6 +133,21 @@ in every figure below. The per-session instance the mentor carried — *"51 guar
 record, a full build session"* — was re-derived this session and **reproduces exactly** (session
 `a7ee3eeb…` through buffer line 360; that session later continued to 53 guard / 2 consult).
 
+**⚖️ RULED 2026-09-12 (Q-A) — the composition, named plainly, to be carried into the Part (1)
+assessment at the seven-day mark.** The ruling holds §2.2's treatment is right and adds that the
+composition deserves stating in one place without qualification:
+
+> The window's 78 consult records are overwhelmingly Write/Edit examinations of governance and
+> record-keeping documents. The 2,846 Bash actions are dropped from the consult floor entirely. The
+> at-action-v2-composed regime's 73 correct holds are all justice-surface reads. This is a real
+> composition, honestly disclosed. **The seven-day clock reaching its mark does not change what the
+> window contains.** The pre-flip report carries the composition; the 0h call rests on the disclosed
+> facts.
+
+**This is the sentence to carry forward on Sunday evening:** part (1)'s counting threshold arriving
+is a fact about the clock, not about the population. Nothing in the composition above changes at
+19:44 AEST on 2026-09-13.
+
 ---
 
 ## 3. Part (2) — the trust record's shape: NOT MET, and why waiting will not meet it
@@ -142,6 +181,16 @@ examinations plainly engaged all four domains. **What has not happened is the se
 that engagement into a trust-state row, which (per below) requires an accreditation write, not more
 consult volume.
 
+**⚖️ RULED 2026-09-12 (Q-B) — THE AMBIGUITY IS RESOLVED: the trust-state reading is operative.**
+Verbatim: *"The standard asks for evaluation that produces a record — not engagement that passes
+through the harness without leaving a trace. The phrase 'aggregate confidence rising above
+conservative on at least two domains' presupposes a record with confidence weights, which only the
+trust-state produces. The records-proxy reading answers a different question: did the harness touch
+these domains? The standard's question is: does the trust record reflect examined assessment of
+these domains? Those are not the same question."* **Part (2) reads 1 of 4, NOT MET.** The
+records-proxy 4/4 stays on this page as an honest disclosure of what the examinations touched; it is
+**not** an alternative reading of the standard.
+
 **On "above conservative":** the term is not encoded numerically anywhere in `trust-core` (checked:
 no confidence-tier constant carries that name); the script itself says the precise tier reading *"is
 the founder's call."* This report therefore reports the observable — one domain, weight 0.420 — and
@@ -161,10 +210,41 @@ every close once the agent's accreditation row already exists (*"the accreditati
 never discharge it"* in the first draft was presented as a quote from D1; it is not there —
 it is this session's own paraphrase (it does appear, unquoted, in an archived standing-opener
 document) and is now stated as such, not in quotation marks. **Consequence: part (2) cannot be met
-by more window days of the current harness traffic pattern alone.** It needs either a deliberate
-accreditation write whose signed assessments engage `phronesis`/`andreia`/`sophrosyne`, or a change
-to the close hook's seed-only shape — a design question for the mentor (§11, Q-B), not something a
-session should route around.
+by more window days of the current harness traffic pattern alone.**
+
+### 3.1 The three branches, as ruled 2026-09-12 (Q-B)
+
+The ruling is on the fork, not on which branch to take — *"that is the founder's call, not this
+ruling's to pre-empt."* Its assessment of each:
+
+| Branch | Ruled assessment |
+|---|---|
+| **1. A founder-walked accreditation write** carrying signed assessments engaging `phronesis`/`andreia`/`sophrosyne` | **The structurally correct path, and the recommended one.** *"The emission path is working as designed… The design reflects a deliberate choice: the trust record should reflect examined, signed assessments, not the volume of harness traffic. A founder-walked accreditation write is not a workaround. It is the path the system was built for."* |
+| **2. Change the close hook's seed-only shape** | *"Not ruled against, but it is the more complex path and it changes the emission semantics in ways that would need their own examination. **It is not the recommended branch.**"* A build under waiver, touching a `GUARD_RE` file. |
+| **3. Re-read part (2) against what the dogfood loop can structurally produce** | **Examined and closed** — the trust-state reading is operative (above). This branch is not available as a way through. |
+
+### 3.2 The condition on Branch 1 — the most important passage in the ruling
+
+Branch 1 being recommended is **not** a licence to perform the write in order to clear the gate. The
+ruling is explicit, and this is the sentence that governs:
+
+> The founder should examine what signed assessments for phronesis, andreia, and sophrosyne would
+> honestly reflect about the loop's behaviour in the window, and whether those assessments are ready
+> to be made. **If they are not ready to be made honestly, the accreditation write should not be
+> performed to discharge a gate. The gate exists to ensure the record reflects genuine assessment,
+> not to be discharged by any available mechanism.**
+>
+> …The accreditation write should reflect what the loop has actually demonstrated, not what would
+> discharge the gate. **If the honest assessment of phronesis, andreia, and sophrosyne is that the
+> evidence is thin, the write should say so. A conservative confidence weight on a domain with thin
+> evidence is not a failure. It is the correct reading.**
+
+**Read against this window's own composition (§2.2), that condition has teeth.** The window's 73
+correct holds are *all* justice-surface reads — `dikaiosyne`, the one domain that already has a
+state row. What the window demonstrates about `phronesis`, `andreia` and `sophrosyne` specifically
+is exactly the question the founder must answer before any write, and this report does not answer it
+or pre-judge it. A thin-evidence reading, honestly recorded, satisfies the ruling; a write
+constructed to produce four rows does not.
 
 ---
 
@@ -189,8 +269,13 @@ the v4=96 figure. Named here on the same footing: **the ruling said "all false-p
 says 137 of 138, with 1 record that is neither.** The one-record difference changes nothing about
 the MET reading (the excluded population is pre-window regardless of its internal split), but a
 mentor re-reading this report should not have to independently re-derive that their own dictated
-wording was inexact. **Not corrected in the ruling — surfaced for the founder's and mentor's
-decision, alongside the v4=96 item in §6.**
+wording was inexact.
+
+**⚖️ RULED 2026-09-12 — SETTLED. The substitution stands.** Verbatim: *"The ruling's wording was
+imprecise. The buffer's breakdown is the accurate one. This report's §4.1 substitution of the precise
+breakdown for the ruling's wording is correct and should stand… The ruling's imprecision is named,
+not corrected by silent substitution — which is exactly the discipline the report applied."* No
+longer an open item for the founder or mentor.
 
 The pooled figure is a **disclosure only**, never the headline (the ruling's own words: a mixture
 *"that has never existed as a coherent measuring apparatus"*): pooled, 477 at-action examinations ·
@@ -202,12 +287,21 @@ of the 137 is a pre-window `v1` record.
 | Population | Classified holds (false / correct) | Notes |
 |---|---|---|
 | **Consult** (n=216 all-time; 78 in-window) | pooled 137 / 70; **composed regime 0 / 70** | all 137 false-positives are pre-window `v1` |
-| **Guard** (n=276, all in-window) | **0 / 3** | only **3 guard denies** in the whole window; the other 273 guard records are cautions/proceeds that *allow* the tool and are not holds by definition |
+| **Guard** (n=276, all in-window) | **MET (0 false-positive holds, 3 correct holds; n=3 — rate stated, not leaned on)** | only **3 guard denies** in the whole window; the other 273 guard records are cautions/proceeds that *allow* the tool and are not holds by definition |
 
 The guard population's **denominator** was verified 1:1 against `gate1.log` on 2026-09-10 (258=258
 then; 276=276 at this run: 254 `GUARD-CAUTION` + 18 `GUARD-PROCEED` + 3 `GUARD-BLOCK` + 1
-`GUARD-OUTAGE`). Its **rate** — 0 false among 3 holds — is reported here for the first time, and it is
-a rate over three events; it is stated, not leaned on.
+`GUARD-OUTAGE`). Its **rate** — 0 false among 3 holds — is reported here for the first time.
+
+**⚖️ RULED 2026-09-12 (Q-C) — the three-event rate discharges the F-3′ obligation, and it carries a
+small-sample qualification** (wording dictated by the ruling, used verbatim in the table above):
+*"MET (0 false-positive holds, 3 correct holds; n=3 — rate stated, not leaned on)."* On the
+asymmetry with the consult-side figure, which the 2026-09-11 ruling held needs **no** such flag at
+73 holds: *"The asymmetry… is not inconsistency. It reflects the actual difference in sample sizes.
+73 holds is enough to characterise a rate. 3 holds is enough to report a rate. They are not the
+same thing, and the pre-flip report should not treat them as if they were."* **The guard-side
+availability figure (275/276 = 99.6%, §4.4) carries no analogous qualification** — ruled: *"a single
+outage in 276 records is a precise count, not a rate over a thin sample."*
 
 **A disclosure the script itself prints, repeated so it is not missed:** on the guard side the
 decision-table column says `do-not-proceed` on **25** records, of which only **3** are classified
@@ -269,10 +363,12 @@ build — is not done and is not part of this report.**
 ## 6. The instrument-change disclosure (required pre-flip content, 2026-09-10 Q1 ruling)
 
 - **Schema distribution in the window** (v1 excluded; the ruling's own convention): **v3=78 ·
-  v4=96 · v5=135 · v6=44** (353 window records; whole buffer 492 incl. 138 `v1` + the probe). The
-  ruling's quoted figure carried `v4=96` at a 423-line snapshot where the arithmetic gives 97 — an
-  off-by-one **surfaced 2026-09-10 for the founder's and mentor's decision, not corrected here**; at
-  this run the window's own v4 count is 96 (the probe, itself v4, sits outside the window).
+  v4=96 · v5=135 · v6=44** (353 window records; whole buffer 492 incl. 138 `v1` + the probe).
+  **⚖️ THE v4 OFF-BY-ONE IS RULED AND SETTLED (2026-09-12): the operative figure is 96.** Verbatim:
+  *"The 2026-09-10 ruling's quoted figure carried v4=96 at a 423-line snapshot where the arithmetic
+  gives 97. At this run the window's own v4 count is 96 (the probe sits outside the window). The
+  operative figure is 96. The prior ruling's figure was a snapshot of a moving buffer; the current
+  run's figure is the authoritative one for this report."* **No longer an open item.**
 - **The edit-window anomaly:** **2** schema-v6 records read `callerClass: unknown` /
   `clientVersion: null` (2026-09-09T19:27:17Z and 19:28:21Z). Diagnosed 2026-09-10 at an honest
   confidence level — both fall inside the 19:25:00–19:29:27Z window in which
@@ -313,10 +409,15 @@ mechanical (exact-token, space-anchored regexes), and this report's figures were
 ## 8. Script defects found by assembling this report — NOT fixed, named for waivers
 
 1. **Part 1's duration is a pooled-buffer span** (§2.1) — reads 61.39 days over a 5.54-day window.
-   Same class as the Part 3 error the 2026-09-11 ruling corrected. Needs its own waiver.
+   Same class as the Part 3 error the 2026-09-11 ruling corrected. **⚖️ CONFIRMED AS A DEFECT
+   2026-09-12 (Q-A), and it needs its own waiver before it can be fixed.** The ruling dictates the
+   grounds the waiver request should state: *"the window-clock figure is the operative one per this
+   ruling; the script's current output is the same class of pooled-span artifact that Part 3 carried
+   before correction."* **Waiver not requested or granted as of this fold — the fix is not made.**
 2. **Part 3 pools consult and guard** (the script says so: *"a population-split Part 3 is an OPEN,
    UNRULED item"*). §4.2 above supplies the split from Part 3b's own columns; whether Part 3 itself
-   should be split is a ruling question, not a session's call.
+   should be split is a ruling question, not a session's call. **Still open and unruled** — the
+   2026-09-12 ruling did not reach it.
 
 ## 9. What this report does not do
 
@@ -329,34 +430,55 @@ computed from the table alone would repeat the pooled error). **D2 remains block
 
 ## 10. Where this leaves the standard
 
-- **(3) is met** and **(4) is satisfied**, on the current instrument, with their bounds stated.
-- **(1) is 1.46 days short** on the window's own clock, and its representativeness is a disclosed
-  composition, not a filtered one.
-- **(2) is structurally blocked** by the emission path — not by time.
+- **(3) is met** and **(4) is satisfied**, on the current instrument, with their bounds stated —
+  the guard-side sub-figure now carrying its own ruled `n=3` qualification.
+- **(1) is NOT MET** — 5.54 days on the window's own clock, which the 2026-09-12 ruling confirms is
+  the operative reading. It reaches its counting threshold **Sun 13 Sep 19:44 AEST**, and reaching it
+  *"does not change what the window contains."*
+- **(2) is NOT MET at 1 of 4**, ruled on the trust-state reading, and **structurally blocked by the
+  emission path — not by time.**
 
 The honest one-line summary the founder can carry: *the instrument's false-hold behaviour under the
-current regime is clean; the record it is meant to inform is one-domain-wide; and the seven days
-arrive on Sunday evening.*
+current regime is clean; the record it is meant to inform is one-domain-wide; the seven days arrive
+on Sunday evening; and the one path through part (2) is a write that must be honest before it is
+useful.*
 
-## 11. Questions for the mentor (relayed by the founder)
+## 11. The three questions — ANSWERED (ruled 2026-09-12)
 
-**Q-A — Part (1) on the window's clock.** The script reports duration over the pooled buffer span
-(61 days); on the window's own clock it is 5.54 days at this assembly, reaching seven on
-2026-09-13T09:44:55Z. Is the window-clock reading the operative one for part (1), on the same
-reasoning the 2026-09-11 ruling applied to part (3)? (This report assumes yes and says so in §2.1.)
+Verbatim, canonical:
+`operations/trust-layer-2026-07/2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md`.
+This section is retained as the record of what was asked and what came back; the substance is folded
+into §§1–4 and §8 above.
 
-**Q-B — Part (2) is not a waiting problem.** Three of four cardinal domains have no state row because
-trust events are emitted only from accreditation writes, and the harness's close hook is seed-only
-(409 before emission once the row exists — the register's D1). More window days cannot change this.
-What discharges part (2): a founder-walked accreditation write carrying signed assessments that
-engage `phronesis`/`andreia`/`sophrosyne`; a change to the close hook's seed-only shape (a
-`GUARD_RE` build under waiver); or a re-reading of part (2) against what the dogfood loop can
-structurally produce? This report recommends nothing — it names the fork.
+**Q-A — Part (1) on the window's clock. → YES, the window-clock reading is operative.** Same
+reasoning as the 2026-09-11 part (3) ruling: *"The pooled span is a disclosure, not an answer."*
+Part (1) is NOT MET; threshold Sun 13 Sep 19:44 AEST. §8 item 1 is confirmed as a defect needing its
+own waiver, with the grounds dictated. Folded into §1, §2.1, §2.2, §8.
 
-**Q-C — The guard-side rate rests on three holds.** 0 false / 3 correct is the guard population's
-first reported rate (F-3′). Does a three-event rate discharge the "reported separately with its rate"
-obligation, or should it carry a small-sample qualification of the kind ruled *not* needed for the
-73-hold consult figure?
+**Q-B — Part (2) is not a waiting problem. → The fork is correctly named; the trust-state reading is
+operative; Branch 1 is recommended, conditionally.** The ambiguity is resolved against the
+records-proxy reading. Branch 1 (a founder-walked accreditation write) is *"the path the system was
+built for"* — **but only if the assessments can be made honestly.** Folded into §1, §3, §3.1, §3.2.
+**Which branch to take remains the founder's call; the ruling explicitly declines to pre-empt it.**
+
+**Q-C — The guard-side rate rests on three holds. → It discharges the obligation, and carries a
+small-sample qualification.** Wording dictated and now used verbatim: *"MET (0 false-positive holds,
+3 correct holds; n=3 — rate stated, not leaned on)."* The availability figure needs none. Folded
+into §1, §4.2.
+
+**Both wording divergences are SETTLED** (§4.1, §6): the v4 operative figure is **96**, and §4.1's
+precise-breakdown substitution **stands**. Neither remains an open item.
+
+## 12. What is owed after this ruling
+
+1. **The founder's Branch-1 examination** — whether honest signed assessments for `phronesis`,
+   `andreia` and `sophrosyne` can be made from what the window actually demonstrates. **Not a session's
+   call, and explicitly not to be performed to discharge a gate** (§3.2).
+2. **A waiver request for §8 item 1** (Part 1's pooled-span defect), grounds dictated by the ruling.
+   Not requested here.
+3. **Part (1)'s counting threshold** arrives 2026-09-13T09:44:55Z — a clock fact, carrying the
+   composition disclosure with it (§2.2).
+4. **Part 3's consult/guard split** (§8 item 2) remains open and unruled.
 
 ---
 
