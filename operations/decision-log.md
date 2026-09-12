@@ -39875,3 +39875,40 @@ Full record: operations/handoffs/founder/2026-09-12-window-specification-approve
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-12 — D-W2-ENFORCEMENT-RECORD-MACHINERY-BUILT-DARK-ON-BRANCH-PR19-FOLDED-2026-09-12
+
+Session `sagereasoning-bd [acc3ac]`, opened under the W2 build prompt. code-elevated, dark,
+flag-gated. AC7 not engaged. Nothing activated, flipped, migrated, minted, deployed or pushed.
+Production unchanged. No GUARD_RE file modified in the measured checkout.
+
+Built all five plan §3 W2 items (mentor L4/L5/L7): the effect-neutral `enforcement-outcome` class
+('flag', NULL domain, insert-only; a deny-time seam in the guardrail's sandwich branch on
+`do_not_proceed` only, agent id from the credential context through a pure helper); per-entry
+regime markers stamped at the store chokepoint; the L7 compliance-not-virtue clause inline on every
+entry (record-level half STAGED for R18 sign-off, not applied); the L4 dual-recording rule pinned
+both directions with a negative sweep; the schema election decided as a SEPARATE step because the
+original C1c is unbuilt and unscheduled (migration 21→22 authored on main). New dedicated flag
+`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED`; unset ⇒ byte-identical, battery-asserted.
+
+Because the byte-identity guard is armed and no waiver existed, the code lives on branch
+`w2-record-honesty` (commit `5aa82f5`, twelve files, path-scoped) in an isolated worktree; the
+branch commit ran with the window flag unset so the pre-commit guard was dormant on it — disclosed.
+Merge + the migration walk are the founder-walked waiver session's acts
+(`2026-09-13-W2-waiver-merge-and-schema-walk-NEXT-SESSION-PROMPT.md`).
+
+PR19: three independent Sonnet reviewers. One HIGH folded at the root — a source-only identity pin
+was defeatable by a `?? agent_id` fallback that would reopen forgery on unbound credentials; now a
+one-parameter helper with runtime pins and a seam-block prohibition. Three nits + one LOW folded.
+Nine live mutations all went red. One process fault, mine: `git add -N` on the new files let a
+reviewer's `git checkout --` empty the module mid-review; caught, reconstructed, verified identical.
+Post-fold batteries: W2 126/0; S10 198/0; orientation 57/0; S9b 86/0; S4 423/0; trust-core 112/0;
+emission-hooks 19/0; stoa 60/0; guardrail-sandwich 91/91; tsc 0; both SHA pins unchanged.
+
+Every at-action frame was unavailable this session (no assessment in response); the build ran
+unframed and is recorded as such.
+
+Full record: operations/handoffs/founder/2026-09-12-W2-record-honesty-build-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

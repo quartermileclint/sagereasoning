@@ -132,7 +132,20 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
-- **2026-09-12 (latest — THE W2 WINDOW IS SPECIFIED, APPROVED, AND RULED. THE CLOCK RESTARTS AT ITS
+- **2026-09-12 (latest — W2 BUILT DARK ON BRANCH `w2-record-honesty` (`5aa82f5`), NOT MERGED, NOT
+  ACTIVATED; `D-W2-ENFORCEMENT-RECORD-MACHINERY-BUILT-DARK-ON-BRANCH-PR19-FOLDED-2026-09-12`;
+  close: `operations/handoffs/founder/2026-09-12-W2-record-honesty-build-CLOSE.md`; design:
+  `operations/agent-circles-2026-08/2026-09-12-W2-record-honesty-DESIGN.md`)** — Row **W3-d**'s
+  "NOT built" is now "BUILT DARK, unmerged": all five plan §3 W2 items (the effect-neutral
+  `enforcement-outcome` class; per-entry regime markers; the L7 clause inline, record-level half
+  STAGED for R18; the L4 dual-recording rule pinned both directions; the schema election decided as
+  a SEPARATE 21→22 CHECK widening, authored on main) behind the new dedicated flag
+  `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED`. PR19 three-reviewer, one HIGH folded at the root. The
+  guard is armed and no waiver existed, so the code sits in an isolated worktree; merge + the
+  migration walk are the founder-walked waiver session's acts
+  (`2026-09-13-W2-waiver-merge-and-schema-walk-NEXT-SESSION-PROMPT.md`). W3-d's flip coupling is
+  unchanged: the flip must not activate without W2 LIVE, and W2 is not live.
+- **2026-09-12 (THE W2 WINDOW IS SPECIFIED, APPROVED, AND RULED. THE CLOCK RESTARTS AT ITS
   FIRST RECORD; NO W2 SESSION HAS YET RUN;
   `D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12`; verbatim, canonical:
   `2026-09-12-mentor-ruling-window-specification-QS1-QS2-QS3-verbatim.md`; specification:
