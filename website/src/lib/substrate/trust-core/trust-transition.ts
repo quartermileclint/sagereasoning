@@ -78,6 +78,12 @@ export const EVENT_EFFECT: Record<TrustEventType, TrustEventEffect> = {
   'orientation-reading-toward': 'flag',
   'orientation-reading-away': 'flag',
   'orientation-reading-indeterminate': 'flag',
+  // Logos-on W2 (2026-09-12, mentor L5): the enforcement class "moves no domain
+  // level in either direction" — 'flag' by construction (EVENT_EFFECT-neutral),
+  // and never reaches applyTrustEvent in practice (INSERT-ONLY emission, NULL
+  // domain). PA-6 re-run in the same change (w2-enforcement-record.test.ts §2):
+  // an enforcement entry cannot raise oversight, or any domain, at any level.
+  'enforcement-outcome': 'flag',
 }
 
 /**

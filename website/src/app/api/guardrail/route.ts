@@ -24,6 +24,24 @@ import {
   runGuardrailSandwich,
   isGuardrailSandwichEnabled,
 } from '@/lib/guardrail-sandwich'
+// Logos-on W2 (2026-09-12): the enforcement-class record seam. DARK behind BOTH
+// SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ENFORCEMENT_RECORD_ENABLED — flag-off
+// the block below is skipped entirely (no read, no write; the route is
+// byte-identical in behaviour). Adds recording ABOUT a deny, never a deny
+// condition (logos-on plan §4). DISCLOSED SCOPE LIMIT (PR19 nit, 2026-09-12):
+// the seam lives in the SANDWICH branch only. The legacy sage-guard path (live
+// only if SUBSTRATE_GUARDRAIL_SANDWICH_ENABLED were rolled back) signs no
+// verdict, so no R18f-parallel entry could be derived there — a sandwich-flag
+// rollback silently loses enforcement-record coverage. Named, not closed.
+import {
+  emitEnforcementOutcomeTrustEvent,
+  resolveEnforcementAgentId,
+} from '@/lib/substrate/trust-core/enforcement-record'
+import {
+  isTrustCoreEnabled,
+  isEnforcementRecordEnabled,
+} from '@/lib/substrate/trust-core/trust-core-flag'
+import { resolveCredentialContext } from '@/lib/substrate/agent-assessment-history-store'
 
 /**
  * sage-guard — Binary safety gate for AI agent actions.
@@ -344,6 +362,44 @@ export async function POST(request: NextRequest) {
           },
         })
         .then(() => {})
+
+      // Logos-on W2 — the enforcement-class record (mentor L5/L7). ONLY on a
+      // genuine deny ('do_not_proceed' — a caution is not enforcement: the
+      // action proceeds). The agent identity is the CREDENTIAL's bound agent_id
+      // (resolveCredentialContext + isAcceptedAgentId, the /api/reason
+      // orientation seam's own rule) — NEVER the caller-supplied `agent_id`
+      // body field, so the entry is consumer-unforgeable. Awaited inside a
+      // never-throws emitter (KG1: no fire-and-forget); the verdict above is
+      // already composed and is not affected by any outcome here. Flag-off the
+      // whole block is skipped: no credential read, no write.
+      // Only a VERDICT outcome carries a signed artifact; engine_unavailable /
+      // tier1_pause produce no signed assessment and therefore no entry
+      // (R18f-parallel: no artifact, no event).
+      const enforcementSigned = outcome.status === 'verdict' ? outcome.signed : null
+      if (
+        isTrustCoreEnabled() &&
+        isEnforcementRecordEnabled() &&
+        resultBody.recommendation === 'do_not_proceed' &&
+        enforcementSigned
+      ) {
+        // PR19 fold (2026-09-12, HIGH): the identity choice is the pure
+        // resolveEnforcementAgentId helper (credential context ONLY — it has no
+        // parameter a body field could be passed through), runtime-tested. This
+        // block deliberately never mentions the request's agent_id field.
+        const enfCredCtx = await resolveCredentialContext(keyCheck.api_key_id)
+        const enforcementAgentId = resolveEnforcementAgentId(enfCredCtx)
+        if (enforcementAgentId !== null) {
+          await emitEnforcementOutcomeTrustEvent({
+            agentId: enforcementAgentId,
+            credentialId: keyCheck.api_key_id,
+            ownerUserId: enfCredCtx.owner_user_id,
+            signedAssessment: enforcementSigned,
+            verdictRecommendation: resultBody.recommendation as string,
+            verdictProximity:
+              (resultBody.katorthoma_proximity as KatorthomaProximityLevel | null) ?? null,
+          })
+        }
+      }
 
       const sandwichEnvelope = buildEnvelope({
         result: resultBody,
