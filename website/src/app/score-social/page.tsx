@@ -107,7 +107,14 @@ export default function ScoreSocialPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Evaluation failed')
+        // O-2 (2026-09-12): prefer the route's human sentence over its machine
+        // code. `data.error` is a code like 'ai_temporarily_unavailable' or
+        // 'ai_unavailable_provider_account', and this message is rendered
+        // verbatim to a practitioner — so the bare code was being shown as if
+        // it were an explanation. Pre-existing for the outage code; O-2 adds a
+        // second one, which is why it is fixed here rather than left. Same
+        // precedence reflect/page.tsx already uses.
+        throw new Error(data.message || data.error || 'Evaluation failed')
       }
 
       const envelope = await res.json()

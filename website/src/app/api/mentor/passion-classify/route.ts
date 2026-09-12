@@ -12,7 +12,12 @@ import {
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
-import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import {
+  isLlmOutage,
+  llmOutageResponse,
+  isProviderAccountBlock,
+  providerAccountBlockResponse,
+} from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import {
   PATTERN_CONSECUTIVE_MISSES,
@@ -185,14 +190,20 @@ Classify this passion event.`,
     })
   } catch (err) {
     console.error('Passion classify API error:', err)
+    // O-2: an account block is checked FIRST and wins over the outage branch.
+    // They are disjoint on every observed shape, but §BND-6 discloses one
+    // hypothetical overlap (a 429 carrying usage-limit wording); on it the
+    // block response is right and 'Retry-After: 30' is the false promise.
+    const accountBlock = isProviderAccountBlock(err)
     const outage = isLlmOutage(err)
     logRouteError({
       route: '/api/mentor/passion-classify',
       method: 'POST',
       error: err,
-      statusCode: outage ? 503 : 500,
+      statusCode: accountBlock || outage ? 503 : 500,
       isLlmOutage: outage,
     })
+    if (accountBlock) return providerAccountBlockResponse(err, 'human')
     if (outage) return llmOutageResponse()
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

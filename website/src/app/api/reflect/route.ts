@@ -1,6 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 // #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
-import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import {
+  isLlmOutage,
+  llmOutageResponse,
+  isProviderAccountBlock,
+  providerAccountBlockResponse,
+} from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -397,8 +402,14 @@ Score my actions and give me the sage perspective.`
     })
   } catch (error) {
     console.error('Reflection API error:', error)
+    // O-2: an account block is checked FIRST and wins over the outage branch.
+    // They are disjoint on every observed shape, but §BND-6 discloses one
+    // hypothetical overlap (a 429 carrying usage-limit wording); on it the
+    // block response is right and 'Retry-After: 30' is the false promise.
+    const accountBlock = isProviderAccountBlock(error)
     const outage = isLlmOutage(error)
-    logRouteError({ route: '/api/reflect', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    logRouteError({ route: '/api/reflect', method: 'POST', error, statusCode: accountBlock || outage ? 503 : 500, isLlmOutage: outage })
+    if (accountBlock) return providerAccountBlockResponse(error, 'human')
     if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },

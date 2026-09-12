@@ -52,6 +52,12 @@ import {
   classifyLlmError,
   isProviderAccountBlock,
   LLM_ERROR_NOTES,
+  providerAccountBlockResponse,
+  providerAccountBlockPayload,
+  retryAfterSecondsFor,
+  PROVIDER_ACCOUNT_BLOCK_CODE,
+  PROVIDER_ACCOUNT_BLOCK_MESSAGES,
+  RETRY_AFTER_MAX_SECONDS,
 } from '../llm-outage'
 import { __test, recordRouteError } from '../observability-store'
 
@@ -333,6 +339,264 @@ console.log('SRC — no caller claims the store\'s context key')
   assert(`SRC-1 no caller under src/app or src/lib supplies context.provider_error (hits: ${hits.join(', ') || 'none'})`, hits.length === 0)
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════
+// O-2 (2026-09-12) — the account-block RESPONSE, and its wiring at every site.
+//   RTY  — retryAfterSecondsFor: derived only from a real future instant.
+//   PAY  — providerAccountBlockPayload: the one wire-shape definition.
+//   MSG  — the human/agent register split (AC5) is real, not cosmetic.
+//   WIRE — source pins: every call site branches on the block, BEFORE the
+//          outage branch, with the audience its own callers actually have.
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('RTY — Retry-After is derived, capped, or absent')
+{
+  const now = Date.parse('2026-09-12T00:00:00Z')
+  assert('RTY-1 no regain_at → no header value at all (silence, not a guess)', retryAfterSecondsFor(null, now) === null)
+  assert('RTY-2 unparseable regain_at → null', retryAfterSecondsFor('not-a-date', now) === null)
+  assert('RTY-3 a past instant → null (a stale block earns no header)', retryAfterSecondsFor('2026-09-11T00:00:00Z', now) === null)
+  assert('RTY-4 an instant exactly now → null (never 0)', retryAfterSecondsFor('2026-09-12T00:00:00Z', now) === null)
+  assert('RTY-5 two hours away → 7200 seconds, uncapped', retryAfterSecondsFor('2026-09-12T02:00:00Z', now) === 7200)
+  // The LIVE block: 2026-09-12 → 2026-10-01 is ~19 days. Uncapped that is
+  // 1,641,600s — a number no client honours. Capped; the body keeps the truth.
+  assert(`RTY-6 the live 19-day block is capped at ${RETRY_AFTER_MAX_SECONDS}s`, retryAfterSecondsFor('2026-10-01T00:00:00Z', now) === RETRY_AFTER_MAX_SECONDS)
+  assert('RTY-7 the cap is 24h', RETRY_AFTER_MAX_SECONDS === 86_400)
+}
+
+console.log('PAY — the single wire-shape definition')
+{
+  const p = providerAccountBlockPayload(liveUsageLimit(), 'agent')
+  assert('PAY-1 status 503 (not 402: the caller is not the one with the billing problem)', p.status === 503)
+  // Compared as a plain string: tsc narrows p.body.error to the literal type and
+  // rejects the second comparison as provably-disjoint. That narrowing IS the
+  // guarantee at compile time, but the pin must still hold at RUNTIME (the
+  // constant could be edited), so the widening keeps a real check rather than
+  // deleting one tsc thinks is redundant.
+  assert('PAY-2 error code is distinct from the transient one', p.body.error === PROVIDER_ACCOUNT_BLOCK_CODE && String(p.body.error) !== 'ai_temporarily_unavailable')
+  assert('PAY-3 retriable:false is on the wire, machine-readable', p.body.retriable === false)
+  assert('PAY-4 regain_at carries the provider-stated instant UNCAPPED', p.body.regain_at === '2026-10-01T00:00:00Z')
+  assert('PAY-5 a Retry-After IS present for the live block (capped, from the instant)', p.headers['Retry-After'] === String(RETRY_AFTER_MAX_SECONDS))
+  // The credit-balance shape carries no "regain access on" instant.
+  const noInstant = providerAccountBlockPayload(new SdkBadRequestError(400, apiBody('invalid_request_error', 'Your credit balance is too low to access the API.')), 'agent')
+  assert('PAY-6 no instant → regain_at null AND no Retry-After header at all', noInstant.body.regain_at === null && !('Retry-After' in noInstant.headers))
+  assert('PAY-7 a message is ALWAYS present — reflect/page.tsx renders body.message and would otherwise show the raw code', typeof p.body.message === 'string' && (p.body.message as string).length > 40)
+}
+
+console.log('MSG — the audience split is substantive')
+{
+  const human = PROVIDER_ACCOUNT_BLOCK_MESSAGES.human
+  const agent = PROVIDER_ACCOUNT_BLOCK_MESSAGES.agent
+  assert('MSG-1 the two registers actually differ', human !== agent)
+  // A practitioner is not the operator: our billing vocabulary is not theirs.
+  assert('MSG-2 the human message leaks no operator vocabulary', !/spend limit|billing|provider console|credit balance|regain_at/i.test(human))
+  assert('MSG-3 the human message says it is not about what they wrote', /not a problem with what you wrote/i.test(human))
+  assert('MSG-4 the human message does not invite an immediate retry', /will not help/i.test(human) && !/try again in a moment/i.test(human))
+  // A developer's agent can act on precision.
+  assert('MSG-5 the agent message names the account-level cause and regain_at', /account-level/i.test(agent) && /regain_at/.test(agent))
+  assert('MSG-6 neither message is the internal LOG note verbatim', human !== LLM_ERROR_NOTES.account_block && agent !== LLM_ERROR_NOTES.account_block)
+}
+
+console.log('WIRE — every call site, from source')
+{
+  const root = path.join(__dirname, '..', '..')
+
+  // ── PR19 (2026-09-12), the systemic finding, and it is the reason every read
+  // below goes through `stripComments`. Every WIRE pin matches raw file text.
+  // A COMMENT reproducing the expected literal satisfies the pin exactly as well
+  // as the live statement does — so an edit that deletes the real code and
+  // leaves a comment quoting it passes. The reviewer demonstrated this against
+  // 6 of the WIRE pins, INCLUDING the two hardened moments earlier after
+  // mutation M9 survived. That is not a merely adversarial scenario in this
+  // codebase: comments here quote field names constantly, and this session's
+  // own SRC-1 pin fired on a comment of mine for precisely that reason.
+  // Stripping is the general repair; anchoring individual pins harder was not.
+  //
+  // The stripper is deliberately string-aware: these route files contain URLs
+  // ('https://...'), so a naive `//`-to-end-of-line strip would corrupt live
+  // code and could turn a pin silently green. Pinned below by STRIP-1..3.
+  function stripComments(src: string): string {
+    let out = ''
+    let i = 0
+    let quote: string | null = null
+    while (i < src.length) {
+      const c = src[i]
+      const next = src[i + 1]
+      if (quote) {
+        if (c === '\\') { out += c + (next ?? ''); i += 2; continue }
+        if (c === quote) quote = null
+        out += c; i++; continue
+      }
+      if (c === "'" || c === '"' || c === '`') { quote = c; out += c; i++; continue }
+      if (c === '/' && next === '/') { while (i < src.length && src[i] !== '\n') i++; continue }
+      if (c === '/' && next === '*') { i += 2; while (i < src.length && !(src[i] === '*' && src[i + 1] === '/')) i++; i += 2; continue }
+      out += c; i++
+    }
+    return out
+  }
+  assert('STRIP-1 line comments are removed', stripComments("const a = 1 // engine_error: decoy\nconst b = 2").indexOf('decoy') === -1)
+  assert('STRIP-2 block comments are removed', stripComments('a /* engine_error: decoy */ b').indexOf('decoy') === -1)
+  assert('STRIP-3 a URL inside a string SURVIVES (a naive stripper would eat the rest of the line)', stripComments("const u = 'https://x.test/a'\nconst keep = 1").includes("https://x.test/a") && stripComments("const u = 'https://x.test/a'\nconst keep = 1").includes('keep'))
+
+  const read = (rel: string) => stripComments(fs.readFileSync(path.join(root, rel), 'utf-8'))
+
+  // The eleven llmOutageResponse call sites, with the audience each one's own
+  // callers actually have (requireAuth → a practitioner; validateApiKey → an
+  // agent). `sites` is the exact count, so a silently-dropped branch is caught.
+  // `style` is the branch SHAPE at that site: 'inline' is the one-line
+  // `if (outage) return llmOutageResponse(...)`; 'guarded' is /api/reason's
+  // multi-line `if (outage) { ... }` outer catch, which needs loop headers
+  // computed first. The distinction is a fact about the existing code, not a
+  // concession — the ordering property below is checked for BOTH shapes.
+  const WIRED: { rel: string; audience: 'human' | 'agent'; sites: number; style: 'inline' | 'guarded' }[] = [
+    { rel: 'app/api/score-decision/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/reflect/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/score-scenario/route.ts', audience: 'human', sites: 2, style: 'inline' },
+    { rel: 'app/api/score-conversation/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/mentor/passion-classify/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/mentor/private/reflect/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/score-iterate/route.ts', audience: 'agent', sites: 1, style: 'inline' },
+    { rel: 'app/api/evaluate/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/score/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/score-social/route.ts', audience: 'human', sites: 1, style: 'inline' },
+    { rel: 'app/api/reason/route.ts', audience: 'agent', sites: 1, style: 'guarded' },
+  ]
+  const OUTAGE_BRANCH = 'if (outage) return llmOutageResponse'
+  let importOk = 0, countOk = 0, orderOk = 0, audienceOk = 0, statusOk = 0
+  const problems: string[] = []
+  for (const { rel, audience, sites, style } of WIRED) {
+    const src = read(rel)
+    if (/isProviderAccountBlock/.test(src) && /providerAccountBlockResponse/.test(src)) importOk++
+    else problems.push(`${rel}: not wired`)
+
+    const outageMarker = style === 'inline' ? OUTAGE_BRANCH : 'if (outage) {'
+    const blockMarker = style === 'inline' ? 'if (accountBlock) return providerAccountBlockResponse' : 'if (accountBlock) {'
+    const outageSites = src.split(outageMarker).length - 1
+    const blockSites = src.split(blockMarker).length - 1
+    if (outageSites === sites && blockSites === sites) countOk++
+    else problems.push(`${rel}: outage=${outageSites} block=${blockSites} expected=${sites}`)
+
+    // ORDERING, the load-bearing property: on the one shape where the two
+    // classes overlap (§BND-6 — a 429 carrying usage-limit wording) whichever
+    // branch runs first decides the response, and only the block branch is
+    // right there. Pinned structurally: the block branch must be the line
+    // IMMEDIATELY above every outage branch, so a later edit that separates
+    // them or reorders them turns this red.
+    let ordered: boolean
+    if (style === 'inline') {
+      const segments = src.split(outageMarker)
+      ordered = segments.length - 1 === sites
+      for (let i = 0; i < segments.length - 1; i++) {
+        const priorLines = segments[i].split('\n')
+        const prev = priorLines[priorLines.length - 2] ?? ''
+        if (!/if \(accountBlock\) return providerAccountBlockResponse\(/.test(prev)) ordered = false
+      }
+    } else {
+      // Guarded shape: the block branch must OPEN before the outage branch and
+      // must return, so control never falls through to the outage branch.
+      const bi = src.indexOf(blockMarker)
+      const oi = src.indexOf(outageMarker)
+      const between = bi >= 0 && oi > bi ? src.slice(bi, oi) : ''
+      ordered = bi >= 0 && oi > bi && /return providerAccountBlockResponse\(/.test(between)
+    }
+    if (ordered) orderOk++
+    else problems.push(`${rel}: block branch does not precede-and-return before the outage branch`)
+
+    // PR19 (2026-09-12) — a REAL hole, not just vacuity, and the sharpest finding
+    // of the review. The first cut excluded only the literals
+    // `providerAccountBlockResponse(error, 'agent'` and `(err, 'agent'`, so
+    // RENAMING the catch variable at a site and swapping its audience passed
+    // clean: the reviewer demonstrated `score-scenario`'s scoring catch serving
+    // the AGENT register — operator vocabulary and regain_at — to a route this
+    // very table declares human. That is the AC5 audience-leak class the R20a
+    // rendering work exists to prevent. Now matched by SHAPE over ANY variable
+    // name, and the positive count is over the same call shape rather than a
+    // bare `, 'human'` substring a decoy could inflate.
+    const audCallRe = new RegExp(`providerAccountBlockResponse\\(\\s*[^,()]+,\\s*'${audience}'`, 'g')
+    const otherAud = audience === 'human' ? 'agent' : 'human'
+    const wrongCallRe = new RegExp(`providerAccountBlockResponse\\(\\s*[^,()]+,\\s*'${otherAud}'`, 'g')
+    const audUses = (src.match(audCallRe) ?? []).length
+    const wrongUses = (src.match(wrongCallRe) ?? []).length
+    if (audUses === sites && wrongUses === 0) audienceOk++
+    else problems.push(`${rel}: audience '${audience}' expected ${sites}, got ${audUses}, wrong-audience calls ${wrongUses}`)
+
+    // The LOGGED status must follow the SERVED status, or the error log
+    // reports 500 for a response that was 503.
+    if (src.includes('statusCode: accountBlock || outage ? 503 : 500') || rel === 'app/api/reason/route.ts') statusOk++
+    else problems.push(`${rel}: logged statusCode not widened to the block`)
+  }
+  assert(`WIRE-1 all ${WIRED.length} llmOutageResponse routes import and call the block branch`, importOk === WIRED.length)
+  assert('WIRE-2 block-branch count equals outage-branch count at every route', countOk === WIRED.length)
+  assert('WIRE-3 the block branch precedes the outage branch at EVERY site (§BND-6 overlap)', orderOk === WIRED.length)
+  assert('WIRE-4 each route passes the audience its own auth mode implies', audienceOk === WIRED.length)
+  assert('WIRE-5 the logged statusCode follows the served one', statusOk === WIRED.length)
+  if (problems.length) console.error('    WIRE problems: ' + problems.join(' | '))
+
+  // Non-vacuity: the table must name routes that exist and really do call the
+  // outage helper — an empty or stale table would make WIRE-1..5 pass hollow.
+  const allCallers = (() => {
+    const hits: string[] = []
+    const walk = (d: string) => {
+      for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
+        const q = path.join(d, ent.name)
+        if (ent.isDirectory()) { if (ent.name !== 'node_modules' && ent.name !== '__tests__') walk(q); continue }
+        if (!/\.ts$/.test(ent.name)) continue
+        if (/llmOutageResponse\(/.test(fs.readFileSync(q, 'utf-8'))) hits.push(path.relative(root, q).split(path.sep).join('/'))
+      }
+    }
+    walk(path.join(root, 'app'))
+    return hits.sort()
+  })()
+  const named = WIRED.map((w) => w.rel).sort()
+  assert(`WIRE-6 the table is the COMPLETE set of llmOutageResponse callers (found: ${allCallers.length})`, JSON.stringify(allCallers) === JSON.stringify(named))
+
+  // /api/practice/discernment — a bespoke 503, not llmOutageResponse.
+  const disc = read('app/api/practice/discernment/handler.ts')
+  assert('WIRE-7 discernment POST returns the block response before its vague 503', /if \(accountBlock\) return providerAccountBlockResponse\(e, 'agent', corsHeaders\(\)\)\n    return json\(\{ error: 'service error' \}, 503\)/.test(disc))
+  assert('WIRE-8 discernment passes corsHeaders explicitly — json() adds them, the shared helper does not', disc.split("providerAccountBlockResponse(e, 'agent', corsHeaders())").length - 1 === 2)
+
+  // /api/guardrail — THE logging gap (both halves) plus the fail-closed decision.
+  const guard = read('app/api/guardrail/route.ts')
+  assert('WIRE-9 guardrail imports logRouteError (it had NO log call on any path)', /import \{ logRouteError \} from '@\/lib\/observability-store'/.test(guard))
+  assert('WIRE-10 guardrail logs on all three failure paths: signing, engine, outer catch', guard.split('logRouteError({').length - 1 === 3)
+  assert("WIRE-11 guardrail's outer catch logs BEFORE returning its 500", /logRouteError\(\{[\s\S]{0,400}?stage: 'route_outer_catch'[\s\S]{0,200}?\}\)\n    return NextResponse\.json\(\n      \{ error: 'Internal server error' \}/.test(guard))
+  // The mirror-image decision: the gate keeps its 200 + proceed:false.
+  // WIRE-12/13 are ANCHORED TO THE RESPONSE BODY, not merely to the presence of
+  // the identifier. A first cut tested /engine_error: engineErrorCode/ against
+  // the whole file and passed while the body had stopped naming the block —
+  // because the same text also appears in the logRouteError context two lines
+  // above. Mutation M9 survived on exactly that, and these are the repair: each
+  // pin now requires the code to reach the field the CALLER reads, anchored on
+  // its neighbouring body key so a log-line match cannot satisfy it.
+  assert('WIRE-12 guardrail STILL returns 200/proceed:false on an account block (a gate must not become client-side fail-open)', !/providerAccountBlockResponse/.test(guard) && /engine_error: engineErrorCode,\n          assessment_status: 'engine_unavailable',/.test(guard))
+  assert("WIRE-13 the block code is computed from the classifier and rides the EXISTING field — no new wire field", /const engineErrorCode = isProviderAccountBlock\(outcome\.error_cause\)\n\s*\? 'provider_account_block'/.test(guard) && !/provider_block:|regain_at:/.test(guard))
+  assert('WIRE-13b the gate also says WHY in its reasoning prose, not only in an enum', /engineErrorCode === 'provider_account_block'\n\s*\? 'The reasoning engine could not evaluate this action: the model provider refused/.test(guard))
+
+  // guardrail-sandwich — without error_cause the classifier is blind here.
+  const sandwich = read('lib/guardrail-sandwich.ts')
+  assert('WIRE-14 both engine_unavailable returns carry error_cause (detail alone classifies as `none`)', sandwich.split('error_cause: err,').length - 1 === 2)
+  assert('WIRE-15 the outcome TYPE declares error_cause, so a third return site cannot omit it', /error_cause: unknown/.test(sandwich))
+
+  // /api/reason — Branch 2 is the live path; the outer catch is not.
+  const reason = read('app/api/reason/route.ts')
+  assert('WIRE-16 reason Branch 2 breaks the R3 masking for the block class only', /if \(isProviderAccountBlock\(sandwichResult\.error_cause\)\)/.test(reason))
+  assert('WIRE-17 the block response goes through respond(), so the loop ledger is not bypassed', /return await respond\(\{\s*body: blockPayload\.body,\s*status: blockPayload\.status,/.test(reason))
+  assert('WIRE-18 an account block is NOT billed (isBillable false), unlike the masked-200 sibling', /isBillable: false,\n        \}\)\n      \}\n      logRouteError\(\{/.test(reason))
+  assert('WIRE-19 the masked-200 path for every OTHER cause is untouched', /body: buildMinimalFallback\(sandwichResult\.error\),\n        status: 200,[\s\S]{0,160}isBillable: true,/.test(reason))
+
+  // The client that would otherwise call a billing block a bug.
+  const client = read('app/private-mentor/page.tsx')
+  assert('WIRE-20 private-mentor branches on the new code (it would otherwise say "Something went wrong")', /data\?\.error === 'ai_unavailable_provider_account'/.test(client))
+  assert('WIRE-21 … and renders the route message, never the raw machine code', /data\?\.message \?\?/.test(client))
+
+  // Two more pages throw `new Error(data.error)` and render err.message
+  // verbatim, so a bare machine code reached the practitioner. Pre-existing for
+  // the transient code; O-2 adds a second one, so both now prefer the sentence.
+  // Pinned because nothing else would notice a revert.
+  for (const page of ['app/score-social/page.tsx', 'app/scenarios/page.tsx']) {
+    assert(`WIRE-22 ${page} prefers the route's sentence over its machine code`, /throw new Error\(data\.message \|\| data\.error \|\|/.test(read(page)))
+  }
+}
+
 // Async body-shape check + STO + summary (tsx cjs transform forbids top-level await).
 ;(async () => {
   const body = (await res.json()) as { error?: string }
@@ -422,6 +686,31 @@ console.log('SRC — no caller claims the store\'s context key')
     const { errorTypeOf, providerErrorContext } = __test
     assert('STO-12 errorTypeOf: non-Error values report typeof', errorTypeOf('s') === 'string' && errorTypeOf(42) === 'number' && errorTypeOf(null) === 'object')
     assert('STO-13 providerErrorContext omits null-valued keys, keeps kind', JSON.stringify(providerErrorContext({ kind: 'none', retriable: null, status: null, api_error_type: null, regain_at: null, note: null })) === '{"kind":"none"}')
+  }
+
+  console.log('BLK — the response a caller actually receives')
+  {
+    const res503 = providerAccountBlockResponse(liveUsageLimit(), 'human')
+    const b = (await res503.json()) as Record<string, unknown>
+    assert('BLK-1 status 503', res503.status === 503)
+    assert('BLK-2 body error code is the account-block one', b.error === PROVIDER_ACCOUNT_BLOCK_CODE)
+    assert('BLK-3 body message is the HUMAN register for a human audience', b.message === PROVIDER_ACCOUNT_BLOCK_MESSAGES.human)
+    assert('BLK-4 retriable:false and regain_at on the wire', b.retriable === false && b.regain_at === '2026-10-01T00:00:00Z')
+    assert('BLK-5 Retry-After present and capped, never 30', res503.headers.get('Retry-After') === String(RETRY_AFTER_MAX_SECONDS) && res503.headers.get('Retry-After') !== '30')
+    const agentRes = providerAccountBlockResponse(liveUsageLimit(), 'agent', { 'X-Loop-Id': 'abc' })
+    const ab = (await agentRes.json()) as Record<string, unknown>
+    assert('BLK-6 the agent audience gets the agent message', ab.message === PROVIDER_ACCOUNT_BLOCK_MESSAGES.agent)
+    assert('BLK-7 extraHeaders merge, exactly as llmOutageResponse does', agentRes.headers.get('X-Loop-Id') === 'abc' && agentRes.headers.get('Retry-After') === String(RETRY_AFTER_MAX_SECONDS))
+    // O-1 disclosed residual #1, now CLOSED at the response layer: the
+    // hypothetical 429 carrying usage-limit wording classifies as a block AND
+    // reads as an outage, and before O-2 it would have received Retry-After: 30.
+    // With the block branch first at every site, it receives this instead.
+    const overlap = new SdkRateLimitError(429, apiBody('rate_limit_error', 'You have reached your specified API usage limits.'))
+    assert('BLK-8 §BND-6 overlap: it IS both classes (the divergence is real, not theoretical)', isProviderAccountBlock(overlap) && isLlmOutage(overlap))
+    const overlapRes = providerAccountBlockResponse(overlap, 'agent')
+    assert('BLK-9 … and the block response, not Retry-After:30, is what the ordering delivers', overlapRes.status === 503 && overlapRes.headers.get('Retry-After') === null)
+    const legacy = llmOutageResponse()
+    assert('BLK-10 the transient response is UNCHANGED — Retry-After:30 still means "come back soon"', legacy.status === 503 && legacy.headers.get('Retry-After') === '30')
   }
 
   console.log(`\n${passCount} passed, ${failCount} failed`)

@@ -324,10 +324,20 @@ export default function PrivateMentorPage() {
       // cleared, so the user's reflection text is not lost on a failure.
       if (!res.ok) {
         const outage = data?.error === 'ai_temporarily_unavailable';
+        // O-2 (2026-09-12): the provider ACCOUNT-BLOCK code is distinct from the
+        // transient one, and without this branch it would fall through to the
+        // generic "Something went wrong" — telling a practitioner that a
+        // billing condition on our side is a bug, and inviting a retry that
+        // cannot succeed. `data.message` is the route's own practitioner-register
+        // sentence (llm-outage.ts PROVIDER_ACCOUNT_BLOCK_MESSAGES.human); the
+        // literal is the fallback so this never renders a machine code.
+        const accountBlock = data?.error === 'ai_unavailable_provider_account';
         const failMsg: Message = {
           id: `msg-${Date.now()}-error`,
           type: 'insight',
-          content: outage
+          content: accountBlock
+            ? `${data?.message ?? 'The mentor is unavailable because of an account limit on our side, and trying again now will not help.'} This reflection was NOT recorded, and your text is still here.`
+            : outage
             ? 'The mentor is temporarily unavailable, and this reflection was NOT recorded. Your text is still here — please try again in a moment.'
             : 'Something went wrong and this reflection was NOT recorded. Your text is still here — please try again.',
           timestamp: formatTime(),

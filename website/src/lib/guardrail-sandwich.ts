@@ -423,6 +423,14 @@ export type GuardrailSandwichOutcome =
       status: 'engine_unavailable'
       stage: 'layer1' | 'layer2'
       detail: string
+      /** O-2 (2026-09-12): the RAW thrown value, carried so the route can
+       *  classify it. `detail` is only `err.message`, and the O-1 classifier
+       *  needs the object's provenance (its attached response body, or the SDK
+       *  constructor plus a numeric status) — a reconstructed `new Error(detail)`
+       *  classifies as `none`, so before this field a provider account block was
+       *  structurally invisible to /api/guardrail. Mirrors the `error_cause`
+       *  convention already used by translation-sandwich/parallel-run.ts. */
+      error_cause: unknown
     }
 
 /**
@@ -451,6 +459,7 @@ export async function runGuardrailSandwich(
       status: 'engine_unavailable',
       stage: 'layer1',
       detail: err instanceof Error ? err.message : 'layer1_extraction_failed',
+      error_cause: err,
     }
   }
   const layer1_latency_ms = Date.now() - l1Start
@@ -540,6 +549,7 @@ export async function runGuardrailSandwich(
       status: 'engine_unavailable',
       stage: 'layer2',
       detail: err instanceof Error ? err.message : 'layer2_application_failed',
+      error_cause: err,
     }
   }
 }

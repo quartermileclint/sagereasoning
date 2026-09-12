@@ -34,6 +34,10 @@
  *               same bound; TEXT_LIMITS.medium is the audit's M bound.
  *   R3-1..2   — Branch 2 (the masked-200 fallback) now calls logRouteError
  *               with the thrown cause and the real status (Election B).
+ *   R3-1b..1c — (O-2, 2026-09-12) Branch 2's provider-account-block sub-case
+ *               leaves the masking for a real 503, logs at that status, is
+ *               distinguishable in the log, and is checked BEFORE the masked
+ *               return so masking survives for every other cause.
  *
  * MUTATION RECORD (2026-09-05, real file, hash-verified restore): the
  * human-path call moved BEFORE the check → ORD-3 fails; moved BETWEEN the
@@ -99,6 +103,13 @@ const SUBJECT_FALLBACK_RE = /:\s*screenedInput\s*\n?\s*const\s+gate\s*=/
 const R3_LOG_RE = /logRouteError\s*\(\s*\{\s*route\s*:\s*['"][^'"]*['"]\s*,\s*method\s*:\s*['"][^'"]*['"]\s*,\s*error\s*:\s*sandwichResult\.error_cause/
 const R3_STATUS_RE = /statusCode\s*:\s*200\s*,\s*isLlmOutage\s*:\s*isLlmOutage\s*\(\s*sandwichResult\.error_cause\s*\)/
 const R3_CONTEXT_RE = /fallback_reason\s*:\s*sandwichResult\.error\s*,\s*masked_fallback\s*:\s*true/
+// O-2 (2026-09-12): Branch 2 now has TWO log calls, because the provider
+// account-block sub-case leaves the masking and returns a real 503. Each logs
+// the status IT actually serves — pinning both is what keeps the log honest;
+// a single-call assertion would now be satisfiable by either one alone.
+const R3_BLOCK_STATUS_RE = /statusCode\s*:\s*503\s*,\s*isLlmOutage\s*:\s*isLlmOutage\s*\(\s*sandwichResult\.error_cause\s*\)/
+const R3_BLOCK_GUARD_RE = /if\s*\(\s*isProviderAccountBlock\s*\(\s*sandwichResult\.error_cause\s*\)\s*\)/
+const R3_BLOCK_CONTEXT_RE = /fallback_reason\s*:\s*sandwichResult\.error\s*,\s*provider_account_block\s*:\s*true/
 
 const checkIdx = codeIndex(code, CHECK_RE)
 const block = structuralBlock(code, REDIRECT_OPEN_RE)
@@ -268,9 +279,21 @@ expectTrue(
 }
 
 expectTrue(
-  'R3-1 Branch 2 (the masked-200 fallback) logs the thrown cause via logRouteError with the REAL status (200) and the outage classification',
-  codeCount(code, R3_LOG_RE) === 1 && codeCount(code, R3_STATUS_RE) === 1,
-  `log=${codeCount(code, R3_LOG_RE)} status=${codeCount(code, R3_STATUS_RE)}`,
+  'R3-1 Branch 2 logs the thrown cause twice — once per sub-case — and the masked-200 path still reports the REAL status 200',
+  codeCount(code, R3_LOG_RE) === 2 && codeCount(code, R3_STATUS_RE) === 1,
+  `log=${codeCount(code, R3_LOG_RE)} status200=${codeCount(code, R3_STATUS_RE)}`,
+)
+expectTrue(
+  'R3-1b (O-2) the account-block sub-case is guarded, logs at the 503 it actually serves, and is distinguishable in the log from the masked fallback',
+  codeCount(code, R3_BLOCK_GUARD_RE) === 1 &&
+    codeCount(code, R3_BLOCK_STATUS_RE) === 1 &&
+    codeCount(code, R3_BLOCK_CONTEXT_RE) === 1,
+  `guard=${codeCount(code, R3_BLOCK_GUARD_RE)} status503=${codeCount(code, R3_BLOCK_STATUS_RE)} context=${codeCount(code, R3_BLOCK_CONTEXT_RE)}`,
+)
+expectTrue(
+  'R3-1c (O-2) the block branch precedes the masked-200 return, so the masking is left only for that one sub-case',
+  codeIndex(code, R3_BLOCK_GUARD_RE) > 0 && codeIndex(code, R3_BLOCK_GUARD_RE) < codeIndex(code, R3_CONTEXT_RE),
+  `blockIdx=${codeIndex(code, R3_BLOCK_GUARD_RE)} maskedIdx=${codeIndex(code, R3_CONTEXT_RE)}`,
 )
 expectTrue(
   'R3-2 the log context names the fallback reason and marks the row as a masked fallback (queryable distinct from a 500)',

@@ -1,6 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 // #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
-import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import {
+  isLlmOutage,
+  llmOutageResponse,
+  isProviderAccountBlock,
+  providerAccountBlockResponse,
+} from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -714,8 +719,14 @@ Evaluate the revised action. Return only the JSON evaluation object.`
     })
   } catch (error) {
     console.error('Score-iterate API error:', error)
+    // O-2: an account block is checked FIRST and wins over the outage branch.
+    // They are disjoint on every observed shape, but §BND-6 discloses one
+    // hypothetical overlap (a 429 carrying usage-limit wording); on it the
+    // block response is right and 'Retry-After: 30' is the false promise.
+    const accountBlock = isProviderAccountBlock(error)
     const outage = isLlmOutage(error)
-    logRouteError({ route: '/api/score-iterate', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    logRouteError({ route: '/api/score-iterate', method: 'POST', error, statusCode: accountBlock || outage ? 503 : 500, isLlmOutage: outage })
+    if (accountBlock) return providerAccountBlockResponse(error, 'agent', { ...buildLoopHeaders({ loopId }) })
     if (outage) return llmOutageResponse({ ...buildLoopHeaders({ loopId }) })
     // Catch-all 500 — emit X-Loop-* headers (we have an accumulator) but skip
     // the ledger write (uncertain whether the failure was customer-side or

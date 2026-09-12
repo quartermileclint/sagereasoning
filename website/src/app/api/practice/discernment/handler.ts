@@ -115,7 +115,11 @@ import { isTrustCoreEnabled } from '@/lib/substrate/trust-core/trust-core-flag'
 // cause. logRouteError/isLlmOutage close that gap going forward, matching the
 // pattern already established at src/app/api/reflect/route.ts.
 import { logRouteError } from '@/lib/observability-store'
-import { isLlmOutage } from '@/lib/llm-outage'
+import {
+  isLlmOutage,
+  isProviderAccountBlock,
+  providerAccountBlockResponse,
+} from '@/lib/llm-outage'
 import {
   validateCandidateProfile,
   validateOrchestratorProfile,
@@ -720,6 +724,15 @@ export async function runDiscernmentPost(
     // and-forget via waitUntil, missing-table-benign until the observability
     // migration lands — never blocks or alters this response.
     console.error('[discernment] handler error:', e instanceof Error ? e.message : e)
+    // O-2: a provider ACCOUNT BLOCK gets an honest, distinguishable response
+    // instead of the bespoke vague 503. The vague shape is deliberate for every
+    // OTHER failure (R4 — the reflect posture: the specific reason stays
+    // server-side); a block is the one class where the reason is safe to state,
+    // is not about the caller's request, and where 'try again' is a lie.
+    // corsHeaders() is passed explicitly: json() adds them and the shared
+    // helper does not, so omitting them here would silently drop CORS on this
+    // one branch.
+    const accountBlock = isProviderAccountBlock(e)
     const outage = isLlmOutage(e)
     logRouteError({
       route: '/api/practice/discernment',
@@ -729,6 +742,7 @@ export async function runDiscernmentPost(
       isLlmOutage: outage,
       context: { phase: typeof phase === 'string' ? phase : null },
     })
+    if (accountBlock) return providerAccountBlockResponse(e, 'agent', corsHeaders())
     return json({ error: 'service error' }, 503)
   }
 }
@@ -761,6 +775,13 @@ export async function runDiscernmentGet(
       statusCode: 503,
       isLlmOutage: isLlmOutage(e),
     })
+    // O-2: DELIBERATELY UNREACHABLE TODAY, and kept for the same reason the
+    // isLlmOutage call above is kept — this catch block reads the trust-core
+    // store and makes no LLM call, so no provider error can arise here now.
+    // Wired anyway so the two catch blocks stay uniform (the comment above
+    // states that convention) and so a future read that DOES call a provider
+    // is honest by default rather than by a later edit nobody remembers.
+    if (isProviderAccountBlock(e)) return providerAccountBlockResponse(e, 'agent', corsHeaders())
     return json({ error: 'service error' }, 503)
   }
 }

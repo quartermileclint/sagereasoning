@@ -24,6 +24,13 @@ import {
   runGuardrailSandwich,
   isGuardrailSandwichEnabled,
 } from '@/lib/guardrail-sandwich'
+// O-2 (2026-09-12): this route wrote NO route_errors row on ANY failure path —
+// a guardrail-only outage was invisible in the error log and surfaced only via a
+// hand-run smoke, exactly as it did on 2026-09-12. Every failure path below now
+// logs. The RESPONSES are deliberately almost unchanged; see the note at the
+// engine_unavailable branch for why a gate must not start returning 5xx.
+import { isLlmOutage, isProviderAccountBlock } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 // Logos-on W2 (2026-09-12): the enforcement-class record seam. DARK behind BOTH
 // SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ENFORCEMENT_RECORD_ENABLED — flag-off
 // the block below is skipped entirely (no read, no write; the route is
@@ -213,6 +220,16 @@ export async function POST(request: NextRequest) {
       // Signing fail-CLOSED → 503 (never emit an unsigned assessment when signing
       // is enabled; mirrors /api/reason). No metering — no verdict produced.
       if (outcome.status === 'signing_unavailable') {
+        // O-2: log it. A signing failure is an operational fault that produced
+        // no verdict; before this it left no row anywhere. Response unchanged.
+        logRouteError({
+          route: '/api/guardrail',
+          method: 'POST',
+          error: new Error('substrate_signing_unavailable'),
+          statusCode: 503,
+          isLlmOutage: false,
+          context: { stage: 'signing' },
+        })
         return NextResponse.json(
           { error: 'substrate_signing_unavailable' },
           { status: 503, headers: { ...publicCorsHeaders() } },
@@ -245,17 +262,81 @@ export async function POST(request: NextRequest) {
       if (outcome.status === 'engine_unavailable') {
         // Layer-1/Layer-2 failure → CONSERVATIVE fallback. A gate NEVER silently
         // "proceeds" on engine failure (ADR-009 §5). 200, not metered.
+        //
+        // O-2 (2026-09-12) — TWO changes here, and the SECOND one is a decision
+        // NOT to change something:
+        //
+        // (a) the failure is now LOGGED, with the raw thrown value (carried out
+        //     of the sandwich as `error_cause`), so the store's provider-error
+        //     context on the row names an account block the way every sibling
+        //     route's log already does. (That context key is named indirectly
+        //     here on purpose: the battery's SRC-1 pin scans file TEXT for the
+        //     literal to prove no caller supplies the key itself, and it caught
+        //     this very comment. Rewording keeps the pin at full strength;
+        //     loosening it to ignore comments would trade a real guarantee for
+        //     a nicety.) `statusCode: 200` is the truth — this branch really
+        //     does serve a 200 — following the precedent set by /api/reason's
+        //     own masked-fallback log call.
+        //
+        // (b) an account block does NOT get the honest 503 the other routes
+        //     now return — the OPPOSITE call from /api/reason above. A first
+        //     draft justified this as "a 5xx would turn a fail-closed gate into
+        //     a client-side fail-open one." PR19 showed that argument does not
+        //     hold and it is withdrawn: this very route ALREADY returns 503 for
+        //     `signing_unavailable` a few lines above, and ADR-009 §5 blessed
+        //     that as "fail-closed is correct for a safety artifact". A general
+        //     "5xx is unsafe here" rule is refuted by our own code.
+        //
+        //     The reasons that DO hold, both checked in the harness source
+        //     rather than assumed:
+        //       (i)  No caller behaviour improves. The shipped reference client
+        //            (harness at-action-hook) hard-blocks only on
+        //            `do_not_proceed`; today's `pause_for_review` already routes
+        //            to CAUTION → allow-with-context. Under a 503 the default
+        //            `open` fail-mode allows too — same outcome, less detail.
+        //       (ii) THE OBSERVATION WINDOW IS RUNNING and this route is in the
+        //            measured set. A 503 re-routes that client from its CAUTION
+        //            branch to `guardOutage`, which changes `guardHold` and
+        //            `guardOutcome` on guard-side capture records mid-window —
+        //            and under `strict` fail-mode flips actions the gate
+        //            currently ALLOWS into denials. Stated precisely, because
+        //            the looser version was tempting and is false: this would
+        //            NOT move records between capture-basis classes
+        //            (`buildGuardHoldRecord` reads `captureBasis` from the
+        //            assessment, and an engine_unavailable body carries none,
+        //            so it is `no_assessment` under both shapes).
+        //     So the honesty rides the body instead, via a third value on the
+        //     EXISTING `engine_error` field — the wire contract widens by one
+        //     enum value and nothing else. Making the two routes consistent at
+        //     503 remains a real option and is named as a founder election for
+        //     after the window closes, not foreclosed here.
+        const engineErrorCode = isProviderAccountBlock(outcome.error_cause)
+          ? 'provider_account_block'
+          : outcome.stage === 'layer1'
+            ? 'layer1_unavailable'
+            : 'assessment_unavailable'
+        logRouteError({
+          route: '/api/guardrail',
+          method: 'POST',
+          error: outcome.error_cause,
+          statusCode: 200,
+          isLlmOutage: isLlmOutage(outcome.error_cause),
+          context: { stage: outcome.stage, engine_error: engineErrorCode, masked_fallback: true },
+        })
         resultBody = {
           proceed: false,
           katorthoma_proximity: null,
           threshold: thresholdLevel,
           recommendation: 'pause_for_review',
           passions_detected: [],
-          reasoning: 'The reasoning engine could not evaluate this action; the gate fails safe (no proceed).',
+          reasoning:
+            engineErrorCode === 'provider_account_block'
+              ? 'The reasoning engine could not evaluate this action: the model provider refused the request for an account-level reason on the service operator\'s side. Retrying will not clear it. The gate fails safe (no proceed).'
+              : 'The reasoning engine could not evaluate this action; the gate fails safe (no proceed).',
           disclaimer: V3_DISCLAIMER,
           risk_class: resolvedRiskClass,
           evaluation_depth: 'deterministic',
-          engine_error: outcome.stage === 'layer1' ? 'layer1_unavailable' : 'assessment_unavailable',
+          engine_error: engineErrorCode,
           assessment_status: 'engine_unavailable',
         }
       } else if (outcome.status === 'tier1_pause') {
@@ -645,6 +726,20 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Guardrail API error:', error)
+    // O-2: THE logging gap named at O-1 — this catch returned a bare 500 with no
+    // log call at all, so any throw outside the sandwich (the legacy sage-guard
+    // path, an envelope or Supabase failure) left no row. Response shape
+    // unchanged: a 500 from a gate is not a false "proceed", and giving this
+    // path a new body would be a wire change with no caller to benefit from it
+    // while the sandwich flag is on and the legacy path unreachable.
+    logRouteError({
+      route: '/api/guardrail',
+      method: 'POST',
+      error,
+      statusCode: 500,
+      isLlmOutage: isLlmOutage(error),
+      context: { stage: 'route_outer_catch' },
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

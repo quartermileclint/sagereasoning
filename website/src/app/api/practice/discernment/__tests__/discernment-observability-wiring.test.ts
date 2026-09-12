@@ -41,7 +41,13 @@ const src = fs.readFileSync(path.join(__dirname, '..', 'handler.ts'), 'utf-8')
 
 async function main() {
   assert(/import \{ logRouteError \} from '@\/lib\/observability-store'/.test(src), '§1-1 imports logRouteError')
-  assert(/import \{ isLlmOutage \} from '@\/lib\/llm-outage'/.test(src), '§1-2 imports isLlmOutage')
+  // O-2 (2026-09-12): the handler's llm-outage import is now multi-line (it also
+  // pulls in the account-block helpers), so the single-line literal no longer
+  // matches. Matched formatting-independently instead — still requiring BOTH the
+  // specifier and that module, so the pin is not weakened, only unbraced from a
+  // formatting accident.
+  assert(/import \{[^}]*\bisLlmOutage\b[^}]*\} from '@\/lib\/llm-outage'/.test(src), '§1-2 imports isLlmOutage')
+  assert(/import \{[^}]*\bisProviderAccountBlock\b[^}]*\} from '@\/lib\/llm-outage'/.test(src), '§1-2b imports isProviderAccountBlock (O-2)')
 
   // The client-facing response shape must be UNCHANGED (R4 reflect posture —
   // this fix adds server-side observability, it does not change what an

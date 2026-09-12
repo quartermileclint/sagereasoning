@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 // #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage at the
 // outer catch-all (the sandwich's own typed-error degradation is upstream).
-import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import {
+  isLlmOutage,
+  llmOutageResponse,
+  isProviderAccountBlock,
+  providerAccountBlockResponse,
+  providerAccountBlockPayload,
+} from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
 import { timingSafeEqual } from 'node:crypto'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
@@ -2244,6 +2250,60 @@ export async function POST(request: NextRequest) {
       // normal case; the bound is named rather than denied. The response
       // bytes are unchanged (R3's status masking itself is NOT resolved here
       // — a separate design question).
+      // O-2 (2026-09-12): a provider ACCOUNT BLOCK is the one sub-case that
+      // leaves the masking, and it is ALSO the live path for a block on this
+      // route — a spend-limit refusal surfaces as a `layer1_throw`, not through
+      // the outer catch. Three reasons the exception is principled rather than
+      // convenient:
+      //   1. R3's masking exists for AMBIGUITY — a masked 200 keeps
+      //      "the engine could not evaluate" from being read as a verdict. A
+      //      block is not ambiguous: we know exactly why, and it is not about
+      //      the caller's input.
+      //   2. A masked 200 with `assessment: null` invites an agent to retry
+      //      forever. Only a real status with `retriable: false` stops that.
+      //   3. Unlike /api/guardrail (see the mirror-image decision in that
+      //      route's engine_unavailable branch), this route is NOT a gate, so
+      //      returning 5xx cannot flip a fail-closed answer into a fail-open
+      //      one. Nothing downstream reads a 200 here as permission.
+      // R3's masking is otherwise UNCHANGED and remains the separate open
+      // design question it already was.
+      //
+      // isBillable: FALSE, a deliberate change from the `true` on the line
+      // below. The neighbouring branches already refuse to bill for a failure
+      // that is ours ("Server misconfig (signing key) — not customer fault";
+      // the outer catch's "fail-open on the bill rather than charging for a
+      // server error"). An unpaid provider bill is the clearest case of ours
+      // there is: the caller must not pay for a request we could not send.
+      //
+      // PR19 raised the sharp case and it is worth stating rather than
+      // absorbing: on a `layer3_throw` block, Layer 1 ALREADY RAN and its cost
+      // is real, and the sibling masked-200 branch WOULD bill it. The
+      // asymmetry is intended, and the distinguishing fact is what the caller
+      // receives — the sibling returns a 200 carrying a minimal fallback body,
+      // so something was delivered for the cost; this branch returns an error
+      // and delivers nothing. We eat the Layer-1 cost of our own unpaid bill.
+      // Applied uniformly across all three throw stages for that reason.
+      if (isProviderAccountBlock(sandwichResult.error_cause)) {
+        logRouteError({
+          route: '/api/reason',
+          method: 'POST',
+          error: sandwichResult.error_cause,
+          statusCode: 503,
+          isLlmOutage: isLlmOutage(sandwichResult.error_cause),
+          context: { fallback_reason: sandwichResult.error, provider_account_block: true },
+        })
+        // Through respond(), not a bare NextResponse: respond() owns the loop
+        // ledger, and bypassing it would silently skip the metering decision.
+        // The shape comes from the shared payload builder so it cannot drift
+        // from what the other eleven routes return.
+        const blockPayload = providerAccountBlockPayload(sandwichResult.error_cause, 'agent')
+        return await respond({
+          body: blockPayload.body,
+          status: blockPayload.status,
+          headers: { ...corsHeaders(), ...blockPayload.headers },
+          isBillable: false,
+        })
+      }
       logRouteError({
         route: '/api/reason',
         method: 'POST',
@@ -2438,8 +2498,18 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('sage-reason API error:', error)
     const message = error instanceof Error ? error.message : 'Internal server error'
+    // O-2: the account block is checked FIRST — see the ten sibling routes for
+    // the §BND-6 overlap this ordering settles. Reached only by a throw OUTSIDE
+    // the sandwich; the in-sandwich path is Branch 2 above.
+    const accountBlock = isProviderAccountBlock(error)
     const outage = isLlmOutage(error)
-    logRouteError({ route: '/api/reason', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    logRouteError({ route: '/api/reason', method: 'POST', error, statusCode: accountBlock || outage ? 503 : 500, isLlmOutage: outage })
+    if (accountBlock) {
+      const blockHeaders = loopAccumulator && loopId && apiKey && apiKey.valid
+        ? { ...buildLoopHeaders({ loopId, state: loopAccumulator.getState() }) }
+        : undefined
+      return providerAccountBlockResponse(error, 'agent', blockHeaders)
+    }
     if (outage) {
       const outageHeaders = loopAccumulator && loopId && apiKey && apiKey.valid
         ? { ...buildLoopHeaders({ loopId, state: loopAccumulator.getState() }) }

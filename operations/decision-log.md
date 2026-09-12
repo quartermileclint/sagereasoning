@@ -40210,3 +40210,178 @@ PR19, PR22, PR23, PR25.
 `D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`;
 `operations/handoffs/founder/2026-09-13-llm-outage-classifier-account-block-NEXT-SESSION-PROMPT.md`;
 `operations/handoffs/founder/2026-09-12-O1-llm-outage-classifier-account-block-CLOSE.md`.
+
+## 2026-09-12 — D-PROVIDER-ACCOUNT-BLOCK-RESPONSE-AND-GUARDRAIL-LOGGING-2026-09-12
+
+**Decision:** two gaps O-1 named and deliberately left open are closed. (1) A provider ACCOUNT BLOCK
+now gets an honest HTTP response — **503**, code `ai_unavailable_provider_account`, `retriable:false`,
+the provider's `regain_at`, and a `Retry-After` **only** when that instant is real and future (capped
+24 h) — on the eleven `llmOutageResponse` routes and `/api/practice/discernment`. (2)
+**`/api/guardrail` now writes a `route_errors` row on every failure path**; it previously wrote none
+on any, so a guardrail-only outage was invisible to the error log. Built under a founder waiver
+covering four `GUARD_RE` paths (`api/reason/route.ts`, `api/guardrail/route.ts`,
+`lib/guardrail-sandwich.ts`, and `api/reason/__tests__/r20a-invocation.test.ts` — the fourth matched
+the regex and was not in the prompt's table).
+
+**A structural fact the prompt did not anticipate, found first-hand and dispositive.**
+`runGuardrailSandwich` returned only `detail: err.message` — a string. O-1's classifier requires the
+error OBJECT's provenance (its attached response body, or an SDK constructor plus a numeric status),
+so a reconstructed `new Error(detail)` classifies as `none`. A provider block on `/api/guardrail` was
+therefore **structurally invisible**, not merely unhandled, and closing it required editing a THIRD
+guarded file the prompt had named read-only. `guardrail-sandwich.ts`'s `engine_unavailable` outcome
+gains `error_cause: unknown`, mirroring the convention `translation-sandwich/parallel-run.ts` already
+uses. Relatedly, `/api/reason`'s live block path is **Branch 2** (the R3 masked-200 fallback, which
+does carry `error_cause`), not the outer catch the prompt targeted; and `/api/reason` never emitted
+`assessment_status: engine_unavailable` at all — that field is `/api/guardrail`'s. Both corrections
+are of this project's own carried prose.
+
+**Two OPPOSITE masking decisions, and the reasoning for the second was rewritten after PR19.**
+- `/api/reason` Branch 2: the account-block sub-case **leaves the R3 masking** and returns a real
+  503. A block is not ambiguous (masking exists for the engine-unavailable-vs-verdict ambiguity); a
+  masked 200 with `assessment: null` invites an agent to retry forever; and this route is not a gate,
+  so a 5xx cannot become fail-open. R3's masking is otherwise untouched and remains the open design
+  question it was.
+- `/api/guardrail`: **keeps its 200 + `proceed:false`**, naming the block via a third value on the
+  existing `engine_error` field. The first draft justified this as "a 5xx would turn a fail-closed
+  gate into a client-side fail-open one." **PR19 refuted that and it is withdrawn**: this same route
+  already returns 503 for `signing_unavailable`, which ADR-009 §5 blessed as *"fail-closed is correct
+  for a safety artifact"* — our own code refutes a general "5xx is unsafe here" rule. The reasons
+  that survive, both checked in the harness source: (i) no caller behaviour improves — the shipped
+  reference client hard-blocks only on `do_not_proceed`, and today's `pause_for_review` already
+  routes to allow-with-caution, as a 503 would under the default `open` fail-mode; (ii) **the
+  observation window is running and this route is in the measured set** — a 503 re-routes that client
+  from its CAUTION branch to `guardOutage`, changing `guardHold` and `guardOutcome` on guard-side
+  capture records mid-window, and under `strict` fail-mode turning actions the gate currently ALLOWS
+  into denials. Stated precisely because the looser version was tempting and is false: it would
+  **not** move records between capture-basis classes (`buildGuardHoldRecord` reads `captureBasis`
+  from the assessment; an `engine_unavailable` body carries none, so it is `no_assessment` either
+  way — verified, not assumed). Making the two routes consistent at 503 remains a real option, named
+  as a founder election for after the window closes.
+
+**Design choices worth stating.** The audience (`'human' | 'agent'`) is a **required** argument, not
+a defaulted one, so no call site can inherit the wrong register silently; a practitioner is told the
+limit is on our side and that it is not about what they wrote, without our billing vocabulary, while
+an agent's message names the account-level cause and `regain_at`. `Retry-After` is emitted only from
+a provider-stated future instant and capped at 24 h — the uncapped truth rides the body, because a
+~19-day header (the live block's real distance) is not a value any client honours. The block branch
+runs BEFORE the outage branch at every site, which **closes O-1's disclosed residual #1**: the
+hypothetical 429 carrying usage-limit wording no longer receives `Retry-After: 30`.
+
+**Billing.** `/api/reason`'s block branch is `isBillable: false`, against the `true` on the masked-200
+sibling. PR19 raised the sharp case: on a `layer3_throw` block, Layer 1 already ran and its cost is
+real. The asymmetry is intended and the distinguishing fact is what the caller receives — the sibling
+returns a 200 carrying a minimal fallback body, so something was delivered; this branch returns an
+error and delivers nothing. We eat the Layer-1 cost of our own unpaid bill.
+
+**PR19 — four independent Sonnet/low reviewers (founder's standing permission), read-only.**
+Response correctness: CLEAN (all 14 call sites reachable, no headers lost, `respond()`/`isBillable`
+correct, `loopId` in scope, the helper cannot throw); two NITs, one folded — `isProviderAccountBlock`'s
+docstring still said *"no route calls it yet"*, now false, rewritten. Blast radius: CLEAN, no
+HIGH/MEDIUM; two items folded — `score-social/page.tsx` and `scenarios/page.tsx` render `data.error`
+verbatim, so a practitioner would have seen the raw machine code (pre-existing for the transient code;
+both now prefer `data.message`), and the Layer-3 billing carve-out above is now recorded rather than
+absorbed. Masking policy: `/api/reason` SURVIVES; `/api/guardrail` SURVIVES but NEEDS DISCLOSURE —
+folded by rewriting the rationale as above. Also confirmed by that reviewer: the harness's `fetchFrame`
+already returns `ok:false` for a masked 200 (`no assessment in response`), so the new 503 is a clearer
+diagnostic and changes no harness behaviour, and the false-hold capture on that path was already
+unreachable — the 503 excludes nothing new.
+
+**Battery non-vacuity: the review's most valuable dimension, and it found a SYSTEMIC weakness plus a
+real defect. Both folded.** (a) Every WIRE pin matched RAW file text, so a comment reproducing the
+expected literal satisfies it while the live statement is deleted — the reviewer defeated **6 of ~14**
+pins that way, **including WIRE-12 and WIRE-13, the two hardened earlier in this same session after
+mutation M9**. Anchoring pins harder was the wrong repair and is abandoned; every WIRE read now passes
+through a **string-aware `stripComments`** (string-aware deliberately: these files carry `https://`
+URLs a naive stripper would eat, which could turn a pin silently green — pinned STRIP-1..3). (b)
+**WIRE-4 was a real hole needing no comment at all**: the negative check excluded only the literals
+`(error, 'agent'` and `(err, 'agent'`, so RENAMING a catch variable and swapping the audience passed
+clean — the reviewer demonstrated `score-scenario`'s scoring catch serving the AGENT register
+(operator vocabulary, `regain_at`) to a route this table declares human. That is the AC5 audience-leak
+class the R20a rendering work exists to prevent, at a site the battery was meant to guard. Now matched
+by call SHAPE over any variable name, with the wrong-audience count required to be zero. WIRE-17 also
+strengthened to require the `respond({` call itself, not only its argument literals. The reviewer's
+untested same-class residuals (WIRE-8, WIRE-20/21) are covered by the same stripping repair rather
+than by individual probes — stated as coverage-by-construction, not as separately demonstrated.
+Recorded as clean by that reviewer: **WIRE-6** (a filesystem walk + exact-set comparison; it caught a
+planted twelfth caller) and the whole RTY/PAY/MSG/BLK group, which call the exported functions
+directly rather than parsing text.
+
+**Two pre-existing pins broke and were STRENGTHENED, not loosened.** `discernment-observability-wiring`
+§1-2 matched a single-line import literal that a multi-line import defeats — now matched
+formatting-independently, still requiring both the specifier and the module, plus a new §1-2b.
+`reason/r20a-invocation` R3-1 asserted Branch 2 logs exactly once; it now logs twice, once per
+sub-case — R3-1 asserts both and that the masked path still reports 200, with new R3-1b (the block
+guard, its 503 status, and a log context distinguishable from the masked one) and R3-1c (the block
+branch precedes the masked return, so masking survives for every other cause).
+
+**Mutation record: 37 mutations across three batteries, applied/run/restored, every restore
+SHA-verified; 0 survivors at close.** Two survived along the way and both are worth carrying.
+**(i) M9:** WIRE-12 tested `/engine_error: engineErrorCode/` against the whole file and was satisfied
+by the `logRouteError` CONTEXT line two lines above the response body, so the guardrail body could
+stop naming the block with the pin green. **(ii) The whole decoy-comment class**, found by PR19 after
+that repair — see above. After the stripping fix the review's own attacks were replayed and all now
+fail red: P1 (guardrail classification deleted, literal in a block comment) → WIRE-13; P2 (layer2
+`error_cause` deleted, literal in a line comment) → WIRE-14; P3 (logged status flattened, ternary in a
+comment) → WIRE-5; P4 (signing log call deleted, decoy keeps the count) → WIRE-10; the WIRE-4 audience
+probe (renamed variable + wrong audience + decoy comment naming the right one) → WIRE-4. **Control P5**
+(a renamed catch variable with the CORRECT audience) correctly stays green, so the WIRE-4 repair
+rejects the leak without rejecting a legitimate rename. Every pass ran in a **git worktree**, not the
+shared checkout — closing O-1's disclosed residual #5.
+
+**Risk classification:** Critical under 0d-ii (`code-critical`) for the four `GUARD_RE` paths;
+Elevated for the rest. **AC7 engaged and discharged by the founder waiver**, granted on the scoping
+finding that the third guarded file was required. PR6, PR17, PR19, PR25. No auth, schema, perimeter
+logic, env flag, credential or migration touched; nothing deployed in-session. The guard binds on
+uncommitted lines, so it ran RED pre-commit naming exactly the four waived paths — that red is the
+waiver's own evidence — and green on the clean tree after.
+
+**R18 — deliberately NOT published, and the reason is not scope-avoidance.** The existing
+`ai_temporarily_unavailable` shape is documented on NONE of `llms.txt` / `agent-card.json` /
+`api-docs` (grep-confirmed). Publishing the rarer new code while its commoner sibling stays
+undocumented would produce a contract that misleads by omission. The right unit is one
+error-responses entry covering both codes plus `/api/guardrail`'s widened `engine_error` enum, under
+founder-signed wording — scoped as a follow-on, not started.
+
+**Disclosed residuals.** (i) The human tool routes' outage/500 branches emit no CORS headers — a
+pre-existing gap this change neither creates nor worsens, named. (ii) `classifyLlmError` runs twice
+per blocked request (guard, then payload); pure and cheap, accepted. (iii) The
+`/api/guardrail`-at-503 consistency option is open, gated on the window. (iv)
+**`S11-FLIP-PREREQUISITES-REGISTER.md` (the paragraph beginning "Also recorded this session, bearing
+on the window") still carries the withdrawn "seven-day Layer-1 outage" premise**, uncorrected by
+`D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`. Flagged, **not edited** — it is a governing
+register and needs its own founder/mentor step. The S11 pre-flip report itself is clean on this
+point: it was assembled before the block was diagnosed and never carried the premise.
+
+**The commit route, and a property of the enforcement it exposed.** The pre-commit hook blocked the
+AI's commit on the byte-identity guard, naming exactly the four waived paths, and its own text says
+*"Do NOT bypass with `--no-verify`."* It offers no mechanism to accept a waiver. Rather than take that
+deviation unasked, it was put to the founder, who elected to **commit from GitHub Desktop** — where,
+per the hook's own disclosed LIMIT, `GATE1_FALSE_HOLD_CAPTURE` is absent (it comes from
+`.claude/settings.local.json`), the working-tree guard is dormant by the M1 ruling, and only the
+unconditional C2/C2b/C2c pins run. Those pass. This is the documented path, not a loophole, and the
+waiver is what makes it legitimate. **The property worth recording, because it is the same class this
+project keeps finding:** the working-tree byte-identity guard has therefore never bound on ANY commit
+made from GitHub Desktop, waiver or not. The hook states this limit plainly; it is restated here
+because a waiver process whose gate is dormant on the founder's normal commit path is a governance
+fact, not a plumbing detail. **The AI performed no bypass and no push.** The waiver binds the commit
+the founder makes from the staged set; its hash is named at the next session's open rather than
+guessed here.
+
+**Rollback path:** `git revert` the commit; no flag, schema or credential is involved. Reverting
+restores the generic 500 / masked 200 / vague 503 and re-opens the guardrail logging gap.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx tsx src/lib/__tests__/llm-outage.test.ts | tail -1 && GATE1_FALSE_HOLD_CAPTURE=true npx tsx src/app/logos/__tests__/human-practitioner-boundary.test.ts | tail -1
+```
+Expected: `140 passed, 0 failed` and `250 passed, 0 failed`.
+
+**Rules served:** R5, R17, R18 (gate respected — nothing published), PR6, PR15, PR17, PR19, PR25.
+
+**Status:** Adopted. Cross-references: `D-LLM-OUTAGE-CLASSIFIER-ACCOUNT-BLOCK-2026-09-12`;
+`D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`;
+`D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12` (the waiver precedent);
+`operations/handoffs/founder/2026-09-12-O1-followon-account-block-response-and-guardrail-logging-NEXT-SESSION-PROMPT.md`.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

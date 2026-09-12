@@ -366,11 +366,148 @@ export function classifyLlmError(error: unknown): LlmErrorClassification {
 }
 
 /**
- * True when the provider refused us for an account-level reason. Intended for
- * a later route-level response branch (a 503 WITHOUT `Retry-After`, or with a
- * long one, and an honest error code) — no route calls it yet; that change
- * touches GUARD_RE files and is its own session.
+ * True when the provider refused us for an account-level reason.
+ *
+ * O-2 (2026-09-12): the "no route calls it yet" note that stood here is now
+ * FALSE and is removed rather than left to mislead. Fourteen call sites branch
+ * on this — the eleven `llmOutageResponse` routes, `/api/practice/discernment`
+ * (both catch blocks), and `/api/reason` Branch 2 — plus `/api/guardrail`,
+ * which uses it to name the cause inside its fail-closed 200 rather than to
+ * change a status. See `providerAccountBlockResponse` below.
  */
 export function isProviderAccountBlock(error: unknown): boolean {
   return classifyLlmError(error).kind === 'account_block'
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// O-2 (2026-09-12) — the honest RESPONSE for an account block.
+//
+// O-1 fixed the log and deliberately changed no response; the header above
+// names that as a disclosed residual. This closes it. `isProviderAccountBlock`
+// finally has callers.
+//
+// Why 503 and not 402/500. A 402 would say the CALLER has a billing problem —
+// false; the limit is the service operator's. A 500 says "a bug in our code" —
+// also false, and it is exactly the lie the human tool routes tell today. 503
+// is the honest class: the service genuinely cannot serve, through no fault of
+// the request. A client that backs off on 5xx behaves correctly.
+//
+// Why the header is conditional. `llmOutageResponse`'s flat `Retry-After: 30`
+// is a promise no retry can keep for a spend limit (pinned ACC-6: it is never
+// emitted for a block). Here the header is emitted ONLY when the provider told
+// us when access returns — `classifyLlmError().regain_at`, parsed from the
+// provider's own message. With no such instant, NO header: silence is honest,
+// a guessed number is not.
+//
+// The 24h cap, and why the body is the unbounded truth. `Retry-After` is a
+// scheduling hint a client acts on; a value of ~19 days (the live 2026-09-12
+// block, regaining 2026-10-01) is not one any client meaningfully honours, and
+// some clamp or reject large values. So the header is capped at 24h — already
+// "not today" — while the exact instant rides the BODY as `regain_at`, which
+// is machine-readable and uncapped. A stale or past `regain_at` yields no
+// header at all rather than a zero or negative one.
+//
+// Why the audience is a required argument, not a default. The wording differs
+// by who is reading (AC5's human/agent distinction, as the R20a rendering path
+// already draws it): a practitioner is not the operator, cannot act on our
+// spend limit, and should not be handed our billing internals or the internal
+// log register of LLM_ERROR_NOTES.account_block. An agent's developer can act
+// on precision. A default would let a call site inherit the wrong register
+// silently; requiring it makes each of the wirings a deliberate choice.
+//
+// Blast radius, checked rather than assumed (2026-09-12): two live clients
+// branch on the outage code. `reflect/page.tsx` prefers `body.message` over
+// `body.error`, so it renders this response correctly with NO client change —
+// which is why `message` is non-negotiable here. `private-mentor/page.tsx`
+// tests `error === 'ai_temporarily_unavailable'` and otherwise says "Something
+// went wrong", so it is updated in the same commit; without that it would tell
+// a practitioner that a billing condition is a bug.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The machine code for an account block. Deliberately distinct from
+ *  `ai_temporarily_unavailable` — a client must be able to tell "come back in
+ *  30 seconds" from "no retry will help". */
+export const PROVIDER_ACCOUNT_BLOCK_CODE = 'ai_unavailable_provider_account'
+
+/** Retry-After is capped here; the uncapped instant rides the body. */
+export const RETRY_AFTER_MAX_SECONDS = 86_400
+
+/** Who is reading the response. Required at every call site — see the header. */
+export type ResponseAudience = 'human' | 'agent'
+
+export const PROVIDER_ACCOUNT_BLOCK_MESSAGES: Record<ResponseAudience, string> = {
+  // A practitioner: no internals, no invitation to retry, and explicit that
+  // this is not about what they wrote — the reflect/score surfaces are places
+  // people bring difficult material to.
+  human:
+    'The reasoning service is unavailable because of an account limit on our side. ' +
+    'This is not a problem with what you wrote, and trying again now will not help. ' +
+    'Please come back later.',
+  // A developer's agent: name the cause precisely enough to act on.
+  agent:
+    'The model provider refused this request for an account-level reason on the service ' +
+    "operator's side (a usage or spend limit, billing, or a disabled account). Retrying " +
+    'will not clear it. If `regain_at` is present it is the provider-stated instant access returns.',
+}
+
+/**
+ * Seconds until `regainAt`, for the `Retry-After` header — or null when there
+ * is nothing honest to say. Null when: no instant was parsed; the instant is
+ * unparseable; or it is already past (a stale block). Capped per above.
+ * Exported for direct unit pinning.
+ */
+export function retryAfterSecondsFor(regainAt: string | null, now: number = Date.now()): number | null {
+  if (!regainAt) return null
+  const target = Date.parse(regainAt)
+  if (Number.isNaN(target)) return null
+  const seconds = Math.ceil((target - now) / 1000)
+  if (seconds <= 0) return null
+  return Math.min(seconds, RETRY_AFTER_MAX_SECONDS)
+}
+
+/**
+ * The honest degraded response for a provider ACCOUNT BLOCK. 503, an error
+ * code distinct from the transient one, `retriable: false`, the provider's
+ * `regain_at` when it gave one, and `Retry-After` only when that instant is
+ * real and still in the future.
+ *
+ * @param error         the thrown value (classified for `regain_at`).
+ * @param audience      'human' for practitioner-facing tool routes, 'agent'
+ *                      for the agent API surfaces. Required; see the header.
+ * @param extraHeaders  merged last (the X-Loop-* metering headers on
+ *                      /api/reason and /api/score-iterate), exactly as
+ *                      `llmOutageResponse` does.
+ */
+export function providerAccountBlockResponse(
+  error: unknown,
+  audience: ResponseAudience,
+  extraHeaders?: Record<string, string>
+): NextResponse {
+  const { body, status, headers } = providerAccountBlockPayload(error, audience)
+  return NextResponse.json(body, { status, headers: { ...headers, ...(extraHeaders ?? {}) } })
+}
+
+/**
+ * The same response as `providerAccountBlockResponse`, decomposed — for the ONE
+ * caller that cannot use a bare NextResponse: `/api/reason` returns through its
+ * own `respond()` wrapper, which owns the loop-ledger decision (`isBillable`)
+ * and must not be bypassed. Both go through this function so the wire shape has
+ * a single definition and cannot drift between the two paths.
+ */
+export function providerAccountBlockPayload(
+  error: unknown,
+  audience: ResponseAudience
+): { body: Record<string, unknown>; status: number; headers: Record<string, string> } {
+  const regainAt = classifyLlmError(error).regain_at
+  const retryAfter = retryAfterSecondsFor(regainAt)
+  return {
+    body: {
+      error: PROVIDER_ACCOUNT_BLOCK_CODE,
+      message: PROVIDER_ACCOUNT_BLOCK_MESSAGES[audience],
+      retriable: false,
+      regain_at: regainAt,
+    },
+    status: 503,
+    headers: retryAfter !== null ? { 'Retry-After': String(retryAfter) } : {},
+  }
 }
