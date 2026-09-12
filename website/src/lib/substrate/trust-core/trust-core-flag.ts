@@ -78,3 +78,26 @@ export const JUSTICE_SELF_CIRCLE_NARROWING_ENV_VAR =
 export function isJusticeSelfCircleNarrowingEnabled(): boolean {
   return process.env[JUSTICE_SELF_CIRCLE_NARROWING_ENV_VAR] === 'true'
 }
+
+/** Logos-on W2 (2026-09-12) — the enforcement-class record machinery's own
+ *  kill-switch (mentor L5/L7; design of record
+ *  operations/agent-circles-2026-08/2026-09-12-W2-record-honesty-DESIGN.md). A
+ *  DEDICATED flag, never a reuse of SUBSTRATE_TRUST_CORE_ENABLED (the standing
+ *  lesson: darkness is per-flag, not per-feature — the trust core is LIVE, so
+ *  riding its flag would make this live the moment it deploys, on a surface that
+ *  writes PERMANENT ledger rows and on the live guardrail route).
+ *
+ *  Gates, together: (1) the deny-time emission seam in /api/guardrail; (2) the
+ *  store's per-entry regime stamp; (3) the S10 `enforcement_outcomes` slice and
+ *  the `regime` field on served entries. UNSET ⇒ all three are byte-identical to
+ *  pre-W2 (battery-asserted). BOTH this flag AND the trust-core flag must be
+ *  'true' for anything to emit.
+ *
+ *  Activation is its own founder-walked `code-critical` step, coupled to the
+ *  S11 flip per the register (§F W3-d: the flip must not activate without W2).
+ *  The CHECK-widening migration MUST land before this flag is set. */
+export const ENFORCEMENT_RECORD_ENV_VAR = 'SUBSTRATE_ENFORCEMENT_RECORD_ENABLED'
+
+export function isEnforcementRecordEnabled(): boolean {
+  return process.env[ENFORCEMENT_RECORD_ENV_VAR] === 'true'
+}

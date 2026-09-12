@@ -28,6 +28,7 @@ import type { VirtueTrustDomain } from './types'
 import { PROXIMITY_RANK } from './constants'
 import type { SessionDomainObservation } from './intervention-engine'
 import { pagedRows } from '@/lib/db/paged-select'
+import { isEnforcementRecordEnabled } from './trust-core-flag'
 
 // ============================================================================
 // SHARED PLUMBING (mirrors agent-assessment-history-store.ts)
@@ -106,6 +107,24 @@ function rowToEarnedState(row: TrustStateRow): EarnedDomainState {
   }
 }
 
+/**
+ * Logos-on W2 item 2 (2026-09-12, mentor L7): the per-entry REGIME marker —
+ * "each examination entry carries a field identifying whether it was conducted
+ * under practice-on or logos-on enforcement" — stamped at THIS single row-mapping
+ * chokepoint rather than at each of the eight emitters. Flag-on only: an event
+ * that already carries `regime` (the enforcement deriver sets
+ * 'logos-on-enforcement') keeps it; any other event is stamped 'practice-on'.
+ * Flag-off the payload object is passed through UNTOUCHED (byte-identical row;
+ * battery-pinned by reference equality). Never mutates the caller's object.
+ */
+export function stampRegime(event: TrustEvent): TrustEvent['payload'] {
+  if (!isEnforcementRecordEnabled()) return event.payload
+  if (event.payload.regime === 'practice-on' || event.payload.regime === 'logos-on-enforcement') {
+    return event.payload
+  }
+  return { ...event.payload, regime: 'practice-on' }
+}
+
 function eventToRow(event: TrustEvent): Record<string, unknown> {
   return {
     agent_id: event.agentId,
@@ -115,7 +134,7 @@ function eventToRow(event: TrustEvent): Record<string, unknown> {
     event_type: event.eventType,
     artifact_kind: event.artifactKind,
     artifact_ref: event.artifactRef,
-    payload: event.payload, // KG7 — object passed directly
+    payload: stampRegime(event), // KG7 — object passed directly (W2: regime stamped flag-on)
     occurred_at: event.occurredAt,
     correlation_id: event.correlationId ?? null,
     retain_until: new Date(Date.parse(event.occurredAt) + RETENTION_MS).toISOString(),
@@ -642,6 +661,12 @@ export interface OrientationReadingLedgerEntry {
    *  is honestly labelled examined by default, matching the architecture at
    *  the time it was written, not a confirmed delivery status). */
   deliveryClass: 'examined' | 'observed'
+  /** Logos-on W2 item 2 (2026-09-12): the per-entry regime marker. PRESENT ONLY
+   *  when SUBSTRATE_ENFORCEMENT_RECORD_ENABLED is set (the key is structurally
+   *  absent flag-off — byte-identical entries). A row with no stamp (emitted
+   *  before the flag) is served 'practice-on': no enforcement entry could have
+   *  existed before the flag, and the only enforcement producer stamps its own. */
+  regime?: 'practice-on' | 'logos-on-enforcement'
 }
 
 export async function readOrientationReadings(
@@ -679,7 +704,12 @@ export async function readOrientationReadings(
     // never assumed to be a syntax failure worth failing the whole read over.
     const { data, error } = await client
       .from(EVENTS_TABLE)
-      .select('event_type, occurred_at, delivery_class:payload->>orientationDeliveryClass')
+      .select(
+        // W2: the regime projection rides ONLY flag-on so the flag-off query
+        // string is byte-identical to pre-W2 (battery-pinned).
+        'event_type, occurred_at, delivery_class:payload->>orientationDeliveryClass' +
+          (isEnforcementRecordEnabled() ? ', regime:payload->>regime' : ''),
+      )
       .eq('agent_id', agentId)
       .in('event_type', [
         'orientation-reading-toward',
@@ -694,18 +724,26 @@ export async function readOrientationReadings(
       }
       return { ok: false, error: `readOrientationReadings: ${error.message}` }
     }
-    const rows = (data ?? []) as {
+    // `as unknown as`: the select string is now computed (the flag-gated regime
+    // projection), so PostgREST's type inference cannot see the row shape.
+    const rows = (data ?? []) as unknown as {
       event_type: string
       occurred_at: string
       delivery_class?: string | null
+      regime?: string | null
     }[]
     const capped = rows.length > ORIENTATION_READINGS_ROW_CAP
+    const regimeOn = isEnforcementRecordEnabled()
     const entries: OrientationReadingLedgerEntry[] = rows
       .slice(0, ORIENTATION_READINGS_ROW_CAP)
       .map((r) => ({
         reading: r.event_type.replace('orientation-reading-', ''),
         occurredAt: r.occurred_at,
         deliveryClass: r.delivery_class === 'observed' ? 'observed' : 'examined',
+        // W2 item 2: spread-conditional so the key is ABSENT flag-off.
+        ...(regimeOn
+          ? { regime: r.regime === 'logos-on-enforcement' ? 'logos-on-enforcement' : 'practice-on' }
+          : {}),
       }))
 
     // Mentor §6(b): the total count. Below the cap the row set IS the total
@@ -735,6 +773,107 @@ export async function readOrientationReadings(
     return { ok: true, value: { entries, capped, totalCount } }
   } catch (e) {
     return { ok: false, error: `readOrientationReadings threw: ${(e as Error).message}` }
+  }
+}
+
+// ============================================================================
+// Logos-on W2 (2026-09-12) — the ENFORCEMENT-CLASS ledger slice for S10
+// ============================================================================
+
+/** The same cap the orientation slice uses (mentor §6(b): capped list + honest
+ *  total). Build-time parameter. */
+export const ENFORCEMENT_OUTCOMES_ROW_CAP = 50
+
+export interface EnforcementOutcomeLedgerEntry {
+  occurredAt: string
+  regime: 'practice-on' | 'logos-on-enforcement'
+  /** JSON-path projected: payload->>enforcementSource. */
+  source: string | null
+  /** JSON-path projected: payload->enforcementGround->>kind. */
+  groundKind: string | null
+  /** JSON-path projected: payload->>verdictRecommendation. */
+  verdictRecommendation: string | null
+}
+
+/**
+ * The capped, newest-first read of `enforcement-outcome` events for the public
+ * trust record (mentor L7: the entry is the unit read in isolation, so the
+ * composer attaches the clause + marker inline per entry). Projects ONLY the
+ * fields the wire needs via JSON-path selectors — never the whole payload
+ * (which carries the verdict's floors basis and the cited circle names; the
+ * served entry names the ground KIND, not the circle list, the S10
+ * state-fold-only posture extended to this slice). Mirrors readOrientationReadings'
+ * probe-one-extra truncation idiom and its fail-honest total-count arm.
+ */
+export async function readEnforcementOutcomes(
+  agentId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<
+  StoreResult<{
+    entries: EnforcementOutcomeLedgerEntry[]
+    capped: boolean
+    totalCount: number | null
+  }>
+> {
+  try {
+    const { data, error } = await client
+      .from(EVENTS_TABLE)
+      .select(
+        'occurred_at, regime:payload->>regime, source:payload->>enforcementSource, ' +
+          'ground_kind:payload->enforcementGround->>kind, ' +
+          'verdict_recommendation:payload->>verdictRecommendation',
+      )
+      .eq('agent_id', agentId)
+      .eq('event_type', 'enforcement-outcome')
+      .order('occurred_at', { ascending: false })
+      .limit(ENFORCEMENT_OUTCOMES_ROW_CAP + 1)
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: { entries: [], capped: false, totalCount: 0 } }
+      }
+      return { ok: false, error: `readEnforcementOutcomes: ${error.message}` }
+    }
+    const rows = (data ?? []) as unknown as {
+      occurred_at: string
+      regime?: string | null
+      source?: string | null
+      ground_kind?: string | null
+      verdict_recommendation?: string | null
+    }[]
+    const capped = rows.length > ENFORCEMENT_OUTCOMES_ROW_CAP
+    const entries: EnforcementOutcomeLedgerEntry[] = rows
+      .slice(0, ENFORCEMENT_OUTCOMES_ROW_CAP)
+      .map((r) => ({
+        occurredAt: r.occurred_at,
+        // An enforcement entry is stamped by its own deriver; a missing stamp is
+        // a read anomaly and is served as what the entry structurally IS.
+        regime: 'logos-on-enforcement',
+        source: r.source ?? null,
+        groundKind: r.ground_kind ?? null,
+        verdictRecommendation: r.verdict_recommendation ?? null,
+      }))
+    let totalCount: number | null = rows.length <= ENFORCEMENT_OUTCOMES_ROW_CAP ? rows.length : null
+    if (totalCount === null) {
+      const countRes = (await client
+        .from(EVENTS_TABLE)
+        .select('id', { count: 'exact', head: true })
+        .eq('agent_id', agentId)
+        .eq('event_type', 'enforcement-outcome')) as {
+        count?: number | null
+        error: { message?: string } | null
+      }
+      if (countRes.error || typeof countRes.count !== 'number') {
+        console.error(
+          '[trust-core] readEnforcementOutcomes: total-count query failed (count omitted this read):',
+          countRes.error?.message ?? 'no count returned',
+        )
+      } else {
+        totalCount = countRes.count
+      }
+    }
+    return { ok: true, value: { entries, capped, totalCount } }
+  } catch (e) {
+    return { ok: false, error: `readEnforcementOutcomes threw: ${(e as Error).message}` }
   }
 }
 

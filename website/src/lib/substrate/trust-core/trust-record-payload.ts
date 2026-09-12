@@ -42,6 +42,7 @@ import {
 } from './provenance-classification'
 import type { TrustVerdict } from './harness-integration'
 import type { EffectiveDomainTrust, VirtueTrustDomain } from './types'
+import { COMPLIANCE_NOT_VIRTUE_CLAUSE, ENFORCEMENT_CONTEXT_MARKER } from './enforcement-clause'
 
 // ============================================================================
 // THE HONEST-CLAIMS ENVELOPE (ADR-013 §8; PA-6 narrowed; PA-10 disclosed)
@@ -234,6 +235,39 @@ export interface TrustRecordOrientationEntry {
   /** selectOrientationEntryWording(reading, class).notAttestableClause. */
   not_attestable_clause: string
   occurred_at: string
+  /** Logos-on W2 item 2 (mentor L7): the per-entry regime marker. PRESENT ONLY
+   *  while SUBSTRATE_ENFORCEMENT_RECORD_ENABLED is set (absent ⇒ byte-identical
+   *  entries; the store omits the key flag-off, the composer passes it through). */
+  regime?: 'practice-on' | 'logos-on-enforcement'
+}
+
+/**
+ * Logos-on W2 (2026-09-12, mentor L5 + L7) — one served ENFORCEMENT-CLASS entry:
+ * an outcome the infrastructure produced by blocking an action (today: a
+ * guardrail deny). Shaped on the orientation_readings precedent exactly: a
+ * capped list, an honest total count, and the clause carried INLINE per entry —
+ * "the entry is the unit that will be read in isolation. A reader who encounters
+ * a single enforcement-class entry without the clause has no way to know what
+ * the entry does and does not show." Effect-neutral by construction (the
+ * `enforcement-outcome` event is 'flag', NULL domain, insert-only); nothing in
+ * this entry is character evidence. The served entry names the ground KIND and
+ * the verdict, never the circle list (the S10 state-fold-only posture).
+ */
+export interface TrustRecordEnforcementEntry {
+  class: 'enforcement'
+  regime: 'logos-on-enforcement'
+  /** WHICH infrastructure acted ('guardrail_deny' today). */
+  source: string
+  /** 'other_directed' (the block cited an other-directed violated obligation) or
+   *  'no_other_directed_ground' (the block rested on the verdict alone). The
+   *  first circle can never be the cited ground (mentor L4). */
+  ground_kind: 'other_directed' | 'no_other_directed_ground' | 'unknown'
+  verdict_recommendation: string | null
+  /** ENFORCEMENT_CONTEXT_MARKER, inline (mentor L5's three statements). */
+  context_marker: string
+  /** COMPLIANCE_NOT_VIRTUE_CLAUSE, inline (mentor L7, verbatim). */
+  compliance_not_virtue_clause: string
+  occurred_at: string
 }
 
 /**
@@ -309,6 +343,15 @@ export interface TrustRecordPayload {
      *  present AND the count read succeeded — OMITTED, never fabricated, on a
      *  transient count failure. */
     total_provenance_gaps_count?: number
+    /** Logos-on W2: ABSENT entirely while SUBSTRATE_ENFORCEMENT_RECORD_ENABLED
+     *  is unset (byte-identical payload — the same optional-field pattern);
+     *  flag-on, the capped recent-entries list (newest first), each entry
+     *  carrying the compliance-not-virtue clause + the L5 context marker inline. */
+    enforcement_outcomes?: TrustRecordEnforcementEntry[]
+    /** The "showing N of M" honesty rule, mirroring
+     *  total_orientation_readings_count. Present whenever enforcement_outcomes
+     *  is present AND the count read succeeded — OMITTED, never fabricated. */
+    total_enforcement_outcomes_count?: number
   }
   envelope: typeof TRUST_RECORD_ENVELOPE
   evidence: {
@@ -397,6 +440,21 @@ export interface ComposeTrustRecordInput {
     capped: boolean
     totalCount?: number | null
   } | null
+  /** Logos-on W2: the capped enforcement-outcome slice. The SAME three-state
+   *  contract — `undefined` ⇒ the flag is OFF, no read happened, NO key on the
+   *  payload (byte-identity); `null` ⇒ flag on, read failed honestly, key
+   *  omitted + note; a value ⇒ composed entries, each carrying the clause and
+   *  marker inline, plus the total count (null ⇒ omitted, never fabricated). */
+  enforcementOutcomes?: {
+    entries: {
+      occurredAt: string
+      source: string | null
+      groundKind: string | null
+      verdictRecommendation: string | null
+    }[]
+    capped: boolean
+    totalCount?: number | null
+  } | null
   /** Injected read time (the route passes new Date(); tests pin it). */
   generatedAt: Date
 }
@@ -444,6 +502,7 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
           reading: 'toward' | 'away' | 'indeterminate'
           occurredAt: string
           deliveryClass: 'examined' | 'observed'
+          regime?: 'practice-on' | 'logos-on-enforcement'
         } => e.reading === 'toward' || e.reading === 'away' || e.reading === 'indeterminate',
       )
       .map((e) => {
@@ -454,6 +513,11 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
           entry_text: wording.entryText,
           not_attestable_clause: wording.notAttestableClause,
           occurred_at: e.occurredAt,
+          // W2 item 2: pass-through ONLY when the store supplied it (flag-on);
+          // spread-conditional so the key is structurally absent flag-off.
+          ...(e.regime === 'practice-on' || e.regime === 'logos-on-enforcement'
+            ? { regime: e.regime }
+            : {}),
         }
       })
     if (input.orientationReadings.capped) {
@@ -491,6 +555,50 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
       // "…in mind. each entry describes…". The wording itself is untouched.
       if (!totalKnown) cappedNote += `. ${M6_TOTAL_UNKNOWN_CURATION_DISCLOSURE}`
       notes.push(cappedNote)
+    }
+  }
+  // Logos-on W2: the enforcement-class entries. Same three-state contract as
+  // the orientation block above. Each entry carries the L7 clause and the L5
+  // marker INLINE — "the entry is the unit that will be read in isolation".
+  let enforcementEntries: TrustRecordEnforcementEntry[] | undefined
+  if (input.enforcementOutcomes === null) {
+    notes.push(
+      'enforcement outcomes unavailable (fail-honest) — enforcement_outcomes omitted this read',
+    )
+  } else if (input.enforcementOutcomes !== undefined) {
+    enforcementEntries = input.enforcementOutcomes.entries.map((e) => ({
+      class: 'enforcement' as const,
+      regime: 'logos-on-enforcement' as const,
+      source: e.source ?? 'unknown',
+      ground_kind:
+        e.groundKind === 'other_directed' || e.groundKind === 'no_other_directed_ground'
+          ? e.groundKind
+          : 'unknown',
+      verdict_recommendation: e.verdictRecommendation ?? null,
+      context_marker: ENFORCEMENT_CONTEXT_MARKER,
+      compliance_not_virtue_clause: COMPLIANCE_NOT_VIRTUE_CLAUSE,
+      occurred_at: e.occurredAt,
+    }))
+    // The slice-level disclosure (always, when the slice is served): enforced
+    // outcomes are effect-neutral and are not character evidence; an EMPTY
+    // list is not a claim of virtue — under enforcement, fewer live occasions
+    // for the examined refusal exist (mentor L5, the mirror problem).
+    notes.push(
+      'enforcement_outcomes lists outcomes the infrastructure produced by blocking an action ' +
+        '(effect-neutral, never character evidence — see each entry’s inline clause). ' +
+        'An empty list does not attest to the agent’s virtue: under enforcement the agent ' +
+        'faces fewer live occasions for the examined refusal, and demonstration evidence in ' +
+        'this period should be read in light of the enforcement context.',
+    )
+    if (input.enforcementOutcomes.capped) {
+      const total = input.enforcementOutcomes.totalCount
+      notes.push(
+        typeof total === 'number'
+          ? `enforcement_outcomes shows the ${enforcementEntries.length} most recent of ${total} ` +
+              'total enforced outcomes (a recency window, not the full record)'
+          : 'enforcement_outcomes is capped at the bounded read window (older outcomes not ' +
+              'listed; the total count was unavailable this read)',
+      )
     }
   }
   // SLICE 3: the provenance-gap entries. Same three-state contract as the
@@ -623,6 +731,12 @@ export function composeTrustRecordPayload(input: ComposeTrustRecordInput): Trust
       ...(provenanceGapEntries !== undefined &&
       typeof input.provenanceGaps?.totalCount === 'number'
         ? { total_provenance_gaps_count: input.provenanceGaps.totalCount }
+        : {}),
+      // Logos-on W2: attached ONLY when composed — structurally absent flag-off.
+      ...(enforcementEntries !== undefined ? { enforcement_outcomes: enforcementEntries } : {}),
+      ...(enforcementEntries !== undefined &&
+      typeof input.enforcementOutcomes?.totalCount === 'number'
+        ? { total_enforcement_outcomes_count: input.enforcementOutcomes.totalCount }
         : {}),
     },
     envelope: TRUST_RECORD_ENVELOPE,

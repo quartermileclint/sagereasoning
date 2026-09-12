@@ -68,12 +68,21 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
    *  row. */
   function projectJsonPathAliases(row: Row, cols: string | null): Row {
     if (!cols) return row
-    const clause = /(\w+):(\w+)->>(\w+)/g
+    // W2 (2026-09-12): ONE optional nested hop (`column->parent->>key`) added
+    // for readEnforcementOutcomes' `payload->enforcementGround->>kind`
+    // projection. The single-hop form is byte-identical in behaviour.
+    const clause = /(\w+):(\w+)(?:->(\w+))?->>(\w+)/g
     let out: Row | null = null
     let m: RegExpExecArray | null
     while ((m = clause.exec(cols)) !== null) {
-      const [, alias, column, jsonKey] = m
-      const container = row[column]
+      const [, alias, column, parentKey, jsonKey] = m
+      let container = row[column]
+      if (parentKey !== undefined) {
+        container =
+          container !== null && typeof container === 'object'
+            ? (container as Record<string, unknown>)[parentKey]
+            : undefined
+      }
       const value =
         container !== null && typeof container === 'object'
           ? (container as Record<string, unknown>)[jsonKey]

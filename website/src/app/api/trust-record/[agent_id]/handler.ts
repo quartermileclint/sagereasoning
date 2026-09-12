@@ -40,7 +40,9 @@ import { NextResponse } from 'next/server'
 import {
   isTrustCoreEnabled,
   isTrustReadSurfaceEnabled,
+  isEnforcementRecordEnabled,
 } from '@/lib/substrate/trust-core/trust-core-flag'
+import { readEnforcementOutcomes } from '@/lib/substrate/trust-core/trust-core-store'
 import {
   readTrustVerdict,
   type TrustVerdict,
@@ -140,6 +142,27 @@ export interface TrustRecordDeps {
       }
     | { ok: false; error: string }
   >
+  /** Logos-on W2 (OPTIONAL so pre-W2 dep objects stay valid — the C2c
+   *  precedent). Absent or flag-off ⇒ no read, no payload field. */
+  isEnforcementRecordEnabled?: () => boolean
+  readEnforcementOutcomes?: (
+    agentId: string,
+  ) => Promise<
+    | {
+        ok: true
+        value: {
+          entries: {
+            occurredAt: string
+            source: string | null
+            groundKind: string | null
+            verdictRecommendation: string | null
+          }[]
+          capped: boolean
+          totalCount: number | null
+        }
+      }
+    | { ok: false; error: string }
+  >
   now: () => Date
 }
 
@@ -160,6 +183,8 @@ const REAL_DEPS: TrustRecordDeps = {
   readOrientationReadings: (agentId) => readOrientationReadings(agentId),
   isProvenanceLedgerEnabled,
   readProvenanceGaps: (agentId) => readProvenanceGaps(agentId),
+  isEnforcementRecordEnabled,
+  readEnforcementOutcomes: (agentId) => readEnforcementOutcomes(agentId),
   now: () => new Date(),
 }
 
@@ -433,11 +458,40 @@ export async function runTrustRecordGet(
     }
   }
 
+  // 6c. Logos-on W2 — the capped enforcement-outcomes slice. Same posture as
+  //     6b: flag-off NOTHING is read and the composer receives undefined ⇒ no
+  //     enforcement_outcomes key (byte-identical); flag-on, an outage never
+  //     blocks the record (null ⇒ omitted + honest note).
+  let enforcementOutcomes:
+    | {
+        entries: {
+          occurredAt: string
+          source: string | null
+          groundKind: string | null
+          verdictRecommendation: string | null
+        }[]
+        capped: boolean
+        totalCount?: number | null
+      }
+    | null
+    | undefined
+  if (deps.isEnforcementRecordEnabled?.() && deps.readEnforcementOutcomes) {
+    const enfRes = await deps.readEnforcementOutcomes(agentId)
+    enforcementOutcomes = enfRes.ok ? enfRes.value : null
+    if (!enfRes.ok) {
+      console.error(
+        '[trust-record] enforcement outcomes read failed (fail-honest):',
+        enfRes.error,
+      )
+    }
+  }
+
   const payload: TrustRecordPayload = composeTrustRecordPayload({
     verdict,
     reflectSummary,
     ...(orientationReadings !== undefined ? { orientationReadings } : {}),
     ...(provenanceGaps !== undefined ? { provenanceGaps } : {}),
+    ...(enforcementOutcomes !== undefined ? { enforcementOutcomes } : {}),
     generatedAt: deps.now(),
   })
 

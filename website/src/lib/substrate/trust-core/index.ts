@@ -59,6 +59,12 @@ export * from './harness-integration'
 // MEASURE-only; DARK behind SUBSTRATE_LOOP_FOLD_ENABLED.
 export * from './loop-fold'
 export * from './trust-core-flag'
+// Logos-on W2 (2026-09-12) — the enforcement-class record machinery (mentor
+// L4/L5/L7). Effect-neutral ('flag', NULL domain, insert-only); the compliance-
+// not-virtue clause inline; the L4 dual-recording rule. DARK behind
+// SUBSTRATE_ENFORCEMENT_RECORD_ENABLED.
+export * from './enforcement-clause'
+export * from './enforcement-record'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
   emitTrustEvents,

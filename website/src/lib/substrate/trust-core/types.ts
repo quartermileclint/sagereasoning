@@ -134,6 +134,26 @@ export type TrustEventType =
   | 'orientation-reading-toward'
   | 'orientation-reading-away'
   | 'orientation-reading-indeterminate'
+  // Logos-on W2 (2026-09-12) — THE ENFORCEMENT CLASS (mentor verdicts L5 + L7,
+  // verbatim record 2026-08-01-mentor-consultation-agent-circles-logos-on-
+  // verbatim.md; design of record 2026-09-12-W2-record-honesty-DESIGN.md).
+  // DARK until the enforcement CHECK-widening migration lands + BOTH
+  // SUBSTRATE_TRUST_CORE_ENABLED and SUBSTRATE_ENFORCEMENT_RECORD_ENABLED are
+  // set. ONE type, not one per ground: event_type is the single source of truth
+  // for EFFECT, and every enforced outcome has the same effect — 'flag', a
+  // genuine no-op in either direction ("a distinct enforcement class that moves
+  // no domain level"). The GROUND (other-directed circle vs none) lives in the
+  // payload (enforcementGround) — descriptive, never effect-bearing.
+  // virtue_domain NULL: an enforced outcome is evidence for no domain — "by the
+  // ruling's own terms it is compliance, not virtue, so it cannot be treated as
+  // character evidence" (L5).
+  //
+  // ⚠ EMISSION PATH IS LOAD-BEARING (the orientation precedent, same reason): a
+  // NULL-domain event through the generic emitTrustEvents would stamp the
+  // reflect timestamp — half-rate decay granted from a guard deny. Enforcement
+  // entries are emitted ONLY via emitLedgerOnlyTrustEvents (insert-only) from
+  // trust-core/enforcement-record.ts.
+  | 'enforcement-outcome'
 
 /** The verifiable examination artifact backing a trust event (the R18f-parallel
  *  proof). S9b adds:
@@ -269,6 +289,39 @@ export interface TrustEventPayload {
    *  S10: the public trust-record read projects `event_type`, `occurred_at`
    *  and a single JSON-path `delivery_class` — never the whole payload. */
   loopId?: string
+  /** Logos-on W2 item 2 (2026-09-12, mentor L7): the per-entry REGIME marker —
+   *  practice-on vs logos-on-enforcement — "the honest-claims dimension beside
+   *  the existing examination-timing credential field". Stamped at the store's
+   *  row chokepoint flag-on (default 'practice-on'); the enforcement deriver sets
+   *  'logos-on-enforcement' itself. Absent on rows written before the flag. */
+  regime?: 'practice-on' | 'logos-on-enforcement'
+  /** enforcement-outcome (W2 item 1): WHICH infrastructure acted. Today only
+   *  the guardrail's live deny exists; 's11_intervention' is declared for the
+   *  intervention engine once flipped and is NEVER emitted before that
+   *  (battery-pinned: no producer in the codebase emits it). */
+  enforcementSource?: 'guardrail_deny' | 's11_intervention'
+  /** enforcement-outcome (W2 item 5, mentor L4): the CITED GROUND. Either the
+   *  other-directed circles whose violated obligations justified the block, or
+   *  an explicit statement that no other-directed ground was identified. The
+   *  self-preservation circle can NEVER appear in `circles` (structural +
+   *  battery-pinned): "the enforcement was triggered by the other-directed
+   *  violation; the first-circle failure is recorded separately". */
+  enforcementGround?:
+    | { kind: 'other_directed'; circles: string[]; obligationStatus: 'violated' }
+    | { kind: 'no_other_directed_ground'; basis: string }
+  /** enforcement-outcome (W2 item 1, mentor L5): the inline context marker —
+   *  produced under enforcement; the agent's reasoning was not the proximate
+   *  cause; demonstration evidence in this period reads in that light. */
+  enforcementContextMarker?: string
+  /** enforcement-outcome (W2 item 3, mentor L7): the compliance-not-virtue
+   *  clause, verbatim, inline — "the entry is the unit that will be read in
+   *  isolation". */
+  complianceNotVirtueClause?: string
+  /** enforcement-outcome: the verdict the block rested on (reproducible from
+   *  the signed assessment referenced by artifact_ref). */
+  verdictRecommendation?: string
+  verdictProximity?: KatorthomaProximity | null
+  proximityFloorsBasis?: string | null
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }
