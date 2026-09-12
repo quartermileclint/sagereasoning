@@ -619,3 +619,17 @@ remain BLOCKED; the 0h call remains the founder's.
   discipline is satisfiable while `CLAUDE.md` — auto-read by every session — names the window and the
   instrument. **D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
   remains the founder's.**
+
+- **2026-09-13 (the two W2-window questions RULED — `D-MENTOR-RULING-W2-WINDOW-WORK-AND-QS2-DISCIPLINE-ADOPTED-2026-09-13`;
+  verbatim, canonical: `2026-09-13-mentor-ruling-w2-window-work-and-QS2-discipline-verbatim.md`).**
+  **Row W3-d's second role is AMENDED:** W2's *build* is no longer the window's work — *"a build that
+  produced zero consult records is, from the window's perspective, as if it did not happen."* **The W2
+  window's clock has NOT started and starts only at the first consult record from consequential
+  Write/Edit work on a live surface**, never at a Bash guard record. The work designation is OPEN and must
+  be settled by the founder before the first session, against the two governing constraints
+  (consequential subject matter; consult channel); the ruled candidates in order of fit are W2
+  activation's remaining authored work, the pre-flip report's outstanding items (the D2 definitions
+  relay — the Part-1 defect the ruling also names was already fixed 2026-09-12), and the standing-runner
+  design session. **Q-S2 is satisfiable as ruled**: CLAUDE.md's instrument disclosure is within bounds;
+  the per-session prompt condition stands. Nothing built, activated or flipped. **D2 remains blocked; the
+  S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**

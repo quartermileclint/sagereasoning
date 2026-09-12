@@ -40448,3 +40448,50 @@ Cross-references: `D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12`;
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## 2026-09-13 — D-MENTOR-RULING-W2-WINDOW-WORK-AND-QS2-DISCIPLINE-ADOPTED-2026-09-13
+
+**Decision:** the mentor's ruling on the two W2-window questions relayed by the founder from
+`2026-09-12-w2-window-two-questions-RELAY-DRAFT.md` is **recorded verbatim, canonical, and adopted in
+full** (`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-w2-window-work-and-QS2-discipline-verbatim.md`;
+verbatim wins). **(i) W2's completed build is not the window's work; the W2 window's clock has NOT started
+and starts at the first consult record produced by consequential Write/Edit work on a live surface, never
+at a Bash guard record.** The work designation must be updated before the first session; three candidates
+are ruled in order of fit (W2 activation's remaining authored work; the pre-flip report's outstanding items;
+the standing-runner design session); **which is the founder's call.** **(ii) The Q-S2 discipline is
+satisfiable as things stand:** CLAUDE.md names the instrument, not the observation goal — *"no scoped
+CLAUDE.md, no different harness, no different project root"*; the per-session prompt condition stands.
+
+**Reasoning.** Both questions arose from first-hand checks at the 2026-09-12 records fold (three Bash guard
+records and zero consult records of W2 in the window; CLAUDE.md's auto-read blocks). The ruling amends the
+2026-09-12 Q-S1 reading of "W2's first record" (a Bash record cannot start the clock) and confirms the
+Q-S2 line at the level it was drawn. One imprecision inside the ruling is recorded beside it, not edited:
+it names the Part-1 script defect as needing a waived session; that defect was fixed 2026-09-12 under B1.
+
+**Folded into:** the window specification (a dated header + new §7); the S11 register (a change-log row);
+the DRAFTED standing opener (the two-questions paragraph, F-1, `Q-W2-FIRST-SESSION`); the relay draft's
+status line. **Nothing built, activated, flipped, deployed or pushed.**
+
+**Files touched:** the verbatim (new); `2026-09-12-part2-window-SPECIFICATION-FOR-APPROVAL.md`;
+`S11-FLIP-PREREQUISITES-REGISTER.md`; `STANDING-SESSION-OPENER-grounded-foundations.md`;
+`2026-09-12-w2-window-two-questions-RELAY-DRAFT.md`;
+`operations/handoffs/founder/2026-09-13-w2-window-two-questions-ruled-CLOSE.md`; this entry.
+
+**Risk classification:** `governance` / documents (0d-ii). AC7 not engaged. No `GUARD_RE` file, R18
+surface, code, schema, flag or credential touched.
+
+**Rollback path:** `git revert` the records commit; the verbatim stands as record regardless.
+
+**Verification step (founder-performable):** read the verbatim against the mentor's message as received;
+confirm the spec's §7 and the opener's F-1 say "the clock has not started" and "the founder designates".
+
+**Rules served:** PR18, PR23, PR25; the verbatim-wins discipline.
+
+**Status:** Adopted. Cross-references: `D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12`;
+`D-RECORDS-FOLD-OPENER-DRAFTED-W1-STAGED-2026-09-12`;
+`D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12`.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

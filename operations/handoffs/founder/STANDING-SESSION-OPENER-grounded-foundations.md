@@ -101,13 +101,17 @@ in `2026-09-12-mentor-ruling-window-specification-QS1-QS2-QS3-verbatim.md`:
 - **Q-S3 — sequenced, not refused.** Evidence first, standard revision second; re-askable with the W2
   window's own evidence.
 
-**⚠ Two open questions the records had not named, drafted for relay and NOT sent —
-`operations/trust-layer-2026-07/2026-09-12-w2-window-two-questions-RELAY-DRAFT.md`.** They are the
-**highest founder item** below. In one line each: **(i)** W2's build ran in an isolated worktree with
-capture unset and was merged under waiver; the measured buffer holds **three Bash guard records and zero
-Write/Edit consult records** of W2 — so what is left of W2 for the window to run over? **(ii)** every
-session auto-reads `CLAUDE.md`, which names the window, the instrument and the buffer — is Q-S2
-satisfiable as ruled, and if not, what does the mentor want done? **Neither is answered here.**
+**⚖️ The two open questions were relayed and RULED 2026-09-13** (verbatim, canonical:
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-w2-window-work-and-QS2-discipline-verbatim.md`).
+**(i) W2's completed build is NOT the window's work** — it produced zero consult records, *"as if it did not
+happen"*; **the W2 window's clock has not started and starts at the first consult record from
+consequential Write/Edit work on a live surface, never at a Bash guard record.** The work designation is
+**open** and the founder must settle it before the first session, against the two constraints; ruled
+candidates in order: W2 activation's remaining authored work, the pre-flip report's outstanding items
+(the D2 definitions relay; the Part-1 defect it also names was fixed 2026-09-12), the standing-runner
+design session. **(ii) Q-S2 is satisfiable as ruled** — CLAUDE.md names the instrument, not the observation
+goal; *"no scoped CLAUDE.md, no different harness, no different project root"*; session prompts must
+still never name the goal.
 
 ## The MERGE trap — carry it beside "guard scope must cover the class"
 
@@ -252,7 +256,7 @@ open). Full detail on those in the archived 2026-09-08 version.
 
 | # | Action | Unblocks / closes |
 |---|---|---|
-| **F-1 (HIGHEST)** | **Read, edit or drop, and send the two-question relay** — `2026-09-12-w2-window-two-questions-RELAY-DRAFT.md`: (i) what is left of W2 for the window to run over; (ii) is Q-S2 satisfiable while `CLAUDE.md` is auto-read. **Neither is answered in the draft.** | whether the first W2 session can legitimately open |
+| **F-1 (HIGHEST)** | **Designate the W2 window's work** (ruled 2026-09-13; the relay was sent and both questions ruled): assess what W2 activation still requires as composed Write/Edit authoring; if insufficient, designate the standing-runner design session. The clock starts at that work's first consult record. Then author the first session prompt naming the work, never the observation. | whether the first W2-window session can open, and when its clock starts |
 | **F-2** | **Adopt this opener** (or correct it and adopt the correction). Until then the 2026-09-10 version is operative and carries the false PR26 / "nothing changed since 09-06" / "residue owed" lines. | every session's opening facts |
 | **F-3** | **Sign the record-level compliance-not-virtue clause** (`operations/agent-circles-2026-08/2026-09-12-W2-compliance-not-virtue-clause-STAGED-R18.md`) — the one R18 item still owed in the logos-on program. W1 needs nothing. | W2's honest-claims half |
 | **F-4** | **Record Part (1)'s mark when it arrives** (Sun 19:44 AEST) — it closes the current window at three of four; it does not start W2's clock (Q-S1). | the current window's honest close |
@@ -285,8 +289,8 @@ founder-visible setting, not an auto-mode outcome"*).
   prompt (unspent — no close exists; left unmarked).
 - **NEW `Q-W2-ACTIVATE`:** `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` — founder-walked, **coupled to the
   flip** (§F W3-d). Not before.
-- **NEW `Q-W2-FIRST-SESSION`:** gated on F-1's answers; its prompt must satisfy Q-S2 (name the work,
-  never the observation).
+- **NEW `Q-W2-FIRST-SESSION`:** gated on F-1 (the work designation, ruled the founder's 2026-09-13); its
+  prompt must satisfy Q-S2 (name the work, never the observation). **The clock has not started.**
 - **`Q-OPTION-S-RUN`: in flight by a peer at this writing** — unverified; do not double-run.
 - **Carried forward UNVERIFIED by this session:** `Q-L1SUPPLY-2B`, `Q-HUB-CONTINUITY`; the held/gated list
   (C) and the longer-tail list (D) of the 2026-09-08 version.

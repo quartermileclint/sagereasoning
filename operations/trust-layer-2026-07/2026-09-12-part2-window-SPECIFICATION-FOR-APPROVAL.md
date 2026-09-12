@@ -14,6 +14,21 @@ standard).
 
 ---
 
+> **⚖️ AMENDED 2026-09-13 — THE WORK DESIGNATION IS OPEN AGAIN, THE CLOCK HAS NOT STARTED.** Ruled on the
+> two relayed questions (verbatim, canonical, wins over this file:
+> `2026-09-13-mentor-ruling-w2-window-work-and-QS2-discipline-verbatim.md`): **W2's build does NOT
+> constitute the window's work** — it ran in an isolated worktree with capture unset and left the buffer
+> zero consult records; *"a build that produced zero consult records is, from the window's perspective, as
+> if it did not happen."* **The clock starts at the first consult record produced by consequential
+> Write/Edit work on a live surface — never at a Bash guard record.** The work designation **must be
+> updated before the first session opens**; three candidates are ruled in order of fit (W2 activation's
+> remaining authored work; the pre-flip report's outstanding items; the standing-runner design session,
+> *"the strongest candidate after W2 activation work"*). **Which — the founder's call**, against the two
+> governing constraints. **Q-S2 is SATISFIABLE as things stand:** CLAUDE.md names the instrument, not the
+> observation goal; *"no scoped CLAUDE.md, no different harness, no different project root."* The
+> per-session condition stands unchanged. §1's "Work" line and §4's timeline below are read as amended
+> by this ruling; they are left as written for the record.
+
 ## 0. The fact that reorders the fork
 
 **W2 — the record-honesty machinery — is unbuilt, and the S11 flip cannot activate without it**
@@ -152,6 +167,19 @@ standard-revision question back with that finding."* Not asked now; explicitly l
 again, with the W2 window's own evidence, if the window does not produce variety.
 
 ---
+
+## 7. 2026-09-13 ruling — work designation and Q-S2 (folded)
+
+**Q-(i)** — W2's completed build is not the window's work; the clock starts at the first consult record
+from whichever work the founder designates. Candidates in ruled order: (1) W2 activation's remaining
+authored work — *"the founder should assess what W2 activation actually requires in terms of composed,
+narrated authoring before the founder-walked step"*; (2) the pre-flip report's outstanding items (the
+D2 "engaged" definitions relay + response; the ruling also names the Part-1 script defect, which was in
+fact fixed 2026-09-12 under B1 — see the verbatim's recording note); (3) the standing-runner design
+session (GS-ATRF-1…4, GS-CYB-1/2). **Founder action owed before any first session: designate the work.**
+
+**Q-(ii)** — the discipline holds; CLAUDE.md is within bounds; session prompts must still never name
+the observation goal.
 
 ## 6. Approval line — DISCHARGED
 

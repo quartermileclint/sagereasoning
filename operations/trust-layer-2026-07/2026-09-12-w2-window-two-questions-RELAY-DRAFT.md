@@ -1,7 +1,7 @@
 # RELAY DRAFT — two questions on the part-(2) window, for the founder to send (NOT SENT)
 
 **Drafted:** 2026-09-12 (machine `date`, ~22:45 AEST) by the autonomous records-fold session
-`sagereasoning-e4 [5bee2f]`. **Status: DRAFT. Not sent. The founder decides whether to send it, and may
+`sagereasoning-e4 [5bee2f]`. **Status: SENT by the founder and RULED 2026-09-13** — verbatim at `2026-09-13-mentor-ruling-w2-window-work-and-QS2-discipline-verbatim.md`. (Original status line:) **Status: DRAFT. Not sent. The founder decides whether to send it, and may
 edit or drop either question.** Both questions were re-verified first-hand before drafting; the
 evidence for each is stated beneath it so the mentor can check the premise rather than take it.
 
