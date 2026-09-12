@@ -192,10 +192,96 @@ listing the exact staged file set against `git status --porcelain` before commit
 "session-paused-NOT-CLOSED" working-notes file was deliberately left uncommitted — its own
 provisional status is not this session's call to resolve.
 
+### COMMIT/PUSH RECONCILIATION — added 2026-09-10 ~16:14 AEST (`date`) = ~06:14 UTC, after this
+session paused to ask for an explicit `--no-verify` waiver on the husky pre-commit guard
+
+**The commit landed and is pushed, but not the way this session executed it.** This session's own
+`git commit` attempt was BLOCKED by a husky pre-commit hook running the `/logos` byte-identity guard
+(the guard's live behaviour, not merely its test — confirmed empirically) and the session paused to
+ask the founder for an explicit waiver before using `--no-verify`, matching the S7 precedent recorded
+in the S11 register. **The founder instead committed and pushed independently** (likely via GitHub
+Desktop, which does not appear to run the repo's husky hooks the way a terminal `git commit` does —
+unconfirmed mechanism, stated as an observation not a claim). The result, verified directly against
+`git log`/`git show`/`origin/main`:
+
+- **Commit `75b35a9`**, author `SageReasoning Build <founder@sagereasoning.com>` (the founder's own
+  commit identity), is on `origin/main` — fetched and confirmed, not merely read locally.
+- **All 13 files this session staged landed correctly and completely**, byte-for-byte matching what
+  this session prepared (verified by `git show --stat`/`--name-status`).
+- **The commit is BUNDLED with 5 additional files from a separate, concurrent session** — the
+  cognitive-os "second migration" arc this document already named as concurrent, not this session's
+  own work: `website/src/lib/cognitive-os-store/store.ts`, its test, the new migration SQL, and that
+  arc's own close + next-session-prompt documents. 18 files total in one commit.
+- **The commit message describes ONLY the cognitive-os migration** — it does not mention Condition 3,
+  `classifyCaller`, the S11/Option C′ build, or any of this session's work by name. A reader of `git
+  log` alone would not discover this build happened from the commit message; only `git show
+  --name-status` or reading this close document reveals it landed in the same commit.
+- **This is recorded as an observation, not corrected** — this session does not amend, split, or
+  re-author a commit the founder made directly; that is exactly the kind of unilateral git-history
+  action this arc's own standing constraints forbid ("never `git checkout`/`restore`/`reset` on
+  live-edited work") extended by the same spirit to a commit already on `origin/main`.
+- **Post-push guard state — RE-RUN LIVE this session, not merely inferred:** `npx tsx
+  website/src/app/logos/__tests__/human-practitioner-boundary.test.ts` returns **250 passed, 0
+  failed** — the git byte-identity guard is confirmed GREEN. (The working tree at this check carries
+  only the concurrent cognitive-os session's own `2026-09-10-SECOND-MIGRATION-AUTHORED-CLOSE.md`, the
+  pre-existing `environmental-context.json`, and the still-uncommitted S10 working-notes file — none
+  `GUARD_RE`-matched.) A future session should still re-derive this fresh rather than quote the
+  figure, per this document's own standing discipline — but this is a genuine observed result, not a
+  prediction.
+- **SHA pins on `layer2-mechanisms.ts`/`stoic-brain.ts` — RE-DERIVED LIVE this session, post-push:**
+  `60cefedb…` and `fa8895ec…` respectively, both CLEAN vs HEAD — identical to the values this session
+  recorded at its own open, before either the build or the founder's commit. Neither file was touched
+  by this session's build or by the cognitive-os arc's own files (confirmed by the file lists above).
+- **`classifyCaller` (Option C′) is now LIVE in the harness code on `main`/`origin/main`.** It carries
+  no separate feature flag of its own — its gate (version+entrypoint+agent_id-presence) IS the
+  activation condition — so the mechanism is live the moment `GATE1_FALSE_HOLD_CAPTURE=true` and the
+  harness hooks fire again, with no further founder-walked activation step required or owed.
+
 ### Not yet done, correctly left for the founder
 
 The `git status --short`-guard's own post-commit clean state was not re-verified inside this
 document (verify after the commit lands, before push, if wanted). No production/schema/flag/
 credential touched. Nothing pushed — the founder pushes.
+
+**The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+---
+
+## ADDENDUM 2 — the mechanism has ALREADY FIRED LIVE, unprompted, during this same session
+
+**Found while preparing the next-session prompt, not sought out deliberately.** The observation
+window's buffer (`~/.sage-gate1/false-hold-record.jsonl`) was checked once more after the commit
+landed and now carries **5 genuine `false-hold-record-v6` records** — the built mechanism has already
+run on the real production wire, not only against synthetic unit-test fixtures. All 5 are `path:guard`
+(Bash guard-caution captures), across TWO DIFFERENT session ids — this session's own
+(`76d3b72c-e7c9-4ff6-b5c3-0fb7b4fce2e5`) and a **concurrent, independent session**
+(`f4a10611-40cd-45b9-989f-293a2df009fd`, distinct from the cognitive-os arc's own commits seen
+elsewhere in this document — a third, unidentified peer session), captured 2026-09-09T19:27–19:40Z
+(UTC; local ~05:27–05:40 AEST 2026-09-10).
+
+**The three most recent, chronologically last, are exactly what the design predicted:**
+```
+callerClass: live_agent, clientVersion: "2.1.260", clientEntrypoint: "claude-desktop"
+```
+on BOTH session ids — genuinely independent corroboration (two separate top-level sessions, same
+correct classification), not a single lucky observation.
+
+**The two earliest (both from the OTHER session, `f4a10611…`, at 19:27:17Z and 19:28:21Z) read
+`callerClass: unknown`, `clientVersion: null`, `clientEntrypoint: null`** — schema was already `v6`
+(the code had landed) but the version/entrypoint read failed. **This is disclosed as a genuine,
+unresolved observation, not silently smoothed over:** since Node re-reads `.mjs` files fresh per hook
+invocation (no module caching across separate process spawns), a hook firing on the OTHER session
+during this session's own multi-step edit window could plausibly have read a PARTIALLY-edited
+intermediate state of `false-hold-capture.mjs`/`at-action-hook.mjs` from disk — this build was applied
+in several sequential `Edit` calls, not one atomic write. This is a PLAUSIBLE explanation, not a
+confirmed one; it was not tested by reconstructing the exact edit timeline against the exact capture
+timestamps. **The safety property held regardless**: a partial/inconsistent read degraded to the
+honest `unknown`, never to a false `subagent`/`live_agent` claim — exactly the fallback the ruling
+requires, exercised for real by an accident of build timing rather than by a designed test. Named as a
+concrete first thing for the next session to either confirm or set aside.
+
+**Consequence:** the mechanism did not merely pass its unit tests — it has ALREADY produced correct,
+corroborated, live production output before this session even closed. This bears directly on whatever
+"first live verification" step a future session might otherwise have felt was still owed.
 
 **The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**

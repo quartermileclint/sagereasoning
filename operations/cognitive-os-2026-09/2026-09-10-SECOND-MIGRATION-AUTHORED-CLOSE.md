@@ -1,9 +1,81 @@
-# Cognitive OS — the SECOND MIGRATION: authored, PR19-reviewed, folded. NOT APPLIED.
+# Cognitive OS — the SECOND MIGRATION: authored, PR19-reviewed, folded, FOUNDER-WALKED, LIVE.
 
 **Session date: 2026-09-10 AEST**, dated from `date`.
 
-**Tier: `code-elevated`.** Authoring only — nothing applied to any database, nothing pushed.
-**AC7 does NOT engage this session.** It engages when the founder walks the migration.
+**UPDATE (same day, post-close): FOUNDER-WALKED ON BOTH ENVIRONMENTS, COMMITTED, PUSHED, DEPLOYED,
+AND LIVE-VERIFIED.** The founder ran the full `§PRE`/`§APPLY`/`§VERIFY` (V1–V9) sequence on TEST,
+then all six `§VERIFY-BEHAVIOURAL` probes (B1–B6, TEST-only, destructive) — every result read and
+confirmed, including B1 (the composite FK's 23503 rejection) and B2c (the JSONB guard's disclosed
+top-level-only limit, proven by a SUCCEEDING insert as designed) — then teardown, confirmed by
+count query rather than by the DELETE's own "Success" message. The identical
+`§PRE`/`§APPLY`/`§VERIFY` sequence then ran on **production** (P5 = 113 tables before; V9 = 117
+after, matching exactly).
+
+**⚠ CORRECTION — Commit `75b35a9` was NOT path-scoped to this session's five files, contrary to
+what this record first said here.** `git show --stat 75b35a9` shows **18 files**, not 5. The
+original wording ("path-scoped… confirmed by `git log` against the pushed tip") checked the wrong
+thing — that this session's five files were present and correctly named — without checking that
+*only* those five were present. They were not.
+
+**What actually happened, mechanically.** The local pre-commit guard (the same byte-identity
+battery this session ran throughout) correctly BLOCKED the first commit attempt, because a **peer
+session's** own work — substantive, functional changes to `classifyCaller`'s signature, a new
+`readClientContext` export, and matching edits across `at-action-hook.mjs`,
+`false-hold-capture.mjs` + its test, `negative-battery.mjs`, and `false-hold-observation-report.ts`
++ its test — was **already staged** in the shared working tree at that moment (visible in `git
+status --porcelain` as `M `/`A ` entries before this session touched anything). This session ran
+`git add <its own five paths>`, which correctly *added* those five to the index — but `git add`
+only adds; it does not restrict what a subsequent bare `git commit` includes. The retry (run after
+the peer's side resolved whatever was blocking the guard) was a **bare `git commit -F <message>`
+with no pathspec**, which committed the *entire index* — this session's five files plus the peer's
+thirteen, none of the latter mentioned anywhere in the commit message. **The fix that would have
+prevented this was `git commit -- <five explicit paths>`, which restricts a commit to named paths
+regardless of what else sits staged; that was never used.** Pushed; Vercel confirmed green by the
+founder; the post-push byte-identity guard re-run **250/0** (it checks the working tree and two
+fixed SHA pins, neither of which this incident touches — it cannot see that a functional edit to
+`GUARD_RE`-matched files already landed in history without a recorded waiver cited anywhere in the
+commit that carried it).
+
+**Disposition, per the founder (2026-09-10, same day):** the founder confirmed directly with the
+peer session that its inclusion reflects real, intended work on its own track (the caller-class /
+Q-CALLER-C3 line), and directed that session to record the fact in its own close and continue from
+there. **This record does not characterise that work's licensing status** — it has no visibility
+into that session's own governance record — and defers entirely to whatever that session's own
+close states. What this record states with certainty, from its own side: the harness files listed
+above genuinely changed, functionally, inside a commit this session made, during an active
+false-hold observation window, without any waiver citation in the commit this session authored.
+**Any session that next assesses the observation window's integrity needs to know this** — a
+functional change to `classifyCaller`/`false-hold-capture.mjs` landed mid-window via `75b35a9`,
+and whether that changes what the window measures going forward is a question for whoever owns
+that assessment, not settled by this correction.
+
+**Standing lesson, recorded because it will recur in any multi-agent-shared-checkout commit:**
+staging one's own files with `git add <paths>` proves nothing about what a subsequent bare `git
+commit` will contain if anything else is already staged. **Verify the commit's actual scope
+(`git show --stat <sha>` or `git diff --cached --stat` before committing), never just that your
+own files are present in it — check that nothing else is.** `git commit -- <paths>` restricts a
+commit to named paths and leaves everything else staged for its own commit; a bare `git commit`
+does not.
+
+**Post-deploy live-verified, R17 read path, `GET /api/user/access`:** all eight
+`personal_data.cognitive_os` arrays present and empty — `contexts, events, claims, belief_states,
+decisions, handoffs, dependency_nodes, dependency_edges` — confirmed against the actual deployed
+build, not merely the local one, the same discipline the core slice's own post-deploy check used.
+A useful intermediate observation on the way there: immediately after the DB migration landed on
+production but *before* the code was pushed, the identical probe correctly returned only the
+original four arrays — the deployed application code lagging the applied schema by design, and a
+concrete illustration of why "the schema is live" and "the code that reads it is live" are two
+separate, sequenced claims, never conflated.
+
+**Production is now genuinely at the state this record's body describes below** — read the rest of
+this file as the as-applied build report, not as a plan.
+
+---
+
+**Tier: `code-critical`. AC7 ENGAGED AND DISCHARGED** at the founder walk described above — full
+Critical Change Protocol; the founder ran every live Supabase step and the push; the AI prepared
+exact SQL blocks (extracted from the file, SHA-checksummed, never retyped) and confirmed each
+result against the file's own stated expectations.
 
 ---
 
@@ -234,20 +306,24 @@ run of prior cautions reading the same other way.
 
 ## 9. Carried forward
 
-1. **The founder walk (§7) — the whole of it.** Nothing applied.
-2. **The library placement question (Q4)** — still not architecturally settled; `cognitive-os-store/`
+1. ~~The founder walk (§7)~~ — **DONE, same day.** Both migrations are live on TEST and
+   production; see the postscript at the top of this record.
+2. **The commit-scope correction above** — carried as a standing lesson, not a further action;
+   no revert or follow-up commit is implied by it. Whoever next assesses the false-hold
+   observation window's integrity should read it.
+3. **The library placement question (Q4)** — still not architecturally settled; `cognitive-os-store/`
    now has a second-migration extension whose placement inherited the same constraint-driven
    reasoning. Post-window review, per the core close.
-3. **`SUBSTRATE_COGNITIVE_OS_SWEEP_ENABLED`** — its own activation decision, unchanged by this
+4. **`SUBSTRATE_COGNITIVE_OS_SWEEP_ENABLED`** — its own activation decision, unchanged by this
    session; now governs seven tables' worth of retention rather than four, with the disclosed
    cascade-counting limit named in §5/§8.
-4. **The sweep's cascade-counting gap (§5, finding 3)** — disclosed, not closed. A future session
+5. **The sweep's cascade-counting gap (§5, finding 3)** — disclosed, not closed. A future session
    that wants exact per-table counts under real cascade conditions needs a post-loop reconciliation
    pass; not built here.
-5. **Phase 2 remains NOT LICENSED.** This migration persists storage for `DecisionRecord` and
+6. **Phase 2 remains NOT LICENSED.** This migration persists storage for `DecisionRecord` and
    `HandoffEnvelope`; it builds no Epistemic Debt service, no debt calculation, no decision-readiness
    gate, and instantiates no actor. Nothing here opens Phase 2.
-6. Unchanged and untouched: `Q-PREFLIP-REPORTS`; the session-opener `cat >` addition; the
+7. Unchanged and untouched: `Q-PREFLIP-REPORTS`; the session-opener `cat >` addition; the
    cap-transparency fold into the project-instructions snapshot; the manifest amendment owed before
    Phase 3.
 
