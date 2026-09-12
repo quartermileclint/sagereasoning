@@ -40032,3 +40032,181 @@ again. What that means for the window is the founder's and the mentor's call.
 finding). Memory saved: `anthropic-spend-limit-masks-as-layer1-unavailable`.
 
 **Status:** Adopted. Open items: the two observability gaps above.
+
+---
+
+## 2026-09-12 — D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12
+
+**Decision:** the "seven-day Layer-1 outage" recorded in `D-ANTHROPIC-SPEND-LIMIT-OUTAGE-DIAGNOSED-2026-09-12`
+(and restated in the W2 close §5/§7, CLAUDE.md's 2026-09-12 block, the memory
+`anthropic-spend-limit-masks-as-layer1-unavailable`, and the O-1 session prompt) is **corrected from
+the rows themselves**: the Anthropic spend-limit block lasted **about 2 h 20 min on 2026-09-12
+(06:07:58Z → 08:27:53Z; 16:07–18:27 AEST), 94 rows**, not seven days. The diagnosis itself (an
+exceeded spend limit with a healthy credit balance; the founder cleared it; the engine recovered)
+stands. Its dating does not.
+
+**Reasoning.** Session `sagereasoning-d2 [6c5506]` (O-1) read the production `route_errors` window
+2026-09-05 → 2026-09-13 read-only (founder-elected; 259 rows, exact count) and classified every row
+by message. The usage-limit message ("You have reached your specified API usage limits. You will
+regain access on 2026-10-01 at 00:00 UTC.") appears **only** on 2026-09-12 between 06:07Z and
+08:27Z. The `first_seen 2026-09-05` the earlier diagnosis dated the outage from is the first row of
+**any** class — an A11b injection reject. The other 165 rows are two different classes: 96 A11b
+rejects (the known `harness-blind-on-substrate-sessions-a11b-schema-tokens` class, clustered on
+09-05/09-08/09-10) and 64 Layer-1 JSON-parse failures whose response sizes cluster at ~15k chars
+(the extractor's `max_tokens: 4000`), plus 4 enum-drift rows and 1 TypeError. Independently, the
+false-hold buffer (`~/.sage-gate1/false-hold-record.jsonl`, window line 140 onward) carries
+**successful consult readings on every UTC day 09-06 → 09-12** (3/17/6/18/34/19/38) and only two
+`outage_open` guard records in the whole window. Primary data:
+`operations/observability-2026-09/2026-09-12-route-errors-outage-window-READOUT.md`.
+
+**Consequence for the observation window, stated as fact:** the W2 close's "for seven days the
+window recorded an engine that could not evaluate anything" is **false**. The window recorded a
+working engine with a ~2 h 20 min hole on 2026-09-12. What that means for the pre-flip report and
+the Q-S1 clock is the founder's and the mentor's call; no session position is taken here, but the
+false premise they were given is withdrawn.
+
+**Lesson (memory `outage-dating-classify-rows-before-first-seen`):** a table's `first_seen` dates the
+first error of any kind; date an outage only from rows classified to its cause. `is_llm_outage`
+reading false on every row was the tell that three classes had been flattened into one.
+
+**Files touched:**
+- `operations/observability-2026-09/2026-09-12-route-errors-outage-window-READOUT.md` — new; the primary data.
+- `CLAUDE.md` — a dated correction annotation on the 2026-09-12 W2 block's outage paragraph (the block itself left as written, per PR18).
+- memory `anthropic-spend-limit-masks-as-layer1-unavailable` rewritten; memory `outage-dating-classify-rows-before-first-seen` added.
+
+**Risk classification:** Standard under 0d-ii (records + a read-only production read, founder-elected;
+no code, schema, flag or credential change from this finding). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit; the read left no trace.
+
+**Verification step (founder-performable):** run the SQL in the read-out's Method section in the
+production SQL Editor; expect 259 rows, and `min(occurred_at)` over rows whose message contains
+`'specified API usage limits'` = `2026-09-12 06:07:58+00`.
+
+**Rules served:** R5, PR18, PR23, PR25.
+
+**Status:** Adopted. Cross-references: `D-ANTHROPIC-SPEND-LIMIT-OUTAGE-DIAGNOSED-2026-09-12` (dating
+superseded by this entry; diagnosis stands); `D-LLM-OUTAGE-CLASSIFIER-ACCOUNT-BLOCK-2026-09-12`;
+`operations/handoffs/founder/2026-09-12-W2-waiver-merge-and-schema-walk-CLOSE.md` §5/§7.
+
+---
+
+## 2026-09-12 — D-LLM-OUTAGE-CLASSIFIER-ACCOUNT-BLOCK-2026-09-12
+
+**Decision:** a provider ACCOUNT BLOCK is not an outage. `isLlmOutage` is deliberately NOT widened;
+a new four-kind `classifyLlmError` (`account_block` / `transient_outage` / `provider_rejection` /
+`none`) sits beside it, and the observability store — which already holds the raw thrown error —
+classifies every `route_errors` row itself, writing `context.provider_error` (`kind`, `retriable`,
+`status`, `api_error_type`, `regain_at`, a constant `note`) and recording the SDK class name in
+`error_type`. No route changes what it returns. Option (c) of the O-1 prompt's Step 1.
+
+**Reasoning.** (1) The category question. `isLlmOutage` gates `llmOutageResponse` — a 503 with
+`Retry-After: 30`. That header is honest for a transient upstream failure and a false promise for a
+spend limit that only a human can lift; widening the boolean (option a) would ship that promise on
+the ~11 routes that call `llmOutageResponse`. A distinct route-level branch (option b) needs edits
+to `/api/reason` (`GUARD_RE`, observation window running) and ten other routes, several R20a
+members. The founder's need was diagnostic — "the log must say not our code" — and the store can
+meet it alone: the raw error is in its hands. **`Retry-After: 30` is never emitted for an account
+block** (pinned ACC-6; the block does not satisfy `isLlmOutage`). PR19 reviewer R2 argued the
+strongest case for widening and found it does not survive. (2) The live shape (Step 0, founder-elected
+read-only query rather than a paste; `operations/observability-2026-09/2026-09-12-route-errors-outage-window-READOUT.md`):
+HTTP **400** `invalid_request_error`, *"You have reached your specified API usage limits. You will
+regain access on 2026-10-01 at 00:00 UTC."* — SDK `BadRequestError`, `.name` 'Error'. My pre-read
+inference (402 `billing_error`) was wrong; both shapes are now covered, the observed one verbatim.
+The miss mechanism, read from `@anthropic-ai/sdk` 0.80 `src/core/error.ts`: 400 is outside
+`OUTAGE_STATUS`, `BadRequestError` outside the name hints, no outage vocabulary in the message; and
+because no SDK class sets `.name`, the store's `name || constructor.name` never reached the
+constructor, so every SDK error was logged as `Error`. Class names survive the production bundle
+(checked in the local `.next/server` build), so the name-hint mechanism was not the failure.
+(3) Account-block detection is **provenance-gated**: nothing (status 402, a `billing_error` body, or
+the vocabulary) is trusted unless the error carries the SDK's parsed body or is an SDK status-error
+instance (exact SDK constructor name, generic `.name`, numeric status). Our own code throws
+"spend limit" wording (the cost-health evaluator); the repo defines its own `PermissionDeniedError`
+(`src/lib/cognitive-os/permissions.ts`) that sets `.name` — both stay `none`.
+
+**Files touched:**
+- `website/src/lib/llm-outage.ts` — `classifyLlmError`, `isProviderAccountBlock`, `LLM_ERROR_NOTES`, the O-1 header. `isLlmOutage`, `llmOutageResponse` and the three hint constants byte-identical (function bodies extracted and diffed against the pre-O-1 file).
+- `website/src/lib/observability-store.ts` — `errorTypeOf`; `context.provider_error` on every row (caller context spread last, never clobbered); optional injected client for tests; `is_llm_outage` unchanged as the route's passthrough.
+- `website/src/lib/__tests__/llm-outage.test.ts` — 38 → **83** assertions (ACC, BND, PAR, SRC, STO).
+
+**PR19 — three independent Sonnet/low reviewers (founder's standing permission), read-only, one
+dimension pair each; all findings folded at the root, re-run, re-mutated:**
+- **HIGH (R1; R3 MEDIUM; R2 LOW) — CONFIRMED:** the `status === 402` disjunct sat outside the
+  provenance gate; `classifyLlmError({ status: 402 })` read `account_block`. Fixed: every disjunct is
+  behind `provenance`. Pins BND-12/12b; mutation M19r red.
+- **MEDIUM (R1; R2 LOW) — CONFIRMED, not reachable today:** provenance was a name-substring match;
+  `cognitive-os`'s `PermissionDeniedError` shares an SDK name. Fixed: exact constructor match + the
+  generic-`.name` discriminator (the SDK never sets `.name`; the in-repo class does) + a numeric
+  status. Pins BND-13/14/15; mutations M18, M21r red.
+- **LOW (R3) — CONFIRMED:** the test header's "every O-1 pin was mutation-verified" overclaimed.
+  Reworded to the honest scope; six property/self-check pins named as not independently killed
+  (ACC-0, ACC-2, ACC-3, BND-11, STO-12, STO-13); a second mutation pass covered the rest.
+- **LOW (R3) — CONFIRMED:** "byte-identical … pinned in §PAR" conflated a static-diff fact with a
+  behavioural check. Reworded to state each check separately.
+- **Noted (R2), not a code finding:** no in-repo reader filters `error_type = 'Error'` or
+  `context IS NULL`; a founder-run SQL dashboard outside the repo cannot be ruled out by grep.
+  Disclosed here.
+- Clean: signature parity at all 33 call sites; no response path touched; `waitUntil` untouched;
+  `next/server` now in the store's import graph — proven safe under bare tsx; PII (no message
+  text in `provider_error`, STO-8); caller-context precedence.
+
+**Mutation record (non-vacuity; each mutation applied, battery run, file restored, hash-verified):**
+| Mutation | Red pins |
+|---|---|
+| M1 account_block branch off | ACC-1/4/5/7/8/9/10, BND-6, STO-2 |
+| M2 provenance gate dropped | BND-1, BND-2, BND-12, BND-12b, BND-13 |
+| M3 `isLlmOutage` widened to 400 | OUT-14, ACC-6, BND-2, BND-3, PAR-1 |
+| M4 store `error_type` reverted | STO-1, STO-3b |
+| M5 store enrichment removed | STO-2, STO-8, STO-5, STO-3b, STO-6 |
+| M6 caller context clobbered | STO-7 |
+| M7 transient branch skipped | BND-5/7/8/10, PAR-1, STO-3b |
+| M8 `regain_at` regex broken | ACC-4, STO-2 |
+| M9 vocabulary widened to 'usage limit' | BND-10 |
+| M10 a caller supplying `provider_error` | SRC-1 |
+| M11 provider_rejection branch off | BND-3, BND-4, BND-14 |
+| M12 caller-context spread dropped | STO-4, STO-7 |
+| M13 classifier try/catch rethrows | BND-9 |
+| M14 `is_llm_outage` forced true | STO-3, STO-6 |
+| M15 insert into the wrong table | STO-0 |
+| M16 store rethrows instead of ok:false | STO-14 (pin added after M16 first SURVIVED — the outer catch was unpinned) |
+| M17 no-client path reports ok:true | STO-11 |
+| M18 generic-name test dropped | BND-13 |
+| M19 402 disjunct un-gated | BND-12, BND-12b, BND-13 |
+| M20 message column nulled | STO-9 |
+| M21 numeric-status requirement dropped | BND-15 (pin added after M21 first SURVIVED) |
+Two first-pass survivals (M16, M21) were each closed by adding the missing pin; one first-pass
+"kill" of BND-1 was found vacuous (its fixture never matched the vocabulary) and retargeted.
+
+**Disclosed residuals:** (i) a hypothetical 429 `RateLimitError` whose body carries the usage-limit
+wording is logged `account_block` but still receives `Retry-After: 30` from the untouched response
+path (BND-6 pins it as known; not observed live); (ii) the account-block HTTP response itself —
+generic 500 on the human tool routes, masked 200 on `/api/reason`, 503 on discernment — is the
+named follow-on (`isProviderAccountBlock` exported and ready; two `GUARD_RE` routes need a waiver);
+(iii) the second observability gap, `/api/guardrail` writes no `route_errors` row, remains OPEN;
+(iv) the mutation passes ran on the shared checkout, leaving a deliberately broken classifier on
+disk for ~10 s per mutation — every restore hash-verified, but a worktree would have removed the
+exposure to a peer's unscoped `git add`.
+
+**Risk classification:** Elevated under 0d-ii (`code-elevated`; changes to a shared library on the
+error path of ~21 routes incl. R20a members — hence PR19 required and run; no auth/perimeter/
+schema/flag/credential/deploy). AC7 not engaged. PR6 not engaged. No `GUARD_RE` file modified;
+guard run ARMED 250/0 at open and at close; SHA pins unchanged.
+
+**Rollback path:** `git revert` the single commit. Nothing deployed in-session; behaviour on the
+response path is unchanged either way; the existing OUT/RES pins hold in both states.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx tsx src/lib/__tests__/llm-outage.test.ts | tail -1
+```
+Expected: `83 passed, 0 failed`. After the push, the next provider refusal writes a `route_errors`
+row whose `context->'provider_error'->>'kind'` reads `account_block` and whose `error_type` reads
+the SDK class.
+
+**Rules served:** R5, R17 (no new PII path), PR15 (SDK error classes read from source, not recalled),
+PR19, PR22, PR23, PR25.
+
+**Status:** Adopted. Cross-references: `D-ANTHROPIC-SPEND-LIMIT-OUTAGE-DIAGNOSED-2026-09-12`;
+`D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`;
+`operations/handoffs/founder/2026-09-13-llm-outage-classifier-account-block-NEXT-SESSION-PROMPT.md`;
+`operations/handoffs/founder/2026-09-12-O1-llm-outage-classifier-account-block-CLOSE.md`.

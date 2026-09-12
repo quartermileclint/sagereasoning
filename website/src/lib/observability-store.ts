@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createHash } from 'node:crypto'
 import { waitUntil } from '@vercel/functions'
+import { classifyLlmError, type LlmErrorClassification } from './llm-outage'
 
 /**
  * Observability store (P-GL, 2026-07-20) — two append-only, service-role-only,
@@ -93,15 +94,68 @@ export interface RouteErrorParams {
   error: unknown
   /** The HTTP status the route returned in response (500 or 503). */
   statusCode: number
-  /** Whether the error was classified as an upstream LLM outage (#10). */
+  /**
+   * Whether the ROUTE classified the error as an upstream LLM outage (#10) —
+   * i.e. whether it answered with `llmOutageResponse` (a retriable 503). This
+   * is the route's decision, recorded as passed; the store never overrides it.
+   * The finer provider classification (an account block is NOT an outage) is
+   * written by the store itself into `context.provider_error` — see
+   * providerErrorContext below.
+   */
   isLlmOutage?: boolean
-  /** Small, PII-FREE structured extras. Never request bodies / user content. */
+  /**
+   * Small, PII-FREE structured extras. Never request bodies / user content.
+   * The store adds `provider_error` (O-1) to every row; a caller-supplied key
+   * of the same name is kept as supplied (the caller is never clobbered).
+   */
   context?: Record<string, unknown>
 }
 
-export async function recordRouteError(params: RouteErrorParams): Promise<{ ok: boolean }> {
+/**
+ * The error's class name for the `error_type` column. `.name` wins when the
+ * error sets one (Layer1ValidationError, TypeError, …); when it is only the
+ * generic 'Error', the constructor name is used instead. Before O-1 the
+ * expression was `err.name || err.constructor?.name || 'Error'`, and because
+ * 'Error' is truthy the constructor name was unreachable — so every Anthropic
+ * SDK error (none of whose classes sets `.name`) was recorded as plain
+ * `Error`. Observed, not inferred: all 94 spend-limit rows of 2026-09-12 read
+ * `error_type = 'Error'` for a thrown `BadRequestError` (O-1 read-only query).
+ */
+function errorTypeOf(err: unknown): string {
+  if (!(err instanceof Error)) return typeof err
+  const name = typeof err.name === 'string' ? err.name : ''
+  if (name && name !== 'Error') return name
+  const ctor = err.constructor?.name
+  return ctor || name || 'Error'
+}
+
+/**
+ * The compact `context.provider_error` object (O-1). `kind` is always present
+ * so `context->'provider_error'->>'kind'` is a total query; the other keys are
+ * present only when known, and never carry the provider's message text (that
+ * already sits in the `message` column — no duplication, no second PII path).
+ */
+function providerErrorContext(c: LlmErrorClassification): Record<string, unknown> {
+  const out: Record<string, unknown> = { kind: c.kind }
+  if (c.retriable !== null) out.retriable = c.retriable
+  if (c.status !== null) out.status = c.status
+  if (c.api_error_type !== null) out.api_error_type = c.api_error_type
+  if (c.regain_at !== null) out.regain_at = c.regain_at
+  if (c.note !== null) out.note = c.note
+  return out
+}
+
+/**
+ * @param client  optional injected client (tests); production callers pass
+ *                nothing and get the lazy service-role client. Mirrors the
+ *                purge functions' seam below.
+ */
+export async function recordRouteError(
+  params: RouteErrorParams,
+  client?: SupabaseClient,
+): Promise<{ ok: boolean }> {
   try {
-    const admin = getAdminClient()
+    const admin = client ?? getAdminClient()
     if (!admin) return { ok: false }
 
     const err = params.error
@@ -109,15 +163,15 @@ export async function recordRouteError(params: RouteErrorParams): Promise<{ ok: 
     const row = {
       route: truncate(params.route, 300),
       method: truncate(params.method ?? null, 12),
-      error_type: truncate(
-        isErr ? err.name || err.constructor?.name || 'Error' : typeof err,
-        120
-      ),
+      error_type: truncate(errorTypeOf(err), 120),
       message: truncate(isErr ? err.message : typeof err === 'string' ? err : null, 2000),
       stack: truncate(isErr ? err.stack ?? null : null, 4000),
       status_code: params.statusCode,
       is_llm_outage: params.isLlmOutage ?? false,
-      context: params.context ?? null,
+      // O-1: the store holds the raw error, so it classifies it itself — no
+      // route needs to change for the log to say "the provider refused us".
+      // Caller keys spread LAST: a caller-supplied `provider_error` wins.
+      context: { provider_error: providerErrorContext(classifyLlmError(err)), ...(params.context ?? {}) },
       retain_until: retainUntil(),
     }
 
@@ -311,4 +365,4 @@ export async function purgeExpiredThrottleEvents(
 }
 
 // Exposed for tests.
-export const __test = { isMissingTableError, truncate, hashIp }
+export const __test = { isMissingTableError, truncate, hashIp, errorTypeOf, providerErrorContext }
