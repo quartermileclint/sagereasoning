@@ -266,6 +266,19 @@ ELECTION_NEEDS = ("What the M/W/S election needs from this data, ruled 2026-09-0
                   "with the A8 bound printed on the rate.' The run PRECEDES the "
                   "election and serves it.")
 
+NAMED_DEFECT_COMPLETENESS = (
+    "NAMED DEFECT, recorded 2026-09-13, deliberately NOT corrected here. "
+    "`complete_series()` counts RECORDS against intended_k, not COUNTED "
+    "OUTCOMES. A series in which most calls returned `engine_unavailable` "
+    "therefore registers as a complete measurement -- and, under the "
+    "earliest-is-operative selection rule, beats any later series run to repair "
+    "it. The defect is GENERAL: any outage-riddled series blocks its own "
+    "repair. The correct fix is to count counted outcomes. It was NOT made in "
+    "the session that found it, because that session knew which input the "
+    "change would affect and which way it would cut -- the post-hoc move the "
+    "D6a class-freeze discipline forbids. RULED 2026-09-13: reserved to a "
+    "future session that does not know which input it affects.")
+
 NOT_A_DECISION = ("Option S decides nothing. The FIRST verdict is operative. This "
                   "output is measurement, not an election between M, W and S.")
 
@@ -731,6 +744,14 @@ def summary(runs_dir: str) -> None:
     def block(rows, label):
         n = len(rows)
         dis = sum(1 for r in rows if r["disagreed_proximity"])
+        # 2026-09-13: this interval is the CI for `per_input_disagreement_rate`
+        # and is now NAMED for it. It previously emitted as a bare `wilson_95`
+        # in a dict that also carries `pooled_p_hat_floor` -- the headline
+        # quantity, which had NO interval of its own -- so a reader bound it to
+        # the wrong rate. It printed the winner stratum as p=0.000 with
+        # [0.417, 0.848], an interval excluding its own point estimate. The
+        # arithmetic was right; the LABEL was the defect, and it was caught
+        # before any figure left the session.
         lo, hi = D6A.wilson_interval(dis, n) if n else (None, None)
         dis_p = sum(1 for r in rows if r["disagreed_proceed"])
         tot_v = sum(r["n_verdicts"] for r in rows)
@@ -738,12 +759,94 @@ def summary(runs_dir: str) -> None:
         tot_d = sum(r["n_decisions"] for r in rows)
         tot_b = sum(r["block_count"] for r in rows)
         blo, bhi = D6A.wilson_interval(tot_b, tot_d) if tot_d else (None, None)
+        # DETERMINISM CENSUS -- RULED DECISION-RELEVANT 2026-09-13. An input is
+        # deterministic when all its counted decisions agreed; M, W and S are
+        # then identical BY CONSTRUCTION and the election has no content there.
+        # The election's practical content is `M_W_divergent_inputs`.
+        det_block = sum(1 for r in rows
+                        if r["n_decisions"] and r["block_count"] == r["n_decisions"])
+        det_permit = sum(1 for r in rows
+                         if r["n_decisions"] and r["block_count"] == 0)
+        variable = sum(1 for r in rows
+                       if r["n_decisions"] and 0 < r["block_count"] < r["n_decisions"])
+        n_det = det_block + det_permit + variable
+        vlo, vhi = (D6A.wilson_interval(variable, n_det) if n_det else (None, None))
+        # CORRECTED 2026-09-13, same session, before publication. This first
+        # compared would_M vs would_W on the PROXIMITY VALUE, which counted a
+        # winner drifting sage_like->principled as "divergent" even though both
+        # PERMIT and the election is untouched there. It reported 6 divergent
+        # inputs in a stratum holding ZERO variable inputs -- self-contradictory,
+        # and contrary to the ruling it implements: "where the engine is
+        # deterministic ... M, W and S are identical by construction".
+        # The election is a policy about BLOCK-OR-PERMIT, so divergence is
+        # measured on the decision the two policies would produce, not on the
+        # rank they happen to name. Deterministic inputs are excluded first, so
+        # the invariant (no variable inputs => no divergence) holds structurally.
+        def _blocks(prox):
+            return prox in BLOCKED_PROXIMITIES
+        mw = sum(1 for r in rows
+                 if r["n_decisions"] and 0 < r["block_count"] < r["n_decisions"]
+                 and r["would_option_M_record"] and r["would_option_W_record"]
+                 and _blocks(r["would_option_M_record"])
+                 != _blocks(r["would_option_W_record"]))
+        # THIN-SERIES DISCLOSURE -- RULED 2026-09-13 (F-R1, Path 1: accept and
+        # disclose). An input whose operative series holds FEWER counted
+        # outcomes than its intended K contributes on thinner evidence than its
+        # siblings while counting equally in the stratum. c15 is the instance:
+        # 4 verdicts of an intended 10, the other 6 `engine_unavailable`.
+        # COMPUTED, never hardcoded, so any future thin series discloses itself.
+        # Thinness is measured on VERDICTS, not counted outcomes. Corrected
+        # 2026-09-13 in build: the first predicate used n_counted, which
+        # INCLUDES outages -- c15's 4 verdicts + 6 outages summed to its
+        # intended 10 and the disclosure reported zero thin inputs while the
+        # very input the ruling is about sat in the set. The floor rate is
+        # floors/VERDICTS, so verdicts are the evidence an input contributes.
+        thin = [{"candidate_id": r["candidate_id"],
+                 "verdicts": r["n_verdicts"], "intended_k": r["intended_k"],
+                 "non_verdict": r.get("n_non_verdict")}
+                for r in rows
+                if r.get("intended_k") and r.get("n_verdicts") is not None
+                and r["n_verdicts"] < r["intended_k"]]
         return {"stratum": label, "inputs": n, "inputs_disagreeing": dis,
+                "thin_series_disclosure": {
+                    "inputs_below_intended_k": len(thin),
+                    "detail": thin,
+                    "note": ("RULED 2026-09-13. These inputs rest on fewer draws "
+                             "than intended and the stratum's Wilson interval "
+                             "carries that limit. The F-R1 re-run was ruled NOT "
+                             "taken: `complete_series()` counts RECORDS not "
+                             "counted outcomes, so a thin series registers as "
+                             "complete and, under the earliest-is-operative "
+                             "rule, would beat its own repair. Correcting that "
+                             "definition is a NAMED DEFECT reserved to a session "
+                             "that does not know which input it affects."),
+                } if thin else {"inputs_below_intended_k": 0, "detail": [],
+                                "note": "every operative series holds its full intended K."},
+                "determinism_census": {
+                    "deterministic_permit": det_permit,
+                    "deterministic_block": det_block,
+                    "variable": variable,
+                    "variable_fraction": (variable / n_det) if n_det else None,
+                    "variable_fraction_wilson_95": {"low": vlo, "high": vhi},
+                    "M_W_divergent_inputs": mw,
+                    "note": ("RULED 2026-09-13 decision-relevant. Where the "
+                             "engine is deterministic there is no uncertainty "
+                             "for a sampling policy to handle, so M, W and S "
+                             "coincide. The election's content is the variable "
+                             "subset, and specifically M_W_divergent_inputs. "
+                             "DIRECTIONAL, NOT A MEASUREMENT -- the basis is "
+                             "thin and the four limits ride it."),
+                },
                 "per_input_disagreement_rate": (dis / n) if n else None,
-                "wilson_95": {"low": lo, "high": hi},
+                "per_input_disagreement_rate_wilson_95": {"low": lo, "high": hi},
                 "inputs_disagreeing_on_proceed": dis_p,
                 "verdicts": tot_v, "floors": tot_f,
                 "pooled_p_hat_floor": (tot_f / tot_v) if tot_v else None,
+                # The headline quantity's OWN interval. Its absence is what let
+                # the mislabelled disagreement CI above be read as this rate's.
+                "pooled_p_hat_floor_wilson_95": dict(zip(
+                    ("low", "high"),
+                    D6A.wilson_interval(tot_f, tot_v) if tot_v else (None, None))),
                 # B2/B4. The decision-level quantity, from the gate's own
                 # `proceed` over verdicts + tier-1 pauses. Outages excluded.
                 "decisions": tot_d, "blocks": tot_b,
@@ -834,6 +937,7 @@ def summary(runs_dir: str) -> None:
         "LIMIT_6_instrument_drift": L6,
         "LIMIT_7_variance_multi_channel": L7,
         "A8_BOUND": A8_BOUND,
+        "NAMED_DEFECT_series_completeness": NAMED_DEFECT_COMPLETENESS,
         "WHAT_THE_ELECTION_NEEDS": ELECTION_NEEDS,
         "PRIOR_DATA_c11": PRIOR,
         "K_note": "K is the POLICY parameter R8 ruled for median-of-3. It is NOT "

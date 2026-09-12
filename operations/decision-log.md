@@ -40495,3 +40495,76 @@ confirm the spec's §7 and the opener's F-1 say "the clock has not started" and 
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## D-OPTION-S-RUN-COMPLETE-RULINGS-ADOPTED-2026-09-13
+
+**Decision:** Option S **RAN**. 240 calls, 24/24 series, ~$3.40, zero failures, 2026-09-12.
+Six questions ruled across three relays 2026-09-13; **F-R1 elected Path 1 (accept and disclose)**.
+**`code-elevated`** (instrument + tests) + `governance`. **No R18 surface touched; no flag, schema,
+migration or activation; the credential remains live per F-R2 until the election concludes.**
+
+**Verbatim (binding, wins over this entry):**
+`operations/agent-circles-2026-08/2026-09-13-mentor-rulings-option-s-result-and-F-R1-verbatim.md`.
+
+### The result
+
+| stratum | inputs | draws | floors | rate | Wilson 95% | variable | M/W divergent |
+|---|---|---|---|---|---|---|---|
+| **guardrail rejections** *(OPERATIVE)* | 9 | 84 | 45 | **0.5357** | [0.430, 0.638] | 3 | **2** |
+| winners | 15 | 144 | 0 | 0.0000 | [0.000, 0.026] | 0 | 0 |
+| pooled *(disclosed, NOT used)* | 24 | 228 | 45 | 0.1974 | [0.151, 0.254] | 3 | 2 |
+
+240 calls → 228 verdicts + **12 `engine_unavailable`**, **zero `tier1_pause`**. Outages excluded per
+D6a's binding round-3 correction.
+
+**The gate condition is DISCHARGED. The M/W/S election and R8-D7's sampling policy PROCEED.**
+
+**The election's entire practical content is two inputs** — c6 and c9, each blocked on 1 of 10 draws.
+**W blocks both; M and S permit both.** Ruled *"a values question, not a rate question"*: is a floor a
+ceiling on permitted risk, or a majority signal about the input's character? **21 of 24 inputs are
+deterministic**, where M, W and S coincide by construction.
+
+**Also ruled:** the near-boundary R18 gap is **NOT closed** — publishing 0.536 against it would
+substitute a provenance category (rejected in August) for a behavioural one (near the boundary
+today). c11's non-reproduction (1/10 → 0/10) is **disclosed, not re-measured** — at p=0.1 a 0/10 draw
+occurs 35% of the time.
+
+### Three defects, all found by the executing session, none reaching publication
+
+1. **A mislabelled confidence interval.** A correct CI for the *per-input disagreement rate* emitted
+   as a bare `wilson_95` beside `pooled_p_hat_floor` — the headline, which had **no interval of its
+   own**. Printed the winner stratum as **p = 0.000 with [0.417, 0.848]**, an interval excluding its
+   own point estimate. Pinned by brute-forcing which `(k,n)` reproduced each published interval.
+2. **The M/W divergence counter compared ranks, not decisions** — reporting **6 divergent inputs in a
+   stratum holding zero variable inputs**, contradicting the ruling it implemented. Now measured on
+   block-or-permit with deterministic inputs excluded first; the invariant holds structurally.
+3. **The thin-series predicate used `n_counted`, which includes outages** — c15's 4 verdicts + 6
+   outages summed to its intended 10, so the disclosure reported **zero thin inputs while the input
+   the ruling is about sat in the set**. Corrected to `n_verdicts`.
+
+**None disturbed the ruling:** every relayed figure was recomputed from the 240 raw records, never
+taken from the summary. **Defect 2 surfaced only because fixing 1 forced a re-read of the output.**
+
+### ⚠ A second thin input was found, which the ruling could not have known
+
+The ruling names c15 as *"the one input whose weight is materially thinner than its siblings."*
+The computed predicate found **two**: c15 (`ee81ffd6`, rejection, 4/10) and **`77586556`, a WINNER**
+(cycle 17, 4/10). **The 12 outages fell entirely on these two inputs, six draws each** — not
+scattered. It moves no figure (the winner stratum recorded 0 floors across 144 verdicts) and touches
+neither c6 nor c9, so **the election is unaffected**. Recorded because a hardcoded disclosure would
+have missed it.
+
+### F-R1: why the ruled re-run was not run
+
+**Verified before spending:** `complete_series()` counts **records**, not counted outcomes, so c15's
+10 records (4 verdicts + 6 outages) register **complete**; and the summary selects the **earliest**
+complete series. A re-run would have been written, been complete, and **lost to the old series**.
+The $0.17 would have bought a record nothing reads. Put to the mentor rather than fixed, because
+changing the definition **after seeing which input it affects** is the post-hoc move the D6a
+class-freeze forbids. **Path 1 elected; the defect is recorded as
+`NAMED_DEFECT_series_completeness`, reserved to a session that does not know which input it affects.**
+
+**Rollback:** `git revert` the commit — instrument, tests and records only; nothing live, no spend to
+reverse, `runs/` is append-only evidence and is never truncated.

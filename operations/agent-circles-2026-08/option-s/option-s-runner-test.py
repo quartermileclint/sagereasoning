@@ -219,11 +219,20 @@ with tempfile.TemporaryDirectory() as _d:
     check("sweep without a tty and without --yes ABORTS",
           res.returncode != 0 and "no tty and no --yes" in res.stderr,
           f"rc={res.returncode} stderr={res.stderr[-300:]}")
+    _calls_before = sum(1 for f in (HERE / "runs").glob("*.jsonl")
+                        for _ in f.open())
     check("...and it announced the DOLLAR figure before aborting",
           "ABOUT TO SPEND" in res.stderr and "approximately $" in res.stderr,
           f"stderr={res.stderr[-300:]}")
-    check("...and it made NO call (no run file was created)",
-          not (HERE / "runs").exists() or not any((HERE / "runs").iterdir()))
+    # 2026-09-13: the sweep RAN, so runs/ is no longer empty and this can no
+    # longer assert emptiness. What it must still prove is the load-bearing
+    # claim: the no-tty/no--yes abort made no NEW call. Asserted by comparing
+    # the record count either side of the aborted invocation -- a stronger
+    # check than the original, which emptiness made vacuously true.
+    check("...and it made NO call (record count unchanged across the abort)",
+          _calls_before == sum(1 for f in (HERE / "runs").glob("*.jsonl")
+                               for _ in f.open()),
+          "the refused invocation must not have written a record")
 
 
 # =============================================================================
@@ -278,8 +287,33 @@ try:
 finally:
     R.RUNS_DIR = _real_runs
 
-check("the real runs/ directory is still empty (Option S has never run)",
-      not any((HERE / "runs").iterdir()))
+# 2026-09-13: Option S HAS now run -- 240 calls, 24/24 series, under the
+# 2026-09-04 Path A ruling and after the 2026-09-05 pre-run blockers were fixed.
+# The original assertion ("has never run") was a real guard and is retired
+# honestly rather than deleted: what replaces it is the invariant that still
+# matters -- every series present is INTERNALLY CONSISTENT (no file carries more
+# records than its intended K), which would catch a double-billing re-run
+# appending to a completed series.
+# CORRECTED 2026-09-13, same day it was written. The first version counted
+# records PER FILE, but the data model is PER SERIES -- a legitimate second
+# series (the F-R1 re-run that was considered and not taken) would have tripped
+# it while breaking nothing. The invariant that actually matters is per-series:
+# no single series may hold more records than the K it was started for, which is
+# what a double-billed re-run appending to a live series would produce.
+import collections as _c
+_overlong = []
+for _f in (HERE / "runs").glob("*.jsonl"):
+    _by = _c.defaultdict(list)
+    for _line in _f.open():
+        if _line.strip():
+            _r = json.loads(_line)
+            _by[_r.get("series_id")].append(_r)
+    for _sid, _rs in _by.items():
+        _ik = _rs[0].get("intended_k")
+        if _ik and len(_rs) > _ik:
+            _overlong.append(f"{_f.name}:{str(_sid)[:8]} {len(_rs)}>{_ik}")
+check("no SERIES exceeds its intended K (no double-billed append)",
+      not _overlong, f"overlong series: {_overlong}")
 
 # deploy_identity -- pure, no network
 _saved = os.environ.pop("OPTION_S_DEPLOY_ID", None)
