@@ -39834,3 +39834,44 @@ Full record: operations/handoffs/founder/2026-09-12-andreia-capture-path-ruling-
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-12 — D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12
+
+Session `be441b20-0c12-4f91-82df-4733781d0a7a` (continuation). governance/documents. AC7 not
+engaged. Nothing built, activated, flipped, migrated or minted. No GUARD_RE file touched.
+
+Given the fork (differently-composed window / revise the standard / accept part 2 unmet) and the
+founder's preference for soonest-to-logos-on, recommended option (i) with W2 (record honesty) as the
+work - not primarily for the channel fit but because W2 blocks the flip on every branch of the fork
+regardless (register section F, W3-d). Drafted a specification with one central discipline: variety
+is assessed after the window, never targeted before it, so the session prompt names the W2 build
+task and never the observation goal - the back-door optimisation problem the project's own L6
+principle forbids.
+
+Founder approved the specification's section 6 in full. Two questions (Q-S1 clock carry/restart,
+Q-S2 optimisation-target soundness) plus one optional standard-revision question (Q-S3) were relayed
+and are now ruled. Verbatim, canonical:
+operations/trust-layer-2026-07/2026-09-12-mentor-ruling-window-specification-QS1-QS2-QS3-verbatim.md.
+
+Q-S1: the clock restarts at W2's first record, not the current window's 2026-09-06 start - "a
+materially different composition is a materially different window." Named consequence: the current
+window's Sunday mark closes it at three of four parts met, part (2) structurally unmet; that mark
+does not carry into or accelerate the W2 window.
+
+Q-S2: the discipline is sound and now carries a binding per-session condition, not merely a
+specification property - if a W2 session prompt names the observation goal, the discipline is broken
+at the point of application regardless of what the specification says; the founder's responsibility
+is to ensure session prompts name the work, not the observation.
+
+Q-S3: sequenced, not refused. No standard revision now - the domain is rarely reached under the
+current window's composition, not structurally unreachable - but explicitly re-askable with the W2
+window's own evidence if variety does not appear. Evidence first, revision second.
+
+Folded into the specification (marked APPROVED, timeline rewritten to reflect the restarted clock)
+and the S11 register (a new change-log entry). No W2 session has yet run; the seven-day clock has not
+started.
+
+Full record: operations/handoffs/founder/2026-09-12-window-specification-approved-ruled-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

@@ -132,7 +132,29 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
-- **2026-09-12 (latest — THE QUALIFYING WINDOW NOW HAS A SPECIFICATION: CHANNEL + VARIETY;
+- **2026-09-12 (latest — THE W2 WINDOW IS SPECIFIED, APPROVED, AND RULED. THE CLOCK RESTARTS AT ITS
+  FIRST RECORD; NO W2 SESSION HAS YET RUN;
+  `D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12`; verbatim, canonical:
+  `2026-09-12-mentor-ruling-window-specification-QS1-QS2-QS3-verbatim.md`; specification:
+  `2026-09-12-part2-window-SPECIFICATION-FOR-APPROVAL.md`)** — The founder approved W2 as the
+  window's work, the consult-channel constraint, and the §2 discipline (variety is assessed, never
+  targeted). The mentor then ruled three questions. **⚖️ Q-S1 — THE CLOCK RESTARTS at W2's first
+  record**, not the current window's 2026-09-06 start: *"A materially different composition is a
+  materially different window."* Named consequence: the current window's Sunday mark closes it at
+  **three of four parts met, part (2) structurally unmet** — that mark does not carry into, or
+  accelerate, the W2 window. **⚖️ Q-S2 — the §2 discipline is sound but now carries a BINDING
+  PER-SESSION CONDITION, not merely a specification property:** *"If a W2 session prompt names the
+  observation goal… the discipline is broken at the point of application, regardless of what the
+  specification says. The founder's responsibility is to ensure the session prompts name the work,
+  not the observation."* **⚖️ Q-S3 — SEQUENCED, NOT REFUSED.** No standard revision now — *"the
+  domain is not structurally unreachable. It is rarely reached under the current window's
+  composition"* — but *"if the window's post-assessment finds that andreia remains unevaluated
+  despite a genuinely composed, consequential window, bring the standard-revision question back with
+  that finding."* Evidence first, revision second. **W2's §F pins remain the only W2 work built to
+  date; the window itself has not started.** Nothing built, activated or flipped this session. D2
+  remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+  founder's.
+- **2026-09-12 (THE QUALIFYING WINDOW NOW HAS A SPECIFICATION: CHANNEL + VARIETY;
   `D-ANDREIA-CAPTURE-PATH-RULING-ADOPTED-2026-09-12`; verbatim, canonical:
   `2026-09-12-mentor-ruling-andreia-capture-path-and-window-design-verbatim.md`; relay:
   `2026-09-12-mentor-question-andreia-capture-path-and-window-design-FOR-RULING.md`)** — **AMENDS the
