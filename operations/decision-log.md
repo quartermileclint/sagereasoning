@@ -39703,3 +39703,68 @@ Full record: operations/handoffs/founder/2026-09-12-preflip-ruling-folded-CLOSE.
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-12 — D-PART2-EVIDENCE-RULING-ADOPTED-B1-D1-D2-EXECUTED-2026-09-12
+
+Session `be441b20-0c12-4f91-82df-4733781d0a7a` (continuation). code-elevated under a scoped,
+per-commit founder waiver of the armed byte-identity guard. AC7 not engaged; nothing activated,
+flipped, migrated or minted.
+
+THE HEADLINE: part (2) of the four-part S11 readiness standard is not waiting on a write, a flag,
+or more days - it is waiting on a window pointed at different work. The mentor ruled on the
+per-domain evidence relayed this session: andreia carries ONE record window-wide, "one observation
+is not an evaluation", and the window's composition (governance authoring) "may never produce
+andreia-engaging material". Satisfying part (2) "may require a different kind of window - one in
+which the loop is operating on consequential product decisions."
+
+This supersedes yesterday's Q-B recommendation in effect. Branch 1 (a founder-walked accreditation
+write) cannot discharge part (2): a write made over a single andreia observation would be exactly
+the dishonest write the Q-B condition forbids. Which fork to take - a differently-composed window,
+a revision of the standard, or accepting part (2) unmet - is the founder's call and is unmade.
+
+Also ruled: "evaluated" means a domain produced a record carrying an assessed reading, not merely
+appeared in an extraction; "above conservative" reconciles to tier 4 or better on the A5 seven-tier
+scale (tier canonical, weight derived). Part 3's consult/guard split remains OPEN and unruled -
+deliberately parked by founder election until part 2 resolves.
+
+Ruling recorded verbatim and canonical:
+operations/trust-layer-2026-07/2026-09-12-mentor-ruling-part2-evidence-and-part3-split-verbatim.md.
+Folded into the pre-flip report at the marked points, with a new section 3.3 (per-domain evidence
+table + the A1/A2 rulings) and section 10 revised to carry the headline. Per-domain figures,
+re-derived not carried: dikaiosyne 378, phronesis 309, sophrosyne 215 (213 guard-path), andreia 1;
+only two sub-species passions window-wide.
+
+Executed under founder election ("B1 waiver granted, B2 done, B3 adopted, D1 Signed, D2 bundle in,
+D3 leave until part 2 resolves"):
+- B1 - the pre-flip report's Part-1 pooled-span defect is FIXED in
+  website/scripts/false-hold-observation-report.ts: duration is window-scoped via a shared
+  windowRowsFor helper (extracted so the three-case window boundary is not implemented twice), the
+  pooled span retained beneath as an explicit [DISCLOSURE ONLY] line, and the script's "OPEN,
+  UNRULED" note replaced with the Q-C ruling's wording.
+- B3 - the standing opener is de-drafted to FOUNDER-ADOPTED 2026-09-12.
+- D1 - R18 logos-on framing applied to llms.txt, agent-card.json (extension count unchanged at 26)
+  and api-docs; npm run build green.
+- D2 - both W3.2 pins BUILT, test-file only, in s4-intervention-engine.test.ts section W3.
+  intervention-engine.ts is NOT modified and stays byte-identical.
+- D3 (W2) deferred by election.
+
+PR19 on the waived build raised one HIGH and it was real: section W3.5 as first written pinned
+ALL_JUSTICE, a constant local to the test file, not the production union. Confirmed independently by
+mutating the real JusticeSurfaceState union and watching the pin stay green. Fixed to source-grep
+the actual union; re-mutation now correctly turns it RED. This was the second vacuous pin caught
+this session (the first, section W3.1b, asserted on a docstring token that does not appear in the
+engine at all; replaced with a positive control). Standing lesson: a pin is not verified until the
+mutation it claims to catch has been shown to turn it red.
+
+Verified: tsc clean; S4 battery 423/0; report battery 141/0; mutation correctly RED at 422/1;
+intervention-engine.ts restored SHA-identical
+(db86fccbaadf9c633374d689816b7e9d5e47ed46e8d89876f3e553f78ef4cd73); build green; both GUARD_RE SHA
+pins unchanged. The guard stayed armed throughout.
+
+Owed: the part-(2) fork (the founder's, unmade); Part 3's consult/guard split; part (1)'s threshold
+Sun 13 Sep 19:44 AEST - which changes the clock, not the window's composition; W2.
+
+Full record: operations/handoffs/founder/2026-09-12-part2-evidence-ruling-and-B1-D1-D2-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

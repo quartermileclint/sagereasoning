@@ -97,8 +97,12 @@ listed separately below as named-not-yet-built, since they touch `GUARD_RE`-matc
 | **W3-c** | **NEW named prerequisite: the practice-on first-circle correction (C1) must be FULLY SETTLED — landed AND calibrated — before the S11 flip proceeds.** This is in addition to, not a replacement for, the 2026-07-12 four-part readiness standard (§A above) — the 2026-07-12 shape is unchanged (L2). Cross-reference to §A when this register's own hard-prerequisites table is next revised. | L2 |
 | **W3-d** | **The W2 record machinery (the enforcement class + per-entry regime markers + the compliance-not-virtue clause) is a flip component.** The flip must not activate without it, or enforced outcomes would land in the trust record unrecorded and unmarked — an honest-claims violation on its own terms, independent of readiness. Status of W2 itself: **NOT built** as of this annotation (soft-dependent on C1c's schema being settled per the plan §3 W2 item 4/§4 dependency graph item 7 — a soft, not hard, dependency; W2 was deliberately not decided to ride inside any earlier schema step). | L5, L7 |
 
-**Pins named, NOT built here (W3.2 — `code-standard`, buildable dark, but touches `GUARD_RE`;
-needs its own founder-waived session, guard left armed):**
+**Pins named here 2026-09-10 — ✅ BOTH BUILT 2026-09-12** under the founder's D2 election ("D2 bundle
+in"), inside the same waived session as the B1 Part-1 fix. They live in
+`website/src/lib/substrate/trust-core/__tests__/s4-intervention-engine.test.ts` **§W3** — the
+**test file only**; `intervention-engine.ts` itself is NOT modified and stays byte-identical. (W3.2
+— `code-standard`, buildable dark, but touches `GUARD_RE`; needed its own founder-waived session,
+guard left armed throughout.)
 1. The fifth-circle orientation reading (`C2`/`C1c`'s `orientation-reading-{toward,away,indeterminate}`
    event class) is never an input to `recommendIntervention` or any enforce path — L6, *"the enforce
    layer may NOT consume the orientation reading… enforcement's blindness to unexamined reasoning is
@@ -111,13 +115,54 @@ needs its own founder-waived session, guard left armed):**
    other-directed circle-2/3/4 violation present, should be structurally unrepresentable or
    battery-caught.
 
-**Both pins are named here so a future waived session does not have to re-derive them from the plan
-document.** Neither is built. Nothing activates. The S11 flip remains REFUSED; weights remain
-BLOCKED; the 0h call remains the founder's.
+**Built shape (2026-09-12).** §W3.1/§W3.1b assert pin 1 — the orientation vocabulary appears nowhere
+in `intervention-engine.ts` source, with a **positive control** so the assertion cannot pass by
+grepping a file that was never read. §W3.2–§W3.4 assert pin 2 — the intervention engine's inputs
+carry no first-circle/prohairesis channel, so an enforcement decision citing only a first-circle
+finding is structurally unrepresentable rather than merely untested. **§W3.5 pins L4's positive half
+by source-grepping the ACTUAL `JusticeSurfaceState` union** (not the test file's own `ALL_JUSTICE`
+fixture — the first cut pinned the fixture, was caught by PR19, independently confirmed by mutating
+the real union and watching the pin stay green, and fixed; re-mutation now correctly turns it RED).
+Every pin is mutation-verified against the real source and the source restored SHA-identical.
+
+**Both pins were named here so a future waived session did not have to re-derive them from the plan
+document; that session was 2026-09-12.** Nothing activates. The S11 flip remains REFUSED; weights
+remain BLOCKED; the 0h call remains the founder's.
 
 ---
 
 ## Change log
+- **2026-09-12 (later — PART 2 IS A WINDOW, NOT A WRITE; B1/B2/B3/D1/D2 executed;
+  `D-PART2-EVIDENCE-RULING-ADOPTED-B1-D1-D2-EXECUTED-2026-09-12`; verbatim, canonical:
+  `2026-09-12-mentor-ruling-part2-evidence-and-part3-split-verbatim.md`)** — **The single most
+  consequential change to this register since the four-part standard was set.** The founder relayed
+  the A1/A2/C1 questions and the mentor ruled on the per-domain evidence. **Part (2) is NOT MET AND
+  IS NOT DISCHARGEABLE FROM THIS WINDOW.** `andreia` carries **one** record window-wide, and *"one
+  observation is not an evaluation"*; `dikaiosyne` 378 / `phronesis` 309 / `sophrosyne` 215 are real,
+  but the window's composition — governance authoring — *"may never produce andreia-engaging
+  material."* So part (2) *"is not waiting on a write, a flag, or more days — it is waiting on a
+  window pointed at different work"*: satisfying it *"may require a different kind of window — one in
+  which the loop is operating on consequential product decisions."* **The Q-B Branch-1 accreditation
+  write, recommended the day before, therefore cannot by itself discharge part (2)** — a write made
+  over one andreia observation would be exactly the dishonest write the Q-B condition forbids.
+  **Which fork to take — a differently-composed window, a standard revision, or accepting part (2)
+  unmet — is the founder's call, unmade.** Also ruled: *"evaluated"* means a domain produced a
+  record with an assessed reading, not merely appeared; *"above conservative"* reconciles to **tier 4
+  or better** on the A5 seven-tier scale (tier canonical, weight derived). **Part 3's consult/guard
+  split remains OPEN and unruled** — deliberately left by the founder ("D3 leave until part 2
+  resolves"). **Executed the same turn under founder election:** **B1** (waiver granted) — the
+  pre-flip report's Part-1 pooled-span defect is FIXED in
+  `website/scripts/false-hold-observation-report.ts`: duration is now window-scoped via a shared
+  `windowRowsFor` helper, with the pooled span retained beneath as a `[DISCLOSURE ONLY]` line, and
+  the Q-C ruling's wording replaces the script's "OPEN, UNRULED" note. **B3** — the standing opener
+  is de-drafted to ✅ FOUNDER-ADOPTED 2026-09-12. **D1** — the R18 logos-on framing is applied to
+  `llms.txt`, `agent-card.json` (extension count unchanged at 26) and `api-docs`. **D2** — the two
+  W3.2 pins are BUILT (see §F above). **D3 (W2) deferred by election.** PR19 ran on the waived build
+  and found one HIGH — §W3.5 pinned a test-file-local constant rather than the real
+  `JusticeSurfaceState` union, confirmed independently by mutating the real union and watching the
+  pin stay green; fixed and re-mutation-verified. `intervention-engine.ts` is NOT modified; both SHA
+  pins clean; the guard stayed armed and the waiver was scoped per-commit. **D2 remains blocked; the
+  S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
 - **2026-09-07 (S7, later — OPTION D RULED and EXECUTED;
   `D-MENTOR-RULING-CALLER-CLASS-OPTION-D-ADOPTED-EXECUTED-2026-09-07`; verbatim, canonical:
   `2026-09-07-mentor-ruling-caller-class-option-D-verbatim.md`)** — **AMENDS the segment-1 clause

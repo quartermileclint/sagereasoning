@@ -5,12 +5,12 @@
 `archive/2026-09-05_…`, `archive/2026-08-29_…`, `archive/2026-08-15_…`, `archive/2026-08-12_…`,
 `archive/2026-08-01_…`, `archive/2026-07-25_…`, `archive/2026-07-13_…`).
 
-> **⚠ DRAFTED, NOT YET FOUNDER-ADOPTED.** Per the mentor's 2026-09-10 ruling: *"The regrounding is a
-> founder act… This is not a build act and does not require a ruling. It requires twenty minutes and
-> accurate facts."* This session did the derivation and drafted this replacement, following the
-> pattern of every prior grounding. **Drafting is not adoption** — the founder should read this file
-> before the next session opens under it and confirm or correct it. Treat this version as accurate to
-> the derivation below unless the founder says otherwise.
+> **✅ FOUNDER-ADOPTED 2026-09-12.** Drafted at the 2026-09-10 grounding session per the mentor's
+> ruling (*"The regrounding is a founder act… It requires twenty minutes and accurate facts"*), and
+> **adopted by the founder on 2026-09-12**. This is the operative standing opener. **Its figures
+> remain claims to re-derive at your own open** — the window has moved since it was written (see the
+> 2026-09-12 pre-flip report and its two rulings for the current readiness board, which supersedes
+> this file's own window figures).
 
 > **How this version was grounded.** Written 2026-09-10 (Thu) evening AEST, dated from `date`, not
 > from the conversation context, by session `8fe3a6ae-dcb1-4324-846d-631d51336dc4`, opened under

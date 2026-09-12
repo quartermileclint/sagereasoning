@@ -22,6 +22,8 @@
  *   The S3 → S4 consumption seam.
  */
 
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import type { LoopDepthTier } from '@/lib/translation-sandwich/reason-loop-closure'
 import {
   recommendIntervention,
@@ -548,6 +550,100 @@ function feat(o: Partial<OutputFeatures> = {}): OutputFeatures {
   // End-to-end: a real S3 conflict → pause + escalate through the seam.
   const s7 = recommendIntervention(interventionInputFromS3({ aggregate: agg({ level: 'deliberate', anyConflict: true }), taskHasJusticeSurface: false }))
   eq(s7.tableRow, 'source-conflict-pause-escalate', 'seam: aggregate conflict → pause+escalate end-to-end')
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// §W3 — the logos-on staging pins (2026-08-01 plan §3 W3.2, verdicts L6 and L4)
+//
+// Built 2026-09-12 under a recorded founder waiver, bundled with the Part-1
+// pooled-span correction. These are the two pins the logos-on plan named and
+// the S11 register's §F carried as "named, NOT built". They are SOURCE pins by
+// design: both verdicts are structural claims about what the enforce path can
+// see, and the honest way to hold a structural claim is to assert the structure
+// rather than to test one input that happens not to exist.
+//
+// L6 (verbatim): "The enforce layer may not consume the orientation reading...
+// Consuming the orientation reading converts it into an optimisation target by
+// the back door... The instrument defeats itself."
+//
+// L4 (verbatim): "Enforcement against the agent's own assent is a category
+// error. The first circle remains measure-only even under logos-on... If the
+// infrastructure blocks an action because the agent's assent was given under
+// task pressure, the infrastructure has not restored the agent's reasoning
+// integrity — it has bypassed it entirely."
+// ════════════════════════════════════════════════════════════════════════════
+{
+  const engineSrc = readFileSync(
+    join(__dirname, '..', 'intervention-engine.ts'),
+    'utf-8',
+  )
+  // Strip comments before grepping: a verdict quoted in a docstring must not
+  // satisfy a pin about what the CODE consumes. (The same discipline the R20a
+  // guard battery applies for the same reason.)
+  const engineCode = engineSrc
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
+
+  // --- L6: the orientation reading never reaches the enforce path -----------
+  assert(
+    !/orientation/i.test(engineCode),
+    '§W3.1 (L6) intervention-engine.ts CODE contains no reference to orientation — the reading never reaches the enforce path',
+  )
+  // NON-VACUITY, via a POSITIVE CONTROL — and this control earned its place.
+  // The first draft of §W3.1b asserted that "orientation" appears in the file's
+  // docstrings, on the assumption that the comment-strip was doing the work.
+  // It went RED: the word is absent from intervention-engine.ts entirely, so
+  // §W3.1 had been passing on an absent word rather than on a stripped comment.
+  // That is the vacuous-pass class this project keeps being bitten by, caught
+  // here by the check written to catch it. The honest replacement proves the
+  // grep MACHINERY is live — it must find a token that genuinely is in the code
+  // — so a future §W3.1 pass means "not present" rather than "grep broken".
+  assert(
+    /justiceSurface/.test(engineCode),
+    '§W3.1b (L6) non-vacuity POSITIVE CONTROL: the comment-stripped source grep finds a token that IS in the code, so §W3.1’s absence result is a real absence',
+  )
+  // The structural form of the same claim: the input surface the enforce path
+  // reads carries five fields, none of them an orientation reading. Asserted on
+  // the interface body so a future field addition has to confront this pin.
+  const inputBlock = engineSrc.slice(
+    engineSrc.indexOf('export interface InterventionInput'),
+    engineSrc.indexOf('export interface InterventionRecommendation'),
+  )
+  assert(
+    inputBlock.length > 100 && !/orientation/i.test(inputBlock.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')),
+    '§W3.2 (L6) InterventionInput declares no orientation field',
+  )
+
+  // --- L4: no enforcement path keys on first-circle-only findings ----------
+  // The first circle is the agent's own reasoning integrity (prohairesis /
+  // self-preservation). The engine's only circle-shaped input is
+  // `justiceSurface`, whose vocabulary is other-directed by construction.
+  assert(
+    !/prohairesis|self_preservation|selfCircle|firstCircle/i.test(engineCode),
+    '§W3.3 (L4) intervention-engine.ts CODE keys on no first-circle concept (prohairesis / self_preservation / selfCircle / firstCircle)',
+  )
+  assert(
+    inputBlock.length > 100 &&
+      !/prohairesis|self_preservation|selfCircle|firstCircle/i.test(inputBlock),
+    '§W3.4 (L4) InterventionInput declares no first-circle field — a first-circle finding cannot be an enforce input',
+  )
+  // PR19 FOLD (2026-09-12, HIGH, confirmed by live mutation): the first draft
+  // pinned `ALL_JUSTICE` — a constant this TEST FILE declares independently
+  // (line ~69) — not the actual exported `JusticeSurfaceState` union. Adding a
+  // 'self_regarding' member to the real type left `ALL_JUSTICE` untouched and
+  // the pin green: it was asserting the test's own fixture never drifted, not
+  // that the type carries no self-regarding value. The comment's own claim
+  // ("pinned against the exported type's own values") was false. Fixed to
+  // source-grep the real union body from the file, comment-stripped, so a
+  // future self-regarding addition to the ACTUAL type trips this pin.
+  const justiceUnionBlock = engineSrc.slice(
+    engineSrc.indexOf('export type JusticeSurfaceState'),
+    engineSrc.indexOf('\n\n', engineSrc.indexOf('export type JusticeSurfaceState')),
+  ).replace(/\/\/.*$/gm, '')
+  assert(
+    justiceUnionBlock.length > 20 && !/self.?regard/i.test(justiceUnionBlock),
+    '§W3.5 (L4) the ACTUAL JusticeSurfaceState union (source-grepped, not the test fixture) carries no self-regarding value',
+  )
 }
 
 // ════════════════════════════════════════════════════════════════════════════

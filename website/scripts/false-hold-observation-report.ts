@@ -927,6 +927,38 @@ function classifyActionClass(preview: string): ActionClass {
  * authoritative while the classification it depends on is still under
  * active ruling.
  */
+/**
+ * THE WINDOW POPULATION — the single derivation every window-scoped figure in
+ * this report uses (Part 1's duration since the 2026-09-12 Q-A ruling, and all
+ * of Part 5). Extracted to ONE function deliberately: two copies of this rule
+ * is exactly the drift class this project keeps paying for, and the Part-1 and
+ * Part-5 figures must never be able to disagree about what "the window" is.
+ *
+ * Derived structurally from the schema field — never a hardcoded line number
+ * (TRAP-3: a hardcoded "139" is the mistake this project has made twice).
+ * v1 is the sole pre-window schema; the probe is the first non-v1 record; the
+ * window is everything after it, MINUS any stray v1 record the index slice
+ * alone would not catch.
+ *
+ * Three cases: -1 (every record is v1 — a pure pre-window buffer, window is
+ * empty); 0 (no v1 prefix at all — no pre-window regime ever existed, so there
+ * was never a probe to strip either; the whole buffer IS the window); >0 (a
+ * real v1 prefix followed by the took-effect probe at firstNonV1Index — strip
+ * the prefix AND the probe). A fixture with no v1 records must not have its
+ * first record misread as "the probe" and silently dropped.
+ *
+ * PR19 FOLD (2026-09-10, MEDIUM): the first draft sliced by INDEX only, so a v1
+ * record occurring after the slice point — not possible on the real append-only
+ * buffer, but not structurally prevented either — would have silently entered
+ * the window. The explicit schema filter closes that regardless of ordering.
+ */
+function windowRowsFor(rows: Classified[]): Classified[] {
+  const firstNonV1Index = rows.findIndex((r) => r.schema !== 'false-hold-record-v1')
+  return (
+    firstNonV1Index === -1 ? [] : firstNonV1Index === 0 ? rows : rows.slice(firstNonV1Index + 1)
+  ).filter((r) => r.schema !== 'false-hold-record-v1')
+}
+
 function reportPreFlipDisclosures(rows: Classified[]): void {
   console.log('\n── Part 5 — pre-flip disclosures (ruled 2026-09-07 + 2026-09-10) ───')
 
@@ -949,16 +981,7 @@ function reportPreFlipDisclosures(rows: Classified[]): void {
   // slice point — not possible on the real append-only buffer, but not
   // structurally prevented either — would have silently entered the window.
   // The explicit schema filter below closes that regardless of ordering).
-  const firstNonV1Index = rows.findIndex((r) => r.schema !== 'false-hold-record-v1')
-  // Three cases: -1 (every record is v1 — a pure pre-window buffer, window is
-  // empty); 0 (no v1 prefix at all — no pre-window regime ever existed, so
-  // there was never a probe to strip either; the whole buffer IS the window);
-  // >0 (a real v1 prefix followed by the took-effect probe at firstNonV1Index
-  // — strip the prefix AND the probe). A fixture/test with no v1 records must
-  // not have its first record misread as "the probe" and silently dropped.
-  const windowRows = (
-    firstNonV1Index === -1 ? [] : firstNonV1Index === 0 ? rows : rows.slice(firstNonV1Index + 1)
-  ).filter((r) => r.schema !== 'false-hold-record-v1')
+  const windowRows = windowRowsFor(rows)
   console.log(`  [window scoping for this whole Part: ${rows.length - windowRows.length} pre-window/probe record(s) excluded (v1 + the took-effect probe), ${windowRows.length} window record(s) used]`)
 
   // 5a — schema distribution (Q1 ruling, 2026-09-10). WINDOW-SCOPED (see
@@ -1364,13 +1387,44 @@ async function main() {
   runLiftCheck(rows)
 
   // Part 1 — duration.
-  const times = rows.map((r) => Date.parse(r.capturedAt)).filter((t) => !Number.isNaN(t)).sort((a, b) => a - b)
-  const firstT = times[0]
-  const lastT = times[times.length - 1]
-  const days = (lastT - firstT) / (24 * 3600 * 1000)
+  //
+  // MENTOR RULING (2026-09-12, Q-A, VERBATIM, binding): "The window-clock reading
+  // is the operative one for part (1), on the same reasoning the 2026-09-11 ruling
+  // applied to part (3). The script's 61.39-day span begins at the buffer's first
+  // pre-window v1 record. That is the same class of error the regime ruling
+  // addressed: a figure computed over a mixture of the retired and current
+  // instruments describes neither. The pooled span is a disclosure, not an answer."
+  //
+  // Fixed here under a recorded founder waiver (2026-09-12). The operative span is
+  // computed over the WINDOW population only — the same `windowRows` derivation
+  // Part 5 already uses, structural (first non-v1 record is the probe; the window
+  // is everything after it), never a hardcoded line number. The pooled span is
+  // retained and printed BELOW the operative one, explicitly labelled a disclosure,
+  // because the ruling permits it as a disclosure and removing it would lose the
+  // buffer's own history from the report entirely.
+  const windowTimes = windowRowsFor(rows)
+    .map((r) => Date.parse(r.capturedAt))
+    .filter((t) => !Number.isNaN(t))
+    .sort((a, b) => a - b)
+  const pooledTimes = rows.map((r) => Date.parse(r.capturedAt)).filter((t) => !Number.isNaN(t)).sort((a, b) => a - b)
+  const pooledDays = pooledTimes.length >= 2 ? (pooledTimes[pooledTimes.length - 1] - pooledTimes[0]) / (24 * 3600 * 1000) : 0
+  // `days` is the OPERATIVE figure the READINESS SUMMARY reads — window-scoped.
+  const days = windowTimes.length >= 2 ? (windowTimes[windowTimes.length - 1] - windowTimes[0]) / (24 * 3600 * 1000) : 0
   console.log('\n── Part 1 — duration ──────────────────────────────────────────────')
-  console.log(`  window: ${new Date(firstT).toISOString()} → ${new Date(lastT).toISOString()}`)
-  console.log(`  span:   ${days.toFixed(2)} days   ⇒ ${days >= 7 ? 'MEETS ≥7 days' : `PENDING (need ${(7 - days).toFixed(2)} more days)`}`)
+  if (windowTimes.length === 0) {
+    console.log('  no window records — duration is not computable over the window population.')
+  } else {
+    // PRECISION, disclosed rather than left to drift: this measures the span of
+    // window RECORDS, first to last. The window CLOCK starts when the capture
+    // flag was set, which this script cannot see — the first record necessarily
+    // arrives some minutes after. The two agree closely but are not the same
+    // quantity; where a ruling speaks of the window clock, the clock governs.
+    console.log(`  window (OPERATIVE, ruled 2026-09-12 — span of window records; the window CLOCK starts at flag-set, which this script cannot observe): ${new Date(windowTimes[0]).toISOString()} → ${new Date(windowTimes[windowTimes.length - 1]).toISOString()}`)
+    console.log(`  span:   ${days.toFixed(2)} days   ⇒ ${days >= 7 ? 'MEETS ≥7 days' : `PENDING (need ${(7 - days).toFixed(2)} more days)`}`)
+  }
+  console.log(`  [DISCLOSURE ONLY — pooled buffer span incl. pre-window v1 records: ${pooledDays.toFixed(2)} days.`)
+  console.log('   Ruled 2026-09-12 (Q-A): this pooled figure is NOT an answer to part (1); it mixes')
+  console.log('   the retired at-action-v1-lean instrument with the current one.]')
 
   // Part 3 — the false-hold rate (THE core output).
   //
@@ -1424,10 +1478,22 @@ async function main() {
   console.log('    (CONSULT-OUTAGE lines), which this report does not read. It is NOT')
   console.log('    reported here rather than estimated — F-3\u2032 asks for both sides, and an')
   console.log('    invented number would not be one of them.')
+  // RULED 2026-09-12 (Q-C1): this note previously ended "A population-split
+  // Part 3 is an OPEN, UNRULED item." It is no longer open. Verbatim: "The
+  // consult and guard populations are not different instruments. They are
+  // different populations measured by the same instrument… Pooling them
+  // produces a figure that describes the combined population under the current
+  // instrument. That is a legitimate figure, with its composition disclosed…
+  // the pooled figure governs part (3); the split is required disclosure
+  // alongside it."
   console.log('    SCOPE, stated because ruling 2 speaks of "the guard rate": the figure')
   console.log('    below POOLS the consult and guard populations — Part 3 has never been')
   console.log('    population-split (only Part 3b is). The ruled exclusion is applied to')
-  console.log('    that pooled figure. A population-split Part 3 is an OPEN, UNRULED item.')
+  console.log('    that pooled figure. RULED 2026-09-12 (Q-C1): THE POOLED FIGURE GOVERNS')
+  console.log('    part (3) — the regime-mixing reasoning does NOT reach here, because')
+  console.log('    consult and guard are two populations under the SAME instrument, not')
+  console.log('    two instruments. The per-population split is REQUIRED DISCLOSURE')
+  console.log('    alongside the pooled figure (see Part 3b), not an alternative headline.')
   console.log(`  at-action examinations: ${rated.length}`)
   console.log(`  holds (loop opened/reopened): ${holds.length}   (${pct(holds.length, rated.length)} of examinations)`)
   console.log(`    false-positive holds (no kathekon factor): ${fps.length}`)

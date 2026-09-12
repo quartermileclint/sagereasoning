@@ -384,6 +384,15 @@ readings, and the loop fold each sit under their own disclosure regime and are o
 
 ### Guardrail — Stoic Risk Gate for AI Agents (V3)
 
+**Logos-on and practice-on are two postures of one instrument, not two separate tools.** The
+deterministic engine's fidelity work (the unity thesis, the justice floors, the corroboration
+overrides) instantiates a fifth circle of concern — the rational order — as a settled disposition the
+infrastructure holds as a fixed condition. Logos-on is that disposition acting: the guardrail's deny,
+the intervention engine once flipped, the calling gate's enforce arm. Practice-on is a practitioner
+developing within that fixed condition through examined responses. A logos-on deny is the
+infrastructure declining on the rational order's behalf, not merely a rule blocking a prohibited
+action.
+
 POST https://www.sagereasoning.com/api/guardrail
 Content-Type: application/json
 Authorization: Bearer sr_live_<your-api-key>

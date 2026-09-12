@@ -589,6 +589,16 @@ export default function ApiDocsPage() {
             same check over its <code>action</code> text, under the same limit.
           </li>
           <li>
+            <strong>Logos-on and practice-on are two postures of one instrument</strong> &mdash; not two separate
+            tools. The deterministic engine&apos;s fidelity work (the unity thesis, the justice floors, the
+            corroboration overrides) instantiates a fifth circle of concern &mdash; the rational order &mdash; as
+            a settled disposition the infrastructure holds as a fixed condition. Logos-on is that disposition
+            acting: the guardrail&apos;s deny, the intervention engine once flipped, the calling gate&apos;s
+            enforce arm. Practice-on is a practitioner developing within that fixed condition through examined
+            responses. A logos-on deny is the infrastructure declining on the rational order&apos;s behalf, not
+            merely a rule blocking a prohibited action.
+          </li>
+          <li>
             <strong>What the profile measures (it is not a fact-checker)</strong> &mdash; the assessment reads
             <em> how</em> a decision was reasoned (its passion, value, and justice structure), <strong>not whether
             the decision was factually correct</strong>. It does not independently verify arithmetic, claims, or
