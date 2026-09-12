@@ -532,3 +532,31 @@ remain BLOCKED; the 0h call remains the founder's.
   request for §8 item 1; part (1)'s threshold on Sunday evening; and Part 3's consult/guard split,
   **still open and unruled**. **Nothing built, activated or flipped. D2 remains blocked; the S11 flip
   remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-12 (W2 merged, deployed, and its schema step applied — `D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12`
+  and `D-W2-ENFORCEMENT-VOCABULARY-MIGRATION-APPLIED-2026-09-12`).** **Row W3-d's "Status of W2
+  itself: NOT built" is now STALE and is corrected here rather than rewritten in place.** W2 is
+  **built, merged (`0e4ea4e`), deployed and schema-backed** — the `agent_trust_events.event_type`
+  CHECK is widened 21 → 22 (`enforcement-outcome`) on **TEST and PRODUCTION**. **W2 is NOT
+  activated:** `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` remains UNSET, production carries **0**
+  `enforcement-outcome` rows (confirmed after a live `do_not_proceed` carrying a signed assessment —
+  every precondition the seam needs except the flag), and activation remains its own step coupled to
+  the flip by this row. **W3-d is therefore discharged as a BUILD component and still open as an
+  ACTIVATION component.**
+  **The merge ran under a founder-granted per-commit byte-identity waiver on `0e4ea4e`**, granted
+  after the founder was shown that the guard would not have caught the merge without one — `GUARD_RE`
+  binds on uncommitted working-tree lines, and a merge commit leaves a clean tree. Recorded as a live
+  instance of the standing "guard scope must cover the class" finding.
+  **Still owed on W2, unchanged:** the record-level compliance-not-virtue clause (envelope +
+  ADR-013 §8 + the three R18 surfaces) is **staged and unapplied**, needing its own founder R18
+  signature; the first-circle lane still has no ledger carrier (C1c-original, unscheduled); the
+  regime column on accreditation rows remains a named follow-on.
+  **Also recorded this session, bearing on the window rather than on W3-d:** a seven-day Layer-1
+  outage (`first_seen` 2026-09-05) caused by an exceeded **Anthropic spend limit** — credit balance
+  healthy throughout — meant the observation window recorded an engine that could not evaluate
+  anything for that period. Cleared this session; the engine is live again. Two observability gaps
+  are named and open: `route_errors.is_llm_outage` read `false` on all 239 errors, and
+  `/api/guardrail` writes no `route_errors` row at all. **No session position is taken on what the
+  outage means for the window — that is the founder's and the mentor's call.**
+  **D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains
+  the founder's.**

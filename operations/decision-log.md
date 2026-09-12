@@ -39912,3 +39912,123 @@ Full record: operations/handoffs/founder/2026-09-12-W2-record-honesty-build-CLOS
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+---
+
+## 2026-09-12 — D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12
+
+**Decision:** the W2 enforcement-class record machinery, built dark on branch `w2-record-honesty`
+(`5aa82f5`), is merged onto `main` as `0e4ea4e` under a **founder-granted per-commit byte-identity
+waiver**, pushed, and deployed. `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` stays **UNSET** — nothing is
+activated.
+
+**The waiver, recorded by hash.** The observation window is running (`GATE1_FALSE_HOLD_CAPTURE=true`)
+and all twelve merged files match `GUARD_RE`. The founder granted the waiver for merge commit
+**`0e4ea4e`** specifically, after being shown that **the guard would not have caught this merge even
+without one**: `GUARD_RE` binds on `git status --short`, i.e. uncommitted working-tree lines, and a
+merge commit leaves a clean tree. The only unconditional committed-edit catchers are the two SHA
+pins, on files W2 does not touch. The waiver is therefore a governance act, not a machinery-enforced
+gate — which makes it more load-bearing, not less. Recorded as a live instance of the standing
+"guard scope must cover the class" finding.
+
+**Verification (re-derived this session, not quoted from the build close).** Branch = one commit,
+twelve files, all code; merge auto-merged clean, zero conflicts; dry-run aborted with peers' files
+byte-identical. tsc 0 **cold** (819 src files) with a non-vacuity probe confirming it genuinely
+compiles all three new modules. Suites re-run in the worktree and again on `main`: W2 126/0, S10
+198/0, orientation 57/0, S9b 86/0, S4 423/0, trust-core 112/0, emission-hooks 19/0, stoa 60/0,
+guardrail-sandwich 91/91. `npm run build` exit 0, both routes registered. **Byte-identity guard run
+ARMED: 250/0 on `main` both before and after the merge** — one assertion stronger than the build
+close's 249, which was a dormant run (the close's figure reproduces exactly when re-run dormant).
+All three SHA pins unchanged throughout (`60cefedb…`, `fa8895ec…`, `db86fccb…`).
+
+**The seam was read first-hand, not cited.** Flag-off it is skipped by short-circuit before any
+credential read or store write; the three new imports add no import-time side effect
+(`supabase-server` was already imported by this route; the new store lazily initialises its client).
+
+**Post-deploy smoke — and a design failure in it, named.** The first pass returned
+`engine_unavailable` / `layer1_unavailable` on both probes. Cause was **not** the merge (see the
+sibling finding below). But the smoke as designed could not have distinguished a merge regression
+from a pre-existing outage, because its expected outputs required a working engine on a session
+where every frame had already reported the engine down. Recorded as an authoring fault, not bad luck.
+**Re-run after the outage was cleared, it passed properly:** benign → `proceed: true`,
+`deliberate`, dikaiosyne floor `sage_like` (no over-block); deny → `proceed: false`,
+`do_not_proceed`, `reflexive`, dikaiosyne floor `reflexive` — the §4 native weighting reproducing its
+June behaviour; both signed (`substrate-layer2-2026Q2`), both `meta.engine_attribution:
+translation-sandwich`, `justice_resolution` absent (bridge retired). A same-session claim that
+`engine_attribution` was absent was **my extractor reading the wrong object** and is corrected here.
+
+**Risk classification:** Critical under 0d-ii (deployment of new code on a measured live surface
+during an observation window). AC7 engaged and discharged. PR6, PR17, PR19 (already discharged on the
+build; the merge resolved no conflicts and needed no second review), PR22, PR25.
+
+**Rollback:** `git revert -m 1 0e4ea4e` + redeploy. No flag, schema or credential involved.
+
+**Status:** Adopted. Cross-references: `D-W2-ENFORCEMENT-RECORD-MACHINERY-BUILT-DARK-ON-BRANCH-PR19-FOLDED-2026-09-12`;
+`operations/agent-circles-2026-08/2026-09-12-W2-record-honesty-DESIGN.md`; S11 register §F W3-d.
+
+---
+
+## 2026-09-12 — D-W2-ENFORCEMENT-VOCABULARY-MIGRATION-APPLIED-2026-09-12
+
+**Decision:** `agent_trust_events.event_type`'s CHECK constraint is widened 21 → 22, adding
+`enforcement-outcome`, on **TEST and then PRODUCTION**, founder-walked end to end. The flag stays
+UNSET; the migration lands **before** any activation, per the standing order.
+
+**Walk, as run.** Both projects: §PRE returned `0`, and the live constraint was **re-derived and
+compared programmatically** rather than eyeballed — a query returning `live_value_count`,
+`expected_value_count`, `missing_from_live`, `extra_in_live`, so the 2026-08-12 Stoa staleness class
+produces a named verdict instead of a reading error. Both returned `21 / 21 / (none) / (none)`, so
+the file was not stale. §A applied; §VERIFY returned **22 / YES** on both.
+
+**TEST behavioural probe (TEST only, four statements, one at a time — never a runnable DDL/DML block
+in a live editor, per the 2026-08-31 near-miss):** insert accepted; **`agent_trust_state` gained no
+row** (the effect-neutrality the design turns on); delete run; teardown confirmed by an explicit
+count, not by the editor's "Success. No rows returned". **No probe was run on production.**
+
+**Production left in the intended state:** `enforcement-outcome` rows = **0**, confirmed after the
+migration. Before it, two independent things held that at zero — the unset flag *and* a constraint
+that refused the value. **After it, only the flag does.** The final count was deliberately taken
+after a live `do_not_proceed` carrying a signed assessment — i.e. every precondition the seam needs
+except the flag — making it a genuine inertness proof rather than a formality.
+
+**Risk classification:** Critical under 0d-ii (production schema change). AC7 engaged and discharged.
+PR6, PR17. The AI performed no Supabase operation; every query was founder-run and founder-reported.
+
+**Rollback:** re-run §A with the 21-value list (drop first). Reversible while no row uses the new
+value, which holds as long as `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` stays unset.
+
+**Status:** Adopted. Cross-references: `website/supabase-agent-trust-events-enforcement-vocabulary-migration.sql`;
+`D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12`.
+
+---
+
+## 2026-09-12 — D-ANTHROPIC-SPEND-LIMIT-OUTAGE-DIAGNOSED-2026-09-12
+
+**Decision:** the seven-day Layer-1 outage affecting `/api/reason`, `/api/guardrail` and
+`/api/practice/discernment` is diagnosed as an **exceeded Anthropic spend limit** on the founder's
+account — not a code defect, not the W2 merge. The founder cleared the limit; the next Gate-1 hook
+returned a real frame (`proximity: deliberate`, `is_kathekon=true`), the first of the session.
+
+**Why it was hard to see, and why it matters beyond today.** The **credit balance was healthy
+(US$11.53)** — checking the balance alone clears it falsely; the *spend limit* is the field that
+mattered. Every affected route returned **HTTP 200** with a conservative refusal, so nothing alerted.
+`route_errors` grouped over 7 days gave `first_seen` **2026-09-05**, seven days before the push,
+which exonerated the merge by data as well as by structure (the merge never touched `/api/reason`,
+yet `/api/reason` failed identically).
+
+**Two observability gaps found, both OPEN and named, neither fixed here:**
+1. **`route_errors.is_llm_outage` read `false` on all 239 errors.** A provider-side spend block is
+   the paradigm LLM outage; the classifier missed it for a week, so the log implied our own code was
+   at fault.
+2. **`/api/guardrail` writes no `route_errors` row at all.** `/api/reason` and
+   `/api/practice/discernment` both log; the guard channel does not, so a guardrail outage is
+   invisible to the error log and surfaced only via a hand-run smoke.
+
+**A standing consequence for the observation window, stated as fact, not recommendation:** for seven
+days the window recorded an engine that could not evaluate anything. It is recording a working one
+again. What that means for the window is the founder's and the mentor's call.
+
+**Risk classification:** Standard (diagnosis; no code, schema, flag or credential changed by this
+finding). Memory saved: `anthropic-spend-limit-masks-as-layer1-unavailable`.
+
+**Status:** Adopted. Open items: the two observability gaps above.
