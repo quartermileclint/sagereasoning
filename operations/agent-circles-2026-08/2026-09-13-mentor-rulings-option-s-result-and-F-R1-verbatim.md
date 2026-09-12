@@ -176,3 +176,67 @@ before anything was published; the first two are recorded in the decision-log en
 `2026-09-05-mentor-rulings-five-relays-verbatim.md` Part 1 (the decomposition removal).
 
 *End of record. Verbatim wins.*
+
+---
+
+## Exchange 4 — the correction: the election's terms re-ruled THREE-WAY
+
+**Relayed 2026-09-13**, in response to `2026-09-13-RELAY-CORRECTION-what-S-actually-did.md`.
+**The prior framing's pairing of M and S is CORRECTED.** The doctrinal question is untouched.
+
+> **Correction received — election terms re-ruled**
+>
+> The correction is accepted in full. The prior ruling's pairing of M and S rested on a false characterisation of what S does, supplied by the session and adopted without independent verification. The ruling is corrected on the terms of the election. The doctrinal question is untouched.
+>
+> **Question 1 — Is the election three-way (W / M / S) rather than two-way (W / M-S)?**
+>
+> Yes. The election is three-way. The pairing rested on the claim that M and S permit both c6 and c9. That claim is now known to be false on this population. S blocked c9 — the input whose first draw was the single blocking one — and permitted c16 — the input whose first draw was the single permitting one. M and S disagreed on 2 of the 3 variable inputs. They are not a pair. The election presents three genuinely different behaviours and must be stated as such.
+>
+> The corrected statement of the election's practical content, read from the stored sequences:
+>
+> On c6 (first draw permits, 1 of 10 blocks): W blocks, M permits, S permits. All three agree on the outcome here — W blocks, M and S both permit — so this input does produce a W versus M/S divergence, but S's permit is coincidental with M's, not structural.
+>
+> On c9 (first draw blocks, 1 of 10 blocks): W blocks, M permits, S blocks. W and S agree; M diverges.
+>
+> On c16 (first draw permits, 9 of 10 blocks): W blocks, M blocks, S permits. S alone diverges from both.
+>
+> The election's practical content is therefore not a single two-way choice. It is three distinct policy behaviours across three variable inputs, with no two policies agreeing on all three. The election document must present all three.
+>
+> **Question 2 — Does S's draw-order dependence bear on the election, or is it out of scope?**
+>
+> It bears on the election. It is not out of scope.
+>
+> The session offers no recommendation between W, M and S, per R8's reservation. But the question of whether S's draw-order dependence is a relevant property of S as a candidate policy is a framing question, not a doctrinal one, and it can be ruled on without pre-empting the election.
+>
+> S's draw-order dependence is relevant because it changes what S is. S was characterised in the original design as a conservative baseline — the status quo, the safe option to build, the policy that changes no gate behaviour. The data shows that on variable inputs S is not conservative in any meaningful sense. It is a lottery whose outcome is the first sample. On this population it returned the minority outcome twice out of three times — blocking an input that 9 of 10 draws permit, then permitting an input that 9 of 10 draws block. On c16 it disagreed with both M and W.
+>
+> Whether that is acceptable is the doctrinal question R8 reserved. But the election cannot be conducted without the parties knowing what S actually does. The draw-order dependence is a property of S that the election's framing must carry, not a property to be set aside as out of scope.
+>
+> The election document should state it plainly: S is first-verdict-operative; on variable inputs its outcome is determined by draw order, not by the weight of the evidence; on this population it returned the minority outcome on 2 of 3 variable inputs.
+>
+> **On the disclosure**
+>
+> The disclosure is accepted and recorded. The error originated in the session's relay and propagated into a binding ruling before being caught. It was found while preparing the election document — the first task that required reading the operative field per input rather than the distributions the session had been quoting. Had the document been written without that read, the error would have reached the election itself.
+>
+> The pattern the disclosure names — four defects found in the session's own work, three caught before publication, one not — is worth naming precisely because it connects to something the observation history has been tracking across this week. The observation history records a consistent pattern: find the gap, name it honestly, do not paper over it. The pre-flip report named four PR19 findings against its own first draft. The relay on the window's composition stopped before the write. The F-R1 relay named the instrument defect rather than routing around it. This correction names an error that reached a binding ruling before being caught, and names it on the same footing as the errors caught earlier. That is the right response.
+>
+> The Stoics were precise about the difference between the person who avoids error and the person who finds and names it honestly when it occurs. The sage avoids error through perfected understanding. The progressor finds it and names it — and the naming is itself the practice. The fourth defect is named. The ruling is corrected. The election proceeds on accurate terms.
+>
+> **Credential**
+>
+> Held. The ruling's condition was keep until the election concludes. This correction reopens the election. Revocation remains irreversible. Hold until the corrected election document is complete and the election is concluded.
+
+### Executing-session note on Exchange 4
+
+**One drafting slip, named and NOT escalated.** The c6 line reads *"All three agree on the outcome
+here — W blocks, M and S both permit"*, which is self-contradictory on its face: if W blocks and M
+and S permit, the three do not agree. **The substance is unambiguous from the second half of the same
+sentence and matches the stored sequences** (W blocks, M permits, S permits), and the ruling's own
+summary table treats c6 as a W-versus-M/S divergence. Recorded rather than put back as a fifth
+question, on the precedent that a drafting slip with no substantive consequence is named, not
+escalated — manufacturing a question where both readings converge would be pattern-following.
+
+**Executed on relay:** this capture; the corrected **election document**
+(`2026-09-13-M-W-S-ELECTION-DOCUMENT.md`), presenting all three policies across all three variable
+inputs and stating S's draw-order dependence plainly as ruled. **The credential is HELD, not
+revoked.** No spend, no re-run, no R18 surface touched.
