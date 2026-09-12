@@ -39768,3 +39768,69 @@ Full record: operations/handoffs/founder/2026-09-12-part2-evidence-ruling-and-B1
 
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.
+
+## 2026-09-12 — D-ANDREIA-CAPTURE-PATH-RULING-ADOPTED-2026-09-12
+
+Session `be441b20-0c12-4f91-82df-4733781d0a7a` (continuation). governance/documents. AC7 not
+engaged. Nothing built, activated or flipped; no code, schema, flag or credential touched. No
+GUARD_RE file modified; guard armed throughout; both SHA pins unchanged.
+
+A founder follow-up to the morning's part-(2) ruling - can anything advance the andreia hold-up now,
+is the window operating and will it capture properly if pointed elsewhere, what did the single
+andreia record come from - sent this session back to the buffer rather than to the report, and it
+returned two things the ruled evidence base did not contain. Both were relayed rather than acted on.
+All four questions are now ruled; verbatim and canonical:
+operations/trust-layer-2026-07/2026-09-12-mentor-ruling-andreia-capture-path-and-window-design-verbatim.md.
+
+Finding 1: the andreia count moved 1 -> 2, and the second record was produced by the session folding
+the morning ruling - an Edit to the S11 register, the change-log entry recording part (2) as not
+dischargeable. Both records near-identical (agonia, reopened, carriedPrior, ~3.5k composed chars,
+self_preservation+cosmopolis, obligations met/met): the act of committing an unwelcome finding to a
+binding record. Q-A1 not reopened.
+
+Finding 2, structural: andreia has NEVER been captured on the guard path in 285 records and cannot
+be. Guard n=285 (Bash, raw shell text): phronesis 255, dikaiosyne 284, sophrosyne 214, andreia 0.
+Consult n=119 (Edit 89/Write 30, composed intent): dikaiosyne 119, phronesis 67, andreia 2,
+sophrosyne 2. Every andreia reading and every sub-species passion comes from the consult path.
+
+Also verified in answer to the founder's second question: the window IS operating -
+GATE1_FALSE_HOLD_CAPTURE=true, four hooks registered, durable state dir, buffer 543 records written
+minutes before the check.
+
+Q-W1: the Q-A1 window specification is AMENDED to two dimensions and the channel is the binding
+half - "a window capable of honestly evaluating andreia requires consequential decisions carried out
+through composed, narrated actions - Write/Edit, not Bash. The subject matter and the channel are
+both required." The decisive sentence: "The subject matter of the work does not reach the extraction
+if the work passes through Bash." Not a defect - a designed property of the harness (Bash removed
+from auto-consult at S1).
+
+Q-W2: variety is now binding alongside volume and duration cannot buy it - "A domain cannot be
+honestly evaluated from a single behavioural class at any N." The two captured records are named as
+the courage of honest record-keeping under the pressure of a finding that blocks progress - real
+courage, not the full domain, which also includes acting when the outcome is uncertain, holding under
+external pressure, and naming a disagreement when agreement would be easier. W2 is ruled the
+strongest candidate for the window's work and satisfies the CHANNEL requirement; whether it satisfies
+VARIETY is the founder's assessment against W2's actual build requirements, expressly not settled.
+
+Q-W3: part (2) is further from met than the board showed. Q-A2 stands, but "'count as records' and
+'constitute an honest evidence base for a signed assessment' are not the same claim." sophrosyne
+214/216 = 99% guard-path; phronesis 255/322 = 79%. The question belongs in any write's honest
+assessment, not in a build decision - the relay's "raise it, do not act on it" is ruled correct. A
+guard-path composition disclosure was ordered onto the pre-flip report and is discharged at its new
+section 3.3b.
+
+Q-W4, priority order: decide the fork (no accreditation write on the present evidence - confirmed);
+if the fork is a new window, specify it before starting it, stating what work, through what channel,
+producing what variety of courage-relevant moments; part (1)'s Sunday threshold - running to the mark
+first or deciding the fork now are both legitimate, and "the clock reaching its mark does not license
+the flip."
+
+Folded: report sections 3.3a (the movement; the ruled 3.3 table left unedited as the evidence the
+morning ruling was given on) and 3.3b (the four rulings plus the ordered guard-path composition
+disclosure as a per-domain share table); board row 2; section 12. Register change-log entry, and
+section F's W3-d now records W2's second role.
+
+Full record: operations/handoffs/founder/2026-09-12-andreia-capture-path-ruling-CLOSE.md.
+
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.

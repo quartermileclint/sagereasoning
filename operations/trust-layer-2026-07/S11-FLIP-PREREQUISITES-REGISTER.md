@@ -95,7 +95,7 @@ listed separately below as named-not-yet-built, since they touch `GUARD_RE`-matc
 | **W3-a** | **Circle-4 enters the S11 flip's staged PAUSE tier only, never the do-not-proceed class.** Promotion to a stronger tier is earned by the extraction demonstrating the SAME zero-false-positive floor on circle-4 candidates that the kathekon-free class must demonstrate on its own — the practice record's accumulated circle-4 track record is the promotion-evidence instrument. | L3 |
 | **W3-b** | **The first circle (own reasoning integrity / prohairesis) is measure-only under enforcement, permanently** — the tool must structure the hegemonikon, never substitute for it. **Narrow exception (L4):** when a task-pressure assent produces an other-directed (circle-2/3/4) violation, the enforcement block is justified by THAT violation; the record distinguishes — enforcement trigger = the other-directed violation; the first-circle failure is recorded separately, measure-only, never as the cited enforcement ground. | L4 |
 | **W3-c** | **NEW named prerequisite: the practice-on first-circle correction (C1) must be FULLY SETTLED — landed AND calibrated — before the S11 flip proceeds.** This is in addition to, not a replacement for, the 2026-07-12 four-part readiness standard (§A above) — the 2026-07-12 shape is unchanged (L2). Cross-reference to §A when this register's own hard-prerequisites table is next revised. | L2 |
-| **W3-d** | **The W2 record machinery (the enforcement class + per-entry regime markers + the compliance-not-virtue clause) is a flip component.** The flip must not activate without it, or enforced outcomes would land in the trust record unrecorded and unmarked — an honest-claims violation on its own terms, independent of readiness. Status of W2 itself: **NOT built** as of this annotation (soft-dependent on C1c's schema being settled per the plan §3 W2 item 4/§4 dependency graph item 7 — a soft, not hard, dependency; W2 was deliberately not decided to ride inside any earlier schema step). | L5, L7 |
+| **W3-d** | **The W2 record machinery (the enforcement class + per-entry regime markers + the compliance-not-virtue clause) is a flip component.** The flip must not activate without it, or enforced outcomes would land in the trust record unrecorded and unmarked — an honest-claims violation on its own terms, independent of readiness. **⚖️ 2026-09-12 (Q-W2): W2 has acquired a SECOND role — it is the mentor-ruled strongest candidate for the WORK of a part-(2)-qualifying observation window, and it satisfies that ruling's CHANNEL requirement (Write/Edit on a live surface with real cost to getting it wrong). Whether it satisfies the VARIETY requirement — more than one class of courage-relevant moment — is the founder's assessment against W2's actual build requirements and is expressly NOT settled by that ruling.** Status of W2 itself: **NOT built** as of this annotation (soft-dependent on C1c's schema being settled per the plan §3 W2 item 4/§4 dependency graph item 7 — a soft, not hard, dependency; W2 was deliberately not decided to ride inside any earlier schema step). | L5, L7 |
 
 **Pins named here 2026-09-10 — ✅ BOTH BUILT 2026-09-12** under the founder's D2 election ("D2 bundle
 in"), inside the same waived session as the B1 Part-1 fix. They live in
@@ -132,6 +132,51 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
+- **2026-09-12 (latest — THE QUALIFYING WINDOW NOW HAS A SPECIFICATION: CHANNEL + VARIETY;
+  `D-ANDREIA-CAPTURE-PATH-RULING-ADOPTED-2026-09-12`; verbatim, canonical:
+  `2026-09-12-mentor-ruling-andreia-capture-path-and-window-design-verbatim.md`; relay:
+  `2026-09-12-mentor-question-andreia-capture-path-and-window-design-FOR-RULING.md`)** — **AMENDS the
+  Q-A1 ruling of earlier the same day.** A founder follow-up ("can anything advance the andreia
+  hold-up now; will a different window capture properly") sent a session back to the buffer, and it
+  returned two things the ruled evidence base did not contain. **(1) The andreia count moved 1 → 2,
+  and the second record was produced by the session folding the Q-A1 ruling** — an Edit to THIS FILE,
+  the change-log entry recording part (2) as not dischargeable; both records are near-identical
+  (`agonia`, reopened, carriedPrior, ~3.5k composed chars, self_preservation+cosmopolis, obligations
+  met/met) and both are *the act of committing an unwelcome finding to a binding record*. Q-A1 is
+  **not** reopened — two of one kind is still not an evaluation. **(2) THE STRUCTURAL FINDING:
+  `andreia` has NEVER been captured on the guard path in 285 records and cannot be.** Guard n=285
+  (Bash, raw shell text): phronesis 255 · dikaiosyne 284 · sophrosyne 214 · **andreia 0**. Consult
+  n=119 (Edit 89 / Write 30, composed intent): dikaiosyne 119 · phronesis 67 · **andreia 2** ·
+  sophrosyne 2. Every andreia reading and every sub-species passion comes from the consult path.
+  **⚖️ Q-W1 — THE WINDOW SPECIFICATION IS AMENDED TO TWO DIMENSIONS, AND THE CHANNEL IS THE BINDING
+  HALF:** *"a window capable of honestly evaluating andreia requires consequential decisions carried
+  out through composed, narrated actions — Write/Edit, not Bash. The subject matter and the channel
+  are both required. Either without the other is insufficient."* The decisive sentence: ***"The
+  subject matter of the work does not reach the extraction if the work passes through Bash."*** Not a
+  defect — *"a designed property of the harness"* (Bash removed from auto-consult at S1).
+  **⚖️ Q-W2 — VARIETY IS NOW BINDING ALONGSIDE VOLUME AND CANNOT BE BOUGHT WITH DURATION:** *"A domain
+  cannot be honestly evaluated from a single behavioural class at any N. The window must be chosen
+  for variety of courage-relevant moments, not duration alone."* The two captured records are *"the
+  courage of honest record-keeping under the pressure of a finding that blocks progress. That is real
+  courage. It is not the full domain"* — which also includes acting under uncertain outcome, holding
+  under external pressure, and naming a disagreement when agreement would be easier. **W2 is ruled
+  the strongest candidate for the work and satisfies the CHANNEL requirement; whether it satisfies
+  VARIETY is the founder's assessment against W2's actual build requirements and is NOT settled.**
+  **⚖️ Q-W3 — PART (2) IS FURTHER FROM MET THAN THE BOARD SHOWS.** Q-A2 stands, but *"'count as
+  records' and 'constitute an honest evidence base for a signed assessment' are not the same claim."*
+  `sophrosyne` 214/216 = **99%** guard-path; `phronesis` 255/322 = **79%**. The question belongs in
+  any write's honest assessment, **not in a build decision** — *"A conservative weight on a domain
+  with a predominantly unreliable extraction path is not a failure. It is the correct reading."* A
+  **guard-path composition disclosure** was ordered onto the pre-flip report and is discharged at its
+  new **§3.3b**. **⚖️ Q-W4 — priority order for the founder:** (1) **decide the fork**, now that both
+  constraints are in hand — **no accreditation write on the present evidence, CONFIRMED**; (2) if the
+  fork is a new window, **specify it before starting it** — *"A window started on the wrong channel
+  or without the variety criterion in view spends weeks and captures nothing"* — stating **what work,
+  through what channel, producing what variety of courage-relevant moments**; (3) part (1)'s Sunday
+  threshold — running to the mark first or deciding the fork now are **both legitimate**, and *"the
+  clock reaching its mark does not license the flip."* **Nothing built, activated or flipped. D2
+  remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+  founder's.**
 - **2026-09-12 (later — PART 2 IS A WINDOW, NOT A WRITE; B1/B2/B3/D1/D2 executed;
   `D-PART2-EVIDENCE-RULING-ADOPTED-B1-D1-D2-EXECUTED-2026-09-12`; verbatim, canonical:
   `2026-09-12-mentor-ruling-part2-evidence-and-part3-split-verbatim.md`)** — **The single most
