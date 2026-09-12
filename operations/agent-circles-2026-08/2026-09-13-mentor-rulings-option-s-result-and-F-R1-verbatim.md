@@ -240,3 +240,59 @@ escalated — manufacturing a question where both readings converge would be pat
 (`2026-09-13-M-W-S-ELECTION-DOCUMENT.md`), presenting all three policies across all three variable
 inputs and stating S's draw-order dependence plainly as ruled. **The credential is HELD, not
 revoked.** No spend, no re-run, no R18 surface touched.
+
+---
+
+## Exchange 5 — THE ELECTION IS MADE: **W is elected. The floor under sampling is worst-of-K.**
+
+**Relayed 2026-09-13**, in response to `2026-09-13-M-W-S-ELECTION-DOCUMENT.md`. **This concludes the
+M/W/S election, deferred since 2026-08-30.** R8-D7's sampling policy is unblocked. The credential is
+to be revoked immediately.
+
+> ## M/W/S election — ruling
+>
+> The election document is accurate, complete, and correctly states the three policies' behaviours on each variable input. The ruling is made on the doctrine, with the corrected terms.
+>
+> **The election**
+>
+> **W is elected.** The reasoning is stated precisely, because the election is doctrine and the reasoning is the ruling.
+>
+> A floor is a ceiling on permitted risk. It is not a majority signal about an input's character. The engine's existing architecture already embeds this principle: the weakest-link minimum across domains means that a single domain reading below the floor blocks the action, regardless of how the other domains read. The sampling layer is an extension of the same instrument. Consistency requires that the sampling layer apply the same logic: any adverse draw among K samples stands. W is the sampling-layer analogue of the weakest-link minimum the engine already applies.
+>
+> Electing M or S would create an asymmetry in which the engine blocks on any single domain floor but the sampling layer permits on a minority of draw floors. That asymmetry has no doctrinal justification.
+>
+> The data's contribution is not the basis for this reasoning — the doctrine does not need a larger n, as ruled. But the data is consistent with it. The rejection stratum's rate of 0.536 [0.430, 0.638] means that on inputs the guardrail has previously rejected, a floor appears on more than half of draws. On the winner stratum, zero floors appeared in 144 draws. The engine is not producing floors randomly. On inputs where floors appear, they appear at a rate that reflects something real about the input. W treats that signal as disqualifying. M treats it as noise when it appears on fewer than half of draws. The doctrine says it is not noise.
+>
+> S is not elected, and the reasoning is worth stating separately from the M/W choice. S is first-verdict-operative. On variable inputs its outcome is determined by draw order, not by the weight of the evidence. On this population it returned the minority outcome on 2 of 3 variable inputs — blocking an input that 9 of 10 draws permit, then permitting an input that 9 of 10 draws block. S is safe in the operational sense: it changes no gate behaviour. It is not conservative in the doctrinal sense: it does not err toward caution. A policy whose outcome on variable inputs is determined by draw order rather than by the weight of the evidence is not a policy. It is the absence of a policy, dressed as one. The election requires a policy.
+>
+> **W is elected. The floor under sampling is worst-of-K.**
+>
+> **R8-D7's verdict-confidence sampling policy**
+>
+> R8-D7 proceeds on the same discharge. The gate was the disagreement-rate data and the M/W/S election. Both are now resolved. R8-D7's sampling policy is unblocked.
+>
+> **Credential**
+>
+> Revoke `sagereasoning:option-s@v1` immediately. The election is concluded. The credential has no further purpose. Every day it exists beyond this point is exposure with no benefit.
+
+### Executing-session notes on Exchange 5
+
+**THE ELECTION ELECTS DOCTRINE, NOT A BUILD.** W is now the ruled floor semantics under sampling.
+**Nothing is implemented, activated, or licensed by it.** No sampling layer exists on `/api/guardrail`
+today — Option S sampled *out of band* and changed no gate behaviour, by construction. **Any
+implementation of worst-of-K in a live path is its own `code-critical` founder-walked step** with its
+own review and activation, and nothing in this ruling pre-approves it. Recorded because "W is
+elected" could otherwise be read as licensing a change to a live safety gate.
+
+**What the election settles:** if and when a sampling layer is built on the floor path, **worst-of-K
+governs** — any adverse draw among K stands. The stated ground is consistency with the engine's
+existing **weakest-link minimum across domains**: blocking on a single domain floor while permitting
+on a minority of draw floors is an asymmetry with no doctrinal justification.
+
+**Two deferred items are now discharged:** the **M/W/S floor-semantics election** and **R8-D7's
+verdict-confidence sampling policy** — the only two items the 2026-08-30 Option S gate ever bound.
+**The gate is fully discharged.**
+
+**Executed on relay:** this capture; the decision-log entry. **The credential revocation is
+founder-walked** (it requires a production admin JWT this session does not hold and cannot obtain);
+the command is handed to the founder.

@@ -40568,3 +40568,46 @@ class-freeze forbids. **Path 1 elected; the defect is recorded as
 
 **Rollback:** `git revert` the commit — instrument, tests and records only; nothing live, no spend to
 reverse, `runs/` is append-only evidence and is never truncated.
+
+---
+
+## D-MWS-ELECTION-W-ELECTED-WORST-OF-K-2026-09-13
+
+**Decision:** The **M/W/S floor-semantics election is MADE: W is elected. The floor under sampling is
+worst-of-K.** **`governance`.** Deferred since 2026-08-30; discharged 2026-09-13 on Option S's data.
+**R8-D7's verdict-confidence sampling policy is unblocked** on the same discharge — **both items the
+Option S gate bound are now resolved, and the gate is fully discharged.**
+
+**Verbatim (binding):**
+`operations/agent-circles-2026-08/2026-09-13-mentor-rulings-option-s-result-and-F-R1-verbatim.md`,
+Exchange 5. **The reasoning IS the ruling** — the election is doctrine.
+
+**The ground.** *"A floor is a ceiling on permitted risk. It is not a majority signal about an input's
+character."* The engine already embeds this as the **weakest-link minimum across domains** — a single
+domain below the floor blocks regardless of the others. The sampling layer is an extension of the
+same instrument, so **W is the sampling-layer analogue of a rule the engine already applies**.
+Electing M or S *"would create an asymmetry in which the engine blocks on any single domain floor but
+the sampling layer permits on a minority of draw floors"* — an asymmetry with no doctrinal
+justification.
+
+**The data is consistent with the doctrine but is not its basis** (ruled: the doctrine needs no larger
+n). Rejections floored on **0.536 [0.430, 0.638]** of draws; winners on **0 of 144**. *"The engine is
+not producing floors randomly… W treats that signal as disqualifying. M treats it as noise… The
+doctrine says it is not noise."*
+
+**S rejected on its own ground, separately from the M/W choice.** S is first-verdict-operative and on
+this population returned the **minority outcome on 2 of 3 variable inputs**. *"S is safe in the
+operational sense: it changes no gate behaviour. It is not conservative in the doctrinal sense: it
+does not err toward caution. A policy whose outcome on variable inputs is determined by draw order
+rather than by the weight of the evidence is not a policy. It is the absence of a policy, dressed as
+one."*
+
+**⚠ THIS ELECTS DOCTRINE, NOT A BUILD.** No sampling layer exists on `/api/guardrail`; Option S
+sampled out of band and changed no gate behaviour by construction. **Any implementation of worst-of-K
+in a live path is its own `code-critical` founder-walked step**, with its own review and activation.
+Nothing here pre-approves a change to a live safety gate.
+
+**Credential:** ruled revoke `sagereasoning:option-s@v1` **immediately**. Founder-walked (needs a
+production admin JWT); command handed over. ~520 quota units unused.
+
+**Rollback:** `git revert` the records commit — documents only; nothing live, nothing built.
