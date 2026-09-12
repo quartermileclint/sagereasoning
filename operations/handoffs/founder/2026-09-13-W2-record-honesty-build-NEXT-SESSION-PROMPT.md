@@ -1,3 +1,5 @@
+**SPENT — see `operations/handoffs/founder/2026-09-12-W2-record-honesty-build-CLOSE.md`** *(marked 2026-09-12 by the records-fold session; the close exists, this prompt is not to be run again)*
+
 Read `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md` first, then
 CLAUDE.md's session-open reading list in order, then this prompt in full.
 

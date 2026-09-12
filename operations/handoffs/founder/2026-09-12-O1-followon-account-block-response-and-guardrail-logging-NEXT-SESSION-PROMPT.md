@@ -1,3 +1,5 @@
+**SPENT — see `operations/handoffs/founder/2026-09-12-O2-account-block-response-and-guardrail-logging-CLOSE.md`** *(marked 2026-09-12 by the records-fold session; the close exists, this prompt is not to be run again)*
+
 # Next-Session Prompt — O-2: an honest HTTP response for a provider account block, and the /api/guardrail logging gap
 
 **Stream:** founder.

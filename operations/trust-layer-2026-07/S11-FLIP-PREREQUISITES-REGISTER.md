@@ -560,3 +560,62 @@ remain BLOCKED; the 0h call remains the founder's.
   outage means for the window — that is the founder's and the mentor's call.**
   **D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains
   the founder's.**
+
+- **2026-09-12 (records fold — `Q-CALLER-BUILD` DISCHARGED; autonomous session `sagereasoning-e4 [5bee2f]`,
+  `D-RECORDS-FOLD-OPENER-DRAFTED-W1-STAGED-2026-09-12`).** The standing-queue row `Q-CALLER-BUILD`
+  (which lives in the standing opener's queue table — the 2026-09-08 version, archived — and never in
+  this register's own tables; this row is where the discharge is recorded so the register carries it)
+  read **"NOT LICENSED"** through the 2026-09-10 opener, which flagged it for correction at the next
+  records fold. **It is DONE and LIVE.** Grounds, each read first-hand: the Condition-3 design close's
+  ADDENDUM (the build, same session, post-ruling) and ADDENDUM 2 (*"the mechanism has ALREADY FIRED
+  LIVE, unprompted"* — five `false-hold-record-v6` records across two independent session ids, the
+  three most recent reading `callerClass: live_agent`, `clientVersion: "2.1.260"`,
+  `clientEntrypoint: "claude-desktop"`) in
+  `operations/handoffs/founder/2026-09-10-condition-3-version-pinning-design-CLOSE.md`; the mentor's
+  post-build-outcome response, verbatim (*"The loop is closed. The report is received and the outcome
+  is what the design warranted"*) in
+  `operations/trust-layer-2026-07/2026-09-10-post-build-outcome-mentor-response-verbatim.md`; and the
+  window itself at this session's open — `caller_class` reads three values (231 `unknown` / 27
+  `live_agent` / 14 `subagent`; 233 records carry no field because they predate v5). The Option C′
+  gate (Conditions 1–3) is discharged. No mechanism, flag, or file changed by this row.
+
+- **2026-09-12 (records fold — the "seven-day Layer-1 outage" premise in the W2-merged row above is
+  WITHDRAWN by `D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`; annotation, not an edit).** The
+  row beginning *"Also recorded this session, bearing on the window rather than on W3-d"* states a
+  seven-day outage from `first_seen 2026-09-05`. The O-1 session read the production `route_errors`
+  rows and classified them by message: the spend-limit block ran **2026-09-12 06:07Z → 08:27Z, about
+  2 h 20 min, 94 rows**; `first_seen` dated the first error of *any* class (an A11b injection reject).
+  The false-hold buffer carries successful consult readings on every UTC day 09-06 → 09-12. The
+  diagnosis (spend limit exceeded, balance healthy) stands; its dating does not, and the sentence
+  *"the observation window recorded an engine that could not evaluate anything for that period"* is
+  false as written. Gap (1) (`is_llm_outage` false) is closed at the log level by O-1 (`3b0bf47`);
+  gap (2) (`/api/guardrail` logs nothing) is closed by O-2 (`6dea995`, under a founder waiver on four
+  `GUARD_RE` paths — `D-PROVIDER-ACCOUNT-BLOCK-RESPONSE-AND-GUARDRAIL-LOGGING-2026-09-12`). The O-2
+  decision flagged this register's stale premise and left it for a founder/mentor step; this row is a
+  records-fold annotation citing the primary data, not a governance change — the founder may strike or
+  re-word it.
+
+- **2026-09-12 (records fold — standing opener Version 2026-09-12 DRAFTED (not adopted); W1's
+  remainder STAGED; `D-RECORDS-FOLD-OPENER-DRAFTED-W1-STAGED-2026-09-12`; close:
+  `operations/handoffs/founder/2026-09-12-records-fold-and-opener-regrounding-CLOSE.md`).**
+  Documents only; nothing built, activated, flipped, migrated, minted, deployed or pushed; no
+  `GUARD_RE` file touched; guard 250/0 and all three SHA pins unchanged at open and close. (i) The
+  standing opener is redrawn to Version 2026-09-12 from primary sources and marked **DRAFTED, NOT YET
+  FOUNDER-ADOPTED**; the founder-adopted 2026-09-10 version is archived. It carries the S11 board as
+  ruled 2026-09-12, the part-(2) window specification and its three rulings, W2's built/merged/dark
+  state, the merge trap, the corrected outage dating, the cleared residue, and two open questions the
+  records had not named (below). (ii) **W1 is COMPLETE, not "untouched" as the session's own prompt assumed** — a stale premise
+  found by reading the surfaces rather than the prompt: item 1 (the ADR-level dated amendment) landed
+  as ADR-013 **§12** on 2026-09-10 (`D-LOGOS-ON-W1-W3-EXECUTED-2026-09-10`); items 2 and 3 (the R18
+  framing; the relationship stated once) were applied to all three R18 surfaces on 2026-09-12 under
+  the founder-signed D1 election (the "two postures of one instrument" paragraph on `llms.txt`,
+  agent-card extension 12, `api-docs`). **Nothing was staged, because nothing remains to stage**; the
+  verification is recorded at
+  `operations/trust-layer-2026-07/2026-09-12-W1-logos-on-documentation-STAGED-R18.md` (the filename
+  the prompt specified, kept so its pointer resolves; the content is a verification, not a staging). (iii) Two questions are drafted for relay, **not sent**
+  (`operations/trust-layer-2026-07/2026-09-12-w2-window-two-questions-RELAY-DRAFT.md`): whether the
+  window as specified still has work, given that W2's build ran in an isolated worktree with capture
+  unset and left the measured buffer only three Bash guard records; and whether the Q-S2 per-session
+  discipline is satisfiable while `CLAUDE.md` — auto-read by every session — names the window and the
+  instrument. **D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
+  remains the founder's.**

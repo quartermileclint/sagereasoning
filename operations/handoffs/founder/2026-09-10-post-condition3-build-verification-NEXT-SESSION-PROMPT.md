@@ -1,3 +1,5 @@
+**SPENT — see `operations/handoffs/founder/2026-09-10-post-condition3-build-verification-CLOSE.md`** *(marked 2026-09-12 by the records-fold session; the close exists, this prompt is not to be run again)*
+
 # NEXT SESSION — post-build verification: Option C′ is live and has already fired for real
 
 **Authored 2026-09-10 ~16:2x AEST (`date`) = ~06:2x UTC. Re-run `date`/`date -u` yourself at open —

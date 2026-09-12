@@ -1,3 +1,5 @@
+**SPENT — see `operations/handoffs/founder/2026-09-10-opener-regrounding-and-51-1-rederivation-CLOSE.md`** *(marked 2026-09-12 by the records-fold session; the close exists, this prompt is not to be run again)*
+
 # SESSION PASTE — reground the standing opener; re-derive the mentor's last open figure
 
 **Paste this as the FIRST message of a FRESH session.**

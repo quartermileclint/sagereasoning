@@ -40385,3 +40385,66 @@ Expected: `140 passed, 0 failed` and `250 passed, 0 failed`.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## 2026-09-12 — D-RECORDS-FOLD-OPENER-DRAFTED-W1-STAGED-2026-09-12
+
+**Decision:** the records fold the 2026-09-10 opener called for is executed by an **autonomous**
+documents session (`sagereasoning-e4 [5bee2f]`, the founder absent): the standing opener is redrawn to
+**Version 2026-09-12 and marked DRAFTED, NOT YET FOUNDER-ADOPTED** (the founder-adopted 2026-09-10 version
+archived beside 2026-09-08); CLAUDE.md's S9 stdin-dump block gains a dated annotation that the residue is
+**cleared**; the S11 register gains three change-log rows (`Q-CALLER-BUILD` discharged; the W2-merged row's
+withdrawn "seven-day outage" premise annotated; this session's row); six spent prompts are marked; **W1 is
+verified COMPLETE rather than staged** (ADR-013 §12 + D1 on all three R18 surfaces — the session prompt's
+"W1 is untouched" was false); and **two questions are drafted for relay and NOT sent**. The decision code
+keeps the prompt's pre-assigned name ("W1-STAGED") for traceability; the substance is "W1 verified, nothing
+to stage."
+
+**Reasoning.** Every premise in the prompt was re-derived rather than quoted, and eight were stale within
+hours of authoring (O-2 landed; the 09-10 opener was adopted; W1 was complete; the six prompts were
+tracked; andreia 1 → 4; correct holds 73 → 125; peers 10 → 7; the 09-10 opener's "PR1–PR26" was itself
+false — the snapshot enumerates PR1–PR25 and the cache names the concurrency rule *"a convention and not
+PR26"*). The two relay questions surfaced from first-hand checks the records had not made: **(i)** the
+W2 build ran in an isolated worktree with `GATE1_FALSE_HOLD_CAPTURE` unset and was merged under waiver,
+leaving the measured buffer **three Bash guard records and zero Write/Edit consult records** of W2 — so
+what does "W2's first record" (Q-S1) now start on? **(ii)** Q-S2 binds the discipline at the session-prompt
+level, but `CLAUDE.md` — auto-read by every session — names the false-hold window, the instrument and the
+buffer. Neither is answered; both are the mentor's and the founder's. A peer was writing Option S run files
+throughout; they were not staged and their meaning is left to their own session.
+
+**PR19:** two blind Sonnet/low reviewers. A (opener facts vs sources + raw buffer): 7 confirmations, 1 NIT
+refuted first-hand (manifest AC5 does enumerate, inline), 1 NIT folded. B (W1 fidelity/overclaim + relay
+neutrality): 1 MEDIUM folded (a staged-clause path cited without its directory), 1 LOW folded (title
+scoping), 4 clean. Each reviewer's "not given" list is in the close.
+
+**Files touched:** `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`
+(rewritten, DRAFTED); `…/archive/2026-09-10_STANDING-SESSION-OPENER-grounded-foundations.md` (new);
+`CLAUDE.md` (annotation only); `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` (three
+appended rows); six `…-NEXT-SESSION-PROMPT.md` files (a SPENT line prepended);
+`operations/trust-layer-2026-07/2026-09-12-W1-logos-on-documentation-STAGED-R18.md` (new — a
+verification); `operations/trust-layer-2026-07/2026-09-12-w2-window-two-questions-RELAY-DRAFT.md` (new —
+draft, unsent); `operations/handoffs/founder/2026-09-12-records-fold-and-opener-regrounding-CLOSE.md`
+(new); this entry.
+
+**Risk classification:** `governance` / documents under 0d-ii. AC7 not engaged. No code, schema, flag,
+credential, migration, deploy, push, R18 surface or `GUARD_RE` file touched. Guard 250/0 and all three
+hashes unchanged at open and close.
+
+**Rollback path:** `git revert` the records commit; nothing live is involved.
+
+**Verification step (founder-performable):** open the new opener and check its correction table against
+the sources it cites; run `ls ~/.sage-gate1/ | grep -c stdin` (expect 0); `grep -c '^### PR'
+adopted/project-instructions-snapshot.md` (expect 25).
+
+**Rules served:** PR15, PR18 (annotate-only on dated blocks), PR19, PR23, PR25; R18 (gate respected —
+nothing published).
+
+**Status:** Adopted (records). The opener itself is **Under review** until the founder adopts it.
+Cross-references: `D-PART2-WINDOW-SPECIFICATION-APPROVED-RULED-2026-09-12`;
+`D-W2-ENFORCEMENT-MACHINERY-MERGED-LIVE-UNDER-WAIVER-2026-09-12`;
+`D-SPEND-LIMIT-OUTAGE-DURATION-CORRECTED-2026-09-12`; `D-LOGOS-ON-W1-W3-EXECUTED-2026-09-10`;
+`D-PART2-EVIDENCE-RULING-ADOPTED-B1-D1-D2-EXECUTED-2026-09-12`.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

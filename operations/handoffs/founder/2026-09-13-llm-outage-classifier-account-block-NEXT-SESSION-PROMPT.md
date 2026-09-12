@@ -1,3 +1,5 @@
+**SPENT — see `operations/handoffs/founder/2026-09-12-O1-llm-outage-classifier-account-block-CLOSE.md`** *(marked 2026-09-12 by the records-fold session; the close exists, this prompt is not to be run again)*
+
 # Next-Session Prompt — Observability O-1: teach the error classifier to recognise a provider account block
 
 **Stream:** founder.
