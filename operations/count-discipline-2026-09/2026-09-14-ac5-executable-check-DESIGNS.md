@@ -212,9 +212,23 @@ adjacent to `route-level`, `substrate-gate`, `flag-gated`, `unconditional`, `rou
 equals the corresponding array length. Use `numbersIn` so the spelled-out headline is covered.
 
 Expected today: `43` route-level, `2` substrate-gate, `45` total, `30` flag-gated, `13` unconditional
-— all derived at runtime from `HUMAN_FACING_POST_ROUTES.length`, `SUBSTRATE_GATE_ROUTES.length`,
-`FLAG_GATED_ROUTE_LEVEL_ROUTES.length`, and the difference for the unconditional count. **No integer
-literal appears in the check.**
+— all derived at runtime. **No integer literal appears in the check.**
+
+> **⚠ GAP 3 — FOUND WHILE PREPARING THE FOUNDER'S EDIT INSTRUCTIONS, AND IT WOULD HAVE PRODUCED A
+> FALSE RED.** An earlier draft of this section said to derive the flag-gated count from
+> **`FLAG_GATED_ROUTE_LEVEL_ROUTES.length`. That is WRONG.** That array is keyed by **flag-pair, not by
+> route** — today it holds **31 entries across 30 distinct routes**, because
+> `src/app/api/mentor/stoa/draft-reflect/route.ts` appears **twice** (two flags on one route).
+> **§AC5's "30" is CORRECT; a check asserting 31 would fail a true document.**
+>
+> **Derive it as `new Set(FLAG_GATED_ROUTE_LEVEL_ROUTES.map(e => e.route)).size`**, and derive the
+> unconditional count as the **set difference** `HUMAN_FACING_POST_ROUTES` minus those routes — **not**
+> as `43 − 30`, which would silently agree with a wrong flag-gated figure.
+>
+> **This is the same trap the registry test has already recorded once** — its own stale line read
+> *"13 flag-pairs across 12"*, conflating the two. **A check that gets this wrong is worse than no
+> check: it goes red on a correct document, and the natural "fix" is to edit §AC5 to match the
+> check.** Re-derive both ways and confirm they agree before writing the assertion.
 
 ### A3 — the substrate-gate pair, if enumerated, is exactly the array
 
