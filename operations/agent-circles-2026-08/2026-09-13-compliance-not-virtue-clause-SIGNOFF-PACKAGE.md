@@ -282,3 +282,30 @@ infrastructure's function") is byte-identical to the staged text and to the live
 **Nothing may be applied until `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is set**, which is itself coupled
 to the S11 flip, which remains **REFUSED**.
 
+---
+
+## ✅ 8.4 SIGNED BY THE FOUNDER — 2026-09-14. APPLICATION STILL WAITS FOR ACTIVATION.
+
+**The founder signed the §8.1 recast wording in session on 2026-09-14** (*"signoff on the recast D-3
+wording"*), recorded by session `sagereasoning-8a [fdb13d]`. **The election is the founder's; the
+transcription is this session's.**
+
+**WHAT THIS SIGNATURE DOES:** it settles the **wording**. The §8.1 text — future-tense trigger clause,
+L7 verbatim closing — is the approved form, and no later session need re-open the wording question.
+
+**WHAT IT DOES NOT DO, and this is the whole point of Q-B1:** it does **not** license application.
+**Nothing was applied on this signature** — not the envelope
+(`trust-record-payload.ts`), not ADR-013 §8, not any of the three R18 public surfaces. All four remain
+untouched.
+
+**The gate is unchanged and is not a signature gate.** Per the 2026-09-13 ruling: *"the record-level
+clause waits for activation… Applying the staged wording now publishes, on a live public surface, a
+sentence describing entries that structurally cannot exist in any served payload while the flag is
+unset."* **`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is UNSET everywhere; production carries 0
+`enforcement-outcome` rows.** Activation is coupled to the S11 flip, which remains **REFUSED**.
+
+**So the application session's trigger is the ACTIVATION, not this signature.** When it comes, §4.4's
+same-edit rule binds (envelope + ADR §8 in one commit, with pins), plus §8.2's added pin on the
+future-tense trigger clause so it cannot silently revert. Next free pin **`S2-104`** — **re-derive it;
+do not quote this line.**
+

@@ -41503,3 +41503,60 @@ push; `option-s/` never opened; the D-3 recast wording not applied.
 
 **W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
 The 0h call remains the founder's.**
+
+## 2026-09-14 — D-TWO-ELECTIONS-DECIDED-D3-RECAST-WORDING-SIGNED-PEERS-CLOSED-2026-09-14
+
+**Session `sagereasoning-8a [fdb13d]`, continuing after its close. Tier: `governance` / documents.
+AC7 NOT engaged. NOT W2's first sitting.** Records three founder acts taken in session, and one
+constraint held against a direct request.
+
+**ELECTION 1 — §6.4 of the conforming W2 opener: KEEP AS WRITTEN.** The founder approved the
+recommendation. **No edit made.** The tool-mode constraint (*"Tool mode has a consequence for the
+record… Never choose because of the record"*) stands verbatim. Grounds on the record: Q-A2's forbidden
+three-part combination is absent; the decisive link in the alleged inference chain is the decision log,
+**ruled in-bounds** and named in §11.2 as reading that must not be trimmed; §3's channel scope is
+**Q-M2's ruling**; both blind passes failed to reach the criterion; and the property is independently
+present in **auto-loaded context** (the memory index). **The rejected alternative is recorded because it
+is counter-intuitive:** stripping §6.4's explanation would leave an *unexplained* emphatic prohibition,
+which **both reviewers ranked the most inference-inviting passage in the document** — a trade that buys
+almost nothing and costs comprehensibility.
+
+**ELECTION 2 — the bare per-domain count table: NOT ADDED.** The founder approved the recommendation.
+**The opener carries no domain figures and remains stricter than Q-A2 requires.** The evidence is on the
+record: given the four re-derived figures (**andreia 4** against phronesis 484 / dikaiosyne 631 /
+sophrosyne 301) and *no stated purpose*, a fresh reader reconstructed the watched domain, produced the
+phrase *"courage-relevant"* unprompted, named the optimisation move, and called it *"a statement of a
+gap, not neutral instrument state."* **This does not contradict Q-A2 — that ruling assessed the FORM and
+did not have these FIGURES.** If the table is ever wanted, the ruled route is to relay these specific
+figures to the mentor rather than rely on a permission whose premise a 4 does not survive.
+
+**D-3 — THE RECAST COMPLIANCE-NOT-VIRTUE WORDING IS SIGNED. NOTHING WAS APPLIED.** Recorded at
+`operations/agent-circles-2026-08/2026-09-13-compliance-not-virtue-clause-SIGNOFF-PACKAGE.md` **§8.4**
+(new). **The signature settles the WORDING only** — the §8.1 form, future-tense trigger clause plus L7
+verbatim closing. **It does not license application, and application did not occur:** the envelope
+(`trust-record-payload.ts`), ADR-013 §8 and all three R18 public surfaces are **untouched**. Per Q-B1
+the clause **waits for activation**, `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is **UNSET everywhere**,
+production carries **0 `enforcement-outcome` rows**, and activation is coupled to the S11 flip, which
+remains **REFUSED**. **The application session's trigger is the activation, not this signature.**
+
+**PEER SESSIONS CLOSED — the mentor's item discharged.** At the founder's direct request, **15 idle
+peer sessions were archived**; interactive `sagereasoning` peers went **15 → 1**. **The
+`idea-loop-rerun-2026-09` session was protected and is untouched** — running cycle 3, and excluded by
+name rather than relying on `archive_session`'s own running/pinned refusals. **Archiving is
+reversible** (`unarchive_session`). **One session was deliberately NOT closed and is flagged:** the
+pinned *"Cognitive OS standing close session"* — pinned, and its prompt is recorded in the standing
+queue as **unspent, no close written**, unlike every session archived, all of whose work was committed.
+**A fact the founder did not have:** the app holds **198 non-archived sessions**, not the ~16 the agent
+list shows, dating to **2026-07-24**; **183 remain** (31 Sep / 122 Aug / 30 Jul, from a 200-row snapshot
+that hit its cap). Those are dormant, not open — **hygiene, not a W2 risk**, since only opening one
+wakes it.
+
+**ONE REQUEST DECLINED AND ROUTED, per the standing rule.** The founder asked this session to make the
+`manifest.md` edits (D-4 ATRF item-3; D-8 the AC5 election). **It did not.** D-4 is **reserved to the
+founder's own act by ruling** — *"the wording is ruled. The act is reserved to the founder"*; the
+standing opener states it as *"no session may make it."* `manifest.md` is a **governing surface**.
+**Instructions were given instead**, with a recommendation on the A/B election. **`manifest.md` is
+verified clean and untouched at this writing.**
+
+**W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
+The 0h call remains the founder's.**
