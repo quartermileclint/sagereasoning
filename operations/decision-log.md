@@ -40640,3 +40640,45 @@ founder adopts it.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## 2026-09-13 — D-WINDOW-MARK-SKIPPED-F1-ASSESSMENT-AND-R8D7-SCOPING-DRAFTED-2026-09-13
+
+**Decision:** two founder-facing DRAFTS authored, nothing decided. **(1)** the F-1 assessment of the
+W2 window's three ruled work candidates
+(`operations/trust-layer-2026-07/2026-09-13-w2-window-work-designation-ASSESSMENT-DRAFT.md`) — each
+read from primary sources against the channel (Q-W1) and variety (Q-W2–Q-W4) constraints, with
+size and `GUARD_RE` exposure; no recommendation. **(2)** the R8-D7 verdict-confidence sampling-policy
+scoping (`operations/agent-circles-2026-08/2026-09-13-R8-D7-sampling-policy-SCOPING-DRAFT.md`) —
+R8-D7 in its own words, what Option S licenses and does not, five option shapes with cost and
+composition under the elected worst-of-K, the Prerequisite Criterion applied explicitly, eight mentor
+questions; **no build proposed**. **Task A (the current window's Part (1) mark record) was SKIPPED on
+its own condition** — the mark `2026-09-13T09:44:55Z` had not passed at open (`00:48Z`); F-4 remains
+the founder's. `governance` / documents; **autonomous, founder absent.**
+
+**Reasoning.** The 2026-09-13 ruling made the work designation the founder's and asked for an
+assessment of what W2 activation still requires; the Option S gate's discharge unblocked R8-D7's
+policy without scoping it. **Two findings the drafts carry:** candidate (b)'s two items are both
+discharged on the record — the Part-1 fix (2026-09-12) and the D2 "engaged" definitions (three
+rulings adopted 2026-09-06; the register's D2 row: *"NO OPEN AXIS REMAINS"*) — so the phrase "relay
+pending" in the window spec §3, the 2026-09-12 summary close and the drafted opener is stale; and
+every candidate whose work touches a `GUARD_RE` file faces the waiver-or-worktree fork the W2 build
+already hit — whether the window's discipline tolerates a waiver as its own work is unruled.
+
+**PR19:** two blind Sonnet reviewers (founder's standing permission), read-only. A: 1 HIGH folded
+(an R9 heading misattributed to the priority index), 1 LOW refuted at source. B: 1 HIGH + 1 MEDIUM +
+1 LOW folded (a non-quotation in quote marks; an election-document sentence tagged as the ruling's; a
+word inserted in a quotation); no overclaim; arithmetic re-derived correct.
+
+**Files touched:** the two drafts (new); the close
+`operations/handoffs/founder/2026-09-13-window-mark-F1-assessment-and-R8D7-scoping-CLOSE.md` (new);
+this entry. **Risk classification:** Standard (0d-ii documents). AC7 not engaged. No `GUARD_RE` file,
+R18 surface, code, schema, flag, credential or `option-s-runner.py` touched. **Rollback:**
+`git revert` the records commit. **Verification (founder):** read each draft's quoted sentences
+against the verbatim files it cites; re-run the guard battery. **Rules served:** PR18, PR19, PR23,
+PR25; the verbatim-wins and re-derive-every-number disciplines. **Status:** Adopted (records); both
+drafts **Under review** by the founder.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
