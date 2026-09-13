@@ -40823,3 +40823,39 @@ PR20, PR23; verbatim-wins.
 
 **Status:** Adopted. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
 0h call remains the founder's.**
+
+## 2026-09-13 — D-R11-MEASUREMENT-RERUN-PROMPT-AUTHORED-TWO-GUARD-DENIES-RECORDED-2026-09-13
+
+**Decision.** On Q-R11-A4's admission of a bounded re-run, the founder directed and the session
+authored the founder-walked run prompt for Deliverable A:
+`operations/handoffs/founder/2026-09-13-R11-measurement-bounded-rerun-FOUNDER-WALKED-RUN-NEXT-SESSION-PROMPT.md`
+— two sessions in two projects (Session R: a new scratch project running the closed validation run's
+six-step cycle unchanged for 20 cycles under loop instance `sagereasoning:idea-loop@v1#002`, plus a
+step-7 capture of nine byte-identical gate draws per first-draw permit on a distinct `consult`-only
+measurement identity, `sagereasoning:verdict-measurement@v1`, per Q1c; Session S: seal, verify,
+record, author the report prompt, no analysis) and the founder-walked steps between (spend-limit
+check; two mints; a quota raise by SQL if the mint drops its flags; two revocations; copying the
+sealed files into `operations/agent-circles-2026-08/r11-measurement/runs/`). The runner acts on
+draw 1 only; the extra draws reach nothing. **`code-critical`, founder-walked; AC7 engages at the
+run, not here. Nothing is run by authoring the prompt.**
+
+**Two guard denies on the record.** The session's path-scoped commit of the prompt drew a
+`do_not_proceed` from the at-action guard (andreia floor on the commit message's narration of
+revocations and a kill switch); the session reported it and stopped. The founder judged it a false
+positive and directed an identical retry under R20c; the retry drew a second deny, now with a
+corroboration contradiction read from the override note itself; the session stopped again. **The
+founder committed from the terminal** (`08c0d38`, on `origin/main`, Vercel green), a channel the
+Claude Code guard does not sit on; the file content was identical across all three attempts. Both
+denies are quoted verbatim in the R11 close's addendum. **Recorded as an observation for the
+window, not a defect claim:** the guard read a message narrating an irreversible act as the act, and
+read an R20c override note as an unexamined claim — an R20c override cannot pass through the guard
+inside the guarded session.
+
+**Files touched:** the run prompt (new; founder-committed); the R11 close (addendum); this entry.
+**Not touched:** any `GUARD_RE` file; any R18 surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`.
+**Risk classification:** `governance`/documents for this entry; the prompt it records is
+`code-critical` when executed. **Rollback:** `git revert` the records commit; the prompt is a
+proposal until the founder opens Session R. **Rules served:** PR17, PR18, PR20, PR23; R20c.
+
+**Status:** Prompt authored; run NOT started. **D2 remains blocked. The S11 flip remains REFUSED.
+Weights remain BLOCKED. The 0h call remains the founder's.**

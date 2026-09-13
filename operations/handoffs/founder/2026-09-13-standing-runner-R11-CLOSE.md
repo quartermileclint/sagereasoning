@@ -119,3 +119,53 @@ with the error disclosed in place. Lesson: compute before writing, which the pro
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## Addendum, same session (2026-09-13, ~12:30–13:10 AEST) — the ruling, the run prompt, and two guard denies on the record
+
+**The seven questions were RULED the same day** and folded by annotation (`e92e389`; verbatim
+`2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`;
+`D-MENTOR-RULING-R11-SEVEN-QUESTIONS-ADOPTED-FOLDED-2026-09-13`). Q-R11-A4 admitted a bounded,
+founder-attended re-run as the measurement's vehicle, and the founder directed the run prompt:
+`2026-09-13-R11-measurement-bounded-rerun-FOUNDER-WALKED-RUN-NEXT-SESSION-PROMPT.md` (`08c0d38`,
+on `origin/main`, Vercel green per the founder).
+
+**Two `do_not_proceed` denies from the at-action guard, on the path-scoped commit of that prompt,
+quoted verbatim rather than left out of the record.** The session reported each and stopped; it did
+not rephrase past either. The founder judged the first a false positive and directed an identical
+retry under R20c; the retry drew a second, stronger deny; the session stopped again and handed the
+commit to the founder's own terminal, where Claude Code's hooks do not sit. **The file content was
+unchanged across all three attempts.**
+
+First (on the original message):
+
+> SageReasoning Gate (at-action guardrail) returned do_not_proceed for this irreversible action
+> (proximity: reflexive). Deterministic virtue assessment — katorthoma proximity: reflexive; the
+> action is appropriate (kathekon) (kathekon quality: moderate). role obligation engaged;
+> justification offered. Ruling faculty: Unsettled — multiple ambiguities in interpretation; ruling
+> faculty unable to resolve.. unity-thesis minimum: base 'principled' floored to 'reflexive' by
+> andreia=reflexive Consider: "runner acts on draw 1 only; the extra draws reach nothing" is outside
+> prohairesis. Only my judgement, impulse, and response to it are within. This tool call is blocked.
+> Re-examine the action, or adjust it, before retrying.
+
+Second (on the same message plus a paragraph recording the founder's R20c override):
+
+> SageReasoning Gate (at-action guardrail) returned do_not_proceed for this irreversible action
+> (proximity: reflexive). Deterministic virtue assessment — katorthoma proximity: reflexive; the
+> action is appropriate (kathekon) (kathekon quality: strong). natural relationship engaged; role
+> obligation engaged; justification offered. Ruling faculty: Unsettled — multiple ambiguities in
+> interpretation; ruling faculty unable to resolve.. unity-thesis minimum: base 'deliberate' floored
+> to 'reflexive' by andreia=reflexive | corroboration: the 'examined_before_acting' claim on a
+> carried-out grave act is uncorroborated/contradicted → andreia floored to 'reflexive' This tool
+> call is blocked. Re-examine the action, or adjust it, before retrying.
+
+**Two observations for the window record, stated as fact.** (i) Both readings found the action
+kathekon and floored it on andreia from the commit *message's* text — a message that narrates
+revocations, a spend-limit check and a "kill switch" as things the run does. The engine read the
+narration of an irreversible act as the act. (ii) The override note itself supplied the second
+reading's corroboration contradiction: "the founder judged it a false positive" was read as an
+`examined_before_acting` claim on a grave act, uncorroborated by the text. **An R20c override cannot
+be carried through the guard by the session that is guarded; it has to travel a channel the guard
+does not sit on.** Both instances are in the false-hold buffer as guard-path records for the window
+to count. The relay, the ruling capture and the run prompt are otherwise as this close describes.
