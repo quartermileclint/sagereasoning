@@ -1,5 +1,16 @@
 # R11 — Deliverable B: R8-D7 as amended — the worst-of-K sampling policy, at the contract level, with its parameters left OPEN
 
+> **⚖️ RULED 2026-09-13, same day, on the relay this document fed** (verbatim, canonical:
+> `2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`; wins over this document).
+> **Q-R11-B1:** §1.4's fork is settled — **reading (i), floor-only dethronement**, ruled; the
+> recorded worst-draw proximity still flows on the existing edge (R9-D10) but never re-ranks a
+> floor-free winner. **Q-R11-B2:** §2/§5's incomplete-series parameter is settled — **hold**; no
+> verdict issues on fewer than K draws; disclose the hold and its cause, never a partial verdict.
+> **Q-R11-A2** (shared with Deliverable A): §5's surface parameter confirmed **gate only**; the
+> consult path is a separate future design, not an extension. **K, the trigger condition,
+> vocabulary and the persistence target remain OPEN** (Q-R11-A1/A3/A4 bear on them via Deliverable
+> A). **No build is licensed by this ruling.**
+
 **Authored 2026-09-13 (from `date`)** by the standing-runner design sitting R11
 (`sagereasoning-6b [802222]`), tier `governance` / design documents, on the main checkout, under
 `operations/handoffs/founder/2026-09-13-standing-runner-R11-R8D7-policy-and-live-measurement-design-NEXT-SESSION-PROMPT.md`.
@@ -118,15 +129,17 @@ deflated, and so on down the field.
 - **Reading (ii) — full worst-draw re-ranking.** The recorded worst-of-K proximity re-enters the
   election, and a floor-free sampled winner can be dethroned by an unsampled survivor.
 
-**This design recommends reading (i) and does not decide it.** The ruling states the sampling
-layer's purpose as *"to catch winners that carry a latent floor"* — the floor, not the rank; and
-comparing a K-draw minimum against single draws on one ranking is the shape the D6a rulings named
-when they removed pooled figures that imply a regularity the data does not carry. Reading (ii) also
-introduces, inside a single cycle, a direction-dependent asymmetry of the same general shape as the
-retry-shopping concern R8 §5.3 named — though not that mechanism itself, which re-ran only adverse
-verdicts and can no longer arise once rejections are never resampled — here in the conservative
-direction: the sampled candidate is systematically disadvantaged on rank relative to the unsampled. **Put to the mentor as Q-R11-B1 (§10).** Until ruled, the build brief must carry both
-readings and build neither.
+**⚖️ RULED (Q-R11-B1, 2026-09-13): reading (i).** *"The sampling layer dethroning a would-be winner
+requires a floor. A floor-free sampled winner is not dethroned by an unsampled survivor whose single
+draw read higher… A K-draw minimum is systematically deflated relative to a single draw on the same
+distribution. Ranking them against each other on the election axis would disadvantage the sampled
+candidate by construction, not by evidence. That is not what a floor is for. The worst-draw proximity
+still flows on the existing backward edge per R9-D10. It does not re-rank a floor-free winner."* The
+design's recommendation and its grounds — the ruling's own stated purpose as catching a latent floor,
+not a rank; the D6a precedent against ranking a K-draw minimum against single draws — are confirmed.
+The design's own retry-shopping analogy is not repeated by the ruling and is not part of the binding
+text; the ruling's reasoning stands on its own. **The build brief carries reading (i). Reading (ii)
+is closed.**
 
 ---
 
@@ -209,9 +222,14 @@ finding), **is set only after Deliverable A §5.5's cross-tabulation exists and 
 rules a first-draw signal admissible** (scoping Q3, carried as Q-R11-A1). Until then the only form
 this design describes is the unconditional one, and it describes it without electing it.
 
-**Incomplete-series handling.** Open (§2, fourth bullet). Named readings: hold (no verdict until K
-verdicts), or fall back to the operative single draw with the incompleteness disclosed. Conservative
-direction named; nothing set.
+**Incomplete-series handling.** **⚖️ RULED (Q-R11-B2, 2026-09-13): hold.** *"When the sampling layer
+cannot obtain K verdicts for the would-be winner, no verdict is issued until K verdicts are in hand…
+A partial series under W is not a completed measurement. The worst-draw rule requires K draws to
+operate; fewer than K draws is not a worst-of-K verdict, it is an incomplete attempt… Hold until K
+verdicts are obtained. Disclose the hold and its cause. Do not issue a partial verdict."* The fallback
+reading named in §2 (the single operative draw stands, incompleteness disclosed) is closed. **This is
+now a parameter set, not open** — the only remaining build question is where the hold is recorded and
+surfaced (a build-session detail, not a doctrinal one).
 
 **Vocabulary.** Whether a sampling-produced block needs its own candidate outcome (distinct from
 `rejected_by_guardrail`, which today means a single-draw floor) and whether a sampling-produced empty
@@ -221,8 +239,10 @@ designed.
 
 **The dethronement reading** — §1.4, Q-R11-B1.
 
-**Surface.** `/api/guardrail` only, as Option S measured and as the published disclosure scopes.
-Whether any sampling reaches `/api/reason` is scoping Q5 (carried as Q-R11-A2). Not extended here.
+**Surface.** **⚖️ RULED (Q-R11-A2, 2026-09-13): gate only.** *"The sampling policy does not reach the
+consult path at this stage… If the consult path comes into scope in future, it is a separate design
+with its own measurement, not an extension of this one."* `/api/reason` is closed to this policy
+until its own measurement exists.
 
 **Persistence target.** Open. §4 names the fields and the watching-table complex as the home; the
 exact table (a new FK'd table in the shape Deliverable A §4.2 names for the measurement, or columns
@@ -314,23 +334,18 @@ sentence. **Nothing here is applied; no file under `website/` was touched by thi
 
 ---
 
-## 10. Questions drafted for the mentor (NOT sent)
+## 10. Questions drafted for the mentor (RULED 2026-09-13 — see the banner and §1.4/§2/§5 above; kept for the record)
 
-- **Q-R11-B1 — the dethronement reading (§1.4).** Under the amended scope, does the sampling layer
-  dethrone a would-be winner only on a floor (reading (i)), or does the recorded worst-of-K proximity
-  re-enter the election and re-rank a floor-free sampled winner against unsampled survivors (reading
-  (ii))? This design recommends (i) — the ruling's stated purpose is the latent floor; ranking a
-  K-draw minimum against single draws puts two statistics on one ranking and disadvantages the
-  sampled candidate systematically — and takes no decision. R9-D10's precision bears on it: under
-  (ii) more flows on the existing edge than the floor.
-- **Q-R11-B2 — incomplete series under W (§2, §5).** When the layer cannot obtain K verdicts (engine
-  outage, Tier-1 pause), is the conservative reading — hold, no verdict — the doctrinal one, or does
-  the single operative draw stand with the incompleteness disclosed? Named directions only.
+- **Q-R11-B1 — the dethronement reading (§1.4).** **RULED: reading (i), floor-only.**
+- **Q-R11-B2 — incomplete series under W (§2, §5).** **RULED: hold; no partial verdict.**
+- **Q-R11-A2 — surface.** **RULED: gate only** (see §5's Surface entry above; shared with
+  Deliverable A).
 - Scoping Q2 (provenance-triggered stratum) is **narrowed, not closed, by Q-M5**: the provenance
   stratum can no longer be a population (rejections are out), but "would-be winner whose text this
-  gate previously rejected" could still be proposed as a *trigger*. That is a trigger question and
-  waits on Deliverable A's data with the others (§5); it is not put now.
-- Scoping Q3, Q5, Q8 are carried by Deliverable A §9 as Q-R11-A1..A3.
+  gate previously rejected" could still be proposed as a *trigger*. That remains a trigger question
+  under Q-R11-A1's condition (a measured relation to the latent floor) and is not answered by this
+  round.
+- Scoping Q3, Q8 are carried by Deliverable A §9 as Q-R11-A1/A3, both now ruled — see Deliverable A.
 
 ---
 

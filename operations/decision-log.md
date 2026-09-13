@@ -40776,3 +40776,50 @@ Prerequisite Criterion applied explicitly in A §8 and B §7; verbatim-wins.
 **Status:** Designed (A, B); Drafted for ruling (C). **Nothing built, activated, flipped, deployed,
 pushed or relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
 call remains the founder's.**
+
+## 2026-09-13 — D-MENTOR-RULING-R11-SEVEN-QUESTIONS-ADOPTED-FOLDED-2026-09-13
+
+**Decision.** The founder relayed the mentor's ruling on all seven R11 questions (drafted, not sent,
+in `2026-09-13-RELAY-DRAFT-R11-seven-questions-NOT-SENT.md`). Captured verbatim and adopted as
+binding: `operations/agent-circles-2026-08/2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`.
+
+**Headlines.** **Q-R11-B1** — reading (i), floor-only dethronement; the session's recommendation
+confirmed; a floor-free sampled winner is never dethroned by an unsampled survivor's higher single
+draw. **Q-R11-B2** — hold on an incomplete series; no verdict on fewer than K draws; distinct from
+Option S's disclosure disposition because this is a policy that changes a recorded verdict, not a
+measurement. **Q-R11-A4** — a bounded, founder-attended re-run is admitted as the measurement's
+vehicle; the standing runner is not a prerequisite; commissioning one is the founder's election.
+**Q-R11-A1** — a first-draw-signal trigger is admissible only on a measured relation to the latent
+floor, shown by Deliverable A §5.5's cross-tabulation once it exists; none is admissible before then,
+in either direction. **Q-R11-A2** — gate only; the consult path needs its own measurement and
+credential shape before any extension. **Q-R11-A3** — the reserved `option-s/` `complete_series()`
+defect does not bind Deliverable A's new capture, which states its own verdict-count completeness
+rule from the outset; it proceeds independently; the fix's own sequencing (a session that does not
+know which input it affects) is unchanged. **Q-R11-C1** — the full wording is ruled for the
+`manifest.md` ATRF item-3 amendment; *"whether the idea was completed"* is removed, since "completed"
+as succeeded is not in the built signal (R8 §2, no success/failure indicator) and "completed" as
+executed at all is attested by the signal's existence, not a field.
+
+**Folded, same session, by annotation (not rewrite) — the repo's standing discipline for a ruled
+document:** a `⚖️ RULED` banner + the specific settled sections in all three R11 deliverables —
+`2026-09-13-R11-live-loop-verdict-measurement-DESIGN.md` (§0 banner; §9's four questions marked
+RULED with the verbatim quoted); `2026-09-13-R11-R8D7-worst-of-K-policy-DESIGN.md` (§0 banner; §1.4's
+dethronement fork settled to reading (i); §5's incomplete-series and surface parameters set; §10's
+three questions marked RULED); `2026-09-13-R11-manifest-ATRF-item3-amendment-DRAFT-FOR-RULING.md`
+(§0 banner naming the full wording as ruled). **`manifest.md` is NOT edited** — Q-R11-C1's own text
+reserves the application to the founder's own act.
+
+**Nothing built, activated, flipped, deployed, pushed or relayed by this ruling or its folds.** R8-D7
+remains a design item whose eventual build is its own `code-critical` founder-walked step; the
+measurement (Deliverable A) is unrun; the standing runner is unbuilt.
+
+**Files touched:** the verbatim (new); the three deliverables (annotated in place); this entry.
+**Not touched:** `manifest.md`; any `GUARD_RE` file (guard re-run at close, see below); any R18
+surface; `option-s/`; `~/.sage-gate1/`; `agent_hold_observations`; the priority index. **Risk
+classification:** `governance`/documents. **Rollback:** `git revert` the commit; the verbatim stands
+as record regardless. **Verification (founder):** read the verbatim against the mentor's message;
+confirm each deliverable's ruled banner and settled section match. **Rules served:** PR18, PR19,
+PR20, PR23; verbatim-wins.
+
+**Status:** Adopted. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
+0h call remains the founder's.**

@@ -1,5 +1,14 @@
 # R11 — Deliverable C: `manifest.md` ATRF item 3 — amendment DRAFT FOR RULING (removing the outcome-comparison reading)
 
+> **⚖️ RULED 2026-09-13, same day, on the relay this draft fed** (verbatim, canonical:
+> `2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`; wins over this document).
+> **Q-R11-C1: the full wording (§3, first option) is ruled. *"Whether the idea was completed" is
+> removed.*** *"'Completed' as succeeded is not in the signal — R8 §2 carries no success/failure
+> indicator. 'Completed' as executed at all is attested by the signal's existence, not by a field in
+> the signal. The full wording correctly omits the word and lets the signal's existence carry the
+> execution fact."* **The application to `manifest.md` is the founder's own act after this ruling —
+> `manifest.md` remains unedited by this sitting.**
+
 **Authored 2026-09-13 (from `date`)** by the standing-runner design sitting R11
 (`sagereasoning-6b [802222]`), tier `governance`. **`manifest.md` is NOT edited by this sitting. This
 is a draft for the mentor's ruling and the founder's application; it changes nothing until both

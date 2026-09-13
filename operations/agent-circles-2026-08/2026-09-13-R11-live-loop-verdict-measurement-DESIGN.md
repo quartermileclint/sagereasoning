@@ -1,5 +1,18 @@
 # R11 — Deliverable A: the live-loop verdict-variance measurement (Option E) — DESIGN
 
+> **⚖️ RULED 2026-09-13, same day, on the relay this document fed** (verbatim, canonical:
+> `2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`; wins over this document).
+> **Q-R11-A4:** §0's vehicle question is settled — **a bounded, founder-attended re-run is admitted**
+> as the measurement's vehicle; the standing runner is not a prerequisite; the election to commission
+> one is the founder's. **Q-R11-A1:** §5.5's cross-tabulation is confirmed as the sole gate on any
+> future trigger — **no first-draw signal may serve as a trigger before the table exists and shows a
+> measured relation to the latent floor**, in either direction. **Q-R11-A2** (shared with
+> Deliverable B): **gate only**; `/api/reason` needs its own measurement before any extension.
+> **Q-R11-A3:** **the reserved `complete_series()` defect does NOT bind this design** — a new
+> instrument that states its own verdict-count completeness rule from the outset does not inherit it;
+> this measurement proceeds independently of that fix's sequencing. **No build is licensed by this
+> ruling.**
+
 **Authored 2026-09-13 (from `date`)** by the standing-runner design sitting R11
 (`sagereasoning-6b [802222]`), tier `governance` / design documents, on the main checkout, under
 `operations/handoffs/founder/2026-09-13-standing-runner-R11-R8D7-policy-and-live-measurement-design-NEXT-SESSION-PROMPT.md`.
@@ -446,26 +459,30 @@ that is a design act under this criterion, not a report format.
 
 ---
 
-## 9. Open questions this design carries (drafted for the mentor, NOT sent)
+## 9. Questions drafted for the mentor (RULED 2026-09-13 — see the banner above; kept for the record)
 
-None of these blocks the run; each is stated so it can be put. The scoping draft's Q2, Q3, Q5 and
-Q8 remain open (its Q1, Q4, Q6, Q7 are answered by Q-M5–Q-M8).
+The scoping draft's Q2, Q3, Q5 and Q8 (its Q1, Q4, Q6, Q7 were already answered by Q-M5–Q-M8) are
+now all resolved by this round.
 
-- **Q-R11-A1 (carries scoping Q3).** After §5.5's cross-tabulation exists: may any first-draw signal
-  (proximity distance to the band threshold; `is_kathekon: null`; an `uncorroborated` finding) serve
-  as a trigger condition, or is a trigger admissible only on measured relation? The design prints the
-  table and takes no position.
-- **Q-R11-A2 (carries scoping Q5).** Does the measurement reach `/api/reason`? This design scopes to
-  the gate (limit 7). If the mentor wants the consult path characterised, that is a second population
-  (the trust ledger accumulates from it) and a second credential shape, not an extension of this one.
-- **Q-R11-A3 (carries scoping Q8).** Whether the reserved `complete_series()` correction must land in
-  the existing instrument before any further Option-S-shaped measurement runs. This design is a new
-  capture with the verdict-count requirement stated (§4.2), so the defect does not bind it; the
-  sequencing is the mentor's.
-- **Q-R11-A4 (new).** Given §0 — no live stream exists today — does Q-M7's "measure on the live loop"
-  admit a bounded founder-attended re-run as the measurement's vehicle, or does it wait for the
-  standing runner (R9 §16.2) to exist? The design supports both; the election is the founder's and
-  the reading of the ruling is the mentor's.
+- **Q-R11-A1 (carried scoping Q3).** **RULED:** *"A trigger is admissible only on a measured
+  relation between the signal and the latent floor… No first-draw signal — katorthoma proximity,
+  is_kathekon, proximity_floors.basis, or any corroboration finding — may serve as a trigger
+  condition until Deliverable A's cross-tabulation exists and shows a measured relation… If the
+  table shows no relation, no trigger is admissible from that signal. If it shows a relation, the
+  trigger is admissible on that signal with the relation disclosed."* §5.5's table remains the
+  gate; it stays descriptive until built and read.
+- **Q-R11-A2 (carried scoping Q5).** **RULED: gate only.** *"The sampling policy does not reach the
+  consult path at this stage… a separate design with its own measurement, not an extension of this
+  one."* Limit 7 stands; `/api/reason` is out of scope.
+- **Q-R11-A3 (carried scoping Q8).** **RULED: the defect does not bind this design.** *"A new
+  instrument that correctly defines completeness as counted outcomes from the start does not
+  inherit the defect from the old instrument… Deliverable A proceeds independently."* §4.2's
+  verdict-count requirement is confirmed sufficient; no dependency on the reserved fix.
+- **Q-R11-A4.** **RULED: a bounded, founder-attended re-run is admitted.** *"Waiting for it to exist
+  before measuring is waiting for the policy to be built before measuring what the policy should be
+  designed against — the wrong sequence… A bounded re-run under the same conditions as the
+  validation run… produces a live-loop population in the relevant sense."* Commissioning one remains
+  the founder's election; nothing here starts it.
 
 ---
 
