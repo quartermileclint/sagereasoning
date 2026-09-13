@@ -1,7 +1,7 @@
 # Relay draft — the W2 window's work (F-1) and the R8-D7 sampling policy: summary, questions, recommendations
 
-**Drafted 2026-09-13 ~12:20 AEST by session `sagereasoning-dd [856dc7]` at the founder's request, for the
-founder to pass to the mentor. NOT SENT by the session. Recommendations are the session's and are
+**Drafted 2026-09-13 ~11:15 AEST (corrected from a "~12:20" context-clock artifact) by session `sagereasoning-dd [856dc7]` at the founder's request, for the
+founder to pass to the mentor. **SENT by the founder and RULED 2026-09-13 — verbatim, canonical: `2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`; that ruling wins over every recommendation below.** NOT sent by the session. Recommendations are the session's and are
 marked as such; every decision named below remains the founder's or the mentor's.** Sources: the
 two drafts committed at `4127cd6` (`2026-09-13-w2-window-work-designation-ASSESSMENT-DRAFT.md`;
 `2026-09-13-R8-D7-sampling-policy-SCOPING-DRAFT.md`) and the primary records they cite. Verbatim wins.

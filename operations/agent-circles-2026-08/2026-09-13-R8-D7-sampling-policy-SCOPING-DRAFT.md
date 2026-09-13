@@ -1,5 +1,16 @@
 # R8-D7 — the verdict-confidence sampling policy: SCOPING DRAFT
 
+> **⚖️ RULED 2026-09-13, same day, on the relay this draft fed** (verbatim, canonical:
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`; wins over this
+> document). **Q-M5:** R8-D7's scope is AMENDED — worst-of-K applies to the would-be-winner
+> population only; the rejection re-election fixpoint is removed; the winner dethronement path
+> remains (§5 Q1 answered). **Q-M6:** K is a cost election; K=1 is W at its minimal expression
+> (§5 Q4 answered; Option A is W at K=1). **Q-M7:** measure first on the live loop — Option E is the
+> recommended next act before any build beyond K=1 disclosure (§5 Q6 answered). **Q-M8:** a sampled
+> verdict discloses K, the floor count and the worst-draw rule, never a confidence scalar; the R18
+> "one call as one draw" sentence is amended, under founder sign-off, only when K>1 is served
+> (§5 Q7 answered). §5 Q2, Q3, Q5 and Q8 remain unput. **No build is licensed.**
+
 **DRAFT — FOR FOUNDER ELECTION AND MENTOR QUESTIONS. This document proposes no build, licenses no
 build, and elects nothing.** It sets out what R8-D7 asked for in its own words, what the Option S data
 licenses and does not, the shapes a policy could take with what each would need to be true and cost,

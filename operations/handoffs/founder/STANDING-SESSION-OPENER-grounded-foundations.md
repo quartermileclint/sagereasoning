@@ -265,7 +265,7 @@ open). Full detail on those in the archived 2026-09-08 version.
 
 | # | Action | Unblocks / closes |
 |---|---|---|
-| **F-1 (HIGHEST)** | **Designate the W2 window's work** (ruled 2026-09-13; the relay was sent and both questions ruled): assess what W2 activation still requires as composed Write/Edit authoring; if insufficient, designate the standing-runner design session. The clock starts at that work's first consult record. Then author the first session prompt naming the work, never the observation. | whether the first W2-window session can open, and when its clock starts |
+| **F-1 (HIGHEST)** | **Designate the W2 window's work** (ruled 2026-09-13; the relay was sent and both questions ruled): assess what W2 activation still requires as composed Write/Edit authoring; if insufficient, designate the standing-runner design session. The clock starts at that work's first consult record. Then author the first session prompt naming the work, never the observation. **⚖️ RULED AGAIN 2026-09-13 (eight questions; verbatim `2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`): the ordering is now (c) the standing-runner design track PRIMARY, (a) the staged-clause application SECONDARY, (b) WITHDRAWN; design authoring in `operations/` satisfies the clock rule (Q-M3); a guarded-file waiver on the measured checkout is window work, a worktree is not (Q-M2). The designation is made by the ruling; what remains yours is opening the first sitting under a Q-S2-conforming prompt.** | whether the first W2-window session can open, and when its clock starts |
 | **F-2** | **Adopt this opener** (or correct it and adopt the correction). Until then the 2026-09-10 version is operative and carries the false PR26 / "nothing changed since 09-06" / "residue owed" lines. | every session's opening facts |
 | **F-3** | **Sign the record-level compliance-not-virtue clause** (`operations/agent-circles-2026-08/2026-09-12-W2-compliance-not-virtue-clause-STAGED-R18.md`) — the one R18 item still owed in the logos-on program. W1 needs nothing. | W2's honest-claims half |
 | **F-4** | **Record Part (1)'s mark when it arrives** (Sun 19:44 AEST) — it closes the current window at three of four; it does not start W2's clock (Q-S1). | the current window's honest close |
@@ -291,8 +291,11 @@ founder-visible setting, not an auto-mode outcome"*).
 - **`Q-PREFLIP-REPORTS`: BUILT, the report ASSEMBLED and RULED.** A re-run is owed at the current
   window's mark (Sunday) and again at the W2 window's mark.
 - **`Q-G6A-QUALIFICATION`: BUILT** 2026-09-10 (same record).
-- **`Q-D2-ENGINE`: still BLOCKED** — now on the part-(2) window and the D2 "engaged" definitions ruling
-  (scoped-for-ruling, relay pending), not on any baseline count.
+- **`Q-D2-ENGINE`: still BLOCKED** — ~~now on the part-(2) window and the D2 "engaged" definitions ruling
+  (scoped-for-ruling, relay pending), not on any baseline count.~~ **CORRECTED 2026-09-13:** the D2 rulings
+  are complete and governing (three, 2026-09-06; "relay pending" was documentation drift — Q-M1); the build
+  S11-D2 is sequenced to **five ordinary consult days from the W2 window's first record** (Q-M4, restarting
+  the count) and is eligible window work under the mid-window waiver shape (Q-M2).
 - **`Q-RECORDS-FOLD`: partially discharged 2026-09-12** (this opener; the S9 annotation; the register
   rows; six spent prompts marked). **Still open in it:** AC5 (F-F); the cognitive-os standing-close
   prompt (unspent — no close exists; left unmarked).

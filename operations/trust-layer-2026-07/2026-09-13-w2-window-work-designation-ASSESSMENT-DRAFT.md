@@ -1,5 +1,15 @@
 # The W2 window's work — the F-1 assessment (DRAFT, NOT a designation)
 
+> **⚖️ RULED 2026-09-13, same day, on the relay this draft fed** (verbatim, canonical:
+> `2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`; wins over this document). **Q-M1:**
+> candidate (b) is WITHDRAWN; the ordering is (c) standing-runner design track primary, (a)
+> staged-clause application secondary; the §2 D2 correction is accepted as fact. **Q-M2:** a
+> recorded guarded-file waiver on the measured checkout, guard armed, IS window work; a worktree is
+> not. **Q-M3:** consequential design authoring in `operations/` satisfies the clock rule. **Q-M4:**
+> the S11-D2 baseline restarts with the W2 window. §4's two named questions are therefore answered
+> by the ruling, not by this draft. **The clock has still not started; the founder opens the first
+> sitting under a Q-S2-conforming prompt.**
+
 **Status: DRAFT — FOR THE FOUNDER'S F-1 DECISION. This document designates nothing and recommends
 nothing.** The 2026-09-13 ruling made the work designation the founder's, to be settled before the
 first W2-window session. This is the comparison the founder asked for, read from primary sources.

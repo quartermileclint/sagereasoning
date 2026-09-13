@@ -1,6 +1,6 @@
 # Session close — the window's mark (skipped on the clock), the F-1 assessment draft, the R8-D7 scoping draft
 
-**2026-09-13, 10:48 → ~12:10 AEST (from `date`).** Session `sagereasoning-dd [856dc7]`, autonomous
+**2026-09-13, 10:48 → ~11:15 AEST (from `date`; an earlier draft of this line read "~12:10", a context-clock artifact corrected on re-reading `date`).** Session `sagereasoning-dd [856dc7]`, autonomous
 (founder absent), opened under
 `2026-09-13-window-mark-F1-assessment-and-R8D7-scoping-AUTONOMOUS-NEXT-SESSION-PROMPT.md` and the
 DRAFTED (not yet adopted) standing opener Version 2026-09-13. **Tier `governance` / documents. AC7
@@ -106,3 +106,18 @@ both were read as accurate and answered genuinely at the elicitation.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## Addendum, same session (~11:24 AEST) — the founder returned; the relay was sent and RULED
+
+The founder asked for a relay with recommendations (`2026-09-13-F1-and-R8D7-RELAY-DRAFT-with-recommendations.md`,
+committed), sent it, and relayed the mentor's eight-question ruling, captured verbatim at
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md` and adopted on relay
+(`D-MENTOR-RULING-EIGHT-QUESTIONS-W2-WORK-S11D2-R8D7-ADOPTED-2026-09-13`). **Every question this close
+listed as the founder's F-1 input is now ruled:** (b) withdrawn, (c) primary, (a) secondary; waivers on the
+measured checkout are window work; design authoring satisfies the clock rule; the S11-D2 baseline restarts
+with W2's window; R8-D7's scope amended to would-be winners only; K a cost election, K=1 is W; measure first
+on the live loop; no confidence scalar on a sampled verdict. Folded into the window spec (§8), the register
+(change-log row), the drafted opener (F-1, `Q-D2-ENGINE`), and the three drafts' headers. **Nothing built,
+activated, flipped or pushed. The W2 clock has not started — the first sitting is the founder's to open.**
+**Time-stamp correction:** the header's "~12:10" and the relay draft's "~12:20" were context-clock artifacts
+(`date` read 11:24 when the ruling was captured); corrected in place.

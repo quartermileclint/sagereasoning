@@ -40682,3 +40682,43 @@ drafts **Under review** by the founder.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## 2026-09-13 — D-MENTOR-RULING-EIGHT-QUESTIONS-W2-WORK-S11D2-R8D7-ADOPTED-2026-09-13
+
+**Decision:** the mentor's ruling on the eight questions relayed by the founder from
+`2026-09-13-F1-and-R8D7-RELAY-DRAFT-with-recommendations.md` is **recorded verbatim, canonical, and
+adopted in full** (`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`;
+verbatim wins). **Q-M1** candidate (b) withdrawn; the W2 window's work is **(c) the standing-runner
+design track primary, (a) the staged-clause application secondary**; the D2 correction accepted —
+"relay pending" was documentation drift. **Q-M2** a recorded `GUARD_RE` waiver on the measured checkout,
+guard armed, IS window work; a worktree with capture unset is not. **Q-M3** consequential design
+authoring in `operations/` via composed Write/Edit on the measured checkout satisfies the clock rule.
+**Q-M4** the S11-D2 baseline restarts with the W2 window (five ordinary consult days from its first
+record). **Q-M5** R8-D7's scope amended: worst-of-K on the would-be-winner population only; the
+rejection fixpoint removed. **Q-M6** K is a cost election; K=1 is W. **Q-M7** measure first on the live
+loop (Option E) before any build beyond K=1 disclosure. **Q-M8** a sampled verdict discloses K, floors
+and the worst-draw rule, never a confidence scalar; the R18 sentence is amended under founder sign-off
+only when K>1 is served.
+
+**Reasoning.** All eight arose from this session's two drafts (`D-WINDOW-MARK-SKIPPED-F1-ASSESSMENT-AND-R8D7-SCOPING-DRAFTED-2026-09-13`),
+which found candidate (b)'s items already discharged and R8-D7's symmetric fixpoint incompatible with
+worst-of-K. The ruling amends the 2026-09-13 W2-window ruling's candidate list, the 2026-09-06
+mid-window ruling's baseline window, and R8 §5.3's scope; it leaves the M/W/S election standing.
+
+**Folded into:** the window specification (§8 + a dated correction of §3); the S11 register (change-log
+row; D2 and W3-d read as amended); the DRAFTED opener (F-1; `Q-D2-ENGINE`); the three drafts' headers;
+the close (addendum). **Nothing built, activated, flipped, deployed or pushed. The W2 clock has NOT
+started** — the first sitting is the founder's to open under a Q-S2-conforming prompt; this session is
+the wrong author for it.
+
+**Files touched:** the verbatim (new); the spec; the register; the opener; the two drafts; the relay
+draft; the close; this entry. **Risk classification:** `governance` / documents. AC7 not engaged; no
+`GUARD_RE` file, R18 surface, code, schema, flag or credential touched. **Rollback:** `git revert` the
+records commit; the verbatim stands as record regardless. **Verification (founder):** read the verbatim
+against the mentor's message; confirm the spec §8 and the opener's F-1 say (c) primary / (a) secondary
+and "the clock has not started". **Rules served:** PR18, PR20, PR23; verbatim-wins.
+
+**Status:** Adopted. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
+0h call remains the founder's.**

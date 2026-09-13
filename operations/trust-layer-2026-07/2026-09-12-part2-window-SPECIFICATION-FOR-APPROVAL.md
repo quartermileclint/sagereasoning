@@ -181,6 +181,20 @@ session (GS-ATRF-1…4, GS-CYB-1/2). **Founder action owed before any first sess
 **Q-(ii)** — the discipline holds; CLAUDE.md is within bounds; session prompts must still never name
 the observation goal.
 
+## 8. 2026-09-13 second ruling — candidate list amended, waivers ruled, design authoring ruled (folded)
+
+Verbatim, canonical: `2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`.
+**Q-M1** — candidate (b) WITHDRAWN (its two items were already discharged; "relay pending" is
+documentation drift — §3's "D2… still scoped-for-ruling with the relay pending" is FALSE and left as
+written for the record); the ordering is **(c) the standing-runner design track PRIMARY, (a) the
+staged-clause application SECONDARY.** **Q-M2** — a recorded `GUARD_RE` waiver on the measured
+checkout with the guard armed IS window work; a worktree with capture unset is not. **Q-M3** —
+consequential design authoring in `operations/` through composed Write/Edit on the measured checkout
+satisfies the clock rule; *"the first consult record of a design sitting on this work starts the W2
+window's clock."* **Q-M4** — the S11-D2 baseline (five ordinary consult days) RESTARTS from W2's first
+record; the current window's count does not transfer. **The clock has not started.** The per-session
+Q-S2 obligation is unchanged.
+
 ## 6. Approval line — DISCHARGED
 
 **Founder approved §6 in full 2026-09-12**, before the mentor's ruling above. The mentor's ruling

@@ -633,3 +633,17 @@ remain BLOCKED; the 0h call remains the founder's.
   design session. **Q-S2 is satisfiable as ruled**: CLAUDE.md's instrument disclosure is within bounds;
   the per-session prompt condition stands. Nothing built, activated or flipped. **D2 remains blocked; the
   S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the founder's.**
+
+- **2026-09-13 (the EIGHT-QUESTION ruling — `D-MENTOR-RULING-EIGHT-QUESTIONS-W2-WORK-S11D2-R8D7-ADOPTED-2026-09-13`;
+  verbatim, canonical: `2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`).**
+  **Row W3-d's second role is amended again:** the W2 window's work is now **(c) the standing-runner
+  design track PRIMARY, (a) the staged compliance-not-virtue clause application SECONDARY; candidate
+  (b) withdrawn** (Q-M1). **Row D2's status is corrected:** the three 2026-09-06 rulings are governing
+  and complete; "relay pending" was documentation drift; **the S11-D2 build's baseline RESTARTS with the
+  W2 window** — five ordinary consult days from W2's first record, the count at zero (Q-M4) — and, when it
+  opens under the mid-window waiver shape on the measured checkout, it is ELIGIBLE window work (Q-M2).
+  Design authoring in `operations/` satisfies the clock rule (Q-M3). R8-D7's scope is amended to the
+  would-be-winner population only; K is a cost election, K=1 is W; measure first on the live loop before
+  any build; a sampled verdict never carries a confidence scalar (Q-M5–Q-M8). **Nothing built, activated
+  or flipped; the W2 clock has not started.** D2 remains blocked; the S11 flip remains REFUSED; weights
+  remain BLOCKED; the 0h call remains the founder's.
