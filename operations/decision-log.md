@@ -40722,3 +40722,57 @@ and "the clock has not started". **Rules served:** PR18, PR20, PR23; verbatim-wi
 
 **Status:** Adopted. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
 0h call remains the founder's.**
+
+## 2026-09-13 — D-STANDING-RUNNER-R11-R8D7-AMENDED-POLICY-AND-LIVE-MEASUREMENT-DESIGNED-2026-09-13
+
+**Decision.** The standing-runner design sitting R11 RAN 2026-09-13 (~11:39–12:10 AEST, from `date`;
+`sagereasoning-6b [802222]`; tier `governance`/design; AC7 NOT engaged) and produced three designs,
+nothing built: **(A)** the live-loop verdict-variance measurement (Option E, per Q-M7) —
+`operations/agent-circles-2026-08/2026-09-13-R11-live-loop-verdict-measurement-DESIGN.md`; **(B)**
+R8-D7 as amended by Q-M5, the worst-of-K policy at the contract level with **K, trigger,
+incomplete-series handling, vocabulary, persistence target and surface all left OPEN** and K=1 with
+the published disclosure stated as the live state and as W (Q-M6) —
+`…/2026-09-13-R11-R8D7-worst-of-K-policy-DESIGN.md`; **(C)** the `manifest.md` ATRF item-3
+amendment DRAFT FOR RULING (R9 §16.5), `manifest.md` NOT edited —
+`…/2026-09-13-R11-manifest-ATRF-item3-amendment-DRAFT-FOR-RULING.md`. Close:
+`operations/handoffs/founder/2026-09-13-standing-runner-R11-CLOSE.md`.
+
+**Reasoning.** Q-M5 amends R8-D7's scope to would-be winners only and removes the rejection
+fixpoint; Q-M7 requires K and any trigger to be designed against live-loop telemetry, not the closed
+run. **Deliverable A states first that no live stream exists** (the bounded run closed 2026-08-16;
+the standing runner is unbuilt) and designs the measurement to ride whichever loop the founder next
+runs: population = first-draw permits (Q-M5's "inputs that would otherwise permit"), rejections not
+re-drawn, the would-be winner read from the runner's election; draws out of band after the election,
+first verdict operative; K=10 as measurement K; price from CI-10's meter ($0.014222/call, c11 record);
+a distinct measurement identity (Q1c); per-draw floor attribution; per-input distributions first, no
+directional decomposition (D6a); does NOT close the near-boundary gap (Q-S2); Prerequisite Criterion
+passes as measurement. **Deliverable B** turns R8 §5.3's fixpoint into a descending chain (rejections
+cost zero extra calls; worst case (K−1)×survivors), keeps Q-M8's three disclosures and no scalar,
+restates R9-D10 as strictly narrower, applies the Prerequisite Criterion conditionally on the
+disclosure riding the record, stages the R18 wording (conditional on K>1 ever being served; three
+surfaces named, api-docs carrying no matching sentence today), and **names one genuine fork the
+rulings do not settle** — whether dethronement is floor-only or re-ranks on worst-draw proximity —
+recommending floor-only and putting it to the mentor (Q-R11-B1).
+
+**PR19.** Two blind Sonnet reviewers (the founder's standing permission), read-only, each given only
+its own deliverable and the source paths. A: 2 MEDIUM (a Wilson bound 0.26→0.2775, also caught by the
+author's own re-derivation; a density that attached 74/20 to a population including novelty rejects,
+whose first-draw-permit density is 111/20≈5.55), 1 LOW, 3 NIT — all folded, cost line recomputed at
+both densities. B: 0 HIGH/MEDIUM, 4 LOW, 1 NIT — all folded; the four hard dimensions clean. Records
+in A §11 and B §12.
+
+**Mentor questions DRAFTED, NOT SENT:** Q-R11-A1..A4, Q-R11-B1..B2, Q-R11-C1 (in the deliverables).
+
+**Files touched:** the three deliverables (new); the close (new); this entry. **Not touched:** any
+`GUARD_RE` file (guard 250/0 at open and close; pins `60cefedb…`/`fa8895ec…`/`db86fccb…` unchanged);
+any R18 surface; `option-s/`; `~/.sage-gate1/`; `agent_hold_observations`; the priority index (no
+named input consumed or redirected). Another session's `environmental-context.json` modification and
+untracked prompt were NOT staged. **Risk classification:** `governance`/documents. **Rollback:**
+`git revert` the commit. **Verification (founder):** read A §0 (the loop is not running) and B §5
+(every parameter open) against the deliverables; confirm no file under `website/` is in the commit.
+**Rules served:** PR15 (existing instruments reused as precedent), PR18, PR19, PR20, PR23; the
+Prerequisite Criterion applied explicitly in A §8 and B §7; verbatim-wins.
+
+**Status:** Designed (A, B); Drafted for ruling (C). **Nothing built, activated, flipped, deployed,
+pushed or relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
+call remains the founder's.**
