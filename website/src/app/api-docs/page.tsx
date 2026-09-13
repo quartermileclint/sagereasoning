@@ -870,7 +870,12 @@ export default function ApiDocsPage() {
           held proceed 20/20, recorded as a calibration falsification and not repaired. Two sweeps on one
           date, spanning a redeploy in which the gate&rsquo;s code path did not change; the deploy
           identifier is a local proxy and attests nothing about production. Not measured on
-          /api/reason. Revised as better evidence arrives. Consistency of examination outputs is
+          /api/reason. Measured again 2026-09-12 on real candidate texts &mdash; 24 inputs &times; 10
+          submissions, 240 calls. 21 of 24 gave the same block-or-permit decision on every draw.
+          On 15 loop-selected inputs: no blocks in 144 verdicts, though 10 of the 15 varied on
+          proximity &mdash; the score moves, the decision does not. On 9 previously-rejected inputs: a
+          floor on 45 of 84 verdicts (Wilson 95% CI 43.0&ndash;63.8%). Neither figure is a rate on
+          near-boundary inputs, which remain unmeasured as a defined population. Revised as better evidence arrives. Consistency of examination outputs is
           evidence of stable disposition, not proof of it &mdash; the harness cannot distinguish
           hexis from drift from the outside. The gate&rsquo;s evaluation takes no role input, which
           is a confirmed design deficiency, not a design choice</em>). MEASURE mode: advisory, never binding; human override is
