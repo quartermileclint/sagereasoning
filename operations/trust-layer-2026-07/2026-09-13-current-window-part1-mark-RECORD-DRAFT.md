@@ -1,8 +1,21 @@
-# DRAFT — THE FOUNDER RECORDS — the current false-hold window's Part (1) mark
+# ✅ RECORDED — the current false-hold window's Part (1) mark
 
-**STATUS: DRAFT. This is F-4 and F-4 is the founder's.** An autonomous session (founder absent)
-assembled it on 2026-09-13 evening from a `--dry-run` report and the raw buffer. **Nothing here is
-recorded, adopted, or entered into any register by the session that wrote it.**
+> **STATUS: RECORDED 2026-09-13 (evening) ON THE FOUNDER'S EXPRESS ELECTION. F-4 is DISCHARGED.**
+> The founder read this draft and its recommendation and answered *"I agree with your
+> recommendations"* in session, electing: **record the CLOCK anchor** (`2026-09-13T09:44:55Z`, the
+> took-effect probe + 7 days) as the mark, **as-of rather than waiting** for the window's intake to
+> close. **The election is the founder's; the transcription is the session's** — the session did not
+> decide what to record, only wrote down what the founder elected. The file's prior status line read
+> *"DRAFT — THE FOUNDER RECORDS"*; it is kept in git history at `70f4b8c`.
+>
+> **What "as-of" means here, and it is not a formality.** Q2 (ruled the same evening) closes a
+> window's intake only when the **next** window's clock starts. W2 has not opened. **So this window is
+> still accruing records, and §4's composition disclosure is as-of this recording, not final.** If the
+> founder wants a closed-window figure, it is obtainable by re-running the report after W2's first
+> sitting opens — the mark itself does not move, only the composition around it.
+
+**Assembled** by an autonomous session (founder absent) on 2026-09-13 evening from a `--dry-run`
+report and the raw buffer; **recorded** the same evening on the founder's return and election.
 
 **Evidence captured verbatim — TWO captures, both kept deliberately:**
 - `operations/trust-layer-2026-07/runs/2026-09-13/observation-report-DRY-RUN-at-part1-mark.txt`

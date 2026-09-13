@@ -34,7 +34,7 @@ presented as compliance.
 
 | # | file | status |
 |---|---|---|
-| A | `operations/trust-layer-2026-07/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md` | **DRAFT — the founder records (F-4)** |
+| A | `operations/trust-layer-2026-07/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md` | **RECORDED on the founder's election, same evening — F-4 DISCHARGED (see §9.1)** |
 | A | `operations/trust-layer-2026-07/runs/2026-09-13/observation-report-DRY-RUN-at-part1-mark.txt` | capture 1, verbatim |
 | A | `…/runs/2026-09-13/observation-report-DRY-RUN-at-part1-mark-CAPTURE-2.txt` | capture 2, verbatim |
 | B | `operations/trust-layer-2026-07/2026-09-13-w2-clock-start-EVIDENCE-MEMO.md` | evidence, **no preference stated** |
@@ -288,6 +288,67 @@ quotation checked matched exactly.
 5. **Session R's founder-walked half** — mint numbers doubled, a **new** runner credential, tokens
    placed, then open and attend the run; revoke both at close; then Session S.
 6. **Push this session's commit** (path-scoped, local only — the AI never pushes).
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
+
+---
+
+## 9. ADDENDUM — the founder returned, ruled, and elected; what was completed after
+
+**Same session, 2026-09-13 evening.** The founder relayed the consolidated six-question ruling
+(captured verbatim + adopted, §7's sibling entry), then answered *"I agree with your
+recommendations"* on the rewritten Part 3 table and directed this session to complete what it could.
+
+### 9.1 Completed on the founder's election
+
+| # | Item | What was done |
+|---|---|---|
+| **D-1** | Record the Part (1) mark | **DONE — F-4 DISCHARGED.** The draft is promoted to a RECORD, headed with the founder's election (clock anchor `2026-09-13T09:44:55Z`, recorded **as-of** rather than waiting for intake to close). **The election is the founder's; the transcription is this session's** — stated in the file so the distinction survives. |
+| **D-2** | Adopt the standing opener | **DONE — the 2026-09-13 version is now the OPERATIVE opener**, superseding 2026-09-10. The DRAFTED banner is replaced by an ADOPTED banner carrying the founder's election; the superseded line is kept beneath it as the record. |
+| **D-5** | Reconcile the Layer-3 priority-index row against Ruling Set D | **DONE — unambiguous documentation drift, corrected.** The scoping record's own header has read *"RULED AND CLOSED"* since 2026-08-15, and Ruling Set D ruled **both** of the row's components (L-1 the re-open question; L-4 the 2026-08-14 relational-context addition). **Only the index was stale.** Row corrected in place; what remains is **O-C**, a design question whose session is not licensed. **No question needs to reach the mentor on this** — which is what the ruling asked be determined first. |
+
+### 9.2 ⚠ NOT done, and the reason is a finding — D-9 is BLOCKED
+
+**The founder asked for W2's first-sitting prompt. It was not written, deliberately.**
+
+Preparing it surfaced a collision: **the standing opener names `andreia` as the part-(2) gap and names
+*"variety assessed, never targeted"*.** Q-S2 binds at the session-prompt level, and the 2026-09-13
+ruling passed `CLAUDE.md` **precisely because** *"It does not name andreia as the watched domain. It
+does not name variety of courage-relevant moments as the criterion."* **The opener does both — and
+unlike `CLAUDE.md`, it is pasted as a session's first message.**
+
+**So a W2 sitting opened under the opener as written appears to break Q-S2 at the point of
+application, by the document it opened under.** Recorded at the opener's addendum **§H**, with three
+routes named and none chosen. **The assembling session takes no position on whether it is a breach —
+only that it declined to write a prompt that would walk into it.**
+
+**This does not affect any non-W2 session**, which is every session today.
+
+### 9.3 Not done because they are the founder's own acts
+
+**D-3** (sign the compliance-not-virtue clause — the signature is yours; the application is its own
+session); **D-4** and **D-8** (`manifest.md` edits, *"reserved to your own act — no session may make
+it"*); **D-6** (**revoke `sagereasoning:option-s@v1`** — needs a production admin JWT; **the only open
+item with a live security surface**); **D-7** (close idle peers, through the UI); **D-9** (open W2's
+first sitting — and now blocked besides); **D-10/D-11** (after W2 / Session R). **D-15's F-B** — the
+peer's `environmental-context.json` — was left unstaged, as it has been all session.
+
+### 9.4 Authored for the next session
+
+`operations/handoffs/founder/2026-09-14-QS2-opener-collision-and-pre-W2-items-NEXT-SESSION-PROMPT.md`
+— **Task A** resolves the Q-S2 collision (verify or refute first-hand; draft a relay; draft a trimmed
+W2-only opener so the founder has it either way) and **blocks the rest**; **Task B** prepares D-3's
+sign-off package without applying it; **Task C** prepares both `manifest.md` edits as a before/after
+for the founder's single act. It states in its own header that **it is not W2's first sitting** and
+must not be treated as one.
+
+### 9.5 Verified at this addendum's close
+
+Byte-identity guard **250/0**; all three SHA pins unchanged (`60cefedb…`/`fa8895ec…`/`db86fccb…`);
+`GUARD_RE` re-read, **no matching file touched** — every file written this session is under
+`operations/`. **The ruling starts no clock; W2 has not opened; the current window's intake remains
+open and this session's own records are in it.**
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**

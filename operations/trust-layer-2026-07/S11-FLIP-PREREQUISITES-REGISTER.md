@@ -692,3 +692,23 @@ remain BLOCKED; the 0h call remains the founder's.
   **Nothing built, activated or flipped; the ruling starts no clock — it rules that none has started.**
   D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
   founder's.
+
+- **2026-09-13 (evening, after the six-question ruling) — PART (1)'s MARK IS RECORDED; F-4 DISCHARGED;
+  and a Q-S2 COLLISION BLOCKS W2's FIRST SITTING**
+  (`D-PART1-MARK-RECORDED-OPENER-ADOPTED-LAYER3-ROW-RECONCILED-QS2-COLLISION-FOUND-2026-09-13`).
+  **Part (1)'s mark is RECORDED on the founder's express election** — the **clock anchor**
+  `2026-09-13T09:44:55Z` (took-effect probe + 7 days), recorded **as-of**, at
+  `2026-09-13-current-window-part1-mark-RECORD-DRAFT.md` (now a record, not a draft). **The board
+  stands at three of four: (1) reached; (2) NOT MET and not dischargeable from this window; (3) MET
+  regime-scoped; (4) SATISFIED with the B2 qualification.** **The as-of qualification is load-bearing:**
+  under the same evening's Q2 ruling a window's intake closes only when the **next** window's clock
+  starts, and **W2 has not opened — so the current window is still accruing and its composition
+  disclosure is as-of, not final.** The standing opener Version 2026-09-13 is **ADOPTED** and operative.
+  **⚠ A Q-S2 COLLISION WAS FOUND IN THE OPENER ITSELF and W2's first sitting is BLOCKED on it:** the
+  opener **names `andreia`** as the part-(2) gap and **names *"variety assessed, never targeted"***,
+  where the 2026-09-13 ruling passed `CLAUDE.md` *"precisely because"* it names neither — and the
+  opener, unlike `CLAUDE.md`, is **pasted as a session's first message.** Three routes are named at the
+  opener's addendum §H; **none is chosen; it is the founder's and the mentor's.** The session declined
+  to author the W2 prompt rather than walk into it. **Nothing built, activated or flipped; no clock
+  started.** D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call
+  remains the founder's.

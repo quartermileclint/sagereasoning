@@ -6,7 +6,28 @@
 08-01, 07-25, 07-13 — live in the **repo-root** `archive/`, not the handoffs archive; the 2026-09-10
 header cited them under one path, imprecisely).
 
-> **⚠ DRAFTED 2026-09-13 (~06:00 AEST), NOT YET FOUNDER-ADOPTED — the founder has asked for this version to adopt.** Drafted by the records-fold session
+> **✅ ADOPTED 2026-09-13 (evening) BY THE FOUNDER.** Answering *"I agree with your recommendations"*
+> in session on the D-2 recommendation, the founder adopted this version. **It is now the operative
+> opener and supersedes the 2026-09-10 version** (archived at
+> `operations/handoffs/founder/archive/2026-09-10_STANDING-SESSION-OPENER-grounded-foundations.md`).
+> The election is the founder's; the transcription is the session's. Read the **Addendum immediately
+> below** before the body — it carries everything that landed after the body was drafted, including
+> two rulings.
+>
+> **⚠ ONE CARVE-OUT, AND IT IS LOAD-BEARING — THIS OPENER MAY NOT BE USED VERBATIM TO OPEN A W2
+> OBSERVATION-WINDOW SITTING.** Q-S2 binds at the session-prompt level: *"If a W2 session prompt names
+> the observation goal — if it tells the loop that andreia is being watched, or that variety of
+> courage-relevant moments is the criterion — the discipline is broken at the point of application."*
+> The mentor's 2026-09-13 ruling passed `CLAUDE.md` **precisely because** *"It does not name andreia as
+> the watched domain. It does not name variety of courage-relevant moments as the criterion."*
+> **This opener does both** — the part-(2) row names `andreia` and its guard/consult split, and the
+> part-(2) window section carries *"variety assessed, never targeted."* Since this opener is **pasted
+> as a session's first message**, it is far closer to a session prompt than `CLAUDE.md` is. **A W2
+> sitting opened under it as written would break Q-S2 at the point of application.** Surfaced
+> 2026-09-13 evening; **not resolved** — it is the founder's and the mentor's. See the addendum §H.
+> **It does not affect this opener's use for any non-W2 session**, which is every session today.
+
+> **⚠ Superseded status line, kept as the record: DRAFTED 2026-09-13 (~06:00 AEST), NOT YET FOUNDER-ADOPTED — the founder has asked for this version to adopt.** Drafted by the records-fold session
 > (autonomous on 2026-09-12; founder-present for the 2026-09-13 re-grounding) — `sagereasoning-e4 [5bee2f]`, opened under
 > `2026-09-12-records-fold-and-opener-regrounding-AUTONOMOUS-NEXT-SESSION-PROMPT.md` — per the
 > opener's own footer rule (*"rewritten only at a grounding session, from primary sources"*) and the
@@ -165,6 +186,38 @@ append-only and live, so any figure off it is as-of a timestamp.**
 | **NEW — Session R's founder-walked half** | Elect mint numbers (**doubled** per C.1); mint **both** credentials fresh (**new** runner credential per C.2); place tokens; confirm `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` unset; open and attend Session R; revoke both at close; then Session S. |
 | **F-4** | **The mark has passed.** The record draft exists; recording it is yours. |
 | **Peer count** | Re-derive with `ListAgents` at your own open. This session's figure is in its close; the body's is stale. |
+
+### H. ⚠ A Q-S2 COLLISION IN THIS VERY DOCUMENT — surfaced 2026-09-13, NOT resolved, blocking D-9
+
+**Found while preparing to author W2's first-sitting prompt. It is the reason that prompt was not
+written.**
+
+**Q-S2's binding condition** (2026-09-12 verbatim): *"If a W2 session prompt names the observation
+goal — if it tells the loop that andreia is being watched, or that variety of courage-relevant
+moments is the criterion — the discipline is broken at the point of application, regardless of what
+the specification says."*
+
+**The 2026-09-13 ruling passed `CLAUDE.md` on exactly that test:** *"It does not name andreia as the
+watched domain. It does not name variety of courage-relevant moments as the criterion."*
+
+**This opener fails both halves of that test:**
+- the **part-(2) row** names the domain and its split — *"`andreia` had one record at the ruling"*,
+  *"**andreia 0 / 4** (all consult…)"*, *"Every andreia reading is on the consult path; the guard path
+  has never carried one"*;
+- the **part-(2) window section** names the criterion — *"variety assessed, never targeted"*.
+
+**And unlike `CLAUDE.md` — which is auto-read background — this opener is pasted as a session's FIRST
+MESSAGE.** That is the thing Q-S2 calls a session prompt. **A W2 sitting opened under this document as
+written would break the discipline at the point of application, by the document it opened under.**
+
+**Not resolved here.** Three routes exist and the choice is the founder's, with the mentor if wanted:
+**(i)** a trimmed W2-only opener variant that carries state without naming the domain or the
+criterion; **(ii)** put it to the mentor as a specific question — is an opener a "session prompt" for
+Q-S2, and does naming a domain in a *state* table differ from naming it as the *criterion*?;
+**(iii)** rule that the carve-out is unnecessary. **The assembling session takes no position beyond
+declining to write a prompt that would walk into it.**
+
+**This does not affect any non-W2 session** — which is every session today, since W2 has not opened.
 
 ### G. What this addendum does not do
 

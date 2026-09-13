@@ -41124,3 +41124,76 @@ capture stands as the record of the ruling either way.
 **Status:** Adopted. **Nothing built, activated, flipped, deployed or pushed. The ruling starts no
 clock — it rules that none has started. D2 remains blocked. The S11 flip remains REFUSED. Weights
 remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-13 — D-PART1-MARK-RECORDED-OPENER-ADOPTED-LAYER3-ROW-RECONCILED-QS2-COLLISION-FOUND-2026-09-13
+
+**Session:** `sagereasoning-bd [c78e58]` (buffer `e1713b19…`), continuing after the founder returned,
+relayed the six-question ruling, and answered *"I agree with your recommendations"* on the rewritten
+Part 3 decision table (D-1…D-15). **Tier `governance`/documents. AC7 not engaged. Nothing built,
+activated, flipped, deployed, pushed, minted or revoked. No code, schema, flag, credential, migration,
+`GUARD_RE` file, R18 surface or `manifest.md` touched. Production unchanged.**
+
+**THREE FOUNDER DECISIONS EXECUTED ON THE FOUNDER'S EXPRESS ELECTION.** In each the **election is the
+founder's and the transcription is the session's**, stated in the artifacts themselves so the
+distinction survives:
+
+- **D-1 — the Part (1) mark is RECORDED; F-4 is DISCHARGED.** The draft is promoted to a record headed
+  with the founder's election: the **clock anchor** (`2026-09-13T09:44:55Z`, took-effect probe + 7
+  days), recorded **as-of** rather than waiting for the window's intake to close. The as-of
+  qualification is not a formality — **Q2 closes a window's intake only when the next window's clock
+  starts, W2 has not opened, so the window is still accruing and §4's composition disclosure is as-of
+  this recording, not final.** The prior *"DRAFT — THE FOUNDER RECORDS"* status line is kept in git
+  history at `70f4b8c`.
+- **D-2 — the standing opener Version 2026-09-13 is ADOPTED and is now the OPERATIVE opener**,
+  superseding 2026-09-10. The DRAFTED banner is replaced; the superseded line is kept beneath it.
+- **D-5 — the Layer-3 priority-index row is RECONCILED against Ruling Set D: unambiguous documentation
+  drift, corrected.** The scoping record's **own header has read *"RULED AND CLOSED"* since
+  2026-08-15**, and Ruling Set D ruled **both** of the row's components (L-1 the re-open question; L-4
+  the 2026-08-14 relational-context addition). **Only the index was stale.** Per the Q5 ruling —
+  *"the 'OPEN' row is a documentation drift and should be corrected"* — it is. **No question needs to
+  reach the mentor on this**, which is what the ruling asked be determined first. What remains is
+  **O-C**, a design question whose session is not licensed.
+
+**⚠ D-9 IS BLOCKED BY A FINDING, AND THE PROMPT THE FOUNDER ASKED FOR WAS DELIBERATELY NOT WRITTEN.**
+Preparing W2's first-sitting prompt surfaced a Q-S2 collision **in the standing opener itself**: the
+opener **names `andreia`** (part-(2) row: *"andreia 0 / 4… the guard path has never carried one"*) and
+**names *"variety assessed, never targeted."*** Q-S2 binds at the session-prompt level, and the
+2026-09-13 ruling passed `CLAUDE.md` **precisely because** *"It does not name andreia as the watched
+domain. It does not name variety of courage-relevant moments as the criterion."* **The opener does
+both — and unlike `CLAUDE.md`, which is auto-read background, the opener is pasted as a session's
+FIRST MESSAGE, which is the thing Q-S2 calls a session prompt.** So **a W2 sitting opened under the
+opener as written appears to break the discipline at the point of application, by the document it
+opened under.** Recorded at the opener's addendum **§H** and in the adopted banner's carve-out, with
+three routes named (a trimmed W2-only opener; a mentor ruling on whether an opener is a "session
+prompt", and whether naming a domain in a *state* table differs from naming it as the *criterion*; or
+that no carve-out is needed) **and none chosen — it is the founder's and the mentor's.** The session
+takes no position on whether it is a breach, only that it **declined to author a prompt that would
+walk into it.** **This affects no non-W2 session, which is every session today.**
+
+**Not done because they are the founder's own acts, restated so they are not lost:** D-3 (the
+compliance-not-virtue clause — the signature is the founder's, the application its own session); D-4
+and D-8 (`manifest.md`, *"reserved to your own act — no session may make it"*); **D-6 — revoke
+`sagereasoning:option-s@v1`, the only open item with a live security surface**; D-7 (close idle peers);
+D-9 (blocked besides); D-10/D-11.
+
+**Authored for the next session:**
+`operations/handoffs/founder/2026-09-14-QS2-opener-collision-and-pre-W2-items-NEXT-SESSION-PROMPT.md`
+— Task A resolves the Q-S2 collision (**verify or refute first-hand**, draft a relay, draft a trimmed
+W2-only opener so the founder has it whichever way it goes) and **blocks the rest**; Task B prepares
+D-3's sign-off package without applying it; Task C prepares both `manifest.md` edits as a before/after
+for one founder act. **Its header states it is NOT W2's first sitting and must not be treated as one.**
+
+**Verified at close (run, not quoted):** byte-identity guard **250/0**; all three SHA pins unchanged
+(`60cefedb…`/`fa8895ec…`/`db86fccb…`); `GUARD_RE` re-read and **no matching file touched** — every file
+written is under `operations/`. **The ruling starts no clock; W2 has not opened; the current window's
+intake remains open and this session's own records are in it.**
+
+**Files touched:** the Part (1) record (promoted); the standing opener (adopted banner + §H); the
+priority index (Layer-3 row); the close (§9 addendum + §2 status); the next-session prompt (new); this
+entry. **Not staged:** another session's `website/src/data/environmental-context.json` and the two
+untracked prompt files. **Risk classification:** `governance`/documents. **Rollback:** `git revert` the
+commit; D-1's and D-2's elections would need re-making, the Q-S2 finding stands regardless.
+
+**Status:** D-1, D-2, D-5 discharged. **D-9 blocked pending the Q-S2 collision. Nothing built,
+activated, flipped, deployed or pushed. D2 remains blocked. The S11 flip remains REFUSED. Weights
+remain BLOCKED. The 0h call remains the founder's.**
