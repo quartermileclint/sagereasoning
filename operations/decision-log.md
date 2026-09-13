@@ -40611,3 +40611,32 @@ Nothing here pre-approves a change to a live safety gate.
 production admin JWT); command handed over. ~520 quota units unused.
 
 **Rollback:** `git revert` the records commit — documents only; nothing live, nothing built.
+
+---
+
+## 2026-09-13 — D-STANDING-OPENER-REGROUNDED-TO-2026-09-13-FOR-ADOPTION-2026-09-13
+
+**Decision:** at the founder's request, the DRAFTED standing opener is re-grounded to **Version 2026-09-13**
+on the six peer commits that landed overnight (`50fd196`…`e26a07c`) and offered for adoption. What it
+folds in, each read from the primary record: **Option S RAN and is CLOSED** (240 calls; 21 of 24 inputs
+deterministic; rejection-stratum rate 0.536 [0.430, 0.638] operative, winners 0/144; the **M/W/S election
+MADE — W, worst-of-K, as doctrine not build**; R8-D7 unblocked; the Option S gate fully discharged;
+`NAMED_DEFECT_series_completeness` reserved to an input-blind session; the credential revocation ruled
+"immediately" and **unverified from here**); the **Option S measurement PUBLISHED on all three R18
+surfaces** at `e26a07c` under founder sign-off, explicitly not closing the near-boundary gap, extension
+count still 26; and the 2026-09-13 W2-window ruling (already recorded). The 2026-09-12 draft was never
+adopted and is superseded in place (git history), not archived.
+
+**Reasoning.** The 2026-09-12 draft's Option S row said "in flight by a peer; re-derive". Both the run
+and its publication closed within hours. Adopting the draft as written would have adopted a stale row.
+
+**Files touched:** `operations/handoffs/founder/STANDING-SESSION-OPENER-grounded-foundations.md`; this
+entry. **Risk classification:** `governance` / documents. AC7 not engaged; no code, schema, flag,
+credential, R18 surface or `GUARD_RE` file touched; guard 250/0 and the three hashes unchanged.
+**Rollback:** `git revert`. **Verification (founder):** the opener's corrections table's Option S row
+against `D-OPTION-S-RUN-COMPLETE-RULINGS-ADOPTED-2026-09-13` and `D-MWS-ELECTION-W-ELECTED-WORST-OF-K-2026-09-13`.
+**Rules served:** PR18, PR23. **Status:** Adopted (records); the opener is **Under review** until the
+founder adopts it.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

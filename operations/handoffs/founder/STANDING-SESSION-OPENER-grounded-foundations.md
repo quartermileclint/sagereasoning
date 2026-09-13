@@ -1,13 +1,13 @@
 # Standing Session Opener — Grounded Foundations
 
-**Version 2026-09-12** (amends the founder-adopted 2026-09-10 version, now archived at
+**Version 2026-09-13** (supersedes the unadopted 2026-09-12 draft of the previous evening — in git history at `f53521c`/`b35fb33`, never adopted, not archived; amends the founder-adopted 2026-09-10 version, now archived at
 `operations/handoffs/founder/archive/2026-09-10_STANDING-SESSION-OPENER-grounded-foundations.md`;
 2026-09-08 sits beside it in that directory; the older predecessors — 2026-09-05, 08-29, 08-15, 08-12,
 08-01, 07-25, 07-13 — live in the **repo-root** `archive/`, not the handoffs archive; the 2026-09-10
 header cited them under one path, imprecisely).
 
-> **⚠ DRAFTED 2026-09-12, NOT YET FOUNDER-ADOPTED.** Drafted by an **autonomous** records-fold session
-> (the founder absent) — `sagereasoning-e4 [5bee2f]`, opened under
+> **⚠ DRAFTED 2026-09-13 (~06:00 AEST), NOT YET FOUNDER-ADOPTED — the founder has asked for this version to adopt.** Drafted by the records-fold session
+> (autonomous on 2026-09-12; founder-present for the 2026-09-13 re-grounding) — `sagereasoning-e4 [5bee2f]`, opened under
 > `2026-09-12-records-fold-and-opener-regrounding-AUTONOMOUS-NEXT-SESSION-PROMPT.md` — per the
 > opener's own footer rule (*"rewritten only at a grounding session, from primary sources"*) and the
 > mentor's 2026-09-10 ruling that regrounding is a founder act requiring *"accurate facts."* The facts
@@ -21,6 +21,10 @@ header cited them under one path, imprecisely).
 > register §F and its change-log tail; the decision-log physical tail (entries through
 > `D-PROVIDER-ACCOUNT-BLOCK-RESPONSE-AND-GUARDRAIL-LOGGING-2026-09-12`); ADR-013 §8 and §12; the
 > logos-on plan and its L1/L7 verbatim; the 2026-09-10 opener as the thing being replaced.
+> **Re-grounded 2026-09-13 (~06:00 AEST) on six peer commits that landed overnight** (`50fd196`…`e26a07c`):
+> the Option S rulings verbatim (all five exchanges), the M/W/S election document, the correction relay,
+> the two new decision-log entries, the R18 sign-off package, and the `git diff` of the three public
+> surfaces at `e26a07c`; plus the 2026-09-13 W2-window ruling verbatim.
 > **Live checks, run not restated:** the false-hold buffer parsed record-by-record in Python (643 lines
 > at open, 646 by close — the capture is live and this session's own actions are in it); all three
 > SHA hashes; the byte-identity guard battery **run** (250/0); `false-hold-observation-report.ts
@@ -45,9 +49,9 @@ then wait for the task. **Every number in it is a claim to re-derive at your own
 | **"6 crons"** | **7** in `vercel.json` (`observability`, `trajectory-retention-sweep`, `narrative-sweep`, `trust-core-retention-sweep`, `observability-retention-sweep`, `agent-hold-observations-retention-sweep`, `cognitive-os-retention-sweep`). Count from source. |
 | **"`Q-PREFLIP-REPORTS` is still unbuilt and still needs a founder waiver"** | **Built 2026-09-10 under a founder waiver** (`D-Q-G6A-QUALIFICATION-AND-Q-PREFLIP-REPORTS-BUILT-2026-09-10`), the **report assembled 2026-09-12**, PR19-folded 13/13, and **ruled** (`2026-09-12-mentor-ruling-preflip-report-three-questions-verbatim.md`). Its Part-1 pooled-span defect was then fixed under the B1 waiver the same day. |
 | **"The three stale `*-stdin.json` files remain on disk… Founder `rm` still owed"** | **Cleared.** `ls ~/.sage-gate1/` at this open: no `*-stdin.json`. The pre-flip report §12 records the `rm` as discharged; the O-2 session found them absent independently. CLAUDE.md's S9 block now carries a dated annotation saying so. The two-step pre-check before any future `GATE1_DEBUG` session remains mandatory. |
-| **"Nothing has changed in production since 2026-09-06"** | **FALSE since 2026-09-12.** (a) **W2** merged (`0e4ea4e`, under a per-commit waiver), **deployed** (Vercel green per its close), and **schema-backed** — `agent_trust_events.event_type` CHECK widened 21→22 on TEST and production; **NOT activated** (`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` unset; 0 `enforcement-outcome` rows). (b) **D1** — the R18 logos-on framing paragraph applied to all three public surfaces (founder-signed). (c) **O-1** (`3b0bf47`) — the error classifier recognises a provider account block. (d) **O-2** (`6dea995`, four `GUARD_RE` paths under a founder waiver) — an honest 503 for the account-block class on 11 routes + discernment, and **`/api/guardrail` now writes `route_errors` rows on all three failure paths**. (c) and (d) are on `origin/main`; their deploy state is **unverified from a repo session**. |
+| **"Nothing has changed in production since 2026-09-06"** | **FALSE since 2026-09-12, and again 2026-09-13:** the Option S measurement is **PUBLISHED on all three R18 surfaces** (`e26a07c`, founder-signed via `2026-09-13-option-s-R18-docs-SIGNOFF-PACKAGE.md`; `llms.txt` +19 lines inside the "What 'deterministic' scopes to" paragraph, the agent-card verdict-variance description, an `api-docs` sentence; **extension count unchanged at 26**) — labelled by provenance, with the explicit line that it **does not close the near-boundary gap**; the founder reports Vercel green. **Also, 2026-09-12:** (a) **W2** merged (`0e4ea4e`, under a per-commit waiver), **deployed** (Vercel green per its close), and **schema-backed** — `agent_trust_events.event_type` CHECK widened 21→22 on TEST and production; **NOT activated** (`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` unset; 0 `enforcement-outcome` rows). (b) **D1** — the R18 logos-on framing paragraph applied to all three public surfaces (founder-signed). (c) **O-1** (`3b0bf47`) — the error classifier recognises a provider account block. (d) **O-2** (`6dea995`, four `GUARD_RE` paths under a founder waiver) — an honest 503 for the account-block class on 11 routes + discernment, and **`/api/guardrail` now writes `route_errors` rows on all three failure paths**. (c) and (d) are on `origin/main`; their deploy state is **unverified from a repo session**. |
 | `Q-CALLER-BUILD` "should be updated in the register at the next records fold" | **Done 2026-09-12** — as a register change-log row (the row never lived in the register's tables; it is the standing queue's, in the 2026-09-08 opener). Grounds: the Condition-3 close's two addenda + the mentor's post-build-outcome verbatim. |
-| **`Q-OPTION-S-RUN`: "fixed, still never run"** (carried unverified) | **A peer session was writing Option S run files at this writing** — eight `option-s/runs/*.jsonl` with mtimes 21:55–22:28 AEST 2026-09-12, uncommitted, unrecorded, not this session's to stage. Whether Option S has now "made a call" is **in flight; re-derive from the decision log and `option-s/runs/` at your open.** |
+| **`Q-OPTION-S-RUN`: "fixed, still never run"** (carried unverified) | **Option S RAN 2026-09-12 and is CLOSED 2026-09-13** (`D-OPTION-S-RUN-COMPLETE-RULINGS-ADOPTED-2026-09-13`; `D-MWS-ELECTION-W-ELECTED-WORST-OF-K-2026-09-13`): 240 calls, 24/24 series, ~$3.40, 228 verdicts + 12 outages; **21 of 24 inputs deterministic**; rejection stratum 45/84 floors (0.536, Wilson [0.430, 0.638]) **operative**, winners 0/144, pooled 0.197 disclosed-not-used. **The M/W/S election is MADE: W, worst-of-K** — doctrine (*"a floor is a ceiling on permitted risk"*), **not a build**; no sampling layer exists on the live gate and any implementation is its own `code-critical` step. **R8-D7's sampling policy is unblocked; the Option S gate is fully discharged.** Three instrument defects caught pre-publication; a second thin input (a winner, 4/10) found that the ruling could not have known; **`NAMED_DEFECT_series_completeness` reserved to a session that does not know which input it affects.** The **near-boundary R18 gap is NOT closed** (ruled Q-S2). Verbatim: `operations/agent-circles-2026-08/2026-09-13-mentor-rulings-option-s-result-and-F-R1-verbatim.md`. |
 | **"10 interactive peers + this one"** | **7 interactive peers + this one** (`ListAgents`), plus eight non-interactive cloud/Remote-Control rows (idle/offline, unrelated projects). |
 | Part (1) "5.54 days… threshold Sunday" (via the pre-flip report) | **Still pending at this writing** (22:xx AEST Sat 12 Sep). The mark is **2026-09-13T09:44:55Z = Sun 13 Sep 19:44 AEST.** Re-check whether it has passed at your open. |
 | **"W2 itself — the actual enforcement-class record machinery — is NOT built"** (the continuation summary, same day) | Superseded within hours — see the production row above. |
@@ -204,10 +208,14 @@ Read, in order:
    specification Q-S1–Q-S3) — **canonical, verbatim wins over every summary including this one**;
    W2 → `2026-09-12-W2-record-honesty-build-CLOSE.md` + `…-W2-waiver-merge-and-schema-walk-CLOSE.md`;
    observability → `2026-09-12-O1-…-CLOSE.md` + `2026-09-12-O2-…-CLOSE.md`; the records fold →
-   `2026-09-12-records-fold-and-opener-regrounding-CLOSE.md`.
+   `2026-09-12-records-fold-and-opener-regrounding-CLOSE.md` + `2026-09-13-w2-window-two-questions-ruled-CLOSE.md`;
+   **Option S / the M/W/S election** → `operations/agent-circles-2026-08/2026-09-13-mentor-rulings-option-s-result-and-F-R1-verbatim.md`
+   (five exchanges — **canonical**), `2026-09-13-M-W-S-ELECTION-DOCUMENT.md`, the correction relay, and
+   `operations/handoffs/founder/2026-09-13-option-s-election-and-R18-NEXT-SESSION-PROMPT.md` (its R18
+   step is spent at `e26a07c`).
 8. **`git status`** (whole, never truncated) and **`git fetch origin && git log --oneline
-   origin/main..HEAD`**. At this writing `HEAD` = `origin/main` = `004d20a`; the tree carried a peer's
-   in-flight Option S run files and the long-standing `environmental-context.json` scan — **none
+   origin/main..HEAD`**. At this re-grounding `HEAD` = `origin/main` = `e26a07c`; the tree carried only
+   the long-standing `environmental-context.json` scan (the Option S run files are now committed) — **none
    matches `GUARD_RE`; never stage another session's files.**
 9. **`ListAgents`** — note the peer count before writing anything.
 
@@ -223,9 +231,10 @@ logos-on, `operations/agent-circles-2026-08/` (the 2026-08-01 plan + L1–L7 ver
 
 ### Production state
 
-The substrate is live at `www.sagereasoning.com`. **Changed since 2026-09-06 (all 2026-09-12):** W2
+The substrate is live at `www.sagereasoning.com`. **Changed since 2026-09-06:** (2026-09-12) W2
 merged + deployed **dark**, schema 21→22 on TEST + prod; D1's R18 paragraph on three surfaces; O-1 and O-2
-on `origin/main` (deploy state unverified from here). **Unchanged:** the R20a perimeter (43+2=45) and its
+(the founder reports pushed + Vercel green, 2026-09-13); (2026-09-13) **the Option S measurement published on
+the three R18 surfaces** (`e26a07c`, founder-signed; Vercel green per the founder). **Unchanged:** the R20a perimeter (43+2=45) and its
 ordering arc (closed); D4 (live, took-effect-proven); the row-cap arc; the provenance ledger (C3 soak to
 ~2026-11-24); the verdict-variance disclosure; the public assessment contract (`api-docs` rewrite still
 open). Full detail on those in the archived 2026-09-08 version.
@@ -246,7 +255,7 @@ open). Full detail on those in the archived 2026-09-08 version.
 | Part (3), regime-scoped | `--dry-run` | 0 FP / 125 correct on `at-action-v2-composed`; MET |
 | `*-stdin.json` residue | `ls ~/.sage-gate1/` | **none** |
 | W2 content in the window | `actionPreview` grep | 3 Bash guard records; 0 consult |
-| `git status` / `origin/main` | whole / fetch, **at open** | `HEAD` = `origin/main` = `004d20a`; peer Option S files + `environmental-context.json` modified; none `GUARD_RE`. (Later in the same session `git status` also showed this session's own edits — CLAUDE.md's annotation, the opener, the SPENT markers — which is the staleness this table warns of, not a peer.) |
+| `git status` / `origin/main` | whole / fetch | **2026-09-13 re-grounding:** `HEAD` = `origin/main` = `e26a07c`; only `environmental-context.json` modified; none `GUARD_RE`. (At the 2026-09-12 open: `004d20a`; a peer's Option S run files, since committed.) (Later in the same session `git status` also showed this session's own edits — CLAUDE.md's annotation, the opener, the SPENT markers — which is the staleness this table warns of, not a peer.) |
 | Open sessions | `ListAgents` | **7 interactive peers + this one** |
 | Vercel / Supabase state | — | **unverified from a repo session** |
 
@@ -268,7 +277,7 @@ open). Full detail on those in the archived 2026-09-08 version.
 | **F-F** | Decide the manifest AC5 fix — still contradictory at this writing. | a governing-surface edit |
 | **F-G** | Decide the concurrency escalation (pre-commit hook / **PR26** / leave as convention). **Still a convention.** | the cache's §6 |
 | **F-H** | Founder-hub Q4. **Carried unverified.** | `Q-HUB-CONTINUITY` |
-| **F-I** | Option S — **a peer was running it at this writing**; re-derive before acting. | `Q-OPTION-S-RUN` / M8 |
+| **F-I** | **Revoke `sagereasoning:option-s@v1`** — ruled *"immediately"* at the election's close (needs a production admin JWT; the command was handed over in the Option S session). **Unverified from a repo session whether it is done.** ~520 quota units unused. | closes the Option S credential's exposure |
 | **F-J** | TEST parity, one sitting. **Carried unverified.** | two "undetermined" carries |
 | **F-7** | **Part 3's consult/guard split** — open, unruled, parked by your own election until part (2) resolves; the capture-path finding bears on it. | the report's Part 3 |
 
@@ -291,7 +300,7 @@ founder-visible setting, not an auto-mode outcome"*).
   flip** (§F W3-d). Not before.
 - **NEW `Q-W2-FIRST-SESSION`:** gated on F-1 (the work designation, ruled the founder's 2026-09-13); its
   prompt must satisfy Q-S2 (name the work, never the observation). **The clock has not started.**
-- **`Q-OPTION-S-RUN`: in flight by a peer at this writing** — unverified; do not double-run.
+- **`Q-OPTION-S-RUN`: DONE and CLOSED** (see the corrections table). **NEW `Q-OPTION-S-SERIES-DEFECT`:** fix `complete_series()` to count counted outcomes, not records — **reserved to a session that does not know which input it affects** (D6a class-freeze); `code-elevated`, its own session. **Standing fact, not a queue row:** worst-of-K is the ruled floor semantics under sampling; **no build is licensed by it.**
 - **Carried forward UNVERIFIED by this session:** `Q-L1SUPPLY-2B`, `Q-HUB-CONTINUITY`; the held/gated list
   (C) and the longer-tail list (D) of the 2026-09-08 version.
 
@@ -299,8 +308,8 @@ founder-visible setting, not an auto-mode outcome"*).
 
 M1 (baseline) — **7 of 7**, counting-complete for the current window; **W2's window restarts the
 clock** (Q-S1). M3 (Option C′) — **decided**. M4 (pre-flip report) — **assembled and ruled**; re-runs
-owed. M5 (the standard re-examined) — **REFUSED**; part (2) is a window, not a write. M6–M8 unchanged
-(M8 may be moving — see F-I). **M9 the 0h call — the founder's, and only the founder's. M10 weights —
+owed. M5 (the standard re-examined) — **REFUSED**; part (2) is a window, not a write. M6–M7 unchanged.
+**M8 (Option S data → M/W/S + R8-D7) — DISCHARGED 2026-09-13**: W elected; R8-D7 unblocked; the standing-runner design track's item-level gate is cleared (its opening remains the founder's act). **M9 the 0h call — the founder's, and only the founder's. M10 weights —
 BLOCKED.**
 
 ---
@@ -346,5 +355,5 @@ malfunction; answer the elicitation genuinely.
 
 ---
 
-*End of the standing opener, Version 2026-09-12. Drafted by an autonomous grounding session from primary
+*End of the standing opener, Version 2026-09-13. Drafted by a grounding session from primary
 sources; awaiting founder adoption. Every number in it is a claim to re-derive.*
