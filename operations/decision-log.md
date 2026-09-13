@@ -41401,3 +41401,96 @@ conforming opener, **the act of opening being what makes it the first**.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## 2026-09-14 — D-CONFORMING-OPENER-THIRD-PASS-CLEARED-AC5-CHECKS-DESIGNED-BARE-TABLE-RECOMMENDED-AGAINST-2026-09-14
+
+**Session `sagereasoning-8a [fdb13d]`. Tier: `governance` / documents. AC7 NOT engaged. NOT W2's first
+sitting — W2's clock has not started, and every record this session produced belongs to the CURRENT
+window, whose intake remains open per Q2.** Close:
+`operations/handoffs/founder/2026-09-14-conforming-opener-third-pass-CLOSE.md`.
+
+**THE CONFORMING OPENER IS CLEARED. W2 may open under it, on the founder's act.** The mandatory-in-form
+third pass ran because **the document had never been reviewed in its current form** — the second pass
+found a HIGH, and the document then changed at five points *after* the reviewer that assessed it. **The
+loop terminated:** a fresh blind pass on the document as it now stands found nothing substantive
+attributable to it.
+
+**Two reviewers, different contamination profiles, as designed.** **One HIGH and one LOW-MEDIUM.**
+
+**The LOW-MEDIUM is FIXED — the sixth instance of the class.** The provenance banner (*"…held
+separately… **Do not go looking for them**; if you think you need them, ask"*) is deleted. **Both
+reviewers converged on it independently** — the implication hunt as meta-commentary, the blind test as
+its *first* answer to *"what feels deliberately withheld?"* It names no trigger and fails no literal
+test, but *"do not go looking"* is a Streisand instruction, and deletion costs nothing: the *"Read this
+first"* block already carries *"propose it to the founder and do not apply it yourself."*
+
+**The HIGH was VERIFIED in substance and then assessed as NOT a Q-S2 breach — and ROUTED, not
+resolved.** The claim: §3 (work scoped to Write/Edit; a worktree *"outside the instrument's reach"*)
+plus §6.4 (*"tool mode has a consequence for the record… never choose because of the record"*) jointly
+imply the channel↔domain link. **Its decisive step is real and was checked, not taken on the reviewer's
+word:** `operations/decision-log.md` **lines 39792–39794** state the criterion outright, channel
+attribution included. **Assessed NOT a breach on four grounds:** Q-A2's forbidden three-part combination
+is absent (no part, no domain, no discharge claim); the decisive link is the decision log, **expressly
+ruled in-bounds** and named in §11.2 as reading that must not be trimmed (Q-A3: *"Its scope is the
+opener, not the repository"*); **§3's channel scope is ruled content (Q-M2)** and not a session's to
+rewrite; and **both blind passes failed to reach the criterion.** **Mitigations rejected with reasons** —
+stripping §6.4's explanation leaves an emphatic *unexplained* prohibition, which **both reviewers ranked
+the single most inference-inviting passage in the document.** **Recommendation: keep §6.4.** Put to the
+founder a second time only because two independent passes landed on the same passage.
+
+**⚠ A CORRECTION TO THE PRIOR RECORD.** The second pass kept §6.4 partly because *"`CLAUDE.md` already
+discloses the same property."* **Grepped: it does not** — `CLAUDE.md` carries no statement that Bash-
+and Write/Edit-authored sessions leave different records. **But the property IS in auto-loaded context —
+the memory index, which nobody had checked** (*"auto-mode Bash authoring adds ~zero consult records"*;
+*"Bash-mode work never enters the consult floor"*). The conclusion survives on a corrected basis: §6.4
+introduces nothing the sitting does not already hold, which is the ground `CLAUDE.md` was passed on.
+
+**A SURFACE NOBODY HAD ASSESSED, NOW ASSESSED.** The **auto-loaded memory index and its 76 files** had
+never been tested against Q-S2. They load into every session exactly as `CLAUDE.md` does and sit
+**outside the repository**, so no repository-side remedy reaches them. **They pass, on the same ground
+`CLAUDE.md` passed:** one trigger line in the index, engine-mechanism (*"the §4 andreia courage-floor…
+coupling to justice"*); **no file among the 76 names a watched domain, "courage-relevant", or the
+variety criterion.**
+
+**TASK C — PREPARED AND RECOMMENDED AGAINST, on evidence rather than caution.** Q-A2 ruled a bare
+four-domain count table *permitted*; the opener carries none, stricter than required. Figures
+re-derived from the buffer (806 lines, 0 unparseable; window = 667 records): **phronesis 484 ·
+dikaiosyne 631 · andreia 4 · sophrosyne 301.** **A fresh reader given those four numbers and nothing
+else** — neutral framing, no purpose stated for the table or the measurement — **reconstructed the
+watched domain, produced the phrase *"courage-relevant"* unprompted, named the optimisation move
+(*"introduce more andreia-tagged content… regardless of whether the task actually calls for it"*), and
+called the table *"a statement of a gap, not neutral instrument state."*** **This does not contradict
+the ruling: Q-A2 assessed the FORM and the mentor did not have these FIGURES.** At 4 against 301–631 the
+distribution states the criterion without a row — Q-A2's own principle applied to numbers instead of
+prose. **If the founder wants the table, the honest route is to relay these figures to the mentor.**
+**Not added to the opener; prepared in the design notes as an unelected option with placement and both
+sides argued.**
+
+**TASK B — BOTH AC5 CHECK DESIGNS PREPARED; NOTHING BUILT**
+(`operations/count-discipline-2026-09/2026-09-14-ac5-executable-check-DESIGNS.md`). Building the wrong
+one is worse than building none, so both are specified to the mutation and the A/B election gates it.
+**Two gaps in the options as offered were surfaced rather than designed around: (1) Option A does not
+fully discharge the defect** — it leaves the bolded sentence, which hand-maintains two counts inside
+itself; **(2) §AC5's headline numbers are SPELLED-OUT WORDS** (*"forty-five"*, *"forty-three"*), so a
+digit regex — **including the sibling guard's own** — returns zero offenders and looks green. Both are
+mandatory mutations. **The honest caveat stated first: there is NO pre-commit hook** (verified —
+`.git/hooks/` holds only samples), so **neither check runs automatically**; founder item **F-D** is what
+turns it from a convention into a gate.
+
+**Tool-mode disclosure:** authored through **Bash** per the harness's standing auto-mode instruction —
+not chosen because of the record. **Consequence: guard records, ~zero consult records**, added to the
+**current** window, not W2. The buffer was parsed **read-only**; no report script was run; nothing was
+written to `~/.sage-gate1/`. The at-action guardrail fired CAUTION several times and the structured
+elicitation **four** times, each answered genuinely, including where the honest answer was that the
+resolution preceded the examination.
+
+**Verified at close:** byte-identity guard **250/0**; all three SHA pins unchanged; **no working-tree
+path matches `GUARD_RE`**; R20a **43 + 2 = 45** from the arrays; extensions **26**; PR1–PR25; crons
+**7**; buffer **806**; conforming opener **0/0/0** word-boundary; **16 interactive peers + this one**.
+
+**NOT DONE, deliberately:** W2's first sitting not opened; neither check built; `manifest.md`, every R18
+surface and every `GUARD_RE` file untouched; no relay sent; no credential touched; no peer closed; no
+push; `option-s/` never opened; the D-3 recast wording not applied.
+
+**W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
+The 0h call remains the founder's.**

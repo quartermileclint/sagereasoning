@@ -2,10 +2,6 @@
 
 > **A preamble, not a task.** Read it, confirm what §1 asks, then wait for the task.
 > **Every number in it is a claim to re-derive at your own open.**
->
-> **Provenance, adoption status and design rationale for this document are held separately and are
-> the founder's.** They are not in this file by design. Do not go looking for them; if you think you
-> need them, ask.
 
 ---
 

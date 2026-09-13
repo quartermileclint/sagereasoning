@@ -132,6 +132,34 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
+- **2026-09-14 (THE CONFORMING W2 OPENER IS CLEARED — the mandatory-in-form third pass RAN and the
+  loop TERMINATED; W2 may open on the founder's act; THE CLOCK IS STILL NOT STARTED;
+  `D-CONFORMING-OPENER-THIRD-PASS-CLEARED-AC5-CHECKS-DESIGNED-BARE-TABLE-RECOMMENDED-AGAINST-2026-09-14`;
+  close: `operations/handoffs/founder/2026-09-14-conforming-opener-third-pass-CLOSE.md`)** — The third
+  pass existed because **the document had never been reviewed in its current form**: the second pass
+  found a HIGH and the document then changed at five points *after* the reviewer that assessed it.
+  **Two reviewers, different contamination profiles; 1 HIGH + 1 LOW-MEDIUM.** The LOW-MEDIUM — the
+  provenance banner, **the sixth instance of the meta-commentary class**, flagged independently by both
+  reviewers — is **FIXED by deletion**. **The HIGH (§3 + §6.4 jointly imply the channel↔domain link) was
+  VERIFIED in substance** — `operations/decision-log.md` **lines 39792–39794** do state the criterion
+  with channel attribution — **and then assessed as NOT a Q-S2 breach and ROUTED, not resolved**:
+  Q-A2's three-part combination is absent; the decisive link is the decision log, **ruled in-bounds**
+  and named in §11.2 as reading that must not be trimmed (Q-A3 — *"Its scope is the opener, not the
+  repository"*); **§3's channel scope is ruled content (Q-M2)**; and **both blind passes failed to
+  reach the criterion**. **Recommendation: keep §6.4** — stripping its explanation leaves an
+  *unexplained* prohibition, which both reviewers ranked the most inference-inviting passage present.
+  **A correction to the prior record:** the second pass's ground *"`CLAUDE.md` already discloses the
+  same property"* is **false** — but the property **is** in auto-loaded context, in the **memory
+  index**, which nobody had checked. **That surface (index + 76 files) was audited against Q-S2 for the
+  first time and PASSES** on the same ground `CLAUDE.md` passed. **Q-A2's bare count table is prepared
+  and RECOMMENDED AGAINST on evidence:** with the re-derived figures (**andreia 4** against
+  phronesis 484 / dikaiosyne 631 / sophrosyne 301), a fresh reader given the four numbers and no stated
+  purpose **reconstructed the watched domain, produced *"courage-relevant"* unprompted, and named the
+  optimisation move** — the ruling assessed the FORM and did not have these FIGURES. **Both AC5
+  executable-check designs prepared, nothing built** (the A/B election gates it); two gaps surfaced —
+  Option A leaves two hand-maintained counts inside its own bolded sentence, and §AC5's headline
+  numbers are **spelled-out words** a digit regex misses. **Nothing built, activated, flipped, applied
+  or pushed. W2's clock has not started; the flip remains REFUSED; weights remain BLOCKED.**
 - **2026-09-13 (THE Q-S2 OPENER COLLISION IS RULED ON ALL FOUR QUESTIONS; THE CONFORMING OPENER IS
   THE RULED PATH; THE W2 CLOCK IS STILL NOT STARTED;
   `D-MENTOR-RULING-QS2-OPENER-COLLISION-FOUR-QUESTIONS-ADOPTED-SECOND-PASS-FOLDED-2026-09-13`;
