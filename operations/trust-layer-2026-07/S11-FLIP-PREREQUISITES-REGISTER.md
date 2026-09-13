@@ -647,3 +647,21 @@ remain BLOCKED; the 0h call remains the founder's.
   any build; a sampled verdict never carries a confidence scalar (Q-M5–Q-M8). **Nothing built, activated
   or flipped; the W2 clock has not started.** D2 remains blocked; the S11 flip remains REFUSED; weights
   remain BLOCKED; the 0h call remains the founder's.
+
+- **2026-09-13 (the current window's Part (1) mark — DRAFTED, not yet founder-recorded;
+  `D-CURRENT-WINDOW-PART1-MARK-DRAFTED-2026-09-13`, if adopted).** The current window's seven-day
+  counting threshold (`2026-09-06T09:44:55.267Z` + 7d = `2026-09-13T09:44:55Z`) **passed.** Drafted for
+  the founder's own recording act (F-4):
+  `operations/trust-layer-2026-07/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md`, with two
+  `--dry-run` captures (`runs/2026-09-13/`) — the script's own record-span metric read `PENDING` at
+  the first capture (its span runs to the newest window record, not the wall clock) and `MEETS ≥7
+  days` at a second capture taken 3m11s later, after ordinary session work produced a further
+  consult record; both are kept, and the flip is disclosed as a metric artifact, not a substantive
+  change. **The board at the mark: (1) counting threshold reached; (2) NOT MET and not dischargeable
+  from this window (a trust-record write on this evidence remains forbidden, Q-B); (3) MET,
+  regime-scoped (`at-action-v2-composed`: 0 false-positive / 163–164 correct); (4) SATISFIED with the
+  B2 qualification.** Per Q-A: *"the seven-day clock reaching its mark does not change what the
+  window contains."* Per Q-S1: this closes the current window at three of four **and does not carry
+  into the W2 window.** Nothing recorded, adopted or written to any trust surface; nothing built,
+  activated or flipped. D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the
+  0h call remains the founder's.

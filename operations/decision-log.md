@@ -40909,3 +40909,133 @@ placeholders, not tokens. **Rules served:** PR15, PR17, PR18, PR19, PR20, PR23; 
 
 **Status:** Pre-flight verified; Session R paste authored; run NOT started. **D2 remains blocked. The S11 flip
 remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-13 — D-PART1-MARK-RECORD-DRAFTED-W2-CLOCK-EVIDENCE-ASSEMBLED-OPENER-ADDENDUM-2026-09-13
+
+**Session:** `sagereasoning-bd [c78e58]` (buffer `e1713b19…`), autonomous, founder absent, main
+checkout, ~19:27–20:1x AEST (from `date`). Opened under
+`2026-09-13-part1-mark-record-W2-clock-evidence-and-opener-addendum-AUTONOMOUS-NEXT-SESSION-PROMPT.md`
+and the DRAFTED (not adopted) standing opener Version 2026-09-13.
+**Tier `governance`/documents + two offline `--dry-run` script runs. AC7 not engaged.**
+**Nothing built, activated, flipped, deployed, pushed, minted, revoked or relayed. No code, schema,
+flag, credential, migration, `GUARD_RE` file, R18 surface or `manifest.md` touched. Production state
+unchanged from open.**
+
+**Deliberate deviation, recorded first.** The prompt's Task A said the mark *"has almost certainly
+passed"* and directed a skip otherwise. At open `date -u` read `09:27:34Z` against a mark of
+`09:44:55Z` — **it had not passed.** Tasks B and C were done first and Task A run after the mark
+passed, rather than skipping F-4 for a third consecutive session on a 17-minute technicality. No
+constraint was breached.
+
+**Task A — the Part (1) mark.** The current window's seven-day counting threshold
+(`2026-09-06T09:44:55.267Z` took-effect probe + 7d) **passed at `2026-09-13T09:44:55Z` = Sun 19:44
+AEST.** Drafted for the founder's own recording act:
+`operations/trust-layer-2026-07/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md`, with two
+verbatim `--dry-run` captures in `runs/2026-09-13/`. **Board: (1) counting threshold reached; (2) NOT
+MET and not dischargeable from this window — a trust-record write on this evidence remains forbidden
+(Q-B); (3) MET regime-scoped (`at-action-v2-composed`: 0 false-positive / 163–164 correct; the pooled
+45.7% is DISCLOSURE ONLY); (4) SATISFIED with the B2 qualification. Three of four.** Per Q-A *"the
+seven-day clock reaching its mark does not change what the window contains"*; per Q-S1 it closes the
+current window and **does not carry into W2**. **A two-anchor distinction is recorded rather than
+collapsed:** the script measures the span between the first and newest window *records*, not the
+clock, and read `PENDING` at capture 1 and `MEETS ≥7 days` at capture 2 — the clock anchor passed once
+and nothing since moved it. **A trap is named:** the `--dry-run`'s `4/4 domains` line is the RECORDS
+reading, not the operative TRUST-STATE reading Q-B made governing (which `--dry-run` skips); part (2)
+is NOT MET. **The `gate1.log` ↔ buffer cross-check reconciles exactly** (430/430 guard, 173/173
+consult), the two off-by-one deltas verified — not assumed — as 3 ms/4 ms boundary artifacts.
+
+**Task B — the W2 clock question, assembled and NOT decided.**
+`2026-09-13-w2-clock-start-EVIDENCE-MEMO.md` (no preference stated) and
+`2026-09-13-w2-clock-start-RELAY-DRAFT.md` (**drafted, NOT sent**). Did R11's first consult record
+(`2026-09-13T01:48:38.960Z`) start the clock under Q-M3/Q-M1, or does the clock await a sitting the
+founder opens as W2's first? R11's session wrote **38 records — 32 consult (7 Write, 25 Edit), 6 Bash
+guard**, all `at-action-v2-composed`; **24 of the 32 wrote two of the three documents Q-M3 names by
+name**; **its prompt does not name the observation goal** (two incidental grep hits in 12.7 KB) and
+**deliberately set Write/Edit on the measured checkout** — the exact Q-M3 condition — without naming
+the observation. **A correction to the commissioning prompt's own premise:** the sentence *"the first
+sitting is the founder's to open under a Q-S2-conforming prompt"* is **not a ruling** — it sits below
+`*End of verbatim ruling.*` under a heading naming it an executing session's recording note, as does a
+parallel note at the foot of the 05:30 file, and **both were written before R11 ran.** The memo
+distinguishes ruling from recording note and states the weight that survives in reading B's favour.
+**Who opened R11 is not in the record**; the structural inference is flagged as an inference.
+
+**Task C — opener addendum**, prepended beneath the DRAFTED banner, **nothing below it edited**:
+the eight-question ruling's operative points (incl. the D2 "relay pending" documentation drift), R11's
+sitting and its seven-question ruling, the bounded re-run with its two pre-flight HIGHs (two quota
+units per call; the novelty window keyed by `credential_ref`), the W2-clock question as OPEN, the
+Part (1) mark, and founder-action deltas.
+
+**PR19 — two blind Sonnet reviewers** (`Agent` subagents at model `sonnet`, the founder's standing
+permission; the session's own model was never changed). **Reviewer A (evidence memo): 9 findings, all
+upheld, all folded**, each verified at source first. Headline (Dimension 2, neutrality, MEDIUM/HIGH):
+**§5 resolved the contested premise in reading A's favour while appearing only to examine it** — it
+answered "is R11 candidate (c)?" (yes, undisputed) and left unstated the contested question, **whether
+Q-M1's *ordering* of candidates is the *designation* the 05:30 ruling calls "the founder's call"**;
+folded as a new §5.1 stating both cases, no position taken. Also folded: §1.3's discounting of reading
+B's best documents ahead of the readings (the surviving weight now stated in B's favour); a wrong
+weekday label; **a consult-availability table extending ~14 minutes past the memo's own declared
+window boundary (173/86/33.2% → 172/84/32.8%)** — the same defect then found by the same check in the
+record draft (`4,383` → `4,344` `AT-ACTION-SKIP-BASH`) and the addendum, conclusions unchanged; a
+count stale by live buffer growth (6 → 8 deep-required, ratio restated as 7 of 8 completed); an
+undisclosed bold; an inverted quotation order; a quote-mark drift.
+
+**Reviewer B (the record draft + the opener addendum) failed on its own model's rate limit, was
+relaunched, and returned 8 findings — 1 refuted on timing, 7 upheld and folded.** Headline (HIGH):
+**`andreia` on the consult path was stated as 6 records; the true count is 4** — the figure came from
+matching the string against each record's whole JSON, which also caught two `actionPreview`
+**filenames** containing the word; matching `signals.virtueDomainsEngaged` gives 4, corroborated
+against the standing opener's own independent long-standing "andreia 0 / 4". **The error made part
+(2) — the one part this window cannot discharge — look 50% better evidenced than it is.** Also folded:
+capture 2's holds transcribed 302 for **301**; `caller_class` figures drawn from the 603-record
+snapshot while framed "across the window" (the captures' own windows give 295/272 and 296/273);
+**`2026-09-13T09:21:47.673Z` mislabelled "the window's last record"** when it is a deliberately frozen
+snapshot boundary excluding this session's own drafting; **the addendum's Q-M8 bullet blurring ruling
+and recording note** — merging the capture session's conditional gloss into text presented as the
+ruling, the identical class the same addendum warns about two sections later; the loop-events figure
+given at one capture against the draft's own both-captures convention (137 → 138); and a rounding nit.
+**Refuted on timing:** a finding that the addendum still carried `173/86/33.2%` — the fix had landed
+before the reviewer's copy was read. **Dimension 2 (overclaim) otherwise CLEAN**, checked explicitly
+against the W2 clock, the S11 flip, D2, part (2) and founder-election language; the reviewer traced the
+capture-1→capture-2 flip to the raw record level and found this session's self-disclosure of its own
+motivation *"accurate and not minimised… if anything more candid than the capture file's own header"*;
+and it verified **all eight Q-M and seven Q-R11 headline summaries line-by-line — "no summary changes
+a ruling's meaning."**
+
+**Three self-caught errors recorded rather than smoothed:** the report was run **65 seconds before the
+mark** (both captures kept, the error disclosed in capture 2's header); a **refuted hypothesis** —
+that `deep`-required calibration systematically causes consult timeouts — was nearly carried as a
+finding and was corrected (7 of 8 completed; n=1 is an instance); and, stated plainly, **the decision
+to re-run the report immediately after authoring the record draft was motivated by wanting to see
+`PENDING` flip to `MET`** — no work was invented to move a counter, and keeping capture 1 rather than
+overwriting it is what makes the record honest rather than shaped, disclosed against the project's two
+rulings on post-hoc population shaping. **Separately, the harness's close hook surfaced what this
+session had not examined as a class:** three `GUARD-CAUTION` `pause_for_review` events on Bash
+commands carrying an overwrite-redirect — a real member of the guard's broadened irreversible set —
+were read as the familiar sparse-extraction default and passed without individual re-examination.
+
+**Tool-mode disclosure (prompt-required):** Write/Edit for the documents, Bash for read-only checks,
+the report runs and the commit — **chosen on the work's merits** (dense verbatim quotation where
+heredocs are a corruption hazard; PR19 folds needing surgical edits; the addendum being an insertion
+into an existing 362-line file) **and not on the record counter in either direction.** Per-path records
+are enumerated in the close. **At the point the memo's §7 was written this session had contributed
+ZERO buffer records**; two of its Write actions drew `CONSULT-OUTAGE` timeouts at 55,000 ms and
+produced none. Under reading A its records fall inside the W2 window; under reading B, outside.
+
+**Verified (run, not quoted):** byte-identity guard battery **250/0**; all three SHA pins unchanged
+(`60cefedb…`/`fa8895ec…`/`db86fccb…`); `GUARD_RE` re-read and **no matching file touched** (every file
+written is under `operations/`); buffer 742 at open, window 603 = 430 guard / 173 consult, all
+`at-action-v2-composed`; R20a **43 + 2 = 45** from the arrays; agent-card extensions **26** from the
+file; crons 7; `origin/main..HEAD` empty at open (`HEAD` = `ab3bf22`); `ListAgents` 14 interactive
+peers incl. Session R + this session. **`option-s/` not opened** (this session is disqualified from the
+`complete_series()` fix); the Session R scratch project **not opened, listed or touched**;
+`~/.sage-gate1/` read-only, `agent_hold_observations` not written (both runs `--dry-run`).
+
+**Files touched:** the three drafts + two captures (new); the opener addendum (prepend only); the
+register change-log row; the close; this entry. **Not staged:** another session's
+`website/src/data/environmental-context.json` and the two untracked prompt files.
+**Risk classification:** `governance`/documents. **Rollback:** `git revert` the commit — the addendum
+and the register row are the only edits to existing files and both are append/prepend-only.
+
+**Status:** Drafted (Task A's record, Task B's memo and relay, Task C's addendum). **Nothing recorded,
+adopted, sent, built, activated, flipped or pushed. D2 remains blocked. The S11 flip remains REFUSED.
+Weights remain BLOCKED. The 0h call remains the founder's.**

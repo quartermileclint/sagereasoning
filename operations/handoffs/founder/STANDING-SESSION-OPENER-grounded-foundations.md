@@ -14,6 +14,144 @@ header cited them under one path, imprecisely).
 > are re-derived below; **the adoption is the founder's.** Until adopted, the 2026-09-10 version is
 > the operative opener and this file is a proposal to replace it.
 
+---
+
+# ⏭ Addendum 2026-09-13 (evening) — facts that landed after this draft, for the adopting founder to fold or strike
+
+**Appended by an autonomous session (founder absent) on 2026-09-13 ~19:45 AEST, from `date`. This is
+an ADDENDUM, not a fifth version — the body below it is UNEDITED.** A fourth draft would churn the
+thing awaiting adoption. **Each item carries its source; nothing here is adopted, and every item is
+the founder's to fold into the body or strike on adoption.** The addendum is written against the body
+as drafted ~06:00 AEST on 2026-09-13; everything below happened after that.
+
+### A. The eight-question ruling — BINDING, adopted on relay (~11:24 AEST)
+
+Verbatim: `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-eight-questions-w2-work-s11d2-sequencing-r8d7-under-w-verbatim.md`;
+entry `D-MENTOR-RULING-EIGHT-QUESTIONS-W2-WORK-S11D2-R8D7-ADOPTED-2026-09-13`. **The verbatim wins over
+this summary.**
+
+- **Q-M1 — the W2 work designation is settled.** Candidate **(b) WITHDRAWN**; ordering amended to
+  **(c) the standing-runner design track PRIMARY, (a) the staged-clause application SECONDARY.** The
+  prior session's factual correction on (b) is accepted.
+- **Q-M1 also corrects a documentation drift this draft carries.** *"The D2 specification is complete;
+  no open axis remains […] The phrase 'scoped-for-ruling, relay pending' surviving in secondary records
+  is a documentation drift, not an open question."* **What is open on D2 is the BUILD, not the
+  specification.** The body's `Q-D2-ENGINE` row was corrected by the ruling-capture session; check it
+  reads that way before adopting.
+- **Q-M2 — a guarded-file waiver on the measured checkout, guard armed, IS window work; a worktree is
+  not.** This is why W2's own build produced nothing for the window.
+- **Q-M3 — consequential design authoring in `operations/` satisfies the clock rule.** *"The ruling's
+  language — 'on a live surface' — means consequential, not necessarily production code."*
+- **Q-M4 — the S11-D2 baseline RESTARTS with the W2 window**: five ordinary consult days from W2's
+  first record. *"The count half restarts at zero."* The *"ordinary"* half remains the founder's
+  judgement.
+- **Q-M5 — R8-D7's scope AMENDED:** worst-of-K on the **would-be-winner population only**; the
+  rejection re-election fixpoint is removed; the dethronement path for winners remains.
+- **Q-M6 — K is a cost election.** *"K=1 is worst-of-one… It is not a rejection of W. It is the
+  cheapest implementation of W."*
+- **Q-M7 — measure first on the live loop (Option E)** before any R8-D7 build beyond K=1 disclosure.
+- **Q-M8 — a sampled verdict discloses K, the floor count and the worst-draw rule; never a confidence
+  scalar.** **The ruling itself says the published *"treat one call as one draw"* sentence "requires
+  amending"**, and that the R18 update *"requires founder sign-off on three live public surfaces"*
+  which the ruling *"does not pre-empt."* **Separately — and this is the capture session's recording
+  note, NOT the ruling** — that sentence is *"left as published… true of the live gate today (W at
+  K=1, Q-M6). The amendment is owed if and when K>1 is served."* **Attribution kept distinct here on
+  purpose**: an earlier draft of this bullet merged the note's conditional gloss into text presented
+  as the ruling — the exact confusion §D below warns about.
+
+### B. R11 sat, and its seven questions were ruled the same day
+
+Close: `operations/handoffs/founder/2026-09-13-standing-runner-R11-CLOSE.md` (with addendum). Entries
+`D-STANDING-RUNNER-R11-R8D7-AMENDED-POLICY-AND-LIVE-MEASUREMENT-DESIGNED-2026-09-13` and
+`D-MENTOR-RULING-R11-SEVEN-QUESTIONS-ADOPTED-FOLDED-2026-09-13`. **Designs only; nothing built.**
+
+- **Three deliverables**, all under `operations/agent-circles-2026-08/`: the **live-loop verdict
+  measurement design** (Option E), the **R8-D7 worst-of-K policy design**, and the **manifest ATRF
+  item-3 amendment draft**.
+- **Seven questions ruled** (verbatim `2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`):
+  **B1** floor-only dethronement (reading (i)); **B2** **hold** — no verdict on fewer than K draws;
+  **A4** a **bounded, founder-attended re-run is admitted** as the measurement's vehicle; **A1** no
+  first-draw trigger before the cross-tabulation exists; **A2** gate only, the consult path needs its
+  own measurement; **A3** the reserved `complete_series()` defect does not bind the new capture;
+  **C1** the ATRF item-3 wording ruled, with *"whether the idea was completed"* removed.
+- **The ATRF item-3 application to `manifest.md` is the founder's own act** and has not been made.
+- **R8-D7's parameters (K, trigger, incomplete-series handling, vocabulary, persistence target) remain
+  OPEN by ruling** — they are to be set from live-loop data that does not yet exist.
+
+### C. The R11 measurement is being run as a bounded, founder-attended re-run
+
+Prompt `operations/handoffs/founder/2026-09-13-R11-measurement-bounded-rerun-FOUNDER-WALKED-RUN-NEXT-SESSION-PROMPT.md`
+(**read its annotation block**); pre-flight close `2026-09-13-R11-rerun-pre-flight-and-session-R-paste-CLOSE.md`;
+paste `2026-09-13-R11-rerun-SESSION-R-PASTE.md`. Sequence: **Session R** in the scratch project
+`…/PROJECTS/idea-loop-rerun-2026-09/` → **founder-walked revocations** → **Session S** → report.
+
+**Two pre-flight HIGHs that change the founder's own steps** — both found by checking route source,
+not the prompt:
+1. **Two quota units per gate/reason call**, not one (auth + loop-billing both call
+   `increment_api_usage`); one per outage or 503; `fresh`/`watching` zero. **Mint quotas must roughly
+   double.**
+2. **The novelty/`fresh` window is keyed by `credential_ref`** — so *"reuse the runner credential"*
+   and *"a fresh window"* are contradictory. **A fresh window needs a NEW runner credential.**
+
+### D. The W2-clock question is OPEN — and it was not open when this draft was written
+
+**`operations/trust-layer-2026-07/2026-09-13-w2-clock-start-EVIDENCE-MEMO.md`** (evidence assembled,
+no preference stated) and **`…-w2-clock-start-RELAY-DRAFT.md`** (drafted, **NOT sent**).
+
+**The question:** did R11's first consult record (`2026-09-13T01:48:38.960Z`) start the W2 window's
+clock under Q-M3 and Q-M1 — or does the clock start only at a sitting the founder opens as W2's first?
+R11 produced **32 consult records**, 24 of them writing two of the three documents Q-M3 names by name,
+in Write/Edit mode on the measured checkout, under a prompt that does not name the observation goal.
+**R11's own close routes the question to the founder and the mentor rather than claiming it.**
+
+**One thing the adopting founder should not carry forward uncorrected:** the sentence *"the first
+sitting is the founder's to open under a Q-S2-conforming prompt"* **is not a ruling.** It is an
+executing session's recording note, below `*End of verbatim ruling.*`, and it was written **before R11
+ran.** It may still be the right reading; it is not law. The memo §1.3 sets out the distinction.
+
+**Until this is settled, the body's line *"The clock has not started"* (≈line 305) is an open
+question, not a fact.**
+
+### E. The current window's Part (1) mark has PASSED
+
+**`2026-09-13T09:44:55Z` = Sun 13 Sep 19:44 AEST**, seven days from the took-effect probe. Recorded
+per **`operations/trust-layer-2026-07/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md`** — a
+**DRAFT; the founder records** (F-4).
+
+**The board at the mark:** (1) **counting threshold reached**; (2) **NOT MET and not dischargeable
+from this window**; (3) **MET, regime-scoped**, the pooled figure DISCLOSURE ONLY; (4) **satisfied**
+with the B2 qualification. **Three of four.** Per Q-A: *"the seven-day clock reaching its mark does
+not change what the window contains."* **This closes the current window at three of four and starts
+nothing.** Q-S1: it does not carry into W2.
+
+**A figure this session derived that bears on "ordinary" under Q-M4, and that the body does not
+carry:** between the window's first record and a **frozen snapshot boundary** at
+`2026-09-13T09:21:47.673Z` (chosen to exclude the deriving session's own drafting; **not** the
+window's last record — the window is live), **172 `CONSULT` against 84 `CONSULT-OUTAGE` — 32.8%,
+roughly one in three attempted consults producing no record.** **2026-09-12** is an extreme outlier in both
+directions (the window's highest record count, 148, and its highest outage share, 60 outages to 40
+consults) — the day of the Anthropic spend-limit block. **Re-derive at your own open; the buffer is
+append-only and live, so any figure off it is as-of a timestamp.**
+
+### F. Founder-action table deltas (for the body's table at ≈line 268)
+
+| change | detail |
+|---|---|
+| **F-1** | **Largely discharged by ruling.** Q-M1 made the designation ((c) primary, (a) secondary, (b) withdrawn). What remains is **not** designation but the clock question in **D** above. |
+| **NEW — "Settle the W2 clock"** | **HIGHEST after Session R.** Read the evidence memo; send, amend or discard the relay draft; record the answer. **Every sitting that runs before this is settled has an undetermined window membership.** |
+| **NEW — "Apply ATRF item-3 to `manifest.md`"** | Ruled wording (Q-R11-C1); **reserved to the founder's own act**; no session may make it. |
+| **NEW — Session R's founder-walked half** | Elect mint numbers (**doubled** per C.1); mint **both** credentials fresh (**new** runner credential per C.2); place tokens; confirm `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` unset; open and attend Session R; revoke both at close; then Session S. |
+| **F-4** | **The mark has passed.** The record draft exists; recording it is yours. |
+| **Peer count** | Re-derive with `ListAgents` at your own open. This session's figure is in its close; the body's is stale. |
+
+### G. What this addendum does not do
+
+It edits **nothing** below itself; it adopts nothing; it starts, stops or dates **no** clock; it sends
+**no** relay; it touches no `GUARD_RE` file, no R18 surface, no `manifest.md`, and no production
+surface. **Adoption of this opener, and of any item here, remains the founder's act.**
+
+---
+
 > **How this version was grounded.** Written 2026-09-12 (Sat) ~22:15–23:15 AEST, dated from `date`.
 > **First-hand, without subagents:** the 2026-09-12 continuation summary and all five closes it indexes;
 > the W2 build, W2 waiver/merge, O-1 and O-2 closes; the S11 pre-flip report (§§1, 3.3–3.3b, 12) and
