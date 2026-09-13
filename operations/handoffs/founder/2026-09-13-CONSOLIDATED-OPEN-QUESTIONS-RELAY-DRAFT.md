@@ -189,23 +189,71 @@ been raised on it"*:
 
 ## PART 3 — DECISIONS THAT ARE THE FOUNDER'S, NOT THE MENTOR'S
 
-**These should not go in the relay.** They are listed because they are open and several gate the
-above.
+> **⚖️ REWRITTEN 2026-09-13 (evening), AFTER the six questions were ruled.** The pre-ruling version of
+> this table is in git history at commit `3672181`. Three items are discharged, three are new, and one
+> constraint now governs the ordering of all of them. **Verbatim, canonical:**
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`.
+
+### 3.0 The constraint that now governs the ORDER — read this before the table
+
+**Q2 ruled that a new window's clock starting closes the prior window's intake.** Two consequences,
+and together they are the whole sequencing problem:
+
+1. **The current window's intake is still OPEN.** Its clock passed its mark on 2026-09-13, but on Q2's
+   mechanism nothing closes its intake until W2's first sitting opens. **Every session run in this
+   repo between now and then adds records to the current window — after its mark.**
+2. **The moment W2 opens, everything counts toward W2.** Q1's whole ground was that R11's records were
+   *"not the records a deliberately-opened W2 first sitting would produce."* That reasoning applies
+   just as much to whatever runs *after* W2 opens. **W2's composition will be whatever you run in this
+   repo from that instant, designated work or not.**
+
+**So the order is the decision.** Housekeeping and one-off acts belong *before* W2 opens; only work you
+want measured belongs after.
+
+**One clean exception worth knowing:** **Session R runs in the scratch project
+`…/PROJECTS/idea-loop-rerun-2026-09/` and produces NO records in this repo's window** — it is
+orthogonal to all of this and can run at any time. **Session S runs *here*** and does produce records.
+
+---
+
+### 3.1 The table — recommendations updated for the ruling
+
+**D-numbers are for you to rule on by number.**
+
+#### BEFORE W2 opens — everything here lands in the current window, whose clock is already done
 
 | # | Decision | Recommendation |
 |---|---|---|
-| **F-4** | **Record the Part (1) mark.** Draft ready at `…/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md`. | **Record the *clock* anchor** (probe + 7d = `09:44:55Z`) as the mark, noting the script's record-span metric beside it. Attach the composition disclosure — it is the part that stops "seven days" being read as "representative." |
-| **Q-M4's "ordinary"** | Q-M4 expressly leaves *which days are ordinary* to you; only the count restarting at zero is ruled. | **2026-09-12 is the live question**: the window's highest record count (148) *and* highest outage share (60 outages to 40 consults, the spend-limit block day). The 2026-09-10 test is *"a day on which the measuring apparatus was functionally modified is not an ordinary day."* **I lean to excluding it**, but this is squarely yours. |
-| **F-1** | Largely discharged by Q-M1. What remains is Q1 above. | — |
-| **F-2** | **Adopt the standing opener** (or correct and adopt). Until then the 2026-09-10 version is operative and carries three known-false lines. | **Adopt it** — the addendum now carries everything that landed after the draft. |
-| **F-3** | **Sign the record-level compliance-not-virtue clause** — the one R18 item still owed in the logos-on program. | Sign it; nothing depends on further analysis. |
-| **ATRF item-3** | Apply the **ruled** wording (Q-R11-C1) to `manifest.md`. **Reserved to your own act** — no session may make it. | Do it; the wording is ruled and *"whether the idea was completed"* is removed. |
-| **Session R** | The bounded re-run's founder-walked half: elect mint numbers (**doubled** — two quota units per call), mint a **new** runner credential (the novelty window is keyed by `credential_ref`), place tokens, attend the run, revoke both at close, then Session S. | This is the item that unblocks R8-D7's parameters. **Highest after Q1.** |
-| **F-7** | Part 3's consult/guard split — open, unruled, **parked by your own election** until part (2) resolves. | Leave parked; Q1 moves part (2), not this. |
-| **F-F** | The `manifest.md` **AC5 contradiction** — it bolds *"does not hand-enumerate route-level membership"* then enumerates all 43. Counts currently correct; the defect is the contradiction. | A governing-surface edit — yours. Worth doing before it drifts again. |
-| **F-I** | **Revoke `sagereasoning:option-s@v1`** — ruled *"immediately"* at the election's close. **Unverified from a repo session whether it is done.** | Verify and revoke if not. This is an open credential. |
-| **F-E** | **Close idle peers** — 13 interactive sessions are open against the standing ruling to work one arc. | Close them; several are ≥1 day old. |
-| **F-B / F-D / F-G / F-H / F-J** | The peer's `environmental-context.json`; `npx` fail-closed on the pre-commit guard; the PR26 concurrency election; founder-hub Q4; TEST parity. | All carried unverified. None gates Q1. |
+| **D-1** | **Record the Part (1) mark.** Draft at `…/2026-09-13-current-window-part1-mark-RECORD-DRAFT.md`. | **Record the *clock* anchor** (probe + 7d = `09:44:55Z`), noting the script's record-span metric beside it, and attach the composition disclosure. **CHANGED BY THE RULING:** the disclosure is **as-of, not final** — the window keeps accruing until W2 opens, so either record it as as-of, or do D-2 first and record a closed window. **I now recommend recording it as as-of and not waiting** — the composition will not change materially, and holding F-4 open a fourth time costs more than the precision gains. |
+| **D-2** | **Adopt the standing opener** (F-2). Until then the 2026-09-10 version is operative and carries three known-false lines. | **Adopt it.** Its addendum §D is now rewritten from OPEN to RULED, so it is current as of this evening. **More urgent than before** — the version it replaces says the W2 designation is still yours to make, which is now wrong twice over. |
+| **D-3** | **Sign the record-level compliance-not-virtue clause** (F-3) — the one R18 item still owed in the logos-on program. | Sign it. Nothing depends on further analysis and it is not affected by the ruling. |
+| **D-4** | **Apply the ruled ATRF item-3 wording to `manifest.md`** (Q-R11-C1). **Reserved to your own act** — no session may make it. | Do it before W2 opens. The wording is ruled, *"whether the idea was completed"* is removed, and it is a governing-surface edit you will not want competing with a running window. |
+| **D-5** | **Reconcile the Layer-3 priority-index row against Ruling Set D** — **newly ruled as your task** (Q5). | Do it now; it is a five-minute read. If Ruling Set D is consistent with the current state, *"the 'OPEN' row is a documentation drift and should be corrected."* If not, surface *"a specific question, not… a general relay."* I have marked the row NOT-CONFIRMED but have not resolved it — that reconciliation is yours. |
+| **D-6** | **F-I — revoke `sagereasoning:option-s@v1`**, ruled *"immediately"* at the election's close; **unverified from a repo session whether it is done.** | **Verify and revoke if not.** This is an open production credential with ~520 unused quota units. Of everything in this table it is the only item with a live security surface. |
+| **D-7** | **F-E — close idle peers.** 13 interactive sessions are open against the standing ruling to work one arc; several are ≥1 day old. | Close them **before** W2 opens. A stale peer that wakes inside W2 contributes records to the window with no one having decided it should. |
+| **D-8** | **F-F — the `manifest.md` AC5 contradiction** (bolds *"does not hand-enumerate route-level membership"*, then enumerates all 43; counts currently correct, the defect is the contradiction). | Fold into D-4's sitting — same file, same class of act, one governing-surface edit instead of two. |
+
+#### THE GATING ACT
+
+| # | Decision | Recommendation |
+|---|---|---|
+| **D-9 (HIGHEST)** | **Open W2's first sitting.** Newly the gating act: Q1 ruled the clock has not started and *"the founder opens a clean first sitting under a Q-S2-conforming prompt. That sitting's first consult record starts W2's clock."* | **Open it once D-1…D-8 are done, and not before.** The work is Q-M1's **(c) the standing-runner design track** (primary). The prompt must **name the work and never the observation**, and it must be **your act of opening** — that act, not the prompt's content, is what the ruling says distinguishes it from R11. **I can author the prompt at your direction; I should not open it.** Note the corollary you may not want: from that instant, everything running in this repo is W2's composition. |
+
+#### AFTER W2 opens — only work you want measured
+
+| # | Decision | Recommendation |
+|---|---|---|
+| **D-10** | **Open the `kathekon-role-relative-evaluation` scoping session** — ruled (Q5) to open **before** the hegemonikon-drift session, because *"Q-M5's would-be-winner scope interacts with the total gap on role input."* | **After W2 opens, not before.** It is consequential Write/Edit design authoring in `operations/` — exactly the shape that feeds the window well. **But note it is a *separate track* from Q-M1's designated (c) work**, so if you want W2's early composition to be the designated work, let the standing-runner sitting run first. |
+| **D-11** | **Session R's founder-walked half** — elect mint numbers (**doubled**: two quota units per call), mint a **new** runner credential (the novelty window is keyed by `credential_ref`), place tokens, attend the run, revoke both at close. | **Any time — it is orthogonal.** Session R runs in the scratch project and produces **no records in this repo's window**. **Session S does run here**, so open Session S after W2 if you want its records in W2, or before if you do not. This remains the item that unblocks R8-D7's parameters. |
+
+#### Unchanged by the ruling — parked or carried
+
+| # | Decision | Recommendation |
+|---|---|---|
+| **D-12** | **Q-M4's "ordinary" day judgement.** | **MATERIALLY CHANGED: this is now two questions, not one.** Q-M4 restarted the S11-D2 baseline at zero from W2's first record, so **2026-09-12's ordinariness no longer bears on the D2 baseline at all** — that question is moot for D2. It remains live **only** for the current window's own part-(1) composition disclosure. I still lean to naming it non-ordinary there (highest record count *and* highest outage share, the spend-limit day), but it is now a much smaller decision than when I first raised it. |
+| **D-13** | **F-7 — part 3's consult/guard split**, open and unruled, parked by your own election until part (2) resolves. | **Leave parked.** Part (2) is unchanged by this ruling — still NOT MET and still needing a differently-composed window, which is what W2 is for. |
+| **D-14** | **F-1** — designate the W2 work. | **Fully discharged.** Q-M1 designated it; Q1 settled the remaining timing question. Nothing left. |
+| **D-15** | **F-B / F-D / F-G / F-H / F-J** — the peer's `environmental-context.json`; `npx` fail-closed on the pre-commit guard; the PR26 concurrency election; founder-hub Q4; TEST parity. | All carried unverified; none gates anything above. **F-B is worth two minutes before D-9** — it is a modified file sitting in the tree that every session's `git status` has to step around. |
 
 ---
 
