@@ -206,14 +206,29 @@ first-hand. **They are disclosed, not corrected.**
 
 ---
 
-## 6. An open question this record does NOT answer
+## 6. A question this record left open — now RULED, and it simplifies the record
 
-**Whether the W2 window's clock has already started is unsettled**, and it is a different question
-from this one. See `operations/trust-layer-2026-07/2026-09-13-w2-clock-start-EVIDENCE-MEMO.md` and the
-relay draft beside it. **Under one reading the R11 sitting's 32 consult records (2026-09-13) are
-simultaneously inside this closing window and inside the W2 window; under the other they are inside
-this one only.** Nothing in this record depends on the answer, and nothing in it should be read as
-settling it.
+**When this draft was first written, whether the W2 window's clock had already started was unsettled,
+and under one reading R11's 32 consult records would have sat simultaneously inside this closing
+window and inside W2.** Both questions were relayed and **ruled the same evening**
+(`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`;
+evidence: `…-w2-clock-start-EVIDENCE-MEMO.md`):
+
+- **The W2 clock has NOT started.** *"The founder opens a clean first sitting under a Q-S2-conforming
+  prompt. That sitting's first consult record starts W2's clock."*
+- **A record belongs to exactly one window.** *"R11's records belong to the current window, which
+  closed its clock at three of four. They do not belong to W2."*
+
+**So this record's population is unambiguous: R11's 38 records, and every record written since, are
+THIS window's.** The overlap the draft flagged cannot arise.
+
+**One consequence the founder should weigh, stated as mechanism rather than as a recommendation.** The
+ruling closes a prior window's **intake** when a new window's **clock starts** — *"even where the
+prior window's clock has not yet run out."* This window's clock reached its mark on 2026-09-13, but on
+that mechanism **its intake remains open until W2's first sitting opens.** Every session run in
+between adds records to this window *after* its mark. That is consistent with Q-A (*"the seven-day
+clock reaching its mark does not change what the window contains"*) — but it means **the composition
+disclosed in §4 is as-of, not final, until W2 opens.** Recording the mark does not freeze the window.
 
 ---
 

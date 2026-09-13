@@ -41039,3 +41039,88 @@ and the register row are the only edits to existing files and both are append/pr
 **Status:** Drafted (Task A's record, Task B's memo and relay, Task C's addendum). **Nothing recorded,
 adopted, sent, built, activated, flipped or pushed. D2 remains blocked. The S11 flip remains REFUSED.
 Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-13 — D-MENTOR-RULING-CONSOLIDATED-SIX-QUESTIONS-W2-CLOCK-WINDOW-MEMBERSHIP-ADOPTED-2026-09-13
+
+**Session:** `sagereasoning-bd [c78e58]` (buffer `e1713b19…`), continuing after the founder returned
+with the mentor's response to the consolidated relay. **Tier `governance`/documents. AC7 not engaged.
+Nothing built, activated, flipped, deployed, pushed, minted or revoked. No code, schema, flag,
+credential, migration, `GUARD_RE` file, R18 surface or `manifest.md` touched. Production unchanged.**
+
+**The six questions the founder relayed
+(`operations/handoffs/founder/2026-09-13-CONSOLIDATED-OPEN-QUESTIONS-RELAY-DRAFT.md`) were ALL RULED
+and are ADOPTED AS BINDING on relay.** Verbatim, canonical:
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`
+— **the verbatim wins over this entry and over every fold below.**
+
+**Q1 — the W2 window's clock has NOT started, and did not start at R11.** Reading B adopted, and the
+ruling is explicit that it goes **against the stronger textual reading**: *"On the text, reading A is
+stronger. The ruling nonetheless adopts reading B."* The ground is the asymmetry of risk the relay
+identified — *"If reading A were adopted and later found to be wrong, the window's first day is
+permanently composed of records that were not run as window work. That is not recoverable. If reading
+B is adopted and reading A was right, the cost is approximately nine hours of records that do not
+count toward the window. That is recoverable."* The ruling also names what R11's composition actually
+contained (*"a 33% consult-outage rate and two 55-second timeouts"*) and that *"nobody ran R11 as
+window work."* **The founder opens a clean first sitting under a Q-S2-conforming prompt; that
+sitting's first consult record starts W2's clock.** On the clarification the relay asked for — what
+distinguishes such a sitting from R11, given Q-S2 forbids naming the observation — *"The distinction
+is in the founder's act of opening it… The distinction is in the record, not in the prompt."*
+
+**Q2 — a NEW GENERAL RULE: a record belongs to exactly one window.** *"A new window's clock starting
+closes the prior window's intake, even where the prior window's clock has not yet run out."* Ruled
+generally rather than for this case, because *"the buffer is continuous and every future window will
+be carved from it."* Shared records are refused on the Q-S1 ground: a disclosure naming records in two
+windows at once *"is not a disclosure — it is a description of an overlap that neither window's
+analysis can cleanly separate."* **Practical effect: R11's 38 records, and every record written since,
+belong to the CURRENT window — which closed its clock at three of four — and not to W2.**
+
+**A consequence recorded as mechanism and flagged for the founder rather than assumed:** on Q2's rule
+the current window's **intake remains open until W2's first sitting opens**, even though its clock
+reached its mark at `2026-09-13T09:44:55Z`. Sessions run in between keep adding records to the current
+window *after* its mark — consistent with Q-A (*"the seven-day clock reaching its mark does not change
+what the window contains"*), but it means **the Part (1) record's composition disclosure is as-of, not
+final.** Whether to close intake sooner by opening W2 promptly is the founder's call, not made here.
+
+**Q3 — a provenance-triggered stratum is a CATEGORY ERROR, ruled out.** *"It is a feedback loop that
+amplifies the initial classification regardless of whether the input's actual character has changed."*
+The relay's secondary question is answered precisely: **Q-R11-A1 does NOT settle the trigger class
+generally** — *"a trigger is admissible only on a measured relation between the trigger signal and the
+latent floor. Provenance — prior rejection — is not a measured relation to a latent floor. It is a
+record of a prior classification"* — **but this specific trigger is ruled out on the same grounds.**
+
+**Q4 — NO confidence signal before the near-boundary population is measured**, failing on all three
+grounds simultaneously (Q-S2's unclosed gap, Q-M8's scalar prohibition, the Prerequisite Criterion).
+*"Option C is unavailable until Deliverable A's cross-tabulation exists and shows a measured relation
+between a first-draw signal and whether the input carried a latent floor. No first-draw signal is
+admissible on doctrine alone as a basis for a confidence output."*
+
+**Q5 — sequencing ruled, substance not.** **The role-relative evaluation scoping session opens
+first**, because *"Q-M5's would-be-winner scope interacts with the total gap on role input, and that
+interaction should be examined before the hegemonikon-drift session opens."* The Layer-3 row: the
+relay's recommendation is confirmed — **do not relay; reconcile the priority-index row against Ruling
+Set D first**, and if inconsistent, surface *"a specific question, not… a general relay of the
+session's status."*
+
+**Q6 — do not relay the two carried instructions.** Confirmed on both counts. On whether a relayed
+instruction may sit unruled indefinitely: *"the answer is no, but the threshold for raising it is
+whether a session is blocked by the absence of a ruling, not whether the instruction has been
+waiting."*
+
+**Folded this session, each at the affected record:** the standing opener's addendum §D (rewritten
+from OPEN to RULED, with the pre-ruling statement kept below it as the record of what was asked); the
+Part (1) mark record draft §6 (the overlap question it flagged is answered and cannot arise; the
+as-of-not-final consequence added); the R8-D7 scoping draft's header (**its "§5 Q2, Q3, Q5 and Q8
+remain unput" line was superseded twice within hours — Q5/Q8 by the R11 ruling, Q2/Q3 by this one;
+nothing in §5 is now unput**); the S11 register (change-log row). **The evidence memo and its relay
+draft are left exactly as written** — they are the record of what was assembled, and their
+no-preference posture remains correct.
+
+**Files touched:** the verbatim capture (new); the opener addendum §D; the Part (1) record draft §6;
+the R8-D7 scoping draft header; the register; this entry. **Not staged:** another session's
+`website/src/data/environmental-context.json` and the two untracked prompt files.
+**Risk classification:** `governance`/documents. **Rollback:** `git revert` the commit; the verbatim
+capture stands as the record of the ruling either way.
+
+**Status:** Adopted. **Nothing built, activated, flipped, deployed or pushed. The ruling starts no
+clock — it rules that none has started. D2 remains blocked. The S11 flip remains REFUSED. Weights
+remain BLOCKED. The 0h call remains the founder's.**

@@ -665,3 +665,30 @@ remain BLOCKED; the 0h call remains the founder's.
   into the W2 window.** Nothing recorded, adopted or written to any trust surface; nothing built,
   activated or flipped. D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the
   0h call remains the founder's.
+
+- **2026-09-13 (evening) — the CONSOLIDATED SIX-QUESTION ruling
+  (`D-MENTOR-RULING-CONSOLIDATED-SIX-QUESTIONS-W2-CLOCK-WINDOW-MEMBERSHIP-ADOPTED-2026-09-13`;
+  verbatim, canonical:
+  `2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`).**
+  **Row W3-d's second role is settled on timing:** **the W2 window's clock has NOT started, and did
+  not start at the R11 sitting.** Reading B is adopted **expressly against the stronger textual
+  reading**, on asymmetry of risk — *"If reading A were adopted and later found to be wrong, the
+  window's first day is permanently composed of records that were not run as window work. That is not
+  recoverable."* **The founder opens a clean first sitting under a Q-S2-conforming prompt; that
+  sitting's first consult record starts the clock.** What distinguishes such a sitting from R11 is
+  *"the founder's act of opening it… the distinction is in the record, not in the prompt."*
+  **A NEW GENERAL RULE ON WINDOW MEMBERSHIP:** *"A record belongs to exactly one window."* A new
+  window's clock starting **closes the prior window's intake**, even where the prior clock has not run
+  out; shared records are refused as a composition disclosure that *"neither window's analysis can
+  cleanly separate."* **R11's records, and every record written since, belong to the CURRENT window,
+  which closed its clock at three of four; they do not belong to W2.** **Consequence flagged, not
+  ruled:** on that mechanism the current window's **intake remains open until W2's first sitting
+  opens**, so its composition is still moving after its mark. Also ruled, outside this register's
+  scope but recorded for completeness: R8-D7 §5 Q2 (provenance trigger — **category error, ruled
+  out**) and §5 Q3 (**no** confidence signal before the near-boundary population is measured;
+  Option C unavailable until Deliverable A's cross-tabulation exists); the role-relative evaluation
+  scoping session opens before the hegemonikon-drift session; two carried instructions stay unrelayed,
+  the threshold being *"whether a session is blocked… not whether the instruction has been waiting."*
+  **Nothing built, activated or flipped; the ruling starts no clock — it rules that none has started.**
+  D2 remains blocked; the S11 flip remains REFUSED; weights remain BLOCKED; the 0h call remains the
+  founder's.

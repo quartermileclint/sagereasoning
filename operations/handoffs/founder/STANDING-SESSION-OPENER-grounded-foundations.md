@@ -93,7 +93,29 @@ not the prompt:
 2. **The novelty/`fresh` window is keyed by `credential_ref`** — so *"reuse the runner credential"*
    and *"a fresh window"* are contradictory. **A fresh window needs a NEW runner credential.**
 
-### D. The W2-clock question is OPEN — and it was not open when this draft was written
+### D. The W2-clock question was open and is now RULED — the clock has NOT started
+
+**⚖️ RULED 2026-09-13 (evening), binding, verbatim:
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`.
+Read the verbatim; this is a summary and the verbatim governs.**
+
+- **Q1 — the W2 clock has NOT started.** Reading B adopted **expressly against the stronger textual
+  reading**, on the asymmetry-of-risk argument: *"If reading A were adopted and later found to be
+  wrong, the window's first day is permanently composed of records that were not run as window work.
+  That is not recoverable."* **The founder opens a clean first sitting under a Q-S2-conforming prompt,
+  and that sitting's first consult record starts W2's clock.** On what distinguishes such a sitting
+  from R11: *"The distinction is in the founder's act of opening it… The distinction is in the record,
+  not in the prompt."*
+- **Q2 — a record belongs to exactly one window**, ruled generally, not just for this case. *"A new
+  window's clock starting closes the prior window's intake, even where the prior window's clock has
+  not yet run out."* **R11's records — and every record written since — belong to the CURRENT window,
+  not to W2.**
+- **A consequence the founder should weigh:** on Q2's mechanism the current window's **intake stays
+  open until W2's first sitting opens**, even though its clock passed its mark on 2026-09-13. Sessions
+  run in between keep adding to the current window's composition, after its mark.
+
+**Everything below in this section is the pre-ruling statement of the question, kept as the record of
+what was asked.**
 
 **`operations/trust-layer-2026-07/2026-09-13-w2-clock-start-EVIDENCE-MEMO.md`** (evidence assembled,
 no preference stated) and **`…-w2-clock-start-RELAY-DRAFT.md`** (drafted, **NOT sent**).

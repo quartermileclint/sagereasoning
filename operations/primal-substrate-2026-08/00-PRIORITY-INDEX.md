@@ -764,6 +764,24 @@ completion reproduces F-Q43's original defect at a new layer.
 `…-guide-function-agent-vs-human-practitioner.md`, each with its own verbatim question record.
 **No build is authorised by any of the eight rulings.**
 
+> **⚖️ SEQUENCING RULED 2026-09-13 (evening)** — verbatim, canonical:
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`
+> (Q5). **Substance is NOT ruled for any of the three; only the order.**
+> 1. **`kathekon-role-relative-evaluation` OPENS FIRST** — *"Q-M5's would-be-winner scope interacts
+>    with the total gap on role input, and that interaction should be examined before the
+>    hegemonikon-drift session opens."*
+> 2. **`hegemonikon-drift-and-melete` second** — *"a more contained question that does not interact
+>    with the current open design work in the same way."*
+> 3. **`layer3-per-consumer-rendering` — its "OPEN" status below is NOT confirmed and may be
+>    documentation drift.** Ruled: **do not relay it**; first reconcile this row against **Ruling Set
+>    D (2026-08-15)**, which adopted O-B and opened O-C *as a design question only*, with the O-C
+>    design session *"not licensed… it requires a separate scoping session, which itself requires a
+>    ruling before execution."* *"If Ruling Set D's adoption of O-B and opening of O-C as a design
+>    question only is consistent with the current state, the 'OPEN' row is a documentation drift and
+>    should be corrected. If it is not consistent, the discrepancy should be surfaced as a specific
+>    question, not as a general relay of the session's status."* **The reconciliation is the founder's
+>    and has not been done.**
+
 **THREE NEW `governance` SCOPING SESSIONS — all OPEN, awaiting ruling, none absorbed into any existing
 open question:**
 

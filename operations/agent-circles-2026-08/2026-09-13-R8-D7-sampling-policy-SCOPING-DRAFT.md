@@ -9,7 +9,29 @@
 > recommended next act before any build beyond K=1 disclosure (§5 Q6 answered). **Q-M8:** a sampled
 > verdict discloses K, the floor count and the worst-draw rule, never a confidence scalar; the R18
 > "one call as one draw" sentence is amended, under founder sign-off, only when K>1 is served
-> (§5 Q7 answered). §5 Q2, Q3, Q5 and Q8 remain unput. **No build is licensed.**
+> (§5 Q7 answered). ~~§5 Q2, Q3, Q5 and Q8 remain unput.~~ **No build is licensed.**
+>
+> **⚖️ ALL EIGHT OF §5 ARE NOW ANSWERED — this block's last sentence was superseded within hours of
+> being written, twice.** (i) **Q5 and Q8 were answered the same day by the R11 seven-question ruling**
+> (`operations/agent-circles-2026-08/2026-09-13-mentor-ruling-R11-seven-questions-verbatim.md`):
+> **Q-R11-A2** — *"Gate only. The sampling policy does not reach the consult path at this stage…
+> If the consult path comes into scope in future, it is a separate design with its own measurement"*
+> (§5 Q5); **Q-R11-A3** — *"The defect does not bind the new capture by construction"*, the `option-s/`
+> fix remaining reserved for a session that has not read the Option S close (§5 Q8).
+> (ii) **Q2 and Q3 were then relayed and ruled the same evening** (verbatim, canonical:
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-consolidated-six-questions-w2-clock-window-membership-verbatim.md`):
+> **§5 Q2 — NO, a provenance-triggered stratum is a CATEGORY ERROR.** *"It is a feedback loop that
+> amplifies the initial classification regardless of whether the input's actual character has
+> changed."* Q-R11-A1 does **not** settle the trigger class generally — *"a trigger is admissible only
+> on a measured relation between the trigger signal and the latent floor. Provenance — prior rejection
+> — is not a measured relation to a latent floor. It is a record of a prior classification"* — but this
+> specific trigger is ruled out on the same grounds.
+> **§5 Q3 — NO confidence signal before the near-boundary population is measured.** It fails on all
+> three grounds simultaneously (Q-S2's unclosed gap; Q-M8's scalar prohibition; the Prerequisite
+> Criterion). *"Option C is unavailable until Deliverable A's cross-tabulation exists and shows a
+> measured relation between a first-draw signal and whether the input carried a latent floor. No
+> first-draw signal is admissible on doctrine alone as a basis for a confidence output."*
+> **Nothing in §5 is now unput. No build is licensed by any of it.**
 
 **DRAFT — FOR FOUNDER ELECTION AND MENTOR QUESTIONS. This document proposes no build, licenses no
 build, and elects nothing.** It sets out what R8-D7 asked for in its own words, what the Option S data
