@@ -40859,3 +40859,53 @@ proposal until the founder opens Session R. **Rules served:** PR17, PR18, PR20, 
 
 **Status:** Prompt authored; run NOT started. **D2 remains blocked. The S11 flip remains REFUSED.
 Weights remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-13 — D-R11-RERUN-PRE-FLIGHT-VERIFIED-SESSION-R-PASTE-AUTHORED-2026-09-13
+
+**Decision.** Opened under `2026-09-13-R11-measurement-bounded-rerun-FOUNDER-WALKED-RUN-NEXT-SESSION-PROMPT.md`
+(session `sagereasoning-d5 [5b2951]`, ~16:06–16:50 AEST from `date`, main checkout), this session performed the
+repo-side, pre-mint half of that prompt: **verified its load-bearing claims against route source before any
+credential was minted**, scaffolded the scratch project, authored the executable Session R paste
+(`2026-09-13-R11-rerun-SESSION-R-PASTE.md`, copied into the scratch project), and annotated the prompt in place
+with the corrections. **Nothing was minted, revoked, run, deployed, pushed, or written server-side.** The
+founder-walked pre-flight (§1), Session R and Session S remain ahead; AC7 engages at the run, not here.
+
+**Findings, each verified in source (files under `website/src/`):** (1) **HIGH** — a `/api/guardrail` or
+`/api/reason` verdict or Tier-1 pause bills **two** quota units (`validateApiKeyUpc` and `recordLoopBilling`
+each call `increment_api_usage`; the guardrail route's own comment says so; the Option S credential's "~520
+unused" = 1000 − 2×240); an outage or 503 bills one; `fresh`/`watching` bill none. The prompt's mint quotas
+were half what the run needs; recommended numbers recorded in the annotation (runner 1200/120, measurement
+4500/600) — **the founder elects at mint time.** (2) **HIGH** — the novelty window is keyed by `credential_ref`
+(fresh handler, `getTrajectoryWindow({credentialRef})`), so the prompt's "reuse the runner credential if
+active" would give `#002` the closed run's populated window; a fresh window needs a **newly minted runner
+credential**. (3) **MEDIUM** — a verdict response carries no `assessment_status` (there is no `"ok"`); Tier-1
+pause is `ambiguous_pause`; `engine_error` has three values; the 503 signing branch returns only `{error}`
+with no loop headers. (4) **MEDIUM** — the prompt's population enumeration dropped first-draw permits in
+`dependency_unavailable`/`terminated_by_timeout` cycles; the paste states the rule by the operative draw's
+verdict and discloses the extension as interpretive. (5) **LOW** — two 429 sources (quota vs the per-IP
+limiter: gate 30/min, reason 15/min); per-attempt response-file naming; a transport-failure record procedure;
+the literal curl line with `--max-time`; a stop on an unsigned bare `assessment`; a precondition that
+`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is unset. (6) **Confirmed:** no caching on the extraction path; no
+credential-dependent branch alters a verdict; every CLI flag the prompt uses exists.
+
+**PR19.** Two blind Sonnet reviewers (the founder's standing permission; the session's own model unchanged;
+`Agent` subagents, read-only, `option-s/` closed to them): A (fidelity to Deliverable A, the Q-R11 ruling, the
+closed run's ruled cycle) — 1 HIGH (the window key), 3 MEDIUM, 3 LOW, 2 NIT; B (operational correctness
+against route source) — 3 MEDIUM (outage billing, the 503 branch's record, transport failures), 3 LOW, 2 NIT.
+Every finding verified first-hand; all folded except the two NITs that were observations (the runner's reading
+list omits Deliverable A §5–§6 by design; §8's arithmetic is a safe-direction over-estimate, now said so).
+
+**Files touched:** the paste (new, repo + scratch copy); the prompt (annotated in place, not rewritten); the
+close `2026-09-13-R11-rerun-pre-flight-and-session-R-paste-CLOSE.md` (new); this entry; the scratch project
+`…/PROJECTS/idea-loop-rerun-2026-09/` (outside the repo: wire contract copied, settings with placeholder
+tokens and no hooks, the paste). **Not touched:** any `GUARD_RE` file (guard **250/0** at open; pins
+`60cefedb…`/`fa8895ec…`/`db86fccb…` unchanged); any R18 surface; `option-s/`; `~/.sage-gate1/`;
+`agent_hold_observations`; another session's `environmental-context.json` and untracked prompt (not staged).
+**Risk classification:** `governance`/documents for what this session did; the prompt it prepares is
+`code-critical` when executed. **Rollback:** `git revert` the records commit; `rm -r` the scratch project.
+**Verification (founder):** read the annotation's findings 1, 2 and 7 against `security.ts`,
+`loop-cost-tracker.ts` and the fresh handler before minting; confirm the scratch settings file carries
+placeholders, not tokens. **Rules served:** PR15, PR17, PR18, PR19, PR20, PR23; verbatim-wins.
+
+**Status:** Pre-flight verified; Session R paste authored; run NOT started. **D2 remains blocked. The S11 flip
+remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**

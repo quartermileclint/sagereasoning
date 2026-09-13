@@ -22,6 +22,68 @@ calls against the production gate under a new identity, and real rows on `idea_l
 production configuration changes. **The gate's behaviour is not changed by anything here — the
 first verdict stays operative and the extra draws reach nothing** (Deliverable A §7).
 
+> **⚠ PRE-RUN VERIFICATION, 2026-09-13 ~16:15 AEST (from `date`), by `sagereasoning-d5 [5b2951]` on the main
+> checkout, BEFORE any mint — annotated in place, not rewritten. The executable form of §2 is now
+> `2026-09-13-R11-rerun-SESSION-R-PASTE.md` (also copied into the scratch project as `SESSION-R-PASTE.md`);
+> where it and §2 differ, the paste governs. Six findings, each checked against route source, not this file:**
+>
+> 1. **HIGH — every `POST /api/guardrail` and `POST /api/reason` consumes TWO quota units, not one.**
+>    `validateApiKeyUpc` and `recordLoopBilling` each call `increment_api_usage` (`security.ts`,
+>    `loop-cost-tracker.ts`; the guardrail route's own comment at ~L128 says so). Corroborated by the Option S
+>    credential: "~520 quota units unused" = 1000 − 2×240. `fresh` and `watching` consume none
+>    (`validatePracticeCredential` does not increment). **§1.2/§1.3's quotas are therefore half what the run
+>    needs.** Re-derived sizing: runner ≈14 units/cycle normal mode, ≈28 friction-only → 20 cycles ≈280–560,
+>    40 ≈560–1,120; measurement ≈100 units/cycle at 5.55 permits × 9 draws × 2 → 20 cycles ≈2,000, 40 ≈4,000,
+>    plus outage retries. **Recommended mint numbers (the founder's election at mint time):** runner
+>    `--monthly 1200 --daily 120`; measurement `--monthly 4500 --daily 600` (the 4-hour `minimumInterval`
+>    bounds a day at 6 cycles → ≤600 measurement units). §1.4's SQL fallback still applies if the mint drops
+>    the flags (the CLI honours them since 2026-07-21, per `mint-credential-core.ts`).
+> 2. **MEDIUM — the record schema in §2.3 names fields the route does not emit.** A verdict response carries
+>    **no** `assessment_status` (there is no `"ok"`); a Tier-1 pause is `assessment_status: "ambiguous_pause"`;
+>    `engine_error` ∈ `layer1_unavailable | assessment_unavailable | provider_account_block`. A **verdict** is a
+>    200 carrying `signed_assessment` and no `assessment_status`. The paste's §4.1 records these as they are.
+> 3. **MEDIUM — §2.3's population enumeration (`winner`/`not_selected`/`rejected_by_novelty`) drops
+>    first-draw permits in cycles that end `dependency_unavailable` or `terminated_by_timeout`** (the closed
+>    run had three such cycles, all with permits). Deliverable A §1.2 defines the population as every candidate
+>    the gate did not reject. The paste states the rule operationally: captured iff the operative step-2 draw
+>    was a signed verdict with `proceed: true`.
+> 4. **LOW — a 429 has two sources.** Quota exhaustion is a 429 with `error: "Daily limit exceeded"` /
+>    `"Monthly quota exceeded"` (a stop); the per-IP limiter (`RATE_LIMITS.publicAgent`, 30/min, shared by both
+>    credentials from one host) is a different 429 body (wait 60 s, continue). §2.5 conflated them.
+> 5. **LOW — byte-identity mechanics.** The paste requires each step-2 body written to a file once and sent
+>    with `--data-binary @file` on every draw, `request_hash` over the file; no `agent_id`, no `X-Loop-Id`
+>    request header (the server generates one when absent).
+> 6. **INFO — three claims confirmed:** no caching on the extraction path (only provider prompt caching, already
+>    Deliverable A limit 11); no credential-dependent branch can alter a verdict (the W2 enforcement seam is
+>    flag-off and reads only after a `do_not_proceed`, and never changes the response); `revoke practice --id`
+>    and every `mint practice` flag in §1.2/§1.3 exist in the CLI. Deploy proxy at this verification:
+>    `ce38df3` / `origin/main` 2026-09-13T16:00:43+10:00.
+>
+> **PR19, same session — two blind Sonnet reviewers, read-only (fidelity to the rulings/design; operational
+> correctness against route source). Every accepted finding verified first-hand and folded into the paste;
+> three bear on YOUR pre-flight and are added here:**
+>
+> 7. **HIGH — the novelty window is keyed by `credential_ref`, not `loop_id`** (`fresh` handler L355–356;
+>    the ruled scope doc's own words). **§1.2's "reuse it" would give `#002` the closed run's populated window,
+>    not the fresh one §1.6 intends.** Election: **mint a NEW runner credential** with the same `agent_id`
+>    even if `527cc86b…` is still active (revoke the old one at the same time, or leave it — say which). The
+>    paste asks the runner to read `window.rows_in_window` on its first `fresh` call and expects ~0.
+> 8. **MEDIUM — confirm `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is unset** (it is, per the 2026-09-12 W2
+>    record; re-check in Vercel). If it were ever set, the dark enforcement seam would mint trust-ledger events
+>    against `sagereasoning:verdict-measurement@v1` on any re-draw reading `do_not_proceed`. State it to
+>    Session R in chat along with the two `agent_id`s differing and the runner credential being new.
+> 9. **LOW — finding 1 refined:** an `engine_unavailable` or 503 response bills ONE unit (no billing write);
+>    the sizing in finding 1 is a safe-direction over-estimate. `/api/reason`'s per-IP limiter is 15/min
+>    (`RATE_LIMITS.scoring`), the gate's 30/min. Also folded into the paste: per-attempt response-file naming
+>    (a QG-A retry no longer overwrites attempt 1), a transport-failure and 503-signing record procedure, the
+>    literal curl line with `--max-time`, a stop on a 200 carrying a bare unsigned `assessment`, and a
+>    disclosure that the paste's population rule extends Deliverable A §1.2's literal enumeration (to permits
+>    in `dependency_unavailable`/`terminated_by_timeout` cycles; `ambiguous_pause` as a non-capture class).
+>
+> **Scratch project scaffolded this session** at `…/PROJECTS/idea-loop-rerun-2026-09` (not a git repo; the
+> wire contract copied; `.claude/settings.local.json` with the two permission blocks and **placeholder**
+> tokens the founder replaces; no hooks). Nothing was minted, revoked, run, pushed or written server-side.
+
 ---
 
 ## 0. What this run is, in one paragraph
