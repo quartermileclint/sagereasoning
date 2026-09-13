@@ -22,26 +22,52 @@ C means in practice, for each of A and B.
 
 ---
 
-## 0. ⚠ THE HONEST CAVEAT, FIRST — nothing currently runs either check
+## 0. ⚠ WHERE THE CHECK WOULD ACTUALLY RUN — corrected in-session, and the correction improves the design
 
-**Verified first-hand this session:** `.git/hooks/` contains **no `pre-commit` hook** — only the
-stock `.sample` files. There is no CI runner wired to these batteries either.
+> **⚠ THIS SECTION ORIGINALLY STATED, AS A VERIFIED FACT, THAT NO PRE-COMMIT HOOK EXISTS. THAT WAS
+> FALSE, AND IT WAS THE MOST PROMINENT CLAIM IN THIS DOCUMENT.** It was caught the only way it could
+> have been — **this session's own commit ran the hook.** The original check was
+> `[ -f .git/hooks/pre-commit ]`, which is the wrong location: hooks here are wired through
+> `core.hooksPath`. **The single-location check is the error, not the missing file.** The corrected
+> facts below are better for the design than the false ones were, and they change the recommendation.
 
-**So an assertion added under either design runs only when a human or a session types
-`npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts`.** An executable check that nothing
-executes is a written instruction with extra steps — which is the precise failure mode the mentor's
-item exists to escape.
+**Verified first-hand after the hook fired:**
 
-**This does not make the check worthless.** The battery is run at nearly every session open under the
-standing opener's re-derive list, and by every session that touches the perimeter, so the check has a
-real and frequent trigger. But it is a *convention-triggered* check, not a *gate*.
+| Claim | Check | Result |
+|---|---|---|
+| A pre-commit hook exists | `git config core.hooksPath` | **YES** — `.husky/_`; the script is `.husky/pre-commit` |
+| It blocks on failure | read the script | **YES** — *"Boundary battery FAILED -- commit blocked"* |
+| It runs a `tsx` battery already | read the script | **YES** — `human-practitioner-boundary.test.ts`, **ALWAYS, whole repo**, not staged-scoped |
+| It runs `r20a-invocation-guard.test.ts` | grepped | **NO.** Its only `r20a` references are ESLint targets (`r20a-classifier.ts`, `r20a-cost-tracker.ts`) — **not the registry battery** |
+| It fails open without `npx` | read lines 73–74 | **YES** — *"WARNING — npx not found. Safety checks skipped."* |
 
-**Recommendation, stated as one:** whichever of A/B is elected, and whether or not C is built,
-**founder item F-D — `npx` fail-closed on the pre-commit guard — is the thing that turns this from a
-convention into a gate.** It is already on the standing list, carried unverified. This design does not
-assume it; it names the dependency.
+### What this means for the design — and it is the most useful thing in this document
 
----
+**An AC5 assertion added to `r20a-invocation-guard.test.ts` would NOT run on commit as things stand**,
+because that battery is not in the hook. So placement alone does not make it a gate.
+
+**But the remedy is now cheap and certain instead of speculative.** The hook already exists, already
+blocks, already runs `npx tsx` on a whole-repo battery, and already has a proven always-on (not
+staged-scoped) pattern with a written rationale for why always-on is necessary. **Adding the registry
+battery to it is one more invocation in a mechanism that is already load-bearing** — not new
+infrastructure.
+
+**Recommendation, revised:** whichever of A/B is elected, **pair the assertion with adding
+`src/lib/__tests__/r20a-invocation-guard.test.ts` to `.husky/pre-commit`.** Without that, the check
+runs only when someone happens to run the battery — which is a convention, and this section's whole
+history is that conventions do not arrest this drift.
+
+**Two honest caveats on that recommendation:**
+
+1. **Cost.** The registry battery is large (700+ assertions, dozens of file reads). Adding it to an
+   always-on hook adds that to **every commit in the repository**. Whether that is acceptable is the
+   founder's call, and a staged-scoped trigger is **not** an adequate substitute — §AC5 and the
+   registry can drift apart in a commit that stages neither.
+2. **Founder item F-D is now verified, not merely carried.** The hook **fails open** when `npx` is
+   absent (lines 73–74) — so on a machine or client without `npx` on PATH, every check above,
+   including any AC5 assertion, is silently skipped with a warning. **F-D is the difference between a
+   gate and a gate with a documented bypass.** It is on the standing list and was carried unverified;
+   it is verified here.
 
 ## 1. The defect being guarded — re-derived at this writing, not quoted
 
@@ -320,7 +346,7 @@ whose mutation coverage is the whole point.
 | The parenthetical hand-maintains 30 and 13 | read | **confirmed — GAP 1 is real** |
 | `GUARD_RE` vs the registry test path | matched against the live regex | **does NOT match — no waiver needed** |
 | The registry test already reads repo-root files | read line ~1448 | **confirmed** (`repoRoot`) |
-| Pre-commit hook | `ls .git/hooks/` | **none — only `.sample` files** |
+| Pre-commit hook | `git config core.hooksPath` + read `.husky/pre-commit` | **EXISTS and blocks** — runs the measurement-integrity battery always; **does NOT run the registry battery**; **fails open without `npx`** (F-D). *An earlier claim in this file that no hook exists was false and is corrected at §0.* |
 | Sibling precedent | read the docstring-count block | **confirmed**, incl. its three non-vacuity assertions |
 
 **Nothing was built. `manifest.md` is untouched. No test file was edited. The A-or-B election is the

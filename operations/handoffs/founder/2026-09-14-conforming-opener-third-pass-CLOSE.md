@@ -123,10 +123,21 @@ criterion.** Recorded so the next pass need not rediscover that the surface exis
 
 `operations/count-discipline-2026-09/2026-09-14-ac5-executable-check-DESIGNS.md`. **Design only.**
 
-**⚠ The honest caveat, stated first in that file:** **there is no pre-commit hook** — verified, `.git/hooks/`
-holds only `.sample` files. **Neither check runs automatically.** An executable check nothing executes
-is a written instruction with extra steps. It still has a real trigger (the battery is run at most
-session opens), but **founder item F-D is what turns it from a convention into a gate.**
+**⚠ A FALSE CLAIM I MADE AND THEN CAUGHT — corrected in that file at §0, and flagged here because it
+was the design's headline.** I wrote, as a verified fact, that **no pre-commit hook exists**. **It was
+false.** The check I ran was `[ -f .git/hooks/pre-commit ]`; hooks here are wired through
+`core.hooksPath`. **It was caught the only way it could have been — this session's own commit ran the
+hook.**
+
+**The corrected facts are better for the design than the false ones were.** A hook exists at
+`.husky/pre-commit`, it **blocks on failure**, and it already runs a whole-repo `npx tsx` battery
+always. **But it does NOT run `r20a-invocation-guard.test.ts`** — so an AC5 assertion placed there
+would still not run on commit. **Revised recommendation: pair the elected assertion with adding that
+battery to `.husky/pre-commit`** — one more invocation in a mechanism that is already load-bearing,
+rather than new infrastructure. Two caveats stated in the file: the cost of adding a 700+-assertion
+battery to every commit is yours to weigh, and **F-D is now verified rather than carried** — the hook
+**fails open when `npx` is absent** (lines 73–74), which is a documented bypass on any client without
+it.
 
 **GAP 1 — Option A does not fully discharge the defect.** It removes the enumeration but leaves the
 bolded sentence, which **hand-maintains two counts inside itself** (*"the 30 currently flag-gated members
@@ -213,7 +224,7 @@ immediately actionable"* is outside prohairesis — a fair correction, recorded.
 | Conforming opener | word-boundary grep ×3 | **0 / 0 / 0** |
 | Every file the opener cites | resolved and audited | clean but the two deliberately retained |
 | Memory surface (76 files + index) | audited against Q-S2 | **passes** — engine-mechanism only |
-| Pre-commit hook | `ls .git/hooks/` | **none** (F-D confirmed still owed) |
+| Pre-commit hook | `git config core.hooksPath`; read `.husky/pre-commit` | **EXISTS and blocks.** Runs the measurement battery always; **not** the registry battery; **fails open without `npx`** — F-D **verified**, not merely carried. *My earlier `.git/hooks/` check was the wrong location and its conclusion was false; corrected in §4.* |
 | `~/.sage-gate1/` | read-only throughout | **never written** |
 | `git status` | whole | peer's `environmental-context.json` + two peer prompt files — **none staged** |
 | Peers | `ListAgents` | **16 interactive + this one** (24 peer rows; 8 unrelated cloud/Remote-Control) |

@@ -41473,9 +41473,18 @@ one is worse than building none, so both are specified to the mutation and the A
 fully discharge the defect** — it leaves the bolded sentence, which hand-maintains two counts inside
 itself; **(2) §AC5's headline numbers are SPELLED-OUT WORDS** (*"forty-five"*, *"forty-three"*), so a
 digit regex — **including the sibling guard's own** — returns zero offenders and looks green. Both are
-mandatory mutations. **The honest caveat stated first: there is NO pre-commit hook** (verified —
-`.git/hooks/` holds only samples), so **neither check runs automatically**; founder item **F-D** is what
-turns it from a convention into a gate.
+mandatory mutations. **⚠ A FALSE CLAIM MADE AND SELF-CAUGHT WITHIN THE SESSION, recorded rather than smoothed over.** This
+entry and the designs file first stated, as verified fact, that **NO pre-commit hook exists** — from
+`[ -f .git/hooks/pre-commit ]`, **the wrong location**; hooks here are wired via `core.hooksPath`.
+**It was caught because this session's own commit ran the hook.** **Corrected:** a hook exists at
+`.husky/pre-commit`, **blocks on failure**, and already runs a whole-repo `npx tsx` battery always —
+**but it does NOT run `r20a-invocation-guard.test.ts`**, so an AC5 assertion placed there would still
+not run on commit. **The correction improves the design:** the revised recommendation is to pair the
+elected assertion with adding that battery to the existing hook — one more invocation in a
+load-bearing mechanism, not new infrastructure — weighing the cost of a 700+-assertion battery on
+every commit. **Founder item F-D is now VERIFIED rather than carried:** the hook **fails open when
+`npx` is absent** (lines 73–74). **The lesson is the project's own: absence found at one location is
+not absence.**
 
 **Tool-mode disclosure:** authored through **Bash** per the harness's standing auto-mode instruction —
 not chosen because of the record. **Consequence: guard records, ~zero consult records**, added to the
