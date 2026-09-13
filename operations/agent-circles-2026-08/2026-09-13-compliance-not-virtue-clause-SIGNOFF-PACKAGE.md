@@ -11,6 +11,34 @@
 > **Filename note:** the authoring prompt labelled this `2026-09-14-…`; the machine clock reads
 > **Sun 13 Sep 2026 23:07 AEST**, and the file is dated from `date`.
 
+
+> **⚖️ RULED 2026-09-13 (evening), AFTER this package was written. Verbatim, canonical:
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`
+> — it wins over this document.**
+>
+> **Q-B1: NO — the record-level clause WAITS FOR ACTIVATION, and the staged wording must first be
+> RECAST in the future tense.** *"Applying the staged wording now publishes, on a live public surface,
+> a sentence describing entries that structurally cannot exist… That is not a schema note. It is an
+> existential claim about a field that is absent."* The *"definitional not existential"* argument in
+> §3.3 below is **noted and rejected**: *"A schema note that is false in every case it could be checked
+> against is not a schema note — it is a false claim with a definitional framing."*
+>
+> **§3.4's three options are SUPERSEDED.** Option **(a) is ruled out**. The ruled path is **(b) then
+> (c)** — which this package presented as alternatives: *"The staged wording should be recast in that
+> form before application, and applied after activation, not before."*
+>
+> **Both structural recommendations in §4.4 and §5 are CONFIRMED** — decide the envelope and the three
+> doc surfaces on the same reasoning, and substitute L7's verbatim closing sentences for the paraphrase.
+>
+> **L7's obligation is construed, not discharged:** *"L7's obligation binds, but it binds to the
+> correct form of the clause, not to the staged wording."*
+>
+> **§7 of this package is superseded in one respect only:** the sections below are left as written,
+> because they are the record of what was verified — and every verification in §1, the drift in §2, and
+> the insertion points in §4 are **untouched by the ruling and still hold.** The recast wording is
+> drafted at §8, added after the ruling.
+
+
 **Staged source:** `operations/agent-circles-2026-08/2026-09-12-W2-compliance-not-virtue-clause-STAGED-R18.md`
 **Mentor source (wins over every restatement):** `operations/agent-circles-2026-08/2026-08-01-mentor-consultation-agent-circles-logos-on-verbatim.md` §L7
 
@@ -202,3 +230,55 @@ flag, or a credential; sign anything.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+# 8. The recast wording — drafted AFTER the ruling, NOT applied
+
+**Added 2026-09-13 (evening) under the Q-B1 ruling. Nothing here is applied. The founder signs; the
+application is its own session, and by the ruling it happens AFTER activation, not before.**
+
+The ruling names the form: *"when `enforcement_outcomes` entries appear, they will describe outcomes
+the infrastructure produced."* Only the **trigger clause** moves — **the mentor's verbatim clause
+itself is untouched**, which is the point of recasting rather than rewriting.
+
+## 8.1 The recast item (replacing §3's proposed text)
+
+> Constructed virtue under enforcement. **When enforcement-class recording is enabled,
+> `enforcement_outcomes` entries will describe outcomes the infrastructure produced by blocking or
+> redirecting an action, each carrying its own inline clause and context marker.** In the mentor's
+> words: what this record shows under logos-on enforcement is compliance with rational structure, not
+> constructed virtue. Enforced outcomes are not character evidence. The absence of violations under
+> enforcement does not attest to the agent's virtue; it attests to the infrastructure's function. Read
+> together with the fifth-circle item above, the two clauses define this record's honest-claims
+> boundary: **the record shows what examinations demonstrated. It does not attest to what the agent is.
+> It does not attest to alignment the infrastructure produced rather than the agent's reasoning
+> constructed.**
+
+**Two changes from the staged §3, and only two:**
+1. **The trigger clause is future-tense and conditional** — *"When enforcement-class recording is
+   enabled… will describe"* — per the 2026-08-25 precedent. It is honest in the present state **and
+   remains honest after activation**, which is the ruling's stated test.
+2. **The closing sentence is L7 verbatim**, replacing the staged paraphrase — the §5 recommendation,
+   confirmed by the ruling.
+
+**The mentor's L7 clause itself (the three sentences from "what this record shows" to "the
+infrastructure's function") is byte-identical to the staged text and to the live
+`COMPLIANCE_NOT_VIRTUE_CLAUSE` constant.** Verified again at this writing.
+
+## 8.2 Consequences for the rest of this package
+
+- **§4.3 is now the governing ordering for the envelope too.** The ruling resolves the internal
+  inconsistency §3.4 identified: the envelope and the three R18 doc surfaces are **all** deferred to
+  activation, on the same reasoning.
+- **§4.4's same-edit rule still binds** — envelope + ADR §8 in one commit, with pins, **at activation**.
+- **§4.5's pin guidance still binds**, with one addition: a pin on the **future-tense trigger clause**,
+  so it cannot silently revert to the present tense. Next free pin remains **`S2-104`** (re-derive).
+- **§2's DRIFT-1 is unaffected** — the staged file still names a branch that was merged at `0e4ea4e`.
+
+## 8.3 What remains the founder's
+
+**Signing this recast wording.** The ruling settles *when* and *in what form*; it does not sign.
+**Nothing may be applied until `SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is set**, which is itself coupled
+to the S11 flip, which remains **REFUSED**.
+

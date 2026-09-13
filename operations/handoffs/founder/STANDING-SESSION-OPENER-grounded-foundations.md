@@ -24,7 +24,14 @@ header cited them under one path, imprecisely).
 > part-(2) window section carries *"variety assessed, never targeted."* Since this opener is **pasted
 > as a session's first message**, it is far closer to a session prompt than `CLAUDE.md` is. **A W2
 > sitting opened under it as written would break Q-S2 at the point of application.** Surfaced
-> 2026-09-13 evening; **not resolved** — it is the founder's and the mentor's. See the addendum §H.
+> 2026-09-13 evening. **⚖️ RULED THE SAME EVENING — THIS "NOT RESOLVED" LINE IS NOW FALSE and is
+> left only as the record of what was true when written.** Verbatim:
+> `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`.
+> **Q-A1: Q-S2 DOES reach this opener** — and the parenthetical below at ≈line 316 (*"This opener is
+> not a W2 session prompt; it may name the window"*) is expressly *"not a ruling and does not
+> govern."* **The carve-out stands and is now binding, not provisional.** The remedy is the
+> conforming variant at `operations/handoffs/founder/W2-SESSION-OPENER-qs2-conforming-DRAFT.md`.
+> **This opener remains operative for every non-W2 session.** See addendum §H.
 > **It does not affect this opener's use for any non-W2 session**, which is every session today.
 
 > **⚠ Superseded status line, kept as the record: DRAFTED 2026-09-13 (~06:00 AEST), NOT YET FOUNDER-ADOPTED — the founder has asked for this version to adopt.** Drafted by the records-fold session
@@ -210,7 +217,14 @@ watched domain. It does not name variety of courage-relevant moments as the crit
 MESSAGE.** That is the thing Q-S2 calls a session prompt. **A W2 sitting opened under this document as
 written would break the discipline at the point of application, by the document it opened under.**
 
-**Not resolved here.** Three routes exist and the choice is the founder's, with the mentor if wanted:
+**⚖️ RULED 2026-09-13 (evening) — this section's "not resolved" framing is superseded; it is kept as
+the record of the question as asked.** All four questions were ruled: Q-S2 reaches this opener
+(route (ii) answered); a **bare** count table would have been permitted but this row is not; the
+discipline governs what a sitting is **told**; and the conforming draft is *"the correct path
+forward."* **Route (i) is the ruled remedy.** Verbatim:
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`.
+
+**As originally written — three routes existed and the choice was the founder's, with the mentor if wanted:**
 **(i)** a trimmed W2-only opener variant that carries state without naming the domain or the
 criterion; **(ii)** put it to the mentor as a specific question — is an opener a "session prompt" for
 Q-S2, and does naming a domain in a *state* table differ from naming it as the *criterion*?;

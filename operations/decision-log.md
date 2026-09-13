@@ -41304,3 +41304,100 @@ the file; `manifest.md` clean.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## 2026-09-13 — D-MENTOR-RULING-QS2-OPENER-COLLISION-FOUR-QUESTIONS-ADOPTED-SECOND-PASS-FOLDED-2026-09-13
+
+**Session:** `sagereasoning-b6 [efdaf2]`, evening (from `date`; the machine clock rolled to 2026-09-14
+during this entry's authoring — the work and the ruling are dated 2026-09-13).
+**Tier:** `governance` / documents. **AC7 NOT engaged.**
+**Verbatim, canonical:** `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`
+**Relayed from:** `operations/trust-layer-2026-07/2026-09-13-MENTOR-BRIEF-qs2-opener-collision-and-D3-sequencing.md`
+**Sibling entry:** `D-QS2-OPENER-COLLISION-VERIFIED-CONFORMING-OPENER-DRAFTED-PRE-W2-ITEMS-PREPARED-2026-09-13`.
+
+**ADOPTED AS BINDING on relay. Nothing built, activated, flipped, deployed or pushed. W2's clock has
+not started and this ruling does not start it.**
+
+**Q-A1 — Q-S2 REACHES the standing opener.** *"The condition's wording — 'a W2 session prompt' — does
+not limit it to per-sitting authored documents… what matters is whether the sitting is told what is
+being watched for."* The opener's own parenthetical (*"This opener is not a W2 session prompt; it may
+name the window"*) is expressly *"not a ruling and does not govern."*
+
+**Q-A2 — the state-vs-criterion distinction is REAL, and this row falls on the wrong side.** A **bare**
+per-domain count table *"would be permitted instrument disclosure."* The purposive row is not: *"That
+combination is not instrument disclosure. It is criterion disclosure in purposive form… The indirection
+does not change what is communicated."* The session's own reading is confirmed, and so is its
+observation that *"an explanation of an omission tends to reconstitute it… a property of the remedy
+class."*
+
+**Q-A3 — the discipline governs what a sitting is TOLD, not what it could discover.** *"The repository
+is readable and nothing prevents a sitting from finding the criterion there. The discipline requires
+that the opener not tell it."* A trimmed opener is therefore *"a genuine remedy, not a cosmetic one"*;
+its scope is *"the opener, not the repository"*; and the prepared conforming draft *"is the correct
+path forward."*
+
+**Q-B1 — NO. The record-level compliance-not-virtue clause WAITS FOR ACTIVATION, and the staged wording
+must first be RECAST in the future tense.** The *"definitional not existential"* argument is *"noted and
+rejected"*: *"A schema note that is false in every case it could be checked against is not a schema
+note — it is a false claim with a definitional framing."* **L7's obligation is construed, not
+discharged:** *"it binds to the correct form of the clause, not to the staged wording."* Both structural
+recommendations confirmed.
+
+**THE SECOND ADVERSARIAL PASS WAS RULED MANDATORY AND HAS RUN**, in the form the ruling specified
+(*"asked to find what the document implies, not only what it states"*). **Two reviewers, different
+contamination profiles.**
+
+**The blind inference test is the positive result.** Given the document and nothing else, the reviewer
+**could not name the domain or the criterion**, said so plainly rather than guessing, disclosed
+unprompted that `CLAUDE.md` sat in its context and that it deliberately did not use it, and answered
+that it could not shape work toward the criterion *"because I don't know what 'well' means here."*
+
+**The implication hunt found a HIGH the first pass and the authoring session both missed, and it was
+worse than an implication — it was routing.** The opener's §2 close-pointer index cited the pre-flip
+report **by exact subsection** (§§1, 3.3–3.3b, 12) and the S11 register (§F + change-log tail).
+**Verified first-hand: those subsections carry 29 occurrences of the trigger terms; the register carries
+19.** A document certified *"0 occurrences, grep-verified"* was directing a sitting, by precise citation,
+into the densest statement of the criterion in the repository. **Both pointers removed**; S11-track
+reading now routes through the founder; **every remaining cited file re-audited (all 0, bar one
+incidental verdict mention).** **The bitter part, recorded because it is the lesson: that index had been
+added to fix a completeness finding from the FIRST pass.** Also fixed: a near-verbatim echo of two of
+the ruling's three criterion-conjuncts in the work section; the prohibition block, which proved a
+virtue-domain-shaped criterion existed and narrowed the space to four; and the provenance banner, which
+named the standing opener by filename.
+
+**FIVE successive instances of one class in one document** — the omissions table, the pointer to it, the
+prohibition, the provenance banner, and the reading index. **The lesson, now demonstrated rather than
+asserted: a document whose purpose is controlled context cannot carry its own meta-commentary.**
+
+**WHERE THE TRIMMING WAS STOPPED, and why — recorded so it is not "fixed" later.** A final audit showed
+the document still cites `CLAUDE.md` (27) and `operations/decision-log.md` (62). **Both were deliberately
+left.** `CLAUDE.md` is **expressly ruled within bounds**; the decision log is mandatory Tier-1 reading
+every session performs regardless; and Q-A3 forecloses repository-wide remediation. **The operative line:
+a pointer leaks when it directs a sitting to a specific location whose content states the criterion; a
+pointer naming standard whole-project reading does not.** This session's own prior entry was checked and
+carries **0** trigger occurrences — it names *"the domain"* and *"the criterion"* throughout.
+
+**Folded:** the verbatim captured; the conforming opener fixed at five points and re-verified **0
+occurrences**; the design notes extended with both passes, the stopped-trimming line, and the founder
+option Q-A2 opens (**a bare count table is permitted; the opener is currently stricter than required**);
+the D-3 sign-off package banner-superseded at §3.4/§7 with **the recast future-tense wording drafted at
+a new §8, unapplied**; a register change-log row; and the standing opener **annotated only** where the
+ruling made its own text false (the carve-out and addendum §H both said *"not resolved"*).
+
+**⚠ ONE FOUNDER ITEM IN THE RULING RESTS ON A STALE PREMISE, recorded rather than acted on.** F-2 —
+*"Adopt the corrected version before W2 opens"* — **is already discharged**; Version 2026-09-13 was
+founder-adopted the same evening and carries the banner in its own header. The ruling's principle
+(*"Operating under a known-false document is not a neutral act"*) is untouched, and in fact bore on a
+different document — which is what the annotation above addresses.
+
+**The `CLAUDE.md` premise was re-verified, not assumed:** nine `andreia` occurrences, **all
+engine-mechanism descriptions**, none naming it as a watched domain — so the 2026-09-13 ruling's own
+recording-note condition is satisfied as of this date.
+
+**Carried, all the founder's:** revoke `sagereasoning:option-s@v1` **first** (the ruling: *"the only open
+item with a live security surface… an exposure with no remaining purpose"*); close idle peers before W2;
+apply the ruled ATRF item-3 wording and the AC5 fix, the latter **paired with an executable check**;
+sign the recast D-3 wording, to be applied only after activation; then open W2's first sitting under the
+conforming opener, **the act of opening being what makes it the first**.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

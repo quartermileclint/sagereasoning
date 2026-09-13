@@ -132,6 +132,28 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
+- **2026-09-13 (THE Q-S2 OPENER COLLISION IS RULED ON ALL FOUR QUESTIONS; THE CONFORMING OPENER IS
+  THE RULED PATH; THE W2 CLOCK IS STILL NOT STARTED;
+  `D-MENTOR-RULING-QS2-OPENER-COLLISION-FOUR-QUESTIONS-ADOPTED-SECOND-PASS-FOLDED-2026-09-13`;
+  verbatim, canonical:
+  `operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`)**
+  — **Q-A1: Q-S2 REACHES the standing opener** — the test is content-based, not document-class-based,
+  and the opener's own *"this opener is not a W2 session prompt"* parenthetical *"is not a ruling and
+  does not govern."* **Q-A2: a BARE per-domain count table IS permitted instrument disclosure; the
+  purposive row is NOT** — *"criterion disclosure in purposive form… the indirection does not change
+  what is communicated."* **Q-A3: the discipline governs what a sitting is TOLD**, so a trimmed opener
+  is *"a genuine remedy, not a cosmetic one"*, its scope is *"the opener, not the repository"*, and the
+  prepared conforming draft *"is the correct path forward."* **Q-B1: NO — the record-level
+  compliance-not-virtue clause WAITS FOR ACTIVATION and must first be RECAST in the future tense**;
+  this supersedes the sign-off package's option (a) and selects (b)+(c). **Consequence for the W2
+  sitting's preconditions: the standing opener may NOT open one; the conforming draft may, and the
+  second adversarial pass the ruling made MANDATORY has now run.** That pass found a HIGH the first
+  did not: the opener's own close-pointer index cited the pre-flip report **by exact subsection** and
+  the register **§F + change-log tail** — **29 and 19 trigger-term occurrences respectively,
+  verified first-hand** — so the pointer, not the prose, was the leak. **Both pointers are removed;
+  S11-track reading is now routed through the founder.** Four further instances of the same class were
+  found and fixed. **Nothing is built, activated, flipped or pushed; the clock has not started; the
+  flip remains REFUSED; weights remain BLOCKED.**
 - **2026-09-13 (THE Q-S2 COLLISION IN THE STANDING OPENER IS VERIFIED; A CONFORMING W2 OPENER IS
   DRAFTED, NOT ADOPTED. W2's clock is still NOT started and no W2 session has run;
   `D-QS2-OPENER-COLLISION-VERIFIED-CONFORMING-OPENER-DRAFTED-PRE-W2-ITEMS-PREPARED-2026-09-13`;

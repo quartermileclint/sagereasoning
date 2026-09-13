@@ -240,3 +240,72 @@ A/B choice, and by declining to choose between A and B at all.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## 11. ADDENDUM — the mentor ruled, and the mandatory second pass found what the first did not
+
+**Appended after §10, same session. The founder relayed the brief and returned the ruling; the machine
+clock rolled to 2026-09-14 00:01 AEST during this addendum's authoring. The work and the ruling are
+dated 2026-09-13.** Verbatim, canonical:
+`operations/trust-layer-2026-07/2026-09-13-mentor-ruling-qs2-opener-collision-four-questions-verbatim.md`;
+entry `D-MENTOR-RULING-QS2-OPENER-COLLISION-FOUR-QUESTIONS-ADOPTED-SECOND-PASS-FOLDED-2026-09-13`.
+
+**All four ruled.** Q-A1 — **Q-S2 reaches the standing opener.** Q-A2 — the state-vs-criterion
+distinction is real, **a bare count table would be permitted**, this purposive row is not. Q-A3 — the
+discipline governs **what a sitting is told**; the conforming draft *"is the correct path forward."*
+Q-B1 — **NO**: the record-level clause **waits for activation** and must first be **recast in the
+future tense**; the *"definitional not existential"* argument is *"noted and rejected."*
+
+### 11.1 The second pass was ruled MANDATORY, ran, and changes §3's verdict
+
+**§3.1 above recorded one defect this session caught in its own remedy. That count was wrong — it is
+five.** The ruling made a second pass mandatory and specified its form; two reviewers ran.
+
+**The blind inference test passed.** Given the document alone, the reviewer could not name the domain
+or the criterion, said so rather than guessing, disclosed that `CLAUDE.md` was in its context and that
+it deliberately did not use it, and could not say how to shape work toward the criterion.
+
+**The implication hunt found a HIGH that inverts §9's "verified at close" claim.** The opener's §2
+close-pointer index cited the pre-flip report **by exact subsection** and the register §F + change-log
+tail — **29 and 19 trigger-term occurrences, verified first-hand.** **A document this close certified
+as "0 occurrences of any forbidden term" was routing a sitting, by precise citation, into the densest
+statement of the criterion in the repository.** *"The pointer is the leak."*
+
+**And that index was added to fix a completeness finding from the FIRST pass.** Remedying completeness
+created the leak.
+
+**Five instances of one class, in one document:** the omissions table → the pointer to it → the
+prohibition (which proved the criterion was virtue-domain-shaped, narrowing it to four) → the
+provenance banner (which named the standing opener by filename) → the reading index. **All five fixed;
+the document re-verified at 0 and every cited file re-audited.**
+
+### 11.2 Where trimming was stopped — deliberately, and it should not be re-trimmed
+
+`CLAUDE.md` (27) and `operations/decision-log.md` (62) are still cited. **Left on purpose.**
+`CLAUDE.md` is expressly ruled within bounds; the decision log is mandatory reading every session does
+anyway; and Q-A3 forecloses repository-wide remediation. **A pointer leaks when it directs a sitting to
+a specific location whose content states the criterion — not when it names standard reading.**
+
+### 11.3 What §7's "not done" list gains
+
+- **The standing opener was ANNOTATED** (annotate-only, dated) where the ruling made its own text false
+  — the carve-out and addendum §H both read *"not resolved."* **Flagged prominently because it edits a
+  founder-adopted document**; nothing else in it was touched.
+- **The D-3 package is banner-superseded** at §3.4/§7, with the **recast future-tense wording drafted
+  at a new §8 and unapplied.**
+- **A founder option opened by Q-A2:** a bare per-domain count table is **permitted**. The conforming
+  opener carries none — **stricter than required**. Not taken here, on the judgement that a document
+  which had just leaked at five levels was not the place to add domain figures the same day.
+- **One founder item in the ruling rests on a stale premise:** F-2 (*"adopt the corrected version"*) is
+  **already discharged** — recorded, not acted on.
+
+### 11.4 Re-verified at this addendum's close
+
+Guard battery **run**; three SHA pins; conforming opener **0 occurrences**; every file it cites
+re-audited; `manifest.md` clean; no `GUARD_RE` file touched. **One harness note, disclosed:** a Gate-1
+pre-decision examination returned *"no assessment in response"* on one subagent spawn and that task
+proceeded unframed — recorded as an outage, not treated as a pass.
+
+**W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
+The 0h call remains the founder's.**

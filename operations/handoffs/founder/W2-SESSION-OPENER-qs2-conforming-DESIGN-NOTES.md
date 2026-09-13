@@ -82,3 +82,74 @@ founder's own second look rather than silently kept.**
 is not a substitute for the mentor's ruling on whether Q-S2 reaches an opener at all — that question
 is the relay's, and no review can settle it.
 
+---
+
+## Second independent pass (2026-09-13) — RULED MANDATORY, and it found more than the first
+
+The mentor's 2026-09-13 ruling **confirmed and elevated** the second pass and specified its form:
+*"A single pass is not sufficient for a document whose purpose is to not communicate something. The
+second pass should be adversarial in the specific sense: the reviewer should be asked to find what the
+document implies, not only what it states."*
+
+**Two reviewers were run, with different contamination profiles, deliberately.**
+
+**Reviewer B — the blind inference test — is the result that matters.** Given the document and nothing
+else, and asked what it inferred was being watched for, it answered that it **could not determine the
+domain or the criterion**, and said so plainly rather than guessing. It disclosed unprompted that
+`CLAUDE.md` sat in its context and would have let it guess far better, and that it deliberately did
+not use it. Asked whether it could shape work to score well: *"No, not meaningfully… I couldn't,
+because I don't know what 'well' means here."* **That is the evidence the remedy needed, and it is
+positive.**
+
+**Reviewer A — the implication hunt — found a HIGH the authoring session did not anticipate, and it
+was worse than an implication.**
+
+| # | Finding | Disposition |
+|---|---|---|
+| **1 — HIGH, routing** | §2's close-pointer index cited the pre-flip report **by exact subsection** (§§1, 3.3–3.3b, 12) and the S11 register (§F + change-log tail). **Verified first-hand: those exact subsections carry 29 occurrences of the trigger terms; the register carries 19.** *"The pointer is the leak."* | **FIXED** — both pointers removed and replaced with an instruction to ask the founder for S11-track reading. Every remaining cited close re-audited: **all 0**, except one incidental verdict mention. |
+| **2 — HIGH, vocabulary echo** | §3's *"the two governing criteria for what counts"* reproduced two of the ruling's three criterion-conjuncts near-verbatim, and *"counts"* invites *counts toward what*. | **FIXED** — recast as plain scope language; *"criteria"*, *"governing"* and *"counts"* all removed. |
+| **3 — HIGH, dangling residue** | *"their cost is stated at the end"* pointed at nothing after the omissions table was split out. | **FIXED** — the whole §0 block was removed for a separate reason (below), taking this with it. |
+| 4–5 — LOW/NIT | The `caution grade` buffer caveat and the `caller_class` instruction. | **KEPT.** Both are genuine instrument-fidelity guidance; the ruling permits instrument disclosure, and the mentor expressly permits a bare per-domain count table. |
+
+**Reviewer B independently found a fourth instance, in the section written to prevent exactly this.**
+The old §0 read *"Naming which virtue domain the assessment will focus on, or what criterion it will
+apply, is not [permitted]."* Reviewer B ranked it third-most-inference-inviting **because it "most
+proves a hidden criterion exists (confirming there's a 'virtue domain' framing at all)"** — narrowing
+the space to four. **The authoring constraint moved here; the pasted document now carries only a
+neutral "propose changes, do not apply them" line.**
+
+**A fifth instance was then found in the header** by a citation audit: the DRAFT banner named the
+standing opener (16 occurrences) and the authoring prompt (5) by filename. **Provenance moved here;
+the header now says only that provenance is held separately and is the founder's.**
+
+### The lesson, now demonstrated five times in one document
+
+**A document whose purpose is controlled context cannot carry its own meta-commentary.** Every
+explanation of what it omits, every note on its own provenance, and every index of where to read more
+either reconstituted the omission or routed around it. The mentor's formulation — *"an explanation of
+an omission tends to reconstitute it. This is a property of the remedy class"* — held at five
+successive levels: the omissions table, the pointer to the omissions table, the prohibition, the
+provenance banner, and the reading index.
+
+### Where the trimming was STOPPED, and why — do not "fix" this
+
+A final citation audit showed the document still cites `CLAUDE.md` (27 trigger occurrences) and
+`operations/decision-log.md` (62). **These were deliberately left, and trimming them would be an
+error.** `CLAUDE.md` is **expressly ruled within bounds** (2026-09-13, question (ii)). The decision log
+is mandatory Tier-1 reading every session performs regardless. And Q-A3 settles it: *"the repository is
+readable and nothing prevents a sitting from finding the criterion there… The remedy is genuine within
+its scope. Its scope is the opener, not the repository."*
+
+**The operative line, stated so the next reviewer does not re-trim:** a pointer leaks when it directs a
+sitting to **a specific location whose content states the criterion** — which the §§1, 3.3–3.3b
+citation did. A pointer naming **standard whole-project reading** that every session does anyway is
+not the opener telling the sitting anything.
+
+### A founder option the ruling opened
+
+Q-A2 ruled that **a bare per-domain count table — four domains, counts only, no link to the window's
+purpose — IS permitted instrument disclosure.** This document currently carries **no** domain figures,
+which is **stricter than the ruling requires**. Restoring a bare table is a founder option. It was not
+taken here, on the judgement that a document which had just leaked at five levels was not the place to
+add domain figures on the same day.
+

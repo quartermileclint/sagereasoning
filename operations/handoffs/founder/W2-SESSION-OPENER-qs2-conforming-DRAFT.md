@@ -1,30 +1,21 @@
 # W2 Session Opener — Q-S2-conforming variant — **DRAFT**
 
-> **⚠ DRAFT. NOT ADOPTED. The founder elects whether this is ever used.** Drafted 2026-09-13
-> (evening, from `date`) by session `sagereasoning-b6 [efdaf2]` under
-> `2026-09-14-QS2-opener-collision-and-pre-W2-items-NEXT-SESSION-PROMPT.md`, so that the founder is not
-> blocked on a ruling. **It does not supersede the standing opener**
-> (`STANDING-SESSION-OPENER-grounded-foundations.md`, Version 2026-09-13, adopted), which remains
-> operative for every non-W2 session. If the mentor rules that no carve-out is needed, discard this.
->
-> **What it is for:** pasting as the first message of a sitting that runs inside the W2 observation
-> window, in place of the standing opener. **Reusable across W2 sittings** — a preamble, not a task:
-> read, confirm, then wait for the task.
->
+> **A preamble, not a task.** Read it, confirm what §1 asks, then wait for the task.
 > **Every number in it is a claim to re-derive at your own open.**
+>
+> **Provenance, adoption status and design rationale for this document are held separately and are
+> the founder's.** They are not in this file by design. Do not go looking for them; if you think you
+> need them, ask.
 
 ---
 
-## ⚠ Read this first — a constraint on this document itself
+## ⚠ Read this first
 
-**Nothing may be added to this opener that describes what the observation window's post-window
-assessment will look for.** Naming that a window is running, what the instrument measures, and where
-its record lives is permitted and is done below — that is the instrument. Naming which virtue domain
-the assessment will focus on, or what criterion it will apply, is not.
+**This document is the founder's to change.** If something here looks wrong, incomplete, or worth
+adding — including anything you would need in order to do the work well — **propose it to the founder
+and do not apply it yourself.** That includes additions that seem plainly helpful.
 
-If you find yourself wanting to add readiness-board detail, a per-domain breakdown, or a note about
-what the window needs to produce — **don't.** Route it to the founder instead. The omissions below are
-deliberate and their cost is stated at the end.
+**Route, do not resolve.** This applies to the document as much as to the work.
 
 ---
 
@@ -59,31 +50,28 @@ deliberate and their cost is stated at the end.
 6. `/operations/decision-log.md` — the **physical tail**. Newest entries are at the END, headed
    `## <date> — D-…`; a bare `grep '^## D-'` misses them.
 7. **The closes matched to your task** (verbatim wins over every summary, including this
-   document). Where to start, by track: **S11 / the window** →
-   `2026-09-12-session-continuation-SUMMARY-CLOSE.md` (an index of five closes), then
-   `operations/trust-layer-2026-07/2026-09-12-S11-PRE-FLIP-REPORT.md` §§1, 3.3–3.3b, 12;
-   **W2** → `2026-09-12-W2-record-honesty-build-CLOSE.md` and
-   `2026-09-12-W2-waiver-merge-and-schema-walk-CLOSE.md`; **observability** → the two
-   `2026-09-12-O1-…` / `-O2-…` closes; **Option S / the M/W/S election** →
+   document). **For tasks on the standing-runner / IDEA-loop track:**
+   `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` §"Named inputs". **For W2:**
+   `2026-09-12-W2-record-honesty-build-CLOSE.md` and `2026-09-12-W2-waiver-merge-and-schema-walk-CLOSE.md`.
+   **For the Option S / M-W-S election:**
    `operations/agent-circles-2026-08/2026-09-13-mentor-rulings-option-s-result-and-F-R1-verbatim.md`
-   (canonical) and `2026-09-13-M-W-S-ELECTION-DOCUMENT.md`. **`option-s/` itself stays closed**
-   unless your task is briefed on it.
-8. **Tier 2, task-dependent:** the day's deliverable in full; for the standing-runner track,
-   `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` §"Named inputs"; for the S11 track, the
-   register `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` (§F and the change-log
-   tail); for agent-circles / logos-on, `operations/agent-circles-2026-08/`.
-
+   (canonical) and `2026-09-13-M-W-S-ELECTION-DOCUMENT.md`. **`option-s/` itself stays closed** unless
+   your task is briefed on it.
+   **If your task touches the S11 track, ask the founder for the reading before you go looking** —
+   do not assemble it yourself. That is a routing instruction, not a hint: the founder hands out that
+   reading deliberately.
+8. **Tier 2, task-dependent:** the day's deliverable in full; for R20a / count-discipline,
+   `operations/count-discipline-2026-09/`; for agent-circles / logos-on,
+   `operations/agent-circles-2026-08/` (the 2026-08-01 plan + L1–L7 verbatim; ADR-013 §12).
 ---
 
 ## 3. The work
 
-**This window's designated work is the standing-runner design track (primary).** The staged
-compliance-not-virtue clause application is secondary. **One further candidate — the pre-flip
-report's outstanding items — was withdrawn by ruling**, its first item having already been
-discharged.
+**This window's designated work is the standing-runner design track.** The staged
+compliance-not-virtue clause application is secondary to it.
 
-**The two governing criteria for what counts:** consequential subject matter, and the consult channel.
-Design authoring in `operations/` satisfies both. A guarded-file waiver on the measured checkout is
+**Scope:** design authoring in `operations/` on live or consequential surfaces, done through
+Write/Edit rather than Bash-only automation. A guarded-file waiver on the measured checkout is
 within scope; **a worktree is not** — work done in a worktree is outside the instrument's reach.
 
 **Do the work on its merits.** Do not shape it around anything else.
