@@ -132,6 +132,26 @@ remain BLOCKED; the 0h call remains the founder's.
 ---
 
 ## Change log
+- **2026-09-13 (THE Q-S2 COLLISION IN THE STANDING OPENER IS VERIFIED; A CONFORMING W2 OPENER IS
+  DRAFTED, NOT ADOPTED. W2's clock is still NOT started and no W2 session has run;
+  `D-QS2-OPENER-COLLISION-VERIFIED-CONFORMING-OPENER-DRAFTED-PRE-W2-ITEMS-PREPARED-2026-09-13`;
+  close: `operations/handoffs/founder/2026-09-13-qs2-collision-and-pre-W2-items-CLOSE.md`)** — This
+  row records a change to **how a W2 sitting may be opened**, not to any flip prerequisite; no part of
+  the readiness standard moves. The standing opener (Version 2026-09-13, founder-adopted) **names both
+  Q-S2 triggers in its body** — the part-(2) row names the domain and ties the unmet part's discharge
+  to the W2 window, and the part-(2) window section names the criterion verbatim — so **a W2 sitting
+  opened under it as written would break Q-S2 at the point of application.** The finding was verified
+  first-hand against the Q-S2 verbatim, **and the carve-out warning in the opener's own header and
+  addendum §H is itself a breach**, quoting both trigger phrases while explaining the collision — so a
+  reading instruction cannot remedy it. **Consequence for W2's first sitting: it needs a document the
+  standing opener cannot supply.** One is drafted
+  (`operations/handoffs/founder/W2-SESSION-OPENER-qs2-conforming-DRAFT.md`, **0 occurrences of any
+  forbidden term, grep-verified**) with its rationale in a separate founder-facing note; a relay
+  putting the scope question (is an opener a "session prompt"?) and the state-vs-criterion question to
+  the mentor is **drafted and NOT sent**. **Nothing is adopted** — the route is the founder's, and the
+  relay recommends drafting-plus-relay in parallel on the same asymmetry the mentor applied to the W2
+  clock: opening under a breaching document is not recoverable; using a shorter one unnecessarily is.
+  **The clock has not started; the flip remains REFUSED; weights remain BLOCKED.**
 - **2026-09-12 (latest — W2 BUILT DARK ON BRANCH `w2-record-honesty` (`5aa82f5`), NOT MERGED, NOT
   ACTIVATED; `D-W2-ENFORCEMENT-RECORD-MACHINERY-BUILT-DARK-ON-BRANCH-PR19-FOLDED-2026-09-12`;
   close: `operations/handoffs/founder/2026-09-12-W2-record-honesty-build-CLOSE.md`; design:

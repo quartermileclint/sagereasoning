@@ -41197,3 +41197,110 @@ commit; D-1's and D-2's elections would need re-making, the Q-S2 finding stands 
 **Status:** D-1, D-2, D-5 discharged. **D-9 blocked pending the Q-S2 collision. Nothing built,
 activated, flipped, deployed or pushed. D2 remains blocked. The S11 flip remains REFUSED. Weights
 remain BLOCKED. The 0h call remains the founder's.**
+
+## 2026-09-13 — D-QS2-OPENER-COLLISION-VERIFIED-CONFORMING-OPENER-DRAFTED-PRE-W2-ITEMS-PREPARED-2026-09-13
+
+**Session:** `sagereasoning-b6 [efdaf2]`, evening (from `date`; the authoring prompt was filename-dated
+2026-09-14 — a context-date artifact, corrected per the standing discipline).
+**Tier:** `governance` / documents. **AC7 NOT engaged.**
+**Close:** `operations/handoffs/founder/2026-09-13-qs2-collision-and-pre-W2-items-CLOSE.md`.
+**Opened under:** `2026-09-14-QS2-opener-collision-and-pre-W2-items-NEXT-SESSION-PROMPT.md`, beneath
+the standing opener (Version 2026-09-13, founder-adopted).
+
+**Not W2's first sitting.** W2's clock has not started. Every record this session produced belongs to
+the **current** window, whose intake remains open per Q2.
+
+**Nothing was applied, sent, opened, activated, flipped, deployed or pushed.** No code, schema, flag,
+credential, migration, R18 surface, `manifest.md` edit, or `GUARD_RE` file. Nothing written to
+`~/.sage-gate1/`; no report run.
+
+**TASK A — the Q-S2 collision is VERIFIED, not refuted.** Grepped first-hand; Q-S2 read verbatim. The
+standing opener names **both** Q-S2 triggers **in its body**, not only in its own §H warning: the
+part-(2) row (line 298) names the domain and its guard/consult split **and** links the unmet part's
+discharge to *"a differently-composed window — now specified, approved and ruled (below)"*; the
+part-(2) window section (line 309) names the criterion verbatim. The operative test is the mentor's
+own from the 2026-09-13 ruling question (ii) — *"The distinction between knowing the instrument exists
+and knowing what the instrument is watching for is real and it is the operative one"* — which names
+precisely what must stay unnamed.
+
+**The question the prompt left open is answered:** a *state* table naming a domain is **not**
+necessarily the same act as naming the *criterion* — a bare count table would be a genuinely hard case
+and would read as instrument disclosure, which question (ii) permits — **but this opener does not sit
+on the safe side of that line**, because its row is purposive: it attributes the unmet part to the
+domain and ties the discharge to the window the sitting is running, with the criterion named outright
+in the next section. **Recorded as a session's reading, not as law**; the scope half (does Q-S2 reach
+an opener at all) is the mentor's, and the relay was drafted regardless.
+
+**A wrinkle the previous session did not have: the carve-out warning is itself a breach** — the header
+block and addendum §H both quote the trigger phrases while explaining the collision. A reading
+instruction cannot save the document; a separate trimmed document is necessary.
+
+**Deliverables.** Relay **DRAFTED, NOT SENT**
+(`operations/trust-layer-2026-07/2026-09-13-qs2-opener-collision-RELAY-DRAFT.md`) — one question in two
+parts, both readings, quoted evidence, three routes; **no position on the breach**, a recommendation on
+**route** only. Conforming opener **DRAFTED, not adopted**
+(`operations/handoffs/founder/W2-SESSION-OPENER-qs2-conforming-DRAFT.md`) — **0 occurrences of any
+forbidden term, grep-verified after every edit** — with its design rationale split into a separate
+founder-facing file (`…-DESIGN-NOTES.md`).
+
+**A defect this session introduced and caught in its own work, recorded because it generalises.** The
+first cut of the conforming opener carried its omissions table in-document — **quoting the forbidden
+criterion verbatim while explaining that the document omits it.** A grep caught it. **The remedy
+reproduced the defect it was written to fix.** Split out. **An explanation of an omission tends to
+reconstitute it.**
+
+**Independent review run; six findings; two substantive, both real, both folded** (each verified
+against source before acting). **(1) MEDIUM-HIGH, factual: the work-designation sentence was
+INVERTED** — it read *"A third candidate was withdrawn by ruling"*, but Q-M1 withdrew candidate **(b)**,
+the **second** of three, while the **third** (standing-runner) is now **PRIMARY**; an ordinal-counting
+reader would have concluded the designated work was the thing dropped. Fixed by naming rather than
+numbering. **(2) MEDIUM, leakage by inference: the pointer to the design notes was itself disclosive** —
+it announced targeted suppression without naming its object; **§9 deleted from the pasted document.**
+**This is the same defect class as the session's own catch above, a second time.** Three completeness
+findings folded (the buffer's 1-indexing and `GUARD-OUTAGE`-has-no-`tool=` traps plus buffer-over-log
+precedence; a per-track close-pointer index; the one-arc concurrency norm); one accepted as a caution
+and flagged rather than silently kept (the tool-mode constraint is the passage closest to the line);
+one relay NIT balanced. **Honest limit: one reviewer, one pass** — it cannot settle the scope question.
+
+**TASK B — D-3 sign-off package**
+(`operations/agent-circles-2026-08/2026-09-13-compliance-not-virtue-clause-SIGNOFF-PACKAGE.md`),
+**nothing applied.** Seven staged claims verified as **holding** against `enforcement-clause.ts`,
+`trust-record-payload.ts`, the battery, and the L7 verbatim — including byte-equality of the clause and
+the correct resolution of *"the fifth-circle item above"* (item 8 of 11; a new item appends as 12).
+**DRIFT-1 (LOW):** the staged file still says the inline half is *"built dark on branch
+`w2-record-honesty`"* — **merged to `main` at `0e4ea4e`.** **⚠ One sequencing decision surfaced for the
+founder:** `enforcement_outcomes` is structurally absent from every served payload while
+`SUBSTRATE_ENFORCEMENT_RECORD_ENABLED` is unset, while `TRUST_RECORD_ENVELOPE` is served on every read
+— so applying §3 as worded publishes a present-tense description of a field that cannot appear. ADR-013
+§8's own history states the discipline twice and the ordering rule four times; **the counter-argument
+is also real** (the sentence is definitional, and L7 *obliges* the record-level clause). Three options,
+**no preference stated.** Also noted: the staged file defers the three doc surfaces *"once the field can
+actually appear"* but applies no such test to the envelope, in the same document. Insertion points,
+the same-edit rule and its reason, and the next free pin (**`S2-104`**, counted) all prepared.
+
+**TASK C — both `manifest.md` edits prepared for one founder sitting**
+(`operations/handoffs/founder/2026-09-13-manifest-edits-FOR-FOUNDER-ACT.md`); **`manifest.md` verified
+clean at close.** **D-4:** the **ruled** Q-R11-C1 full wording against live line 265, change-by-change,
+with the minimal-difference alternative flagged as **NOT** the ruled wording. **D-8:** the §AC5
+contradiction — counts **re-derived as correct today (43 + 2 = 45)**, so **the defect is form, not
+staleness**, and the bolded *"does not hand-enumerate"* sentence **hand-maintains two counts inside
+itself**. Three options; **no preference between A and B**; a recommendation on **structure only** —
+pair whichever is chosen with an executable check, since the section's own history is three consecutive
+demonstrations that a written instruction does not arrest this drift. **Option C is a code change and
+its own act** (verified: `GUARD_RE` does **not** match `r20a-invocation-guard.test.ts`).
+
+**Carried, all the founder's:** the Task-A route election; D-3's sequencing decision then signature;
+D-4 + D-8 as one sitting; **D-6 — revoke `sagereasoning:option-s@v1`, still the only open item with a
+live security surface**; D-7 — close idle peers (**23 at open**) before W2; then D-9, opening W2's
+first sitting, **the act of opening being what makes it the first**.
+
+**Tool-mode disclosure:** authored entirely via Bash heredocs under the harness's auto-mode
+instruction, so **this session's records are guard-class, not consult-class** — disclosed, not adjusted
+for. Buffer **792 lines at open** (646 at the previous close; live, append-only, never written to).
+
+**Verified at close:** byte-identity guard **run, 250/0**; all three SHA pins unchanged; `GUARD_RE`
+re-read with **no matching file touched**; R20a **43 + 2 = 45** from the arrays; extensions **26** from
+the file; `manifest.md` clean.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
