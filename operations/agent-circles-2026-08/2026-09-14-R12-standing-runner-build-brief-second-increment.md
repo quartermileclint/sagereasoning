@@ -172,6 +172,18 @@ exists to avoid. The brief keeps it because R9 §3.4 names it explicitly as a se
 **whether it should instead be derived at read time is a build election, and either choice must be
 recorded, not made silently.**
 
+> **⚖️ MENTOR RECOMMENDATION 2026-09-14 (a recommendation, NOT a ruling — the election remains the
+> founder's):** **derive from `derivation.moves[]`; do not store.** *"Storing it duplicates a fact
+> that is already structurally present in the derivation array. A derived field that duplicates a
+> stored fact creates two sources of truth for the same value, which is the shape that produces
+> silent inconsistency when one is updated and the other is not. The derivation array is the
+> authoritative source; read from it."*
+> **This REVERSES this section's specification**, which creates the column. **If the founder adopts
+> the recommendation, §2.3's column is struck from the bundle** and `accepted_move_count` becomes a
+> read-time derivation over `derivation.moves[]` — which also removes one column from §2's migration
+> and one field from §11's required source-grep assertions. **Not applied here:** the brief does not
+> make the founder's election, and the recommendation is recorded rather than executed.
+
 ### 2.4 `idea_loop_candidates.role_context` (R9 §7a)
 
 Nullable `JSONB`:
@@ -568,6 +580,20 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
 > the measured system's behaviour and is not admitted. **The table below states the phases' internal
 > ordering, which is unchanged; it does not state when the first of them may begin.** Read it with
 > §8.4. The worktree route remains available and remains non-equivalent for the instrument.
+>
+> **⚖️ THE CLOSE CONDITION IS NAMED — follow-on ruling, same day.** *"The window closes when the
+> S11-D2 baseline is complete — five ordinary post-remedy consult days counted from W2's first
+> record."* The clock starts at **W2's first sitting's first consult record**; five ordinary days
+> from that record sets the baseline; **the baseline's completion is the close condition.**
+> **It is bounded, not indefinite** — *"it is bounded by a clock that starts when the founder opens
+> W2's first sitting."*
+> **A correction this brief needed:** the F-3′ obligations are **the reporting obligations that
+> FOLLOW the close, not the close condition itself** — this session had read them as the condition.
+> **⚠ ONE PREMISE IS FLAGGED FOR THE FOUNDER, NOT RESOLVED HERE:** the ruling reasons from *"W2 has
+> not opened"*. Whether the founder's opening of the sitting that authored this brief **was** W2's
+> first sitting is the founder's determination — the recorded criterion is *"the act of opening being
+> what makes it the first"*. It matters: if it was, the clock started `2026-09-14T08:44:36.147Z` and
+> the baseline completes about **2026-09-19**. See the follow-on verbatim's executing-session notes.
 
 | Phase | Content | Gate |
 |---|---|---|
@@ -790,8 +816,20 @@ capability shape, §8.4's window question, or D1's vocabulary-direction question
   payload including `TRUST_RECORD_ENVELOPE`, read server-side; the read persists nothing and nothing
   about the target accumulates in the runner's state.
 - **Founder election** — §2.3: store `accepted_move_count` or derive it from `derivation.moves[]`.
+  **Mentor recommendation 2026-09-14 (not a ruling): DERIVE, do not store** — two sources of truth
+  for one value is *"the shape that produces silent inconsistency."* This reverses §2.3's
+  specification; see the annotation there. **Still the founder's election.**
 - **Founder election** — §2.5: `election_basis` on the candidate row or the cycle row.
+  **Mentor recommendation 2026-09-14 (not a ruling): CANDIDATE ROW** — *"R8's 'per-cycle' wording
+  describes the cadence of the election, not the granularity of the record… A cycle row carrying the
+  election basis would require joining back to the candidate to interpret it."* **Confirms §2.5's
+  specification and its stated reasoning.**
 - **Founder election** — §8.1: the value of N for phase 3, constrained only to be non-zero.
+  **Mentor 2026-09-14: *"genuinely the founder's election and the ruling does not constrain it
+  beyond the stated non-zero requirement."*** Recommendation: **3** — *"low enough that the first
+  completion signals are informative before the threshold is reached, and high enough that the
+  threshold is not met by a single anomalous signal… it requires a pattern, not a single
+  occurrence."*
 - **Held open, owned by no session (D1)** — the GS-ATRF-4 vocabulary direction. §2.8 records the
   dependency and assigns nothing.
 

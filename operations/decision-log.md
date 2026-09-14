@@ -41782,3 +41782,67 @@ match. **Rules served:** PR18, PR20, PR23; verbatim-wins.
 this ruling or its folds. The build is now explicitly gated on the observation window's close.
 D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+## 2026-09-14 — D-MENTOR-RULING-R12-FOLLOWON-ADOPTED-PREMISE-FLAGGED-2026-09-14
+
+**Decision.** The founder relayed the mentor's ruling on this session's four-item request for what is
+needed to progress the standing-runner track. Captured verbatim and adopted as binding:
+`operations/agent-circles-2026-08/2026-09-14-mentor-ruling-R12-followon-window-close-and-elections-verbatim.md`.
+Session `sagereasoning-b1 [4bc334]`; tier `governance`/documents; AC7 NOT engaged.
+
+**Item 1 — RULED, and it corrects this session's reading.** The window's close is **a mentor ruling,
+not a founder election**. *"The window closes when the S11-D2 baseline is complete — five ordinary
+post-remedy consult days counted from W2's first record, as Q-M4 ruled."* The founder opens W2's
+first sitting; that sitting's first consult record starts the clock; five ordinary days sets the
+baseline; **the baseline's completion is the close condition**, and it is **bounded, not
+indefinite**. **The correction:** the F-3′ obligations are **the reporting obligations that FOLLOW
+the close — they are not the close condition**, which is how this session had read them.
+
+**⚠ ONE PREMISE FLAGGED FOR THE FOUNDER, NOT RESOLVED.** The ruling reasons from *"W2 has not
+opened"* and *"the nine days do not count."* **This session cannot confirm that, and three facts pull
+the other way:** it opened under the **W2 conforming opener**, whose §3 states *"This window's
+designated work is the standing-runner design track"*; **the founder made that designation in this
+session**; and the session produced **27 consult-path records, the first at
+`2026-09-14T08:44:36.147Z`** — which is what F-1 says starts the clock. **Against that:** the recorded
+criterion is *"the act of opening being what makes it the first"*, making it the **founder's act**,
+not an inference from work performed; and the two prior sittings each declared themselves **"NOT W2's
+first sitting"** while none has declared itself the first. **This is a PR20 gap in this session's own
+relay and is named as one** — the request did not put the designation in front of the mentor, so the
+ruling reasoned without it. Per PR20's 2026-08-19 amendment **a ruling on a withheld premise stands**,
+and this one may well be right since opening is the founder's act; **standing-by-luck is not the
+standard, so the premise is put back.** **It decides the track's whole schedule:** if the opening was
+W2's first sitting the baseline completes about **2026-09-19**; if not, the build waits until the
+founder opens W2.
+
+**Item 3 — RULED.** Open **the producer-question mentor brief** next — *"a structural dependency, not
+a design preference."* R8's judgement that it precedes any build is **confirmed as hard rather than
+advisory** by Q-R12-B. The generation-step scoping session **can wait**; it does not gate the build.
+
+**Item 4 — RULED.** **Consult-side parity with the guard-side Condition-3 disclosure IS owed**, and
+the gap this session found is **a defect, not a design choice**. The ground is general and is carried
+forward: parity is owed *"not because the guard side has it but because the disclosure's purpose —
+honest representation of what the record attests — applies to both paths equally."* **It cannot be
+repaired mid-window** — the fix is in `harness/gate1` files, behaviour-altering changes to the
+measured checkout, so Q-R12-B governs. **It waits for the close.**
+
+**Item 2 — three founder elections, recommendations recorded AS recommendations, none applied.**
+**`accepted_move_count`: recommended DERIVE, not store** — *"two sources of truth for the same value…
+the shape that produces silent inconsistency."* **This REVERSES §2.3's specification**, which creates
+a column; if adopted, the column leaves the bundle and one field leaves §11's required source-grep
+assertions. **`election_basis`: recommended CANDIDATE ROW** — confirms §2.5. **Phase 3's N:**
+*"genuinely the founder's election"*; **3** recommended. **All three annotated in §13 and at their
+sections, marked as recommendations; the brief makes no election.**
+
+**Files touched:** the follow-on verbatim (new); the brief (annotated in place at §2.3, §8.1 and the
+three §13 elections — annotation, not rewrite); this entry. **Not touched:** any `GUARD_RE` file
+(guard **250/0 ARMED**); any R18 surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`;
+`agent_hold_observations`; the priority index. Another session's `environmental-context.json` and two
+untracked peer prompts NOT staged. **Risk classification:** `governance`/documents. **Rollback:**
+`git revert` the commit; the verbatim stands as record regardless. **Verification (founder):**
+determine whether this session was W2's first sitting — the one act that unblocks the schedule.
+**Rules served:** PR18, PR20 (including its 2026-08-19 amendment, invoked against this session's own
+relay), PR23; verbatim-wins.
+
+**Status:** Adopted, one premise flagged. **Nothing built, activated, flipped, deployed, migrated,
+minted or pushed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
+call remains the founder's.**
