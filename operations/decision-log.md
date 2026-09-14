@@ -41560,3 +41560,65 @@ verified clean and untouched at this writing.**
 
 **W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
 The 0h call remains the founder's.**
+
+## 2026-09-14 — D-MANIFEST-SITTING-APPLIED-OPTION-A-AND-D6-FOUND-ALREADY-DISCHARGED-2026-09-14
+
+**Session `sagereasoning-8a [fdb13d]`. Tier: `governance`. AC7 NOT engaged. NOT W2's first sitting.**
+Records the founder's `manifest.md` sitting, and **closes D-6 on live evidence that contradicts four
+records.**
+
+**THE `manifest.md` SITTING IS APPLIED — BOTH EDITS, OPTION A ELECTED.** **The founder made the edits**;
+this session prepared the paste text, verified the result, and — **on the founder's explicit
+instruction in session** — inserted one missing blank line. **D-4's application remains the founder's
+act and was made by the founder.**
+
+- **EDIT 1 (D-4, ATRF item-3, line 265):** the ruled Q-R11-C1 full wording applied; *"whether the idea
+  was completed"* removed per ruling; the anchor is still a single occurrence.
+- **EDIT 2 (D-8, §AC5, Option A):** the route-level enumeration deleted (heading + both member lists).
+  **The edit went beyond the literal option in two respects, each argued in the founder-act file:** the
+  **headline counts** (*forty-five / forty-three / two*) were removed, because with the enumeration gone
+  they would have become the section's **only** counts with nothing left to check them against —
+  strictly worse than before; and the **bolded sentence's own parenthetical** (*"the 30 currently
+  flag-gated members and the 13 that screen unconditionally"*) was stripped, because the sentence
+  claiming the section does not hand-maintain counts **was hand-maintaining two inside itself**. Kept:
+  the substrate-gate pair, all three historical correction notes, the four-step addition protocol, the
+  ST2 note.
+- **A defect grep could not see, found by reading the region:** the deletion consumed the blank line
+  before the 2026-09-04 blockquote, leaving `>` flush against the end of a numbered list — the
+  ambiguous markdown case. **Fixed, and proved whitespace-only** by diffing both versions with blank
+  lines stripped: zero content change.
+- **Verified:** 15/15 content checks; `manifest.md` the only file changed. **Counts re-derived from the
+  arrays first — 43 / 2 / 45, 30 flag-gated, 13 unconditional — all of §AC5's figures were CORRECT;
+  Option A removed the places that carry numbers rather than changing one.**
+- **A trap recorded in the founder-act file:** `FLAG_GATED_ROUTE_LEVEL_ROUTES` holds **31 entries
+  across 30 distinct routes** (`mentor/stoa/draft-reflect` carries two flags). **Anyone re-deriving
+  from `.length` gets 31 and concludes a correct §AC5 is wrong.**
+
+**⚠ D-6 IS ALREADY DISCHARGED, AND FOUR RECORDS SAY OTHERWISE.** The founder ran an admin `list`
+against production: **`sr_prac_18cddc`, label `option-s sweep`, `REVOKED`, 800/800, `used:468`, id
+`3faf3a74-92ca-429e-8722-76b03d402a4f`.** **It was revoked founder-walked on 2026-09-13**, exactly as
+`2026-09-13-option-s-run-election-and-R18-CLOSE.md` recorded (*"revoked founder-walked at the
+election's conclusion"*). **Only the VERIFICATION was ever outstanding** — a repo session cannot query
+production, so the item hardened into "not done" and was relayed to the mentor that way; the ruling's
+*"it has not been verified as revoked"* was accurate about verification and was read forward as
+accurate about the act. **This is the project's own recorded lesson — a carried item's stated cause is
+worth re-deriving before its priority is trusted — and it cost a mentor ruling's worth of attention.**
+**Exposure after the ruling: zero days.**
+
+**A FIGURE TO STOP QUOTING: "~520 quota units unused" is WRONG. The true figure is 332** (800 − 468).
+It appears in the M/W/S election document, the Option S relay, the mentor-questions document and the
+standing opener's F-I. **The live `used:468` is itself corroboration of the run and of the two-units
+rule:** 228 verdicts × 2 + 12 outages × 1 = **468 exactly**.
+
+**TWO SESSION ERRORS, BOTH MINE, RECORDED.** The `list` command this session gave the founder searches
+for `option-s@v1` — **the agent_id — in output that prints only the LABEL**. The follow-up `curl`
+filtered on `.agent_id`, which came back empty because **a consult-only credential needs no agent
+binding and the column is null**; the name lives in the label and the records, not on the row. **Two
+commands, two different wrong assumptions about where the identity lives.** The founder's raw `list`
+output settled in one glance what neither command could.
+
+**Standing opener F-I annotated as discharged** (annotate-only, dated, on the founder-adopted
+document, per the 2026-09-13 precedent).
+
+**W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
+The 0h call remains the founder's.**

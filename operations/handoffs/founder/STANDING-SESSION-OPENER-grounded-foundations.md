@@ -504,7 +504,7 @@ open). Full detail on those in the archived 2026-09-08 version.
 | **F-F** | Decide the manifest AC5 fix — still contradictory at this writing. | a governing-surface edit |
 | **F-G** | Decide the concurrency escalation (pre-commit hook / **PR26** / leave as convention). **Still a convention.** | the cache's §6 |
 | **F-H** | Founder-hub Q4. **Carried unverified.** | `Q-HUB-CONTINUITY` |
-| **F-I** | **Revoke `sagereasoning:option-s@v1`** — ruled *"immediately"* at the election's close (needs a production admin JWT; the command was handed over in the Option S session). **Unverified from a repo session whether it is done.** ~520 quota units unused. | closes the Option S credential's exposure |
+| **F-I** | ~~**Revoke `sagereasoning:option-s@v1`**~~ — **✅ DISCHARGED. Verified live 2026-09-14** by an admin `list` against production: row `sr_prac_18cddc`, label **`option-s sweep`**, **`REVOKED`**, 800/800, `used:468`, id `3faf3a74-92ca-429e-8722-76b03d402a4f`. **It was revoked founder-walked on 2026-09-13**, exactly as the run close recorded; only the *verification* was ever outstanding. **⚠ The "~520 quota units unused" figure carried here and in three other records is WRONG — the true figure is 332** (800 − 468). The 468 is itself corroboration: 228 verdicts × 2 units + 12 outages × 1 = 468 exactly. **Exposure after the ruling: zero days.** | **closed** |
 | **F-J** | TEST parity, one sitting. **Carried unverified.** | two "undetermined" carries |
 | **F-7** | **Part 3's consult/guard split** — open, unruled, parked by your own election until part (2) resolves; the capture-path finding bears on it. | the report's Part 3 |
 
