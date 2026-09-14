@@ -544,6 +544,30 @@ founder-visible setting, not an auto-mode outcome"*).
 - **NEW `Q-W2-FIRST-SESSION`:** gated on F-1 (the work designation, ruled the founder's 2026-09-13); its
   prompt must satisfy Q-S2 (name the work, never the observation). **The clock has not started.**
 - **`Q-OPTION-S-RUN`: DONE and CLOSED** (see the corrections table). **NEW `Q-OPTION-S-SERIES-DEFECT`:** fix `complete_series()` to count counted outcomes, not records — **reserved to a session that does not know which input it affects** (D6a class-freeze); `code-elevated`, its own session. **Standing fact, not a queue row:** worst-of-K is the ruled floor semantics under sampling; **no build is licensed by it.**
+- **NEW `Q-SESSION-REF-CHECK` — RULED 2026-09-15 (Q-C), a binding obligation with a trigger, not a
+  suggestion.** *"When the window closes and the build sequence opens, the first session touching the
+  session-reference infrastructure should implement a check that flags any document naming a session
+  whose close is on record in the repository. The form — grep, assertion, CI gate — is a
+  build-session precision item, not a ruling. **The principle is ruled: the detection should be
+  executing, not conventional.**"* Verbatim:
+  `agent-circles-2026-08/2026-09-15-mentor-ruling-QA-QB-QC-session-routing-and-executing-detection-verbatim.md`.
+  **Grounds:** four instances of a session being named as a live receiver *after* closing, across
+  **three distinct closed sessions** (generation-step 2026-08-09; ATRF 2026-08-23; Evaluative Engine
+  Epistemic Status 2026-08-23) — and **PR20's 2026-08-19 drafting-time amendment, written to catch
+  exactly this, missed three of the four.** The ruled reason it fails: *"A drafting session that
+  inherits a stale reference does not know it is stale. The check asks it to verify something it has
+  no independent reason to doubt… Four instances have been caught because four sessions happened to
+  check. The fifth may not."* The stale-registry objection is ruled **not applicable**: *"A check that
+  reads from the repository's own closing records is not a hand-maintained registry — it is a read of
+  facts already present."* **Same shape as the perimeter count**, which went stale three times under a
+  written warning and was fixed only by an assertion.
+  **Trigger reading (the executing session's, offered for correction):** no session-reference
+  infrastructure exists today, so the trigger is read as **the first build session that creates or
+  modifies anything resolving, recording or cross-referencing a named session**; if the build sequence
+  completes without one, **the obligation is carried here, not discharged**.
+  **NOT a numbered process rule.** Q-C rules a principle and names a receiving session; it creates no
+  PR. **Elevation to PR26 is the founder's call** — recorded so a later session does not read the
+  absence as an oversight.
 - **Carried forward UNVERIFIED by this session:** `Q-L1SUPPLY-2B`, `Q-HUB-CONTINUITY`; the held/gated list
   (C) and the longer-tail list (D) of the 2026-09-08 version.
 

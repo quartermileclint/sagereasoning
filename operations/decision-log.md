@@ -42202,3 +42202,72 @@ recommendation and not a re-homing, and that Q-C is put as posture rather than p
 **Nothing is currently licensed to open** — Item 3's two options were a discharged brief and a session
 that does not exist. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
 0h call remains the founder's.**
+
+---
+
+## 2026-09-15 — D-MENTOR-RULING-QA-QB-QC-ADOPTED-EXECUTED-2026-09-15
+
+**Decision:** The mentor's rulings on **Q-A, Q-B and Q-C** are recorded verbatim
+(`operations/agent-circles-2026-08/2026-09-15-mentor-ruling-QA-QB-QC-session-routing-and-executing-detection-verbatim.md`,
+**binding on relay; the verbatim wins over every summary including this entry**) and their
+immediately-executable parts executed, documents-only, in the same session. `governance`/documents;
+Standard under 0d-ii; AC7 NOT engaged. **Nothing built, migrated, minted, activated, deployed or
+relayed.** No file under `website/` or `harness/` touched. Guard **ARMED, 250/0**.
+
+**Q-A — RULED, the redirect confirmed on all four grounds.** *"Q-R12-C re-homes to the standing-runner
+design track's next sitting… The routing correction applied at R12 §0 is confirmed as the correct
+form."* **The ruling's own distinction is preserved in every artifact: the REDIRECT is ruled; the
+RE-HOMING ACT — opening the track — is the FOUNDER'S.** Executed: R12 §0's block promoted from
+RECOMMENDED to RULED (recommendation text retained beneath it), and **a register row added at
+`operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md` beside the A5.2 row the ruling names**, per
+the register's own pointer-not-restatement rule. The row records what is settled at R12 and
+not re-openable (the envelope is not sufficient for machine consumption; the anchor serves coverage
+and confidence state only) separately from what is carried open (whether the runner's explicit
+engagement is mandatory — *"not mandatory… the correct direction"*).
+
+**Q-B — the declination CONFIRMED.** *"No standing ruling currently licenses a session to open. The
+window admits authoring only. The founder's election governs."* **One register fact recorded because
+the ruling states it as a fact and not a recommendation:** the track's next sitting is now *"the
+natural receiver for both Q-R12-C and Q-P1's source question A5.2… A sitting that opens the track
+carries both"* — *"a fact about the current state of the register, not a recommendation about
+timing."* `Q-PREFLIP-REPORTS`' second half is noted as a scheduled obligation at the window's close,
+its timing expressly left to the founder's judgement of an ordinary consult day.
+
+**Q-C — A STRUCTURAL FIX IS WARRANTED; RULED.** *"The redirect-not-void remedy plus human vigilance is
+not the right posture going forward."* All three arguments the brief raised against building were
+engaged and answered: (i) four instances caught *"is not a reliable prediction about future
+instances"* — *"A drafting session that inherits a stale reference does not know it is stale. The
+check asks it to verify something it has no independent reason to doubt… The fifth may not"*;
+(ii) the stale-registry objection, called *"the sharpest"*, is ruled **not applicable** — *"A check
+that reads from the repository's own closing records is not a hand-maintained registry — it is a read
+of facts already present"*; (iii) the window's prohibition is **accepted** — *"The ruling governs a
+later session, not this one."* **The ruled obligation: when the window closes and the build sequence
+opens, the first session touching the session-reference infrastructure implements a check flagging any
+document naming a session whose close is on record. The form (grep, assertion, CI gate) is a
+build-session precision item; THE PRINCIPLE IS RULED — the detection should be executing, not
+conventional.** The perimeter-count parallel is confirmed: *"fixed only when the warning was replaced
+by an assertion. The session-reference problem has the same shape. The remedy is the same."*
+Executed as a new standing-queue row **`Q-SESSION-REF-CHECK`**, carrying the ruling verbatim, its
+grounds, and its trigger.
+
+**Two readings recorded as the executing session's, offered for correction rather than asserted.**
+**(1) The trigger.** No session-reference infrastructure exists today, so *"the first session touching
+[it]"* is read as the first build session creating or modifying anything that resolves, records or
+cross-references a named session; **if the build sequence completes without one, the obligation is
+carried, not discharged.** **(2) No numbered rule was created.** Q-C rules a principle and names a
+receiving session; it creates no PR. **Elevation to PR26 is the founder's call**, already reserved to
+the founder by the standing cache — recorded so a later session does not read the absence as
+oversight.
+
+**Files touched:** the verbatim capture (new); R12 §0's routing block; the register (new row); the
+standing queue (new row); this entry. **Not touched:** any `GUARD_RE` file; anything under `website/`
+or `harness/`; `manifest.md`; the twelve further documents carrying the stale phrase, left per the
+2026-08-19 restraint. `environmental-context.json` not staged (peer). **Rollback:** `git revert` the
+commit. **Verification (founder):** confirm the register row reads as a pointer and not a
+restatement, and that the trigger reading in `Q-SESSION-REF-CHECK` is the intended one.
+**Rules served:** PR18, PR20, PR23.
+
+**Status:** W2's clock **RUNNING**; no end date determinable; the window admits this authoring and
+**forbids Q-C's check, which is ruled to a later session.** **Nothing is currently licensed to open;
+the founder's election governs. D2 remains blocked. The S11 flip remains REFUSED. Weights remain
+BLOCKED. The 0h call remains the founder's.**

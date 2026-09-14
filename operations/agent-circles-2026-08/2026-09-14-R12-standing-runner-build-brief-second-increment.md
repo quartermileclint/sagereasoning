@@ -29,13 +29,26 @@
 > already-closed session is *"neither voided nor dated-amended into the closed document, but
 > **redirected to whichever open-or-future session's subject matter actually fits**, recorded there as
 > a named input, not a pre-answer."*
-> **Recommended destination: the standing-runner design track's next sitting (R13)** — Q-R12-C arose
-> at R12, the track's fifth sitting, and its subject is runner-side generation design. **There is a
-> precedent for exactly this redirect**: a prior correction moved a stale *"generation-step scoping
-> session"* reference to *"the standing-runner design session"* (`operations/decision-log.md:25823`).
-> **The redirect is NOT taken here** — the track's opening is the founder's act, and Item 3 of the
-> 2026-09-14 ruling named the closed session by name, so the founder may wish to put it back. **The
-> item is carried, not re-homed by an autonomous session.**
+> **⚖️ RULED 2026-09-15 (Q-A) — THE REDIRECT IS RULED. Q-R12-C RE-HOMES TO THE STANDING-RUNNER
+> DESIGN TRACK'S NEXT SITTING.** Verbatim:
+> `2026-09-15-mentor-ruling-QA-QB-QC-session-routing-and-executing-detection-verbatim.md` (binding;
+> verbatim wins). *"The recommendation is confirmed and the routing correction is ruled… The ruling
+> rests on all four [grounds]."* **This block is confirmed as the correct form** — *"The routing
+> correction applied at R12 §0 is confirmed as the correct form."*
+> **The distinction the ruling draws and this note preserves: the REDIRECT is ruled; the RE-HOMING
+> ACT — opening the track — is the FOUNDER'S.** *"The redirect is ruled; the re-homing act is the
+> founder's."* **A register row is recorded** beside the A5.2 row the ruling names, at
+> `operations/primal-substrate-2026-08/00-PRIORITY-INDEX.md`.
+> **Also ruled, and recorded where it bears:** the track's next sitting is now *"the natural receiver
+> for both Q-R12-C and Q-P1's source question A5.2… A sitting that opens the track carries both"* —
+> stated by the ruling as *"a fact about the current state of the register, not a recommendation about
+> timing."*
+>
+> *Recommendation as originally offered, retained:* **the standing-runner design track's next sitting
+> (R13)** — Q-R12-C arose at R12, the track's fifth sitting, and its subject is runner-side generation
+> design. **There is a precedent for exactly this redirect**: a prior correction moved a stale
+> *"generation-step scoping session"* reference to *"the standing-runner design session"*
+> (`operations/decision-log.md:25823`).
 
 **STATUS: Designed and ruled, awaiting the window's close.**
 
