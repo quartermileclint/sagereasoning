@@ -127,3 +127,110 @@ decision log on the founder's behalf.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+---
+
+# ✅ OPTION A ELECTED (2026-09-14) — FINAL PASTE TEXT
+
+**The founder elected Option A in session on 2026-09-14.** Prepared by session
+`sagereasoning-8a [fdb13d]`. **`manifest.md` is untouched by that session — verified clean at this
+writing.** Everything below is paste text for the founder's own act.
+
+**Counts re-derived from the registry arrays immediately before writing this** — `HUMAN_FACING_POST_ROUTES` **43**,
+`SUBSTRATE_GATE_ROUTES` **2**, distinct flag-gated routes **30**, unconditional **13**, total **45**.
+**§AC5's current figures are all CORRECT.** Neither edit changes a number; Option A removes the places
+that carry numbers.
+
+> **⚠ ONE TRAP, FOUND WHILE PREPARING THIS.** `FLAG_GATED_ROUTE_LEVEL_ROUTES` holds **31 entries
+> across 30 distinct routes** — `src/app/api/mentor/stoa/draft-reflect/route.ts` appears **twice**
+> (two flags on one route). **Anyone re-deriving "30" must count DISTINCT ROUTES, not array length.**
+> A naive `.length` gives 31 and makes a correct §AC5 look wrong.
+
+---
+
+## EDIT 1 of 2 — line 265, the ATRF item-3 wording
+
+**Anchor:** `**3. Idea completion signal.**` — **exactly one occurrence in the file** (verified).
+**Replace that entire line.** Nothing else in the ATRF section changes.
+
+### DELETE this line
+
+**3. Idea completion signal.** When the IDEA loop proposes an action and the agent elects and executes it, a thin task-agnostic completion signal returns to the harness: whether the idea was completed and how the outcome compared to the proposal. This closes the loop on each proposed idea without exposing task details.
+
+### PASTE this line in its place
+
+**3. Idea completion signal.** When the IDEA loop proposes an action and an executing agent adopts and executes it, a thin task-agnostic completion signal returns to the harness carrying the executing agent's **examination of its own assent** — what impression it assented to when it adopted and executed the idea, whether that assent was examined or habitual, and whether the threshold reached was katorthoma or kathekon — with a refuse-to-attest branch and the cycle identity, under the producer's declared provenance. **It carries no task-outcome content and no comparison of outcome to proposal:** it closes the loop on each proposed idea as evidence about the quality of the assent, never about the result, and without exposing task details.
+
+---
+
+## EDIT 2 of 2 — §AC5, lines 370–383
+
+**Replace the whole block from line 370 through line 383 with the text below.**
+**Line 368 (`### AC5 — R20a Enforcement Perimeter`) stays. Line 385 onward — the 2026-09-04 count
+correction and everything after it — stays untouched.**
+
+Replacing the contiguous block is safer than deleting individual lines: the blank lines between
+paragraphs are invisible when pasting, and line numbers rot the moment anything above shifts.
+
+### The block being replaced (lines 370–383), for confirmation before you delete
+
+| line | starts with |
+|---|---|
+| 370 | `The R20a vulnerable-user protections apply to **forty-five** routes…` |
+| 371 | *(blank)* |
+| 372 | `**This section does not hand-enumerate route-level membership.** It did, twice…` |
+| 373 | *(blank)* |
+| 374 | `**Substrate-gate (2, stable since 2026-05-28 — unchanged by this correction):**` |
+| 375 | *(blank)* |
+| 376 | `1. `/api/calling` *(added under…` |
+| 377 | `2. `/api/practice/reflect` *(added under Option A)*` |
+| 378 | *(blank)* |
+| 379 | `**Route-level (43) — a verified snapshot…`  ← **DELETED, not replaced** |
+| 380 | *(blank)* |
+| 381 | `*Unconditional (13 — no feature flag…`  ← **DELETED** |
+| 382 | *(blank)* |
+| 383 | `*Flag-gated (30):* …`  ← **DELETED** |
+
+**Sanity check before you paste:** the line immediately *after* the block you selected should begin
+`> **Count correction (2026-09-04, grounding session, founder-elected).**` — if it doesn't, you have
+the wrong range.
+
+### PASTE this in place of lines 370–383
+
+The R20a vulnerable-user protections apply to every route enumerated in `r20a-invocation-guard.test.ts` — the **route-level** members (the `await enforceDistressCheck(detectDistressTwoStage(...))` pattern) plus the **substrate-gate** members (the `enforceLayer2R20aGate` pattern, which reuses A7 and internally invokes the same Haiku classifier). **The registry arrays are canonical. This section does not restate the route-level membership or any count; the substrate-gate members are listed below because that pair has been stable since 2026-05-28.**
+
+**This section does not hand-enumerate route-level membership, and carries no route-level count.** It enumerated three times — at eight members, then thirteen, then forty-three. The first two went stale, the second silently for over a month, discovered only by a documents-only examination session that happened to re-derive from source rather than restate the document. The third was accurate when written and is removed anyway: **an enumeration that is correct today is still a drift surface tomorrow**, and this section's own history is that a written instruction not to let it drift does not prevent the drift. The registry is canonical; a session needing the current membership or count reads `HUMAN_FACING_POST_ROUTES` and `SUBSTRATE_GATE_ROUTES` directly. **Count distinct routes, not array entries — `FLAG_GATED_ROUTE_LEVEL_ROUTES` is keyed by flag-pair and one route carries two.**
+
+**Substrate-gate (stable since 2026-05-28 — unchanged by this correction):**
+
+1. `/api/calling` *(added under `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` — the first substrate-gate member)*
+2. `/api/practice/reflect` *(added under Option A)*
+
+---
+
+## What changed, and why each change is there
+
+| Change | Ground |
+|---|---|
+| The **route-level enumeration deleted** (the heading plus both member lists) | Option A as offered. The enumeration is the drift surface; this section has now carried one three times. |
+| **Headline counts removed** (*forty-five / forty-three / two*) | **Not cosmetic.** With the enumeration gone, those would become the section's **only** counts, hand-maintained, with **nothing left to check them against** — strictly worse than today, where a reader can at least count the list. |
+| **The parenthetical's `30` and `13` removed** from the bolded sentence | The sentence claiming the section does not hand-maintain counts **was hand-maintaining two, inside itself.** Leaving them would keep the contradiction in miniature. |
+| **`(2, …)` removed** from the substrate-gate heading | Same reason; the pair is enumerated two lines below, so the number adds nothing. |
+| *"twice"* → *"three times"*, with the third distinguished | After this edit the section has enumerated three times. **The third was correct** — saying it "went stale" would be false, so it is recorded as removed-on-principle, not as a failure. |
+| **The distinct-routes-not-entries warning added** | The `31 vs 30` trap, found while preparing this. Anyone re-deriving would hit it. |
+| **Nothing else touched** | The 2026-09-04 / 2026-08-23 / 2026-07-17 correction notes, the four-step addition protocol, and the ST2 note all stay. They are the record of why the section reads as it does. |
+
+---
+
+## After the paste — checks
+
+1. `grep -c "Idea completion signal" manifest.md` → **1**
+2. `grep -c "Route-level (43)" manifest.md` → **0**
+3. `grep -c "Flag-gated (30)" manifest.md` → **0**
+4. `grep -n "Count correction (2026-09-04" manifest.md` → still present
+5. `grep -n "api/calling" manifest.md` → substrate-gate pair still present
+6. **Record it** in the decision log at the **physical tail**.
+
+**No code, schema, endpoint or flag changes. No perimeter membership changes. `git diff` should show
+`manifest.md` and nothing else.**
