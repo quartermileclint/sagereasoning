@@ -151,3 +151,72 @@ Another session's `environmental-context.json` and two untracked peer prompts we
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## Addendum, same session (~20:30–21:10 AEST) — the relay went, all three questions RULED, folds applied, pushed
+
+**The close above was written before the ruling existed. It is left as written; this addendum
+supersedes its §10 where they differ.**
+
+Sequence: the founder asked for the three questions in relay form → they were authored with every
+PR20 mechanism fact **re-verified at relay** (`2026-09-14-MENTOR-QUESTIONS-R12-three-questions-FOR-RULING.md`,
+commit `c5f5e42`) → the founder relayed → the mentor ruled all three → captured verbatim, adopted and
+folded (`2026-09-14-mentor-ruling-R12-three-questions-verbatim.md` +
+`D-MENTOR-RULING-R12-THREE-QUESTIONS-ADOPTED-FOLDED-2026-09-14`, commit `f990299`) → **founder pushed;
+all three commits confirmed on `origin/main`; Vercel green.**
+
+**Vercel green is not evidence about this work.** `git diff --name-only 2f881be~1 f990299` returns
+**zero** files under `website/`. The deploy is documents-only by construction; a green build confirms
+the push, not the brief.
+
+### What the ruling settled
+
+- **Q-R12-A — option (c).** A narrower CHECK on `agent_id` only, for read-class capabilities.
+  **(a) ruled out** on the RLS-survey precedent. The two-migration structure is confirmed as right
+  discipline, and the brief's disclosure of it as a Q-B2 exception is accepted.
+- **Q-R12-B — NO, and this is the consequential one.** The window's waiver admission is confined to
+  **authoring**. *"The build brief is complete and ruled. The build waits for the window to close."*
+  **The ruling's ground is behaviour-alteration, not `GUARD_RE` membership** — so it gates the
+  **whole bundle**, including the migrations and the capability work, which are not guarded files.
+- **Q-R12-C — the envelope is NOT sufficient for machine consumption.** A **Prerequisite Criterion
+  finding**, not a pass. The anchor now serves **coverage and confidence state only, without
+  per-domain levels**. This brief's own argument was found insufficient: *"presence is not
+  engagement."*
+
+### The brief's status has changed
+
+**From *Designed, three questions open* → *Designed and ruled, awaiting the window's close.*** There
+is no remaining design question inside the brief. Everything it specifies is settled; what it waits
+on is the window, not a decision.
+
+### Folded by annotation, not rewrite
+
+Banner at the head plus six settled sections — §5, §8.1, §8.4, §3.3 block 2, §10, §13. The
+superseded argument in §3.3 is **left in place** as the record of what the brief argued, per the
+repo's discipline for a ruled document.
+
+### One genuinely new open item, belonging to a different session
+
+**Whether the runner's generation step must include an explicit examination of the anchor's disclosed
+limitations before reasoning from it.** Ruled *"not mandatory at this stage, but the correct
+direction"*, and to be carried **as an open design question for the generation-step scoping session,
+never as a resolved parameter.** R12 does not own it and does not assign it.
+
+### §10 of the close above is superseded as follows
+
+Items 1–2 (read the three gating items; carry the questions to the mentor) are **discharged** — they
+were carried and ruled. Item 5 (push) is **discharged**. **Items 3 and 4 stand**, and one is now
+sharper: the producer-question mentor brief is no longer merely R8's recommendation — **§7.6 and
+Q-R12-B together make it the only tractable next step on this track while the window runs**, because
+it is authoring, which the window admits, whereas everything else in the brief is a build, which it
+does not.
+
+### Verified at addendum close (run, not quoted)
+
+Byte-identity guard **250/0, ARMED**. SHA pins unchanged (`60cefedb…`/`fa8895ec…`/`db86fccb…`).
+All three commits on `origin/main`. Working tree carries only the peer session's
+`environmental-context.json` and two untracked peer prompts — **none staged, none touched.**
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
