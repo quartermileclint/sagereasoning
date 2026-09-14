@@ -161,6 +161,18 @@ a derivation is rejected before examination**. A **`task_list_friction` candidat
 
 ### 2.3 `idea_loop_candidates.accepted_move_count` (R9 §3.4)
 
+> **🗳 FOUNDER ELECTION APPLIED 2026-09-14 — THIS COLUMN IS STRUCK FROM THE BUNDLE.** The founder
+> elected the mentor's recommendation: **derive `accepted_move_count` from `derivation.moves[]`; do
+> not store it.** Ground: *"two sources of truth for the same value… the shape that produces silent
+> inconsistency when one is updated and the other is not. The derivation array is the authoritative
+> source; read from it."*
+> **Consequences, so a build does not have to re-derive them:** (i) the §2 migration creates **no**
+> `accepted_move_count` column; (ii) §11's required source-grep assertions drop this field — the
+> others stand; (iii) the non-comparability disclosure below **still holds and must ride the derived
+> value**, since granularity remains runner-controlled whether the number is stored or computed.
+> **The section is retained, not deleted, as the record of what was specified and why the election
+> went the other way.**
+
 Nullable `INTEGER`. **Runner-attested, runner-controlled granularity, and therefore NON-COMPARABLE
 across runners** unless the build fixes a move vocabulary and a granularity rule. **Recorded as
 disclosure and consulted by nothing** — no selection, no threshold, no indicator reads it. This is
@@ -196,6 +208,12 @@ it is **never** read to infer practitioner type (the auth-signal discriminator s
 disclosure rather than perpetuation of the deficiency A2 names.
 
 ### 2.5 `idea_loop_candidates.election_basis` (R8 §5.2c)
+
+> **🗳 FOUNDER ELECTION APPLIED 2026-09-14 — CANDIDATE ROW, as specified.** The founder elected the
+> mentor's recommendation, which confirms this section: *"R8's 'per-cycle' wording describes the
+> cadence of the election, not the granularity of the record… A cycle row carrying the election basis
+> would require joining back to the candidate to interpret it."* **The placement note below is
+> settled; it is no longer electable.**
 
 Nullable `TEXT` CHECK over `uncontested | tie_break_random | out_scored`, plus a nullable
 `tie_set_size INTEGER`. Runner-recorded at election time. **Telemetry records how elections
@@ -601,7 +619,7 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
 | **1 — receipt** | Resolve TEST apply status, then activate `SUBSTRATE_COMPLETION_SIGNAL_ENABLED` (migration-before-flag) | founder-walked `code-critical` |
 | **1′ — generation prerequisites** | The §2 migration bundle + §3.3's read behind its own flag | founder-walked; **independent of phase 3** |
 | **2 — observability** | §3.1's dashboard fold, own flag | buildable immediately after phase 1; valuable from the first signal |
-| **3 — consumption** | §3.2's read + §4's update rule | **follows the first N genuine signals having been received and read on the dashboard.** N is a founder election; **the design constraint is only that it is not zero** |
+| **3 — consumption** | §3.2's read + §4's update rule | **follows the first N genuine signals having been received and read on the dashboard. N = 3, founder-elected 2026-09-14** — *"it requires a pattern, not a single occurrence, and it is small enough to reach in a reasonable window."* **AND, per R8 §4.0, the producer question answered** — an activation gate on an event with no designed cause would be self-sealing |
 | **not a phase** | The weight-touching update rule. **No activation slot on this path at all** | designable only if GS-CYB-1's two conditions are both independently ruled |
 
 ### 8.2 Why 1′ is not inside 3

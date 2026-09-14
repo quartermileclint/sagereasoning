@@ -263,3 +263,42 @@ files, unstaged.
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## Addendum 3 (~22:10 AEST) — W2's clock started; elections applied; the producer brief prompted
+
+Record: `D-W2-CLOCK-STARTED-ELECTIONS-APPLIED-PRODUCER-BRIEF-PROMPTED-2026-09-14`.
+
+**⚠ W2'S CLOCK HAS STARTED.** The founder determined that their opening of this sitting **was W2's
+first sitting** — the criterion being *"the act of opening being what makes it the first."* Per Q-M4
+the clock started at this session's **first consult record, `2026-09-14T08:44:36.147Z`**. **Every
+record before today's says "W2's clock has not started"; that line is now stale.**
+
+**No end date is stated, and this close's own earlier estimate is withdrawn.** Addendum 2 offered
+*"about 2026-09-19."* The baseline is **five ordinary consult days**, and **"ordinary" is the
+founder's judgement, not a computation** — *"The count half restarts at zero. The 'ordinary' half
+remains the founder's."* A day with no consult records is not a consult day. **The close condition is
+bounded; its date is not yet determinable.**
+
+**Three elections applied.** `accepted_move_count` **derived, not stored** — §2.3's column is
+**struck**, with its consequences recorded at the section and the section retained as the record of
+what was specified. `election_basis` on the **candidate row**, confirming §2.5. **N = 3** at phase 3 —
+and the same edit **restored R8 §4.0's own precondition** to the ladder, which the brief had stated
+only as "first N signals": phase 3 also requires **the producer question answered**, since an
+activation gate on an event with no designed cause is self-sealing.
+
+**The producer-question brief is prompted:**
+`operations/handoffs/founder/2026-09-14-producer-question-mentor-brief-NEXT-SESSION-PROMPT.md`. It
+carries **R8 §4.0's four items, not one**, requires **PR20 in full**, records that the brief is
+narrower than R8 §11.1 described (the M/W/S half is discharged), and instructs that the Q-C2a
+elector/attester tension be **put, not answered**.
+
+**Two frame outages this session returned *"no assessment in response"*** on writes carrying schema
+tokens — the A11b injection-defence class. **No capture record is written when the consult-path frame
+fails**, which is the same coverage gap ruled a defect today and parked until the window closes.
+
+**Verified:** guard **250/0 ARMED**; pins unchanged; nothing under `website/` or `harness/` touched.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**

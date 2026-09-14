@@ -41846,3 +41846,69 @@ relay), PR23; verbatim-wins.
 **Status:** Adopted, one premise flagged. **Nothing built, activated, flipped, deployed, migrated,
 minted or pushed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
 call remains the founder's.**
+
+## 2026-09-14 — D-W2-CLOCK-STARTED-ELECTIONS-APPLIED-PRODUCER-BRIEF-PROMPTED-2026-09-14
+
+**⚠ W2'S CLOCK HAS STARTED. Every record before this one says it has not; from this entry forward
+that line is stale.** Session `sagereasoning-b1 [4bc334]`; tier `governance`/documents; AC7 NOT
+engaged.
+
+**THE FOUNDER'S DETERMINATION.** Asked directly whether their opening of this session was **W2's
+first sitting**, the founder answered **YES**. By the recorded criterion — *"the act of opening being
+what makes it the first"* — **this sitting is W2's first**, and per Q-M4 **the clock started at its
+first consult record: `2026-09-14T08:44:36.147Z`** (schema `false-hold-record-v3`, tool `Write`; read
+from the buffer, not inferred). This resolves the premise flagged at
+`D-MENTOR-RULING-R12-FOLLOWON-ADOPTED-PREMISE-FLAGGED-2026-09-14`, which was put back to the founder
+precisely because the ruling had reasoned from *"W2 has not opened"* without the designation in front
+of it.
+
+**⚠ NO END DATE IS STATED, AND THIS SESSION'S EARLIER ESTIMATE IS WITHDRAWN.** The baseline is **five
+ordinary consult days** from that record (Q-M4), and **"ordinary" is the founder's judgement, not a
+computation** — the standing opener: *"The count half restarts at zero. The 'ordinary' half remains
+the founder's."* This session earlier offered *"about 2026-09-19"*; that assumed five consecutive
+ordinary consult days and **is withdrawn as an inference the rule does not license.** A day with no
+consult records is not a consult day, and which days are ordinary is not this session's to say.
+**The close condition is bounded but its date is not yet determinable.**
+
+**THREE ELECTIONS MADE AND APPLIED (founder, this session).**
+**(1) `accepted_move_count` — DERIVE, NOT STORE.** The mentor's recommendation elected; **§2.3's
+column is STRUCK from the bundle.** Consequences recorded at the section so a build need not
+re-derive them: the migration creates no such column; §11's source-grep assertions drop this field;
+**the non-comparability disclosure still holds and must ride the derived value**, since granularity
+stays runner-controlled whether the number is stored or computed. The section is **retained, not
+deleted**, as the record of what was specified and why the election went the other way.
+**(2) `election_basis` — CANDIDATE ROW**, confirming §2.5; the placement note is settled and no
+longer electable. **(3) Phase 3's N = 3.** Applied to §8.1 — **and the same edit restored R8 §4.0's
+own precondition to the ladder**, which the brief's phase table had stated only as "first N signals":
+phase 3 also requires **the producer question answered**, because an activation gate on an event with
+no designed cause is self-sealing.
+
+**THE PRODUCER-QUESTION BRIEF IS PROMPTED** (Item 3 ruled; founder elected):
+`operations/handoffs/founder/2026-09-14-producer-question-mentor-brief-NEXT-SESSION-PROMPT.md`.
+`governance`/Standard; authoring, which Q-R12-B admits. It carries **R8 §4.0's four items**, not one
+— who executes at all (the bounded run had **no executing agent**); how an executing agent learns
+`loop_id` + `cycle_number` (**both** required; no designed path hands cycle identity to a non-runner);
+whether runner and executing agent may share an `agent_id` (capability separation stops one
+*credential*, not one *identity*); and **the Q-C2a elector/attester tension, to be PUT and not
+answered** — election is runner-side and **4 of h7's 5 wins were random tie-breaks**, so the honest
+answer about assent *at election* is `habitual` or a refusal for every such cycle. The prompt records
+that the brief is **narrower than R8 §11.1 described** (the M/W/S half is discharged) and requires
+**PR20 in full** with named source verification.
+
+**A window observation, recorded not routed around.** A second and third at-action frame returned
+*"no assessment in response"* on writes carrying schema tokens — the A11b injection-defence class
+(memory `harness-blind-on-substrate-sessions-a11b-schema-tokens`). **No capture record is written
+when the frame fails on the consult path**, which is the same coverage gap this session found and
+which is now ruled a defect awaiting the window's close.
+
+**Files touched:** the prompt (new); the brief (§2.3 struck, §2.5 confirmed, §8.1 N=3 + the restored
+precondition — annotation, not rewrite); this entry. **Not touched:** any `GUARD_RE` file (guard
+**250/0 ARMED**); any file under `website/` or `harness/`; any R18 surface; `option-s/`;
+`manifest.md`; `~/.sage-gate1/`. Peer files not staged. **Risk classification:**
+`governance`/documents. **Rollback:** `git revert` the commit. **Verification (founder):** confirm
+the clock's start record and that no end date is asserted anywhere. **Rules served:** PR18, PR20,
+PR23.
+
+**Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`. **Nothing built, activated,
+migrated, minted, deployed or relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights
+remain BLOCKED. The 0h call remains the founder's.**
