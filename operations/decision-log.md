@@ -42415,3 +42415,69 @@ request. **Rules served:** PR18, PR19, PR20, PR23.
 **Status:** W2's clock **RUNNING**; no end date determinable. **Nothing built; no successor sitting
 opened. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains
 the founder's.**
+
+---
+
+## 2026-09-15 — D-MENTOR-RULING-R13-OUTCOME-ADOPTED-EXECUTED-2026-09-15
+
+**Decision:** The mentor's ruling on R13's outcome is recorded verbatim
+(`operations/agent-circles-2026-08/2026-09-15-mentor-ruling-R13-outcome-QR13A-QR13B-Q6-raising-carryloss-verbatim.md`,
+**binding; the verbatim wins over every summary including this entry**) and executed, documents-only.
+`governance`/documents; Standard; AC7 NOT engaged. **Nothing built, migrated, minted, activated,
+deployed or relayed.** Guard **ARMED, 250/0**.
+
+**Q-R13-A — R13-D1's reading HOLDS; the alternative is RULED OUT.** *"The examination is the
+prerequisite; a recording of it on its own is a self-report the harness cannot credit… The two
+sentences… name different things, and R13-D1 reads them correctly."* The server-side-recording reading
+is refused on settled ground: *"a claim the harness cannot credit is not worth building as a
+verification mechanism. The cost of making the expectation explicit does not justify building
+infrastructure that cannot distinguish genuine engagement from a bare declaration."* **The correct
+direction is runner-side; the server's complement is the content constraint against the `derivation`
+vocabulary when that vocabulary is settled.**
+
+**Q-R13-B — R13-D3's topological verdict STANDS on its own**, the role-relative examination not being
+a precondition: the interaction is *"a separate question… which the topological argument does not
+answer and does not need to answer to be valid."* **R13's honest limit is ruled the correct posture** —
+*"The verdict stands; the qualification travels with it"* — and a later finding *"may add precision…
+[but] does not retroactively invalidate the topological argument."*
+
+**The Q6 raising — RULED, and the two rows disposed of differently.** **Row 593 STAYS and its "not yet
+ruled" status is discharged:** the topological framing is *"a genuine alternative justification for the
+same proxy, **not a replacement**… **Both can stand**"*, with the question sharpened and **expressly not
+pre-answered** — whether it *"adds honest precision… or merely redescribes it"* — and **each branch's
+consequence ruled in advance** (adds precision ⇒ the disclosure carries both framings; merely
+redescribes ⇒ the ruled answer stands and the row retires). **Row 594 is RETIRED** — *"R9 §3 is that
+architecture, built under B1/B2. The register row's 'not yet ruled' status is stale… **The row is
+subsumed. Retire it**"* — retained as a retirement record with the ruling's specified note, per the
+2026-08-29 precedent that a stale receiving-session row is retired, not merely updated.
+
+**The carry-loss CONFIRMED and folded into R12 §7 as new prerequisite 2b.** *"R12 is that build brief.
+R12 contains neither… Both belong in R12 §7's prerequisites."* The mitigation is expressly refused as
+changing nothing: *"v1 runs one runner, so the collision is contingent on generalisation — **does not
+change R10's wording, which is required, not contingent. The requirement stands.**"* **A binding
+instruction to the build session rides with it:** treat R10 §4.6 item 2 as *"an explicit checklist item
+against R12 §7, **not as a marker to be trusted**"*, on the ground that *"a marker that records receipt
+does not record whether the item's content was carried forward. **This is the
+executing-versus-conventional detection problem at the document level**"* — **Q-C's ruling applied one
+level up.** *Precedent for the executing session folding this rather than leaving it: Q-P1 used the
+same "before the build session opens" phrasing for prerequisite 2, and this ruling's predecessor
+confirmed that discharge. The founder's review before the build opens remains theirs.*
+
+**On PR19 (§2) — the ruling confirms reporting it plainly was right, and names what it shows.**
+*"A session that produces a first draft with eight HIGH findings and does not detect them through its
+own reasoning is a session whose self-assessment is not a reliable verification mechanism. PR19 is the
+executing check that caught what the conventional check missed. **This is the same structure as Q-C,
+one level up.**"* On the method finding: *"A session that trusts one surface over the governing brief
+is a session that has substituted a convenient boundary for the correct one."* **The analogue is ruled
+real and no remedy beyond the checklist instruction is assigned; this session proposes none.**
+
+**Files touched:** the verbatim capture (new); register rows 593 and 594; R12 §7 (new prerequisite
+2b); this entry. **Not touched:** any `GUARD_RE` file; anything under `website/` or `harness/`;
+`manifest.md`. `environmental-context.json` not staged. **Rollback:** `git revert` the commit.
+**Verification (founder):** confirm row 594's retirement note matches the ruling's specified wording,
+and review prerequisite 2b before the build session opens. **Rules served:** PR18, PR20, PR23.
+
+**Status:** W2's clock **RUNNING**; no end date determinable. **Nothing built; no successor sitting
+opened** — the next sitting's examination of row 593 is named, not scheduled, and opening the track
+remains the founder's act. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
+The 0h call remains the founder's.**

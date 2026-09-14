@@ -635,6 +635,23 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
    *Original text, retained:* **A harness identity with an examined record for the v1 executing actor must exist** for R9 §3's
    anchor to do any work (R9 §3.1). This is the founder's act (R9 §16.10) and is **not** satisfied
    by the runner's own identity — Q1c makes them distinct by construction.
+2b. **⚠ ADDED 2026-09-15 BY RULING — A REQUIRED ADDITION R10 MADE AND THIS BRIEF DID NOT CARRY.**
+   R10 §4.6 item 2: the cycle-open read *"should be authorised **per-identity, not hard-coded to a
+   single runner**, if it is ever generalised… **Recorded as a required addition to any build brief**
+   for R9 §16.2's bundle, **not as something already discharged**."* R10 §4.4 names what bites: the
+   write-side **`CONSTRAINT uq_ilc_loop_cycle UNIQUE (loop_id, cycle_number)`**, which *"even a
+   correctly-scoped read does not resolve."*
+   **Ruled 2026-09-15** (`2026-09-15-mentor-ruling-R13-outcome-QR13A-QR13B-Q6-raising-carryloss-verbatim.md`):
+   *"R12 is that build brief. R12 contains neither… **Both belong in R12 §7's prerequisites**… The
+   mitigating fact — v1 runs one runner, so the collision is contingent on generalisation — **does not
+   change R10's wording, which is required, not contingent. The requirement stands.**"*
+   **⚖️ AND A BINDING INSTRUCTION TO THE BUILD SESSION:** *"The build session should treat the R10
+   §4.6 item 2 requirement as **an explicit checklist item against R12 §7, not as a marker to be
+   trusted.**"* Ground: *"A marker that records receipt does not record whether the item's content was
+   carried forward. **This is the executing-versus-conventional detection problem at the document
+   level**"* — Q-C's ruling applied one level up. **It sat behind a `[R10: RECEIVED and EXAMINED]`
+   register marker for eleven days and was found by PR19, not by any session reading the marker.**
+
 3. **The read-scoped capability does not exist** (§5) and its shape is an open question.
 4. **`target_circle` is populated only going forward.** Circle-attributed observation starts when
    the column starts being populated, and **A9 makes the historical gap permanent** — the design
