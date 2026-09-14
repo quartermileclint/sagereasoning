@@ -1,5 +1,24 @@
 # R12 — The standing-runner build brief, second increment
 
+> **⚖️ RULED 2026-09-14, same day, on the relay this document fed** (verbatim, canonical:
+> `2026-09-14-mentor-ruling-R12-three-questions-verbatim.md`; **wins over this document**).
+> **Q-R12-A:** §5's fork is settled — **option (c)**, a new narrower CHECK requiring
+> `agent_id IS NOT NULL` **only**, for read-class capabilities. Option (a) is **ruled out** on the
+> RLS-survey precedent. The two-migration structure and its disclosure as a deliberate exception to
+> Q-B2 are **accepted**.
+> **Q-R12-B:** §8.4 is settled — **NO.** The window's waiver admission is **confined to authoring**
+> and does not extend to a code build on the measured checkout. **The build waits for the window to
+> close**, or goes to a worktree outside the instrument's reach.
+> **Q-R12-C:** §3.3 block 2 and §10's anchor row are settled — the envelope is **not sufficient for
+> machine consumption** (a **Prerequisite Criterion finding**, not a pass). **The anchor serves
+> coverage and confidence state ONLY, without per-domain levels.**
+> **NOT ruled, and not to be recorded as ruled:** the runner's explicit engagement with the anchor's
+> disclosed limitations is **not mandatory** — it is *"the correct direction"*, carried as an **open
+> design question for the generation-step scoping session**, never as a resolved parameter (§13).
+> **No build is licensed by this ruling.**
+
+**STATUS: Designed and ruled, awaiting the window's close.**
+
 **2026-09-14.** The standing-runner design track's fifth sitting (R8 → R9 → R10 → R11 → **R12**).
 Tier `governance` / design. **AC7 not engaged. Nothing is built, activated, flipped, deployed,
 migrated, minted or pushed by this document.**
@@ -290,6 +309,26 @@ Blocks, **each absent when its data is absent** (block 1 is §3.2's, served by t
   `trust_record_summary` is the **public trust-record payload reused, envelope included**, read
   server-side so the runner needs no second credential. This reuse is why serving a virtue
   assessment of another agent to an agent practitioner passes the Prerequisite Criterion (§10).
+
+  > **⚖️ RULED 2026-09-14 — THIS BLOCK'S PAYLOAD IS REDUCED. The two sentences above are SUPERSEDED**
+  > and left only as the record of what this brief argued. The ruling: *"The envelope is not
+  > sufficient as currently designed for machine consumption. The anchor requires a structural
+  > constraint the brief's design does not yet carry."*
+  > **`trust_record_summary` serves COVERAGE AND CONFIDENCE STATE ONLY — NOT per-domain levels.**
+  > The honest-claims envelope travels with the reduced payload.
+  > **Why per-domain levels specifically:** *"the per-domain levels are where the score most directly
+  > resembles a virtue verdict, and they are the fields an agent consuming the payload is most likely
+  > to reason from without engaging the disclosure."* The ruling is explicit that this does **not**
+  > eliminate the concern — *"the coverage and confidence state still carries information about the
+  > target agent"* — but removes the field most likely to function as a virtue score one level
+  > removed.
+  > **Why this brief's argument failed, carried because it generalises:** *"The envelope travels with
+  > the payload. The disclosure is present. But presence is not engagement, and the design cannot
+  > establish that the runner engages with the disclosure rather than treating it as metadata."*
+  > **NOT ruled:** requiring the runner to record its own engagement with the target before the
+  > anchor is served. It is *"the correct direction for the design to develop toward"*, carried as an
+  > **open design question for the generation-step scoping session, NOT as a resolved parameter**
+  > (§13). A build implementing it as a design element would be over-reading this ruling.
 - **3 `dwelling`** — `{ max_dwell_ms, termination }`, operator-configured server-side. **In v1 only
   `time` termination is enforceable and the contract must say so.**
 - **4 `runner_history`** — the runner's own examined-action history: per prior candidate of *this
@@ -423,6 +462,18 @@ as this brief's recommendation** — an earlier draft recommended it on the beli
 identity binding generally; the CHECK's own predicate shows it enforces owner-**and**-agent, which is
 strictly more than the read needs and incompatible with the live runner-credential shape.
 
+> **⚖️ RULED 2026-09-14 — (c) is ruled.** *"A new, narrower CHECK requiring `agent_id IS NOT NULL`
+> only, applied to read-class capabilities."* The recommendation and its reasoning are confirmed.
+> **(a) is ruled OUT**, on this project's own precedent: *"The RLS survey exists because
+> route-handler-only enforcement has been bitten before. A capability whose only enforcement is in a
+> route handler is a capability whose enforcement can be bypassed by a route change. The database is
+> the right place for this constraint."* On the cost of a second constraint: *"That cost is correct
+> to pay."* **The two-migration structure is confirmed as the right discipline** and this brief's
+> disclosure of it as a deliberate Q-B2 exception is **accepted** — *"Bundling a mint-side constraint
+> change with a loop-schema change would couple two unrelated rollbacks."*
+> **The ruling licenses no build.** The CHECK, the capability addition and both migrations remain
+> `code-critical`, founder-walked steps — and per Q-R12-B they wait for the window to close.
+
 **A migration consequence, disclosed rather than buried.** Whichever way this resolves, adding any
 value to `PRACTICE_CAPABILITIES` **does not extend the DB CHECKs by itself** — the DB arrays are
 hard-coded, and `practice-credential.ts`'s own PR20-verified comment says so: a companion migration's
@@ -512,6 +563,12 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
 
 ### 8.1 The phase ladder, with R9's phase 1′ folded in
 
+> **⚖️ RULED 2026-09-14 — NO PHASE IN THIS TABLE OPENS UNTIL THE OBSERVATION WINDOW CLOSES**, on the
+> measured checkout. Q-R12-B confines the window's waiver admission to authoring; a code build alters
+> the measured system's behaviour and is not admitted. **The table below states the phases' internal
+> ordering, which is unchanged; it does not state when the first of them may begin.** Read it with
+> §8.4. The worktree route remains available and remains non-equivalent for the instrument.
+
 | Phase | Content | Gate |
 |---|---|---|
 | **0 (current)** | Write endpoint deployed, dark. Migration apply status: production confirmed, TEST undetermined | — |
@@ -550,6 +607,23 @@ stating plainly:**
   ruled** — the same open question the W2 work-designation assessment named, and the reason W2's own
   build took a worktree route the ruling says produced nothing. **This brief does not resolve it and
   must not be read as licensing either answer.**
+
+> **⚖️ RULED 2026-09-14 — NO. THIS SECTION IS SETTLED, AND IT SETTLES THE BRIEF'S OWN STATUS.**
+> *"The window's admission of guarded-file waivers is confined to the authoring work the designation
+> names. It does not extend to a code build on the measured checkout."*
+> **The operative distinction:** a waiver for authoring is granted because authoring *"does not alter
+> the measured system's behaviour"*; **a code build does.** Admitting one *"is not a waiver of the
+> guard's form — it is a waiver of the guard's purpose."*
+> **The practical implication, in the ruling's own words:** *"the build brief is complete and ruled.
+> The build waits for the window to close. The window's remaining cycles proceed on the measured
+> checkout, unmodified."*
+> **The worktree remains available and remains non-equivalent** — the ruling confirms it *"places the
+> work outside the instrument's reach, as the W2 build did. That is the cost of the window's
+> discipline. The measurement's integrity is not negotiable mid-window."*
+> **This reaches the WHOLE bundle, not only the one guarded file.** §2's migrations and §5's
+> capability work are not `GUARD_RE`-matched, but they are a code build on the measured checkout, and
+> the ruling's ground is behaviour-alteration rather than regex membership. **Nothing in §8.1's
+> ladder opens until the window closes.**
 
 ---
 
@@ -599,6 +673,23 @@ ruled. Stated as a deliberate omission so a later build does not read the absenc
 | §3.1 dashboard fold | **Yes** | **Passes** — it prompts founder attention and diagnoses nothing. The absence marker is the load-bearing honesty |
 | §2.1–2.3, §2.6 generation mechanics and rank pairs | **Checked, not fired** | Runner-internal records; their candidates are examined by the unchanged engine. The rank **pair** rather than a difference is what keeps this true |
 | §2.5 election telemetry | **Checked, not fired** | Records how elections happened; changes nothing |
+
+> **⚖️ RULED 2026-09-14 — THE ANCHOR ROW DOES NOT PASS AS DESIGNED. It is a PREREQUISITE CRITERION
+> FINDING, and the row above is superseded.** *"The envelope is not sufficient as currently designed
+> for machine consumption."*
+> **The ruling accepts this brief's own diagnosis of why the standard disposition failed to settle
+> it:** *"every other row in the design passes on the second ground — the field is recorded and read
+> by nothing. This row cannot claim that. It is the one place where an assessment of an agent is
+> consumed by a reasoning process. The standard disposition does not settle it because the standard
+> disposition was written for displayed records, not consumed ones."*
+> **What makes the row pass is a design change, not an argument: the anchor serves coverage and
+> confidence state ONLY, without per-domain levels** (§3.3 block 2). Even then the concern is reduced,
+> not eliminated — *"the coverage and confidence state still carries information about the target
+> agent."*
+> **A general lesson this row now carries for every future Prerequisite-Criterion application in this
+> project:** a disposition written for a **displayed** record does not transfer to a **consumed** one,
+> because *"presence is not engagement"* — and where the consumer is a machine, the design cannot
+> establish engagement by shipping the disclosure alongside the data.
 
 ---
 
@@ -650,7 +741,27 @@ capability shape, §8.4's window question, or D1's vocabulary-direction question
 
 ---
 
-## 13. Questions raised, not resolved
+## 13. Questions raised — ALL THREE RULED 2026-09-14
+
+> **⚖️ Q-R12-A, Q-R12-B and Q-R12-C are all RULED** (verbatim:
+> `2026-09-14-mentor-ruling-R12-three-questions-verbatim.md`). **A:** option (c) — a narrower CHECK
+> on `agent_id` only; (a) ruled out; the two-migration structure accepted. **B:** **no** — the waiver
+> admission is confined to authoring; the build waits for the window to close. **C:** the envelope is
+> **not sufficient** for machine consumption; the anchor serves coverage and confidence state only.
+> The three questions are retained below as authored, because a ruling is read against the question
+> it answered.
+>
+> **ONE GENUINELY NEW OPEN ITEM, created by the ruling and belonging to a DIFFERENT session:**
+> **whether the runner's generation step must include an explicit examination of the anchor's
+> disclosed limitations before reasoning from it.** The ruling: *"not ruled as mandatory at this
+> stage, but it is the correct direction for the design to develop toward… If the runner's generation
+> step is designed to include an explicit examination of the anchor's disclosed limitations before
+> reasoning from it, that examination is the prerequisite the envelope cannot supply by itself."*
+> **It is carried to the generation-step scoping session as an open design question, NOT as a
+> resolved parameter** — the ruling says so in terms, and a build that treated it as settled in
+> either direction would be over-reading it. **This brief does not own it and does not assign it.**
+
+### The questions as put
 
 - **Q-R12-A (mentor)** — §5. How should the loop-scoped read capability be bound? **(a)** route-level
   enforcement only; **(b)** add it to `WRITE_CLASS_CAPABILITIES` so the existing 6e §A CHECK applies,

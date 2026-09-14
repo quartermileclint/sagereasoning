@@ -41717,3 +41717,68 @@ Criterion applied explicitly at §10; verbatim-wins.
 **Status:** Designed. **Nothing built, activated, flipped, deployed, migrated, minted, pushed or
 relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains
 the founder's.**
+
+## 2026-09-14 — D-MENTOR-RULING-R12-THREE-QUESTIONS-ADOPTED-FOLDED-2026-09-14
+
+**Decision.** The founder relayed the mentor's ruling on all three R12 questions
+(`2026-09-14-MENTOR-QUESTIONS-R12-three-questions-FOR-RULING.md`). Captured verbatim and adopted as
+binding: `operations/agent-circles-2026-08/2026-09-14-mentor-ruling-R12-three-questions-verbatim.md`.
+Session `sagereasoning-b1 [4bc334]`; tier `governance`/documents; AC7 NOT engaged.
+
+**Headlines.** **Q-R12-A — option (c) ruled:** a new, narrower CHECK requiring `agent_id IS NOT NULL`
+**only**, for read-class capabilities; the session's recommendation and reasoning confirmed.
+**Option (a) is ruled OUT on this project's own precedent** — *"the RLS survey exists because
+route-handler-only enforcement has been bitten before. A capability whose only enforcement is in a
+route handler is a capability whose enforcement can be bypassed by a route change."* The cost of a
+second constraint is *"correct to pay"*, and **the two-migration structure is confirmed as the right
+discipline**, the brief's disclosure of it as a deliberate Q-B2 exception **accepted**.
+**Q-R12-B — NO.** The window's waiver admission is **confined to the authoring work the designation
+names** and does not extend to a code build on the measured checkout. The operative distinction:
+authoring *"does not alter the measured system's behaviour"*, a code build does, and admitting one
+*"is not a waiver of the guard's form — it is a waiver of the guard's purpose."* **The practical
+implication, in the ruling's words: *"the build brief is complete and ruled. The build waits for the
+window to close. The window's remaining cycles proceed on the measured checkout, unmodified."***
+The worktree remains available and remains non-equivalent — *"the measurement's integrity is not
+negotiable mid-window."* **Q-R12-C — the envelope is NOT sufficient for machine consumption**, and
+this is recorded as a **Prerequisite Criterion FINDING, not a passing disposition**: *"presence is not
+engagement, and the design cannot establish that the runner engages with the disclosure rather than
+treating it as metadata."* **Ruled: the anchor serves coverage and confidence state ONLY, without
+per-domain levels** — those being *"where the score most directly resembles a virtue verdict"* and
+the fields an agent is *"most likely to reason from without engaging the disclosure"*. The ruling is
+explicit that this **reduces and does not eliminate** the concern.
+
+**A general lesson the ruling supplies, recorded because it reaches beyond this design:** *"the
+standard disposition does not settle it because the standard disposition was written for displayed
+records, not consumed ones."* **Every future Prerequisite-Criterion application in this project now
+inherits that distinction** — a disposition written for a record a human reads does not transfer to a
+record a machine consumes.
+
+**NOT ruled, and deliberately not recorded as ruled.** Requiring the runner to record its own
+engagement with the target before the anchor is served is **not mandatory** — it is *"the correct
+direction for the design to develop toward"*, and **must be carried as an open design question for
+the generation-step scoping session, not as a resolved parameter.** This is the one genuinely new
+open item the ruling creates, and it belongs to a different session; R12 does not own or assign it.
+
+**Folded, same session, by ANNOTATION (not rewrite) — the repo's standing discipline for a ruled
+document, per the R11 precedent:** a `⚖️ RULED` banner at the head of
+`2026-09-14-R12-standing-runner-build-brief-second-increment.md` plus the specific settled sections —
+§5 (Q-R12-A, with (a)'s exclusion quoted), §8.4 (Q-R12-B, noting the ruling's ground is
+**behaviour-alteration rather than `GUARD_RE` membership**, so it reaches the whole bundle and not
+only the one matched file), §8.1 (no phase opens until the window closes), §3.3 block 2 (the anchor's
+payload reduced; the brief's own superseded argument left as the record of what it argued), §10 (the
+anchor row does not pass as designed), and §13 (all three marked ruled, with the new open item named
+and unassigned). **The brief's status moves from *Designed, three questions open* to *Designed and
+ruled, awaiting the window's close*.**
+
+**Files touched:** the verbatim (new); the brief (annotated in place, not rewritten); this entry.
+**Not touched:** any `GUARD_RE` file; any R18 surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`;
+`agent_hold_observations`; the priority index. Another session's `environmental-context.json` and two
+untracked peer prompts NOT staged. **Risk classification:** `governance`/documents. **Rollback:**
+`git revert` the commit; the verbatim stands as record regardless. **Verification (founder):** read
+the verbatim against the mentor's message; confirm the brief's banner and each annotated section
+match. **Rules served:** PR18, PR20, PR23; verbatim-wins.
+
+**Status:** Adopted. **Nothing built, activated, flipped, deployed, migrated, minted or pushed by
+this ruling or its folds. The build is now explicitly gated on the observation window's close.
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
