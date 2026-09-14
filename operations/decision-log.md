@@ -42271,3 +42271,85 @@ restatement, and that the trigger reading in `Q-SESSION-REF-CHECK` is the intend
 **forbids Q-C's check, which is ruled to a later session.** **Nothing is currently licensed to open;
 the founder's election governs. D2 remains blocked. The S11 flip remains REFUSED. Weights remain
 BLOCKED. The 0h call remains the founder's.**
+
+---
+
+## 2026-09-15 — D-STANDING-RUNNER-DESIGN-R13-COMPLETE-PR19-FOLDED-2026-09-15
+
+**Decision:** The standing-runner design track's **sixth sitting (R13)** ran on the founder's act —
+the re-homing act Q-A reserved to them — and is complete: `operations/agent-circles-2026-08/2026-09-15-standing-runner-design-R13.md`.
+Tier `governance`/design; AC7 NOT engaged. **Nothing built, activated, migrated, minted, deployed,
+pushed or relayed; the sitting licenses no build and elects nothing.** No file under `website/` or
+`harness/` touched. Guard **ARMED, 250/0**. Q-M3 admits design authoring; **Q-R12-B forbids the build
+regardless.**
+
+**Four items taken** — Q-R12-C (row 598, re-homed by Q-A); A5.2 (row 597); R8-D7 against the single
+backward edge **as amended by Q-M5** (from R8 §4.9, **not a register row**); the conjectural entry
+type ↔ GS-ATRF-4 (row 588). **Excluded and checked:** R8-D7's parameters (deferred to live
+measurement by Q-M7 — verified on all four, not assumed); the M/W/S election (closed).
+
+**R13-D1 (Q-R12-C).** A bare attestation is worth nothing at a server boundary and is ruled out **on
+the standing no-self-report rule**. The sharper finding: the ruling's own direction — *"that
+examination is the prerequisite the envelope cannot supply by itself"* — names an examination inside
+the **runner-owned** generation step, so **the prerequisite lives in the one component the server does
+not build**; not a v1 scheduling limit but a standing property of the ownership split. The designable
+server-side complement is named (a content constraint on `derivation.moves`) and not designed.
+**R13-D2 (A5.2).** The core is empty **of harness-held state**; the runner's own declared
+`OikeiosisGap` is the *whole* core, runner-attested at `heuristic`'s trust posture with the
+"cannot invent" claim withdrawn. `gap_only` is the honest marker and already exists. **R13-D3.**
+R9 §11 had already confirmed the evaluation; **Q-M5 amended the object afterwards**, and the
+confirmation survives on R9's terms — termination strengthens (monotone descending chain), **ground
+(ii) does not survive unqualified**. **R13-D4.** Blocked on a question owned by no session; the
+blocker is named, **not assigned**. **R13-D5 (new, from review).** Three live items found behind
+"consumed" markers.
+
+**PR19 RAN AS THREE BLIND REVIEWERS AND THE FIRST DRAFT DID NOT SURVIVE IT — twenty-one findings,
+eight HIGH, all folded at the root.** Two reviewers converged independently on three findings. The
+rewrite is recorded at §8 and the first draft is in git history. **What was wrong:** the claim that
+Q-M5 left *"no loop at all"* (**false** — Q-M5 removed the fixpoint **for rejections only**; R11 §1.3
+sets out a monotone descending chain); the re-assertion of R8's ground (ii) after **R9-D10 had
+already struck its unqualified form** (*"the policy is not wholly examination-side in effect"* — block
+4 `runner_history` carries `guardrail_proximity` to the runner cross-cycle, so the draft answered the
+within-cycle question when the live path is cross-cycle); *"the core is EMPTY"* (dropping R9's *"of
+harness-held state"* — **the most build-consequential error**, since non-empty-and-runner-attested is
+a worse epistemic situation than empty and carries its own disclosure); a **Prerequisite Criterion
+misapplication** (its ruled trigger is practitioner-facing outputs — scores, recommendations,
+diagnoses, virtue assessments — and an attestation is none; the draft substituted "engagement" for
+"the destination" and never faced the rebuttal that an attestation is *recorded and consumed by
+nothing*); an **exhaustiveness claim** (*"exactly two available shapes"* — at least five exist, three
+already instantiated here); a **self-contradiction** (a branch asserted "knowable at read time" two
+paragraphs before noting the mint enforcement it depends on is unbuilt); a **false novelty claim**
+(*"the first item where the Criterion decides against a design element"* — Q-R12-C already was one,
+and R8 §4.10 before it); plus *"R8's four grounds"* (R8 gives three), a mis-discharge of R8 §4.9's
+condition (it runs to the **adopting** session), and a register miscount.
+
+**THE DEEPEST FINDING WAS THE METHOD, AND IT IS CORRECTED AT §0.** The draft scoped its load to *"the
+register's standing-runner rows."* **The 2026-09-04 A2 ruling forbids that equation**: *"Additive.
+The brief's named-input list does not replace the items the record routes to the standing-runner
+track… The full named-input load… includes: the M-vs-W floor-semantics deferral, Ruling Set E's A2,
+A3, and A4, item D's guard end-condition, the four Gate-3 §11 handoff items, the ten [R8:…] register
+rows, and everything in the brief."* R9 §0 carried that load; the draft did not, and did not cite the
+governing brief at all. **The full load is now dispositioned item by item, and the four items taken
+are a checked result rather than a by-product of trusting one surface.**
+
+**⚠ A LIVE CARRY-LOSS IS SURFACED FOR THE FOUNDER (§4b(1)).** R10 §4.6 item 2 records that the
+cycle-open read *"should be authorised per-identity, not hard-coded to a single runner… **Recorded as
+a required addition to any build brief** for R9 §16.2's bundle, **not as something already
+discharged**"*, against the write-side `UNIQUE (loop_id, cycle_number)` collision R10 §4.4 names.
+**R12 IS that build brief and contains neither — a grep for `uq_ilc_loop_cycle` and `per-identity`
+across R12 returns ZERO**, and §3.3 and §7's prerequisites are both silent. **It belongs in R12 §7.**
+Mitigating and stated: v1 runs one runner, so the collision is contingent on generalisation — but R10
+worded it as required, not contingent. **Also surfaced:** Q6's *"raise them when the receiving session
+opens"* is unfired on rows 593/594 (the raising is the founder's relay act, named as owed); row 595's
+"Open for the session" list carries the same unowned-vocabulary blocker as row 588; row 592's
+leverage item #6 is re-deferred with a named unlock, not consumed.
+
+**Files touched:** R13 (new); this entry. **Not touched:** any `GUARD_RE` file; anything under
+`website/` or `harness/`; the register; R12; `manifest.md`. `environmental-context.json` not staged.
+**Rollback:** `git revert` the commit. **Verification (founder):** the §4b(1) carry-loss — confirm it
+belongs in R12 §7 — and whether rows 593/594's raising is owed now or at the build.
+**Rules served:** PR18, PR19, PR20, PR23.
+
+**Status:** W2's clock **RUNNING**; no end date determinable. **Nothing is built and no successor
+sitting is opened. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
+call remains the founder's.**
