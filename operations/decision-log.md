@@ -42158,3 +42158,47 @@ back to the mentor. **Rules served:** PR18, PR20, PR23.
 **Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`; no end date is determinable.
 **Nothing built, activated, migrated, minted, deployed or relayed. D2 remains blocked. The S11 flip
 remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+---
+
+## 2026-09-15 — D-ITEM3-PREMISE-AND-STALE-SESSION-ROUTING-BRIEF-AUTHORED-2026-09-15
+
+**Decision:** The relay brief for Item 3's second withheld premise is authored:
+`operations/agent-circles-2026-08/2026-09-15-MENTOR-QUESTIONS-item3-premise-and-stale-session-routing-FOR-RULING.md`.
+`governance`/documents; Standard; AC7 NOT engaged. **Nothing built, migrated, minted, activated,
+deployed or relayed.** Guard **ARMED 250/0**. The founder relays.
+
+**It carries three questions.** **Q-A — where Q-R12-C re-homes**, recommending the standing-runner
+design track's next sitting on four verified grounds: the 2026-08-19 ruling redirected a carry-forward
+from **this same closed session to that same destination**; Q-R12-C arose at R12, the track's fifth
+sitting; the track's item-level gate is cleared and its opening is the founder's act; and the
+register's standing-runner rows **already carry A5.2 — Q-P1's own source question**. **The redirect is
+recommended, NOT taken.** **Q-B — what opens next**, put without a recommendation, since both of Item
+3's options are unavailable and the choice is the founder's. **Q-C — whether PR20's drafting-time
+check should become executing rather than conventional**, with three arguments *against* building
+anything stated alongside so the question is not loaded; nothing is proposed, designed or scoped.
+
+**The finding that motivates Q-C, verified as a chronology:** the generation-step scoping session
+closed 2026-08-09; **instance 1** (2026-08-19) produced the redirect-not-void template and the PR20
+drafting-time amendment; **instance 2** (2026-08-21) named the same closed session; **instance 3**
+(2026-08-29) found the *ATRF scoping session's own register row* stale and the **Evaluative Engine
+Epistemic Status session also already closed**; **instance 4** is R12 §13 and Item 3, 2026-09-14.
+**Three distinct sessions have been named as live receivers after closing, and the amendment written
+to catch this has not caught instances 2, 3 or 4** — the 2026-08-19 record says as much of instance 1:
+*"the amendment did not catch it — the error arrived inside inherited text."* **The remedy is not what
+fails; the detection is.** Every instance was found by a session that happened to check.
+
+**Restraint preserved:** a 2026-08-19 correction found the stale phrase in **12 further documents** and
+deliberately left them, since correcting them *"would rewrite closed records."* This brief corrects
+none of them; its only applied edit is the dated routing correction at R12 §0 (commit `66ba39e`).
+
+**Files touched:** the brief (new); this entry. **Not touched:** any `GUARD_RE` file; anything under
+`website/` or `harness/`; `manifest.md`; the closed records. `environmental-context.json` not staged.
+**Rollback:** `git revert` the commit. **Verification (founder):** confirm Q-A's recommendation is a
+recommendation and not a re-homing, and that Q-C is put as posture rather than proposal.
+**Rules served:** PR18, PR20, PR23.
+
+**Status:** W2's clock **RUNNING**; no end date determinable; the window admits this authoring.
+**Nothing is currently licensed to open** — Item 3's two options were a discharged brief and a session
+that does not exist. **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The
+0h call remains the founder's.**
