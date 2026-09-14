@@ -1,4 +1,4 @@
-# W2 Session Opener — Q-S2-conforming variant
+# W2 Session Opener
 
 > **A preamble, not a task.** Read it, confirm what §1 asks, then wait for the task.
 > **Every number in it is a claim to re-derive at your own open.**
