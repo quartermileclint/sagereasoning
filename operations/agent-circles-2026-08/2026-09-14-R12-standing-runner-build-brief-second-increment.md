@@ -16,6 +16,26 @@
 > disclosed limitations is **not mandatory** — it is *"the correct direction"*, carried as an **open
 > design question for the generation-step scoping session**, never as a resolved parameter (§13).
 > **No build is licensed by this ruling.**
+>
+> **⚠ ROUTING CORRECTED 2026-09-15 — "the generation-step scoping session" DOES NOT EXIST TO ROUTE
+> TO. It was ruled 2026-08-09 and is CLOSED**, and the mentor ruled on 2026-08-21 that naming it in a
+> cross-reference is *"a stale-mechanism-fact error of the class the PR20 amendment was designed to
+> catch"* (`2026-08-21-mentor-rulings-five-questions-examination-session-verbatim.md`, Q1: *"The
+> generation-step scoping session was ruled 2026-08-09 and is closed… Its subject matter was the
+> generation step's build decisions — QG-A through QG-D, the proposal shape, the completion signal
+> scope question, the six build-gate review dimensions"*). **Q-R12-C's subject — whether the runner
+> must explicitly engage the anchor's disclosed limitations — is none of those.**
+> **PR20's 2026-08-19 carry-forward rule governs the remedy:** a carry-forward pointed at an
+> already-closed session is *"neither voided nor dated-amended into the closed document, but
+> **redirected to whichever open-or-future session's subject matter actually fits**, recorded there as
+> a named input, not a pre-answer."*
+> **Recommended destination: the standing-runner design track's next sitting (R13)** — Q-R12-C arose
+> at R12, the track's fifth sitting, and its subject is runner-side generation design. **There is a
+> precedent for exactly this redirect**: a prior correction moved a stale *"generation-step scoping
+> session"* reference to *"the standing-runner design session"* (`operations/decision-log.md:25823`).
+> **The redirect is NOT taken here** — the track's opening is the founder's act, and Item 3 of the
+> 2026-09-14 ruling named the closed session by name, so the founder may wish to put it back. **The
+> item is carried, not re-homed by an autonomous session.**
 
 **STATUS: Designed and ruled, awaiting the window's close.**
 

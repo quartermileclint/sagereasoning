@@ -517,6 +517,19 @@ founder-visible setting, not an auto-mode outcome"*).
 - **`Q-CALLER-C2`, `Q-CALLER-C3`, `Q-CALLER-BUILD`: DONE** (register change-log row 2026-09-12).
 - **`Q-PREFLIP-REPORTS`: BUILT, the report ASSEMBLED and RULED.** A re-run is owed at the current
   window's mark (Sunday) and again at the W2 window's mark.
+  > **⚠ UPDATED 2026-09-15 — the first of the two owed re-runs is DISCHARGED; only the second
+  > remains.** The pre-W2 window's mark **passed at `2026-09-13T09:44:55Z` (Sun 19:44 AEST)** and the
+  > re-run was made against it — two verbatim dry-run captures at
+  > `operations/trust-layer-2026-07/runs/2026-09-13/observation-report-DRY-RUN-at-part1-mark{,-CAPTURE-2}.txt`,
+  > with the record **founder-elected the same evening (F-4 discharged)**. **Still owed: the re-run at
+  > the W2 window's mark.**
+  > **Its date is NOT determinable and must not be estimated.** W2's clock started
+  > `2026-09-14T08:44:36.147Z` (**2026-09-14 18:44:36 AEST**) and the close condition is **five
+  > *ordinary consult days*** (Q-M4) — a day with no consult records is not a consult day (the buffer
+  > ran **32.8% CONSULT-OUTAGE**, 172:84, at the last snapshot), and *"ordinary"* is the founder's
+  > judgement. A prior session's *"about 2026-09-19"* was **withdrawn** as an inference the rule does
+  > not license. **The count half is computable from the append-only buffer on request; the ordinary
+  > half is the founder's.**
 - **`Q-G6A-QUALIFICATION`: BUILT** 2026-09-10 (same record).
 - **`Q-D2-ENGINE`: still BLOCKED** — ~~now on the part-(2) window and the D2 "engaged" definitions ruling
   (scoped-for-ruling, relay pending), not on any baseline count.~~ **CORRECTED 2026-09-13:** the D2 rulings

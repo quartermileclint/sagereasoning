@@ -42090,3 +42090,71 @@ reads as non-blocking. **Rules served:** PR18, PR20, PR23.
 and **the ruling licenses no build** — every element above waits for the window's close under
 Q-R12-B. **Nothing built, activated, migrated, minted, deployed or relayed. D2 remains blocked. The
 S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
+
+---
+
+## 2026-09-15 — D-SPENT-PROMPTS-MARKED-PREFLIP-ROW-UPDATED-Q-R12-C-ROUTING-CORRECTED-2026-09-15
+
+**Decision:** Three founder-directed housekeeping acts, executed documents-only — **and the third
+reversed the recommendation it was executing.** `governance`/documents; Standard under 0d-ii; AC7 NOT
+engaged. **Nothing built, migrated, minted, activated, deployed or relayed.** No file under
+`website/` or `harness/` touched. Byte-identity guard **ARMED, 250/0**. `ListAgents` at open: **11
+peers**, four of them live `sagereasoning-*` sessions — path-scoped staging throughout.
+
+**(1) TWO SPENT PROMPTS MARKED AND COMMITTED.** Both 2026-09-13 AUTONOMOUS prompts had been sitting
+**untracked** in the working tree; **both had already RUN and both closes exist and are committed** —
+they were simply never staged. `…-window-mark-F1-assessment-and-R8D7-scoping-…` ran ~10:48–11:15 AEST
+(`sagereasoning-dd [856dc7]`) with **Task A skipped on the clock** (the mark had not yet passed);
+`…-part1-mark-record-W2-clock-evidence-…` ran ~19:27–20:1x (`sagereasoning-bd [c78e58]`), **inherited
+Task A and discharged it** rather than skipping. Both marked SPENT with their closes named and their
+**overtaken halves recorded**: the W2-clock-evidence half is superseded by the founder's 2026-09-14
+determination; F-1 is largely discharged by Q-M1; R8-D7 was unblocked when W was elected.
+
+**(2) `Q-PREFLIP-REPORTS` ROW UPDATED — the first of its two owed re-runs is DISCHARGED.** The
+pre-W2 window's mark **passed `2026-09-13T09:44:55Z` (Sun 19:44 AEST)** and the re-run was made
+against it (two verbatim dry-run captures under `runs/2026-09-13/`; record founder-elected the same
+evening, **F-4 discharged**). **Still owed: the re-run at the W2 window's mark** — and the row now
+records that **its date is not determinable and must not be estimated**: five *ordinary consult days*
+from `2026-09-14T08:44:36.147Z` (**2026-09-14 18:44:36 AEST**), where a day with no consult records is
+not a consult day (**32.8% CONSULT-OUTAGE, 172:84**, at the last snapshot) and *"ordinary"* is the
+founder's judgement. A prior *"about 2026-09-19"* stands **withdrawn**. The count half is computable
+on request; the ordinary half is not.
+
+**(3) THE THIRD ACT WAS NOT PERFORMED AS RECOMMENDED — "the generation-step scoping session" IS
+CLOSED.** The session recommended opening it next and was directed to proceed; **verification before
+drafting found it was ruled 2026-08-09 and closed**, and that the mentor had **already ruled on
+2026-08-21 that naming it in a cross-reference is *"a stale-mechanism-fact error of the class the
+PR20 amendment was designed to catch."*** Its subject matter was the generation step's build
+decisions (QG-A…QG-D, the proposal shape, the completion-signal scope question, the six build-gate
+dimensions); **Q-R12-C's subject — whether the runner must explicitly engage the anchor's disclosed
+limitations — is none of those.** **No prompt was authored for a closed session.**
+
+**This is the SECOND stale-premise instance in two days, and of the same class.** R12 §13 routed
+Q-R12-C there on 2026-09-14, and the mentor's own Item 3 the same day named it as the alternative
+that *"can wait"* — five weeks after the mentor had corrected that exact phrase as a stale-fact error.
+**PR20's 2026-08-19 carry-forward rule governs the remedy:** a carry-forward pointed at an
+already-closed session is *"neither voided nor dated-amended into the closed document, but redirected
+to whichever open-or-future session's subject matter actually fits, recorded there as a named input,
+not a pre-answer."* **Recommended destination: the standing-runner design track's next sitting
+(R13)** — Q-R12-C arose at R12, the track's fifth sitting, and its subject is runner-side generation
+design; **there is a precedent for exactly this redirect** (a prior correction moved a stale
+*"generation-step scoping session"* reference to *"the standing-runner design session"*, this log line
+25823). **THE REDIRECT IS RECOMMENDED, NOT TAKEN** — the track's opening is the founder's act, and
+Item 3 named the closed session by name, so the founder may wish to put the premise back as was done
+for Q-P1. A dated routing correction is applied at R12 §0 carrying exactly that disposition.
+
+**Consequence for "what opens next": genuinely undetermined.** Item 3's two options were the producer
+brief (**discharged**) and the generation-step scoping session (**does not exist**). **No session is
+currently licensed to open by any standing ruling**, and the window admits authoring only —
+`Q-OPTION-S-SERIES-DEFECT` is `code-elevated` and ineligible.
+
+**Files touched:** the two spent prompts (now tracked); the standing opener's `Q-PREFLIP-REPORTS`
+row; R12 §0's routing block; this entry. **Not touched:** any `GUARD_RE` file; anything under
+`website/` or `harness/`; any R18 surface; `manifest.md`; `~/.sage-gate1/`. `environmental-context.json`
+**not staged** (peer). **Risk classification:** `governance`/documents. **Rollback:** `git revert` the
+commit. **Verification (founder):** decide where Q-R12-C re-homes, and whether Item 3's premise goes
+back to the mentor. **Rules served:** PR18, PR20, PR23.
+
+**Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`; no end date is determinable.
+**Nothing built, activated, migrated, minted, deployed or relayed. D2 remains blocked. The S11 flip
+remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**
