@@ -41622,3 +41622,98 @@ document, per the 2026-09-13 precedent).
 
 **W2's clock has not started. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED.
 The 0h call remains the founder's.**
+
+## 2026-09-14 — D-STANDING-RUNNER-R12-BUILD-BRIEF-AUTHORED-PR19-FOLDED-2026-09-14
+
+**Decision.** The standing-runner design track's fifth sitting (**R12**) ran 2026-09-14 (~18:31–20:15
+AEST, from `date`; session `sagereasoning-b1 [4bc334]`; tier `governance`/design; AC7 NOT engaged) on
+the founder's designation of **the standing-runner design track, excluding R8-D7's parameters**. It
+produced one deliverable, built nothing:
+`operations/agent-circles-2026-08/2026-09-14-R12-standing-runner-build-brief-second-increment.md`.
+Close: `operations/handoffs/founder/2026-09-14-standing-runner-R12-build-brief-CLOSE.md`.
+
+**What the designation contained, determined before authoring and recorded so it is not re-derived.**
+The track's remaining design work is far narrower than the designation implies: **the M/W/S election
+is CLOSED** (W elected 2026-09-13, fully discharging the Option S gate — both items it ever bound are
+resolved); R10's six questions, Q-R11-A1/A2/A3/A4/B1/B2/C1, and the `manifest.md` ATRF wording are all
+ruled, the last applied by the founder that morning. Of R8 §11's five follow-ons and R9 §16's ten,
+**exactly one** is design-class, unexcluded and unauthored — **the standing-runner build brief, second
+increment** (R9 §16.2; R8 §11.2), which both sittings named and neither wrote. That is what was
+authored: one buildable specification consolidating both lists — six columns plus one table in a
+single Q-B2 window, three read surfaces behind three new flags, the runner-side components with
+R8-D2's closure predicate, the capability question, data-rights wiring, six prerequisites, the phase
+ladder with R9's phase 1′, R8-D7's unparameterised slot, and the compliance tables. **It authorises
+nothing.**
+
+**Three findings that gate any build.** **(1)** R8-D1b requires a read-scoped capability explicitly
+NOT `watching_write`; **none exists** (`PRACTICE_CAPABILITIES` is seven values). The obvious fix —
+adding it to `WRITE_CLASS_CAPABILITIES` so the 6e §A CHECK applies — **would reject a mint on the
+established owner-less runner-credential shape**, because that CHECK's predicate is
+`agent_id IS NOT NULL AND owner_user_id IS NOT NULL` (**both**) while the read's scoping needs only
+`agent_id`. A third option (a narrower agent-bound-only CHECK) is now recommended; **Q-R12-A** to the
+mentor. **(2)** R8 §4.0 item 2 — how an executing agent learns `loop_id` + `cycle_number` — is
+unanswered, so **nobody but the runner can post a completion signal**, so phase 3 would consume a
+stream only the runner produces. **R8's own recommendation that the producer-question mentor brief
+comes first, ahead of any build, therefore stands.** **(3)** Exactly **one** file in the whole bundle
+matches `GUARD_RE` — `website/src/lib/substrate/idea-loop-watching-store.ts` — and **all three read
+paths need it**, so the read work is precisely the part that collides with the armed guard while the
+migration, capability and data-rights wiring do not. Whether the window tolerates a guarded-file
+waiver as its own work **remains unruled** (**Q-R12-B**).
+
+**PR19 — three blind reviewers, twelve findings, all confirmed at source first-hand, all folded.**
+Each was given only the deliverable and the source paths, with no visibility into the author's
+assessment or into each other. **A (source facts): CLEAN** — it re-derived every line citation and
+mechanically re-applied the live `GUARD_RE`; its one parenthetical was a real PR20 gap and was folded
+(two production claims now marked recorded-but-not-independently-verified). **B (fidelity): six,
+all confirmed** — headline, §9 listed `surface` as **both settled and open**, the five-item list being
+the pre-ruling state that the 2026-09-13 ruling had already resolved on two counts (Q-R11-A2 surface =
+gate only; Q-R11-B2 incomplete-series = hold); and **R8-D2's closure predicate was missing entirely —
+the exact defect R8 itself named and fixed** (*"an undefined closure either never closes… or closes
+trivially"*). Also folded: the proposal-shape environment field (claimed in §0, specified nowhere);
+two of three named dashboard views, one of which was melete's **only** reader; the producer-question
+prerequisite absent from a §7 framed as exhaustive; R8-D9's exclusion reading as oversight rather than
+gate. **C (constraints/safety): six, all confirmed** — headline, the melete **delete path cannot ride
+the cascade**: the sibling carries an explicit call whose comment states *"erasure is verified by
+query, never inferred from a cascade"*, and the cascade reading would have shipped a `tables_cleared`
+compliance claim for a deletion the code never verifies. **§5's recommendation was withdrawn** on the
+CHECK's actual predicate. Clean on PR24 non-engagement, absence of any candidate→execution path or
+harness-computed scalar, and §11's three core compliance claims. **One refinement made against a
+reviewer:** C reported "no export path at all" for owner-less credentials; `/api/user/export` does
+carry a `credential_ref`-keyed pattern for an operator's owner-NULL credentials, so the fix is
+narrower than the reviewer's reading.
+
+**⚠ A FINDING ABOUT THE INSTRUMENT, ROUTED NOT FIXED.** Verified at source in
+`harness/gate1-pre-decision/claude-code/hooks/lib/false-hold-capture.mjs`: **`buildFalseHoldRecord` —
+the CONSULT path, schema v3 — takes no `callerClass`, `clientVersion` or `clientEntrypoint`
+parameter**; only `buildGuardHoldRecord` (v6) does. The Condition-3 disclosure the 2026-09-07/09-10
+rulings put on the guard path **has no counterpart on the consult path**, and consult records cannot
+be attributed to live-agent vs subagent at all — confirmed on a record written by this session, not
+only on history. Separately, **capture is imported only by `at-action-hook.mjs`**, so the session-open
+and subagent frames write **no record** and a frame outage on either is invisible to the buffer; this
+session hit that three times (the `Agent` launches returned *"no assessment in response"* and produced
+nothing, where the guard path would have written `captureBasis: no_assessment`). **These are
+`harness/gate1` files, `GUARD_RE` matches them and the guard is armed, so this is named for the
+founder rather than fixed.** It bears directly on F-3′.
+
+**F-3′ counted, not estimated.** Window population 681 (the 138 v1 records and the took-effect probe
+at 139 excluded): **consult 215 · guard 466**, reported separately as the obligation requires, with
+**consult records present on 9 of 9 window days** — availability from day one satisfied, not assumed.
+Guard outcomes: `pause_for_review` 364, `proceed_with_caution` 54, `proceed` 37, `do_not_proceed` 8,
+`outage_open` 3. Buffer read-only; nothing written to `~/.sage-gate1/`.
+
+**Files touched:** the brief (new); the close (new); this entry. **Not touched:** any `GUARD_RE` file
+(guard **250/0 ARMED** at open and close; pins `60cefedb…`/`fa8895ec…`/`db86fccb…` unchanged); any
+R18 surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`; `agent_hold_observations`; the priority
+index (no named input consumed or redirected — the one redirected row, the GS-ATRF-4 vocabulary
+direction, stays held open and owned by no session per D1). Another session's
+`environmental-context.json` and two untracked peer prompts were NOT staged. **Tool mode:** the
+deliverable and close were authored through Write/Edit per the designation's channel scope; Bash was
+used for reading and verification only — disclosed on the merits, not chosen for the record.
+**Risk classification:** `governance`/documents. **Rollback:** `git revert` the commit.
+**Verification (founder):** read §5, §7.6 and §8.4 against the deliverable; confirm no file under
+`website/` is in the commit. **Rules served:** PR15, PR18, PR19, PR20, PR23, PR25; the Prerequisite
+Criterion applied explicitly at §10; verbatim-wins.
+
+**Status:** Designed. **Nothing built, activated, flipped, deployed, migrated, minted, pushed or
+relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains
+the founder's.**
