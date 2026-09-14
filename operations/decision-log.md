@@ -42353,3 +42353,65 @@ belongs in R12 §7 — and whether rows 593/594's raising is owed now or at the 
 **Status:** W2's clock **RUNNING**; no end date determinable. **Nothing is built and no successor
 sitting is opened. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h
 call remains the founder's.**
+
+---
+
+## 2026-09-15 — D-R13-OUTCOME-BRIEF-AUTHORED-Q6-RAISING-DISCHARGED-2026-09-15
+
+**Decision:** The R13 outcome brief is authored for relay:
+`operations/agent-circles-2026-08/2026-09-15-R13-OUTCOME-BRIEF-FOR-MENTOR.md`.
+`governance`/documents; Standard; AC7 NOT engaged. **Nothing built, migrated, minted, activated,
+deployed or relayed.** Guard **ARMED, 250/0**. The founder relays.
+
+**It carries two questions, discharges one ruled obligation, and surfaces one carry-loss.**
+
+**Q-R13-A — does R13-D1's reading of "the correct direction" hold?** The brief puts the reading
+squarely rather than assuming it: R13 reads the ruling's two sentences as naming different things — a
+*recording* and an *examination* — and concludes the examination is the prerequisite while a recording
+of it alone is a self-report the harness cannot credit, which locates the direction **runner-side**.
+**The alternative reading is stated fairly** — that the recording requirement *is* the direction, to
+be built server-side now with unverifiability accepted as the cost of making the expectation explicit.
+**R13 took a substantive, non-neutral reading of the mentor's words; if it is wrong, R13-D1 is
+overturned.**
+
+**Q-R13-B — is R13-D3's verdict admissible ahead of the Q5-assigned examination?** Q5 holds that
+*"Q-M5's would-be-winner scope interacts with the total gap on role input, and that interaction should
+be examined"*, assigned to the **role-relative evaluation session**. R13-D3 cleared Q-M5's scope
+structurally without touching it. Not a missed deliverable — but the verdict reads more cleanly than
+the record supports, and the brief asks whether it stands alone or must be held. **R13 takes no
+position.**
+
+**THE Q6 RAISING IS DISCHARGED (§4).** Q6 ruled *"Raise them when the receiving session opens."* The
+session opened at R13 and **R13 did not raise them — an omission PR19 caught and this brief repairs.**
+Both 2026-09-01 items are named and put: **(1) GS-ATRF-1's blast-radius proxy as a candidate
+ALTERNATIVE BASIS** — the 2026-08-11 ruled answer and vocabulary untouched, offering blast radius as a
+**topological property** (expanding moves from the generalisation of the practice); **(2) the
+generation-step design as a candidate ARCHITECTURE** — the *"bidirectional/reverse algorithm"* shape,
+which **R9 §3 already is**. Both have shaped built design while carrying *"not yet ruled"*; the brief
+asks whether they stand as ruled inputs, need their own ruling, or are subsumed by R9 + B1–B4 such
+that the rows retire.
+
+**The carry-loss is surfaced with NO ruling sought (§5)** — R10 already ruled it required. R10 §4.6
+item 2 records per-identity authorisation of the cycle-open read as *"a required addition to any build
+brief… not as something already discharged"*, against R10 §4.4's write-side
+`UNIQUE (loop_id, cycle_number)` collision; **R12 is that brief and a grep returns ZERO** for
+`uq_ilc_loop_cycle` and `per-identity`. It belongs in R12 §7. Two smaller instances named (row 595's
+identical unowned-vocabulary blocker; row 592's item #6 re-deferred, not consumed).
+
+**§2 reports PR19's outcome to the mentor rather than presenting the folded document as first-draft
+sound** — twenty-one findings, eight HIGH, including six places the draft **misstated the mentor's own
+record** (Q-M5's scope; R9-D10's struck ground; R9's *"of harness-held state"*; the Prerequisite
+Criterion's trigger; the false novelty claim; the false exhaustiveness claim) and the method finding
+that A2 forbids equating the register with the inbound set. Stated honestly: *"the folded document is
+sound, but it is sound because review caught it, and the sitting's own confidence in its first draft
+was not a reliable signal"* — the analogue of Q-C's ruling, named and not resolved.
+
+**Files touched:** the brief (new); this entry. **Not touched:** any `GUARD_RE` file; anything under
+`website/` or `harness/`; the register; R12; `manifest.md`. `environmental-context.json` not staged.
+**Rollback:** `git revert` the commit. **Verification (founder):** confirm §4 names both 2026-09-01
+items correctly against rows 593/594, and that §5 is surfaced as a finding and not as a ruling
+request. **Rules served:** PR18, PR19, PR20, PR23.
+
+**Status:** W2's clock **RUNNING**; no end date determinable. **Nothing built; no successor sitting
+opened. D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains
+the founder's.**
