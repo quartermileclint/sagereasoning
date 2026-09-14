@@ -240,6 +240,19 @@ such and never interpolated.**
 
 ### 2.7 The proposal-shape environment field (R9-D5 / GS-ATRF-2)
 
+> **⚖️ ADDED 2026-09-15 by the Q-P1 ruling — A SECOND, REQUIRED PROPOSAL-SHAPE FIELD: the operative
+> GENERATION MODE.** Verbatim: `2026-09-15-mentor-ruling-Q-P1-gap-only-posture-verbatim.md`.
+> *"A completion signal produced under `gap_only` generation is a different signal from one produced
+> under full reverse-algorithm generation. The proposal shape should carry a field indicating which
+> generation mode was operative. This is not a new architectural requirement — it is the
+> honest-claims discipline applied to the signal's own provenance. The build session should treat
+> this as a **required field, not an optional annotation**."*
+> **Recorded here so the build carries it rather than rediscovering it.** It sits alongside this
+> section's environment field and is subject to the same runner-attested disclosure discipline.
+> **It is NOT built and is NOT licensed** — a `website/` change, window-gated under Q-R12-B, and the
+> ruling licenses no build. Whether it rides this bundle or its own is a build-session question this
+> annotation does not decide.
+
 The proposal shape carries the generative environment as a **third disclosed classification**,
 alongside the two it already carries — because the adopter at Threshold is owed the conditions under
 which the candidate became thinkable, and withholding them is the omission Gate-3 Q2 names as *"a
@@ -566,7 +579,27 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
 1. **A server-side derivation of the target's current circle does not exist** (R9 §3.3). The circle
    finger is the **runner's own declaration**; `gap_ref` is runner-supplied and the harness holds no
    per-circle state. Any build element reading a server-derived circle is building on nothing.
-2. **A harness identity with an examined record for the v1 executing actor must exist** for R9 §3's
+2. **⚠ CORRECTED 2026-09-15 on the Q-P1 ruling, which directs this correction by name** — *"should
+   be corrected in the build brief before the build session opens."* Verbatim:
+   `2026-09-15-mentor-ruling-Q-P1-gap-only-posture-verbatim.md`. **Two changes:**
+
+   **(i) This is NOT a blocking prerequisite.** The original *"must exist"* framing is overturned:
+   **v1 proceeds with R9 §3's reverse algorithm idle on `gap_only`, and that is the ruled honest v1
+   posture.** Q1a's founder-personal branch **remains live**; an examined-record identity is **not a
+   precondition of v1 execution**. It remains an architectural prerequisite *of the reverse algorithm
+   doing any work* — a named, disclosed limitation, not a gate. **The build must not treat this item
+   as blocking.**
+
+   **(ii) Q1c's prohibition is CURRENTLY UNENFORCED AT MINT**, and the ruling directs that this
+   prerequisite record it. A repo-wide search finds **no code or migration enforcing distinct
+   identities**: capability separation exists, identity separation does not, so **nothing today
+   prevents minting a `completion_signal_write` credential on the runner's own `agent_id`** — *"which
+   is exactly the condition Q1c rules against."* Building that enforcement is what makes the
+   founder-directed session identity branch available *"with the enforcement the ruling requires"*;
+   it is window-gated under Q-R12-B. **The build must not foreclose that branch** — *"The gap_only
+   posture is v1's honest starting point, not its permanent ceiling."*
+
+   *Original text, retained:* **A harness identity with an examined record for the v1 executing actor must exist** for R9 §3's
    anchor to do any work (R9 §3.1). This is the founder's act (R9 §16.10) and is **not** satisfied
    by the runner's own identity — Q1c makes them distinct by construction.
 3. **The read-scoped capability does not exist** (§5) and its shape is an open question.
@@ -576,7 +609,19 @@ R9 §16.2 named two. This brief carries both, and adds three found at source tod
 5. **TEST's apply status for the ATRF/S4 columns is undetermined** (§1.3). The bundle's `§PRE` must
    determine it by query rather than assume it — the 2026-08-12 Stoa staleness class, and the
    W2 schema walk's own programmatic re-derivation, are the precedent.
-6. **⚠ THE CYCLE-IDENTITY HANDOFF — R8 §4.0's producer question, item 2 — is unanswered, and §3.2's
+6. **⚠ CORRECTED 2026-09-14 (same day, later session) — THIS ITEM'S HEADLINE IS FALSE AND IS LEFT
+   AS WRITTEN ONLY AS THE RECORD OF WHAT WAS BELIEVED. The cycle-identity handoff is RULED, not
+   unanswered — `Q1b`, 2026-08-30:** *"The elected proposal carries its own `loop_id` and
+   `cycle_number` when surfaced for adoption on the founder dashboard. The executing actor learns
+   the cycle identity from the proposal surface, not from manual relay… This is a build-session
+   precision item, not a new ruling."* **The true state is RULED AND UNBUILT.** The gap this item
+   points at is real; its remedy is a **build item under Q1b**, not a mentor question. Note the
+   internal inconsistency this correction resolves: prerequisite 2 above cites **Q1c** as settled
+   ground, and §0's ruled-ground table cites it again — **Q1c, Q1a and Q1b are three answers in one
+   ruling on one day**, of which this brief inherited only Q1c. See
+   `2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md` §§0–2.
+
+   *Original text, retained:* **⚠ THE CYCLE-IDENTITY HANDOFF — R8 §4.0's producer question, item 2 — is unanswered, and §3.2's
    whole read path depends on it.** R8 §4.0 is titled *"THE PRODUCER QUESTION — this design's own
    largest open item"*, and its item 2 asks: **how does an executing agent learn `loop_id` +
    `cycle_number`?** The built schema requires both on a completion-signal write. **Without an
@@ -934,7 +979,14 @@ reproduced once more.
    folded document is better than the drafted one; **that is a statement about the review, not about
    the drafting, and a later reader should weight §14 accordingly** rather than treating the current
    text as having been got right first time.
-7. **§7.6 constrains the ladder more than §8.1 shows.** The producer question is unanswered, so the
+7. **⚠ CORRECTED 2026-09-14 (same correction as §7's prerequisite 6; left as written, not current).
+   "The producer question is unanswered" is FALSE — Q1a names a producer other than the runner**
+   (*"the founder personally — or an agent session the founder directs"*), and Q1b rules the cycle-
+   identity handoff. The ladder constraint this item asserts therefore does not follow from an
+   unanswered question; what remains is **unbuilt** work under Q1a/Q1b. See
+   `2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md` §2(b).
+
+   *Original text, retained:* **§7.6 constrains the ladder more than §8.1 shows.** The producer question is unanswered, so the
    completion-signal stream has no producer other than the runner itself. **Phases 1 and 1′ are
    reachable today; phase 3's value is not, until R8's own recommended first follow-on — the
    producer-question mentor brief — has run.** §8.1's table states the phase gates; it does not

@@ -266,6 +266,23 @@ own (Q1c). Made concrete, and faced:
   404s under ENV-1 and no purpose acknowledgement exists, **the core is empty of harness-held state and
   the only finger is the runner's own declared `OikeiosisGap`** (§3.3). It is disclosed on every
   candidate the cycle produces.
+> **⚖️ RULED 2026-09-15 (Q-P1) — A5.2 BELOW IS A DEGRADED-POSTURE CONDITION, NOT A BLOCKING ONE.**
+> Verbatim: `2026-09-15-mentor-ruling-Q-P1-gap-only-posture-verbatim.md` (binding; verbatim wins).
+> **V1 proceeds with §3's reverse algorithm idle on `gap_only`, and that is the honest v1 posture** —
+> *"A blocking condition would mean v1 cannot execute honestly until the prerequisite is met. A
+> degraded-posture condition means v1 executes honestly with a named limitation… R9 §3.1 establishes
+> the second, not the first. Its own language confirms this."* **Q1a's founder-personal branch
+> remains LIVE**; minting and populating an examined-record identity is **NOT a precondition of v1
+> execution**, and treating this section's named consequence as one *"would be reading a prohibition
+> into a description."* The word **"PREREQUISITE"** below is therefore to be read as *architectural
+> prerequisite of the reverse algorithm doing work*, **never** as a gate on execution.
+> **Two build consequences carried** (both window-gated under Q-R12-B): the proposal shape must carry
+> the operative **generation mode as a REQUIRED field**, *"not an optional annotation"*; and the
+> founder-directed session identity branch **must not be foreclosed** — *"The gap_only posture is
+> v1's honest starting point, not its permanent ceiling."*
+> **This annotation is at the section, not the document head** — deliberately, per the propagation
+> diagnosis confirmed in the same ruling.
+
 - **A5.2, answered as a design decision and as a prerequisite.** Under Q1a the v1 executing actor is
   the founder or a founder-directed session. **If the founder acts personally, there is no agent
   identity, no `target_agent_id`, no trust record, no purpose acknowledgement — and the reverse
@@ -909,7 +926,12 @@ constraint; the expanding-move strike; "a separate act") ·
 `2026-09-04-mentor-ruling-standing-runner-gate-item-level-session-may-open-verbatim.md` (the
 item-level gate; Path A; the founder opens) ·
 `2026-08-30-standing-runner-design-R8.md` (§2, §4.3 R8-D1b, §4.8, §4.9, §5.3, §6.2, §9, §11, §12) ·
-`2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (Q1a/Q1c; Q3) ·
+`2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` (Q1a/**Q1b**/Q1c; Q2; Q3 —
+**`Q1b` and `Q2` ADDED 2026-09-14**: this line originally read "(Q1a/Q1c; Q3)", and the omission of
+Q1b is the first point at which the cycle-identity ruling fell out of downstream tracking. Q1b:
+*"the elected proposal carries its own `loop_id` and `cycle_number`… on the founder dashboard"*.
+Q2: Q-C2a's first question AMENDED, binding on relay. See
+`2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md` §1) ·
 `2026-08-30-mentor-ruling-set-E-A2-A3-A4-D-verbatim.md` (A2, A3, A4, D — verbatim wins) ·
 `2026-09-03-DESIGN-DOCUMENT-oc-per-consumer-rendering-FOR-RULING.md` §4.3(e), §11 ·
 `2026-09-03-mentor-rulings-oc-gate3-verbatim.md` (Q1; Q2; Q6) ·

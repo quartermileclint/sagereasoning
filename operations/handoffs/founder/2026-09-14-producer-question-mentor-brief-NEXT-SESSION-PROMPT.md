@@ -1,5 +1,19 @@
 # Next session — author the producer-question mentor brief
 
+> **⚠ SPENT 2026-09-14 — RUN, BUT RESCOPED IN FLIGHT. DO NOT RE-RUN AS WRITTEN.**
+> The session opened under this prompt and found, at its PR20 verification step, that **all four
+> items in §2.1 were put to the mentor on 2026-08-30 and ruled the same day** (Q1a/Q1b/Q1c/Q2 —
+> `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md`), in a brief that already
+> exists in this repository. Authoring §2.1's four items would have asked the mentor to re-rule
+> their own ruling. **§2.1 is therefore void; §2.2 (PR20) and §2.3 were performed and stand.**
+> The session did **not** cancel — Item 3's ruling stands under PR20's withheld-premise rule — but
+> **rescoped**, and delivered
+> `operations/agent-circles-2026-08/2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md`:
+> the premise put back, three factual corrections to the record, one genuinely-open question
+> (**Q-P1**, created by Q1a and unanswered by it), and three window-gated build items.
+> **§6's claim that the producer question gates the build is superseded** — what gates it is
+> unbuilt work, not an unanswered question.
+
 **Authored 2026-09-14** by session `sagereasoning-b1 [4bc334]` (R12), on the founder's election
 following the mentor's Item-3 ruling: *"Open the producer-question mentor brief… a structural
 dependency, not a design preference."*

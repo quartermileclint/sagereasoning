@@ -41912,3 +41912,181 @@ PR23.
 **Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`. **Nothing built, activated,
 migrated, minted, deployed or relayed. D2 remains blocked. The S11 flip remains REFUSED. Weights
 remain BLOCKED. The 0h call remains the founder's.**
+
+---
+
+## 2026-09-14 — D-PRODUCER-QUESTION-ALREADY-RULED-BRIEF-RESCOPED-RECORD-CORRECTED-2026-09-14
+
+**Decision:** The session opened under
+`operations/handoffs/founder/2026-09-14-producer-question-mentor-brief-NEXT-SESSION-PROMPT.md` to
+author a mentor brief carrying R8 §4.0's four producer-question items. At its PR20 verification step
+it found that **all four were put to the mentor on 2026-08-30 and ruled the same day** — in a brief
+that already exists in this repository — and **rescoped rather than either authoring them or
+cancelling.** `governance`/documents; Standard under 0d-ii; AC7 NOT engaged. **Nothing built,
+migrated, minted, activated, deployed, pushed or relayed.** No file under `website/` or `harness/`
+touched. Byte-identity guard **ARMED, 250/0** at open and at close; all SHA pins unchanged.
+
+**The finding.** `2026-08-30-MENTOR-QUESTIONS-R8-producer-and-floor-semantics-FOR-RULING.md` carries
+all four items; `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md` rules all four,
+none deferred: **Q1a** (the founder, or a founder-directed agent session, on a founder-minted
+`completion_signal_write` credential, is the ONLY v1 producer — *"This is not a deficiency"*);
+**Q1b** (the elected proposal carries its own `loop_id`/`cycle_number` on the founder-dashboard
+adoption surface — *"a build-session precision item, not a new ruling"*); **Q1c** (distinct
+identities REQUIRED, enforced at mint); **Q2** (reading (a); Q-C2a's first question AMENDED, binding
+on relay). R8's own head annotation records **"§11's follow-on 1 (the mentor brief): EXECUTED and
+answered same day"** — follow-on 1 being the session this prompt asked to run.
+
+**Why it was RESCOPED and not cancelled — the session's own reversal, recorded as one.** The first
+conclusion reached was *"do not author the brief"*, and a finding document to that effect was
+drafted. **An independent adversarial review (PR19, launched under the prompt's Step 5) confirmed
+every fact and refuted the conclusion**, on ground the session had not weighed: the mentor's
+2026-09-14 Item 3 ruled this brief open and the founder elected it, and **per PR20's 2026-08-19
+amendment a ruling on a withheld premise STANDS** — *"standing-by-luck is not the standard, so the
+premise is put back."* **This project applied that exact remedy one session earlier to Item 1 of the
+same ruling.** Cancelling would have left R12 §7.6's falsehood in the build brief, left Item 3
+undischarged with no record of why, and left the track with nothing moving in a window that admits
+only authoring. The draft was superseded and not committed. **The at-action guard fired CAUTION on
+the drafting step and the honest elicitation answer was that the resolution preceded the
+examination** — the instrument caught its own builder, which is what it is for.
+
+**Deliverable:** `operations/agent-circles-2026-08/2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md`
+— (i) the withheld premise put back with the four-item mapping; (ii) the propagation path; (iii)
+three corrections; (iv) **one genuinely-open question, Q-P1**; (v) three window-gated build items;
+(vi) the PR20 mechanism table.
+
+**Q-P1, the one item the 2026-08-30 ruling CREATED and did not answer.** R9 §3.1 (A5.2) derives from
+Q1a: *"If the founder acts personally, there is no agent identity, no `target_agent_id`, no trust
+record… **a harness identity with an examined trust record for the v1 executing actor is a
+PREREQUISITE**… Until the founder mints and populates one, v1 generation runs on `gap_only` and §3's
+architecture is idle."* Precisely, the gap is **record, not identity** — a write-class credential
+forces an `agent_id` into existence (6e §A requires owner AND agent), but no *examined record*
+exists for it, and the founder's human mentor profile is ruled not-read. **So: is minting and
+populating such an identity a precondition of v1 execution (the founder-personal branch unavailable
+until then), or does v1 proceed with §3 idle?** It degrades the **generation** step, not merely the
+balancing loop. Unresolved fifteen days after Q1a; put, not answered.
+
+**Propagation path, corrected at every source (the root fix, since this is exactly how it spread).**
+R8 §4.0 was ruled and annotated **at the document head, not at the section** — so a reader sent to
+§4.0 in full sees an open question. **R9 (2026-09-04) cited the ruling as "(Q1a/Q1c; Q3)", omitting
+Q1b** — the first point of loss. **R12 (2026-09-14) cites Q1c four times** (including §0's
+ruled-ground table) **and Q1a/Q1b nowhere**, then states at §7.6 and §15.7 that the producer question
+is unanswered. Item 3 reasoned from that; the prompt carried Item 3 faithfully. **No session read its
+predecessor carelessly; the defect entered once and was inherited four times.** Dated annotations
+applied in place (bodies retained, never rewritten) to **R8 §4.0's body**, **R12 §7.6 and §15.7**,
+**R9's cross-reference**, and the **prompt** (marked SPENT/rescoped).
+
+**Corrections of record (no ruling needed).** R12 §7.6/§15.7 conflate *unanswered* with *unbuilt* —
+the true state is **ruled and unbuilt**; R9:912 omits Q1b; and **R8 §2.3's "contested" migration
+apply status is stale** — the log records the table (17/17 columns) and the `api_keys` capability
+CHECK (seven values incl. `completion_signal_write`) as APPLIED and verified (this log, lines
+30850–30851).
+
+**Genuinely open, all `website/` and all window-gated under Q-R12-B:** (1) Q1b's dashboard handoff,
+unbuilt; (2) **Q1c's mint-level enforcement, unbuilt — the sharpest**: a repo-wide search finds **no
+code or migration enforcing distinct identities**, so nothing today would stop minting a
+`completion_signal_write` credential on the runner's own `agent_id` — the exact condition Q1c says
+*"would make the signature meaningless as a discriminating signal"* — **and it is not tracked in R12
+§7's prerequisites in its own right**; (3) Q2's amendment unapplied to `handler.ts:34` and the
+migration's line 101 comments (R8 already parked this; no semantic consequence, surface dark).
+
+**PR20 discharged in full**, every fact verified at source with file:line (the FOR-RULING doc §5),
+including: the route exports **POST and OPTIONS only**; `cycle_number` required alongside `loop_id`;
+identity stamped server-side, never caller-supplied; **409 `no_such_cycle`** on an unrecorded cycle;
+the `refusal_coherence` CHECK; `completion_signal_write` and `watching_write` distinct and both
+write-class; 6e §A requiring owner AND agent; and — confirmed by exhaustive grep — **no read surface
+hands cycle identity to a non-runner** (the only cycle-data read is `GET /api/founder/watching`,
+behind a `FOUNDER_USER_ID` Bearer JWT gate). Production flag states and live credential rows are
+marked **recorded-but-not-independently-verified**.
+
+**Files touched:** the FOR-RULING document (new); annotations to R8, R9, R12 and the prompt; this
+entry. **Not touched:** any `GUARD_RE` file; anything under `website/` or `harness/`; any R18
+surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`. Peer files (`environmental-context.json`, the
+two 09-13 prompts) **not staged**. **Risk classification:** `governance`/documents. **Rollback:**
+`git revert` the commit. **Verification (founder):** confirm Q-P1 is a genuine open item and not a
+fifth re-ask. **Rules served:** PR18, PR19, PR20, PR23.
+
+**Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`; the window admits this authoring.
+**The founder's calls:** whether to tell the mentor that Item 3 rested on a withheld premise (a
+relay-integrity matter, the founder's not the AI's); which session opens next, now that Item 3's
+stated gating reason is discharged; and whether Q1c's unenforced prohibition should join R12 §7's
+prerequisites in its own right. **Nothing built, activated, migrated, minted, deployed or relayed.
+D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
+
+---
+
+## 2026-09-15 — D-MENTOR-RULING-Q-P1-GAP-ONLY-POSTURE-ADOPTED-EXECUTED-2026-09-15
+
+**Decision:** The mentor's ruling on **Q-P1** — the one question the rescoped producer brief put — is
+recorded verbatim (`operations/agent-circles-2026-08/2026-09-15-mentor-ruling-Q-P1-gap-only-posture-verbatim.md`,
+**binding on relay; the verbatim wins over every summary including this entry**) and its
+immediately-executable parts are executed, **documents-only, in the same session**.
+`governance`/documents; Standard under 0d-ii; AC7 NOT engaged. **Nothing built, migrated, minted,
+activated, deployed, pushed or relayed.** No file under `website/` or `harness/` touched.
+Byte-identity guard **ARMED, 250/0** at open and close; SHA pins unchanged.
+
+**THE RULING — the SECOND reading is ruled.** *"V1 proceeds with §3's reverse algorithm idle on
+gap_only, accepting degraded generation as the honest v1 posture. The founder-personal branch of Q1a
+remains live. Minting and populating a harness identity with a genuinely examined trust record is not
+a precondition of v1 execution."*
+
+**The distinction the ruling turns on, in its own words:** *"A blocking condition would mean v1
+cannot execute honestly until the prerequisite is met. A degraded-posture condition means v1 executes
+honestly with a named limitation… **R9 §3.1 establishes the second, not the first. Its own language
+confirms this**"* — the section says *"v1 generation runs on gap_only and §3's architecture is idle,"*
+which is *"a description of what happens under the condition, not a prohibition on proceeding under
+it."* The first reading is ruled out because treating a named consequence as a gate *"would be
+reading a prohibition into a description."* **The brief's own declination to infer the first reading
+from Q1a's "high-integrity signal" framing is confirmed:** that framing *"describes the design's
+aspiration for the signal's quality. It does not make the high-integrity path a precondition of the
+low-integrity path's availability."*
+
+**The Prerequisite Criterion, applied by the mentor and resolving in the design's favour:** *"A v1
+that runs on gap_only and discloses that it does so is not producing an output that resembles more
+than it is. It is producing an output that accurately represents its own limitations. That is the
+honest posture, not a violation of the criterion."*
+
+**TWO BUILD CONSEQUENCES CARRIED — both recorded in the build brief, neither built.**
+**(1) A NEW REQUIRED PROPOSAL-SHAPE FIELD: the operative generation mode.** *"A completion signal
+produced under gap_only generation is a different signal from one produced under full
+reverse-algorithm generation… The build session should treat this as a **required field, not an
+optional annotation**."* Recorded at R12 §2.7 so the build carries it rather than rediscovering it;
+whether it rides that bundle or its own is left to the build session.
+**(2) The founder-directed session identity branch must not be foreclosed** — building Q1c's mint
+enforcement is what makes it available *"with the enforcement the ruling requires."* *"The gap_only
+posture is v1's honest starting point, not its permanent ceiling."*
+
+**§4's build items: CONFIRMED window-gated, no ruling needed** — Q1b's handoff unbuilt; **Q1c's mint
+enforcement unbuilt and "the sharpest gap — nothing currently prevents minting a
+completion_signal_write credential on the runner's own agent_id, which is exactly the condition Q1c
+rules against"**; Q2's amendment unapplied to comments, no semantic consequence while dark.
+**§2's four record corrections: CONFIRMED as stated**, requiring no ruling. **The propagation
+diagnosis is confirmed correct**, including its mechanical cause — *"a dated annotation placed at a
+document's head governs the body but does not reach a reader instructed to read one section in
+full"* — and the premise-restoration remedy is *"confirmed as the correct practice."*
+
+**Executed this session (documents-only):** the verbatim capture; **R9 §3.1 (A5.2) annotated AT THE
+SECTION** (deliberately, per the propagation diagnosis the same ruling confirms) recording that its
+"PREREQUISITE" is architectural, never a gate on execution; **R12 §7 prerequisite 2 corrected exactly
+as the ruling directs by name** — its *"must exist"* framing overturned, **and it now records that
+Q1c's prohibition is currently unenforced at mint**; **R12 §2.7 annotated** with the new required
+field; the FOR-RULING document marked RULED. Bodies retained throughout, never rewritten.
+
+**One internal discrepancy in the ruling, named rather than absorbed:** §4's heading reads *"the four
+build items"* and then enumerates **three**, closing *"All three wait for the window to close."* The
+brief's §4 carried three. Read as a slip — enumeration, closing sentence and brief all agree at three;
+**nothing turns on it** (no item is named that the brief did not carry, none it carried is
+unaddressed). Recorded per the name-departures discipline.
+
+**Files touched:** the verbatim capture (new); annotations to R9 §3.1, R12 §7 prerequisite 2, R12
+§2.7, and the FOR-RULING head; this entry. **Not touched:** any `GUARD_RE` file; anything under
+`website/` or `harness/`; any R18 surface; `option-s/`; `manifest.md`; `~/.sage-gate1/`. Peer files
+(`environmental-context.json`, the two 09-13 prompts) **not staged**. **Risk classification:**
+`governance`/documents. **Rollback:** `git revert` the commit. **Verification (founder):** confirm the
+generation-mode field is recorded where the build session will find it, and that prerequisite 2 now
+reads as non-blocking. **Rules served:** PR18, PR20, PR23.
+
+**Status:** W2's clock **RUNNING** from `2026-09-14T08:44:36.147Z`; the window admits this authoring
+and **the ruling licenses no build** — every element above waits for the window's close under
+Q-R12-B. **Nothing built, activated, migrated, minted, deployed or relayed. D2 remains blocked. The
+S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the founder's.**

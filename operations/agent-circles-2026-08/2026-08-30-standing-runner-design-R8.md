@@ -219,6 +219,27 @@ dependency shape — a named dependency, not a re-split). §§2.2, 4.1 are the G
 
 ### 4.0 THE PRODUCER QUESTION — this design's own largest open item, named before anything is built on it
 
+> **⚖️ RULED 2026-08-30 — ALL FOUR ITEMS BELOW ARE ANSWERED. This section's body is left as the
+> record of what was open when written; it is NOT current.** The ruling is at the head of this
+> document (lines 23–56) and verbatim at
+> `2026-08-30-mentor-ruling-R8-producer-floor-semantics-verbatim.md`; the annotations bind and win
+> over this body. Item 1 = **Q1a** (the founder, or a founder-directed agent session, on a
+> founder-minted `completion_signal_write` credential, is the ONLY v1 producer). Item 2 = **Q1b**
+> (the elected proposal carries its own `loop_id`/`cycle_number` on the founder-dashboard adoption
+> surface — *"a build-session precision item, not a new ruling"*). Item 3 = **Q1c** (distinct
+> identities REQUIRED, enforced at mint). Item 4 = **Q2** (reading (a); Q-C2a's first question
+> AMENDED, binding on relay). **The closing sentence below — "the recommended next act on it is a
+> mentor question, not a build" — was discharged the same day this section was written;** §11's
+> follow-on 1 is recorded at line 55 as *"EXECUTED and answered same day."*
+>
+> **⚠ THIS ANNOTATION WAS ADDED 2026-09-14, and why it was needed is the point.** The 2026-08-30
+> annotation was placed at the document head only. Three later sessions read this section directly
+> and correctly saw an open question: R9 (2026-09-04) omitted Q1b from its cross-reference; R12
+> (2026-09-14) §7.6/§15.7 state the producer question is *unanswered*; and the mentor's 2026-09-14
+> Item 3 then reasoned from that premise to direct a brief re-asking ruled questions. **A head
+> annotation governs the body but does not reach a reader instructed to read one section in full.**
+> Full account: `2026-09-14-MENTOR-QUESTIONS-producer-question-FOR-RULING.md` §1.
+
 **Folded from PR19 independent review (both the constraint and soundness dimensions raised it;
 the soundness reviewer rated it HIGH), and independently reached by this session's own close-turn
 reflection before review returned. It is stated here, at the head of the design, rather than
