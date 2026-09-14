@@ -1,4 +1,4 @@
-# W2 Session Opener — Q-S2-conforming variant — **DRAFT**
+# W2 Session Opener — Q-S2-conforming variant
 
 > **A preamble, not a task.** Read it, confirm what §1 asks, then wait for the task.
 > **Every number in it is a claim to re-derive at your own open.**
@@ -147,5 +147,4 @@ Client `2.1.260`, entrypoint `claude-desktop`; re-derive the rest at your own op
 
 ---
 
-*End of the W2 session opener — DRAFT, Version 2026-09-13. Not adopted. Every number in it is a claim
-to re-derive.*
+*End of the W2 session opener — Version 2026-09-14. Every number in it is a claim to re-derive.*
