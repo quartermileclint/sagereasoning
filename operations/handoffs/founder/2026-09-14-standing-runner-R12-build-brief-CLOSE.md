@@ -220,3 +220,46 @@ All three commits on `origin/main`. Working tree carries only the peer session's
 
 **D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
 founder's.**
+
+---
+
+## Addendum 2 (~21:30 AEST) — the follow-on ruling: the close condition named, one premise flagged
+
+Record: `D-MENTOR-RULING-R12-FOLLOWON-ADOPTED-PREMISE-FLAGGED-2026-09-14`; verbatim:
+`operations/agent-circles-2026-08/2026-09-14-mentor-ruling-R12-followon-window-close-and-elections-verbatim.md`.
+Commit `9e5d5ac`.
+
+**The close condition is named and is bounded.** *"The window closes when the S11-D2 baseline is
+complete — five ordinary post-remedy consult days counted from W2's first record."* The clock starts
+at W2's **first sitting's first consult record**. **It is not indefinite.**
+
+**A correction this close needed.** §6 above reported consult availability on 9 of 9 days as
+satisfying F-3′. The ruling: **the F-3′ obligations are the reporting obligations that FOLLOW the
+close, not the close condition** — and *"those are the current window's records. W2 has not opened.
+The nine days do not count toward the five-day baseline."* §6's count is accurate as a count; its
+framing as satisfying a condition was wrong.
+
+**⚠ THE ONE THING THAT DECIDES THE SCHEDULE, AND IT IS THE FOUNDER'S.** The ruling reasons from *"W2
+has not opened."* This session cannot confirm that. It opened under the **W2 conforming opener**
+(§3: *"This window's designated work is the standing-runner design track"*), the founder made that
+designation here, and the session produced **27 consult-path records, the first at
+`2026-09-14T08:44:36.147Z`** — which is what F-1 names as starting the clock. Against that, the
+recorded criterion is *"the act of opening being what makes it the first"* — **the founder's act, not
+an inference from the work done** — and no sitting has yet declared itself the first.
+**This is a PR20 gap in this session's own relay, named as one:** the request did not put the
+designation in front of the mentor. **If the opening was W2's first sitting, the baseline completes
+about 2026-09-19. If not, the build waits until W2 opens.**
+
+**Also ruled.** **Open the producer-question mentor brief next** — *"a structural dependency, not a
+design preference."* **Consult-side parity IS owed** and this session's capture-gap finding is *"a
+defect, not a design choice"*, which **waits for the close** because the fix is in `harness/gate1`.
+
+**Three recommendations recorded, none applied** — the elections remain the founder's.
+`accepted_move_count`: **derive, not store** (this **reverses §2.3**). `election_basis`: **candidate
+row** (confirms §2.5). Phase 3's **N: 3** suggested.
+
+**Verified:** guard **250/0 ARMED**; pins unchanged; working tree carries only the peer session's
+files, unstaged.
+
+**D2 remains blocked. The S11 flip remains REFUSED. Weights remain BLOCKED. The 0h call remains the
+founder's.**
